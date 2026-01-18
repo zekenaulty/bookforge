@@ -15,7 +15,14 @@
     "thread_updates": {
       "type": "array",
       "items": {
-        "type": "object"
+        "anyOf": [
+          {
+            "type": "object"
+          },
+          {
+            "type": "string"
+          }
+        ]
       }
     },
     "canon_updates": {
@@ -40,6 +47,9 @@
     },
     "duplication_warnings_in_row_delta": {
       "type": "integer"
+    },
+    "world": {
+      "type": "object"
     }
   },
   "additionalProperties": true

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 import json
+import shutil
 
 
 @dataclass(frozen=True)
@@ -54,6 +56,12 @@ def load_continuity_pack(path: Path) -> ContinuityPack:
 
 def save_continuity_pack(path: Path, pack: ContinuityPack) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists():
+        archive_dir = path.parent / "continuity_history"
+        archive_dir.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        archive_path = archive_dir / f"continuity_pack_{timestamp}.json"
+        shutil.copyfile(path, archive_path)
     path.write_text(json.dumps(pack.to_dict(), ensure_ascii=True, indent=2), encoding="utf-8")
 
 

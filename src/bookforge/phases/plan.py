@@ -178,6 +178,22 @@ def _chapter_characters(chapter: Dict[str, Any]) -> List[str]:
     return unique
 
 
+def _character_name_map(outline: Dict[str, Any]) -> Dict[str, str]:
+    mapping: Dict[str, str] = {}
+    characters = outline.get("characters", [])
+    if not isinstance(characters, list):
+        return mapping
+    for item in characters:
+        if not isinstance(item, dict):
+            continue
+        character_id = str(item.get("character_id") or "").strip()
+        if not character_id:
+            continue
+        name = str(item.get("name") or character_id).strip() or character_id
+        mapping[character_id] = name
+    return mapping
+
+
 def _build_outline_window(chapter: Dict[str, Any], scene_number: int) -> Dict[str, Any]:
     scenes = _flatten_scenes(chapter)
     if scenes and scene_number > len(scenes):
@@ -246,6 +262,12 @@ def _normalize_scene_card(
     chapter: int,
     scene: int,
     scene_target: str,
+    cast_present: List[str],
+    cast_present_ids: List[str],
+    introduces: List[str],
+    introduces_ids: List[str],
+    thread_ids: List[str],
+    callbacks: List[str],
 ) -> Dict[str, Any]:
     if "schema_version" not in card:
         card["schema_version"] = SCENE_CARD_SCHEMA_VERSION
@@ -265,8 +287,15 @@ def _normalize_scene_card(
 
     if not isinstance(card.get("required_callbacks"), list):
         card["required_callbacks"] = []
+    if not card.get("required_callbacks") and callbacks:
+        card["required_callbacks"] = list(callbacks)
     if not isinstance(card.get("constraints"), list):
         card["constraints"] = []
+    card["cast_present"] = list(cast_present)
+    card["cast_present_ids"] = list(cast_present_ids)
+    card["introduces"] = list(introduces)
+    card["introduces_ids"] = list(introduces_ids)
+    card["thread_ids"] = list(thread_ids)
 
     return card
 
@@ -314,6 +343,28 @@ def plan_scene(
     current_scene = outline_window.get("current") or {}
     scene_target = current_scene.get("summary") or chapter_obj.get("goal", "")
     scene_target = str(scene_target) if scene_target is not None else ""
+    character_names = _character_name_map(outline)
+    cast_present_ids = current_scene.get("characters", [])
+    if not isinstance(cast_present_ids, list):
+        cast_present_ids = []
+    cast_present_ids = [str(item) for item in cast_present_ids if str(item).strip()]
+    cast_present = [character_names.get(item, item) for item in cast_present_ids]
+
+    introduces_ids = current_scene.get("introduces", [])
+    if not isinstance(introduces_ids, list):
+        introduces_ids = []
+    introduces_ids = [str(item) for item in introduces_ids if str(item).strip()]
+    introduces = [character_names.get(item, item) for item in introduces_ids]
+
+    thread_ids = current_scene.get("threads", [])
+    if not isinstance(thread_ids, list):
+        thread_ids = []
+    thread_ids = [str(item) for item in thread_ids if str(item).strip()]
+
+    callbacks = current_scene.get("callbacks", [])
+    if not isinstance(callbacks, list):
+        callbacks = []
+    callbacks = [str(item) for item in callbacks if str(item).strip()]
 
     plan_template = _resolve_plan_template(book_root)
     prompt = render_template_file(
@@ -363,7 +414,18 @@ def plan_scene(
             extra_msg = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_PLAN_MAX_TOKENS."
         raise ValueError(f"{exc}{extra_msg} (raw response logged to {log_path})") from exc
 
-    card = _normalize_scene_card(card, chapter_num, scene_num, scene_target)
+    card = _normalize_scene_card(
+        card,
+        chapter_num,
+        scene_num,
+        scene_target,
+        cast_present,
+        cast_present_ids,
+        introduces,
+        introduces_ids,
+        thread_ids,
+        callbacks,
+    )
     validate_json(card, "scene_card")
 
     chapter_dir = book_root / "draft" / "chapters" / f"ch_{chapter_num:03d}"

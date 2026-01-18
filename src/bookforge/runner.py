@@ -263,6 +263,86 @@ def _outline_summary(outline: Dict[str, Any]) -> Tuple[List[int], Dict[int, int]
     return chapter_order, scene_counts
 
 
+def _build_character_registry(outline: Dict[str, Any]) -> List[Dict[str, str]]:
+    registry: List[Dict[str, str]] = []
+    characters = outline.get("characters", [])
+    if not isinstance(characters, list):
+        return registry
+    for item in characters:
+        if not isinstance(item, dict):
+            continue
+        character_id = str(item.get("character_id") or "").strip()
+        if not character_id:
+            continue
+        name = str(item.get("name") or "").strip()
+        registry.append({"character_id": character_id, "name": name})
+    return registry
+
+
+def _build_thread_registry(outline: Dict[str, Any]) -> List[Dict[str, str]]:
+    registry: List[Dict[str, str]] = []
+    threads = outline.get("threads", [])
+    if not isinstance(threads, list):
+        return registry
+    for item in threads:
+        if not isinstance(item, dict):
+            continue
+        thread_id = str(item.get("thread_id") or "").strip()
+        if not thread_id:
+            continue
+        label = str(item.get("label") or "").strip()
+        status = str(item.get("status") or "").strip()
+        entry = {"thread_id": thread_id}
+        if label:
+            entry["label"] = label
+        if status:
+            entry["status"] = status
+        registry.append(entry)
+    return registry
+
+
+def _normalize_continuity_pack(
+    pack: Dict[str, Any],
+    scene_card: Dict[str, Any],
+    thread_registry: List[Dict[str, str]],
+) -> Dict[str, Any]:
+    normalized = dict(pack)
+    allowed_cast = scene_card.get("cast_present", [])
+    if not isinstance(allowed_cast, list):
+        allowed_cast = []
+    allowed_cast = [str(item) for item in allowed_cast if str(item).strip()]
+    cast_present = normalized.get("cast_present", [])
+    if not isinstance(cast_present, list):
+        cast_present = []
+    cast_present = [str(item) for item in cast_present if str(item).strip()]
+    if allowed_cast:
+        filtered_cast = [item for item in cast_present if item in allowed_cast]
+        normalized["cast_present"] = filtered_cast or list(allowed_cast)
+    else:
+        normalized["cast_present"] = []
+
+    allowed_threads = {
+        str(item.get("thread_id")).strip()
+        for item in thread_registry
+        if isinstance(item, dict) and str(item.get("thread_id") or "").strip()
+    }
+    thread_ids = scene_card.get("thread_ids", [])
+    if not isinstance(thread_ids, list):
+        thread_ids = []
+    thread_ids = [str(item) for item in thread_ids if str(item).strip()]
+    open_threads = normalized.get("open_threads", [])
+    if not isinstance(open_threads, list):
+        open_threads = []
+    open_threads = [str(item) for item in open_threads if str(item).strip()]
+    if thread_ids:
+        open_threads = thread_ids
+    if allowed_threads:
+        open_threads = [item for item in open_threads if item in allowed_threads]
+    normalized["open_threads"] = open_threads
+
+    return normalized
+
+
 def _cursor_beyond_target(
     chapter: int,
     scene: int,
@@ -405,6 +485,9 @@ def _generate_continuity_pack(
     book_root: Path,
     system_path: Path,
     state: Dict[str, Any],
+    scene_card: Dict[str, Any],
+    character_registry: List[Dict[str, str]],
+    thread_registry: List[Dict[str, str]],
     client: LLMClient,
     model: str,
 ) -> Dict[str, Any]:
@@ -415,6 +498,9 @@ def _generate_continuity_pack(
         {
             "state": state,
             "recent_facts": recent_facts,
+            "scene_card": scene_card,
+            "character_registry": character_registry,
+            "thread_registry": thread_registry,
         },
     )
 
@@ -434,6 +520,7 @@ def _generate_continuity_pack(
     )
 
     data = _extract_json(response.text)
+    data = _normalize_continuity_pack(data, scene_card, thread_registry)
     pack = ContinuityPack.from_dict(data)
     save_continuity_pack(continuity_pack_path(book_root), pack)
     return pack.to_dict()
@@ -447,6 +534,8 @@ def _write_scene(
     continuity_pack: Dict[str, Any],
     state: Dict[str, Any],
     style_anchor: str,
+    character_registry: List[Dict[str, str]],
+    thread_registry: List[Dict[str, str]],
     client: LLMClient,
     model: str,
 ) -> Tuple[str, Dict[str, Any]]:
@@ -458,6 +547,8 @@ def _write_scene(
             "continuity_pack": continuity_pack,
             "state": state,
             "style_anchor": style_anchor,
+            "character_registry": character_registry,
+            "thread_registry": thread_registry,
         },
     )
 
@@ -536,6 +627,9 @@ def _repair_scene(
     prose: str,
     lint_report: Dict[str, Any],
     state: Dict[str, Any],
+    scene_card: Dict[str, Any],
+    character_registry: List[Dict[str, str]],
+    thread_registry: List[Dict[str, str]],
     client: LLMClient,
     model: str,
 ) -> Tuple[str, Dict[str, Any]]:
@@ -546,6 +640,9 @@ def _repair_scene(
             "issues": lint_report.get("issues", []),
             "prose": prose,
             "state": state,
+            "scene_card": scene_card,
+            "character_registry": character_registry,
+            "thread_registry": thread_registry,
         },
     )
 
@@ -578,6 +675,8 @@ def _repair_scene(
 
 def _apply_state_patch(state: Dict[str, Any], patch: Dict[str, Any]) -> Dict[str, Any]:
     world_updates = patch.get("world_updates")
+    if world_updates is None and isinstance(patch.get("world"), dict):
+        world_updates = patch.get("world")
     if isinstance(world_updates, dict):
         world = state.get("world", {}) if isinstance(state.get("world", {}), dict) else {}
         for key, value in world_updates.items():
@@ -681,6 +780,8 @@ def run_loop(
     validate_json(outline, "outline")
 
     chapter_order, scene_counts = _outline_summary(outline)
+    character_registry = _build_character_registry(outline)
+    thread_registry = _build_thread_registry(outline)
     if not chapter_order:
         raise ValueError("Outline is missing chapters; cannot run writer loop.")
 
@@ -742,6 +843,9 @@ def run_loop(
             book_root,
             system_path,
             state,
+            scene_card,
+            character_registry,
+            thread_registry,
             planner_client,
             planner_model,
         )
@@ -756,6 +860,8 @@ def run_loop(
             continuity_pack,
             state,
             style_anchor,
+            character_registry,
+            thread_registry,
             writer_client,
             writer_model,
         )
@@ -785,6 +891,9 @@ def run_loop(
                 prose,
                 lint_report,
                 state,
+                scene_card,
+                character_registry,
+                thread_registry,
                 writer_client,
                 writer_model,
             )

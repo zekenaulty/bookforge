@@ -10,11 +10,24 @@ PROSE:
 STATE_PATCH:
 <json>
 
-Rules:
-- STATE_PATCH must be a single JSON object with double quotes and no trailing commas.
+STATE_PATCH rules:
+- Use schema_version "1.0".
+- Use world_updates to update world state (cast_present, location, recent_facts, open_threads).
+- Use scene_card.cast_present_ids for cast_present (ids, not names).
+- Use scene_card.thread_ids for open_threads (thread ids).
+- Do not invent new character or thread ids.
 
 Issues:
 {{issues}}
+
+Scene card:
+{{scene_card}}
+
+Character registry (id -> name):
+{{character_registry}}
+
+Thread registry:
+{{thread_registry}}
 
 Scene:
 {{prose}}

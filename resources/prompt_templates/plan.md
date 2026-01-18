@@ -7,10 +7,6 @@ No markdown, no code fences, no commentary. Use strict JSON (double quotes, no t
 If outline_window includes character information, keep those character ids in mind.
 If outline_window.current.introduces is present, the scene must introduce those characters.
 
-Field guidance:
-- scene_target must be a short sentence describing what this scene must accomplish (not a word count).
-- If you need a word-count target, put it in constraints as a string like "target_words: 900".
-
 Required keys:
 - schema_version ("1.1")
 - scene_id
@@ -23,6 +19,13 @@ Required keys:
 - constraints (array)
 - end_condition
 
+Recommended keys (use ids from the outline; do not invent ids):
+- cast_present (array of character names for prose guidance)
+- cast_present_ids (array of character ids, e.g. CHAR_Eldrin)
+- introduces (array of character names introduced in this scene)
+- introduces_ids (array of character ids introduced in this scene)
+- thread_ids (array of thread ids, e.g. THREAD_Awakened_Sage)
+
 JSON shape example (fill with real values):
 {
   "schema_version": "1.1",
@@ -34,7 +37,12 @@ JSON shape example (fill with real values):
   "conflict": "Safety versus obligation.",
   "required_callbacks": [],
   "constraints": ["target_words: 900"],
-  "end_condition": "The protagonist leaves home."
+  "end_condition": "The protagonist leaves home.",
+  "cast_present": ["Eldrin"],
+  "cast_present_ids": ["CHAR_Eldrin"],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": ["THREAD_Awakened_Sage"]
 }
 
 Outline window:
