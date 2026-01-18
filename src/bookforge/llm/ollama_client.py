@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-from typing import Iterable
+from typing import Iterable, Optional
 
 from .client import LLMClient
+from .rate_limiter import RateLimiter
 from .types import LLMResponse, Message
 from .utils import post_json
 
 
 class OllamaClient(LLMClient):
-    def __init__(self, api_url: str) -> None:
-        super().__init__(provider="ollama")
+    def __init__(self, api_url: str, rate_limiter: Optional[RateLimiter] = None) -> None:
+        super().__init__(provider="ollama", rate_limiter=rate_limiter)
         self.api_url = api_url.rstrip("/") + "/api/chat"
 
     def chat(
@@ -19,6 +20,7 @@ class OllamaClient(LLMClient):
         temperature: float = 0.7,
         max_tokens: int = 1024,
     ) -> LLMResponse:
+        self._throttle()
         payload = {
             "model": model,
             "messages": list(messages),
@@ -29,7 +31,7 @@ class OllamaClient(LLMClient):
             },
         }
         headers = {"Content-Type": "application/json"}
-        raw = post_json(self.api_url, payload, headers)
+        raw = post_json(self.api_url, payload, headers, max_retries=3)
         message = raw.get("message", {})
         text = message.get("content", "")
         prompt_tokens = raw.get("prompt_eval_count")

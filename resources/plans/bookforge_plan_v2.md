@@ -471,7 +471,7 @@ Checklist
 - [x] Story 3.R: Schema governance and validation refinement
 - [x] Story 3: Schema versioning and validation implementation
 - [x] Story 4.R: Prompt system and caching refinement
-- [ ] Story 4: Prompt templates and registry implementation
+- [x] Story 4: Prompt templates and registry implementation
 - [x] Story 5.R: Prompt budgeter and continuity pack refinement
 - [ ] Story 5: Budgeter and continuity pack implementation
 - [x] Story 6.R: Author library versioning refinement

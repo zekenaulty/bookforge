@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-from typing import Iterable
+from typing import Iterable, Optional
 
 from .client import LLMClient
+from .rate_limiter import RateLimiter
 from .types import LLMResponse, Message
 from .utils import post_json
 
 
 class OpenAIClient(LLMClient):
-    def __init__(self, api_key: str, api_url: str) -> None:
-        super().__init__(provider="openai")
+    def __init__(self, api_key: str, api_url: str, rate_limiter: Optional[RateLimiter] = None) -> None:
+        super().__init__(provider="openai", rate_limiter=rate_limiter)
         self.api_key = api_key
         self.api_url = api_url
 
@@ -20,6 +21,7 @@ class OpenAIClient(LLMClient):
         temperature: float = 0.7,
         max_tokens: int = 1024,
     ) -> LLMResponse:
+        self._throttle()
         payload = {
             "model": model,
             "messages": list(messages),
@@ -30,7 +32,7 @@ class OpenAIClient(LLMClient):
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
         }
-        raw = post_json(self.api_url, payload, headers)
+        raw = post_json(self.api_url, payload, headers, max_retries=3)
         choice = raw.get("choices", [{}])[0]
         message = choice.get("message", {})
         text = message.get("content", "")

@@ -18,6 +18,7 @@ class AppConfig:
     writer_model: Optional[str]
     linter_model: Optional[str]
     default_model: Optional[str]
+    gemini_requests_per_minute: Optional[int]
     task_model_overrides: Dict[str, str]
     task_provider_overrides: Dict[str, str]
 
@@ -63,6 +64,12 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
     task_model_overrides = _extract_prefixed(merged, "TASK_MODEL_")
     task_provider_overrides = _extract_prefixed(merged, "TASK_PROVIDER_")
 
+    gemini_rpm = merged.get("GEMINI_REQUESTS_PER_MINUTE")
+    try:
+        gemini_rpm_val = int(gemini_rpm) if gemini_rpm is not None and str(gemini_rpm).strip() else None
+    except ValueError:
+        gemini_rpm_val = None
+
     return AppConfig(
         provider=provider,
         openai_api_key=merged.get("OPENAI_API_KEY"),
@@ -74,6 +81,7 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
         writer_model=merged.get("WRITER_MODEL"),
         linter_model=merged.get("LINTER_MODEL"),
         default_model=merged.get("DEFAULT_MODEL"),
+        gemini_requests_per_minute=gemini_rpm_val,
         task_model_overrides=task_model_overrides,
         task_provider_overrides=task_provider_overrides,
     )

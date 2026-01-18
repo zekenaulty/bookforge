@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-from typing import Iterable
+from typing import Iterable, Optional
 
 from .client import LLMClient
+from .rate_limiter import RateLimiter
 from .types import LLMResponse, Message
 from .utils import post_json, split_system_messages
 
 
 class GeminiClient(LLMClient):
-    def __init__(self, api_key: str, api_url: str) -> None:
-        super().__init__(provider="gemini")
+    def __init__(self, api_key: str, api_url: str, rate_limiter: Optional[RateLimiter] = None) -> None:
+        super().__init__(provider="gemini", rate_limiter=rate_limiter)
         self.api_key = api_key
         self.api_url = api_url.rstrip("/")
 
@@ -20,6 +21,7 @@ class GeminiClient(LLMClient):
         temperature: float = 0.7,
         max_tokens: int = 1024,
     ) -> LLMResponse:
+        self._throttle()
         system_text, non_system = split_system_messages(messages)
         contents = []
         for msg in non_system:
@@ -39,7 +41,7 @@ class GeminiClient(LLMClient):
 
         url = f"{self.api_url}/models/{model}:generateContent?key={self.api_key}"
         headers = {"Content-Type": "application/json"}
-        raw = post_json(url, payload, headers)
+        raw = post_json(url, payload, headers, max_retries=3)
         candidates = raw.get("candidates", [])
         text = ""
         if candidates:

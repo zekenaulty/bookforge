@@ -1,13 +1,19 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Iterable
+from typing import Iterable, Optional
 from .types import LLMResponse, Message
+from .rate_limiter import RateLimiter
 
 
 class LLMClient(ABC):
-    def __init__(self, provider: str) -> None:
+    def __init__(self, provider: str, rate_limiter: Optional[RateLimiter] = None) -> None:
         self.provider = provider
+        self.rate_limiter = rate_limiter
+
+    def _throttle(self) -> None:
+        if self.rate_limiter:
+            self.rate_limiter.wait()
 
     @abstractmethod
     def chat(
