@@ -473,7 +473,7 @@ Checklist
 - [x] Story 4.R: Prompt system and caching refinement
 - [x] Story 4: Prompt templates and registry implementation
 - [x] Story 5.R: Prompt budgeter and continuity pack refinement
-- [ ] Story 5: Budgeter and continuity pack implementation
+- [x] Story 5: Budgeter and continuity pack implementation
 - [x] Story 6.R: Author library versioning refinement
 - [ ] Story 6: Author creation pipeline
 - [x] Story 7.R: Workspace init and book schema refinement
