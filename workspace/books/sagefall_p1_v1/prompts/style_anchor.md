@@ -1,1 +1,0 @@
-The air itself seemed to hum with an ancient, resonant cold, a quality not of temperature but of time, thick with the dust of epochs. Stone, scarred by winds that had scoured centuries
