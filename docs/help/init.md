@@ -20,6 +20,10 @@ Optional parameters
 - --series-id: Optional series identifier.
 - --workspace: Override workspace root (global option).
 
+Outputs
+- Creates workspace/books/<BOOK_ID>/ with book.json, state.json, prompts/, outline/, canon/, draft/, exports/, logs/.
+- Writes prompts/system_v1.md assembled from base rules, book constitution, and author fragment.
+
 Examples
 - Minimal:
   bookforge init --book my_novel_v1 --author-ref eldrik-vale/v3 --title "Untitled" --genre "fantasy"

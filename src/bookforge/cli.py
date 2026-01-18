@@ -3,6 +3,28 @@ from pathlib import Path
 import sys
 
 from bookforge.author import generate_author
+from bookforge.workspace import init_book_workspace, parse_genre, parse_targets
+
+
+def _init(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        genre = parse_genre(args.genre)
+        targets = parse_targets(args.target)
+        book_dir = init_book_workspace(
+            workspace=workspace,
+            book_id=args.book,
+            author_ref=args.author_ref,
+            title=args.title,
+            genre=genre,
+            targets=targets,
+            series_id=args.series_id,
+        )
+    except Exception as exc:
+        sys.stderr.write(f"Init failed: {exc}\n")
+        return 1
+    sys.stdout.write(f"Workspace created at {book_dir}\n")
+    return 0
 
 
 def _author_generate(args: argparse.Namespace) -> int:
@@ -53,7 +75,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Target key=value pair (repeatable).",
     )
     init_parser.add_argument("--series-id", help="Optional series identifier.")
-    init_parser.set_defaults(func=_not_implemented)
+    init_parser.set_defaults(func=_init)
 
     author_parser = subparsers.add_parser("author", help="Author commands.")
     author_sub = author_parser.add_subparsers(dest="author_command", required=True)

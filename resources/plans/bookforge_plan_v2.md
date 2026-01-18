@@ -464,6 +464,7 @@ Refinement Notes
 - Story 16.R accepted: resources/plans/steps_20260118_0115_story16r_tests_docs.md
 
 Implementation Notes
+- Story 7 implementation: resources/plans/steps_20260118_0940_story7_workspace_init.md
 - Story 1 implementation: resources/plans/steps_20260118_0121_story1_scaffold.md
 - Story 2 implementation: resources/plans/steps_20260118_0130_story2_llm_provider_impl.md
 - Story 3 implementation: resources/plans/steps_20260118_0147_story3_schema_impl.md
@@ -489,7 +490,7 @@ Checklist
 - [x] Story 6.R: Author library versioning refinement
 - [x] Story 6: Author creation pipeline
 - [x] Story 7.R: Workspace init and book schema refinement
-- [ ] Story 7: Workspace init command
+- [x] Story 7: Workspace init command
 - [x] Story 8.R: Outline and scene card schema refinement
 - [ ] Story 8: Outline generation and scene planning
 - [x] Story 9.R: Writing loop and state patch refinement
