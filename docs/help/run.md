@@ -29,6 +29,13 @@ Outputs
 - draft/context/bible.md and draft/context/last_excerpt.md
 - workspace/logs/llm (when BOOKFORGE_LOG_LLM=1; includes quota error logs)
 
+
+Environment
+- BOOKFORGE_LINT_MODE=strict|warn|off (default: strict)
+  - strict: lint + repair enforced; run stops if lint still fails.
+  - warn: lint + repair attempted; failures are logged and run continues.
+  - off: skip lint and repair; lint report is recorded as pass.
+
 Examples
 - Minimal:
   bookforge run --book my_novel_v1

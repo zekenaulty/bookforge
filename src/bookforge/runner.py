@@ -68,6 +68,15 @@ def _style_anchor_max_tokens() -> int:
     return _int_env("BOOKFORGE_STYLE_ANCHOR_MAX_TOKENS", DEFAULT_STYLE_ANCHOR_MAX_TOKENS)
 
 
+
+
+def _lint_mode() -> str:
+    raw = os.environ.get("BOOKFORGE_LINT_MODE", "strict").strip().lower()
+    if raw in {"strict", "warn", "off"}:
+        return raw
+    return "strict"
+
+
 def _now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -107,6 +116,49 @@ def _clean_json_payload(payload: str) -> str:
     cleaned = cleaned.replace("\u2018", "'").replace("\u2019", "'")
     cleaned = re.sub(r",\s*([}\]])", r"\1", cleaned)
     return cleaned
+
+
+
+
+def _normalize_lint_report(report: Dict[str, Any]) -> Dict[str, Any]:
+    normalized = dict(report)
+    if "schema_version" not in normalized:
+        normalized["schema_version"] = "1.0"
+
+    status = normalized.get("status")
+    if not status:
+        passed = normalized.get("pass")
+        if isinstance(passed, bool):
+            normalized["status"] = "pass" if passed else "fail"
+
+    issues: List[Dict[str, Any]] = []
+    raw_issues = normalized.get("issues")
+    if isinstance(raw_issues, list):
+        for item in raw_issues:
+            if isinstance(item, dict) and item.get("message"):
+                issues.append(item)
+            elif item is not None:
+                issues.append({"code": "issue", "message": str(item)})
+
+    violations = normalized.get("violations")
+    if isinstance(violations, list):
+        for item in violations:
+            if item is not None:
+                issues.append({"code": "violation", "message": str(item), "severity": "error"})
+
+    warnings = normalized.get("warnings")
+    if isinstance(warnings, list):
+        for item in warnings:
+            if item is not None:
+                issues.append({"code": "warning", "message": str(item), "severity": "warning"})
+
+    if not isinstance(normalized.get("issues"), list) or issues:
+        normalized["issues"] = issues
+
+    if "status" not in normalized or not normalized.get("status"):
+        normalized["status"] = "fail" if normalized.get("issues") else "pass"
+
+    return normalized
 
 
 def _extract_json(text: str) -> Dict[str, Any]:
@@ -449,8 +501,7 @@ def _lint_scene(
     )
 
     report = _extract_json(response.text)
-    if "schema_version" not in report:
-        report["schema_version"] = "1.0"
+    report = _normalize_lint_report(report)
     validate_json(report, "lint_report")
     return report
 
@@ -686,19 +737,24 @@ def run_loop(
             writer_model,
         )
 
-        lint_report = _lint_scene(
-            workspace,
-            book_root,
-            system_path,
-            prose,
-            state,
-            invariants,
-            linter_client,
-            linter_model,
-        )
+        lint_mode = _lint_mode()
+
+        if lint_mode == "off":
+            lint_report = {"schema_version": "1.0", "status": "pass", "issues": [], "mode": "off"}
+        else:
+            lint_report = _lint_scene(
+                workspace,
+                book_root,
+                system_path,
+                prose,
+                state,
+                invariants,
+                linter_client,
+                linter_model,
+            )
 
         write_attempts = 1
-        if lint_report.get("status") == "fail":
+        if lint_mode != "off" and lint_report.get("status") == "fail":
             prose, patch = _repair_scene(
                 workspace,
                 book_root,
@@ -720,7 +776,7 @@ def run_loop(
                 linter_client,
                 linter_model,
             )
-            if lint_report.get("status") == "fail":
+            if lint_report.get("status") == "fail" and lint_mode == "strict":
                 raise ValueError("Lint failed after repair; see lint logs for details.")
 
         state = _apply_state_patch(state, patch)

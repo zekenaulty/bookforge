@@ -86,7 +86,10 @@ def _pretty_text_payload(text: str) -> str:
     try:
         parsed = json.loads(payload)
     except json.JSONDecodeError:
-        return _loose_pretty_text(payload)
+        stripped = payload.lstrip()
+        if stripped.startswith("{") or stripped.startswith("["):
+            return _loose_pretty_text(payload)
+        return payload
     return json.dumps(parsed, ensure_ascii=True, indent=2)
 
 

@@ -466,6 +466,7 @@ Refinement Notes
 - Story 16.R accepted: resources/plans/steps_20260118_0115_story16r_tests_docs.md
 
 Implementation Notes
+- Lint mode + normalization: resources/plans/steps_20260118_1920_lint_mode_normalization.md
 - Phase API key overrides: resources/plans/steps_20260118_1845_phase_api_keys.md
 - Story 9 implementation: resources/plans/steps_20260118_1805_story9_write_loop_impl.md
 - Outline character hooks + scene/section variance: resources/plans/steps_20260118_1210_outline_characters_beats.md

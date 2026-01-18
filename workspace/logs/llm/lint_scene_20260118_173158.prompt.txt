@@ -1,0 +1,117 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: The Awakened Sage
+Book ID: sagefall_p1_v1
+Author Ref: eldrik-vale/v3
+Genre: fantasy, epic
+Series ID: sagefall
+Series Ref: series/sagefall
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 900
+- chapters: 24
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+When emulating Eldrik Vale, prioritize a tight, immersive third-person limited POV. Weave a narrative rich with subtle foreshadowing and intricate plot threads, ensuring that major reveals feel earned and are judiciously hinted at throughout the text. Maintain a mythic and epic tone through descriptive language and thematic depth. Develop complex, morally ambiguous characters alongside clear heroes and villains, exploring their internal conflicts and motivations. Integrate world-building seamlessly, avoiding direct info-dumps. Vary sentence structure and pacing, using longer, flowing sentences for description and shorter, impactful ones for tension and revelation. Avoid deus ex machina, predictable character arcs, and simplistic moral resolutions. Focus on creating a layered reading experience where the importance of minor details becomes clear in surprising, satisfying ways, rewarding attentive readers.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+
+
+USER:
+
+# LINT
+
+Check the scene for continuity, invariant violations, and duplication.
+Return ONLY JSON matching the lint_report schema.
+
+Scene:
+The first breath was not a choice; it was a violent intrusion of air into lungs that had forgotten the shape of oxygen. Eldrin’s chest heaved, a rusted bellows forced into sudden, agonizing motion. The air was thick, tasting of pulverized granite and the dry, metallic tang of an age-old decay. It burned—a searing, glacial fire that traced the branching paths of his bronchioles, anchoring his consciousness to a body that felt less like flesh and more like cooling lead.
+
+He did not open his eyes. Instead, he felt the weight of the silence. It was not the reverent, humming stillness of the Sanctuary he remembered, but a hollow, predatory quiet. Beneath that silence lay the sound: the Whispering Stone. It was a low, discordant thrumming, like a heartbeat skipped and then dragged across jagged glass. In the height of the Second Epoch, the Stone had sung a celestial resonance that harmonized with the very marrow of his bones. Now, it groaned. It was the sound of a foundation failing, a rhythmic grinding that vibrated through the stone plinth beneath him and up into his spine.
+
+His fingers twitched. The sensation was alien. He felt the grit of centuries-old dust beneath his nails—fine as flour, cold as the void. He attempted to curl his hand, and the skin across his knuckles protested, tight and brittle like cured parchment. Memory flickered, a fragmented mosaic of gold-leafed domes and the smell of burning cedar, clashing violently with the reality of the stagnant air. This was the Heart of Oakhaven, the eternal refuge. It was supposed to be inviolate.
+
+Eldrin forced his eyelids apart. 
+
+The darkness was not absolute, but it was oppressive. A sickly, pale luminescence filtered down from high above, where the great vaulted ceiling had partially surrendered to the weight of the earth. Massive ribs of worked stone, once etched with the silver-blue glowing runes of warding, lay shattered across the floor like the ribcage of a fallen titan. The silver was gone, scoured away or faded into dull, lightless scars. 
+
+He tried to push himself up. His muscles screamed, a chorus of atrophy and shock. The physical trauma of reanimation felt like being stitched back together with needles of ice. He rolled onto his side, his shoulder hitting the stone floor with a dull thud that sent a cloud of choking dust into the air. He coughed, a dry, racking sound that seemed to echo too long, bouncing off the jagged remains of the pillars. 
+
+The Whispering Stone sat in the center of the chamber, or what remained of it. The great monolith, once a perfect spire of translucent obsidian, was cracked. A jagged fissure ran from its apex down to the base, and from that wound, the discordant hum emanated. It was no longer a beacon; it was a tombstone.
+
+Eldrin gripped the edge of his sarcophagus—a simple slab of basalt that had outlasted the finery of his peers—and hauled himself upward. His joints popped with the sound of breaking dry wood. He swayed, his vision swimming in the dim light. The dissonance in his mind grew louder; he remembered the Archive as a place of infinite knowledge and warmth, a library that defied the passage of suns. To see it reduced to this—a cavern of debris, a hollowed-out shell—was a psychic blow that rivaled the pain of his waking.
+
+He found his feet. They were bare, the skin pale and mapped with blue veins that pulsed with a sluggish, newborn rhythm. He stood, trembling, his height a mockery of the power he had once wielded. He was a ghost in a ruin, a relic of a world that had clearly moved on without him.
+
+As he steadied himself against a leaning column, his gaze drifted to the base of the Whispering Stone. The pale light caught something there—something that did not belong to the stone or the dust. 
+
+A web of obsidian-colored veins, thick and oily, was crawling across the floor. It didn't just sit upon the stone; it seemed to be consuming it. The growth pulsed with a rhythmic, sickly light that matched the discord of the Stone’s hum. It was a blight, an unnatural corruption that looked like frozen smoke given physical form. It was spreading, threading its way into the cracks of the sanctuary, its presence a silent scream of rot in the heart of what should have been his eternal sanctuary. 
+
+Eldrin stared, his breath hitching. The refuge was not just ruined; it was infested.
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 1
+  },
+  "duplication_warnings_in_row": 0,
+  "outline": {
+    "path": "outline/outline.json"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_001.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "PLANNED",
+  "world": {
+    "cast_present": [],
+    "location": "",
+    "open_threads": [],
+    "recent_facts": [],
+    "time": {}
+  }
+}
+
+Invariants:
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships."
+]

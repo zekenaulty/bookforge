@@ -92,6 +92,7 @@ workspace/
 - PLANNER_MODEL, WRITER_MODEL, LINTER_MODEL
 - Provider-specific keys and endpoints
 - PLANNER_API_KEY, WRITER_API_KEY, LINTER_API_KEY (optional per-phase overrides; fall back to the provider default key)
+- BOOKFORGE_LINT_MODE=strict|warn|off (default: strict)
 
 ## Logging and validation
 - JSONL logs with prompt hashes, model info, token estimates, and results.

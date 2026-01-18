@@ -261,8 +261,16 @@ def _normalize_scene_card(
     card.setdefault("scene_id", _scene_id(chapter, scene))
     card.setdefault("chapter", chapter)
     card.setdefault("scene", scene)
-    if not card.get("scene_target"):
+    scene_target_value = card.get("scene_target")
+    if scene_target_value is None or scene_target_value == "":
         card["scene_target"] = scene_target
+    else:
+        if not isinstance(scene_target_value, str):
+            scene_target_value = str(scene_target_value)
+        if scene_target_value.strip().isdigit():
+            card["scene_target"] = scene_target
+        else:
+            card["scene_target"] = scene_target_value
 
     if not isinstance(card.get("required_callbacks"), list):
         card["required_callbacks"] = []
