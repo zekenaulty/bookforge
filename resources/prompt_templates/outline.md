@@ -3,6 +3,7 @@
 You are the outline planner. Create a compact outline for the book.
 Return ONLY a single JSON object that matches the outline schema.
 No markdown, no code fences, no commentary.
+Keep summaries concise but in the author voice from the system prompt.
 
 Beats must vary per chapter. Do NOT use a fixed beat count.
 Use enough beats per chapter to support multiple scenes (aim 4-8, vary by chapter complexity).
