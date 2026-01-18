@@ -12,6 +12,7 @@ import re
 from bookforge.config.env import load_config
 from bookforge.llm.factory import get_llm_client, resolve_model
 from bookforge.llm.types import Message, LLMResponse
+from bookforge.llm.logging import log_llm_response, should_log_llm
 from bookforge.prompt.renderer import render_template_file
 from bookforge.util.paths import repo_root
 
@@ -96,29 +97,6 @@ def _build_prompt(influences: Optional[str], prompt_text: Optional[str], name: O
 
 
 
-def _should_log_llm() -> bool:
-    flag = os.environ.get("BOOKFORGE_LOG_LLM", "").strip().lower()
-    return flag in {"1", "true", "yes", "on"}
-
-
-def _log_llm_response(workspace: Path, label: str, response: LLMResponse) -> Path:
-    log_dir = workspace / "logs" / "llm"
-    log_dir.mkdir(parents=True, exist_ok=True)
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    log_path = log_dir / f"{label}_{timestamp}.json"
-    payload = {
-        "label": label,
-        "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-        "provider": response.provider,
-        "model": response.model,
-        "text": response.text,
-        "raw": response.raw,
-    }
-    log_path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
-    return log_path
-
-
-
 def _int_env(name: str, default: int) -> int:
     raw = os.environ.get(name)
     if raw is None:
@@ -174,13 +152,13 @@ def generate_author(
     max_tokens = _author_max_tokens()
     response = client.chat(messages, model=model, temperature=0.7, max_tokens=max_tokens)
     log_path: Optional[Path] = None
-    if _should_log_llm():
-        log_path = _log_llm_response(workspace, "author_generate", response)
+    if should_log_llm():
+        log_path = log_llm_response(workspace, "author_generate", response)
     try:
         data = _extract_json(response.text)
     except ValueError as exc:
         if not log_path:
-            log_path = _log_llm_response(workspace, "author_generate", response)
+            log_path = log_llm_response(workspace, "author_generate", response)
         extra = ""
         if _response_truncated(response):
             extra = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_AUTHOR_MAX_TOKENS or reduce output size."

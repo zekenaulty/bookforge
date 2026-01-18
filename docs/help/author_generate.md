@@ -24,8 +24,8 @@ Debugging
 - To always log raw responses, set BOOKFORGE_LOG_LLM=1 before running.
   Example (PowerShell): $env:BOOKFORGE_LOG_LLM="1"
 
-- If the output is truncated (MAX_TOKENS), raise BOOKFORGE_AUTHOR_MAX_TOKENS (default: 4096).
-  Example (PowerShell): $env:BOOKFORGE_AUTHOR_MAX_TOKENS="4096"
+- If the output is truncated (MAX_TOKENS), raise BOOKFORGE_AUTHOR_MAX_TOKENS (default: 6096).
+  Example (PowerShell): $env:BOOKFORGE_AUTHOR_MAX_TOKENS="6096"
 
 Examples
 - Minimal:

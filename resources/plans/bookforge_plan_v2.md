@@ -463,6 +463,18 @@ Refinement Notes
 - Story 15.R accepted: resources/plans/steps_20260118_0113_story15r_observability.md
 - Story 16.R accepted: resources/plans/steps_20260118_0115_story16r_tests_docs.md
 
+Implementation Notes
+- Story 1 implementation: resources/plans/steps_20260118_0121_story1_scaffold.md
+- Story 2 implementation: resources/plans/steps_20260118_0130_story2_llm_provider_impl.md
+- Story 3 implementation: resources/plans/steps_20260118_0147_story3_schema_impl.md
+- Story 4 implementation: resources/plans/steps_20260118_0151_story4_prompt_impl.md
+- Story 5 implementation: resources/plans/steps_20260118_0216_story5_budgeter_continuity_impl.md
+- Story 6 implementation: resources/plans/steps_20260118_0222_story6_author_impl.md
+- Gemini quota handling: resources/plans/steps_20260118_0211_gemini_throttle_quota.md
+- Env path fix: resources/plans/steps_20260118_0229_env_path_fix.md
+- Author logging and token caps: resources/plans/steps_20260118_0918_story6_author_logging.md
+
+
 Checklist
 - [x] Story 1.R: Requirements baseline and architecture handshake
 - [x] Story 1: Repo scaffolding and core package layout
