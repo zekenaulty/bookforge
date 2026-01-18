@@ -153,12 +153,12 @@ def generate_author(
     response = client.chat(messages, model=model, temperature=0.7, max_tokens=max_tokens)
     log_path: Optional[Path] = None
     if should_log_llm():
-        log_path = log_llm_response(workspace, "author_generate", response)
+        log_path = log_llm_response(workspace, "author_generate", response, messages=messages)
     try:
         data = _extract_json(response.text)
     except ValueError as exc:
         if not log_path:
-            log_path = log_llm_response(workspace, "author_generate", response)
+            log_path = log_llm_response(workspace, "author_generate", response, messages=messages)
         extra = ""
         if _response_truncated(response):
             extra = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_AUTHOR_MAX_TOKENS or reduce output size."

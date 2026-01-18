@@ -14,7 +14,10 @@ from bookforge.llm.logging import log_llm_response, should_log_llm
 from bookforge.llm.types import LLMResponse, Message
 from bookforge.prompt.renderer import render_template_file
 from bookforge.util.paths import repo_root
-from bookforge.util.schema import SCHEMA_VERSION, validate_json
+from bookforge.util.schema import validate_json
+
+
+SCENE_CARD_SCHEMA_VERSION = "1.1"
 
 
 def _int_env(name: str, default: int) -> int:
@@ -114,79 +117,65 @@ def _find_chapter(outline: Dict[str, Any], chapter_number: int) -> Dict[str, Any
     raise ValueError(f"Chapter {chapter_number} not found in outline.")
 
 
-def _beat_summary(beat: Optional[Dict[str, Any]]) -> str:
-    if not beat:
+def _scene_summary(scene: Optional[Dict[str, Any]]) -> str:
+    if not scene:
         return ""
-    summary = beat.get("summary")
+    summary = scene.get("summary")
     return str(summary) if summary is not None else ""
 
 
-def _build_outline_window(chapter: Dict[str, Any], scene_number: int) -> Dict[str, Any]:
-    beats = chapter.get("beats", []) if isinstance(chapter.get("beats", []), list) else []
-    if beats and scene_number > len(beats):
-        chapter_id = chapter.get("chapter_id", "")
-        raise ValueError(f"Scene {scene_number} exceeds available beats ({len(beats)}) for chapter {chapter_id}.")
-    beat_index = max(0, scene_number - 1)
-    if beats:
-        beat_index = min(beat_index, len(beats) - 1)
-    else:
-        beat_index = 0
-
-    current = beats[beat_index] if beats else {}
-    prev = beats[beat_index - 1] if beats and beat_index > 0 else None
-    nxt = beats[beat_index + 1] if beats and beat_index + 1 < len(beats) else None
-
-    return {
-        "chapter": {
-            "chapter_id": chapter.get("chapter_id"),
-            "title": chapter.get("title", ""),
-            "goal": chapter.get("goal", ""),
-            "characters": _chapter_characters(chapter),
-        },
-        "scene_index": scene_number,
-        "previous": {
-            "summary": _beat_summary(prev),
-            "characters": _beat_characters(prev),
-            "introduces": _beat_introduces(prev),
-        } if prev else None,
-        "current": {
-            "beat_id": current.get("beat_id"),
-            "summary": _beat_summary(current),
-            "characters": _beat_characters(current),
-            "introduces": _beat_introduces(current),
-        },
-        "next": {
-            "summary": _beat_summary(nxt),
-            "characters": _beat_characters(nxt),
-            "introduces": _beat_introduces(nxt),
-        } if nxt else None,
-    }
-
-
-
-
-def _beat_characters(beat: Optional[Dict[str, Any]]) -> List[str]:
-    if not beat or not isinstance(beat, dict):
+def _scene_characters(scene: Optional[Dict[str, Any]]) -> List[str]:
+    if not scene or not isinstance(scene, dict):
         return []
-    values = beat.get("characters")
+    values = scene.get("characters")
     return values if isinstance(values, list) else []
 
 
-def _beat_introduces(beat: Optional[Dict[str, Any]]) -> List[str]:
-    if not beat or not isinstance(beat, dict):
+def _scene_introduces(scene: Optional[Dict[str, Any]]) -> List[str]:
+    if not scene or not isinstance(scene, dict):
         return []
-    values = beat.get("introduces")
+    values = scene.get("introduces")
     return values if isinstance(values, list) else []
+
+
+def _scene_threads(scene: Optional[Dict[str, Any]]) -> List[str]:
+    if not scene or not isinstance(scene, dict):
+        return []
+    values = scene.get("threads")
+    return values if isinstance(values, list) else []
+
+
+def _scene_callbacks(scene: Optional[Dict[str, Any]]) -> List[str]:
+    if not scene or not isinstance(scene, dict):
+        return []
+    values = scene.get("callbacks")
+    return values if isinstance(values, list) else []
+
+
+def _flatten_scenes(chapter: Dict[str, Any]) -> List[Dict[str, Any]]:
+    sections = chapter.get("sections", []) if isinstance(chapter.get("sections", []), list) else []
+    flattened: List[Dict[str, Any]] = []
+    for section in sections:
+        if not isinstance(section, dict):
+            continue
+        section_info = {
+            "section_id": section.get("section_id"),
+            "title": section.get("title", ""),
+            "intent": section.get("intent", ""),
+            "section_role": section.get("section_role", ""),
+        }
+        scenes = section.get("scenes", []) if isinstance(section.get("scenes", []), list) else []
+        for scene in scenes:
+            if not isinstance(scene, dict):
+                continue
+            flattened.append({"section": section_info, "scene": scene})
+    return flattened
 
 
 def _chapter_characters(chapter: Dict[str, Any]) -> List[str]:
-    values = chapter.get("characters")
-    if isinstance(values, list):
-        return values
     characters: List[str] = []
-    for beat in chapter.get("beats", []) if isinstance(chapter.get("beats", []), list) else []:
-        characters.extend(_beat_characters(beat))
-    # de-dupe while preserving order
+    for entry in _flatten_scenes(chapter):
+        characters.extend(_scene_characters(entry.get("scene")))
     seen = set()
     unique = []
     for item in characters:
@@ -196,6 +185,66 @@ def _chapter_characters(chapter: Dict[str, Any]) -> List[str]:
         unique.append(item)
     return unique
 
+
+def _build_outline_window(chapter: Dict[str, Any], scene_number: int) -> Dict[str, Any]:
+    scenes = _flatten_scenes(chapter)
+    if scenes and scene_number > len(scenes):
+        chapter_id = chapter.get("chapter_id", "")
+        raise ValueError(f"Scene {scene_number} exceeds available scenes ({len(scenes)}) for chapter {chapter_id}.")
+
+    index = max(0, scene_number - 1)
+    if scenes:
+        index = min(index, len(scenes) - 1)
+    else:
+        index = 0
+
+    current_entry = scenes[index] if scenes else None
+    prev_entry = scenes[index - 1] if scenes and index > 0 else None
+    next_entry = scenes[index + 1] if scenes and index + 1 < len(scenes) else None
+
+    def _entry_payload(entry: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        if not entry:
+            return None
+        scene = entry.get("scene", {})
+        section = entry.get("section", {})
+        return {
+            "scene_id": scene.get("scene_id"),
+            "summary": _scene_summary(scene),
+            "type": scene.get("type"),
+            "outcome": scene.get("outcome"),
+            "characters": _scene_characters(scene),
+            "introduces": _scene_introduces(scene),
+            "threads": _scene_threads(scene),
+            "callbacks": _scene_callbacks(scene),
+            "section": {
+                "section_id": section.get("section_id"),
+                "title": section.get("title", ""),
+                "intent": section.get("intent", ""),
+                "section_role": section.get("section_role", ""),
+            },
+        }
+
+    current_payload = _entry_payload(current_entry)
+
+    return {
+        "chapter": {
+            "chapter_id": chapter.get("chapter_id"),
+            "title": chapter.get("title", ""),
+            "goal": chapter.get("goal", ""),
+            "chapter_role": chapter.get("chapter_role", ""),
+            "stakes_shift": chapter.get("stakes_shift", ""),
+            "bridge": chapter.get("bridge", {}),
+            "pacing": chapter.get("pacing", {}),
+            "characters": _chapter_characters(chapter),
+        },
+        "section": current_payload.get("section") if current_payload else None,
+        "scene_index": scene_number,
+        "previous": _entry_payload(prev_entry),
+        "current": current_payload,
+        "next": _entry_payload(next_entry),
+    }
+
+
 def _scene_id(chapter: int, scene: int) -> str:
     return f"SC_{chapter:03d}_{scene:03d}"
 
@@ -204,15 +253,15 @@ def _normalize_scene_card(
     card: Dict[str, Any],
     chapter: int,
     scene: int,
-    beat_target: str,
+    scene_target: str,
 ) -> Dict[str, Any]:
     if "schema_version" not in card:
-        card["schema_version"] = SCHEMA_VERSION
+        card["schema_version"] = SCENE_CARD_SCHEMA_VERSION
     card.setdefault("scene_id", _scene_id(chapter, scene))
     card.setdefault("chapter", chapter)
     card.setdefault("scene", scene)
-    if not card.get("beat_target"):
-        card["beat_target"] = beat_target
+    if not card.get("scene_target"):
+        card["scene_target"] = scene_target
 
     if not isinstance(card.get("required_callbacks"), list):
         card["required_callbacks"] = []
@@ -248,6 +297,8 @@ def plan_scene(
     outline = _load_json(outline_path)
     state = _load_json(state_path)
 
+    validate_json(outline, "outline")
+
     cursor = state.get("cursor", {}) if isinstance(state.get("cursor"), dict) else {}
     chapter_num = chapter if chapter is not None else int(cursor.get("chapter", 0) or 0)
     scene_num = scene if scene is not None else int(cursor.get("scene", 0) or 0)
@@ -260,8 +311,9 @@ def plan_scene(
     chapter_obj = _find_chapter(outline, chapter_num)
     outline_window = _build_outline_window(chapter_obj, scene_num)
 
-    beat_target = outline_window.get("current", {}).get("summary") or chapter_obj.get("goal", "")
-    beat_target = str(beat_target) if beat_target is not None else ""
+    current_scene = outline_window.get("current") or {}
+    scene_target = current_scene.get("summary") or chapter_obj.get("goal", "")
+    scene_target = str(scene_target) if scene_target is not None else ""
 
     plan_template = _resolve_plan_template(book_root)
     prompt = render_template_file(
@@ -289,18 +341,18 @@ def plan_scene(
     response = client.chat(messages, model=model, temperature=0.4, max_tokens=max_tokens)
     log_path: Optional[Path] = None
     if should_log_llm():
-        log_path = log_llm_response(workspace, "plan_scene", response)
+        log_path = log_llm_response(workspace, "plan_scene", response, messages=messages)
     try:
         card = _extract_json(response.text)
     except ValueError as exc:
         if not log_path:
-            log_path = log_llm_response(workspace, "plan_scene", response)
+            log_path = log_llm_response(workspace, "plan_scene", response, messages=messages)
         extra = ""
         if _response_truncated(response):
             extra = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_PLAN_MAX_TOKENS."
         raise ValueError(f"{exc}{extra} (raw response logged to {log_path})") from exc
 
-    card = _normalize_scene_card(card, chapter_num, scene_num, beat_target)
+    card = _normalize_scene_card(card, chapter_num, scene_num, scene_target)
     validate_json(card, "scene_card")
 
     chapter_dir = book_root / "draft" / "chapters" / f"ch_{chapter_num:03d}"

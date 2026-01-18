@@ -8,13 +8,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "1.0"
-    },
-    "acts": {
-      "type": "array",
-      "items": {
-        "type": "object"
-      }
+      "const": "1.1"
     },
     "chapters": {
       "type": "array",
@@ -24,7 +18,11 @@
           "chapter_id",
           "title",
           "goal",
-          "beats"
+          "chapter_role",
+          "stakes_shift",
+          "bridge",
+          "pacing",
+          "sections"
         ],
         "properties": {
           "chapter_id": {
@@ -39,33 +37,207 @@
           "goal": {
             "type": "string"
           },
-          "beats": {
+          "chapter_role": {
+            "type": "string",
+            "description": "Preferred values: hook, setup, pressure, reversal, revelation, investigation, journey, trial, alliance, betrayal, siege, confrontation, climax, aftermath, transition, hinge."
+          },
+          "stakes_shift": {
+            "type": "string"
+          },
+          "bridge": {
+            "type": "object",
+            "required": [
+              "from_prev",
+              "to_next"
+            ],
+            "properties": {
+              "from_prev": {
+                "type": "string"
+              },
+              "to_next": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "pacing": {
+            "type": "object",
+            "required": [
+              "intensity",
+              "tempo",
+              "expected_scene_count"
+            ],
+            "properties": {
+              "intensity": {
+                "type": [
+                  "number",
+                  "string"
+                ],
+                "description": "Preferred range: 1-5."
+              },
+              "tempo": {
+                "type": "string",
+                "description": "Preferred values: slow_burn, steady, rush."
+              },
+              "expected_scene_count": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "additionalProperties": true
+          },
+          "sections": {
             "type": "array",
             "items": {
               "type": "object",
               "required": [
-                "beat_id",
-                "summary"
+                "section_id",
+                "title",
+                "intent",
+                "scenes"
               ],
               "properties": {
-                "beat_id": {
+                "section_id": {
                   "type": [
                     "string",
                     "integer"
                   ]
                 },
-                "summary": {
+                "title": {
                   "type": "string"
                 },
-                "entry_state": {
-                  "type": "object"
+                "intent": {
+                  "type": "string"
                 },
-                "exit_state": {
-                  "type": "object"
+                "section_role": {
+                  "type": "string"
+                },
+                "scenes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "scene_id",
+                      "summary",
+                      "type",
+                      "outcome",
+                      "characters"
+                    ],
+                    "properties": {
+                      "scene_id": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "summary": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Preferred values: setup, action, reveal, escalation, choice, consequence, aftermath, transition."
+                      },
+                      "outcome": {
+                        "type": "string"
+                      },
+                      "characters": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "introduces": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "threads": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "callbacks": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "additionalProperties": true
+                  }
                 }
               },
               "additionalProperties": true
             }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "characters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "character_id",
+          "name",
+          "intro"
+        ],
+        "properties": {
+          "character_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "pronouns": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "intro": {
+            "type": "object",
+            "required": [
+              "chapter",
+              "scene"
+            ],
+            "properties": {
+              "chapter": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "scene": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "threads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "thread_id",
+          "label",
+          "status"
+        ],
+        "properties": {
+          "thread_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
           }
         },
         "additionalProperties": true

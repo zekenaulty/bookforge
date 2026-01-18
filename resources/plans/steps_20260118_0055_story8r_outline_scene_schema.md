@@ -18,9 +18,9 @@ Issues
 - None.
 
 Decision
-- Outline schema: acts optional; chapters with goals and beats; beats include beat_id, summary, entry_state (optional), exit_state (optional).
-- Scene card schema: scene_id, chapter, scene, beat_target, goal, conflict, required_callbacks, constraints, end_condition.
-- Outline window in prompts includes prev/current/next beats.
+- Outline schema v1.1: chapters with roles, pacing, and sections; sections contain scenes with scene_id, summary, type, outcome, characters.
+- Scene card schema v1.1: scene_id, chapter, scene, scene_target, goal, conflict, required_callbacks, constraints, end_condition.
+- Outline window in prompts includes prev/current/next scenes with section context.
 
 Completion
 - Story 8.R accepted and locked.

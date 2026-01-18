@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 import json
 
 from bookforge.llm.types import LLMResponse
@@ -35,13 +35,32 @@ def test_plan_scene_writes_scene_card(tmp_path: Path) -> None:
     )
 
     outline = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "chapters": [
             {
                 "chapter_id": 1,
                 "title": "Opening",
                 "goal": "Introduce the quest.",
-                "beats": [{"beat_id": 1, "summary": "The call arrives."}],
+                "chapter_role": "hook",
+                "stakes_shift": "The call arrives.",
+                "bridge": {"from_prev": "", "to_next": "A decision is forced."},
+                "pacing": {"intensity": 3, "tempo": "steady", "expected_scene_count": 1},
+                "sections": [
+                    {
+                        "section_id": 1,
+                        "title": "Arrival",
+                        "intent": "Present the summons.",
+                        "scenes": [
+                            {
+                                "scene_id": 1,
+                                "summary": "The call arrives.",
+                                "type": "setup",
+                                "outcome": "The hero is summoned.",
+                                "characters": ["CHAR_kaelen"],
+                            }
+                        ],
+                    }
+                ],
             }
         ],
     }
@@ -51,11 +70,11 @@ def test_plan_scene_writes_scene_card(tmp_path: Path) -> None:
     outline_path.write_text(json.dumps(outline, ensure_ascii=True, indent=2), encoding="utf-8")
 
     scene_card = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "scene_id": "SC_001_001",
         "chapter": 1,
         "scene": 1,
-        "beat_target": "The call arrives.",
+        "scene_target": "The call arrives.",
         "goal": "Force a decision.",
         "conflict": "A warning complicates the offer.",
         "required_callbacks": [],

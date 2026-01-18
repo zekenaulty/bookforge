@@ -96,7 +96,7 @@ Duplication Prevention Controls
 - Banned phrase list from recent scenes injected into write prompts.
 - Cross-scene similarity checks (n-gram overlap, opening similarity) before commit.
 - Anti-loop sentinel in state.json to tighten constraints after repeated duplication warnings.
-- Scene cards enforce one beat, one conflict pivot, one end condition.
+- Scene cards enforce one scene target, one conflict pivot, one end condition.
 
 Prompt Budgeting and Injection Policy
 - Budgets per phase: stable prefix, dynamic payload, canon injection, continuity pack.
@@ -263,7 +263,7 @@ Definition of Done
 
 Story 8.R: Refinement - Outline and scene card schemas
 Tasks
-- Define outline.json schema and chapter/beat fields.
+- Define outline.json schema and chapter/section/scene fields.
 - Define scene card schema and output contract for plan step.
 - Define how outline window and state are included in payload.
 Definition of Done
@@ -466,10 +466,19 @@ Refinement Notes
 - Story 16.R accepted: resources/plans/steps_20260118_0115_story16r_tests_docs.md
 
 Implementation Notes
-- Outline character hooks + beat variance: resources/plans/steps_20260118_1210_outline_characters_beats.md
+- Outline character hooks + scene/section variance: resources/plans/steps_20260118_1210_outline_characters_beats.md
+- Outline prompt file support: resources/plans/steps_20260118_1330_outline_prompt_file.md
+- Outline sections + scene terminology: resources/plans/steps_20260118_1245_outline_sections_scenes.md
 - Series canon scaffolding: resources/plans/steps_20260118_1130_series_canon_seed.md
 - Request timeout increase: resources/plans/steps_20260118_1115_request_timeout.md
 - Outline max tokens default: resources/plans/steps_20260118_1056_outline_max_tokens.md
+- Outline JSON repair fallback: resources/plans/steps_20260118_1410_outline_json_repair.md
+- Outline enum softening: resources/plans/steps_20260118_1510_outline_enum_soften.md
+- Outline enum warnings: resources/plans/steps_20260118_1530_outline_enum_warning.md
+- Outline JSON extra-data repair: resources/plans/steps_20260118_1600_outline_json_extra_data_repair.md
+- Outline intensity softening: resources/plans/steps_20260118_1650_outline_intensity_soften.md
+- Pretty LLM text logs: resources/plans/steps_20260118_1605_llm_pretty_logs.md
+- Prompt logging: resources/plans/steps_20260118_1715_prompt_logging.md
 - Story 8 implementation: resources/plans/steps_20260118_1035_story8_outline_plan_impl.md
 - Story 7 implementation: resources/plans/steps_20260118_0940_story7_workspace_init.md
 - Story 1 implementation: resources/plans/steps_20260118_0121_story1_scaffold.md

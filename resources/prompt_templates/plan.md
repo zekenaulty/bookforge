@@ -1,4 +1,4 @@
-# PLAN
+﻿# PLAN
 
 You are the planner. Use the outline window and state to create the next scene card.
 Return ONLY a single JSON object that matches the scene_card schema.
@@ -8,11 +8,11 @@ If outline_window includes character information, keep those character ids in mi
 If outline_window.current.introduces is present, the scene must introduce those characters.
 
 Required keys:
-- schema_version ("1.0")
+- schema_version ("1.1")
 - scene_id
 - chapter
 - scene
-- beat_target
+- scene_target
 - goal
 - conflict
 - required_callbacks (array)
@@ -21,11 +21,11 @@ Required keys:
 
 JSON shape example (fill with real values):
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "scene_id": "SC_001_001",
   "chapter": 1,
   "scene": 1,
-  "beat_target": "",
+  "scene_target": "",
   "goal": "",
   "conflict": "",
   "required_callbacks": [],

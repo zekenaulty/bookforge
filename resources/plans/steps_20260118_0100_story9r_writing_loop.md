@@ -22,7 +22,7 @@ Decision
 - State patch includes world_updates, thread_updates, canon_updates, cursor_advance, duplication_warnings_in_row_delta.
 - Resume mid-chapter using existing scene files and state.json cursor.
 - Stop conditions: outline complete, max steps, consecutive failure threshold.
-- Writer output includes compliance checklist (beat_completed, end_condition_met, new_entities_count, new_threads_count).
+- Writer output includes compliance checklist (scene_target_completed, end_condition_met, new_entities_count, new_threads_count).
 - Word/page count targets are enforced per scene with configurable words_per_page/chars_per_page and threshold bands.
 
 Completion

@@ -48,11 +48,13 @@ def _author_generate(args: argparse.Namespace) -> int:
 
 def _outline_generate(args: argparse.Namespace) -> int:
     workspace = Path(args.workspace)
+    prompt_file = Path(args.prompt_file) if args.prompt_file else None
     try:
         outline_path = generate_outline(
             workspace=workspace,
             book_id=args.book,
             new_version=args.new_version,
+            prompt_file=prompt_file,
         )
     except Exception as exc:
         sys.stderr.write(f"Outline generation failed: {exc}\n")
@@ -109,6 +111,7 @@ def build_parser() -> argparse.ArgumentParser:
     outline_sub = outline_parser.add_subparsers(dest="outline_command", required=True)
     outline_generate = outline_sub.add_parser("generate", help="Generate an outline.")
     outline_generate.add_argument("--book", required=True, help="Book id.")
+    outline_generate.add_argument("--prompt-file", help="Path to outline prompt file.")
     outline_generate.add_argument(
         "--new-version",
         action="store_true",
