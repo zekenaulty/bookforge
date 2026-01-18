@@ -5,7 +5,7 @@ import sys
 from bookforge.author import generate_author
 from bookforge.outline import generate_outline
 from bookforge.runner import run_loop
-from bookforge.workspace import init_book_workspace, parse_genre, parse_targets
+from bookforge.workspace import init_book_workspace, parse_genre, parse_targets, reset_book_workspace
 
 
 def _init(args: argparse.Namespace) -> int:
@@ -80,6 +80,17 @@ def _run(args: argparse.Namespace) -> int:
         sys.stderr.write(f"Run failed: {exc}\n")
         return 1
     sys.stdout.write("Run completed.\n")
+    return 0
+
+
+def _book_reset(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        book_root = reset_book_workspace(workspace=workspace, book_id=args.book)
+    except Exception as exc:
+        sys.stderr.write(f"Reset failed: {exc}\n")
+        return 1
+    sys.stdout.write(f"Book reset at {book_root}\n")
     return 0
 
 
@@ -184,6 +195,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Output format.",
     )
     book_show_current.set_defaults(func=_not_implemented)
+
+    book_reset = book_sub.add_parser("reset", help="Reset book draft state.")
+    book_reset.add_argument("--book", required=True, help="Book id.")
+    book_reset.set_defaults(func=_book_reset)
 
     book_clear_current = book_sub.add_parser("clear-current", help="Clear current book.")
     book_clear_current.add_argument(

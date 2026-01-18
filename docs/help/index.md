@@ -13,3 +13,4 @@ Commands
 - book set-current: docs/help/book_set_current.md
 - book show-current: docs/help/book_show_current.md
 - book clear-current: docs/help/book_clear_current.md
+- book reset: docs/help/book_reset.md

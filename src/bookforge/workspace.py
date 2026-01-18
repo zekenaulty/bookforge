@@ -27,6 +27,13 @@ DEFAULT_PAGE_METRICS = {
     "chars_per_page": 1500,
 }
 
+DEFAULT_BUDGETS = {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "min_scene_words": 0,
+    "max_scene_words": 0,
+}
+
 
 def parse_genre(value: str) -> List[str]:
     items = [item.strip() for item in value.split(",") if item.strip()]
@@ -221,12 +228,7 @@ def init_book_workspace(
             "open_threads": [],
             "recent_facts": [],
         },
-        "budgets": {
-            "max_new_entities": 1,
-            "max_new_threads": 1,
-            "min_scene_words": 0,
-            "max_scene_words": 0,
-        },
+        "budgets": dict(DEFAULT_BUDGETS),
         "duplication_warnings_in_row": 0,
     }
 
@@ -282,5 +284,77 @@ def init_book_workspace(
 
     system_path = book_root / "prompts" / "system_v1.md"
     write_system_prompt(system_path, base_rules, constitution_text, author_fragment, output_contract)
+
+    return book_root
+
+
+
+def reset_book_workspace(workspace: Path, book_id: str) -> Path:
+    book_root = workspace / "books" / book_id
+    if not book_root.exists():
+        raise FileNotFoundError(f"Book workspace not found: {book_root}")
+
+    book_path = book_root / "book.json"
+    state_path = book_root / "state.json"
+    outline_path = book_root / "outline" / "outline.json"
+
+    if not book_path.exists():
+        raise FileNotFoundError(f"Missing book.json: {book_path}")
+
+    existing_state: Dict[str, Any] = {}
+    if state_path.exists():
+        try:
+            existing_state = json.loads(state_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            existing_state = {}
+
+    budgets = dict(DEFAULT_BUDGETS)
+    existing_budgets = existing_state.get("budgets") if isinstance(existing_state, dict) else None
+    if isinstance(existing_budgets, dict):
+        for key, value in existing_budgets.items():
+            if key in DEFAULT_BUDGETS:
+                if isinstance(value, int):
+                    budgets[key] = value
+                elif isinstance(value, float):
+                    budgets[key] = int(value)
+                elif isinstance(value, str) and value.strip().isdigit():
+                    budgets[key] = int(value)
+            else:
+                budgets[key] = value
+
+    status = "OUTLINED" if outline_path.exists() else "NEW"
+    state = {
+        "schema_version": SCHEMA_VERSION,
+        "status": status,
+        "cursor": {
+            "chapter": 0,
+            "scene": 0,
+        },
+        "world": {
+            "time": {},
+            "location": "",
+            "cast_present": [],
+            "open_threads": [],
+            "recent_facts": [],
+        },
+        "budgets": budgets,
+        "duplication_warnings_in_row": 0,
+    }
+
+    validate_json(state, "state")
+    state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
+
+    chapters_dir = book_root / "draft" / "chapters"
+    if chapters_dir.exists():
+        shutil.rmtree(chapters_dir)
+    chapters_dir.mkdir(parents=True, exist_ok=True)
+
+    context_dir = book_root / "draft" / "context"
+    context_dir.mkdir(parents=True, exist_ok=True)
+    (context_dir / "bible.md").write_text("", encoding="utf-8")
+    (context_dir / "last_excerpt.md").write_text("", encoding="utf-8")
+    continuity_path = context_dir / "continuity_pack.json"
+    if continuity_path.exists():
+        continuity_path.unlink()
 
     return book_root
