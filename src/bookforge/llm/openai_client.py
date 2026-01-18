@@ -9,10 +9,11 @@ from .utils import post_json
 
 
 class OpenAIClient(LLMClient):
-    def __init__(self, api_key: str, api_url: str, rate_limiter: Optional[RateLimiter] = None) -> None:
+    def __init__(self, api_key: str, api_url: str, rate_limiter: Optional[RateLimiter] = None, timeout_seconds: int = 240) -> None:
         super().__init__(provider="openai", rate_limiter=rate_limiter)
         self.api_key = api_key
         self.api_url = api_url
+        self.timeout_seconds = timeout_seconds
 
     def chat(
         self,
@@ -32,7 +33,7 @@ class OpenAIClient(LLMClient):
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
         }
-        raw = post_json(self.api_url, payload, headers, max_retries=3)
+        raw = post_json(self.api_url, payload, headers, timeout=self.timeout_seconds, max_retries=3)
         choice = raw.get("choices", [{}])[0]
         message = choice.get("message", {})
         text = message.get("content", "")

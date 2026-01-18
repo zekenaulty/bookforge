@@ -15,6 +15,7 @@ class AppConfig:
     ollama_url: str
     openai_api_url: str
     gemini_api_url: str
+    request_timeout_seconds: int
     planner_model: Optional[str]
     writer_model: Optional[str]
     linter_model: Optional[str]
@@ -51,6 +52,19 @@ def _extract_prefixed(env: Dict[str, str], prefix: str) -> Dict[str, str]:
         values[suffix] = value
     return values
 
+
+
+def _parse_int(value: Optional[str]) -> Optional[int]:
+    if value is None:
+        return None
+    raw = str(value).strip()
+    if not raw:
+        return None
+    try:
+        return int(raw)
+    except ValueError:
+        return None
+
 def _default_env_path() -> Path:
     return repo_root(Path(__file__).resolve()) / ".env"
 
@@ -75,11 +89,10 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
     task_model_overrides = _extract_prefixed(merged, "TASK_MODEL_")
     task_provider_overrides = _extract_prefixed(merged, "TASK_PROVIDER_")
 
-    gemini_rpm = merged.get("GEMINI_REQUESTS_PER_MINUTE")
-    try:
-        gemini_rpm_val = int(gemini_rpm) if gemini_rpm is not None and str(gemini_rpm).strip() else None
-    except ValueError:
-        gemini_rpm_val = None
+    gemini_rpm_val = _parse_int(merged.get("GEMINI_REQUESTS_PER_MINUTE"))
+    timeout_val = _parse_int(merged.get("BOOKFORGE_REQUEST_TIMEOUT_SECONDS"))
+    if timeout_val is None:
+        timeout_val = 600
 
     return AppConfig(
         provider=provider,
@@ -88,6 +101,7 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
         ollama_url=ollama_url,
         openai_api_url=openai_url,
         gemini_api_url=gemini_url,
+        request_timeout_seconds=timeout_val,
         planner_model=merged.get("PLANNER_MODEL"),
         writer_model=merged.get("WRITER_MODEL"),
         linter_model=merged.get("LINTER_MODEL"),

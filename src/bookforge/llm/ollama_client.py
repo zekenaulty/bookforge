@@ -9,9 +9,10 @@ from .utils import post_json
 
 
 class OllamaClient(LLMClient):
-    def __init__(self, api_url: str, rate_limiter: Optional[RateLimiter] = None) -> None:
+    def __init__(self, api_url: str, rate_limiter: Optional[RateLimiter] = None, timeout_seconds: int = 240) -> None:
         super().__init__(provider="ollama", rate_limiter=rate_limiter)
         self.api_url = api_url.rstrip("/") + "/api/chat"
+        self.timeout_seconds = timeout_seconds
 
     def chat(
         self,
@@ -31,7 +32,7 @@ class OllamaClient(LLMClient):
             },
         }
         headers = {"Content-Type": "application/json"}
-        raw = post_json(self.api_url, payload, headers, max_retries=3)
+        raw = post_json(self.api_url, payload, headers, timeout=self.timeout_seconds, max_retries=3)
         message = raw.get("message", {})
         text = message.get("content", "")
         prompt_tokens = raw.get("prompt_eval_count")

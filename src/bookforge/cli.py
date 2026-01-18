@@ -3,6 +3,7 @@ from pathlib import Path
 import sys
 
 from bookforge.author import generate_author
+from bookforge.outline import generate_outline
 from bookforge.workspace import init_book_workspace, parse_genre, parse_targets
 
 
@@ -42,6 +43,21 @@ def _author_generate(args: argparse.Namespace) -> int:
         sys.stderr.write(f"Author generation failed: {exc}\n")
         return 1
     sys.stdout.write(f"Author created at {version_dir}\n")
+    return 0
+
+
+def _outline_generate(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        outline_path = generate_outline(
+            workspace=workspace,
+            book_id=args.book,
+            new_version=args.new_version,
+        )
+    except Exception as exc:
+        sys.stderr.write(f"Outline generation failed: {exc}\n")
+        return 1
+    sys.stdout.write(f"Outline created at {outline_path}\n")
     return 0
 
 
@@ -98,7 +114,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Create a new outline version.",
     )
-    outline_generate.set_defaults(func=_not_implemented)
+    outline_generate.set_defaults(func=_outline_generate)
 
     characters_parser = subparsers.add_parser("characters", help="Character commands.")
     characters_sub = characters_parser.add_subparsers(dest="characters_command", required=True)

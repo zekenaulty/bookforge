@@ -204,6 +204,7 @@ def init_book_workspace(
     prompt_src = root / "resources" / "prompt_templates"
 
     templates_to_copy = [
+        "outline.md",
         "plan.md",
         "write.md",
         "lint.md",

@@ -9,10 +9,11 @@ from .utils import post_json, split_system_messages
 
 
 class GeminiClient(LLMClient):
-    def __init__(self, api_key: str, api_url: str, rate_limiter: Optional[RateLimiter] = None) -> None:
+    def __init__(self, api_key: str, api_url: str, rate_limiter: Optional[RateLimiter] = None, timeout_seconds: int = 240) -> None:
         super().__init__(provider="gemini", rate_limiter=rate_limiter)
         self.api_key = api_key
         self.api_url = api_url.rstrip("/")
+        self.timeout_seconds = timeout_seconds
 
     def chat(
         self,
@@ -41,7 +42,7 @@ class GeminiClient(LLMClient):
 
         url = f"{self.api_url}/models/{model}:generateContent?key={self.api_key}"
         headers = {"Content-Type": "application/json"}
-        raw = post_json(url, payload, headers, max_retries=3)
+        raw = post_json(url, payload, headers, timeout=self.timeout_seconds, max_retries=3)
         candidates = raw.get("candidates", [])
         text = ""
         if candidates:
