@@ -56,7 +56,7 @@ def test_plan_scene_writes_scene_card(tmp_path: Path) -> None:
                                 "summary": "The call arrives.",
                                 "type": "setup",
                                 "outcome": "The hero is summoned.",
-                                "characters": ["CHAR_kaelen"],
+                                "characters": ["CHAR_new_character_name"],
                             }
                         ],
                     }

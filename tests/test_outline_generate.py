@@ -26,8 +26,8 @@ def _basic_outline() -> dict:
         "schema_version": "1.1",
         "characters": [
             {
-                "character_id": "CHAR_kaelen",
-                "name": "Kaelen",
+                "character_id": "CHAR_new_character_name",
+                "name": "new_character_name",
                 "pronouns": "he/him",
                 "role": "protagonist",
                 "intro": {"chapter": 1, "scene": 1},
@@ -56,8 +56,8 @@ def _basic_outline() -> dict:
                                 "summary": "The call arrives.",
                                 "type": "setup",
                                 "outcome": "The hero receives the summons.",
-                                "characters": ["CHAR_kaelen"],
-                                "introduces": ["CHAR_kaelen"],
+                                "characters": ["CHAR_new_character_name"],
+                                "introduces": ["CHAR_new_character_name"],
                                 "threads": ["THREAD_prophecy"],
                             }
                         ],
@@ -83,7 +83,7 @@ def _basic_outline() -> dict:
                                 "summary": "They depart.",
                                 "type": "transition",
                                 "outcome": "The journey begins.",
-                                "characters": ["CHAR_kaelen"],
+                                "characters": ["CHAR_new_character_name"],
                                 "threads": ["THREAD_prophecy"],
                             }
                         ],
