@@ -12,7 +12,8 @@ import re
 from bookforge.config.env import load_config
 from bookforge.llm.factory import get_llm_client, resolve_model
 from bookforge.llm.types import Message, LLMResponse
-from bookforge.llm.logging import log_llm_response, should_log_llm
+from bookforge.llm.logging import log_llm_error, log_llm_response, should_log_llm
+from bookforge.llm.errors import LLMRequestError
 from bookforge.prompt.renderer import render_template_file
 from bookforge.util.paths import repo_root
 
@@ -140,7 +141,7 @@ def generate_author(
         prompt_text = prompt_file.read_text(encoding='utf-8')
 
     config = load_config()
-    client = get_llm_client(config)
+    client = get_llm_client(config, phase="planner")
     model = resolve_model('planner', config)
 
     prompt = _build_prompt(influences, prompt_text, name, notes)
@@ -150,19 +151,28 @@ def generate_author(
     ]
 
     max_tokens = _author_max_tokens()
-    response = client.chat(messages, model=model, temperature=0.7, max_tokens=max_tokens)
+    key_slot = getattr(client, "key_slot", None)
+    try:
+        response = client.chat(messages, model=model, temperature=0.7, max_tokens=max_tokens)
+    except LLMRequestError as exc:
+        if should_log_llm():
+            extra = {"key_slot": key_slot} if key_slot else None
+            log_llm_error(workspace, "author_generate_error", exc, messages=messages, extra=extra)
+        raise
+
     log_path: Optional[Path] = None
+    log_extra = {"key_slot": key_slot} if key_slot else None
     if should_log_llm():
-        log_path = log_llm_response(workspace, "author_generate", response, messages=messages)
+        log_path = log_llm_response(workspace, "author_generate", response, messages=messages, extra=log_extra)
     try:
         data = _extract_json(response.text)
     except ValueError as exc:
         if not log_path:
-            log_path = log_llm_response(workspace, "author_generate", response, messages=messages)
-        extra = ""
+            log_path = log_llm_response(workspace, "author_generate", response, messages=messages, extra=log_extra)
+        extra_msg = ""
         if _response_truncated(response):
-            extra = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_AUTHOR_MAX_TOKENS or reduce output size."
-        raise ValueError(f"{exc}{extra} (raw response logged to {log_path})") from exc
+            extra_msg = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_AUTHOR_MAX_TOKENS or reduce output size."
+        raise ValueError(f"{exc}{extra_msg} (raw response logged to {log_path})") from exc
 
     author = data.get('author') if isinstance(data.get('author'), dict) else {}
     author_style_md = str(data.get('author_style_md') or '')

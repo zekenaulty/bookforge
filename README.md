@@ -91,6 +91,7 @@ workspace/
 - LLM_PROVIDER=openai|gemini|ollama
 - PLANNER_MODEL, WRITER_MODEL, LINTER_MODEL
 - Provider-specific keys and endpoints
+- PLANNER_API_KEY, WRITER_API_KEY, LINTER_API_KEY (optional per-phase overrides; fall back to the provider default key)
 
 ## Logging and validation
 - JSONL logs with prompt hashes, model info, token estimates, and results.

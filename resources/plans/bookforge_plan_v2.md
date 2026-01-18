@@ -466,6 +466,8 @@ Refinement Notes
 - Story 16.R accepted: resources/plans/steps_20260118_0115_story16r_tests_docs.md
 
 Implementation Notes
+- Phase API key overrides: resources/plans/steps_20260118_1845_phase_api_keys.md
+- Story 9 implementation: resources/plans/steps_20260118_1805_story9_write_loop_impl.md
 - Outline character hooks + scene/section variance: resources/plans/steps_20260118_1210_outline_characters_beats.md
 - Outline prompt file support: resources/plans/steps_20260118_1330_outline_prompt_file.md
 - Outline sections + scene terminology: resources/plans/steps_20260118_1245_outline_sections_scenes.md
@@ -510,7 +512,7 @@ Checklist
 - [x] Story 8.R: Outline and scene card schema refinement
 - [x] Story 8: Outline generation and scene planning
 - [x] Story 9.R: Writing loop and state patch refinement
-- [ ] Story 9: Writing loop implementation
+- [x] Story 9: Writing loop implementation
 - [x] Story 10.R: Pre-generation duplication prevention refinement
 - [ ] Story 10: Opening preview and banned phrases
 - [x] Story 11.R: Lint, repair, and similarity checks refinement

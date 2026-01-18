@@ -1,0 +1,189 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: The Awakened Sage
+Book ID: sagefall_p1_v1
+Author Ref: eldrik-vale/v3
+Genre: fantasy, epic
+Series ID: sagefall
+Series Ref: series/sagefall
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 900
+- chapters: 24
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+When emulating Eldrik Vale, prioritize a tight, immersive third-person limited POV. Weave a narrative rich with subtle foreshadowing and intricate plot threads, ensuring that major reveals feel earned and are judiciously hinted at throughout the text. Maintain a mythic and epic tone through descriptive language and thematic depth. Develop complex, morally ambiguous characters alongside clear heroes and villains, exploring their internal conflicts and motivations. Integrate world-building seamlessly, avoiding direct info-dumps. Vary sentence structure and pacing, using longer, flowing sentences for description and shorter, impactful ones for tension and revelation. Avoid deus ex machina, predictable character arcs, and simplistic moral resolutions. Focus on creating a layered reading experience where the importance of minor details becomes clear in surprising, satisfying ways, rewarding attentive readers.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+
+
+USER:
+
+﻿# PLAN
+
+You are the planner. Use the outline window and state to create the next scene card.
+Return ONLY a single JSON object that matches the scene_card schema.
+No markdown, no code fences, no commentary. Use strict JSON (double quotes, no trailing commas).
+
+If outline_window includes character information, keep those character ids in mind.
+If outline_window.current.introduces is present, the scene must introduce those characters.
+
+Required keys:
+- schema_version ("1.1")
+- scene_id
+- chapter
+- scene
+- scene_target
+- goal
+- conflict
+- required_callbacks (array)
+- constraints (array)
+- end_condition
+
+JSON shape example (fill with real values):
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_001",
+  "chapter": 1,
+  "scene": 1,
+  "scene_target": "",
+  "goal": "",
+  "conflict": "",
+  "required_callbacks": [],
+  "constraints": [],
+  "end_condition": ""
+}
+
+Outline window:
+{
+  "chapter": {
+    "bridge": {
+      "from_prev": "Eldrin's centuries-long slumber ends abruptly.",
+      "to_next": "Eldrin grapples with his weakened state and the implications of the blight's pervasive spread."
+    },
+    "chapter_id": 1,
+    "chapter_role": "hook",
+    "characters": [
+      "CHAR_Eldrin",
+      "CHAR_Lyra"
+    ],
+    "goal": "Introduce Eldrin's awakening and the initial mystery of the changed world, establishing his disorientation and the first hint of the pervasive blight.",
+    "pacing": {
+      "expected_scene_count": 8,
+      "intensity": 3,
+      "tempo": "slow_burn"
+    },
+    "stakes_shift": "Eldrin's ancient existence is revealed to Lyra, forcing a clash between his forgotten past and the harsh realities of the present world.",
+    "title": "The Whispering Stone"
+  },
+  "current": {
+    "callbacks": [],
+    "characters": [
+      "CHAR_Eldrin"
+    ],
+    "introduces": [
+      "CHAR_Eldrin"
+    ],
+    "outcome": "Eldrin is physically reawakened but mentally disoriented, burdened by fragmented memories.",
+    "scene_id": 1,
+    "section": {
+      "intent": "Establish Eldrin's disorientation and the ancient, forgotten nature of his sanctuary.",
+      "section_id": 1,
+      "section_role": "",
+      "title": "Awakening in Dust"
+    },
+    "summary": "Eldrin stirs from a profound slumber within a crumbling, overgrown sanctuary, his senses overwhelmed by a world he no longer recognizes.",
+    "threads": [
+      "THREAD_Awakened_Sage"
+    ],
+    "type": "setup"
+  },
+  "next": {
+    "callbacks": [],
+    "characters": [
+      "CHAR_Eldrin"
+    ],
+    "introduces": [],
+    "outcome": "Eldrin perceives the world has changed drastically, with an underlying sense of unnatural decay.",
+    "scene_id": 2,
+    "section": {
+      "intent": "Reveal the subtle signs of the world's decay and Eldrin's initial struggle with his powers.",
+      "section_id": 2,
+      "section_role": "",
+      "title": "The First Glimpse"
+    },
+    "summary": "Eldrin ventures from his sanctuary, confronting a landscape subtly twisted and unnerving, a stark contrast to his memories.",
+    "threads": [
+      "THREAD_Shadow_Blight",
+      "THREAD_Awakened_Sage"
+    ],
+    "type": "reveal"
+  },
+  "previous": null,
+  "scene_index": 1,
+  "section": {
+    "intent": "Establish Eldrin's disorientation and the ancient, forgotten nature of his sanctuary.",
+    "section_id": 1,
+    "section_role": "",
+    "title": "Awakening in Dust"
+  }
+}
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "cursor": {
+    "chapter": 0,
+    "scene": 0
+  },
+  "duplication_warnings_in_row": 0,
+  "outline": {
+    "path": "outline/outline.json"
+  },
+  "schema_version": "1.0",
+  "status": "OUTLINED",
+  "world": {
+    "cast_present": [],
+    "location": "",
+    "open_threads": [],
+    "recent_facts": [],
+    "time": {}
+  }
+}
+
+Task:
+Create the next scene card.

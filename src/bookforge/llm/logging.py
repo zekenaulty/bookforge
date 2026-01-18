@@ -7,6 +7,7 @@ import json
 import os
 import re
 
+from .errors import LLMRequestError
 from .types import LLMResponse, Message
 
 
@@ -141,6 +142,33 @@ def llm_log_dir(workspace: Path) -> Path:
     return workspace / "logs" / "llm"
 
 
+
+
+def _format_error_payload(error: LLMRequestError) -> Dict[str, Any]:
+    return {
+        "status_code": error.status_code,
+        "message": error.message,
+        "retry_after_seconds": error.retry_after_seconds,
+        "quota_violations": [
+            {
+                "quota_metric": item.quota_metric,
+                "quota_id": item.quota_id,
+                "quota_dimensions": item.quota_dimensions,
+                "quota_value": item.quota_value,
+            }
+            for item in error.quota_violations
+        ],
+    }
+
+
+def _write_error_text_log(log_path: Path, error: LLMRequestError) -> None:
+    pretty_path = log_path.with_suffix(".txt")
+    if isinstance(error.raw_response, (dict, list)):
+        pretty = json.dumps(error.raw_response, ensure_ascii=True, indent=2)
+    else:
+        pretty = str(error.raw_response)
+    pretty_path.write_text(pretty, encoding="utf-8")
+
 def log_llm_response(
     workspace: Path,
     label: str,
@@ -181,3 +209,43 @@ def log_llm_response(
     except OSError:
         pass
     return log_path
+
+def log_llm_error(
+    workspace: Path,
+    label: str,
+    error: LLMRequestError,
+    extra: Optional[Dict[str, Any]] = None,
+    messages: Optional[list[Message]] = None,
+) -> Path:
+    log_dir = llm_log_dir(workspace)
+    log_dir.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    log_path = log_dir / f"{label}_{timestamp}.json"
+    system_text = ""
+    non_system: list[Message] = []
+    if messages:
+        system_text, non_system = _split_prompt_messages(messages)
+    payload: Dict[str, Any] = {
+        "label": label,
+        "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "error": _format_error_payload(error),
+        "raw": error.raw_response,
+    }
+    if extra:
+        payload["extra"] = extra
+    if system_text or non_system:
+        payload["prompt"] = {
+            "system": system_text,
+            "messages": non_system,
+        }
+    log_path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
+    try:
+        _write_error_text_log(log_path, error)
+    except OSError:
+        pass
+    try:
+        _write_prompt_log(log_path, system_text, non_system)
+    except OSError:
+        pass
+    return log_path
+

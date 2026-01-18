@@ -9,8 +9,8 @@ from .utils import post_json, split_system_messages
 
 
 class GeminiClient(LLMClient):
-    def __init__(self, api_key: str, api_url: str, rate_limiter: Optional[RateLimiter] = None, timeout_seconds: int = 240) -> None:
-        super().__init__(provider="gemini", rate_limiter=rate_limiter)
+    def __init__(self, api_key: str, api_url: str, rate_limiter: Optional[RateLimiter] = None, timeout_seconds: int = 240, key_slot: Optional[str] = None) -> None:
+        super().__init__(provider="gemini", rate_limiter=rate_limiter, key_slot=key_slot)
         self.api_key = api_key
         self.api_url = api_url.rstrip("/")
         self.timeout_seconds = timeout_seconds

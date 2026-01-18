@@ -11,6 +11,9 @@ Scene card:
 Continuity pack:
 {{continuity_pack}}
 
+Style anchor:
+{{style_anchor}}
+
 State:
 {{state}}
 

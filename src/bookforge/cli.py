@@ -4,6 +4,7 @@ import sys
 
 from bookforge.author import generate_author
 from bookforge.outline import generate_outline
+from bookforge.runner import run_loop
 from bookforge.workspace import init_book_workspace, parse_genre, parse_targets
 
 
@@ -60,6 +61,25 @@ def _outline_generate(args: argparse.Namespace) -> int:
         sys.stderr.write(f"Outline generation failed: {exc}\n")
         return 1
     sys.stdout.write(f"Outline created at {outline_path}\n")
+    return 0
+
+
+
+
+def _run(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        run_loop(
+            workspace=workspace,
+            book_id=args.book,
+            steps=args.steps,
+            until=args.until,
+            resume=args.resume,
+        )
+    except Exception as exc:
+        sys.stderr.write(f"Run failed: {exc}\n")
+        return 1
+    sys.stdout.write("Run completed.\n")
     return 0
 
 
@@ -135,7 +155,7 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--steps", type=int, help="Number of steps to run.")
     run_parser.add_argument("--until", help="Stop condition, e.g. chapter:5.")
     run_parser.add_argument("--resume", action="store_true", help="Resume prior run.")
-    run_parser.set_defaults(func=_not_implemented)
+    run_parser.set_defaults(func=_run)
 
     compile_parser = subparsers.add_parser("compile", help="Compile a manuscript.")
     compile_parser.add_argument("--book", required=True, help="Book id.")

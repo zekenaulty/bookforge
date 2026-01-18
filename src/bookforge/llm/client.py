@@ -7,9 +7,10 @@ from .rate_limiter import RateLimiter
 
 
 class LLMClient(ABC):
-    def __init__(self, provider: str, rate_limiter: Optional[RateLimiter] = None) -> None:
+    def __init__(self, provider: str, rate_limiter: Optional[RateLimiter] = None, key_slot: Optional[str] = None) -> None:
         self.provider = provider
         self.rate_limiter = rate_limiter
+        self.key_slot = key_slot
 
     def _throttle(self) -> None:
         if self.rate_limiter:

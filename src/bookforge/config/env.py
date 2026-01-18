@@ -12,6 +12,9 @@ class AppConfig:
     provider: str
     openai_api_key: Optional[str]
     gemini_api_key: Optional[str]
+    planner_api_key: Optional[str]
+    writer_api_key: Optional[str]
+    linter_api_key: Optional[str]
     ollama_url: str
     openai_api_url: str
     gemini_api_url: str
@@ -98,6 +101,9 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
         provider=provider,
         openai_api_key=merged.get("OPENAI_API_KEY"),
         gemini_api_key=merged.get("GEMINI_API_KEY"),
+        planner_api_key=merged.get("PLANNER_API_KEY"),
+        writer_api_key=merged.get("WRITER_API_KEY"),
+        linter_api_key=merged.get("LINTER_API_KEY"),
         ollama_url=ollama_url,
         openai_api_url=openai_url,
         gemini_api_url=gemini_url,
@@ -112,14 +118,24 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
     )
 
 
+
+
+def _has_phase_api_keys(config: AppConfig) -> bool:
+    return any([
+        config.planner_api_key,
+        config.writer_api_key,
+        config.linter_api_key,
+    ])
+
+
 def validate_provider_config(config: AppConfig) -> None:
     if config.provider == "openai":
-        if not config.openai_api_key:
-            raise ValueError("OPENAI_API_KEY is required when LLM_PROVIDER=openai")
+        if not (config.openai_api_key or _has_phase_api_keys(config)):
+            raise ValueError("OPENAI_API_KEY or phase API key is required when LLM_PROVIDER=openai")
         return
     if config.provider == "gemini":
-        if not config.gemini_api_key:
-            raise ValueError("GEMINI_API_KEY is required when LLM_PROVIDER=gemini")
+        if not (config.gemini_api_key or _has_phase_api_keys(config)):
+            raise ValueError("GEMINI_API_KEY or phase API key is required when LLM_PROVIDER=gemini")
         return
     if config.provider == "ollama":
         if not config.ollama_url:

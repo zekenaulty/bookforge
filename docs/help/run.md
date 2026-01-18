@@ -18,6 +18,17 @@ Optional parameters
 - --resume: Resume a prior run.
 - --workspace: Override workspace root (global option).
 
+
+Defaults
+- If neither --steps nor --until is provided, the run loop executes 1 scene step.
+
+Outputs
+- draft/chapters/ch_###/scene_###.md (scene prose)
+- draft/chapters/ch_###/scene_###.meta.json (scene card + state patch + lint report)
+- draft/context/continuity_pack.json
+- draft/context/bible.md and draft/context/last_excerpt.md
+- workspace/logs/llm (when BOOKFORGE_LOG_LLM=1; includes quota error logs)
+
 Examples
 - Minimal:
   bookforge run --book my_novel_v1

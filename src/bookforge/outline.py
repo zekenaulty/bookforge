@@ -11,8 +11,9 @@ import logging
 from bookforge.config.env import load_config
 from bookforge.llm.client import LLMClient
 from bookforge.llm.factory import get_llm_client, resolve_model
-from bookforge.llm.logging import log_llm_response, should_log_llm
+from bookforge.llm.logging import log_llm_error, log_llm_response, should_log_llm
 from bookforge.llm.types import LLMResponse, Message
+from bookforge.llm.errors import LLMRequestError
 from bookforge.prompt.renderer import render_template_file
 from bookforge.util.paths import repo_root
 from bookforge.util.schema import validate_json
@@ -462,7 +463,7 @@ def generate_outline(
 
     if client is None:
         config = load_config()
-        client = get_llm_client(config)
+        client = get_llm_client(config, phase="planner")
         if model is None:
             model = resolve_model("planner", config)
     elif model is None:
@@ -474,19 +475,29 @@ def generate_outline(
     ]
 
     max_tokens = _outline_max_tokens()
-    response = client.chat(messages, model=model, temperature=0.6, max_tokens=max_tokens)
-    log_path: Optional[Path] = None
-    if should_log_llm():
-        log_path = log_llm_response(workspace, "outline_generate", response, messages=messages)
+    key_slot = getattr(client, "key_slot", None)
     try:
+        response = client.chat(messages, model=model, temperature=0.6, max_tokens=max_tokens)
+    except LLMRequestError as exc:
+        if should_log_llm():
+            extra = {"key_slot": key_slot} if key_slot else None
+            log_llm_error(workspace, "outline_generate_error", exc, messages=messages, extra=extra)
+        raise
+
+    log_path: Optional[Path] = None
+    log_extra = {"key_slot": key_slot} if key_slot else None
+    if should_log_llm():
+        log_path = log_llm_response(workspace, "outline_generate", response, messages=messages, extra=log_extra)
+    try:
+
         outline = _extract_json(response.text)
     except ValueError as exc:
         if not log_path:
-            log_path = log_llm_response(workspace, "outline_generate", response, messages=messages)
-        extra = ""
+            log_path = log_llm_response(workspace, "outline_generate", response, messages=messages, extra=log_extra)
+        extra_msg = ""
         if _response_truncated(response):
-            extra = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_OUTLINE_MAX_TOKENS."
-        raise ValueError(f"{exc}{extra} (raw response logged to {log_path})") from exc
+            extra_msg = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_OUTLINE_MAX_TOKENS."
+        raise ValueError(f"{exc}{extra_msg} (raw response logged to {log_path})") from exc
 
     if "schema_version" not in outline:
         outline["schema_version"] = OUTLINE_SCHEMA_VERSION
