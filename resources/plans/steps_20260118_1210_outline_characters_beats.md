@@ -26,8 +26,10 @@ Issues
 - None.
 
 Decision
-- Outline prompts require variable beats per chapter and explicit character stubs + per-beat character ids.
+- Outline prompts require variable beats per chapter and explicit character stubs + per-beat character ids (aim 6-32 based on chapter complexity).
+- Outline summaries should remain concise but reflect the author voice.
 - Outline generation writes outline/characters.json when characters are present.
+- Plan step raises when scene_number exceeds available beats (avoids reuse).
 - Default request timeout increased to 600 seconds.
 
 Completion
