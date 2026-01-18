@@ -2,10 +2,29 @@ import argparse
 from pathlib import Path
 import sys
 
+from bookforge.author import generate_author
+
+
+def _author_generate(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    prompt_file = Path(args.prompt_file) if args.prompt_file else None
+    try:
+        version_dir = generate_author(
+            workspace=workspace,
+            influences=args.influences,
+            prompt_file=prompt_file,
+            name=args.name,
+            notes=args.notes,
+        )
+    except Exception as exc:
+        sys.stderr.write(f"Author generation failed: {exc}\n")
+        return 1
+    sys.stdout.write(f"Author created at {version_dir}\n")
+    return 0
+
 
 def _not_implemented(args: argparse.Namespace) -> int:
-    sys.stderr.write("Not implemented yet.
-")
+    sys.stderr.write("Not implemented yet.\n")
     return 0
 
 
@@ -46,7 +65,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     author_generate.add_argument("--prompt-file", help="Path to author prompt file.")
     author_generate.add_argument("--notes", help="Optional notes for author creation.")
-    author_generate.set_defaults(func=_not_implemented)
+    author_generate.set_defaults(func=_author_generate)
 
     outline_parser = subparsers.add_parser("outline", help="Outline commands.")
     outline_sub = outline_parser.add_subparsers(dest="outline_command", required=True)

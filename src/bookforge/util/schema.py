@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Any
 import json
 
+from bookforge.util.paths import repo_root
+
 try:
     from jsonschema import Draft202012Validator
 except ImportError as exc:  # pragma: no cover
@@ -29,7 +31,7 @@ class SchemaValidationError(Exception):
         return self.message
 
 def _root_dir() -> Path:
-    return Path(__file__).resolve().parents[3]
+    return repo_root(Path(__file__).resolve())
 
 def load_schema(schema_name: str) -> dict:
     if schema_name not in _SCHEMA_MAP:

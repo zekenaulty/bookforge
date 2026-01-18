@@ -475,7 +475,7 @@ Checklist
 - [x] Story 5.R: Prompt budgeter and continuity pack refinement
 - [x] Story 5: Budgeter and continuity pack implementation
 - [x] Story 6.R: Author library versioning refinement
-- [ ] Story 6: Author creation pipeline
+- [x] Story 6: Author creation pipeline
 - [x] Story 7.R: Workspace init and book schema refinement
 - [ ] Story 7: Workspace init command
 - [x] Story 8.R: Outline and scene card schema refinement

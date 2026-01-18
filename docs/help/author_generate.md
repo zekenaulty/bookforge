@@ -18,6 +18,15 @@ Optional parameters
 - --notes: Optional notes or constraints.
 - --workspace: Override workspace root (global option).
 
+
+Debugging
+- If the model returns invalid JSON, the raw response is written to workspace/logs/llm/author_generate_<timestamp>.json.
+- To always log raw responses, set BOOKFORGE_LOG_LLM=1 before running.
+  Example (PowerShell): $env:BOOKFORGE_LOG_LLM="1"
+
+- If the output is truncated (MAX_TOKENS), raise BOOKFORGE_AUTHOR_MAX_TOKENS (default: 4096).
+  Example (PowerShell): $env:BOOKFORGE_AUTHOR_MAX_TOKENS="4096"
+
 Examples
 - Minimal:
   bookforge author generate --influences "Brandon Sanderson:0.5,G.R.R. Martin:0.3,J.R.R. Tolkien:0.2"

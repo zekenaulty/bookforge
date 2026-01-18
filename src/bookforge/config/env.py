@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Dict, Optional
 import os
 
+from bookforge.util.paths import repo_root
 
 @dataclass(frozen=True)
 class AppConfig:
@@ -27,7 +28,8 @@ def _parse_env_file(path: Path) -> Dict[str, str]:
     if not path.exists():
         return {}
     data: Dict[str, str] = {}
-    for raw in path.read_text(encoding="utf-8").splitlines():
+    # Use utf-8-sig to drop a BOM that would otherwise prefix the first key.
+    for raw in path.read_text(encoding="utf-8-sig").splitlines():
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
@@ -49,11 +51,20 @@ def _extract_prefixed(env: Dict[str, str], prefix: str) -> Dict[str, str]:
         values[suffix] = value
     return values
 
+def _default_env_path() -> Path:
+    return repo_root(Path(__file__).resolve()) / ".env"
 
-def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = ".env") -> AppConfig:
+
+def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = None) -> AppConfig:
     merged: Dict[str, str] = {}
-    if env_path:
-        merged.update(_parse_env_file(Path(env_path)))
+    env_file: Optional[Path] = None
+    if env_path is None:
+        if env is None:
+            env_file = _default_env_path()
+    elif env_path:
+        env_file = Path(env_path)
+    if env_file:
+        merged.update(_parse_env_file(env_file))
     merged.update(env or os.environ)
 
     provider = (merged.get("LLM_PROVIDER") or "openai").lower()
