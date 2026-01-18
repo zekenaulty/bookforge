@@ -31,7 +31,7 @@ def _int_env(name: str, default: int) -> int:
 
 
 def _outline_max_tokens() -> int:
-    return _int_env("BOOKFORGE_OUTLINE_MAX_TOKENS", 12288)
+    return _int_env("BOOKFORGE_OUTLINE_MAX_TOKENS", 36864)
 
 
 def _response_truncated(response: LLMResponse) -> bool:

@@ -28,6 +28,14 @@ def test_init_book_workspace(tmp_path: Path) -> None:
     assert book["book_id"] == "my_book"
     assert book["author_ref"] == "eldrik-vale/v1"
 
+    assert book["series_id"] == "my_book"
+    assert book["series_ref"] == "series/my_book"
+
+    series_root = tmp_path / "series" / "my_book"
+    assert (series_root / "series.json").exists()
+    series_manifest = json.loads((series_root / "series.json").read_text(encoding="utf-8"))
+    assert "my_book" in series_manifest.get("books", [])
+
     system_text = (book_dir / "prompts" / "system_v1.md").read_text(encoding="utf-8")
     assert "Author fragment." in system_text
 

@@ -3,6 +3,7 @@ Book ID: sagefall_p1_v1
 Author Ref: eldrik-vale/v3
 Genre: fantasy, epic
 Series ID: sagefall
+Series Ref: series/sagefall
 
 Voice
 - POV: third_limited

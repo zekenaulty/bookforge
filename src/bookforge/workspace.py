@@ -65,6 +65,54 @@ def _parse_author_ref(author_ref: str) -> Tuple[str, str]:
     return parts[0], parts[1]
 
 
+
+def _resolve_series_id(series_id: Optional[str], book_id: str) -> str:
+    if series_id:
+        cleaned = series_id.strip()
+        if cleaned:
+            return cleaned
+    return book_id
+
+
+def _ensure_series_workspace(workspace: Path, series_id: str, book_id: str) -> None:
+    series_root = workspace / "series" / series_id
+    (series_root / "canon" / "characters").mkdir(parents=True, exist_ok=True)
+    (series_root / "canon" / "locations").mkdir(parents=True, exist_ok=True)
+    (series_root / "canon" / "rules").mkdir(parents=True, exist_ok=True)
+    (series_root / "canon" / "threads").mkdir(parents=True, exist_ok=True)
+
+    series_manifest_path = series_root / "series.json"
+    if series_manifest_path.exists():
+        try:
+            existing = json.loads(series_manifest_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Invalid series.json: {series_manifest_path}") from exc
+        if not isinstance(existing, dict):
+            raise ValueError(f"Invalid series.json: {series_manifest_path}")
+        books = existing.get("books", [])
+        if not isinstance(books, list):
+            books = []
+        if book_id not in books:
+            books.append(book_id)
+        existing["schema_version"] = SCHEMA_VERSION
+        existing["series_id"] = existing.get("series_id", series_id)
+        existing["books"] = books
+        series_manifest = existing
+    else:
+        series_manifest = {
+            "schema_version": SCHEMA_VERSION,
+            "series_id": series_id,
+            "books": [book_id],
+        }
+    series_manifest_path.write_text(
+        json.dumps(series_manifest, ensure_ascii=True, indent=2), encoding="utf-8"
+    )
+
+    series_index_path = series_root / "canon" / "index.json"
+    if not series_index_path.exists():
+        series_index_path.write_text("{}", encoding="utf-8")
+
+
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
@@ -143,6 +191,8 @@ def init_book_workspace(
     if not author_fragment_path.exists():
         raise FileNotFoundError(f"Author fragment not found: {author_fragment_path}")
 
+    resolved_series_id = _resolve_series_id(series_id, book_id)
+
     book = {
         "schema_version": SCHEMA_VERSION,
         "book_id": book_id,
@@ -154,8 +204,8 @@ def init_book_workspace(
         "author_ref": author_ref,
         "page_metrics": DEFAULT_PAGE_METRICS,
     }
-    if series_id:
-        book["series_id"] = series_id
+    book["series_id"] = resolved_series_id
+    book["series_ref"] = f"series/{resolved_series_id}"
 
     state = {
         "schema_version": SCHEMA_VERSION,
@@ -193,6 +243,8 @@ def init_book_workspace(
     (book_root / "draft" / "chapters").mkdir(parents=True, exist_ok=True)
     (book_root / "exports").mkdir(parents=True, exist_ok=True)
     (book_root / "logs").mkdir(parents=True, exist_ok=True)
+
+    _ensure_series_workspace(workspace, resolved_series_id, book_id)
 
     (book_root / "book.json").write_text(json.dumps(book, ensure_ascii=True, indent=2), encoding="utf-8")
     (book_root / "state.json").write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")

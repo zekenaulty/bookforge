@@ -17,11 +17,12 @@ Required parameters
 
 Optional parameters
 - --target: Repeatable key=value target (e.g. chapters=24).
-- --series-id: Optional series identifier.
+- --series-id: Optional series identifier (defaults to the book id when omitted).
 - --workspace: Override workspace root (global option).
 
 Outputs
 - Creates workspace/books/<BOOK_ID>/ with book.json, state.json, prompts/, outline/, canon/, draft/, exports/, logs/.
+- Creates workspace/series/<SERIES_ID>/ with series.json and canon/ scaffolding.
 - Writes prompts/system_v1.md assembled from base rules, book constitution, and author fragment.
 
 Examples

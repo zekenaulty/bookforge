@@ -10,6 +10,7 @@ Definition of Done
 - CLI supports: init, author generate, outline generate, characters generate, run, compile, export synopsis.
 - LLM provider is selected from .env (openai, gemini, ollama) with per-phase models.
 - Workspace layout matches resources/initial_concept.md with book.json, state.json, outline, canon, draft, exports, logs.
+- Series-level canon namespace exists for every book; book.json always includes series_id and series_ref (default series_id=book_id) and series/<series_id>/canon scaffolding is created.
 - Author creation uses the active LLM and stores reusable author artifacts in a versioned global author library; books pin author versions.
 - Prompt system uses a stable system prompt file and per-stage templates; dynamic payload is deterministic, ordered, and size-bounded.
 - Prompt budgeter enforces per-step budgets and deterministic size reporting; over-budget payloads are allowed and logged.
@@ -34,19 +35,20 @@ Scope
 - Canon store, retrieval, and rolling bible updates.
 - Compiler and export commands.
 - Logging, metrics, tests, and documentation.
+- Series-level canon scaffolding (series/<SERIES_ID>/canon) for shared characters/locations/rules/threads.
 
 Out of Scope
 - UI or web console.
 - Database, vector store, or agent framework dependencies.
 - Full plagiarism detection beyond lightweight self-dup checks.
-- Cross-book continuity engine or series-level canon management (future).
+- Cross-book continuity engine (future).
 
 Assumptions / Reuse
 - Use resources/reference/iterate-book.py as a workflow reference, but avoid its duplication issues by limiting prior prose and enforcing anti-repeat gates.
 - Use resources/reference/authors as examples for author persona content and tone.
 - Follow the plan structure pattern in resources/reference/dod_domains_workflows_v2.md.
 - Apply the duplication prevention strategy and prompt budgeting guidance in resources/steel man.md.
-- Design for future cross-book continuity (series_id hooks and shared canon namespace) without implementing in v1.
+- Design for future cross-book continuity with series_id hooks and shared canon namespace; v1 seeds series-level canon folders but does not reconcile across books.
 
 Current Code Anchors (reviewed)
 - resources/initial_concept.md
@@ -245,7 +247,7 @@ Definition of Done
 Story 7.R: Refinement - Workspace init and book schema
 Tasks
 - Define book.json and state.json defaults and required fields.
-- Reserve optional series_id and series_ref fields for future cross-book continuity.
+- Ensure series_id and series_ref are always present; default series_id to book_id and seed series workspace.
 - Confirm prompt templates and registry placement per book.
 - Define init command inputs (book id, author ref, genre, targets).
 Definition of Done
@@ -331,7 +333,7 @@ Story 12.R: Refinement - Canon store and retrieval rules
 Tasks
 - Define canon item schemas and index.json format.
 - Define selection rules for injecting canon into prompts.
-- Define optional canon namespace rules for future cross-book series support.
+- Define series-level canon namespace and merge order without cross-book reconciliation.
 - Define update rules for canon changes after scenes.
 Definition of Done
 - Canon schema and retrieval rules are approved.
@@ -465,6 +467,7 @@ Refinement Notes
 
 Implementation Notes
 - Outline character hooks + beat variance: resources/plans/steps_20260118_1210_outline_characters_beats.md
+- Series canon scaffolding: resources/plans/steps_20260118_1130_series_canon_seed.md
 - Request timeout increase: resources/plans/steps_20260118_1115_request_timeout.md
 - Outline max tokens default: resources/plans/steps_20260118_1056_outline_max_tokens.md
 - Story 8 implementation: resources/plans/steps_20260118_1035_story8_outline_plan_impl.md

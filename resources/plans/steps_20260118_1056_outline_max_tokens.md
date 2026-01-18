@@ -20,7 +20,7 @@ Issues
 - None.
 
 Decision
-- Default BOOKFORGE_OUTLINE_MAX_TOKENS set to 12288 (3x prior value).
+- Default BOOKFORGE_OUTLINE_MAX_TOKENS set to 36864 (expanded for high-variance outlines).
 
 Completion
 - Outline default token cap increased and docs updated.
