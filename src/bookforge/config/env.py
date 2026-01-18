@@ -119,6 +119,29 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
 
 
 
+def read_env_value(name: str) -> Optional[str]:
+    value = os.environ.get(name)
+    if value is not None:
+        return value
+    env_path = _default_env_path()
+    data = _parse_env_file(env_path)
+    return data.get(name)
+
+
+def read_int_env(name: str, default: int) -> int:
+    raw = read_env_value(name)
+    if raw is None:
+        return default
+    raw = str(raw).strip()
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
+
 
 def _has_phase_api_keys(config: AppConfig) -> bool:
     return any([

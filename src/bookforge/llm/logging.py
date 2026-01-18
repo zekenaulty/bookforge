@@ -176,6 +176,7 @@ def log_llm_response(
     workspace: Path,
     label: str,
     response: LLMResponse,
+    request: Optional[Dict[str, Any]] = None,
     extra: Optional[Dict[str, Any]] = None,
     messages: Optional[list[Message]] = None,
 ) -> Path:
@@ -195,6 +196,10 @@ def log_llm_response(
         "text": response.text,
         "raw": response.raw,
     }
+    if request:
+        payload["request"] = request
+    if request:
+        payload["request"] = request
     if extra:
         payload["extra"] = extra
     if system_text or non_system:
@@ -217,6 +222,7 @@ def log_llm_error(
     workspace: Path,
     label: str,
     error: LLMRequestError,
+    request: Optional[Dict[str, Any]] = None,
     extra: Optional[Dict[str, Any]] = None,
     messages: Optional[list[Message]] = None,
 ) -> Path:

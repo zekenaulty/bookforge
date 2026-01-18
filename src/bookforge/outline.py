@@ -8,7 +8,7 @@ import os
 import re
 import logging
 
-from bookforge.config.env import load_config
+from bookforge.config.env import load_config, read_int_env
 from bookforge.llm.client import LLMClient
 from bookforge.llm.factory import get_llm_client, resolve_model
 from bookforge.llm.logging import log_llm_error, log_llm_response, should_log_llm
@@ -65,20 +65,11 @@ PREFERRED_INTENSITY_RANGE = (1, 5)
 MAX_ENUM_CONTEXT = 3
 
 def _int_env(name: str, default: int) -> int:
-    raw = os.environ.get(name)
-    if raw is None:
-        return default
-    raw = raw.strip()
-    if not raw:
-        return default
-    try:
-        return int(raw)
-    except ValueError:
-        return default
+    return read_int_env(name, default)
 
 
 def _outline_max_tokens() -> int:
-    return _int_env("BOOKFORGE_OUTLINE_MAX_TOKENS", 36864)
+    return _int_env("BOOKFORGE_OUTLINE_MAX_TOKENS", 49152)
 
 
 def _response_truncated(response: LLMResponse) -> bool:
@@ -476,24 +467,25 @@ def generate_outline(
 
     max_tokens = _outline_max_tokens()
     key_slot = getattr(client, "key_slot", None)
+    request = {"model": model, "temperature": 0.6, "max_tokens": max_tokens}
     try:
         response = client.chat(messages, model=model, temperature=0.6, max_tokens=max_tokens)
     except LLMRequestError as exc:
         if should_log_llm():
             extra = {"key_slot": key_slot} if key_slot else None
-            log_llm_error(workspace, "outline_generate_error", exc, messages=messages, extra=extra)
+            log_llm_error(workspace, "outline_generate_error", exc, request=request, messages=messages, extra=extra)
         raise
 
     log_path: Optional[Path] = None
     log_extra = {"key_slot": key_slot} if key_slot else None
     if should_log_llm():
-        log_path = log_llm_response(workspace, "outline_generate", response, messages=messages, extra=log_extra)
+        log_path = log_llm_response(workspace, "outline_generate", response, request=request, messages=messages, extra=log_extra)
     try:
 
         outline = _extract_json(response.text)
     except ValueError as exc:
         if not log_path:
-            log_path = log_llm_response(workspace, "outline_generate", response, messages=messages, extra=log_extra)
+            log_path = log_llm_response(workspace, "outline_generate", response, request=request, messages=messages, extra=log_extra)
         extra_msg = ""
         if _response_truncated(response):
             extra_msg = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_OUTLINE_MAX_TOKENS."

@@ -9,7 +9,7 @@ import json
 import os
 import re
 
-from bookforge.config.env import load_config
+from bookforge.config.env import load_config, read_int_env
 from bookforge.llm.factory import get_llm_client, resolve_model
 from bookforge.llm.types import Message, LLMResponse
 from bookforge.llm.logging import log_llm_error, log_llm_response, should_log_llm
@@ -99,20 +99,11 @@ def _build_prompt(influences: Optional[str], prompt_text: Optional[str], name: O
 
 
 def _int_env(name: str, default: int) -> int:
-    raw = os.environ.get(name)
-    if raw is None:
-        return default
-    raw = raw.strip()
-    if not raw:
-        return default
-    try:
-        return int(raw)
-    except ValueError:
-        return default
+    return read_int_env(name, default)
 
 
 def _author_max_tokens() -> int:
-    return _int_env("BOOKFORGE_AUTHOR_MAX_TOKENS", 6096)
+    return _int_env("BOOKFORGE_AUTHOR_MAX_TOKENS", 8192)
 
 
 def _response_truncated(response: LLMResponse) -> bool:
@@ -152,23 +143,24 @@ def generate_author(
 
     max_tokens = _author_max_tokens()
     key_slot = getattr(client, "key_slot", None)
+    request = {"model": model, "temperature": 0.7, "max_tokens": max_tokens}
     try:
         response = client.chat(messages, model=model, temperature=0.7, max_tokens=max_tokens)
     except LLMRequestError as exc:
         if should_log_llm():
             extra = {"key_slot": key_slot} if key_slot else None
-            log_llm_error(workspace, "author_generate_error", exc, messages=messages, extra=extra)
+            log_llm_error(workspace, "author_generate_error", exc, request=request, messages=messages, extra=extra)
         raise
 
     log_path: Optional[Path] = None
     log_extra = {"key_slot": key_slot} if key_slot else None
     if should_log_llm():
-        log_path = log_llm_response(workspace, "author_generate", response, messages=messages, extra=log_extra)
+        log_path = log_llm_response(workspace, "author_generate", response, request=request, messages=messages, extra=log_extra)
     try:
         data = _extract_json(response.text)
     except ValueError as exc:
         if not log_path:
-            log_path = log_llm_response(workspace, "author_generate", response, messages=messages, extra=log_extra)
+            log_path = log_llm_response(workspace, "author_generate", response, request=request, messages=messages, extra=log_extra)
         extra_msg = ""
         if _response_truncated(response):
             extra_msg = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_AUTHOR_MAX_TOKENS or reduce output size."

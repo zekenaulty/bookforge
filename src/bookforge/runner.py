@@ -8,7 +8,7 @@ import json
 import os
 import re
 
-from bookforge.config.env import load_config
+from bookforge.config.env import load_config, read_int_env
 from bookforge.llm.client import LLMClient
 from bookforge.llm.errors import LLMRequestError
 from bookforge.llm.factory import get_llm_client, resolve_model
@@ -28,24 +28,15 @@ from bookforge.util.paths import repo_root
 from bookforge.util.schema import validate_json
 
 
-DEFAULT_WRITE_MAX_TOKENS = 4096
-DEFAULT_LINT_MAX_TOKENS = 2048
-DEFAULT_REPAIR_MAX_TOKENS = 4096
-DEFAULT_CONTINUITY_MAX_TOKENS = 2048
-DEFAULT_STYLE_ANCHOR_MAX_TOKENS = 1024
+DEFAULT_WRITE_MAX_TOKENS = 16384
+DEFAULT_LINT_MAX_TOKENS = 36864
+DEFAULT_REPAIR_MAX_TOKENS = 36864
+DEFAULT_CONTINUITY_MAX_TOKENS = 36864
+DEFAULT_STYLE_ANCHOR_MAX_TOKENS = 8192
 
 
 def _int_env(name: str, default: int) -> int:
-    raw = os.environ.get(name)
-    if raw is None:
-        return default
-    raw = raw.strip()
-    if not raw:
-        return default
-    try:
-        return int(raw)
-    except ValueError:
-        return default
+    return read_int_env(name, default)
 
 
 def _write_max_tokens() -> int:
@@ -319,14 +310,15 @@ def _chat(
 ) -> LLMResponse:
     key_slot = getattr(client, "key_slot", None)
     extra = {"key_slot": key_slot} if key_slot else None
+    request = {"model": model, "temperature": temperature, "max_tokens": max_tokens}
     try:
         response = client.chat(messages, model=model, temperature=temperature, max_tokens=max_tokens)
     except LLMRequestError as exc:
         if should_log_llm():
-            log_llm_error(workspace, f"{label}_error", exc, messages=messages, extra=extra)
+            log_llm_error(workspace, f"{label}_error", exc, request=request, messages=messages, extra=extra)
         raise
     if should_log_llm():
-        log_llm_response(workspace, label, response, messages=messages, extra=extra)
+        log_llm_response(workspace, label, response, request=request, messages=messages, extra=extra)
     return response
 
 
