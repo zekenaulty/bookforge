@@ -5,10 +5,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 import ast
 import json
-import os
 import re
 
-from bookforge.config.env import load_config, read_int_env
+from bookforge.config.env import load_config, read_env_value, read_int_env
 from bookforge.llm.client import LLMClient
 from bookforge.llm.errors import LLMRequestError
 from bookforge.llm.factory import get_llm_client, resolve_model
@@ -62,10 +61,13 @@ def _style_anchor_max_tokens() -> int:
 
 
 def _lint_mode() -> str:
-    raw = os.environ.get("BOOKFORGE_LINT_MODE", "strict").strip().lower()
+    raw = read_env_value("BOOKFORGE_LINT_MODE")
+    if raw is None:
+        raw = "warn"
+    raw = str(raw).strip().lower()
     if raw in {"strict", "warn", "off"}:
         return raw
-    return "strict"
+    return "warn"
 
 
 def _now_iso() -> str:
@@ -179,9 +181,9 @@ def _extract_json(text: str) -> Dict[str, Any]:
 
 
 def _extract_prose_and_patch(text: str) -> Tuple[str, Dict[str, Any]]:
-    match = re.search(r"STATE_PATCH\s*:\s*", text, re.IGNORECASE)
+    match = re.search(r"STATE\s*_?PATCH\s*:\s*", text, re.IGNORECASE)
     if not match:
-        raise ValueError("Missing STATE_PATCH block in response.")
+        return _extract_prose_and_patch_fallback(text)
     prose_block = text[:match.start()].strip()
     patch_block = text[match.end():].strip()
     prose = re.sub(r"^PROSE\s*:\s*", "", prose_block, flags=re.IGNORECASE).strip()
@@ -191,6 +193,35 @@ def _extract_prose_and_patch(text: str) -> Tuple[str, Dict[str, Any]]:
     if "schema_version" not in patch:
         patch["schema_version"] = "1.0"
     return prose, patch
+
+
+def _extract_prose_and_patch_fallback(text: str) -> Tuple[str, Dict[str, Any]]:
+    fence_matches = list(re.finditer(r"```json\s*([\s\S]*?)\s*```", text, re.IGNORECASE))
+    if fence_matches:
+        match = fence_matches[-1]
+        patch_block = match.group(1).strip()
+        prose_block = text[:match.start()].strip()
+        prose = re.sub(r"^PROSE\s*:\s*", "", prose_block, flags=re.IGNORECASE).strip()
+        if not prose:
+            prose = prose_block.strip()
+        patch = _extract_json(patch_block)
+        if "schema_version" not in patch:
+            patch["schema_version"] = "1.0"
+        return prose, patch
+
+    match = re.search(r"(\{[\s\S]*\})\s*$", text)
+    if match:
+        patch_block = match.group(1).strip()
+        prose_block = text[:match.start()].strip()
+        prose = re.sub(r"^PROSE\s*:\s*", "", prose_block, flags=re.IGNORECASE).strip()
+        if not prose:
+            prose = prose_block.strip()
+        patch = _extract_json(patch_block)
+        if "schema_version" not in patch:
+            patch["schema_version"] = "1.0"
+        return prose, patch
+
+    raise ValueError("Missing STATE_PATCH block in response.")
 
 
 def _parse_until(value: Optional[str]) -> Tuple[Optional[int], Optional[int]]:

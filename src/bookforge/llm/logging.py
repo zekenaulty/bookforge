@@ -4,11 +4,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 import json
-import os
 import re
 
 from .errors import LLMRequestError
 from .types import LLMResponse, Message
+from bookforge.config.env import read_env_value
 
 
 def _extract_text_payload(text: str) -> str:
@@ -137,7 +137,8 @@ def _write_pretty_text_log(log_path: Path, text: str) -> None:
 
 
 def should_log_llm() -> bool:
-    flag = os.environ.get("BOOKFORGE_LOG_LLM", "").strip().lower()
+    flag = read_env_value("BOOKFORGE_LOG_LLM") or ""
+    flag = str(flag).strip().lower()
     return flag in {"1", "true", "yes", "on"}
 
 
