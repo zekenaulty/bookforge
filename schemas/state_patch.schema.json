@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "State Patch",
+  "type": "object",
+  "required": [
+    "schema_version"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "world_updates": {
+      "type": "object"
+    },
+    "thread_updates": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "canon_updates": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "cursor_advance": {
+      "type": "object",
+      "properties": {
+        "chapter": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "scene": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "duplication_warnings_in_row_delta": {
+      "type": "integer"
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scene Card",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "scene_id",
+    "chapter",
+    "scene",
+    "beat_target",
+    "goal",
+    "conflict",
+    "required_callbacks",
+    "constraints",
+    "end_condition"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "scene_id": {
+      "type": "string"
+    },
+    "chapter": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "scene": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "beat_target": {
+      "type": "string"
+    },
+    "goal": {
+      "type": "string"
+    },
+    "conflict": {
+      "type": "string"
+    },
+    "required_callbacks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "end_condition": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

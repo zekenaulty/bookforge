@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Outline",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "chapters"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "acts": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "chapters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "chapter_id",
+          "title",
+          "goal",
+          "beats"
+        ],
+        "properties": {
+          "chapter_id": {
+            "type": [
+              "string",
+              "integer"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "goal": {
+            "type": "string"
+          },
+          "beats": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "beat_id",
+                "summary"
+              ],
+              "properties": {
+                "beat_id": {
+                  "type": [
+                    "string",
+                    "integer"
+                  ]
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "entry_state": {
+                  "type": "object"
+                },
+                "exit_state": {
+                  "type": "object"
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

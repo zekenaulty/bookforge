@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Book",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "book_id",
+    "title",
+    "genre",
+    "targets",
+    "voice",
+    "invariants",
+    "author_ref"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "book_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "genre": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "targets": {
+      "type": "object"
+    },
+    "voice": {
+      "type": "object",
+      "properties": {
+        "pov": {
+          "type": "string"
+        },
+        "tense": {
+          "type": "string"
+        },
+        "style_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "invariants": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "author_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "series_id": {
+      "type": "string"
+    },
+    "series_ref": {
+      "type": "string"
+    },
+    "page_metrics": {
+      "type": "object",
+      "properties": {
+        "words_per_page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "chars_per_page": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

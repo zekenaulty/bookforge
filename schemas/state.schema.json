@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "State",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "status",
+    "cursor",
+    "world",
+    "budgets",
+    "duplication_warnings_in_row"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "status": {
+      "type": "string"
+    },
+    "cursor": {
+      "type": "object",
+      "required": [
+        "chapter",
+        "scene"
+      ],
+      "properties": {
+        "chapter": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "scene": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "world": {
+      "type": "object",
+      "required": [
+        "time",
+        "location",
+        "cast_present",
+        "open_threads",
+        "recent_facts"
+      ],
+      "properties": {
+        "time": {
+          "type": "object"
+        },
+        "location": {
+          "type": "string"
+        },
+        "cast_present": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "open_threads": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "recent_facts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "budgets": {
+      "type": "object",
+      "properties": {
+        "max_new_entities": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_new_threads": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "min_scene_words": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_scene_words": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "duplication_warnings_in_row": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "additionalProperties": true
+}
