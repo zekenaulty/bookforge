@@ -465,7 +465,7 @@ Refinement Notes
 
 Checklist
 - [x] Story 1.R: Requirements baseline and architecture handshake
-- [ ] Story 1: Repo scaffolding and core package layout
+- [x] Story 1: Repo scaffolding and core package layout
 - [x] Story 2.R: LLM provider abstraction refinement
 - [ ] Story 2: LLM provider layer
 - [x] Story 3.R: Schema governance and validation refinement
