@@ -23,6 +23,7 @@ from bookforge.memory.continuity import (
 )
 from bookforge.phases.plan import plan_scene
 from bookforge.prompt.renderer import render_template_file
+from bookforge.prompt.system import load_system_prompt
 from bookforge.util.paths import repo_root
 from bookforge.util.schema import validate_json
 
@@ -582,7 +583,7 @@ def _write_scene(
     )
 
     messages: List[Message] = [
-        {"role": "system", "content": system_path.read_text(encoding="utf-8")},
+        {"role": "system", "content": load_system_prompt(system_path, book_root / "outline" / "outline.json", include_outline=True)},
         {"role": "user", "content": prompt},
     ]
 
@@ -676,7 +677,7 @@ def _repair_scene(
     )
 
     messages: List[Message] = [
-        {"role": "system", "content": system_path.read_text(encoding="utf-8")},
+        {"role": "system", "content": load_system_prompt(system_path, book_root / "outline" / "outline.json", include_outline=True)},
         {"role": "user", "content": prompt},
     ]
 
