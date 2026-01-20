@@ -528,3 +528,13 @@ Checklist
 - [ ] Story 15: Logging and metrics
 - [x] Story 16.R: Tests and documentation refinement
 - [ ] Story 16: Tests and documentation
+
+Proposed TODOs (from reviews + our observed issues)
+Continuity and state (highest priority)
+
+- Track inventory/artifacts explicitly (e.g., shard status, maps, blade) with stable IDs and status fields (physical/embedded/bound, location, owner).
+- Add a running summary field in the continuity pack/state (short, updated per scene) so the writer gets a stable “what just happened + what must stay true.”
+- Enforce outline contract continuity: if the outline references the shard as a carryable object in Chapter 2, the writer can’t dissolve it in Chapter 1 without a reversible rule.
+- Track oath‑mark location/status consistently (body location + visual state) to prevent drift.
+- Add a cast/group introduction check (“the others didn’t make it” should only appear if “others” were established). (This is questionable at best, this can be a stylistic thing no a continuty thing...)
+
