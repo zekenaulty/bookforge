@@ -29,4 +29,4 @@ Examples
 - Minimal:
   bookforge init --book my_novel_v1 --author-ref eldrik-vale/v3 --title "Untitled" --genre "fantasy"
 - With optional parameters:
-  bookforge --workspace workspace init --book my_novel_v1 --author-ref eldrik-vale/v3 --title "Untitled" --genre "fantasy,epic" --target chapters=24 --target avg_scene_words=900 --series-id "sagefall"
+  bookforge --workspace workspace init --book my_novel_v1 --author-ref eldrik-vale/v3 --title "Untitled" --genre "fantasy,epic" --target chapters=24 --target avg_scene_words=1900 --series-id "sagefall"

@@ -103,7 +103,7 @@ def _int_env(name: str, default: int) -> int:
 
 
 def _author_max_tokens() -> int:
-    return _int_env("BOOKFORGE_AUTHOR_MAX_TOKENS", 8192)
+    return _int_env("BOOKFORGE_AUTHOR_MAX_TOKENS", 16384)
 
 
 def _response_truncated(response: LLMResponse) -> bool:

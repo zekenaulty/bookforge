@@ -173,7 +173,7 @@ Example:
   ],
   "targets": {
     "chapters": 24,
-    "avg_scene_words": 900
+    "avg_scene_words": 1900
   }
 }
 ```

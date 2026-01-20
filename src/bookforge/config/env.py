@@ -14,14 +14,18 @@ class AppConfig:
     gemini_api_key: Optional[str]
     planner_api_key: Optional[str]
     writer_api_key: Optional[str]
+    repair_api_key: Optional[str]
     linter_api_key: Optional[str]
+    continuity_api_key: Optional[str]
     ollama_url: str
     openai_api_url: str
     gemini_api_url: str
     request_timeout_seconds: int
     planner_model: Optional[str]
     writer_model: Optional[str]
+    repair_model: Optional[str]
     linter_model: Optional[str]
+    continuity_model: Optional[str]
     default_model: Optional[str]
     gemini_requests_per_minute: Optional[int]
     task_model_overrides: Dict[str, str]
@@ -103,14 +107,18 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
         gemini_api_key=merged.get("GEMINI_API_KEY"),
         planner_api_key=merged.get("PLANNER_API_KEY"),
         writer_api_key=merged.get("WRITER_API_KEY"),
+        repair_api_key=merged.get("REPAIR_API_KEY"),
         linter_api_key=merged.get("LINTER_API_KEY"),
+        continuity_api_key=merged.get("CONTINUITY_API_KEY"),
         ollama_url=ollama_url,
         openai_api_url=openai_url,
         gemini_api_url=gemini_url,
         request_timeout_seconds=timeout_val,
         planner_model=merged.get("PLANNER_MODEL"),
         writer_model=merged.get("WRITER_MODEL"),
+        repair_model=merged.get("REPAIR_MODEL"),
         linter_model=merged.get("LINTER_MODEL"),
+        continuity_model=merged.get("CONTINUITY_MODEL"),
         default_model=merged.get("DEFAULT_MODEL"),
         gemini_requests_per_minute=gemini_rpm_val,
         task_model_overrides=task_model_overrides,
@@ -147,7 +155,9 @@ def _has_phase_api_keys(config: AppConfig) -> bool:
     return any([
         config.planner_api_key,
         config.writer_api_key,
+        config.repair_api_key,
         config.linter_api_key,
+        config.continuity_api_key,
     ])
 
 

@@ -36,7 +36,7 @@ JSON shape example (fill with real values):
   "goal": "Force a decisive choice.",
   "conflict": "Safety versus obligation.",
   "required_callbacks": [],
-  "constraints": ["target_words: 900"],
+  "constraints": ["target_words: 1900"],
   "end_condition": "The protagonist leaves home.",
   "cast_present": ["Eldrin"],
   "cast_present_ids": ["CHAR_Eldrin"],

@@ -24,6 +24,7 @@ Defaults
 
 Outputs
 - draft/chapters/ch_###/scene_###.md (scene prose)
+- draft/chapters/ch_###.md (compiled chapter when a chapter completes)
 - draft/chapters/ch_###/scene_###.meta.json (scene card + state patch + lint report)
 - draft/context/continuity_pack.json
 - draft/context/bible.md and draft/context/last_excerpt.md

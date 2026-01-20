@@ -19,6 +19,7 @@ from bookforge.util.schema import validate_json
 
 
 SCENE_CARD_SCHEMA_VERSION = "1.1"
+DEFAULT_EMPTY_RESPONSE_RETRIES = 1
 
 
 def _int_env(name: str, default: int) -> int:
@@ -26,7 +27,11 @@ def _int_env(name: str, default: int) -> int:
 
 
 def _plan_max_tokens() -> int:
-    return _int_env("BOOKFORGE_PLAN_MAX_TOKENS", 8192)
+    return _int_env("BOOKFORGE_PLAN_MAX_TOKENS", 16384)
+
+
+def _empty_response_retries() -> int:
+    return max(0, _int_env("BOOKFORGE_EMPTY_RESPONSE_RETRIES", DEFAULT_EMPTY_RESPONSE_RETRIES))
 
 
 def _response_truncated(response: LLMResponse) -> bool:
@@ -390,20 +395,25 @@ def plan_scene(
 
     max_tokens = _plan_max_tokens()
     request = {"model": model, "temperature": 0.4, "max_tokens": max_tokens}
-    try:
-        response = client.chat(messages, model=model, temperature=0.4, max_tokens=max_tokens)
-    except LLMRequestError as exc:
-        if should_log_llm():
-            key_slot = getattr(client, "key_slot", None)
-            extra = {"key_slot": key_slot} if key_slot else None
-            log_llm_error(workspace, "plan_scene_error", exc, request=request, messages=messages, extra=extra)
-        raise
-
     log_path: Optional[Path] = None
     key_slot = getattr(client, "key_slot", None)
     log_extra = {"key_slot": key_slot} if key_slot else None
-    if should_log_llm():
-        log_path = log_llm_response(workspace, "plan_scene", response, request=request, messages=messages, extra=log_extra)
+    retries = _empty_response_retries()
+    attempt = 0
+    while True:
+        try:
+            response = client.chat(messages, model=model, temperature=0.4, max_tokens=max_tokens)
+        except LLMRequestError as exc:
+            if should_log_llm():
+                extra = {"key_slot": key_slot} if key_slot else None
+                log_llm_error(workspace, "plan_scene_error", exc, request=request, messages=messages, extra=extra)
+            raise
+        label = "plan_scene" if attempt == 0 else f"plan_scene_retry{attempt}"
+        if should_log_llm():
+            log_path = log_llm_response(workspace, label, response, request=request, messages=messages, extra=log_extra)
+        if str(response.text).strip() or attempt >= retries:
+            break
+        attempt += 1
     try:
         card = _extract_json(response.text)
     except ValueError as exc:

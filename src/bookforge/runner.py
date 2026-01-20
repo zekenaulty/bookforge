@@ -28,11 +28,12 @@ from bookforge.util.paths import repo_root
 from bookforge.util.schema import validate_json
 
 
-DEFAULT_WRITE_MAX_TOKENS = 16384
-DEFAULT_LINT_MAX_TOKENS = 36864
-DEFAULT_REPAIR_MAX_TOKENS = 36864
-DEFAULT_CONTINUITY_MAX_TOKENS = 36864
-DEFAULT_STYLE_ANCHOR_MAX_TOKENS = 8192
+DEFAULT_WRITE_MAX_TOKENS = 36864
+DEFAULT_LINT_MAX_TOKENS = 73728
+DEFAULT_REPAIR_MAX_TOKENS = 73728
+DEFAULT_CONTINUITY_MAX_TOKENS = 73728
+DEFAULT_STYLE_ANCHOR_MAX_TOKENS = 16384
+DEFAULT_EMPTY_RESPONSE_RETRIES = 1
 
 SUMMARY_CHAPTER_SO_FAR_CAP = 20
 SUMMARY_KEY_FACTS_CAP = 25
@@ -62,6 +63,10 @@ def _continuity_max_tokens() -> int:
 
 def _style_anchor_max_tokens() -> int:
     return _int_env("BOOKFORGE_STYLE_ANCHOR_MAX_TOKENS", DEFAULT_STYLE_ANCHOR_MAX_TOKENS)
+
+
+def _empty_response_retries() -> int:
+    return max(0, _int_env("BOOKFORGE_EMPTY_RESPONSE_RETRIES", DEFAULT_EMPTY_RESPONSE_RETRIES))
 
 
 
@@ -364,6 +369,22 @@ def _summary_list(value: Any) -> List[str]:
     return cleaned
 
 
+def _coerce_summary_update(patch: Dict[str, Any]) -> None:
+    summary_update = patch.get("summary_update")
+    if not isinstance(summary_update, dict):
+        return
+    for key in (
+        "last_scene",
+        "key_events",
+        "must_stay_true",
+        "chapter_so_far_add",
+        "story_so_far_add",
+        "threads_touched",
+    ):
+        if key in summary_update:
+            summary_update[key] = _summary_list(summary_update.get(key))
+
+
 def _dedupe_preserve(items: List[str]) -> List[str]:
     seen = set()
     result: List[str] = []
@@ -543,6 +564,86 @@ def _rollup_chapter_summary(book_root: Path, state: Dict[str, Any], chapter_num:
     summary_path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
 
 
+def _find_chapter_outline(outline: Dict[str, Any], chapter_num: int) -> Dict[str, Any]:
+    chapters = outline.get("chapters", []) if isinstance(outline, dict) else []
+    if isinstance(chapters, list):
+        for entry in chapters:
+            if not isinstance(entry, dict):
+                continue
+            chapter_id = entry.get("chapter_id")
+            try:
+                chapter_id_int = int(chapter_id)
+            except (TypeError, ValueError):
+                continue
+            if chapter_id_int == chapter_num:
+                return entry
+    return {}
+
+
+def _section_title(section: Dict[str, Any], index: int) -> str:
+    title = str(section.get("title", "")).strip()
+    if title:
+        return title
+    return f"Section {index}"
+
+
+def _scene_id_from_obj(scene_obj: Dict[str, Any], fallback: int) -> int:
+    for key in ("scene_id", "beat_id", "id"):
+        value = scene_obj.get(key)
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            continue
+    return fallback
+
+
+def _compile_chapter_markdown(book_root: Path, outline: Dict[str, Any], chapter_num: int) -> Path:
+    chapter_dir = book_root / "draft" / "chapters" / f"ch_{chapter_num:03d}"
+    chapter_dir.mkdir(parents=True, exist_ok=True)
+
+    chapter = _find_chapter_outline(outline, chapter_num)
+    chapter_title = str(chapter.get("title", "")).strip() if chapter else ""
+    if chapter_title:
+        header = f"Chapter {chapter_num}: {chapter_title}"
+    else:
+        header = f"Chapter {chapter_num}"
+
+    sections = chapter.get("sections", []) if isinstance(chapter, dict) else []
+    if not isinstance(sections, list) or not sections:
+        fallback_scenes = []
+        if isinstance(chapter, dict):
+            raw = chapter.get("scenes") or chapter.get("beats") or []
+            if isinstance(raw, list):
+                fallback_scenes = raw
+        sections = [{"section_id": 1, "title": "", "scenes": fallback_scenes}]
+
+    blocks: List[str] = [f"# {header}"]
+    for idx_section, section in enumerate(sections, start=1):
+        if not isinstance(section, dict):
+            continue
+        blocks.append(f"## {_section_title(section, idx_section)}")
+        scenes = section.get("scenes", [])
+        if not isinstance(scenes, list):
+            scenes = []
+        if not scenes:
+            blocks.append("[No scenes listed for this section]")
+            continue
+        for idx_scene, scene_obj in enumerate(scenes, start=1):
+            scene_id = _scene_id_from_obj(scene_obj, idx_scene)
+            scene_path = chapter_dir / f"scene_{scene_id:03d}.md"
+            if scene_path.exists():
+                scene_text = scene_path.read_text(encoding="utf-8").strip()
+                blocks.append(scene_text)
+            else:
+                blocks.append(f"[Missing scene {scene_id:03d}]")
+
+    compiled = "\n\n".join([block for block in blocks if str(block).strip()]) + "\n"
+
+    chapter_file = book_root / "draft" / "chapters" / f"ch_{chapter_num:03d}.md"
+    chapter_file.write_text(compiled, encoding="utf-8")
+    return chapter_file
+
+
 def _cursor_beyond_target(
     chapter: int,
     scene: int,
@@ -622,15 +723,22 @@ def _chat(
     key_slot = getattr(client, "key_slot", None)
     extra = {"key_slot": key_slot} if key_slot else None
     request = {"model": model, "temperature": temperature, "max_tokens": max_tokens}
-    try:
-        response = client.chat(messages, model=model, temperature=temperature, max_tokens=max_tokens)
-    except LLMRequestError as exc:
+    retries = _empty_response_retries()
+    attempt = 0
+    while True:
+        try:
+            response = client.chat(messages, model=model, temperature=temperature, max_tokens=max_tokens)
+        except LLMRequestError as exc:
+            if should_log_llm():
+                log_llm_error(workspace, f"{label}_error", exc, request=request, messages=messages, extra=extra)
+            raise
+        label_used = label if attempt == 0 else f"{label}_retry{attempt}"
         if should_log_llm():
-            log_llm_error(workspace, f"{label}_error", exc, request=request, messages=messages, extra=extra)
-        raise
-    if should_log_llm():
-        log_llm_response(workspace, label, response, request=request, messages=messages, extra=extra)
-    return response
+            log_llm_response(workspace, label_used, response, request=request, messages=messages, extra=extra)
+        if str(response.text).strip() or attempt >= retries:
+            return response
+        attempt += 1
+
 
 
 def _fallback_style_anchor(author_fragment: str) -> str:
@@ -806,6 +914,7 @@ def _write_scene(
             extra = f" Model output hit MAX_TOKENS ({_write_max_tokens()}); increase BOOKFORGE_WRITE_MAX_TOKENS."
         raise ValueError(f"{exc}{extra}") from exc
 
+    _coerce_summary_update(patch)
     validate_json(patch, "state_patch")
     return prose, patch
 
@@ -910,6 +1019,7 @@ def _repair_scene(
             extra = f" Model output hit MAX_TOKENS ({_repair_max_tokens()}); increase BOOKFORGE_REPAIR_MAX_TOKENS."
         raise ValueError(f"{exc}{extra}") from exc
 
+    _coerce_summary_update(patch)
     validate_json(patch, "state_patch")
     return prose, patch
 
@@ -1051,10 +1161,14 @@ def run_loop(
 
     config = load_config()
     planner_client = get_llm_client(config, phase="planner")
+    continuity_client = get_llm_client(config, phase="continuity")
     writer_client = get_llm_client(config, phase="writer")
+    repair_client = get_llm_client(config, phase="repair")
     linter_client = get_llm_client(config, phase="linter")
     planner_model = resolve_model("planner", config)
+    continuity_model = resolve_model("continuity", config)
     writer_model = resolve_model("writer", config)
+    repair_model = resolve_model("repair", config)
     linter_model = resolve_model("linter", config)
 
     style_anchor = _ensure_style_anchor(
@@ -1104,8 +1218,8 @@ def run_loop(
             scene_card,
             character_registry,
             thread_registry,
-            planner_client,
-            planner_model,
+            continuity_client,
+            continuity_model,
         )
 
         base_invariants = book.get("invariants", []) if isinstance(book.get("invariants", []), list) else []
@@ -1157,8 +1271,8 @@ def run_loop(
                 scene_card,
                 character_registry,
                 thread_registry,
-                writer_client,
-                writer_model,
+                repair_client,
+                repair_model,
             )
             write_attempts += 1
             lint_report = _lint_scene(
@@ -1210,6 +1324,7 @@ def run_loop(
 
         if chapter_end:
             _rollup_chapter_summary(book_root, state, chapter_num)
+            _compile_chapter_markdown(book_root, outline, chapter_num)
 
         state["cursor"] = {"chapter": next_chapter, "scene": next_scene}
         if completed:
