@@ -1,0 +1,33 @@
+The first shadow didn’t emerge so much as it curdled out of the air. It spilled from the lip of the crater, a viscous smear of absolute black that swallowed the reflected violet light of the shard. Kaelen’s breath hitched, the air in his lungs suddenly tasting of wet ash and old graves. He didn't have time to adjust his grip on the pulsing star-matter before the second form manifested, a jagged silhouette that lacked a face but possessed a terrifying, singular intent.
+
+A spike of agony erupted from his ribs. The Starwrought Oath, usually a dormant lattice of silver etched into his skin, burned with the heat of a stoked forge. He felt the skin blister beneath his tunic. The mark wasn't just reacting; it was screaming in sympathetic resonance with the shard. Every pulse of violet light from the stone sent a corresponding jolt of white-hot needles through his side, threatening to buckle his knees.
+
+He dropped the shard into the heavy leather satchel at his hip, but the distance did nothing to dampen the connection. The first shadow-form lunged. It didn't run; it elongated, a ribbon of void-matter snapping across the fractured sky-glass. Kaelen threw himself to the left, his boots skidding on the slick, crystalline surface. He drew his short-blade, the steel feeling impossibly cold against his palm, a sharp contrast to the fire in his chest.
+
+The shadow struck the glass where he had been standing a heartbeat before. The sky-glass didn't shatter; it turned gray, the vibrant translucent blue leaching away as if the entity had drank the very history of the stone. 
+
+"Back," Kaelen wheezed, the word more a gasp of pain than a command. 
+
+The shadows ignored him. Three more drifted over the rim, their edges flickering like guttering candles. They were drawn to the shard, or perhaps to the oath-mark that now bled a faint, sickly purple light through the weave of his shirt. He swung the blade in a wide arc, catching the lead shadow across its midsection. There was no resistance, no spray of blood—only the sensation of cutting through thick, freezing fog. 
+
+The entity recoiled, a low hiss vibrating through the glass beneath Kaelen’s feet. The sound wasn't auditory; it was a rhythmic grinding that set his teeth on edge. The oath-mark flared again, a violent contraction that pulled his torso tight and forced him to his knees. He coughed, the metallic tang of blood coating his tongue. 
+
+The shadows sensed the weakness. They converged, a ring of predatory absences closing the distance. Kaelen jammed the hilt of his blade into the glass to steady himself, his knuckles white. The violet light in his satchel grew frantic, strobing in time with his hammering heart. 
+
+"Not today," he snarled, though the defiance felt hollow against the crushing weight of the void-forms. 
+
+As the closest shadow reached out a limb that resembled a skeletal hand, the oath-mark on Kaelen’s ribs underwent a terrifying transformation. The bruised purple deepened to a black so intense it seemed to pull the surrounding light into his body. The pain transitioned from heat to a numbing, soul-deep frost. A shockwave of kinetic force erupted from his chest, a radial burst of starlight and shadow that caught the entities mid-stride.
+
+The impact sent Kaelen sprawling backward. His head cracked against a shelf of sky-glass, sending stars dancing across his vision that had nothing to do with the fallen sky. He scrambled for purchase, his fingers raw and bleeding where they caught on the sharp edges of the crater. 
+
+The shadow-forms didn't vanish. They began to unravel. The shockwave had disrupted their cohesion, turning their solid-void forms into tattered ribbons of smoke. They thrashed, their silent screams vibrating through Kaelen’s marrow. One by one, they were pulled downward—not into the air, but into the sky-glass itself. The crystalline floor of the crater acted like a sponge, the dark smoke swirling into the fractures and veins of the glass, staining the once-clear material with oily, permanent streaks of charcoal.
+
+Kaelen lay flat on his back, his chest heaving. Every breath was a jagged razor in his throat. He looked down at his side. His tunic was scorched, a ragged hole burned through the fabric where the oath-mark sat. The skin beneath was a ruin of weeping blisters and dark, interlacing lines that looked less like a mark and more like a map of a dying star. 
+
+The silence that followed was heavier than the noise of the fight. The violet glow from his satchel had dimmed to a rhythmic, low thrum, as if the shard were sated or exhausted. 
+
+He tried to move his left arm, but a sharp, biting pain in his shoulder signaled a deep laceration he hadn't felt in the heat of the moment. The shadow-forms had left their mark in more ways than one. The sky-glass beneath him felt dead, the resonance of the High Spire anchor truly extinguished, replaced by the cold, lingering presence of the things that had tried to claim the shard.
+
+He was alive, but the cost was etched into his flesh. He reached into the satchel, his fingers brushing the cold surface of the shard. It was still there. It was still his burden. For now. 
+
+Kaelen rolled onto his side, his vision swimming. He needed to move. The crater was no longer a place of discovery; it was a tomb, and the things buried in the glass weren't necessarily dead. They were just waiting.

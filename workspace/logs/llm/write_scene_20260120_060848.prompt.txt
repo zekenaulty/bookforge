@@ -1,0 +1,218 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: The Starwrought Oath
+Book ID: starwrought_b1_v1
+Author Ref: maeron-kestrel/v1
+Genre: fantasy, epic
+Series ID: starwrought
+Series Ref: series/starwrought
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 900
+- chapters: 24
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are Maeron Kestrel. Your writing is characterized by a tight, limited third-person perspective that never breaks into omniscient narration. You must maintain strict continuity, ensuring that characters utilize their full range of established skills and knowledge. Do not use 'As you know' dialogue or provide summaries of previous events. When a scene begins, drop the reader directly into the character's current sensory experience. Avoid clichés in descriptions; instead of 'cold as ice,' describe the 'brittle, biting snap of air that makes the lungs ache.' Ensure all plot payoffs are seeded with subtle clues in earlier movements. Magic and high-fantasy elements must have clear costs and logical consistency.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+
+
+USER:
+
+# WRITE
+
+Write the scene described by the scene card.
+- Start in motion. No recap.
+- Use the continuity pack and state for continuity.
+- Use character_registry to keep names consistent in prose.
+- Return prose plus a state_patch JSON block.
+
+STATE_PATCH rules:
+- Use schema_version "1.0".
+- Use world_updates to update world state (cast_present, location, recent_facts, open_threads).
+- Use scene_card.cast_present_ids for cast_present (ids, not names).
+- Use scene_card.thread_ids for open_threads (thread ids).
+- Do not invent new character or thread ids.
+- Use cursor_advance only if you need to override the default cursor.
+
+Scene card:
+{
+  "cast_present": [
+    "Kaelen"
+  ],
+  "cast_present_ids": [
+    "CHAR_kaelen"
+  ],
+  "chapter": 1,
+  "conflict": "Kaelen's duty to the dying Spire versus the catastrophic event unfolding in the valley.",
+  "constraints": [
+    "target_words: 900",
+    "no-recaps",
+    "sensory focus on the violet light and the silence-breaking impact"
+  ],
+  "end_condition": "The star impacts the valley and the shockwave reaches the High Spire.",
+  "goal": "Escalate the sense of dread and establish the unnatural nature of the starfall.",
+  "introduces": [],
+  "introduces_ids": [],
+  "required_callbacks": [
+    "THREAD_oath_binding"
+  ],
+  "scene": 2,
+  "scene_id": "SC_001_002",
+  "scene_target": "Kaelen witnesses the violet starfall and its impact on the valley.",
+  "schema_version": "1.1",
+  "thread_ids": []
+}
+
+Continuity pack:
+{
+  "cast_present": [
+    "Kaelen"
+  ],
+  "constraints": [
+    "Kaelen must exhibit physical signs of strain from his failed attempt to mend the sky-glass.",
+    "The violet light of the starfall must contrast with the existing void-silence of the valley.",
+    "The sky-glass anchor's fractures should react or resonate as the star approaches.",
+    "The impact shockwave must be the terminal event of the scene."
+  ],
+  "location": "High Spire",
+  "next_action": "Kaelen watches the violet star descend toward the valley and prepares for the physical impact of the shockwave.",
+  "open_threads": [
+    "THREAD_oath_binding",
+    "THREAD_starfall_corruption"
+  ],
+  "scene_end_anchor": "Kaelen stood by the primary sky-glass anchor and observed the irreversible internal fractures spreading through the crystal. His attempt to stabilize the fading wards with his own vitality resulted in failure and physical exhaustion. He concluded that the High Spire's defenses would inevitably collapse before the coming sunrise."
+}
+
+Character registry (id -> name):
+[
+  {
+    "character_id": "CHAR_kaelen",
+    "name": "Kaelen"
+  },
+  {
+    "character_id": "CHAR_lyra",
+    "name": "Lyra"
+  },
+  {
+    "character_id": "CHAR_vane",
+    "name": "Vane"
+  },
+  {
+    "character_id": "CHAR_astra",
+    "name": "Astra"
+  }
+]
+
+Thread registry:
+[
+  {
+    "label": "The nature and cost of the Starwrought Oath",
+    "status": "open",
+    "thread_id": "THREAD_oath_binding"
+  },
+  {
+    "label": "The spreading void-influence from the fallen stars",
+    "status": "open",
+    "thread_id": "THREAD_starfall_corruption"
+  },
+  {
+    "label": "The true history of the First Weaver and the cosmic beast",
+    "status": "open",
+    "thread_id": "THREAD_ancient_legacy"
+  }
+]
+
+Style anchor:
+The scent of scorched copper clung to the back of the throat, thick enough to mask the underlying rot of the marsh. Every step through the knee-deep peat required a deliberate shift of weight, a calculated gamble against the suction of the black mud. To rush was to sink; to hesitate was to let the stinging gnats find the gaps in the leather greaves.
+
+The silver needle of the compass didn’t spin; it shuddered, vibrating with a frequency that numbed the thumb pressing against the casing. This wasn't the erratic jitter of a magnetic anomaly, but the rhythmic, heavy thrum of a tethered ley-line. It pulled at the marrow, a dull ache in the long bones that signaled the proximity of a ruptured seal. The price of such proximity was always paid in blood-sugar and breath; the lungs felt scorched, as if the very oxygen had been thinned by the invisible pressure.
+
+A jagged obsidian shard protruded from a stump of petrified oak. It didn't just sit in the light; it seemed to drink it, casting a shadow that fell toward the sun rather than away. Touching it would be a mistake—the last time a finger had brushed a similar fracture, the skin had turned the color of a bruised plum and stayed cold for a week. Instead, the focus remained on the tension of the wire stretched across the path, nearly invisible against the gray mist. It was set at mid-thigh height, weighted with a lead sinker to ensure it wouldn't flutter in the wind. A simple trap, but one that required a steady hand and a sharp eye to bypass without tripping the chime hidden in the hollow log nearby. The world didn't offer warnings, only consequences recorded in the stiffness of joints and the steady, rhythmic thud of a heart working too hard against a thinning atmosphere.
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 2
+  },
+  "duplication_warnings_in_row": 0,
+  "outline": {
+    "path": "outline/outline.json"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_002.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "world": {
+    "cast_present": [
+      "CHAR_kaelen"
+    ],
+    "location": "High Spire",
+    "open_threads": [
+      "THREAD_oath_binding"
+    ],
+    "recent_facts": [
+      "The primary sky-glass anchor of the High Spire has developed irreversible internal fractures.",
+      "Kaelen's attempts to stabilize the wards with his own vitality have failed.",
+      "The surrounding valley is silent and consumed by void-influence.",
+      "Kaelen has confirmed the wards will collapse before sunrise."
+    ],
+    "time": {}
+  }
+}
+
+Output:
+PROSE:
+<scene prose>
+
+STATE_PATCH:
+<json>

@@ -1,0 +1,33 @@
+- The primary sky-glass anchor of the High Spire has developed irreversible internal fractures.
+- Kaelen's attempts to stabilize the wards with his own vitality have failed.
+- The surrounding valley is silent and consumed by void-influence.
+- Kaelen has confirmed the wards will collapse before sunrise.
+- A violet star has impacted the valley floor, causing massive topographical destruction.
+- The primary sky-glass anchor of the High Spire has been physically destroyed by the impact's resonance.
+- Kaelen has survived the initial shockwave but is suffering from physical trauma and oath-resonance.
+- The valley now emits a rhythmic violet glow from the impact site.
+- Kaelen has retrieved the pulsing violet shard from the impact site.
+- The Starwrought Oath on Kaelen's ribs has reacted to the shard, turning from silver to a bruised purple.
+- The physical contact with the shard has initiated a direct resonance between the star-matter and Kaelen's oath-binding.
+- The High Spire's sky-glass anchor is confirmed as completely destroyed.
+- Kaelen defended the shard against shadow-forms that emerged from the crater's edge.
+- The shadow-forms were dissipated by a violent burst of energy from Kaelen's oath-mark.
+- The remnants of the shadow-forms have been absorbed into the sky-glass of the crater, staining it black.
+- Kaelen has sustained serious physical injuries, including a scorched chest and a deep shoulder laceration.
+- The oath-mark has shifted from bruised purple to a deep, light-eating black.
+- Kaelen successfully bound the volatile star-shard to his oath-mark through a violent metaphysical process.
+- The oath-mark has transitioned from solid black to a swirling pattern of midnight and white-hot veins.
+- Kaelen's shoulder wound has been cauterized by the energy of the binding, though he remains in a state of extreme physical exhaustion.
+- Kaelen has begun the treacherous climb out of the crater toward High Spire.
+- Kaelen successfully completed the treacherous climb from the impact crater to the High Spire.
+- Kaelen discovered the High Spire has fallen to the silver rot and is largely abandoned or silent.
+- Commander Varkas has been consumed by the silver rot, his body transforming into a metallic vessel for the star-corruption.
+- Varkas attacked Kaelen in the Map Room, confirming he is no longer an ally.
+- Kaelen killed Commander Varkas in a lethal duel within the Map Room.
+- Varkas was fully consumed by the silver rot before his death.
+- Kaelen secured the three Star-Map canisters from the High Spire.
+- The High Spire has begun its final structural collapse due to the proximity of the starfall impact.
+- Kaelen successfully escaped the High Spire before its total collapse.
+- The High Spire has been completely consumed by the void-influence, leaving only a scar on the mountain.
+- Kaelen has the three Star-Map canisters in his possession.
+- Kaelen is showing early physical signs of void-exposure (discoloration of the skin).

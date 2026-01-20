@@ -1,0 +1,245 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: The Starwrought Oath
+Book ID: starwrought_b1_v1
+Author Ref: maeron-kestrel/v1
+Genre: fantasy, epic
+Series ID: starwrought
+Series Ref: series/starwrought
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 900
+- chapters: 24
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are Maeron Kestrel. Your writing is characterized by a tight, limited third-person perspective that never breaks into omniscient narration. You must maintain strict continuity, ensuring that characters utilize their full range of established skills and knowledge. Do not use 'As you know' dialogue or provide summaries of previous events. When a scene begins, drop the reader directly into the character's current sensory experience. Avoid clichés in descriptions; instead of 'cold as ice,' describe the 'brittle, biting snap of air that makes the lungs ache.' Ensure all plot payoffs are seeded with subtle clues in earlier movements. Magic and high-fantasy elements must have clear costs and logical consistency.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+
+
+USER:
+
+# REPAIR
+
+Fix the scene based on lint issues.
+Return corrected prose plus a corrected state_patch JSON block.
+
+Output format (required, no code fences, no commentary):
+PROSE:
+<scene prose>
+
+STATE_PATCH:
+<json>
+
+STATE_PATCH rules:
+- Use schema_version "1.0".
+- Use world_updates to update world state (cast_present, location, recent_facts, open_threads).
+- Use scene_card.cast_present_ids for cast_present (ids, not names).
+- Use scene_card.thread_ids for open_threads (thread ids).
+- Do not invent new character or thread ids.
+
+Issues:
+[
+  {
+    "code": "continuity",
+    "message": "The Starwrought Oath is established as being 'etched... into the marrow of his ribs' and localized to his chest, but the scene concludes with the 'silver lines of his oath' being visible on his palm where the shard touches his skin. This is a location inconsistency.",
+    "severity": "error"
+  },
+  {
+    "code": "duplication",
+    "message": "The sensory descriptor 'metallic tang' and the associated taste of metal is used in paragraph 1 and repeated in paragraph 10, creating a repetitive sensory beat.",
+    "severity": "warning"
+  }
+]
+
+Scene card:
+{
+  "cast_present": [
+    "Kaelen"
+  ],
+  "cast_present_ids": [
+    "CHAR_kaelen"
+  ],
+  "chapter": 1,
+  "conflict": "Environmental hazards of the razor-sharp glass and the physical toll of oath-resonance.",
+  "constraints": [
+    "target_words: 900",
+    "no-recaps",
+    "forward-motion",
+    "tight-prose"
+  ],
+  "end_condition": "Kaelen claims the pulsing shard as the rhythmic beat intensifies.",
+  "goal": "Investigate the impact site and secure the source of the alien resonance.",
+  "introduces": [],
+  "introduces_ids": [],
+  "required_callbacks": [
+    "The violet star impact from SC_001_002",
+    "Kaelen's physical trauma and oath-resonance"
+  ],
+  "scene": 3,
+  "scene_id": "SC_001_003",
+  "scene_target": "Kaelen navigates the glass-scarred crater to retrieve the pulsing shard.",
+  "schema_version": "1.1",
+  "thread_ids": [
+    "THREAD_starfall_corruption"
+  ]
+}
+
+Character registry (id -> name):
+[
+  {
+    "character_id": "CHAR_kaelen",
+    "name": "Kaelen"
+  },
+  {
+    "character_id": "CHAR_lyra",
+    "name": "Lyra"
+  },
+  {
+    "character_id": "CHAR_vane",
+    "name": "Vane"
+  },
+  {
+    "character_id": "CHAR_astra",
+    "name": "Astra"
+  }
+]
+
+Thread registry:
+[
+  {
+    "label": "The nature and cost of the Starwrought Oath",
+    "status": "open",
+    "thread_id": "THREAD_oath_binding"
+  },
+  {
+    "label": "The spreading void-influence from the fallen stars",
+    "status": "open",
+    "thread_id": "THREAD_starfall_corruption"
+  },
+  {
+    "label": "The true history of the First Weaver and the cosmic beast",
+    "status": "open",
+    "thread_id": "THREAD_ancient_legacy"
+  }
+]
+
+Scene:
+The edge of a glass splinter sliced through Kaelen’s leather glove, parting the skin of his palm with a clinical, biting precision. He didn't pull back. To flinch was to lose his footing on the treacherous, translucent slope of the crater, and a fall here meant a thousand more cuts, each deeper than the last. The air inside the bowl was thick with the scent of ionized oxygen and the sharp, metallic tang of scorched earth. It tasted like a copper coin held against the tongue.
+
+His heart didn't beat; it shuddered. The Starwrought Oath, etched in silver-fire into the marrow of his ribs, was no longer a silent weight. It had woken with the impact of the violet star, and now it pulsed in a sickening, rhythmic synchronization with the light at the crater’s floor. Every time the distant shard flared, the mark in his chest tightened, a hot-iron sear that made his lungs feel brittle.
+
+He shifted his weight, his boots crunching over a drift of pulverized sky-glass. The sound was like grinding teeth. Below him, the valley had been transformed. Where there had once been the mossy foundations of the High Spire’s anchor, there was now a jagged wound in the world. The violet star hadn't just hit the earth; it had rewritten it. The soil had been flash-fused into obsidian ribs that curved toward the center like the skeletal remains of a titan.
+
+A wave of resonance rolled upward, a physical pressure that hit Kaelen’s chest and forced a ragged gasp from his throat. His vision blurred, the violet hue of the crater deepening into a bruising indigo. The oath-resonance wasn't just pain; it was a demand. It pulled at him, a magnetic tether hooked into his very soul, dragging him toward the source. 
+
+He scrambled down the last ten feet, his boots sliding through a scree of violet shards that chimed like broken bells. He hit the flat of the impact zone hard. The ground here was still radiating a dry, unnatural heat that bypassed the thick soles of his boots. In the center of the fused glass, the shard sat nestled in a bed of its own cooling slag.
+
+It was smaller than he had expected—no larger than a man’s forearm—but it possessed a density that seemed to warp the air around it. It wasn't solid, not exactly. It looked like a fracture in reality, a jagged hole filled with a churning, violet nebula. And it was beating. 
+
+*Thump-thump.*
+
+The sound wasn't auditory; it was a vibration that traveled through the glass, up through his boots, and into his skeleton. Kaelen stumbled, his knees hitting the hot obsidian. He clutched his chest, his fingers hooking into the fabric of his tunic as if he could physically hold his ribs together. The oath-mark was screaming now, a white-hot frequency that threatened to shatter his teeth.
+
+"Not... yet," he wheezed, the words catching on the dry heat in his throat. 
+
+He forced himself to look at the shard. Around it, the remains of the High Spire’s sky-glass anchor lay in ruin—monolithic chunks of reinforced crystal reduced to shimmering dust. The impact had been a surgical strike against the world’s architecture. 
+
+Kaelen reached out. His hand trembled, the tremors radiating from his elbow down to his fingertips. The air around the shard was viscous, resisting his movement like heavy oil. The closer he got, the more the rhythm intensified. The *thump-thump* was now a frantic, driving pace that forced his own pulse to accelerate to a dangerous tempo. Sweat stung his eyes, tasting of salt and the same metallic tang that permeated the air.
+
+His fingers brushed the edge of the violet light. 
+
+The world vanished into a roar of silent sound. The resonance peaked, a crescendo of agony that turned his veins to liquid lead. He saw the High Spire fall again—not as a memory, but as a present, recurring fracture. He felt the weight of the star as it had plummeted, the cold vacuum of the void clinging to its wake. 
+
+His hand closed around the shard. 
+
+The heat was gone instantly, replaced by a cold so profound it felt like a different kind of burning. The rhythmic pulsing didn't stop, but it changed. It was no longer an external force battering against him; it was internal. The shard’s beat and the oath’s beat became a single, unified strike. 
+
+Kaelen pulled the shard from the glass. It came free with a sound like a long-held breath finally being released. The violet glow dimmed, retreating from the crater walls to concentrate within the jagged fragment in his hand. 
+
+He slumped back against a ridge of fused earth, cradling the shard against his chest. His breath came in ragged, shallow hitches. The physical trauma of the descent and the resonance had left him hollowed out, his muscles twitching with residual electricity. But the shard was heavy, solid, and undeniably present. 
+
+The silence that followed was heavier than the noise had been. The crater remained a jagged, violet-stained scar on the valley floor, a testament to the starfall’s corruption. Kaelen looked down at his hand. The leather of his glove had been scorched away, leaving his palm bare. Where the shard touched his skin, the silver lines of his oath were beginning to turn a deep, bruised purple. 
+
+The price had been paid, but the rhythm was still there, a low, constant hum beneath his skin, waiting for the next star to fall.
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 3
+  },
+  "duplication_warnings_in_row": 0,
+  "outline": {
+    "path": "outline/outline.json"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_003.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "world": {
+    "cast_present": [
+      "CHAR_kaelen"
+    ],
+    "location": "High Spire",
+    "open_threads": [
+      "THREAD_oath_binding",
+      "THREAD_starfall_corruption"
+    ],
+    "recent_facts": [
+      "A violet star has impacted the valley floor, causing massive topographical destruction.",
+      "The primary sky-glass anchor of the High Spire has been physically destroyed by the impact's resonance.",
+      "Kaelen has survived the initial shockwave but is suffering from physical trauma and oath-resonance.",
+      "The valley now emits a rhythmic violet glow from the impact site."
+    ],
+    "time": {}
+  }
+}

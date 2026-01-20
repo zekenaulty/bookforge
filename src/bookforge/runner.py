@@ -433,6 +433,13 @@ def _chat(
     return response
 
 
+def _fallback_style_anchor(author_fragment: str) -> str:
+    cleaned = re.sub(r"^You are [^.]+\.\s*", "", author_fragment, flags=re.IGNORECASE).strip()
+    if cleaned:
+        return cleaned
+    return "Write in tight third-person limited with concrete sensory detail and forward motion."
+
+
 def _ensure_style_anchor(
     workspace: Path,
     book_root: Path,
@@ -474,6 +481,28 @@ def _ensure_style_anchor(
         max_tokens=_style_anchor_max_tokens(),
     )
     text = response.text.strip()
+    if not text:
+        retry_prompt = (
+            prompt
+            + "\n\nOutput must be non-empty and 200-400 words."
+            + " If you are unsure, write 8-12 sentences of neutral prose with no names."
+        )
+        retry_messages: List[Message] = [
+            {"role": "system", "content": system_path.read_text(encoding="utf-8")},
+            {"role": "user", "content": retry_prompt},
+        ]
+        response = _chat(
+            workspace,
+            "style_anchor_retry",
+            client,
+            retry_messages,
+            model=model,
+            temperature=0.7,
+            max_tokens=_style_anchor_max_tokens(),
+        )
+        text = response.text.strip()
+    if not text:
+        text = _fallback_style_anchor(author_fragment)
     if not text:
         raise ValueError("Style anchor generation returned empty output.")
     save_style_anchor(anchor_path, text)

@@ -1,0 +1,201 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: The Starwrought Oath
+Book ID: starwrought_b1_v1
+Author Ref: maeron-kestrel/v1
+Genre: fantasy, epic
+Series ID: starwrought
+Series Ref: series/starwrought
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 900
+- chapters: 24
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are Maeron Kestrel. Your writing is characterized by a tight, limited third-person perspective that never breaks into omniscient narration. You must maintain strict continuity, ensuring that characters utilize their full range of established skills and knowledge. Do not use 'As you know' dialogue or provide summaries of previous events. When a scene begins, drop the reader directly into the character's current sensory experience. Avoid clichés in descriptions; instead of 'cold as ice,' describe the 'brittle, biting snap of air that makes the lungs ache.' Ensure all plot payoffs are seeded with subtle clues in earlier movements. Magic and high-fantasy elements must have clear costs and logical consistency.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+
+
+USER:
+
+# CONTINUITY PACK
+
+Create a continuity pack JSON object with these fields:
+- scene_end_anchor: 2-4 factual sentences about how the last scene ended (no prose).
+- constraints: list of immediate continuity constraints.
+- open_threads: list of active thread ids.
+- cast_present: list of character names present next.
+- location: location id or name.
+- next_action: the implied next action.
+
+Return ONLY JSON.
+
+Rules:
+- Use only characters listed in scene_card.cast_present. Do not introduce new names.
+- If scene_card.cast_present is empty, cast_present must be an empty array.
+- open_threads must be a subset of thread_registry thread_id values.
+- If scene_card.thread_ids is present, prefer those thread ids.
+- Do not invent new thread ids or character names.
+
+Scene card:
+{
+  "cast_present": [
+    "Kaelen",
+    "CHAR_commander_varkas"
+  ],
+  "cast_present_ids": [
+    "CHAR_kaelen",
+    "CHAR_commander_varkas"
+  ],
+  "chapter": 1,
+  "conflict": "Kaelen's loyalty to his mentor versus the necessity of stopping the corruption and preserving the maps.",
+  "constraints": [
+    "target_words: 900",
+    "no-recaps",
+    "forward-motion",
+    "tight-prose"
+  ],
+  "end_condition": "Varkas is dead and Kaelen has the Star-Maps in his possession.",
+  "goal": "Defeat the corrupted Commander and retrieve the maps before the Spire falls.",
+  "introduces": [],
+  "introduces_ids": [],
+  "required_callbacks": [
+    "Varkas's transformation by the silver rot",
+    "The urgency of the starfall impact"
+  ],
+  "scene": 7,
+  "scene_id": "SC_001_007",
+  "scene_target": "Kaelen kills Varkas and secures the Star-Maps.",
+  "schema_version": "1.1",
+  "thread_ids": []
+}
+
+Character registry (id -> name):
+[
+  {
+    "character_id": "CHAR_kaelen",
+    "name": "Kaelen"
+  },
+  {
+    "character_id": "CHAR_lyra",
+    "name": "Lyra"
+  },
+  {
+    "character_id": "CHAR_vane",
+    "name": "Vane"
+  },
+  {
+    "character_id": "CHAR_astra",
+    "name": "Astra"
+  }
+]
+
+Thread registry:
+[
+  {
+    "label": "The nature and cost of the Starwrought Oath",
+    "status": "open",
+    "thread_id": "THREAD_oath_binding"
+  },
+  {
+    "label": "The spreading void-influence from the fallen stars",
+    "status": "open",
+    "thread_id": "THREAD_starfall_corruption"
+  },
+  {
+    "label": "The true history of the First Weaver and the cosmic beast",
+    "status": "open",
+    "thread_id": "THREAD_ancient_legacy"
+  }
+]
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 7
+  },
+  "duplication_warnings_in_row": 0,
+  "outline": {
+    "path": "outline/outline.json"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_007.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "world": {
+    "cast_present": [
+      "CHAR_kaelen",
+      "CHAR_commander_varkas"
+    ],
+    "location": "High Spire (Map Room/Inner Sanctum)",
+    "open_threads": [
+      "THREAD_oath_binding",
+      "THREAD_starfall_corruption"
+    ],
+    "recent_facts": [
+      "Kaelen successfully completed the treacherous climb from the impact crater to the High Spire.",
+      "Kaelen discovered the High Spire has fallen to the silver rot and is largely abandoned or silent.",
+      "Commander Varkas has been consumed by the silver rot, his body transforming into a metallic vessel for the star-corruption.",
+      "Varkas attacked Kaelen in the Map Room, confirming he is no longer an ally."
+    ],
+    "time": {}
+  }
+}
+
+Recent facts:
+[
+  "Kaelen successfully completed the treacherous climb from the impact crater to the High Spire.",
+  "Kaelen discovered the High Spire has fallen to the silver rot and is largely abandoned or silent.",
+  "Commander Varkas has been consumed by the silver rot, his body transforming into a metallic vessel for the star-corruption.",
+  "Varkas attacked Kaelen in the Map Room, confirming he is no longer an ally."
+]
