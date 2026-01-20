@@ -34,6 +34,19 @@ DEFAULT_BUDGETS = {
     "max_scene_words": 0,
 }
 
+PROMPT_TEMPLATE_FILES = [
+    "outline.md",
+    "plan.md",
+    "write.md",
+    "lint.md",
+    "repair.md",
+    "continuity_pack.md",
+    "style_anchor.md",
+    "system_base.md",
+    "output_contract.md",
+]
+
+
 
 def parse_genre(value: str) -> List[str]:
     items = [item.strip() for item in value.split(",") if item.strip()]
@@ -180,6 +193,19 @@ def _render_book_constitution(book: Dict[str, Any]) -> str:
     return "\n".join(lines).strip() + "\n"
 
 
+def _copy_prompt_templates(book_root: Path) -> None:
+    root = repo_root(Path(__file__).resolve())
+    prompt_src = root / "resources" / "prompt_templates"
+    templates_dir = book_root / "prompts" / "templates"
+    templates_dir.mkdir(parents=True, exist_ok=True)
+    for name in PROMPT_TEMPLATE_FILES:
+        shutil.copyfile(prompt_src / name, templates_dir / name)
+
+    registry_src = root / "resources" / "prompt_registry.json"
+    (book_root / "prompts").mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(registry_src, book_root / "prompts" / "registry.json")
+
+
 def init_book_workspace(
     workspace: Path,
     book_id: str,
@@ -228,6 +254,13 @@ def init_book_workspace(
             "open_threads": [],
             "recent_facts": [],
         },
+        "summary": {
+            "last_scene": [],
+            "chapter_so_far": [],
+            "story_so_far": [],
+            "key_facts_ring": [],
+            "must_stay_true": [],
+        },
         "budgets": dict(DEFAULT_BUDGETS),
         "duplication_warnings_in_row": 0,
     }
@@ -254,25 +287,7 @@ def init_book_workspace(
     (book_root / "draft" / "context" / "bible.md").write_text("", encoding="utf-8")
     (book_root / "draft" / "context" / "last_excerpt.md").write_text("", encoding="utf-8")
 
-    root = repo_root(Path(__file__).resolve())
-    prompt_src = root / "resources" / "prompt_templates"
-
-    templates_to_copy = [
-        "outline.md",
-        "plan.md",
-        "write.md",
-        "lint.md",
-        "repair.md",
-        "continuity_pack.md",
-        "style_anchor.md",
-        "system_base.md",
-        "output_contract.md",
-    ]
-    for name in templates_to_copy:
-        shutil.copyfile(prompt_src / name, book_root / "prompts" / "templates" / name)
-
-    registry_src = root / "resources" / "prompt_registry.json"
-    shutil.copyfile(registry_src, book_root / "prompts" / "registry.json")
+    _copy_prompt_templates(book_root)
 
     author_fragment = _read_text(author_fragment_path)
     base_rules = _read_text(book_root / "prompts" / "templates" / "system_base.md")
@@ -287,6 +302,47 @@ def init_book_workspace(
 
     return book_root
 
+
+
+def update_book_templates(workspace: Path, book_id: Optional[str] = None) -> List[Path]:
+    books_root = workspace / "books"
+    if book_id:
+        book_root = books_root / book_id
+        if not book_root.exists():
+            raise FileNotFoundError(f"Book workspace not found: {book_root}")
+        book_roots = [book_root]
+    else:
+        if not books_root.exists():
+            raise FileNotFoundError(f"Books folder not found: {books_root}")
+        book_roots = [path for path in books_root.iterdir() if path.is_dir()]
+
+    updated: List[Path] = []
+    for book_root in book_roots:
+        book_path = book_root / "book.json"
+        if not book_path.exists():
+            continue
+        _copy_prompt_templates(book_root)
+
+        book = json.loads(book_path.read_text(encoding="utf-8"))
+        constitution_text = _render_book_constitution(book)
+        constitution_path = book_root / "prompts" / "book_constitution.md"
+        constitution_path.write_text(constitution_text, encoding="utf-8")
+
+        author_ref = str(book.get("author_ref", "")).strip()
+        author_fragment_path = workspace / "authors" / Path(author_ref) / "system_fragment.md"
+        if not author_fragment_path.exists():
+            raise FileNotFoundError(f"Author fragment not found: {author_fragment_path}")
+        author_fragment = _read_text(author_fragment_path)
+
+        base_rules = _read_text(book_root / "prompts" / "templates" / "system_base.md")
+        output_contract = _read_text(book_root / "prompts" / "templates" / "output_contract.md")
+
+        system_path = book_root / "prompts" / "system_v1.md"
+        write_system_prompt(system_path, base_rules, constitution_text, author_fragment, output_contract)
+
+        updated.append(book_root)
+
+    return updated
 
 
 def reset_book_workspace(workspace: Path, book_id: str) -> Path:
@@ -336,6 +392,13 @@ def reset_book_workspace(workspace: Path, book_id: str) -> Path:
             "cast_present": [],
             "open_threads": [],
             "recent_facts": [],
+        },
+        "summary": {
+            "last_scene": [],
+            "chapter_so_far": [],
+            "story_so_far": [],
+            "key_facts_ring": [],
+            "must_stay_true": [],
         },
         "budgets": budgets,
         "duplication_warnings_in_row": 0,

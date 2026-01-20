@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
@@ -16,6 +16,7 @@ class ContinuityPack:
     cast_present: List[str]
     location: str
     next_action: str
+    summary: Dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "ContinuityPack":
@@ -23,6 +24,9 @@ class ContinuityPack:
         missing = [key for key in required if key not in data]
         if missing:
             raise ValueError(f"Continuity pack missing fields: {', '.join(missing)}")
+        summary = data.get("summary")
+        if not isinstance(summary, dict):
+            summary = {}
         return cls(
             scene_end_anchor=str(data.get("scene_end_anchor", "")),
             constraints=[str(item) for item in data.get("constraints", [])],
@@ -30,6 +34,7 @@ class ContinuityPack:
             cast_present=[str(item) for item in data.get("cast_present", [])],
             location=str(data.get("location", "")),
             next_action=str(data.get("next_action", "")),
+            summary=summary,
         )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -40,6 +45,7 @@ class ContinuityPack:
             "cast_present": list(self.cast_present),
             "location": self.location,
             "next_action": self.next_action,
+            "summary": self.summary,
         }
 
 

@@ -286,6 +286,43 @@ Tasks
 Definition of Done
 - State update rules and resume behavior are approved.
 
+State-Patch Summaries (Refined Plan)
+Schema changes (state/state_patch/continuity_pack/scene_meta)
+- state.summary: last_scene (array, 2-4 factual sentences), chapter_so_far (array of bullets), story_so_far (array of bullets), key_facts_ring (deduped bullet ring), must_stay_true (deduped bullet list).
+- state_patch.summary_update: last_scene (array), key_events (array), must_stay_true (array), chapter_so_far_add (array), story_so_far_add (array, optional), threads_touched (array of ids, optional).
+- continuity_pack.summary: mirror of state.summary for writer reference (facts-only; no prose).
+- scene_meta: scene_summary (2-4 sentences), key_events (3-7 bullets), must_stay_true (3-7 bullets), threads_touched (ids, optional).
+
+Prompt/template changes (write.md/repair.md/continuity_pack.md)
+- WRITE/REPAIR require STATE_PATCH.summary_update with last_scene, key_events, must_stay_true, chapter_so_far_add (and story_so_far_add only when triggered).
+- Add explicit rule: summaries are reference-only; do not recap them in prose unless scene_card explicitly calls for recap.
+- Keep "start in motion; no recap" as a hard rule; continuity pack remains facts-only scaffolding.
+- continuity_pack prompt includes summary blocks and invariants; no full prose.
+
+Merge/truncation rules (deterministic)
+- Overwrite summary.last_scene with summary_update.last_scene.
+- Append chapter_so_far_add bullets, then trim to last K bullets (default 20).
+- Maintain key_facts_ring as a deduped ring buffer from key_events + must_stay_true, cap N (default 25).
+- Merge must_stay_true as deduped bullets, cap M (default 20).
+- Apply story_so_far_add only on chapter end (or every N scenes if configured), then trim to last S bullets (default 40).
+
+Chapter boundary behavior
+- On chapter completion, derive chapter_summary bullets from that chapter's scene_meta (key_events + must_stay_true), append to story_so_far.
+- Reset chapter_so_far to empty for the next chapter.
+- Optional LLM compress rollup is off by default; only triggered when caps are exceeded or drift is detected.
+- Persist chapter summaries to a chapter_summaries artifact (JSON or MD) derived from scene_meta, not prose.
+
+Lint checks (v0 + optional v1)
+- v0 heuristic: flag contradictions between new state_patch/scene_summary and must_stay_true/key_facts_ring using keyword/polarity checks (lost vs has, destroyed vs present, dead vs alive, embedded vs physical).
+- v1 optional: LLM check that returns a list of contradictions; only run when v0 warns or drift flag is set.
+
+Tests to add
+- State patch merge/truncation (last_scene overwrite, chapter_so_far_add caps, key_facts_ring dedupe, must_stay_true caps).
+- Chapter rollup from scene_meta summaries and reset behavior.
+- Prompt contract tests for summary_update fields and no-recap rule.
+- Lint contradiction detection (v0) with targeted fixtures.
+
+
 Story 9: Writing loop implementation
 Tasks
 - Implement run loop: plan -> opening preview -> write -> lint -> repair -> commit -> advance.

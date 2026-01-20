@@ -14,3 +14,4 @@ Commands
 - book show-current: docs/help/book_show_current.md
 - book clear-current: docs/help/book_clear_current.md
 - book reset: docs/help/book_reset.md
+- book update-templates: docs/help/book_update_templates.md

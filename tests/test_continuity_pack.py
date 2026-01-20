@@ -12,6 +12,13 @@ def test_continuity_pack_roundtrip():
         "cast_present": ["CHAR_1"],
         "location": "LOC_1",
         "next_action": "Proceed",
+        "summary": {
+            "last_scene": ["Anchor."],
+            "chapter_so_far": [],
+            "story_so_far": [],
+            "key_facts_ring": [],
+            "must_stay_true": [],
+        },
     }
     text = json.dumps(payload)
     pack = parse_continuity_pack(text)

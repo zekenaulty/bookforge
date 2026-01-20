@@ -5,7 +5,7 @@ import sys
 from bookforge.author import generate_author
 from bookforge.outline import generate_outline
 from bookforge.runner import run_loop
-from bookforge.workspace import init_book_workspace, parse_genre, parse_targets, reset_book_workspace
+from bookforge.workspace import init_book_workspace, parse_genre, parse_targets, reset_book_workspace, update_book_templates
 
 
 def _init(args: argparse.Namespace) -> int:
@@ -80,6 +80,21 @@ def _run(args: argparse.Namespace) -> int:
         sys.stderr.write(f"Run failed: {exc}\n")
         return 1
     sys.stdout.write("Run completed.\n")
+    return 0
+
+
+def _book_update_templates(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        updated = update_book_templates(workspace=workspace, book_id=args.book)
+    except Exception as exc:
+        sys.stderr.write(f"Update templates failed: {exc}\n")
+        return 1
+    if not updated:
+        sys.stdout.write("No books updated.\n")
+        return 0
+    updated_paths = "\n".join([str(path) for path in updated])
+    sys.stdout.write(f"Templates updated for:\n{updated_paths}\n")
     return 0
 
 
@@ -195,6 +210,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Output format.",
     )
     book_show_current.set_defaults(func=_not_implemented)
+
+    book_update_templates = book_sub.add_parser("update-templates", help="Update prompt templates for books.")
+    book_update_templates.add_argument("--book", help="Optional book id; default updates all books.")
+    book_update_templates.set_defaults(func=_book_update_templates)
 
     book_reset = book_sub.add_parser("reset", help="Reset book draft state.")
     book_reset.add_argument("--book", required=True, help="Book id.")

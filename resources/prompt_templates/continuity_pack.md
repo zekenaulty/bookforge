@@ -7,11 +7,13 @@ Create a continuity pack JSON object with these fields:
 - cast_present: list of character names present next.
 - location: location id or name.
 - next_action: the implied next action.
+- summary: echo state.summary (facts-only arrays; do not paraphrase).
 
 Return ONLY JSON.
 
 Rules:
 - Use only characters listed in scene_card.cast_present. Do not introduce new names.
+- summary must match state.summary and remain facts-only; do not add prose.
 - If scene_card.cast_present is empty, cast_present must be an empty array.
 - open_threads must be a subset of thread_registry thread_id values.
 - If scene_card.thread_ids is present, prefer those thread ids.
@@ -28,6 +30,9 @@ Thread registry:
 
 State:
 {{state}}
+
+Summary (facts-only):
+{{summary}}
 
 Recent facts:
 {{recent_facts}}

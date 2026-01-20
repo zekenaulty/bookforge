@@ -34,6 +34,11 @@ DEFAULT_REPAIR_MAX_TOKENS = 36864
 DEFAULT_CONTINUITY_MAX_TOKENS = 36864
 DEFAULT_STYLE_ANCHOR_MAX_TOKENS = 8192
 
+SUMMARY_CHAPTER_SO_FAR_CAP = 20
+SUMMARY_KEY_FACTS_CAP = 25
+SUMMARY_MUST_STAY_TRUE_CAP = 20
+SUMMARY_STORY_SO_FAR_CAP = 40
+
 
 def _int_env(name: str, default: int) -> int:
     return read_int_env(name, default)
@@ -344,6 +349,200 @@ def _normalize_continuity_pack(
     return normalized
 
 
+def _summary_list(value: Any) -> List[str]:
+    if isinstance(value, list):
+        items = value
+    elif isinstance(value, str):
+        items = [value]
+    else:
+        items = []
+    cleaned: List[str] = []
+    for item in items:
+        text = str(item).strip()
+        if text:
+            cleaned.append(text)
+    return cleaned
+
+
+def _dedupe_preserve(items: List[str]) -> List[str]:
+    seen = set()
+    result: List[str] = []
+    for item in items:
+        key = item.strip().lower()
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        result.append(item)
+    return result
+
+
+def _summary_from_state(state: Dict[str, Any]) -> Dict[str, List[str]]:
+    summary = state.get("summary", {})
+    if not isinstance(summary, dict):
+        summary = {}
+    return {
+        "last_scene": _summary_list(summary.get("last_scene")),
+        "chapter_so_far": _summary_list(summary.get("chapter_so_far")),
+        "story_so_far": _summary_list(summary.get("story_so_far")),
+        "key_facts_ring": _summary_list(summary.get("key_facts_ring")),
+        "must_stay_true": _summary_list(summary.get("must_stay_true")),
+    }
+
+
+def _merge_summary_update(state: Dict[str, Any], summary_update: Dict[str, Any]) -> None:
+    summary = _summary_from_state(state)
+
+    last_scene = _summary_list(summary_update.get("last_scene"))
+    if last_scene:
+        summary["last_scene"] = last_scene
+
+    chapter_add = _summary_list(summary_update.get("chapter_so_far_add"))
+    if chapter_add:
+        summary["chapter_so_far"] = (summary.get("chapter_so_far", []) + chapter_add)[-SUMMARY_CHAPTER_SO_FAR_CAP:]
+
+    story_add = _summary_list(summary_update.get("story_so_far_add"))
+    if story_add:
+        summary["story_so_far"] = (summary.get("story_so_far", []) + story_add)[-SUMMARY_STORY_SO_FAR_CAP:]
+
+    key_events = _summary_list(summary_update.get("key_events"))
+    must_stay_true = _summary_list(summary_update.get("must_stay_true"))
+    if key_events or must_stay_true:
+        ring = summary.get("key_facts_ring", []) + key_events + must_stay_true
+        summary["key_facts_ring"] = _dedupe_preserve(ring)[-SUMMARY_KEY_FACTS_CAP:]
+
+    if must_stay_true:
+        merged_invariants = summary.get("must_stay_true", []) + must_stay_true
+        summary["must_stay_true"] = _dedupe_preserve(merged_invariants)[-SUMMARY_MUST_STAY_TRUE_CAP:]
+
+    state["summary"] = summary
+
+
+def _contains_any(text: str, terms: List[str]) -> bool:
+    for term in terms:
+        if not term:
+            continue
+        if " " in term:
+            if term in text:
+                return True
+        else:
+            if re.search(r"\b" + re.escape(term) + r"\b", text):
+                return True
+    return False
+
+
+def _heuristic_invariant_issues(
+    prose: str,
+    summary_update: Dict[str, Any],
+    invariants: List[str],
+) -> List[Dict[str, Any]]:
+    if not invariants:
+        return []
+    observed = prose.lower()
+    summary_bits: List[str] = []
+    for key in ("last_scene", "key_events", "must_stay_true", "chapter_so_far_add", "story_so_far_add"):
+        items = summary_update.get(key)
+        if isinstance(items, list):
+            summary_bits.extend([str(item) for item in items if str(item).strip()])
+    if summary_bits:
+        observed += " " + " ".join([item.lower() for item in summary_bits])
+
+    objects = ["shard", "blade", "sword", "knife", "dagger", "map", "canister", "oath", "mark"]
+    presence = ["present", "here", "carried", "carry", "carrying", "held", "holds", "has", "in his pack", "in his satchel", "on his person"]
+    absence = ["gone", "missing", "lost", "destroyed", "shattered", "dissolved", "vanished", "consumed", "erased"]
+    physical = ["physical", "solid", "tangible", "carryable"]
+    embedded = ["embedded", "bound", "fused", "absorbed", "within him", "in his body", "in his chest"]
+    alive = ["alive", "living", "breathing"]
+    dead = ["dead", "killed", "slain", "corpse"]
+
+    issues: List[Dict[str, Any]] = []
+    for invariant in invariants:
+        inv_text = str(invariant).strip().lower()
+        if not inv_text:
+            continue
+        relevant_objects = [obj for obj in objects if obj in inv_text]
+        if not relevant_objects:
+            continue
+        for obj in relevant_objects:
+            if obj not in observed:
+                continue
+            if _contains_any(inv_text, presence) and _contains_any(observed, absence):
+                issues.append({
+                    "code": "invariant_contradiction",
+                    "message": f"Possible contradiction for '{obj}': invariant suggests present, prose suggests absent.",
+                    "severity": "error",
+                })
+                continue
+            if _contains_any(inv_text, absence) and _contains_any(observed, presence):
+                issues.append({
+                    "code": "invariant_contradiction",
+                    "message": f"Possible contradiction for '{obj}': invariant suggests absent, prose suggests present.",
+                    "severity": "error",
+                })
+                continue
+            if _contains_any(inv_text, physical) and _contains_any(observed, embedded):
+                issues.append({
+                    "code": "invariant_contradiction",
+                    "message": f"Possible contradiction for '{obj}': invariant suggests physical, prose suggests embedded.",
+                    "severity": "error",
+                })
+                continue
+            if _contains_any(inv_text, embedded) and _contains_any(observed, physical):
+                issues.append({
+                    "code": "invariant_contradiction",
+                    "message": f"Possible contradiction for '{obj}': invariant suggests embedded, prose suggests physical.",
+                    "severity": "error",
+                })
+                continue
+            if _contains_any(inv_text, alive) and _contains_any(observed, dead):
+                issues.append({
+                    "code": "invariant_contradiction",
+                    "message": f"Possible contradiction for '{obj}': invariant suggests alive, prose suggests dead.",
+                    "severity": "error",
+                })
+                continue
+            if _contains_any(inv_text, dead) and _contains_any(observed, alive):
+                issues.append({
+                    "code": "invariant_contradiction",
+                    "message": f"Possible contradiction for '{obj}': invariant suggests dead, prose suggests alive.",
+                    "severity": "error",
+                })
+                continue
+    return issues
+
+
+def _rollup_chapter_summary(book_root: Path, state: Dict[str, Any], chapter_num: int) -> None:
+    chapter_dir = book_root / "draft" / "chapters" / f"ch_{chapter_num:03d}"
+    if not chapter_dir.exists():
+        return
+
+    key_events: List[str] = []
+    must_stay_true: List[str] = []
+    for meta_path in sorted(chapter_dir.glob("scene_*.meta.json")):
+        try:
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        key_events.extend(_summary_list(meta.get("key_events")))
+        must_stay_true.extend(_summary_list(meta.get("must_stay_true")))
+
+    summary = _summary_from_state(state)
+    chapter_summary = _dedupe_preserve(key_events + must_stay_true)
+    if chapter_summary:
+        summary["story_so_far"] = (summary.get("story_so_far", []) + chapter_summary)[-SUMMARY_STORY_SO_FAR_CAP:]
+    summary["chapter_so_far"] = []
+    state["summary"] = summary
+
+    summaries_dir = book_root / "draft" / "context" / "chapter_summaries"
+    summaries_dir.mkdir(parents=True, exist_ok=True)
+    summary_path = summaries_dir / f"ch_{chapter_num:03d}.json"
+    payload = {
+        "chapter": chapter_num,
+        "key_events": _dedupe_preserve(key_events),
+        "must_stay_true": _dedupe_preserve(must_stay_true),
+    }
+    summary_path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
+
+
 def _cursor_beyond_target(
     chapter: int,
     scene: int,
@@ -527,6 +726,7 @@ def _generate_continuity_pack(
         template,
         {
             "state": state,
+            "summary": _summary_from_state(state),
             "recent_facts": recent_facts,
             "scene_card": scene_card,
             "character_registry": character_registry,
@@ -551,6 +751,7 @@ def _generate_continuity_pack(
 
     data = _extract_json(response.text)
     data = _normalize_continuity_pack(data, scene_card, thread_registry)
+    data["summary"] = _summary_from_state(state)
     pack = ContinuityPack.from_dict(data)
     save_continuity_pack(continuity_pack_path(book_root), pack)
     return pack.to_dict()
@@ -615,6 +816,7 @@ def _lint_scene(
     system_path: Path,
     prose: str,
     state: Dict[str, Any],
+    patch: Dict[str, Any],
     invariants: List[str],
     client: LLMClient,
     model: str,
@@ -625,6 +827,7 @@ def _lint_scene(
         {
             "prose": prose,
             "state": state,
+            "summary": _summary_from_state(state),
             "invariants": invariants,
         },
     )
@@ -646,6 +849,14 @@ def _lint_scene(
 
     report = _extract_json(response.text)
     report = _normalize_lint_report(report)
+    summary_update = patch.get("summary_update") if isinstance(patch, dict) else {}
+    if not isinstance(summary_update, dict):
+        summary_update = {}
+    heuristic_issues = _heuristic_invariant_issues(prose, summary_update, invariants)
+    if heuristic_issues:
+        report["issues"] = list(report.get("issues", [])) + heuristic_issues
+        report["status"] = "fail"
+        report.setdefault("mode", "heuristic")
     validate_json(report, "lint_report")
     return report
 
@@ -703,7 +914,7 @@ def _repair_scene(
     return prose, patch
 
 
-def _apply_state_patch(state: Dict[str, Any], patch: Dict[str, Any]) -> Dict[str, Any]:
+def _apply_state_patch(state: Dict[str, Any], patch: Dict[str, Any], chapter_end: bool = False) -> Dict[str, Any]:
     world_updates = patch.get("world_updates")
     if world_updates is None and isinstance(patch.get("world"), dict):
         world_updates = patch.get("world")
@@ -718,6 +929,16 @@ def _apply_state_patch(state: Dict[str, Any], patch: Dict[str, Any]) -> Dict[str
         world = state.get("world", {}) if isinstance(state.get("world", {}), dict) else {}
         world["open_threads"] = thread_updates
         state["world"] = world
+
+    summary_update = patch.get("summary_update")
+    if isinstance(summary_update, dict):
+        if not chapter_end and "story_so_far_add" in summary_update:
+            summary_update = dict(summary_update)
+            summary_update.pop("story_so_far_add", None)
+        _merge_summary_update(state, summary_update)
+    else:
+        if "summary" not in state:
+            state["summary"] = _summary_from_state(state)
 
     delta = patch.get("duplication_warnings_in_row_delta")
     if isinstance(delta, int):
@@ -769,6 +990,13 @@ def _write_scene_files(
     meta = dict(scene_card)
     meta["prose_path"] = prose_path.relative_to(book_root).as_posix()
     meta["state_patch"] = patch
+    summary_update = patch.get("summary_update") if isinstance(patch, dict) else {}
+    if not isinstance(summary_update, dict):
+        summary_update = {}
+    meta["scene_summary"] = _summary_list(summary_update.get("last_scene"))
+    meta["key_events"] = _summary_list(summary_update.get("key_events"))
+    meta["must_stay_true"] = _summary_list(summary_update.get("must_stay_true"))
+    meta["threads_touched"] = _summary_list(summary_update.get("threads_touched"))
     meta["lint_report"] = lint_report
     meta["write_attempts"] = write_attempts
     meta["updated_at"] = _now_iso()
@@ -880,7 +1108,11 @@ def run_loop(
             planner_model,
         )
 
-        invariants = book.get("invariants", []) if isinstance(book.get("invariants", []), list) else []
+        base_invariants = book.get("invariants", []) if isinstance(book.get("invariants", []), list) else []
+        summary = _summary_from_state(state)
+        invariants = list(base_invariants)
+        invariants += summary.get("must_stay_true", [])
+        invariants += summary.get("key_facts_ring", [])
 
         prose, patch = _write_scene(
             workspace,
@@ -907,6 +1139,7 @@ def run_loop(
                 system_path,
                 prose,
                 state,
+                patch,
                 invariants,
                 linter_client,
                 linter_model,
@@ -934,6 +1167,7 @@ def run_loop(
                 system_path,
                 prose,
                 state,
+                patch,
                 invariants,
                 linter_client,
                 linter_model,
@@ -941,10 +1175,12 @@ def run_loop(
             if lint_report.get("status") == "fail" and lint_mode == "strict":
                 raise ValueError("Lint failed after repair; see lint logs for details.")
 
-        state = _apply_state_patch(state, patch)
-
         chapter_num = int(scene_card.get("chapter", chapter))
         scene_num = int(scene_card.get("scene", scene))
+        chapter_total = scene_counts.get(chapter_num)
+        chapter_end = isinstance(chapter_total, int) and chapter_total > 0 and scene_num >= chapter_total
+
+        state = _apply_state_patch(state, patch, chapter_end=chapter_end)
 
         cursor_override = patch.get("cursor_advance") if isinstance(patch.get("cursor_advance"), dict) else None
         if cursor_override:
@@ -971,6 +1207,9 @@ def run_loop(
         )
 
         _update_bible(book_root, patch)
+
+        if chapter_end:
+            _rollup_chapter_summary(book_root, state, chapter_num)
 
         state["cursor"] = {"chapter": next_chapter, "scene": next_scene}
         if completed:
