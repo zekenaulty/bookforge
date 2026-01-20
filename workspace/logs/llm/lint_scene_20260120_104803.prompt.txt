@@ -1,0 +1,270 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: The Starwrought Oath
+Book ID: starwrought_b1_v1
+Author Ref: maeron-kestrel/v1
+Genre: fantasy, epic
+Series ID: starwrought
+Series Ref: series/starwrought
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 1900
+- chapters: 24
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are Maeron Kestrel. Your writing is characterized by a tight, limited third-person perspective that never breaks into omniscient narration. You must maintain strict continuity, ensuring that characters utilize their full range of established skills and knowledge. Do not use 'As you know' dialogue or provide summaries of previous events. When a scene begins, drop the reader directly into the character's current sensory experience. Avoid clichés in descriptions; instead of 'cold as ice,' describe the 'brittle, biting snap of air that makes the lungs ache.' Ensure all plot payoffs are seeded with subtle clues in earlier movements. Magic and high-fantasy elements must have clear costs and logical consistency.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+
+
+USER:
+
+# LINT
+
+Check the scene for continuity, invariant violations, and duplication.
+Flag invariant contradictions against must_stay_true/key facts.
+Return ONLY JSON matching the lint_report schema.
+
+Required keys:
+- schema_version ("1.0")
+- status ("pass" or "fail")
+- issues (array of objects)
+
+Each issue object must include:
+- code
+- message
+Optional:
+- severity
+
+If there are no issues, return:
+{
+  "schema_version": "1.0",
+  "status": "pass",
+  "issues": []
+}
+
+If there are issues, return:
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {"code": "continuity", "message": "Example issue", "severity": "error"}
+  ]
+}
+
+Scene:
+The spiral staircase of the High Spire was a throat of cold stone, and Kaelen was being swallowed by it. Every lungful of air tasted of pulverized limestone and the sharp, metallic tang of ozone. His boots skidded on the crystalline dust—the remains of the outer wards, sloughing off the walls like dead skin. The Great Seal's groan still vibrated in his teeth, a low-frequency tectonic shiver that suggested the mountain itself was tired of holding the sky.
+
+He reached the upper gallery, a circular balcony that hung over the precipice of the Silver Valley. The wind here didn't just blow; it bit. It was a brittle, snapping thing that made his eyes water and his throat ache with the phantom heat of a forge. He leaned against a pillar of star-glass, his hand trembling. Beneath the leather of his left wrist, the Starwrought Oath—that silver-white thread woven directly into his marrow—pulsed with a frantic, uneven rhythm. It was no longer the steady hum of a sentinel’s duty; it was the staccato panic of a bird trapped in a cage.
+
+He looked up, and the breath he had been struggling to catch died in his chest.
+
+The stars were not supposed to be heavy. In the texts of the High Spire, they were described as the "Weightless Watchers," points of infinite distance and absolute purity. But tonight, the sky looked like a sagging canopy, weighted down by something immense and unseen. The constellations were distorted, the familiar lines of the Weaver and the Spear-Bearer stretched and warped as if viewed through a flawed lens.
+
+And then, the tear happened.
+
+It wasn't a sound at first. It was a visual rupture, a jagged line of absolute blackness that opened between the Spear-Bearer’s shoulder and the horizon. From that void, a spark emerged. It began as a brilliant, blinding white—the pure, cold light of a celestial body. But as it descended, gravity seemed to catch it, and the purity curdled.
+
+Kaelen gripped the railing, his knuckles turning the color of the crystalline dust. The white light bled into a bruised, sickly violet. It wasn't the purple of a sunset or the soft hue of a lilac; it was the color of a deep, ancient bruise, a shade that felt like it was radiating heat and rot simultaneously. 
+
+"Steady," Kaelen whispered, though whether to himself or the failing mountain, he didn't know. The Oath-thread in his wrist tightened, the silver wire digging into his radius bone. The coldness of the magic began to seep out from the thread, turning his arm into a pillar of frost. He could feel the frost-burn starting in the back of his throat, the familiar price of the Spire’s power. 
+
+The star was falling too fast. It didn't streak across the sky like a meteor; it fell like a stone dropped into a well. The violet trail it left behind didn't dissipate. It hung in the air, a glowing scar that began to pulse. 
+
+The silence of the High Spire, usually so profound it felt like a physical weight, was suddenly replaced by a sound that defied categorization. It was a high-pitched, crystalline shriek, the sound of a thousand glass flutes being shattered at once. It wasn't coming from the air; it was coming from the stone beneath his feet. The Spire was screaming in sympathy with the dying star.
+
+Kaelen watched, mesmerized and horrified, as the violet light expanded. The star was no longer a point of light; it was a jagged, irregular mass of burning glass. He could see the internal architecture of the thing—fractal geometries that shifted and collapsed as it tore through the atmosphere. It looked like a city made of lightning, falling toward the earth.
+
+He tried to summon the warding-light, to cast a shield that might protect the lower valley, but as he reached for the Oath, the thread in his wrist turned the color of tarnished pewter. It went limp, the energy draining out of it as if the star above were a vacuum, drinking the Spire’s essence. The cold in his arm vanished, replaced by a sudden, searing heat that made him cry out and pull back his sleeve. The thread was glowing with the same sickly violet as the falling star.
+
+"Varkas!" he shouted, his voice lost in the rising wind. "Commander!"
+
+There was no answer from the archives below. Only the sound of the wind, which had turned into a rhythmic thrumming, like the heartbeat of a giant.
+
+The star was seconds from impact. It had cleared the peaks of the Iron Range, casting long, distorted shadows across the Silver Valley. The forests below, usually a deep, lush green, were illuminated in a ghostly, ultraviolet glare. The river that snaked through the valley floor looked like a vein of liquid mercury.
+
+Kaelen squeezed his eyes shut for a heartbeat, but the light was so intense it burned through his eyelids. He forced himself to look. He was a Watchman of the High Spire; he was the last witness to the Oath. If the world was going to end, he would not die with his eyes closed.
+
+The star hit the valley floor three miles from the base of the Spire.
+
+The impact was silent for the first second. Kaelen saw the earth simply... cease to be earth. Where the star landed, the soil and rock didn't explode; they liquified, turning into a fountain of white-hot glass that sprayed upward in a perfect, terrifying crown. The violet light intensified until it was the only thing in existence, a pillar of radiation that seemed to connect the earth to the void above.
+
+Then, the sound arrived.
+
+It wasn't a bang. It was a roar that had the weight of a mountain. It hit the High Spire like a physical fist. Kaelen was thrown backward, his head slamming into the star-glass pillar. The glass, designed to withstand the pressure of the heavens, shattered. A thousand shards, each as sharp as a razor, rained down on him.
+
+But he didn't feel the cuts. He felt the shockwave.
+
+It traveled through the air, but more importantly, it traveled through the *Oath*. The silver thread in his marrow didn't just vibrate; it buckled. He felt a snap—not of bone, but of something more fundamental. A metaphysical fracture that resonated from his wrist, up his arm, and directly into his chest. 
+
+His lungs, already scorched by the cold magic of the Spire, felt as if they had been filled with molten lead. He gasped, but there was no oxygen to be had, only the taste of burning minerals and the smell of something ancient and long-dead.
+
+The Spire tilted.
+
+Kaelen gripped the edge of the floor as the balcony groaned and began to sag toward the abyss. Below him, the Silver Valley was no longer a valley. It was a crater of roiling, violet-tinged smoke, at the center of which pulsed a rhythmic, alien beat. *Thump. Thump. Thump.*
+
+It was the heartbeat of the shard.
+
+Kaelen pulled himself toward the inner doorway, his fingers bleeding where they caught on the broken glass. The violet light was fading now, replaced by a thick, heavy darkness that seemed to be crawling up the sides of the mountain. The shadows weren't just the absence of light; they were tangible, like oil slicks moving against the wind.
+
+He looked back one last time at the impact site. The crown of glass had solidified, forming a jagged, translucent forest of razor-sharp pillars. And in the center, something was moving. Not a person, not an animal, but a shape of shadow and starlight, emerging from the wreckage of the sky.
+
+The Oath in his wrist gave one final, dying pulse of silver, then went dark. 
+
+Kaelen didn't wait for the Spire to collapse. He turned and plunged into the darkness of the interior, his mind a chaotic blur of failure and fear. The wards were gone. The star had fallen. And the Oath—the thing that defined his very existence—was broken.
+
+As he ran, the only sound he could hear was the rhythmic, alien thrumming from the valley floor, calling to the iron in his blood.
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 2
+  },
+  "duplication_warnings_in_row": 0,
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_002.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Kaelen discovers the High Spire's wards are failing beyond repair and suspects an external celestial threat."
+    ],
+    "key_facts_ring": [
+      "Kaelen attempted to reinforce a failing iron ward-ring, resulting in a painful magical backlash.",
+      "The Star-glass of the West Gate was found to be 'feverish' and heavily fractured.",
+      "Kaelen's tuning fork was destroyed by the intense discordant energy of the Spire.",
+      "Kaelen realized the isolation of his post has become a deadly liability as the wards began to catastrophically fail.",
+      "Kaelen's magic is tied to a physical 'Starwrought Oath' that manifests as a thread in his wrist.",
+      "Magic use has a clear physical cost, including coldness, scorched lungs, and metallic scents.",
+      "The High Spire is isolated and the wards are failing at an accelerated, unnatural rate.",
+      "The stars are appearing 'heavy' and unstable in the sky."
+    ],
+    "last_scene": [
+      "Kaelen performed a desperate inspection of the High Spire's crumbling defenses as the sun set.",
+      "He discovered that the wards are not merely decaying but are being actively consumed by an external celestial pressure.",
+      "The scene ended with a catastrophic groan from the Great Seal and Kaelen fleeing toward the archives to find Commander Varkas."
+    ],
+    "must_stay_true": [
+      "Kaelen's magic is tied to a physical 'Starwrought Oath' that manifests as a thread in his wrist.",
+      "Magic use has a clear physical cost, including coldness, scorched lungs, and metallic scents.",
+      "The High Spire is isolated and the wards are failing at an accelerated, unnatural rate.",
+      "The stars are appearing 'heavy' and unstable in the sky."
+    ],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_kaelen"
+    ],
+    "location": "High Spire battlements and West Gate",
+    "open_threads": [
+      "THREAD_oath_binding"
+    ],
+    "recent_facts": [
+      "Kaelen is experiencing significant physical and magical strain from the failing wards.",
+      "The High Spire's wards are sloughing off as crystalline dust and emitting violet sparks.",
+      "The Starwrought Oath in Kaelen's marrow is thinning and turning the color of tarnished pewter.",
+      "A resonance-tuning fork charred and shrieked when tested against the Spire's stone, indicating the wards are being consumed by an external force.",
+      "Commander Varkas has been missing in the lower archives for three days."
+    ],
+    "time": {}
+  }
+}
+
+Summary (facts-only):
+{
+  "chapter_so_far": [
+    "Kaelen discovers the High Spire's wards are failing beyond repair and suspects an external celestial threat."
+  ],
+  "key_facts_ring": [
+    "Kaelen attempted to reinforce a failing iron ward-ring, resulting in a painful magical backlash.",
+    "The Star-glass of the West Gate was found to be 'feverish' and heavily fractured.",
+    "Kaelen's tuning fork was destroyed by the intense discordant energy of the Spire.",
+    "Kaelen realized the isolation of his post has become a deadly liability as the wards began to catastrophically fail.",
+    "Kaelen's magic is tied to a physical 'Starwrought Oath' that manifests as a thread in his wrist.",
+    "Magic use has a clear physical cost, including coldness, scorched lungs, and metallic scents.",
+    "The High Spire is isolated and the wards are failing at an accelerated, unnatural rate.",
+    "The stars are appearing 'heavy' and unstable in the sky."
+  ],
+  "last_scene": [
+    "Kaelen performed a desperate inspection of the High Spire's crumbling defenses as the sun set.",
+    "He discovered that the wards are not merely decaying but are being actively consumed by an external celestial pressure.",
+    "The scene ended with a catastrophic groan from the Great Seal and Kaelen fleeing toward the archives to find Commander Varkas."
+  ],
+  "must_stay_true": [
+    "Kaelen's magic is tied to a physical 'Starwrought Oath' that manifests as a thread in his wrist.",
+    "Magic use has a clear physical cost, including coldness, scorched lungs, and metallic scents.",
+    "The High Spire is isolated and the wards are failing at an accelerated, unnatural rate.",
+    "The stars are appearing 'heavy' and unstable in the sky."
+  ],
+  "story_so_far": []
+}
+
+Invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "Kaelen's magic is tied to a physical 'Starwrought Oath' that manifests as a thread in his wrist.",
+  "Magic use has a clear physical cost, including coldness, scorched lungs, and metallic scents.",
+  "The High Spire is isolated and the wards are failing at an accelerated, unnatural rate.",
+  "The stars are appearing 'heavy' and unstable in the sky.",
+  "Kaelen attempted to reinforce a failing iron ward-ring, resulting in a painful magical backlash.",
+  "The Star-glass of the West Gate was found to be 'feverish' and heavily fractured.",
+  "Kaelen's tuning fork was destroyed by the intense discordant energy of the Spire.",
+  "Kaelen realized the isolation of his post has become a deadly liability as the wards began to catastrophically fail.",
+  "Kaelen's magic is tied to a physical 'Starwrought Oath' that manifests as a thread in his wrist.",
+  "Magic use has a clear physical cost, including coldness, scorched lungs, and metallic scents.",
+  "The High Spire is isolated and the wards are failing at an accelerated, unnatural rate.",
+  "The stars are appearing 'heavy' and unstable in the sky."
+]

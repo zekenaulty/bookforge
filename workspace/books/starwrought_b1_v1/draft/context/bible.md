@@ -1,0 +1,29 @@
+- Kaelen is experiencing significant physical and magical strain from the failing wards.
+- The High Spire's wards are sloughing off as crystalline dust and emitting violet sparks.
+- The Starwrought Oath in Kaelen's marrow is thinning and turning the color of tarnished pewter.
+- A resonance-tuning fork charred and shrieked when tested against the Spire's stone, indicating the wards are being consumed by an external force.
+- Commander Varkas has been missing in the lower archives for three days.
+- A corrupted star has impacted the Silver Valley, turning the earth into a crown of glass.
+- The Starwrought Oath in Kaelen's marrow has physically fractured and turned dark.
+- The High Spire is structurally failing and tilting after the impact shockwave.
+- Shadow-forms are emerging from the impact site in the valley.
+- Commander Varkas remains missing; the archives are sealed by void-frost.
+- Kaelen has reached the center of the starfall crater in the Silver Valley.
+- The Silver Valley has been transformed into a crown of razor-sharp solidified glass.
+- The Starwrought Oath is a physical pewter filament in Kaelen's marrow that has fractured into dark splinters.
+- Kaelen has secured the pulsing star-shard, which is now bound to his life force.
+- Shadow-forms are closing in on Kaelen's position at the impact site.
+- Kaelen survived the first skirmish with shadow-forms by discharging a massive wave of fractured Oath-magic.
+- The pewter filament in Kaelen's radius bone is severely depleted and physically damaged.
+- Kaelen has successfully ascended from the crater floor to the rim.
+- The star-shard remains in Kaelen's possession, its pulse now stabilized but still active.
+- Kaelen has successfully bound the star-shard to his physical Starwrought Oath.
+- The pewter filament in Kaelen's radius bone has integrated the shard's necrotic pulse.
+- Kaelen experienced a vision of a cosmic beast consuming a dying galaxy upon touching the shard.
+- Kaelen's heartbeat is now synchronized with the shard's 'thump-hiss' resonance.
+- The frost-burn on Kaelen's right arm has been partially replaced by black, starwrought scarring.
+- Kaelen found Commander Varkas physically transformed and corrupted by star-glass.
+- Varkas claims the Starwrought Oath is a lie and the Order was a cage.
+- The High Spire is in the final stages of structural failure and tilting heavily.
+- Kaelen's physical pewter Oath-filament is reacting violently to Varkas's presence.
+- The star-shard remains in Kaelen's satchel, though its resonance is synchronized with his heart.
