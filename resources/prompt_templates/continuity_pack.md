@@ -14,6 +14,7 @@ Return ONLY JSON.
 Rules:
 - Use only characters listed in scene_card.cast_present. Do not introduce new names.
 - summary must match state.summary and remain facts-only; do not add prose.
+- constraints must include the highest-priority invariants from summary.must_stay_true and summary.key_facts_ring (copy exact strings when possible).
 - If scene_card.cast_present is empty, cast_present must be an empty array.
 - open_threads must be a subset of thread_registry thread_id values.
 - If scene_card.thread_ids is present, prefer those thread ids.

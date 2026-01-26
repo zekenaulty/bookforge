@@ -6,6 +6,11 @@ Write the scene described by the scene card.
 - Summaries are reference-only; do not recap them in prose unless scene_card explicitly requires recap.
 - Use the continuity pack and state for continuity.
 - Use character_registry to keep names consistent in prose.
+- Timeline Lock: only depict events explicitly listed in the current Scene Card. Do not depict, imply, or resolve later-scene milestones (acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+- State primacy: state invariants and summary facts are binding; do not contradict them.
+- Milestone uniqueness: if a milestone is marked DONE in must_stay_true, do not depict it again. If marked NOT_YET, do not depict it now.
+- Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+- If a required event is not in the Scene Card, do not perform it.
 - Return prose plus a state_patch JSON block.
 
 STATE_PATCH rules:
@@ -18,6 +23,12 @@ STATE_PATCH rules:
 - Include story_so_far_add only at chapter end (or when scene_card explicitly requests).
 - Use threads_touched only if you can reference thread ids from scene_card.thread_ids.
 - Use cursor_advance only if you need to override the default cursor.
+- must_stay_true must include a milestone ledger and invariants using standard phrasing, e.g.:
+  - milestone: shard_bind = DONE/NOT_YET
+  - milestone: maps_acquired = DONE/NOT_YET
+  - inventory: longsword (carried) / short-blade (carried)
+  - injury: right forearm scar / left arm filament
+  - ownership: shard (carried) / shard (bound but physical)
 
 Scene card:
 {{scene_card}}
@@ -37,7 +48,13 @@ Style anchor:
 State:
 {{state}}
 
-Output:
+Output (required, no code fences):
+COMPLIANCE:
+Scene ID: <scene_card.scene_id>
+Allowed events: <short list from Scene Card>
+Forbidden milestones: <from must_stay_true>
+Current arm-side / inventory facts: <from must_stay_true>
+
 PROSE:
 <scene prose>
 

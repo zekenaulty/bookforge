@@ -191,12 +191,25 @@ def _extract_json(text: str) -> Dict[str, Any]:
     return data
 
 
+def _strip_compliance_block(text: str) -> str:
+    if not re.match(r"^COMPLIANCE\s*:", text.strip(), flags=re.IGNORECASE):
+        return text
+    match = re.search(r"\bPROSE\s*:\s*", text, re.IGNORECASE)
+    if match:
+        return text[match.end():].strip()
+    parts = re.split(r"\n\s*\n", text, maxsplit=1)
+    if len(parts) > 1:
+        return parts[1].strip()
+    return ""
+
+
 def _extract_prose_and_patch(text: str) -> Tuple[str, Dict[str, Any]]:
     match = re.search(r"STATE\s*_?PATCH\s*:\s*", text, re.IGNORECASE)
     if not match:
         return _extract_prose_and_patch_fallback(text)
     prose_block = text[:match.start()].strip()
     patch_block = text[match.end():].strip()
+    prose_block = _strip_compliance_block(prose_block)
     prose = re.sub(r"^PROSE\s*:\s*", "", prose_block, flags=re.IGNORECASE).strip()
     if not prose:
         prose = prose_block.strip()
@@ -212,6 +225,7 @@ def _extract_prose_and_patch_fallback(text: str) -> Tuple[str, Dict[str, Any]]:
         match = fence_matches[-1]
         patch_block = match.group(1).strip()
         prose_block = text[:match.start()].strip()
+        prose_block = _strip_compliance_block(prose_block)
         prose = re.sub(r"^PROSE\s*:\s*", "", prose_block, flags=re.IGNORECASE).strip()
         if not prose:
             prose = prose_block.strip()
@@ -224,6 +238,7 @@ def _extract_prose_and_patch_fallback(text: str) -> Tuple[str, Dict[str, Any]]:
     if match:
         patch_block = match.group(1).strip()
         prose_block = text[:match.start()].strip()
+        prose_block = _strip_compliance_block(prose_block)
         prose = re.sub(r"^PROSE\s*:\s*", "", prose_block, flags=re.IGNORECASE).strip()
         if not prose:
             prose = prose_block.strip()
@@ -458,7 +473,8 @@ def _heuristic_invariant_issues(
 ) -> List[Dict[str, Any]]:
     if not invariants:
         return []
-    observed = prose.lower()
+    prose_lower = prose.lower()
+    observed = prose_lower
     summary_bits: List[str] = []
     for key in ("last_scene", "key_events", "must_stay_true", "chapter_so_far_add", "story_so_far_add"):
         items = summary_update.get(key)
@@ -528,6 +544,98 @@ def _heuristic_invariant_issues(
                     "severity": "error",
                 })
                 continue
+
+    milestone_patterns = {
+        "shard_bind": [
+            r"\bbind(?:s|ing|ed)?\b.{0,40}\bshard\b",
+            r"\bshard\b.{0,40}\bbind(?:s|ing|ed)?\b",
+            r"\boath\b.{0,40}\bfilament\b",
+        ],
+        "maps_acquired": [
+            r"\bmap(?:s)?\b.{0,40}\b(acquire|acquired|retrieve|retrieved|unfurl|unfurled|take|took|get|got)\b",
+            r"\b(acquire|retriev|unfurl|take|get)\w*\b.{0,40}\bmap(?:s)?\b",
+            r"\bchart(?:s)?\b",
+            r"\bstar[- ]?map\b",
+        ],
+        "shadow_form_first": [
+            r"\bshadow[- ]?form\b",
+            r"\bshadow\b.{0,20}\bforms\b",
+        ],
+    }
+
+    milestones: List[tuple[str, str]] = []
+    for invariant in invariants:
+        match = re.search(r"milestone\s*:\s*([a-z0-9_\- ]+)\s*=\s*(done|not_yet)", str(invariant), re.IGNORECASE)
+        if not match:
+            continue
+        key = match.group(1).strip().lower().replace("-", "_").replace(" ", "_")
+        status = match.group(2).upper()
+        if key:
+            milestones.append((key, status))
+
+    for key, status in milestones:
+        patterns = milestone_patterns.get(key)
+        if not patterns:
+            token = key.replace("_", " ")
+            if token:
+                patterns = [r"\b" + re.escape(token) + r"\b"]
+        hit = False
+        for pattern in patterns or []:
+            if re.search(pattern, prose_lower):
+                hit = True
+                break
+        if not hit:
+            continue
+        if status == "DONE":
+            issues.append({
+                "code": "milestone_duplicate",
+                "message": f"Milestone '{key}' is DONE but appears to be depicted again.",
+                "severity": "warning",
+            })
+        elif status == "NOT_YET":
+            issues.append({
+                "code": "milestone_future",
+                "message": f"Milestone '{key}' is NOT_YET but appears to be depicted early.",
+                "severity": "warning",
+            })
+
+    invariant_text = " ".join([str(item).lower() for item in invariants])
+    if "right" in invariant_text and re.search(r"\bleft\s+(arm|forearm|hand)\b.{0,40}\b(scar|mark|filament|oath|sigil)\b", prose_lower):
+        issues.append({
+            "code": "arm_side_mismatch",
+            "message": "Possible arm-side mismatch: invariants mention right-side mark but prose mentions left-side mark.",
+            "severity": "warning",
+        })
+    if "left" in invariant_text and re.search(r"\bright\s+(arm|forearm|hand)\b.{0,40}\b(scar|mark|filament|oath|sigil)\b", prose_lower):
+        issues.append({
+            "code": "arm_side_mismatch",
+            "message": "Possible arm-side mismatch: invariants mention left-side mark but prose mentions right-side mark.",
+            "severity": "warning",
+        })
+
+    if "longsword" in invariant_text:
+        if any(term in prose_lower for term in ["short-blade", "short blade", "dagger", "knife"]) and "longsword" not in prose_lower:
+            issues.append({
+                "code": "inventory_mismatch",
+                "message": "Possible weapon mismatch: invariants mention longsword but prose emphasizes a different blade.",
+                "severity": "warning",
+            })
+    if any(term in invariant_text for term in ["short-blade", "short blade", "dagger", "knife"]):
+        if "longsword" in prose_lower and not any(term in prose_lower for term in ["short-blade", "short blade", "dagger", "knife"]):
+            issues.append({
+                "code": "inventory_mismatch",
+                "message": "Possible weapon mismatch: invariants mention short blade but prose emphasizes a longsword.",
+                "severity": "warning",
+            })
+
+    mojibake_markers = ["\ufffd", "\u00c3", "\u00c2", "\u00e2\u0080\u0094", "\u00e2\u0080\u0099", "\u00e2\u0080\u009c", "\u00e2\u0080\u009d"]
+    if any(marker in prose for marker in mojibake_markers):
+        issues.append({
+            "code": "encoding_mojibake",
+            "message": "Possible encoding/mojibake artifacts detected in prose output.",
+            "severity": "warning",
+        })
+
     return issues
 
 
