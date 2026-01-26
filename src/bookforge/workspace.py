@@ -421,4 +421,12 @@ def reset_book_workspace(workspace: Path, book_id: str) -> Path:
     if continuity_path.exists():
         continuity_path.unlink()
 
+    continuity_history_dir = context_dir / "continuity_history"
+    if continuity_history_dir.exists():
+        shutil.rmtree(continuity_history_dir)
+
+    chapter_summaries_dir = context_dir / "chapter_summaries"
+    if chapter_summaries_dir.exists():
+        shutil.rmtree(chapter_summaries_dir)
+
     return book_root

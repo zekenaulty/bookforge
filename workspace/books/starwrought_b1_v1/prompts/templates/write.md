@@ -28,7 +28,9 @@ STATE_PATCH rules:
 - Include story_so_far_add only at chapter end (or when scene_card explicitly requests).
 - Use threads_touched only if you can reference thread ids from scene_card.thread_ids.
 - Use cursor_advance only if you need to override the default cursor.
-- Include character_updates entries for cast_present_ids that change state (inventory, containers, persona shifts). Each entry must include character_id, chapter, scene, inventory (full current list), containers (full current list), invariants_add, persona_updates.
+- Include character_updates entries for cast_present_ids that change state (inventory, containers, persona shifts).
+  - Each entry must include character_id, chapter, scene, inventory (full current list), containers (full current list), invariants_add (array), persona_updates (array).
+  - If you have a single persona update, still wrap it in an array of strings.
 - must_stay_true must include a milestone ledger and invariants using standard phrasing, e.g.:
   - inventory: CHAR_example -> shard (carried, container=satchel)
   - inventory: CHAR_example -> longsword (carried, container=hand_right)
