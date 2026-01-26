@@ -40,6 +40,7 @@ PROMPT_TEMPLATE_FILES = [
     "write.md",
     "lint.md",
     "repair.md",
+    "state_repair.md",
     "continuity_pack.md",
     "characters_generate.md",
     "style_anchor.md",
@@ -428,5 +429,9 @@ def reset_book_workspace(workspace: Path, book_id: str) -> Path:
     chapter_summaries_dir = context_dir / "chapter_summaries"
     if chapter_summaries_dir.exists():
         shutil.rmtree(chapter_summaries_dir)
+
+    characters_dir = context_dir / "characters"
+    if characters_dir.exists():
+        shutil.rmtree(characters_dir)
 
     return book_root

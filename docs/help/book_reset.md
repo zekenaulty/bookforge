@@ -20,6 +20,7 @@ What gets reset
 - draft/context/continuity_pack.json is removed.
 - draft/context/continuity_history/* is removed.
 - draft/context/chapter_summaries/* is removed.
+- draft/context/characters/* is removed (character state will be auto-regenerated on next run).
 - draft/context/bible.md and draft/context/last_excerpt.md are emptied.
 - state.json is reset to a clean cursor/world state (budgets preserved).
 

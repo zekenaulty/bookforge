@@ -15,6 +15,7 @@ class AppConfig:
     planner_api_key: Optional[str]
     writer_api_key: Optional[str]
     repair_api_key: Optional[str]
+    state_repair_api_key: Optional[str]
     linter_api_key: Optional[str]
     continuity_api_key: Optional[str]
     characters_api_key: Optional[str]
@@ -25,6 +26,7 @@ class AppConfig:
     planner_model: Optional[str]
     writer_model: Optional[str]
     repair_model: Optional[str]
+    state_repair_model: Optional[str]
     linter_model: Optional[str]
     continuity_model: Optional[str]
     characters_model: Optional[str]
@@ -112,6 +114,7 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
         planner_api_key=merged.get("PLANNER_API_KEY"),
         writer_api_key=merged.get("WRITER_API_KEY"),
         repair_api_key=merged.get("REPAIR_API_KEY"),
+        state_repair_api_key=merged.get("STATE_REPAIR_API_KEY"),
         linter_api_key=merged.get("LINTER_API_KEY"),
         continuity_api_key=merged.get("CONTINUITY_API_KEY"),
         characters_api_key=merged.get("CHARACTERS_API_KEY"),
@@ -122,6 +125,7 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
         planner_model=merged.get("PLANNER_MODEL"),
         writer_model=merged.get("WRITER_MODEL"),
         repair_model=merged.get("REPAIR_MODEL"),
+        state_repair_model=merged.get("STATE_REPAIR_MODEL"),
         linter_model=merged.get("LINTER_MODEL"),
         continuity_model=merged.get("CONTINUITY_MODEL"),
         characters_model=merged.get("CHARACTERS_MODEL"),
@@ -161,6 +165,7 @@ def _has_phase_api_keys(config: AppConfig) -> bool:
         config.planner_api_key,
         config.writer_api_key,
         config.repair_api_key,
+        config.state_repair_api_key,
         config.linter_api_key,
         config.continuity_api_key,
         config.characters_api_key,

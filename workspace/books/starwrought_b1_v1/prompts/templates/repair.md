@@ -9,6 +9,7 @@ Spatial/inventory consistency: injuries, inventory, and ownership must remain co
 Inventory contract: track ownership and container location for key items; update must_stay_true when items move or change hands.
 For held items, specify container=hand_left or container=hand_right.
 summary_update arrays are mandatory; do not omit or leave empty unless explicitly stated.
+STATE_PATCH must record all major events and outcomes from the prose; if an event happens, add it to key_events and update must_stay_true as needed.
 must_stay_true must include a milestone ledger entry for every milestone referenced in the Scene Card or already present in state.
 If state lacks a key invariant needed for this scene, seed it in must_stay_true using standard phrasing.
 Return corrected prose plus a corrected state_patch JSON block.

@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
@@ -29,11 +29,12 @@ from bookforge.util.paths import repo_root
 from bookforge.util.schema import validate_json
 
 
-DEFAULT_WRITE_MAX_TOKENS = 36864
-DEFAULT_LINT_MAX_TOKENS = 73728
-DEFAULT_REPAIR_MAX_TOKENS = 73728
-DEFAULT_CONTINUITY_MAX_TOKENS = 73728
-DEFAULT_STYLE_ANCHOR_MAX_TOKENS = 16384
+DEFAULT_WRITE_MAX_TOKENS = 73728
+DEFAULT_LINT_MAX_TOKENS = 147456
+DEFAULT_REPAIR_MAX_TOKENS = 147456
+DEFAULT_STATE_REPAIR_MAX_TOKENS = 147456
+DEFAULT_CONTINUITY_MAX_TOKENS = 147456
+DEFAULT_STYLE_ANCHOR_MAX_TOKENS = 32768
 DEFAULT_EMPTY_RESPONSE_RETRIES = 2
 
 SUMMARY_CHAPTER_SO_FAR_CAP = 20
@@ -56,6 +57,10 @@ def _lint_max_tokens() -> int:
 
 def _repair_max_tokens() -> int:
     return _int_env("BOOKFORGE_REPAIR_MAX_TOKENS", DEFAULT_REPAIR_MAX_TOKENS)
+
+
+def _state_repair_max_tokens() -> int:
+    return _int_env("BOOKFORGE_STATE_REPAIR_MAX_TOKENS", DEFAULT_STATE_REPAIR_MAX_TOKENS)
 
 
 def _continuity_max_tokens() -> int:
@@ -84,6 +89,10 @@ def _lint_mode() -> str:
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _status(message: str) -> None:
+    print(f"[bookforge] {message}", flush=True)
 
 
 def _resolve_template(book_root: Path, name: str) -> Path:
@@ -167,7 +176,7 @@ def _normalize_lint_report(report: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _extract_json(text: str) -> Dict[str, Any]:
-    match = re.search(r"```json\s*([\s\S]*?)\s*```", text, re.IGNORECASE)
+    match = re.search(r"```json\s*([\s\S]*OK)\s*```", text, re.IGNORECASE)
     if match:
         payload = match.group(1)
     else:
@@ -205,7 +214,7 @@ def _strip_compliance_block(text: str) -> str:
 
 
 def _extract_prose_and_patch(text: str) -> Tuple[str, Dict[str, Any]]:
-    match = re.search(r"STATE\s*_?PATCH\s*:\s*", text, re.IGNORECASE)
+    match = re.search(r"STATE\s*_OKPATCH\s*:\s*", text, re.IGNORECASE)
     if not match:
         return _extract_prose_and_patch_fallback(text)
     prose_block = text[:match.start()].strip()
@@ -221,7 +230,7 @@ def _extract_prose_and_patch(text: str) -> Tuple[str, Dict[str, Any]]:
 
 
 def _extract_prose_and_patch_fallback(text: str) -> Tuple[str, Dict[str, Any]]:
-    fence_matches = list(re.finditer(r"```json\s*([\s\S]*?)\s*```", text, re.IGNORECASE))
+    fence_matches = list(re.finditer(r"```json\s*([\s\S]*OK)\s*```", text, re.IGNORECASE))
     if fence_matches:
         match = fence_matches[-1]
         patch_block = match.group(1).strip()
@@ -442,6 +451,20 @@ def _dedupe_preserve(items: List[str]) -> List[str]:
         result.append(item)
     return result
 
+def _coerce_character_updates(patch: Dict[str, Any]) -> None:
+    updates = patch.get("character_updates") if isinstance(patch, dict) else None
+    if not isinstance(updates, list):
+        return
+    for update in updates:
+        if not isinstance(update, dict):
+            continue
+        for key in ("persona_updates", "invariants_add"):
+            if key in update:
+                update[key] = _summary_list(update.get(key))
+
+
+
+
 
 def _summary_from_state(state: Dict[str, Any]) -> Dict[str, List[str]]:
     summary = state.get("summary", {})
@@ -578,18 +601,18 @@ def _heuristic_invariant_issues(
 
     milestone_patterns = {
         "shard_bind": [
-            r"\bbind(?:s|ing|ed)?\b.{0,40}\bshard\b",
-            r"\bshard\b.{0,40}\bbind(?:s|ing|ed)?\b",
+            r"\bbind(OK:s|ing|ed)OK\b.{0,40}\bshard\b",
+            r"\bshard\b.{0,40}\bbind(OK:s|ing|ed)OK\b",
             r"\boath\b.{0,40}\bfilament\b",
         ],
         "maps_acquired": [
-            r"\bmap(?:s)?\b.{0,40}\b(acquire|acquired|retrieve|retrieved|unfurl|unfurled|take|took|get|got)\b",
-            r"\b(acquire|retriev|unfurl|take|get)\w*\b.{0,40}\bmap(?:s)?\b",
-            r"\bchart(?:s)?\b",
-            r"\bstar[- ]?map\b",
+            r"\bmap(OK:s)OK\b.{0,40}\b(acquire|acquired|retrieve|retrieved|unfurl|unfurled|take|took|get|got)\b",
+            r"\b(acquire|retriev|unfurl|take|get)\w*\b.{0,40}\bmap(OK:s)OK\b",
+            r"\bchart(OK:s)OK\b",
+            r"\bstar[- ]OKmap\b",
         ],
         "shadow_form_first": [
-            r"\bshadow[- ]?form\b",
+            r"\bshadow[- ]OKform\b",
             r"\bshadow\b.{0,20}\bforms\b",
         ],
     }
@@ -1087,6 +1110,7 @@ def _write_scene(
         raise ValueError(f"{exc}{extra}") from exc
 
     _coerce_summary_update(patch)
+    _coerce_character_updates(patch)
     validate_json(patch, "state_patch")
     return prose, patch
 
@@ -1199,8 +1223,65 @@ def _repair_scene(
         raise ValueError(f"{exc}{extra}") from exc
 
     _coerce_summary_update(patch)
+    _coerce_character_updates(patch)
     validate_json(patch, "state_patch")
     return prose, patch
+
+
+def _state_repair(
+    workspace: Path,
+    book_root: Path,
+    system_path: Path,
+    prose: str,
+    state: Dict[str, Any],
+    scene_card: Dict[str, Any],
+    continuity_pack: Dict[str, Any],
+    draft_patch: Dict[str, Any],
+    character_registry: List[Dict[str, str]],
+    thread_registry: List[Dict[str, str]],
+    character_states: List[Dict[str, Any]],
+    client: LLMClient,
+    model: str,
+) -> Dict[str, Any]:
+    template = _resolve_template(book_root, "state_repair.md")
+    prompt = render_template_file(
+        template,
+        {
+            "prose": prose,
+            "state": state,
+            "summary": _summary_from_state(state),
+            "scene_card": scene_card,
+            "continuity_pack": continuity_pack,
+            "draft_patch": draft_patch,
+            "character_registry": character_registry,
+            "thread_registry": thread_registry,
+            "character_states": character_states,
+        },
+    )
+
+    messages: List[Message] = [
+        {"role": "system", "content": load_system_prompt(system_path, book_root / "outline" / "outline.json", include_outline=True)},
+        {"role": "user", "content": prompt},
+    ]
+
+    response = _chat(
+        workspace,
+        "state_repair",
+        client,
+        messages,
+        model=model,
+        temperature=0.2,
+        max_tokens=_state_repair_max_tokens(),
+        log_extra=_log_scope(book_root, scene_card),
+    )
+
+    patch = _extract_json(response.text)
+    if "schema_version" not in patch:
+        patch["schema_version"] = "1.0"
+    _coerce_summary_update(patch)
+    _coerce_character_updates(patch)
+    validate_json(patch, "state_patch")
+    return patch
 
 
 def _apply_state_patch(state: Dict[str, Any], patch: Dict[str, Any], chapter_end: bool = False) -> Dict[str, Any]:
@@ -1422,6 +1503,7 @@ def run_loop(
     continuity_client = get_llm_client(config, phase="continuity")
     writer_client = get_llm_client(config, phase="writer")
     repair_client = get_llm_client(config, phase="repair")
+    state_repair_client = get_llm_client(config, phase="state_repair")
     linter_client = get_llm_client(config, phase="linter")
     planner_model = resolve_model("planner", config)
     continuity_model = resolve_model("continuity", config)
@@ -1430,6 +1512,7 @@ def run_loop(
         generate_characters(workspace=workspace, book_id=book_id)
     writer_model = resolve_model("writer", config)
     repair_model = resolve_model("repair", config)
+    state_repair_model = resolve_model("state_repair", config)
     linter_model = resolve_model("linter", config)
 
     style_anchor = _ensure_style_anchor(
@@ -1459,20 +1542,32 @@ def run_loop(
 
         scene_card_path = _existing_scene_card(state, book_root) if resume else None
         if scene_card_path is None:
+            _status(f"Planning chapter {chapter} scene {scene}...")
             scene_card_path = plan_scene(
                 workspace=workspace,
                 book_id=book_id,
                 client=planner_client,
                 model=planner_model,
             )
+            _status(f"Planned scene card: ch{chapter:03d} sc{scene:03d} OK")
+        else:
+            _status(f"Using existing scene card: ch{chapter:03d} sc{scene:03d}")
 
         scene_card = _load_json(scene_card_path)
         validate_json(scene_card, "scene_card")
+        chapter_num = int(scene_card.get("chapter", chapter))
+        scene_num = int(scene_card.get("scene", scene))
 
         state = _load_json(state_path)
 
-        character_states = _load_character_states(book_root, scene_card)
+        chapter_total = scene_counts.get(chapter_num)
+        chapter_end = isinstance(chapter_total, int) and chapter_total > 0 and scene_num >= chapter_total
 
+        _status(f"Loading character states (cast only): ch{chapter_num:03d} sc{scene_num:03d}...")
+        character_states = _load_character_states(book_root, scene_card)
+        _status("Character states loaded OK")
+
+        _status(f"Generating continuity pack: ch{chapter_num:03d} sc{scene_num:03d}...")
         continuity_pack = _generate_continuity_pack(
             workspace,
             book_root,
@@ -1485,13 +1580,11 @@ def run_loop(
             continuity_client,
             continuity_model,
         )
+        _status("Continuity pack ready OK")
 
         base_invariants = book.get("invariants", []) if isinstance(book.get("invariants", []), list) else []
-        summary = _summary_from_state(state)
-        invariants = list(base_invariants)
-        invariants += summary.get("must_stay_true", [])
-        invariants += summary.get("key_facts_ring", [])
 
+        _status(f"Writing scene: ch{chapter_num:03d} sc{scene_num:03d}...")
         prose, patch = _write_scene(
             workspace,
             book_root,
@@ -1506,18 +1599,46 @@ def run_loop(
             writer_client,
             writer_model,
         )
+        _status("Write complete OK")
+
+        _status(f"Repairing state: ch{chapter_num:03d} sc{scene_num:03d}...")
+        patch = _state_repair(
+            workspace,
+            book_root,
+            system_path,
+            prose,
+            state,
+            scene_card,
+            continuity_pack,
+            patch,
+            character_registry,
+            thread_registry,
+            character_states,
+            state_repair_client,
+            state_repair_model,
+        )
+        _status("State repair complete OK")
+
+        lint_state = json.loads(json.dumps(state))
+        lint_state = _apply_state_patch(lint_state, patch, chapter_end=chapter_end)
+        summary = _summary_from_state(lint_state)
+        invariants = list(base_invariants)
+        invariants += summary.get("must_stay_true", [])
+        invariants += summary.get("key_facts_ring", [])
 
         lint_mode = _lint_mode()
 
         if lint_mode == "off":
             lint_report = {"schema_version": "1.0", "status": "pass", "issues": [], "mode": "off"}
+            _status("Linting disabled (mode=off).")
         else:
+            _status(f"Linting scene: ch{chapter_num:03d} sc{scene_num:03d}...")
             lint_report = _lint_scene(
                 workspace,
                 book_root,
                 system_path,
                 prose,
-                state,
+                lint_state,
                 patch,
                 scene_card,
                 invariants,
@@ -1525,9 +1646,11 @@ def run_loop(
                 linter_client,
                 linter_model,
             )
+            _status(f"Lint status: {lint_report.get('status', 'unknown')}")
 
         write_attempts = 1
         if lint_mode != "off" and lint_report.get("status") == "fail":
+            _status(f"Repairing scene: ch{chapter_num:03d} sc{scene_num:03d}...")
             prose, patch = _repair_scene(
                 workspace,
                 book_root,
@@ -1542,13 +1665,41 @@ def run_loop(
                 repair_client,
                 repair_model,
             )
+            _status("Repair complete OK")
             write_attempts += 1
-            lint_report = _lint_scene(
+
+            _status(f"Repairing state: ch{chapter_num:03d} sc{scene_num:03d}...")
+            patch = _state_repair(
                 workspace,
                 book_root,
                 system_path,
                 prose,
                 state,
+                scene_card,
+                continuity_pack,
+                patch,
+                character_registry,
+                thread_registry,
+                character_states,
+                state_repair_client,
+                state_repair_model,
+            )
+            _status("State repair complete OK")
+
+            lint_state = json.loads(json.dumps(state))
+            lint_state = _apply_state_patch(lint_state, patch, chapter_end=chapter_end)
+            summary = _summary_from_state(lint_state)
+            invariants = list(base_invariants)
+            invariants += summary.get("must_stay_true", [])
+            invariants += summary.get("key_facts_ring", [])
+
+            _status(f"Linting scene: ch{chapter_num:03d} sc{scene_num:03d}...")
+            lint_report = _lint_scene(
+                workspace,
+                book_root,
+                system_path,
+                prose,
+                lint_state,
                 patch,
                 scene_card,
                 invariants,
@@ -1556,16 +1707,24 @@ def run_loop(
                 linter_client,
                 linter_model,
             )
+            _status(f"Lint status: {lint_report.get('status', 'unknown')}")
             if lint_report.get("status") == "fail" and lint_mode == "strict":
                 raise ValueError("Lint failed after repair; see lint logs for details.")
 
-        chapter_num = int(scene_card.get("chapter", chapter))
-        scene_num = int(scene_card.get("scene", scene))
         chapter_total = scene_counts.get(chapter_num)
         chapter_end = isinstance(chapter_total, int) and chapter_total > 0 and scene_num >= chapter_total
 
+        _status("Applying state patch...")
         state = _apply_state_patch(state, patch, chapter_end=chapter_end)
-        _apply_character_updates(book_root, patch, chapter_num, scene_num)
+        _status("State updated OK")
+
+        updates = patch.get("character_updates") if isinstance(patch, dict) else None
+        if isinstance(updates, list) and updates:
+            _status("Updating character states...")
+            _apply_character_updates(book_root, patch, chapter_num, scene_num)
+            _status("Character states updated OK")
+        else:
+            _apply_character_updates(book_root, patch, chapter_num, scene_num)
 
         cursor_override = patch.get("cursor_advance") if isinstance(patch.get("cursor_advance"), dict) else None
         if cursor_override:
@@ -1580,6 +1739,7 @@ def run_loop(
                 scene_num,
             )
 
+        _status("Persisting scene files...")
         _write_scene_files(
             book_root,
             chapter_num,
@@ -1590,13 +1750,18 @@ def run_loop(
             lint_report,
             write_attempts,
         )
+        _status("Scene files written OK")
 
         _update_bible(book_root, patch)
 
         if chapter_end:
+            _status(f"Rolling up chapter summary: ch{chapter_num:03d}...")
             _rollup_chapter_summary(book_root, state, chapter_num)
+            _status(f"Compiling chapter: ch{chapter_num:03d}...")
             _compile_chapter_markdown(book_root, outline, chapter_num)
+            _status("Chapter compiled OK")
 
+        _status(f"Advancing cursor -> ch{next_chapter:03d} sc{next_scene:03d}")
         state["cursor"] = {"chapter": next_chapter, "scene": next_scene}
         if completed:
             state["status"] = "COMPLETE"

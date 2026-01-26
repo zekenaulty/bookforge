@@ -27,7 +27,7 @@ def _int_env(name: str, default: int) -> int:
 
 
 def _plan_max_tokens() -> int:
-    return _int_env("BOOKFORGE_PLAN_MAX_TOKENS", 16384)
+    return _int_env("BOOKFORGE_PLAN_MAX_TOKENS", 32768)
 
 
 def _empty_response_retries() -> int:

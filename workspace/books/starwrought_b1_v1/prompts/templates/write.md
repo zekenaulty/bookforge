@@ -14,6 +14,7 @@ Write the scene described by the scene card.
 - For held items, specify container=hand_left or container=hand_right.
 - If a required event is not in the Scene Card, do not perform it.
 - summary_update arrays are mandatory; do not omit or leave empty unless explicitly stated.
+- STATE_PATCH must record all major events and outcomes from the prose; if an event happens, add it to key_events and update must_stay_true as needed.
 - must_stay_true must include a milestone ledger entry for every milestone referenced in the Scene Card or already present in state.
 - If state lacks a key invariant needed for this scene, seed it in must_stay_true using standard phrasing.
 - Return prose plus a state_patch JSON block.

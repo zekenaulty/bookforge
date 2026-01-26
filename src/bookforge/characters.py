@@ -221,14 +221,14 @@ def generate_characters(
         {"role": "user", "content": prompt},
     ]
 
-    request = {"model": model, "temperature": 0.5, "max_tokens": 16384}
+    request = {"model": model, "temperature": 0.5, "max_tokens": 32768}
     key_slot = getattr(client, "key_slot", None)
     log_extra: Dict[str, Any] = {"book_id": book_id}
     if key_slot:
         log_extra["key_slot"] = key_slot
 
     try:
-        response = client.chat(messages, model=model, temperature=0.5, max_tokens=16384)
+        response = client.chat(messages, model=model, temperature=0.5, max_tokens=32768)
     except LLMRequestError as exc:
         if should_log_llm():
             log_llm_error(workspace, "characters_generate_error", exc, request=request, messages=messages, extra=log_extra)

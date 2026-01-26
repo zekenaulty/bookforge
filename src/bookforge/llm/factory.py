@@ -21,6 +21,8 @@ def _select_api_key(config: AppConfig, phase: Optional[str], default_key: Option
         override = config.writer_api_key
     elif phase_key == "repair":
         override = config.repair_api_key
+    elif phase_key == "state_repair":
+        override = config.state_repair_api_key
     elif phase_key == "linter":
         override = config.linter_api_key
     elif phase_key == "continuity":
@@ -61,6 +63,8 @@ def resolve_model(phase: str, config: AppConfig) -> str:
         model = config.writer_model
     elif phase_key == "repair":
         model = config.repair_model
+    elif phase_key == "state_repair":
+        model = config.state_repair_model
     elif phase_key == "linter":
         model = config.linter_model
     elif phase_key == "continuity":
