@@ -5,6 +5,7 @@ import sys
 from bookforge.author import generate_author
 from bookforge.outline import generate_outline
 from bookforge.runner import run_loop
+from bookforge.characters import generate_characters
 from bookforge.workspace import init_book_workspace, parse_genre, parse_targets, reset_book_workspace, update_book_templates
 
 
@@ -109,6 +110,19 @@ def _book_reset(args: argparse.Namespace) -> int:
     return 0
 
 
+
+
+def _characters_generate(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        generate_characters(workspace=workspace, book_id=args.book, count=args.count)
+    except Exception as exc:
+        sys.stderr.write(f"Characters generation failed: {exc}\n")
+        return 1
+    sys.stdout.write("Characters generated.\n")
+    return 0
+
+
 def _not_implemented(args: argparse.Namespace) -> int:
     sys.stderr.write("Not implemented yet.\n")
     return 0
@@ -174,7 +188,7 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         help="Optional character count limit.",
     )
-    characters_generate.set_defaults(func=_not_implemented)
+    characters_generate.set_defaults(func=_characters_generate)
 
     run_parser = subparsers.add_parser("run", help="Run the generation loop.")
     run_parser.add_argument("--book", required=True, help="Book id.")

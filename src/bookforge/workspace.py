@@ -41,6 +41,7 @@ PROMPT_TEMPLATE_FILES = [
     "lint.md",
     "repair.md",
     "continuity_pack.md",
+    "characters_generate.md",
     "style_anchor.md",
     "system_base.md",
     "output_contract.md",

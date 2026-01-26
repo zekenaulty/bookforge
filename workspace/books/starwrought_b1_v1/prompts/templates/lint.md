@@ -34,6 +34,10 @@ If there are issues, return:
 Scene:
 {{prose}}
 
+
+Character states (per cast_present_ids):
+{{character_states}}
+
 State:
 {{state}}
 

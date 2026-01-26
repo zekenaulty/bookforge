@@ -8,6 +8,7 @@ import json
 import re
 
 from bookforge.config.env import load_config, read_env_value, read_int_env
+from bookforge.characters import characters_ready, generate_characters
 from bookforge.llm.client import LLMClient
 from bookforge.llm.errors import LLMRequestError
 from bookforge.llm.factory import get_llm_client, resolve_model
@@ -325,6 +326,36 @@ def _build_thread_registry(outline: Dict[str, Any]) -> List[Dict[str, str]]:
             entry["status"] = status
         registry.append(entry)
     return registry
+
+
+def _character_slug(character_id: str) -> str:
+    cleaned = str(character_id or "").strip()
+    if cleaned.upper().startswith("CHAR_"):
+        cleaned = cleaned[5:]
+    cleaned = re.sub(r"[^a-zA-Z0-9\s-]+", "", cleaned)
+    cleaned = re.sub(r"\s+", "-", cleaned)
+    cleaned = re.sub(r"-{2,}", "-", cleaned)
+    cleaned = cleaned.strip("-")
+    return cleaned.lower() or "character"
+
+
+def _load_character_states(book_root: Path, scene_card: Dict[str, Any]) -> List[Dict[str, Any]]:
+    cast_ids = scene_card.get("cast_present_ids", []) if isinstance(scene_card, dict) else []
+    if not isinstance(cast_ids, list):
+        cast_ids = []
+    states: List[Dict[str, Any]] = []
+    for char_id in cast_ids:
+        slug = _character_slug(str(char_id))
+        state_path = book_root / "draft" / "context" / "characters" / f"{slug}.state.json"
+        if state_path.exists():
+            try:
+                states.append(json.loads(state_path.read_text(encoding="utf-8")))
+                continue
+            except json.JSONDecodeError:
+                pass
+        states.append({"character_id": str(char_id), "missing": True})
+    return states
+
 
 
 def _normalize_continuity_pack(
@@ -960,6 +991,7 @@ def _generate_continuity_pack(
     scene_card: Dict[str, Any],
     character_registry: List[Dict[str, str]],
     thread_registry: List[Dict[str, str]],
+    character_states: List[Dict[str, Any]],
     client: LLMClient,
     model: str,
 ) -> Dict[str, Any]:
@@ -974,6 +1006,7 @@ def _generate_continuity_pack(
             "scene_card": scene_card,
             "character_registry": character_registry,
             "thread_registry": thread_registry,
+            "character_states": character_states,
         },
     )
 
@@ -1011,6 +1044,7 @@ def _write_scene(
     style_anchor: str,
     character_registry: List[Dict[str, str]],
     thread_registry: List[Dict[str, str]],
+    character_states: List[Dict[str, Any]],
     client: LLMClient,
     model: str,
 ) -> Tuple[str, Dict[str, Any]]:
@@ -1024,6 +1058,7 @@ def _write_scene(
             "style_anchor": style_anchor,
             "character_registry": character_registry,
             "thread_registry": thread_registry,
+            "character_states": character_states,
         },
     )
 
@@ -1065,6 +1100,7 @@ def _lint_scene(
     patch: Dict[str, Any],
     scene_card: Dict[str, Any],
     invariants: List[str],
+    character_states: List[Dict[str, Any]],
     client: LLMClient,
     model: str,
 ) -> Dict[str, Any]:
@@ -1076,6 +1112,7 @@ def _lint_scene(
             "state": state,
             "summary": _summary_from_state(state),
             "invariants": invariants,
+            "character_states": character_states,
         },
     )
 
@@ -1119,6 +1156,7 @@ def _repair_scene(
     scene_card: Dict[str, Any],
     character_registry: List[Dict[str, str]],
     thread_registry: List[Dict[str, str]],
+    character_states: List[Dict[str, Any]],
     client: LLMClient,
     model: str,
 ) -> Tuple[str, Dict[str, Any]]:
@@ -1132,6 +1170,7 @@ def _repair_scene(
             "scene_card": scene_card,
             "character_registry": character_registry,
             "thread_registry": thread_registry,
+            "character_states": character_states,
         },
     )
 
@@ -1196,6 +1235,85 @@ def _apply_state_patch(state: Dict[str, Any], patch: Dict[str, Any], chapter_end
         state["duplication_warnings_in_row"] = max(0, current + delta)
 
     return state
+
+
+def _apply_character_updates(book_root: Path, patch: Dict[str, Any], chapter_num: int, scene_num: int) -> None:
+    updates = patch.get("character_updates") if isinstance(patch, dict) else None
+    if not isinstance(updates, list):
+        return
+    characters_dir = book_root / "draft" / "context" / "characters"
+    characters_dir.mkdir(parents=True, exist_ok=True)
+    for update in updates:
+        if not isinstance(update, dict):
+            continue
+        char_id = str(update.get("character_id") or "").strip()
+        if not char_id:
+            continue
+        slug = _character_slug(char_id)
+        state_path = characters_dir / f"{slug}.state.json"
+        state: Dict[str, Any] = {
+            "schema_version": "1.0",
+            "character_id": char_id,
+            "inventory": [],
+            "containers": [],
+            "invariants": [],
+            "history": [],
+        }
+        if state_path.exists():
+            try:
+                loaded = json.loads(state_path.read_text(encoding="utf-8"))
+                if isinstance(loaded, dict):
+                    state.update(loaded)
+            except json.JSONDecodeError:
+                pass
+
+        chapter = int(update.get("chapter", chapter_num) or chapter_num)
+        scene = int(update.get("scene", scene_num) or scene_num)
+
+        inventory = update.get("inventory")
+        if isinstance(inventory, list):
+            state["inventory"] = inventory
+        containers = update.get("containers")
+        if isinstance(containers, list):
+            state["containers"] = containers
+
+        invariants_add = update.get("invariants_add")
+        if isinstance(invariants_add, list):
+            existing = state.get("invariants", [])
+            if not isinstance(existing, list):
+                existing = []
+            combined = existing + [str(item) for item in invariants_add if str(item).strip()]
+            deduped = []
+            seen = set()
+            for item in combined:
+                key = str(item).strip().lower()
+                if not key or key in seen:
+                    continue
+                seen.add(key)
+                deduped.append(item)
+            state["invariants"] = deduped
+
+        history_entry: Dict[str, Any] = {"chapter": chapter, "scene": scene, "changes": []}
+        persona_updates = update.get("persona_updates")
+        if isinstance(persona_updates, list):
+            history_entry["persona_updates"] = [str(item) for item in persona_updates if str(item).strip()]
+        notes = update.get("notes")
+        if isinstance(notes, str) and notes.strip():
+            history_entry["notes"] = notes.strip()
+        if isinstance(inventory, list):
+            history_entry["changes"].append("inventory_updated")
+        if isinstance(containers, list):
+            history_entry["changes"].append("containers_updated")
+        if history_entry.get("persona_updates") or history_entry.get("notes") or history_entry.get("changes"):
+            history = state.get("history", [])
+            if not isinstance(history, list):
+                history = []
+            history.append(history_entry)
+            state["history"] = history
+
+        state["updated_at"] = _now_iso()
+        state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
+
 
 
 def _update_bible(book_root: Path, patch: Dict[str, Any]) -> None:
@@ -1307,6 +1425,9 @@ def run_loop(
     linter_client = get_llm_client(config, phase="linter")
     planner_model = resolve_model("planner", config)
     continuity_model = resolve_model("continuity", config)
+
+    if not characters_ready(book_root):
+        generate_characters(workspace=workspace, book_id=book_id)
     writer_model = resolve_model("writer", config)
     repair_model = resolve_model("repair", config)
     linter_model = resolve_model("linter", config)
@@ -1350,6 +1471,8 @@ def run_loop(
 
         state = _load_json(state_path)
 
+        character_states = _load_character_states(book_root, scene_card)
+
         continuity_pack = _generate_continuity_pack(
             workspace,
             book_root,
@@ -1358,6 +1481,7 @@ def run_loop(
             scene_card,
             character_registry,
             thread_registry,
+            character_states,
             continuity_client,
             continuity_model,
         )
@@ -1378,6 +1502,7 @@ def run_loop(
             style_anchor,
             character_registry,
             thread_registry,
+            character_states,
             writer_client,
             writer_model,
         )
@@ -1396,6 +1521,7 @@ def run_loop(
                 patch,
                 scene_card,
                 invariants,
+                character_states,
                 linter_client,
                 linter_model,
             )
@@ -1412,6 +1538,7 @@ def run_loop(
                 scene_card,
                 character_registry,
                 thread_registry,
+                character_states,
                 repair_client,
                 repair_model,
             )
@@ -1425,6 +1552,7 @@ def run_loop(
                 patch,
                 scene_card,
                 invariants,
+                character_states,
                 linter_client,
                 linter_model,
             )
@@ -1437,6 +1565,7 @@ def run_loop(
         chapter_end = isinstance(chapter_total, int) and chapter_total > 0 and scene_num >= chapter_total
 
         state = _apply_state_patch(state, patch, chapter_end=chapter_end)
+        _apply_character_updates(book_root, patch, chapter_num, scene_num)
 
         cursor_override = patch.get("cursor_advance") if isinstance(patch.get("cursor_advance"), dict) else None
         if cursor_override:

@@ -90,6 +90,32 @@ def _resolve_plan_template(book_root: Path) -> Path:
 def _load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+def _character_slug(character_id: str) -> str:
+    cleaned = str(character_id or "").strip()
+    if cleaned.upper().startswith("CHAR_"):
+        cleaned = cleaned[5:]
+    cleaned = re.sub(r"[^a-zA-Z0-9\s-]+", "", cleaned)
+    cleaned = re.sub(r"\s+", "-", cleaned)
+    cleaned = re.sub(r"-{2,}", "-", cleaned)
+    cleaned = cleaned.strip("-")
+    return cleaned.lower() or "character"
+
+
+def _load_character_states(book_root: Path, cast_present_ids: List[str]) -> List[Dict[str, Any]]:
+    states: List[Dict[str, Any]] = []
+    for char_id in cast_present_ids:
+        slug = _character_slug(str(char_id))
+        state_path = book_root / "draft" / "context" / "characters" / f"{slug}.state.json"
+        if state_path.exists():
+            try:
+                states.append(json.loads(state_path.read_text(encoding="utf-8")))
+                continue
+            except json.JSONDecodeError:
+                pass
+        states.append({"character_id": str(char_id), "missing": True})
+    return states
+
+
 
 def _find_chapter(outline: Dict[str, Any], chapter_number: int) -> Dict[str, Any]:
     chapters = outline.get("chapters", [])
@@ -355,6 +381,8 @@ def plan_scene(
     cast_present_ids = [str(item) for item in cast_present_ids if str(item).strip()]
     cast_present = [character_names.get(item, item) for item in cast_present_ids]
 
+    character_states = _load_character_states(book_root, cast_present_ids)
+
     introduces_ids = current_scene.get("introduces", [])
     if not isinstance(introduces_ids, list):
         introduces_ids = []
@@ -377,6 +405,7 @@ def plan_scene(
         {
             "outline_window": outline_window,
             "state": state,
+            "character_states": character_states,
         },
     )
 

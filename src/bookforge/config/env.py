@@ -17,6 +17,7 @@ class AppConfig:
     repair_api_key: Optional[str]
     linter_api_key: Optional[str]
     continuity_api_key: Optional[str]
+    characters_api_key: Optional[str]
     ollama_url: str
     openai_api_url: str
     gemini_api_url: str
@@ -26,6 +27,7 @@ class AppConfig:
     repair_model: Optional[str]
     linter_model: Optional[str]
     continuity_model: Optional[str]
+    characters_model: Optional[str]
     default_model: Optional[str]
     gemini_requests_per_minute: Optional[int]
     task_model_overrides: Dict[str, str]
@@ -112,6 +114,7 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
         repair_api_key=merged.get("REPAIR_API_KEY"),
         linter_api_key=merged.get("LINTER_API_KEY"),
         continuity_api_key=merged.get("CONTINUITY_API_KEY"),
+        characters_api_key=merged.get("CHARACTERS_API_KEY"),
         ollama_url=ollama_url,
         openai_api_url=openai_url,
         gemini_api_url=gemini_url,
@@ -121,6 +124,7 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
         repair_model=merged.get("REPAIR_MODEL"),
         linter_model=merged.get("LINTER_MODEL"),
         continuity_model=merged.get("CONTINUITY_MODEL"),
+        characters_model=merged.get("CHARACTERS_MODEL"),
         default_model=merged.get("DEFAULT_MODEL"),
         gemini_requests_per_minute=gemini_rpm_val,
         task_model_overrides=task_model_overrides,
@@ -159,6 +163,7 @@ def _has_phase_api_keys(config: AppConfig) -> bool:
         config.repair_api_key,
         config.linter_api_key,
         config.continuity_api_key,
+        config.characters_api_key,
     ])
 
 

@@ -5,6 +5,7 @@ Return ONLY a single JSON object that matches the scene_card schema.
 No markdown, no code fences, no commentary. Use strict JSON (double quotes, no trailing commas).
 
 If outline_window includes character information, keep those character ids in mind.
+If character_states are provided, keep inventory/persona constraints consistent; do not invent conflicting facts.
 If outline_window.current.introduces is present, the scene must introduce those characters.
 
 Required keys:
@@ -47,6 +48,10 @@ JSON shape example (fill with real values):
 
 Outline window:
 {{outline_window}}
+
+
+Character states (per outline_window.current.characters):
+{{character_states}}
 
 State:
 {{state}}

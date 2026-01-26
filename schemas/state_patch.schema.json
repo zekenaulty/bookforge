@@ -92,6 +92,58 @@
         }
       },
       "additionalProperties": true
+    },
+    "character_updates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "character_id": {
+            "type": "string"
+          },
+          "chapter": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "scene": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "inventory": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "containers": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "persona_updates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "invariants_add": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "character_id",
+          "chapter",
+          "scene"
+        ],
+        "additionalProperties": true
+      }
     }
   },
   "additionalProperties": true

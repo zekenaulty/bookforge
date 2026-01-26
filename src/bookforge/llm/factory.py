@@ -25,6 +25,8 @@ def _select_api_key(config: AppConfig, phase: Optional[str], default_key: Option
         override = config.linter_api_key
     elif phase_key == "continuity":
         override = config.continuity_api_key
+    elif phase_key == "characters":
+        override = config.characters_api_key
     if override:
         return override, phase_key
     return default_key, "default"
@@ -63,6 +65,8 @@ def resolve_model(phase: str, config: AppConfig) -> str:
         model = config.linter_model
     elif phase_key == "continuity":
         model = config.continuity_model
+    elif phase_key == "characters":
+        model = config.characters_model
 
     if model:
         return model

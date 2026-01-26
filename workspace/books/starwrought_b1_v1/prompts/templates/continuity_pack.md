@@ -16,6 +16,7 @@ Rules:
 - summary must match state.summary and remain facts-only; do not add prose.
 - constraints must include the highest-priority invariants from summary.must_stay_true and summary.key_facts_ring (copy exact strings when possible).
 - constraints must include the highest-priority inventory/container invariants from summary.must_stay_true (copy exact strings when possible).
+- If character_states are provided, prefer their inventory/container facts for constraints; do not invent conflicting facts.
 - If scene_card.cast_present is empty, cast_present must be an empty array.
 - open_threads must be a subset of thread_registry thread_id values.
 - If scene_card.thread_ids is present, prefer those thread ids.
@@ -29,6 +30,10 @@ Character registry (id -> name):
 
 Thread registry:
 {{thread_registry}}
+
+
+Character states (per cast_present_ids):
+{{character_states}}
 
 State:
 {{state}}
