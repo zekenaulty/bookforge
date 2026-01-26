@@ -93,6 +93,38 @@ def _pretty_text_payload(text: str) -> str:
     return json.dumps(parsed, ensure_ascii=True, indent=2)
 
 
+def _sanitize_log_component(value: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "-", value)
+    return cleaned.strip("-_")
+
+
+def _format_scope_number(prefix: str, value: Any) -> str:
+    if value is None:
+        return f"{prefix}000"
+    try:
+        number = int(str(value))
+    except (TypeError, ValueError):
+        cleaned = _sanitize_log_component(str(value))
+        if not cleaned:
+            cleaned = "000"
+        return f"{prefix}{cleaned}"
+    return f"{prefix}{number:03d}"
+
+
+def _log_scope_prefix(extra: Optional[Dict[str, Any]]) -> str:
+    if not extra:
+        return ""
+    book_id = extra.get("book_id")
+    if not book_id:
+        return ""
+    book_label = _sanitize_log_component(str(book_id))
+    if not book_label:
+        return ""
+    chapter = _format_scope_number("ch", extra.get("chapter"))
+    scene = _format_scope_number("sc", extra.get("scene"))
+    return f"{book_label}_{chapter}_{scene}_"
+
+
 def _split_prompt_messages(messages: Optional[list[Message]]) -> tuple[str, list[Message]]:
     if not messages:
         return "", []
@@ -184,7 +216,8 @@ def log_llm_response(
     log_dir = llm_log_dir(workspace)
     log_dir.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    log_path = log_dir / f"{label}_{timestamp}.json"
+    prefix = _log_scope_prefix(extra)
+    log_path = log_dir / f"{prefix}{label}_{timestamp}.json"
     system_text = ""
     non_system: list[Message] = []
     if messages:
@@ -230,7 +263,8 @@ def log_llm_error(
     log_dir = llm_log_dir(workspace)
     log_dir.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    log_path = log_dir / f"{label}_{timestamp}.json"
+    prefix = _log_scope_prefix(extra)
+    log_path = log_dir / f"{prefix}{label}_{timestamp}.json"
     system_text = ""
     non_system: list[Message] = []
     if messages:

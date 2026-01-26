@@ -467,17 +467,18 @@ def generate_outline(
 
     max_tokens = _outline_max_tokens()
     key_slot = getattr(client, "key_slot", None)
+    log_extra: Dict[str, Any] = {"book_id": book_id}
+    if key_slot:
+        log_extra["key_slot"] = key_slot
     request = {"model": model, "temperature": 0.6, "max_tokens": max_tokens}
     try:
         response = client.chat(messages, model=model, temperature=0.6, max_tokens=max_tokens)
     except LLMRequestError as exc:
         if should_log_llm():
-            extra = {"key_slot": key_slot} if key_slot else None
-            log_llm_error(workspace, "outline_generate_error", exc, request=request, messages=messages, extra=extra)
+            log_llm_error(workspace, "outline_generate_error", exc, request=request, messages=messages, extra=log_extra)
         raise
 
     log_path: Optional[Path] = None
-    log_extra = {"key_slot": key_slot} if key_slot else None
     if should_log_llm():
         log_path = log_llm_response(workspace, "outline_generate", response, request=request, messages=messages, extra=log_extra)
     try:

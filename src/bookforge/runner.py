@@ -711,6 +711,25 @@ def _author_fragment_path(workspace: Path, author_ref: str) -> Path:
     return workspace / "authors" / parts[0] / parts[1] / "system_fragment.md"
 
 
+def _maybe_int(value: Any) -> Optional[int]:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _log_scope(book_root: Path, scene_card: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    scope: Dict[str, Any] = {"book_id": book_root.name}
+    if scene_card:
+        chapter = _maybe_int(scene_card.get("chapter"))
+        if chapter is not None:
+            scope["chapter"] = chapter
+        scene = _maybe_int(scene_card.get("scene"))
+        if scene is not None:
+            scope["scene"] = scene
+    return scope
+
+
 def _chat(
     workspace: Path,
     label: str,
@@ -719,9 +738,15 @@ def _chat(
     model: str,
     temperature: float,
     max_tokens: int,
+    log_extra: Optional[Dict[str, Any]] = None,
 ) -> LLMResponse:
     key_slot = getattr(client, "key_slot", None)
-    extra = {"key_slot": key_slot} if key_slot else None
+    merged_extra: Dict[str, Any] = {}
+    if log_extra:
+        merged_extra.update(log_extra)
+    if key_slot:
+        merged_extra["key_slot"] = key_slot
+    extra = merged_extra or None
     request = {"model": model, "temperature": temperature, "max_tokens": max_tokens}
     retries = _empty_response_retries()
     attempt = 0
@@ -787,6 +812,7 @@ def _ensure_style_anchor(
         model=model,
         temperature=0.7,
         max_tokens=_style_anchor_max_tokens(),
+        log_extra=_log_scope(book_root),
     )
     text = response.text.strip()
     if not text:
@@ -807,6 +833,7 @@ def _ensure_style_anchor(
             model=model,
             temperature=0.7,
             max_tokens=_style_anchor_max_tokens(),
+            log_extra=_log_scope(book_root),
         )
         text = response.text.strip()
     if not text:
@@ -855,6 +882,7 @@ def _generate_continuity_pack(
         model=model,
         temperature=0.4,
         max_tokens=_continuity_max_tokens(),
+        log_extra=_log_scope(book_root, scene_card),
     )
 
     data = _extract_json(response.text)
@@ -904,6 +932,7 @@ def _write_scene(
         model=model,
         temperature=0.7,
         max_tokens=_write_max_tokens(),
+        log_extra=_log_scope(book_root, scene_card),
     )
 
     try:
@@ -926,6 +955,7 @@ def _lint_scene(
     prose: str,
     state: Dict[str, Any],
     patch: Dict[str, Any],
+    scene_card: Dict[str, Any],
     invariants: List[str],
     client: LLMClient,
     model: str,
@@ -954,6 +984,7 @@ def _lint_scene(
         model=model,
         temperature=0.0,
         max_tokens=_lint_max_tokens(),
+        log_extra=_log_scope(book_root, scene_card),
     )
 
     report = _extract_json(response.text)
@@ -1009,6 +1040,7 @@ def _repair_scene(
         model=model,
         temperature=0.4,
         max_tokens=_repair_max_tokens(),
+        log_extra=_log_scope(book_root, scene_card),
     )
 
     try:
@@ -1254,6 +1286,7 @@ def run_loop(
                 prose,
                 state,
                 patch,
+                scene_card,
                 invariants,
                 linter_client,
                 linter_model,
@@ -1282,6 +1315,7 @@ def run_loop(
                 prose,
                 state,
                 patch,
+                scene_card,
                 invariants,
                 linter_client,
                 linter_model,

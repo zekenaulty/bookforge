@@ -397,7 +397,9 @@ def plan_scene(
     request = {"model": model, "temperature": 0.4, "max_tokens": max_tokens}
     log_path: Optional[Path] = None
     key_slot = getattr(client, "key_slot", None)
-    log_extra = {"key_slot": key_slot} if key_slot else None
+    log_extra: Dict[str, Any] = {"book_id": book_id, "chapter": chapter_num, "scene": scene_num}
+    if key_slot:
+        log_extra["key_slot"] = key_slot
     retries = _empty_response_retries()
     attempt = 0
     while True:
@@ -405,8 +407,7 @@ def plan_scene(
             response = client.chat(messages, model=model, temperature=0.4, max_tokens=max_tokens)
         except LLMRequestError as exc:
             if should_log_llm():
-                extra = {"key_slot": key_slot} if key_slot else None
-                log_llm_error(workspace, "plan_scene_error", exc, request=request, messages=messages, extra=extra)
+                log_llm_error(workspace, "plan_scene_error", exc, request=request, messages=messages, extra=log_extra)
             raise
         label = "plan_scene" if attempt == 0 else f"plan_scene_retry{attempt}"
         if should_log_llm():
