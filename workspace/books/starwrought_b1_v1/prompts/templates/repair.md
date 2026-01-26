@@ -9,6 +9,10 @@ Spatial/inventory consistency: injuries, inventory, and ownership must remain co
 summary_update arrays are mandatory; do not omit or leave empty unless explicitly stated.
 must_stay_true must include a milestone ledger entry for every milestone referenced in the Scene Card or already present in state.
 If state lacks a key invariant needed for this scene, seed it in must_stay_true using standard phrasing.
+Inventory contract: track ownership and container location for key items; update must_stay_true when items move or change hands.
+summary_update arrays are mandatory; do not omit or leave empty unless explicitly stated.
+must_stay_true must include a milestone ledger entry for every milestone referenced in the Scene Card or already present in state.
+If state lacks a key invariant needed for this scene, seed it in must_stay_true using standard phrasing.
 Return corrected prose plus a corrected state_patch JSON block.
 
 Output format (required, no code fences, no commentary):
@@ -34,9 +38,11 @@ STATE_PATCH rules:
 - Include story_so_far_add only at chapter end (or when scene_card explicitly requests).
 - Use threads_touched only if you can reference thread ids from scene_card.thread_ids.
 - must_stay_true must include a milestone ledger and invariants using standard phrasing, e.g.:
+  - inventory: CHAR_kaelen -> shard (carried, container=satchel)
+  - inventory: CHAR_kaelen -> longsword (carried, container=hand)
+  - container: satchel (owner=CHAR_kaelen, contents=[shard, maps])
   - milestone: shard_bind = DONE/NOT_YET
   - milestone: maps_acquired = DONE/NOT_YET
-  - inventory: longsword (carried) / short-blade (carried)
   - injury: right forearm scar / left arm filament
   - ownership: shard (carried) / shard (bound but physical)
 

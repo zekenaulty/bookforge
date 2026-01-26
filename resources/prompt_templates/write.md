@@ -10,6 +10,7 @@ Write the scene described by the scene card.
 - State primacy: state invariants and summary facts are binding; do not contradict them.
 - Milestone uniqueness: if a milestone is marked DONE in must_stay_true, do not depict it again. If marked NOT_YET, do not depict it now.
 - Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+- Inventory contract: track ownership and container location for key items; update must_stay_true when items move or change hands.
 - If a required event is not in the Scene Card, do not perform it.
 - summary_update arrays are mandatory; do not omit or leave empty unless explicitly stated.
 - must_stay_true must include a milestone ledger entry for every milestone referenced in the Scene Card or already present in state.
@@ -27,9 +28,11 @@ STATE_PATCH rules:
 - Use threads_touched only if you can reference thread ids from scene_card.thread_ids.
 - Use cursor_advance only if you need to override the default cursor.
 - must_stay_true must include a milestone ledger and invariants using standard phrasing, e.g.:
+  - inventory: CHAR_kaelen -> shard (carried, container=satchel)
+  - inventory: CHAR_kaelen -> longsword (carried, container=hand)
+  - container: satchel (owner=CHAR_kaelen, contents=[shard, maps])
   - milestone: shard_bind = DONE/NOT_YET
   - milestone: maps_acquired = DONE/NOT_YET
-  - inventory: longsword (carried) / short-blade (carried)
   - injury: right forearm scar / left arm filament
   - ownership: shard (carried) / shard (bound but physical)
 

@@ -14,6 +14,7 @@ Timeline Lock: You may only depict events explicitly listed in the current Scene
 State primacy: state invariants and summary facts are binding; do not contradict them.
 Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
 Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
 State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
 Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
 Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
