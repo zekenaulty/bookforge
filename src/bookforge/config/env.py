@@ -84,9 +84,11 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
             env_file = _default_env_path()
     elif env_path:
         env_file = Path(env_path)
+    merged.update(os.environ)
     if env_file:
         merged.update(_parse_env_file(env_file))
-    merged.update(env or os.environ)
+    if env is not None:
+        merged.update(env)
 
     provider = (merged.get("LLM_PROVIDER") or "openai").lower()
     openai_url = merged.get("OPENAI_API_URL") or "https://api.openai.com/v1/chat/completions"
@@ -128,12 +130,11 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
 
 
 def read_env_value(name: str) -> Optional[str]:
-    value = os.environ.get(name)
-    if value is not None:
-        return value
     env_path = _default_env_path()
     data = _parse_env_file(env_path)
-    return data.get(name)
+    if name in data:
+        return data.get(name)
+    return os.environ.get(name)
 
 
 def read_int_env(name: str, default: int) -> int:

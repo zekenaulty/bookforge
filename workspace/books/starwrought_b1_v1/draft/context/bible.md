@@ -27,3 +27,13 @@
 - The High Spire is in the final stages of structural failure and tilting heavily.
 - Kaelen's physical pewter Oath-filament is reacting violently to Varkas's presence.
 - The star-shard remains in Kaelen's satchel, though its resonance is synchronized with his heart.
+- Kaelen killed the corrupted Commander Varkas by overloading his core with star-shard resonance.
+- Varkas dissolved into ash and violet shards upon death.
+- Kaelen secured the Star-Maps in their brass cylinder.
+- Kaelen's right arm is severely scarred and blackened from the resonance discharge.
+- The High Spire is in the final seconds of total structural collapse.
+- Kaelen escaped the High Spire as it collapsed into violet smoke and light.
+- The physical pewter filament in Kaelen's radius bone is severely strained but intact.
+- Kaelen has secured the Star-Maps and the physical star-shard in his satchel.
+- The High Spire is completely destroyed, leaving only a hollow in the world.
+- Kaelen is now a fugitive, alone and injured at the edge of the impact zone.
