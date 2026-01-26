@@ -6,6 +6,9 @@ Timeline Lock: only depict events explicitly listed in the current Scene Card. D
 State primacy: state invariants and summary facts are binding; do not contradict them.
 Milestone uniqueness: if a milestone is marked DONE in must_stay_true, do not depict it again. If marked NOT_YET, do not depict it now.
 Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+summary_update arrays are mandatory; do not omit or leave empty unless explicitly stated.
+must_stay_true must include a milestone ledger entry for every milestone referenced in the Scene Card or already present in state.
+If state lacks a key invariant needed for this scene, seed it in must_stay_true using standard phrasing.
 Return corrected prose plus a corrected state_patch JSON block.
 
 Output format (required, no code fences, no commentary):
