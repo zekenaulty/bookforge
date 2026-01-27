@@ -16,6 +16,7 @@ from bookforge.llm.types import LLMResponse, Message
 from bookforge.llm.errors import LLMRequestError
 from bookforge.prompt.renderer import render_template_file
 from bookforge.util.paths import repo_root
+from bookforge.util.json_extract import extract_json
 from bookforge.util.schema import validate_json
 
 
@@ -63,6 +64,7 @@ PREFERRED_INTENSITY_RANGE = (1, 5)
 
 
 MAX_ENUM_CONTEXT = 3
+DEFAULT_JSON_RETRY_COUNT = 1
 
 def _int_env(name: str, default: int) -> int:
     return read_int_env(name, default)
@@ -70,6 +72,10 @@ def _int_env(name: str, default: int) -> int:
 
 def _outline_max_tokens() -> int:
     return _int_env("BOOKFORGE_OUTLINE_MAX_TOKENS", 98304)
+
+
+def _json_retry_count() -> int:
+    return max(0, _int_env("BOOKFORGE_JSON_RETRY_COUNT", DEFAULT_JSON_RETRY_COUNT))
 
 
 def _response_truncated(response: LLMResponse) -> bool:
@@ -82,14 +88,6 @@ def _response_truncated(response: LLMResponse) -> bool:
     finish = candidates[0].get("finishReason")
     return str(finish).upper() == "MAX_TOKENS"
 
-
-def _clean_json_payload(payload: str) -> str:
-    cleaned = payload.strip()
-    cleaned = cleaned.replace("\ufeff", "")
-    cleaned = cleaned.replace("\u201c", '"').replace("\u201d", '"')
-    cleaned = cleaned.replace("\u2018", "'").replace("\u2019", "'")
-    cleaned = re.sub(r",\s*([}\]])", r"\1", cleaned)
-    return cleaned
 
 
 def _find_matching_bracket(payload: str, start_index: int) -> Optional[int]:
@@ -317,32 +315,7 @@ def _warn_outline_enum_values(outline: Dict[str, Any]) -> None:
 
 
 def _extract_json(text: str) -> Dict[str, Any]:
-    match = re.search(r"```json\s*([\s\S]*?)\s*```", text, re.IGNORECASE)
-    if match:
-        payload = match.group(1)
-    else:
-        match = re.search(r"(\{[\s\S]*\})", text)
-        if not match:
-            raise ValueError("No JSON object found in response.")
-        payload = match.group(1)
-    payload = payload.strip()
-    try:
-        data = json.loads(payload)
-    except json.JSONDecodeError:
-        cleaned = _clean_json_payload(payload)
-        try:
-            data = json.loads(cleaned)
-        except json.JSONDecodeError:
-            try:
-                repaired = _repair_outline_json(cleaned)
-                data = json.loads(repaired)
-            except json.JSONDecodeError:
-                try:
-                    data = ast.literal_eval(repaired)
-                except (ValueError, SyntaxError) as exc:
-                    raise ValueError("Invalid JSON in response.") from exc
-            except (ValueError, SyntaxError) as exc:
-                raise ValueError("Invalid JSON in response.") from exc
+    data = extract_json(text, label="Outline response", repair_fn=_repair_outline_json)
     if not isinstance(data, dict):
         raise ValueError("Outline response JSON must be an object.")
     return data
@@ -481,16 +454,30 @@ def generate_outline(
     log_path: Optional[Path] = None
     if should_log_llm():
         log_path = log_llm_response(workspace, "outline_generate", response, request=request, messages=messages, extra=log_extra)
-    try:
-
-        outline = _extract_json(response.text)
-    except ValueError as exc:
-        if not log_path:
-            log_path = log_llm_response(workspace, "outline_generate", response, request=request, messages=messages, extra=log_extra)
-        extra_msg = ""
-        if _response_truncated(response):
-            extra_msg = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_OUTLINE_MAX_TOKENS."
-        raise ValueError(f"{exc}{extra_msg} (raw response logged to {log_path})") from exc
+    retries = _json_retry_count()
+    parse_attempt = 0
+    while True:
+        try:
+            outline = _extract_json(response.text)
+            break
+        except ValueError as exc:
+            if parse_attempt >= retries:
+                if not log_path:
+                    log_path = log_llm_response(workspace, "outline_generate", response, request=request, messages=messages, extra=log_extra)
+                extra_msg = ""
+                if _response_truncated(response):
+                    extra_msg = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_OUTLINE_MAX_TOKENS."
+                raise ValueError(f"{exc}{extra_msg} (raw response logged to {log_path})") from exc
+            retry_messages = list(messages)
+            retry_messages.append({
+                "role": "user",
+                "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
+            })
+            response = client.chat(retry_messages, model=model, temperature=0.6, max_tokens=max_tokens)
+            label = f"outline_generate_json_retry{parse_attempt + 1}"
+            if should_log_llm():
+                log_path = log_llm_response(workspace, label, response, request=request, messages=retry_messages, extra=log_extra)
+            parse_attempt += 1
 
     if "schema_version" not in outline:
         outline["schema_version"] = OUTLINE_SCHEMA_VERSION

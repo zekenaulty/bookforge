@@ -8,6 +8,7 @@ import os
 import re
 
 from bookforge.config.env import load_config, read_int_env
+from bookforge.characters import resolve_character_state_path, ensure_character_index
 from bookforge.llm.client import LLMClient
 from bookforge.llm.factory import get_llm_client, resolve_model
 from bookforge.llm.logging import log_llm_error, log_llm_response, should_log_llm
@@ -15,11 +16,13 @@ from bookforge.llm.types import LLMResponse, Message
 from bookforge.llm.errors import LLMRequestError
 from bookforge.prompt.renderer import render_template_file
 from bookforge.util.paths import repo_root
+from bookforge.util.json_extract import extract_json
 from bookforge.util.schema import validate_json
 
 
 SCENE_CARD_SCHEMA_VERSION = "1.1"
 DEFAULT_EMPTY_RESPONSE_RETRIES = 1
+DEFAULT_JSON_RETRY_COUNT = 1
 
 
 def _int_env(name: str, default: int) -> int:
@@ -34,6 +37,10 @@ def _empty_response_retries() -> int:
     return max(0, _int_env("BOOKFORGE_EMPTY_RESPONSE_RETRIES", DEFAULT_EMPTY_RESPONSE_RETRIES))
 
 
+def _json_retry_count() -> int:
+    return max(0, _int_env("BOOKFORGE_JSON_RETRY_COUNT", DEFAULT_JSON_RETRY_COUNT))
+
+
 def _response_truncated(response: LLMResponse) -> bool:
     raw = response.raw
     if not isinstance(raw, dict):
@@ -45,36 +52,9 @@ def _response_truncated(response: LLMResponse) -> bool:
     return str(finish).upper() == "MAX_TOKENS"
 
 
-def _clean_json_payload(payload: str) -> str:
-    cleaned = payload.strip()
-    cleaned = cleaned.replace("\ufeff", "")
-    cleaned = cleaned.replace("\u201c", '"').replace("\u201d", '"')
-    cleaned = cleaned.replace("\u2018", "'").replace("\u2019", "'")
-    cleaned = re.sub(r",\s*([}\]])", r"\1", cleaned)
-    return cleaned
-
 
 def _extract_json(text: str) -> Dict[str, Any]:
-    match = re.search(r"```json\s*([\s\S]*?)\s*```", text, re.IGNORECASE)
-    if match:
-        payload = match.group(1)
-    else:
-        match = re.search(r"(\{[\s\S]*\})", text)
-        if not match:
-            raise ValueError("No JSON object found in response.")
-        payload = match.group(1)
-    payload = payload.strip()
-    try:
-        data = json.loads(payload)
-    except json.JSONDecodeError:
-        cleaned = _clean_json_payload(payload)
-        try:
-            data = json.loads(cleaned)
-        except json.JSONDecodeError:
-            try:
-                data = ast.literal_eval(cleaned)
-            except (ValueError, SyntaxError) as exc:
-                raise ValueError("Invalid JSON in response.") from exc
+    data = extract_json(text, label="Scene card response")
     if not isinstance(data, dict):
         raise ValueError("Scene card response JSON must be an object.")
     return data
@@ -90,23 +70,13 @@ def _resolve_plan_template(book_root: Path) -> Path:
 def _load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
-def _character_slug(character_id: str) -> str:
-    cleaned = str(character_id or "").strip()
-    if cleaned.upper().startswith("CHAR_"):
-        cleaned = cleaned[5:]
-    cleaned = re.sub(r"[^a-zA-Z0-9\s-]+", "", cleaned)
-    cleaned = re.sub(r"\s+", "-", cleaned)
-    cleaned = re.sub(r"-{2,}", "-", cleaned)
-    cleaned = cleaned.strip("-")
-    return cleaned.lower() or "character"
-
 
 def _load_character_states(book_root: Path, cast_present_ids: List[str]) -> List[Dict[str, Any]]:
     states: List[Dict[str, Any]] = []
+    ensure_character_index(book_root)
     for char_id in cast_present_ids:
-        slug = _character_slug(str(char_id))
-        state_path = book_root / "draft" / "context" / "characters" / f"{slug}.state.json"
-        if state_path.exists():
+        state_path = resolve_character_state_path(book_root, str(char_id))
+        if state_path and state_path.exists():
             try:
                 states.append(json.loads(state_path.read_text(encoding="utf-8")))
                 continue
@@ -444,15 +414,52 @@ def plan_scene(
         if str(response.text).strip() or attempt >= retries:
             break
         attempt += 1
-    try:
-        card = _extract_json(response.text)
-    except ValueError as exc:
-        if not log_path:
-            log_path = log_llm_response(workspace, "plan_scene", response, request=request, messages=messages, extra=log_extra)
-        extra_msg = ""
-        if _response_truncated(response):
-            extra_msg = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_PLAN_MAX_TOKENS."
-        raise ValueError(f"{exc}{extra_msg} (raw response logged to {log_path})") from exc
+    retries = _json_retry_count()
+    parse_attempt = 0
+    while True:
+        try:
+            card = _extract_json(response.text)
+            break
+        except ValueError as exc:
+            if parse_attempt >= retries:
+                if not log_path:
+                    log_path = log_llm_response(workspace, "plan_scene", response, request=request, messages=messages, extra=log_extra)
+                extra_msg = ""
+                if _response_truncated(response):
+                    extra_msg = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_PLAN_MAX_TOKENS."
+                raise ValueError(f"{exc}{extra_msg} (raw response logged to {log_path})") from exc
+            retry_messages = list(messages)
+            retry_messages.append({
+                "role": "user",
+                "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
+            })
+            response = client.chat(retry_messages, model=model, temperature=0.4, max_tokens=max_tokens)
+            label = f"plan_scene_json_retry{parse_attempt + 1}"
+            if should_log_llm():
+                log_path = log_llm_response(workspace, label, response, request=request, messages=retry_messages, extra=log_extra)
+            parse_attempt += 1
+
+    # Fill cast ids from model response if outline window had none.
+    if not cast_present_ids:
+        card_cast_ids = card.get("cast_present_ids")
+        if isinstance(card_cast_ids, list):
+            cast_present_ids = [str(item) for item in card_cast_ids if str(item).strip()]
+        if not cast_present_ids:
+            name_to_id = {value.lower(): key for key, value in character_names.items() if value}
+            card_cast = card.get("cast_present")
+            if isinstance(card_cast, list):
+                for name in card_cast:
+                    mapped = name_to_id.get(str(name).strip().lower())
+                    if mapped:
+                        cast_present_ids.append(mapped)
+
+    if not cast_present:
+        if cast_present_ids:
+            cast_present = [character_names.get(item, item) for item in cast_present_ids]
+        else:
+            card_cast = card.get("cast_present")
+            if isinstance(card_cast, list):
+                cast_present = [str(item) for item in card_cast if str(item).strip()]
 
     card = _normalize_scene_card(
         card,

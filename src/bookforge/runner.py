@@ -9,7 +9,7 @@ import re
 import time
 
 from bookforge.config.env import load_config, read_env_value, read_int_env
-from bookforge.characters import characters_ready, generate_characters
+from bookforge.characters import characters_ready, generate_characters, resolve_character_state_path, ensure_character_index, create_character_state_path
 from bookforge.llm.client import LLMClient
 from bookforge.llm.errors import LLMRequestError
 from bookforge.llm.factory import get_llm_client, resolve_model
@@ -27,6 +27,7 @@ from bookforge.phases.plan import plan_scene
 from bookforge.prompt.renderer import render_template_file
 from bookforge.prompt.system import load_system_prompt
 from bookforge.util.paths import repo_root
+from bookforge.util.json_extract import extract_json
 from bookforge.util.schema import validate_json
 
 
@@ -40,6 +41,7 @@ DEFAULT_EMPTY_RESPONSE_RETRIES = 2
 DEFAULT_REQUEST_ERROR_RETRIES = 1
 DEFAULT_REQUEST_ERROR_BACKOFF_SECONDS = 2.0
 DEFAULT_REQUEST_ERROR_MAX_SLEEP = 60.0
+DEFAULT_JSON_RETRY_COUNT = 1
 PAUSE_EXIT_CODE = 75
 
 SUMMARY_CHAPTER_SO_FAR_CAP = 20
@@ -82,6 +84,10 @@ def _empty_response_retries() -> int:
 
 def _request_error_retries() -> int:
     return max(0, _int_env("BOOKFORGE_REQUEST_ERROR_RETRIES", DEFAULT_REQUEST_ERROR_RETRIES))
+
+
+def _json_retry_count() -> int:
+    return max(0, _int_env("BOOKFORGE_JSON_RETRY_COUNT", DEFAULT_JSON_RETRY_COUNT))
 
 
 
@@ -132,15 +138,6 @@ def _response_truncated(response: LLMResponse) -> bool:
     return False
 
 
-def _clean_json_payload(payload: str) -> str:
-    cleaned = payload.strip()
-    cleaned = cleaned.replace("\ufeff", "")
-    cleaned = cleaned.replace("\u201c", '"').replace("\u201d", '"')
-    cleaned = cleaned.replace("\u2018", "'").replace("\u2019", "'")
-    cleaned = re.sub(r",\s*([}\]])", r"\1", cleaned)
-    return cleaned
-
-
 
 
 def _normalize_lint_report(report: Dict[str, Any]) -> Dict[str, Any]:
@@ -184,58 +181,8 @@ def _normalize_lint_report(report: Dict[str, Any]) -> Dict[str, Any]:
     return normalized
 
 
-def _last_json_block(text: str) -> Optional[str]:
-    end = text.rfind("}")
-    if end == -1:
-        return None
-    depth = 0
-    in_str = False
-    escape = False
-    for idx in range(end, -1, -1):
-        ch = text[idx]
-        if in_str:
-            if escape:
-                escape = False
-                continue
-            if ch == "\\":
-                escape = True
-                continue
-            if ch == '"':
-                in_str = False
-            continue
-        if ch == '"':
-            in_str = True
-            continue
-        if ch == "}":
-            depth += 1
-            continue
-        if ch == "{":
-            depth -= 1
-            if depth == 0:
-                return text[idx:end + 1]
-    return None
-
-
 def _extract_json(text: str) -> Dict[str, Any]:
-    matches = list(re.finditer(r"```json\s*([\s\S]*?)\s*```", text, re.IGNORECASE))
-    if matches:
-        payload = matches[-1].group(1)
-    else:
-        payload = _last_json_block(text)
-        if not payload:
-            raise ValueError("No JSON object found in response.")
-    payload = payload.strip()
-    try:
-        data = json.loads(payload)
-    except json.JSONDecodeError:
-        cleaned = _clean_json_payload(payload)
-        try:
-            data = json.loads(cleaned)
-        except json.JSONDecodeError:
-            try:
-                data = ast.literal_eval(cleaned)
-            except (ValueError, SyntaxError) as exc:
-                raise ValueError("Invalid JSON in response.") from exc
+    data = extract_json(text, label="Response")
     if not isinstance(data, dict):
         raise ValueError("Response JSON must be an object.")
     return data
@@ -381,55 +328,75 @@ def _build_thread_registry(outline: Dict[str, Any]) -> List[Dict[str, str]]:
     return registry
 
 
-def _character_slug(character_id: str) -> str:
-    cleaned = str(character_id or "").strip()
-    if cleaned.upper().startswith("CHAR_"):
-        cleaned = cleaned[5:]
-    cleaned = re.sub(r"[^a-zA-Z0-9\s-]+", "", cleaned)
-    cleaned = re.sub(r"\s+", "-", cleaned)
-    cleaned = re.sub(r"-{2,}", "-", cleaned)
-    cleaned = cleaned.strip("-")
-    return cleaned.lower() or "character"
+def _character_name_map(registry: List[Dict[str, str]]) -> Dict[str, str]:
+    mapping: Dict[str, str] = {}
+    for entry in registry:
+        if not isinstance(entry, dict):
+            continue
+        char_id = str(entry.get("character_id") or "").strip()
+        name = str(entry.get("name") or "").strip()
+        if char_id:
+            mapping[char_id] = name or char_id
+    return mapping
+
+
+def _character_id_map(registry: List[Dict[str, str]]) -> Dict[str, str]:
+    mapping: Dict[str, str] = {}
+    for entry in registry:
+        if not isinstance(entry, dict):
+            continue
+        char_id = str(entry.get("character_id") or "").strip()
+        name = str(entry.get("name") or "").strip().lower()
+        if name and char_id:
+            mapping[name] = char_id
+        if char_id:
+            mapping[char_id.lower()] = char_id
+    return mapping
+
+
+def _scene_cast_ids_from_outline(outline: Dict[str, Any], chapter_num: int, scene_num: int) -> List[str]:
+    chapter = _find_chapter_outline(outline, chapter_num)
+    scenes: List[Dict[str, Any]] = []
+    sections = chapter.get("sections") if isinstance(chapter, dict) else None
+    if isinstance(sections, list):
+        for section in sections:
+            if not isinstance(section, dict):
+                continue
+            sec_scenes = section.get("scenes")
+            if isinstance(sec_scenes, list):
+                scenes.extend([item for item in sec_scenes if isinstance(item, dict)])
+    else:
+        raw = chapter.get("scenes") if isinstance(chapter, dict) else None
+        if isinstance(raw, list):
+            scenes = [item for item in raw if isinstance(item, dict)]
+    if not scenes:
+        return []
+    index = max(0, scene_num - 1)
+    if index >= len(scenes):
+        return []
+    current = scenes[index]
+    cast_ids = current.get("characters") if isinstance(current, dict) else None
+    if not isinstance(cast_ids, list):
+        return []
+    return [str(item) for item in cast_ids if str(item).strip()]
+
 
 
 def _load_character_states(book_root: Path, scene_card: Dict[str, Any]) -> List[Dict[str, Any]]:
     cast_ids = scene_card.get("cast_present_ids", []) if isinstance(scene_card, dict) else []
     if not isinstance(cast_ids, list):
         cast_ids = []
-    index_map: Dict[str, str] = {}
-    index_path = book_root / "draft" / "context" / "characters" / "index.json"
-    if index_path.exists():
-        try:
-            index_data = json.loads(index_path.read_text(encoding="utf-8"))
-            entries = index_data.get("characters") if isinstance(index_data, dict) else None
-            if isinstance(entries, list):
-                for entry in entries:
-                    if not isinstance(entry, dict):
-                        continue
-                    char_id = str(entry.get("character_id") or "").strip()
-                    state_path = str(entry.get("state_path") or "").strip()
-                    if char_id and state_path:
-                        index_map[char_id] = state_path
-        except json.JSONDecodeError:
-            pass
-
+    ensure_character_index(book_root)
     states: List[Dict[str, Any]] = []
     for char_id in cast_ids:
-        char_id_str = str(char_id)
-        state_path = None
-        indexed = index_map.get(char_id_str)
-        if indexed:
-            state_path = book_root / indexed
-        if state_path is None or not state_path.exists():
-            slug = _character_slug(char_id_str)
-            state_path = book_root / "draft" / "context" / "characters" / f"{slug}.state.json"
-        if state_path.exists():
+        state_path = resolve_character_state_path(book_root, str(char_id))
+        if state_path and state_path.exists():
             try:
                 states.append(json.loads(state_path.read_text(encoding="utf-8")))
                 continue
             except json.JSONDecodeError:
                 pass
-        states.append({"character_id": char_id_str, "missing": True})
+        states.append({"character_id": str(char_id), "missing": True})
     return states
 
 
@@ -1197,7 +1164,31 @@ def _generate_continuity_pack(
         log_extra=_log_scope(book_root, scene_card),
     )
 
-    data = _extract_json(response.text)
+    retries = _json_retry_count()
+    attempt = 0
+    while True:
+        try:
+            data = _extract_json(response.text)
+            break
+        except ValueError as exc:
+            if attempt >= retries:
+                raise exc
+            retry_messages = list(messages)
+            retry_messages.append({
+                "role": "user",
+                "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
+            })
+            response = _chat(
+                workspace,
+                f"continuity_pack_json_retry{attempt + 1}",
+                client,
+                retry_messages,
+                model=model,
+                temperature=0.4,
+                max_tokens=_continuity_max_tokens(),
+                log_extra=_log_scope(book_root, scene_card),
+            )
+            attempt += 1
     data = _normalize_continuity_pack(data, scene_card, thread_registry)
     data["summary"] = _summary_from_state(state)
     pack = ContinuityPack.from_dict(data)
@@ -1249,13 +1240,34 @@ def _write_scene(
         log_extra=_log_scope(book_root, scene_card),
     )
 
-    try:
-        prose, patch = _extract_prose_and_patch(response.text)
-    except ValueError as exc:
-        extra = ""
-        if _response_truncated(response):
-            extra = f" Model output hit MAX_TOKENS ({_write_max_tokens()}); increase BOOKFORGE_WRITE_MAX_TOKENS."
-        raise ValueError(f"{exc}{extra}") from exc
+    retries = _json_retry_count()
+    attempt = 0
+    while True:
+        try:
+            prose, patch = _extract_prose_and_patch(response.text)
+            break
+        except ValueError as exc:
+            if attempt >= retries:
+                extra = ""
+                if _response_truncated(response):
+                    extra = f" Model output hit MAX_TOKENS ({_write_max_tokens()}); increase BOOKFORGE_WRITE_MAX_TOKENS."
+                raise ValueError(f"{exc}{extra}") from exc
+            retry_messages = list(messages)
+            retry_messages.append({
+                "role": "user",
+                "content": "Return PROSE plus a STATE_PATCH JSON block. Output format: PROSE: <text> then STATE_PATCH: <json>. No markdown.",
+            })
+            response = _chat(
+                workspace,
+                f"write_scene_json_retry{attempt + 1}",
+                client,
+                retry_messages,
+                model=model,
+                temperature=0.7,
+                max_tokens=_write_max_tokens(),
+                log_extra=_log_scope(book_root, scene_card),
+            )
+            attempt += 1
 
     _coerce_summary_update(patch)
     _coerce_character_updates(patch)
@@ -1304,7 +1316,31 @@ def _lint_scene(
         log_extra=_log_scope(book_root, scene_card),
     )
 
-    report = _extract_json(response.text)
+    retries = _json_retry_count()
+    attempt = 0
+    while True:
+        try:
+            report = _extract_json(response.text)
+            break
+        except ValueError as exc:
+            if attempt >= retries:
+                raise exc
+            retry_messages = list(messages)
+            retry_messages.append({
+                "role": "user",
+                "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
+            })
+            response = _chat(
+                workspace,
+                f"lint_scene_json_retry{attempt + 1}",
+                client,
+                retry_messages,
+                model=model,
+                temperature=0.0,
+                max_tokens=_lint_max_tokens(),
+                log_extra=_log_scope(book_root, scene_card),
+            )
+            attempt += 1
     report = _normalize_lint_report(report)
     summary_update = patch.get("summary_update") if isinstance(patch, dict) else {}
     if not isinstance(summary_update, dict):
@@ -1362,13 +1398,34 @@ def _repair_scene(
         log_extra=_log_scope(book_root, scene_card),
     )
 
-    try:
-        prose, patch = _extract_prose_and_patch(response.text)
-    except ValueError as exc:
-        extra = ""
-        if _response_truncated(response):
-            extra = f" Model output hit MAX_TOKENS ({_repair_max_tokens()}); increase BOOKFORGE_REPAIR_MAX_TOKENS."
-        raise ValueError(f"{exc}{extra}") from exc
+    retries = _json_retry_count()
+    attempt = 0
+    while True:
+        try:
+            prose, patch = _extract_prose_and_patch(response.text)
+            break
+        except ValueError as exc:
+            if attempt >= retries:
+                extra = ""
+                if _response_truncated(response):
+                    extra = f" Model output hit MAX_TOKENS ({_repair_max_tokens()}); increase BOOKFORGE_REPAIR_MAX_TOKENS."
+                raise ValueError(f"{exc}{extra}") from exc
+            retry_messages = list(messages)
+            retry_messages.append({
+                "role": "user",
+                "content": "Return PROSE plus a STATE_PATCH JSON block. Output format: PROSE: <text> then STATE_PATCH: <json>. No markdown.",
+            })
+            response = _chat(
+                workspace,
+                f"repair_scene_json_retry{attempt + 1}",
+                client,
+                retry_messages,
+                model=model,
+                temperature=0.4,
+                max_tokens=_repair_max_tokens(),
+                log_extra=_log_scope(book_root, scene_card),
+            )
+            attempt += 1
 
     _coerce_summary_update(patch)
     _coerce_character_updates(patch)
@@ -1423,7 +1480,31 @@ def _state_repair(
         log_extra=_log_scope(book_root, scene_card),
     )
 
-    patch = _extract_json(response.text)
+    retries = _json_retry_count()
+    attempt = 0
+    while True:
+        try:
+            patch = _extract_json(response.text)
+            break
+        except ValueError as exc:
+            if attempt >= retries:
+                raise exc
+            retry_messages = list(messages)
+            retry_messages.append({
+                "role": "user",
+                "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
+            })
+            response = _chat(
+                workspace,
+                f"state_repair_json_retry{attempt + 1}",
+                client,
+                retry_messages,
+                model=model,
+                temperature=0.2,
+                max_tokens=_state_repair_max_tokens(),
+                log_extra=_log_scope(book_root, scene_card),
+            )
+            attempt += 1
     if "schema_version" not in patch:
         patch["schema_version"] = "1.0"
     _coerce_summary_update(patch)
@@ -1471,35 +1552,16 @@ def _apply_character_updates(book_root: Path, patch: Dict[str, Any], chapter_num
         return
     characters_dir = book_root / "draft" / "context" / "characters"
     characters_dir.mkdir(parents=True, exist_ok=True)
-    index_map: Dict[str, str] = {}
-    index_path = characters_dir / "index.json"
-    if index_path.exists():
-        try:
-            index_data = json.loads(index_path.read_text(encoding="utf-8"))
-            entries = index_data.get("characters") if isinstance(index_data, dict) else None
-            if isinstance(entries, list):
-                for entry in entries:
-                    if not isinstance(entry, dict):
-                        continue
-                    cid = str(entry.get("character_id") or "").strip()
-                    spath = str(entry.get("state_path") or "").strip()
-                    if cid and spath:
-                        index_map[cid] = spath
-        except json.JSONDecodeError:
-            pass
+    ensure_character_index(book_root)
     for update in updates:
         if not isinstance(update, dict):
             continue
         char_id = str(update.get("character_id") or "").strip()
         if not char_id:
             continue
-        state_path = None
-        indexed = index_map.get(char_id)
-        if indexed:
-            state_path = book_root / indexed
-        if state_path is None or not state_path.exists():
-            slug = _character_slug(char_id)
-            state_path = characters_dir / f"{slug}.state.json"
+        state_path = resolve_character_state_path(book_root, char_id)
+        if state_path is None:
+            state_path = create_character_state_path(book_root, char_id)
         state: Dict[str, Any] = {
             "schema_version": "1.0",
             "character_id": char_id,
@@ -1677,7 +1739,10 @@ def run_loop(
     continuity_model = resolve_model("continuity", config)
 
     if not characters_ready(book_root):
-        generate_characters(workspace=workspace, book_id=book_id)
+        try:
+            generate_characters(workspace=workspace, book_id=book_id)
+        except LLMRequestError as exc:
+            _pause_on_quota(book_root, state_path, None, "characters_generate", exc)
     writer_model = resolve_model("writer", config)
     repair_model = resolve_model("repair", config)
     state_repair_model = resolve_model("state_repair", config)
@@ -1731,6 +1796,28 @@ def run_loop(
         validate_json(scene_card, "scene_card")
         chapter_num = int(scene_card.get("chapter", chapter))
         scene_num = int(scene_card.get("scene", scene))
+
+        cast_ids = scene_card.get("cast_present_ids", []) if isinstance(scene_card, dict) else []
+        if not isinstance(cast_ids, list):
+            cast_ids = []
+        cast_ids = [str(item) for item in cast_ids if str(item).strip()]
+        if not cast_ids:
+            derived = _scene_cast_ids_from_outline(outline, chapter_num, scene_num)
+            if not derived:
+                name_map = _character_id_map(character_registry)
+                cast_names = scene_card.get("cast_present", []) if isinstance(scene_card, dict) else []
+                if not isinstance(cast_names, list):
+                    cast_names = []
+                for name in cast_names:
+                    mapped = name_map.get(str(name).strip().lower())
+                    if mapped:
+                        derived.append(mapped)
+            if derived:
+                scene_card["cast_present_ids"] = derived
+                cast_ids = list(derived)
+        if cast_ids and not scene_card.get("cast_present"):
+            name_map = _character_name_map(character_registry)
+            scene_card["cast_present"] = [name_map.get(item, item) for item in cast_ids]
 
         state = _load_json(state_path)
 

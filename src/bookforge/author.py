@@ -16,8 +16,10 @@ from bookforge.llm.logging import log_llm_error, log_llm_response, should_log_ll
 from bookforge.llm.errors import LLMRequestError
 from bookforge.prompt.renderer import render_template_file
 from bookforge.util.paths import repo_root
+from bookforge.util.json_extract import extract_json
 
 AUTHOR_TEMPLATE = repo_root(Path(__file__).resolve()) / 'resources' / 'prompt_templates' / 'author_generate.md'
+DEFAULT_JSON_RETRY_COUNT = 1
 
 @dataclass(frozen=True)
 class AuthorArtifacts:
@@ -33,38 +35,11 @@ def slugify(name: str) -> str:
     value = value.strip('-')
     return value or 'author'
 
-def _clean_json_payload(payload: str) -> str:
-    cleaned = payload.strip()
-    cleaned = cleaned.replace("\ufeff", "")
-    cleaned = cleaned.replace("\u201c", '"').replace("\u201d", '"')
-    cleaned = cleaned.replace("\u2018", "'").replace("\u2019", "'")
-    cleaned = re.sub(r",\s*([}\]])", r"\1", cleaned)
-    return cleaned
-
 
 def _extract_json(text: str) -> Dict[str, Any]:
-    match = re.search(r"```json\s*([\s\S]*?)\s*```", text, re.IGNORECASE)
-    if match:
-        payload = match.group(1)
-    else:
-        match = re.search(r"(\{[\s\S]*\})", text)
-        if not match:
-            raise ValueError('No JSON object found in response.')
-        payload = match.group(1)
-    payload = payload.strip()
-    try:
-        data = json.loads(payload)
-    except json.JSONDecodeError:
-        cleaned = _clean_json_payload(payload)
-        try:
-            data = json.loads(cleaned)
-        except json.JSONDecodeError:
-            try:
-                data = ast.literal_eval(cleaned)
-            except (ValueError, SyntaxError) as exc:
-                raise ValueError('Invalid JSON in response.') from exc
+    data = extract_json(text, label="Author response")
     if not isinstance(data, dict):
-        raise ValueError('Author response JSON must be an object.')
+        raise ValueError("Author response JSON must be an object.")
     return data
 
 def _load_index(path: Path) -> Dict[str, Any]:
@@ -104,6 +79,10 @@ def _int_env(name: str, default: int) -> int:
 
 def _author_max_tokens() -> int:
     return _int_env("BOOKFORGE_AUTHOR_MAX_TOKENS", 32768)
+
+
+def _json_retry_count() -> int:
+    return max(0, _int_env("BOOKFORGE_JSON_RETRY_COUNT", DEFAULT_JSON_RETRY_COUNT))
 
 
 def _response_truncated(response: LLMResponse) -> bool:
@@ -156,15 +135,30 @@ def generate_author(
     log_extra = {"key_slot": key_slot} if key_slot else None
     if should_log_llm():
         log_path = log_llm_response(workspace, "author_generate", response, request=request, messages=messages, extra=log_extra)
-    try:
-        data = _extract_json(response.text)
-    except ValueError as exc:
-        if not log_path:
-            log_path = log_llm_response(workspace, "author_generate", response, request=request, messages=messages, extra=log_extra)
-        extra_msg = ""
-        if _response_truncated(response):
-            extra_msg = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_AUTHOR_MAX_TOKENS or reduce output size."
-        raise ValueError(f"{exc}{extra_msg} (raw response logged to {log_path})") from exc
+    retries = _json_retry_count()
+    parse_attempt = 0
+    while True:
+        try:
+            data = _extract_json(response.text)
+            break
+        except ValueError as exc:
+            if parse_attempt >= retries:
+                if not log_path:
+                    log_path = log_llm_response(workspace, "author_generate", response, request=request, messages=messages, extra=log_extra)
+                extra_msg = ""
+                if _response_truncated(response):
+                    extra_msg = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_AUTHOR_MAX_TOKENS or reduce output size."
+                raise ValueError(f"{exc}{extra_msg} (raw response logged to {log_path})") from exc
+            retry_messages = list(messages)
+            retry_messages.append({
+                "role": "user",
+                "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
+            })
+            response = client.chat(retry_messages, model=model, temperature=0.7, max_tokens=max_tokens)
+            label = f"author_generate_json_retry{parse_attempt + 1}"
+            if should_log_llm():
+                log_path = log_llm_response(workspace, label, response, request=request, messages=retry_messages, extra=log_extra)
+            parse_attempt += 1
 
     author = data.get('author') if isinstance(data.get('author'), dict) else {}
     author_style_md = str(data.get('author_style_md') or '')

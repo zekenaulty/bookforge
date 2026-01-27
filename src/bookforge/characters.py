@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -7,7 +7,7 @@ import json
 import re
 import hashlib
 
-from bookforge.config.env import load_config
+from bookforge.config.env import load_config, read_int_env
 from bookforge.llm.client import LLMClient
 from bookforge.llm.errors import LLMRequestError
 from bookforge.llm.factory import get_llm_client, resolve_model
@@ -15,7 +15,10 @@ from bookforge.llm.logging import log_llm_error, log_llm_response, should_log_ll
 from bookforge.llm.types import Message
 from bookforge.prompt.renderer import render_template_file
 from bookforge.util.paths import repo_root
+from bookforge.util.json_extract import extract_json
 from bookforge.util.schema import validate_json
+
+DEFAULT_JSON_RETRY_COUNT = 1
 
 
 def _now_iso() -> str:
@@ -23,37 +26,18 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def _clean_json_payload(payload: str) -> str:
-    cleaned = payload.strip()
-    cleaned = cleaned.replace("\ufeff", "")
-    cleaned = cleaned.replace("\u201c", '"').replace("\u201d", '"')
-    cleaned = cleaned.replace("\u2018", "'").replace("\u2019", "'")
-    cleaned = re.sub(r",\s*([}\]])", r"\1", cleaned)
-    return cleaned
+def _int_env(name: str, default: int) -> int:
+    return read_int_env(name, default)
+
+
+def _json_retry_count() -> int:
+    return max(0, _int_env("BOOKFORGE_JSON_RETRY_COUNT", DEFAULT_JSON_RETRY_COUNT))
+
 
 def _extract_json(text: str) -> Dict[str, Any]:
-    match = re.search(r"```json\s*([\s\S]*?)\s*```", text, re.IGNORECASE)
-    if match:
-        payload = match.group(1)
-    else:
-        match = re.search(r"(\{[\s\S]*\})", text)
-        if not match:
-            raise ValueError("No JSON object found in response.")
-        payload = match.group(1)
-    payload = payload.strip()
-    try:
-        data = json.loads(payload)
-    except json.JSONDecodeError:
-        cleaned = _clean_json_payload(payload)
-        try:
-            data = json.loads(cleaned)
-        except json.JSONDecodeError:
-            try:
-                data = ast.literal_eval(cleaned)
-            except (ValueError, SyntaxError) as exc:
-                raise ValueError("Invalid JSON in response.") from exc
+    data = extract_json(text, label="Characters response")
     if not isinstance(data, dict):
-        raise ValueError("Response JSON must be an object.")
+        raise ValueError("Characters response JSON must be an object.")
     return data
 
 
@@ -106,6 +90,7 @@ def _series_root(workspace: Path, book: Dict[str, Any]) -> Path:
     series_id = str(book.get("series_id") or book.get("book_id") or "series").strip()
     return workspace / "series" / (series_id or "series")
 
+
 def _short_id_hash(value: str) -> str:
     digest = hashlib.sha1(value.encode("utf-8")).hexdigest()
     return digest[:8]
@@ -116,7 +101,20 @@ def _character_state_filename(character_id: str) -> str:
     return f"{slug}__{_short_id_hash(character_id)}.state.json"
 
 
-
+def _unique_state_path(characters_dir: Path, character_id: str) -> Path:
+    base_path = characters_dir / _character_state_filename(character_id)
+    if base_path.exists():
+        try:
+            data = json.loads(base_path.read_text(encoding="utf-8"))
+            if str(data.get("character_id") or "").strip() == str(character_id).strip():
+                return base_path
+        except json.JSONDecodeError:
+            pass
+        from datetime import datetime, timezone
+        slug = _character_slug(character_id)
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+        return characters_dir / f"{slug}__{stamp}.state.json"
+    return base_path
 
 
 def _ensure_series_dirs(series_root: Path) -> None:
@@ -173,6 +171,112 @@ def _update_book_index(book_root: Path, entries: List[Dict[str, str]]) -> None:
         by_id[char_id] = entry
     data["characters"] = list(by_id.values())
     index_path.write_text(json.dumps(data, ensure_ascii=True, indent=2), encoding="utf-8")
+
+
+def _read_book_index(book_root: Path) -> Dict[str, str]:
+    index_path = book_root / "draft" / "context" / "characters" / "index.json"
+    if not index_path.exists():
+        return {}
+    try:
+        data = json.loads(index_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+    entries = data.get("characters") if isinstance(data, dict) else None
+    if not isinstance(entries, list):
+        return {}
+    mapping: Dict[str, str] = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        char_id = str(entry.get("character_id") or "").strip()
+        state_path = str(entry.get("state_path") or "").strip()
+        if char_id and state_path:
+            mapping[char_id] = state_path
+    return mapping
+
+
+def _persist_book_index(book_root: Path, index_map: Dict[str, str]) -> None:
+    entries: List[Dict[str, str]] = []
+    for char_id, state_path in index_map.items():
+        entries.append({"character_id": char_id, "state_path": state_path})
+    if entries:
+        _update_book_index(book_root, entries)
+
+
+def ensure_character_index(book_root: Path) -> Dict[str, str]:
+    characters_dir = book_root / "draft" / "context" / "characters"
+    if not characters_dir.exists():
+        return {}
+
+    index_map = _read_book_index(book_root)
+    if index_map:
+        missing = [
+            char_id
+            for char_id, rel_path in index_map.items()
+            if not (book_root / rel_path).exists()
+        ]
+        if not missing:
+            return index_map
+
+    rebuilt: Dict[str, str] = {}
+    for path in characters_dir.glob("*.state.json"):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        char_id = str(data.get("character_id") or "").strip()
+        if not char_id:
+            continue
+        rel_path = str(path.relative_to(book_root)).replace("\\", "/")
+        rebuilt[char_id] = rel_path
+
+    if rebuilt:
+        _persist_book_index(book_root, rebuilt)
+        return rebuilt
+
+    return index_map
+
+
+def resolve_character_state_path(book_root: Path, character_id: str) -> Optional[Path]:
+    character_id = str(character_id or "").strip()
+    if not character_id:
+        return None
+    characters_dir = book_root / "draft" / "context" / "characters"
+    index_map = ensure_character_index(book_root)
+    rel_path = index_map.get(character_id)
+    if rel_path:
+        candidate = book_root / rel_path
+        if candidate.exists():
+            return candidate
+
+    slug = _character_slug(character_id)
+    candidates = sorted(characters_dir.glob(f"{slug}__*.state.json"))
+    if candidates:
+        chosen = candidates[0]
+        rel_path = str(chosen.relative_to(book_root)).replace("\\", "/")
+        index_map[character_id] = rel_path
+        _persist_book_index(book_root, index_map)
+        return chosen
+
+    legacy = characters_dir / f"{slug}.state.json"
+    if legacy.exists():
+        rel_path = str(legacy.relative_to(book_root)).replace("\\", "/")
+        index_map[character_id] = rel_path
+        _persist_book_index(book_root, index_map)
+        return legacy
+
+    return None
+
+
+def create_character_state_path(book_root: Path, character_id: str) -> Path:
+    characters_dir = book_root / "draft" / "context" / "characters"
+    characters_dir.mkdir(parents=True, exist_ok=True)
+    state_path = _unique_state_path(characters_dir, character_id)
+    rel_path = str(state_path.relative_to(book_root)).replace("\\", "/")
+    index_map = ensure_character_index(book_root)
+    index_map[str(character_id).strip()] = rel_path
+    _persist_book_index(book_root, index_map)
+    return state_path
 
 
 def generate_characters(
@@ -251,7 +355,26 @@ def generate_characters(
     if should_log_llm():
         log_path = log_llm_response(workspace, "characters_generate", response, request=request, messages=messages, extra=log_extra)
 
-    data = _extract_json(response.text)
+    retries = _json_retry_count()
+    parse_attempt = 0
+    while True:
+        try:
+            data = _extract_json(response.text)
+            break
+        except ValueError as exc:
+            if parse_attempt >= retries:
+                raise ValueError(f"{exc} (raw response logged to {log_path})") from exc
+            retry_messages = list(messages)
+            retry_messages.append({
+                "role": "user",
+                "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
+            })
+            response = client.chat(retry_messages, model=model, temperature=0.5, max_tokens=32768)
+            label = f"characters_generate_json_retry{parse_attempt + 1}"
+            if should_log_llm():
+                log_path = log_llm_response(workspace, label, response, request=request, messages=retry_messages, extra=log_extra)
+            parse_attempt += 1
+
     characters = data.get("characters")
     if not isinstance(characters, list):
         raise ValueError(f"Invalid characters response. (raw response logged to {log_path})")
@@ -314,7 +437,7 @@ def generate_characters(
 
         characters_dir = book_root / "draft" / "context" / "characters"
         characters_dir.mkdir(parents=True, exist_ok=True)
-        state_path = characters_dir / _character_state_filename(char_id)
+        state_path = _unique_state_path(characters_dir, char_id)
         state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
         updated_paths.append(state_path)
 
@@ -346,12 +469,10 @@ def generate_characters(
 
 
 def characters_ready(book_root: Path) -> bool:
-    index_path = book_root / "draft" / "context" / "characters" / "index.json"
-    if not index_path.exists():
+    index_map = ensure_character_index(book_root)
+    if not index_map:
         return False
-    try:
-        data = json.loads(index_path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return False
-    entries = data.get("characters") if isinstance(data, dict) else None
-    return isinstance(entries, list) and len(entries) > 0
+    for rel_path in index_map.values():
+        if not (book_root / rel_path).exists():
+            return False
+    return True
