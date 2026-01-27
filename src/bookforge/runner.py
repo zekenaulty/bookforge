@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import ast
 import json
 import re
+import time
 
 from bookforge.config.env import load_config, read_env_value, read_int_env
 from bookforge.characters import characters_ready, generate_characters
@@ -36,6 +37,10 @@ DEFAULT_STATE_REPAIR_MAX_TOKENS = 147456
 DEFAULT_CONTINUITY_MAX_TOKENS = 147456
 DEFAULT_STYLE_ANCHOR_MAX_TOKENS = 32768
 DEFAULT_EMPTY_RESPONSE_RETRIES = 2
+DEFAULT_REQUEST_ERROR_RETRIES = 1
+DEFAULT_REQUEST_ERROR_BACKOFF_SECONDS = 2.0
+DEFAULT_REQUEST_ERROR_MAX_SLEEP = 60.0
+PAUSE_EXIT_CODE = 75
 
 SUMMARY_CHAPTER_SO_FAR_CAP = 20
 SUMMARY_KEY_FACTS_CAP = 25
@@ -73,6 +78,10 @@ def _style_anchor_max_tokens() -> int:
 
 def _empty_response_retries() -> int:
     return max(0, _int_env("BOOKFORGE_EMPTY_RESPONSE_RETRIES", DEFAULT_EMPTY_RESPONSE_RETRIES))
+
+
+def _request_error_retries() -> int:
+    return max(0, _int_env("BOOKFORGE_REQUEST_ERROR_RETRIES", DEFAULT_REQUEST_ERROR_RETRIES))
 
 
 
@@ -175,15 +184,46 @@ def _normalize_lint_report(report: Dict[str, Any]) -> Dict[str, Any]:
     return normalized
 
 
+def _last_json_block(text: str) -> Optional[str]:
+    end = text.rfind("}")
+    if end == -1:
+        return None
+    depth = 0
+    in_str = False
+    escape = False
+    for idx in range(end, -1, -1):
+        ch = text[idx]
+        if in_str:
+            if escape:
+                escape = False
+                continue
+            if ch == "\\":
+                escape = True
+                continue
+            if ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+            continue
+        if ch == "}":
+            depth += 1
+            continue
+        if ch == "{":
+            depth -= 1
+            if depth == 0:
+                return text[idx:end + 1]
+    return None
+
+
 def _extract_json(text: str) -> Dict[str, Any]:
-    match = re.search(r"```json\s*([\s\S]*OK)\s*```", text, re.IGNORECASE)
-    if match:
-        payload = match.group(1)
+    matches = list(re.finditer(r"```json\s*([\s\S]*?)\s*```", text, re.IGNORECASE))
+    if matches:
+        payload = matches[-1].group(1)
     else:
-        match = re.search(r"(\{[\s\S]*\})", text)
-        if not match:
+        payload = _last_json_block(text)
+        if not payload:
             raise ValueError("No JSON object found in response.")
-        payload = match.group(1)
     payload = payload.strip()
     try:
         data = json.loads(payload)
@@ -214,7 +254,9 @@ def _strip_compliance_block(text: str) -> str:
 
 
 def _extract_prose_and_patch(text: str) -> Tuple[str, Dict[str, Any]]:
-    match = re.search(r"STATE\s*_OKPATCH\s*:\s*", text, re.IGNORECASE)
+    match = None
+    for candidate in re.finditer(r"STATE\s*_(?:OKPATCH|PATCH)\s*:\s*", text, re.IGNORECASE):
+        match = candidate
     if not match:
         return _extract_prose_and_patch_fallback(text)
     prose_block = text[:match.start()].strip()
@@ -230,7 +272,7 @@ def _extract_prose_and_patch(text: str) -> Tuple[str, Dict[str, Any]]:
 
 
 def _extract_prose_and_patch_fallback(text: str) -> Tuple[str, Dict[str, Any]]:
-    fence_matches = list(re.finditer(r"```json\s*([\s\S]*OK)\s*```", text, re.IGNORECASE))
+    fence_matches = list(re.finditer(r"```json\s*([\s\S]*?)\s*```", text, re.IGNORECASE))
     if fence_matches:
         match = fence_matches[-1]
         patch_block = match.group(1).strip()
@@ -257,7 +299,9 @@ def _extract_prose_and_patch_fallback(text: str) -> Tuple[str, Dict[str, Any]]:
             patch["schema_version"] = "1.0"
         return prose, patch
 
-    raise ValueError("Missing STATE_PATCH block in response.")
+    raise ValueError(
+        "Missing STATE_PATCH/STATE_OKPATCH block in response (searched for explicit marker, fenced JSON, or trailing JSON)."
+    )
 
 
 def _parse_until(value: Optional[str]) -> Tuple[Optional[int], Optional[int]]:
@@ -352,17 +396,40 @@ def _load_character_states(book_root: Path, scene_card: Dict[str, Any]) -> List[
     cast_ids = scene_card.get("cast_present_ids", []) if isinstance(scene_card, dict) else []
     if not isinstance(cast_ids, list):
         cast_ids = []
+    index_map: Dict[str, str] = {}
+    index_path = book_root / "draft" / "context" / "characters" / "index.json"
+    if index_path.exists():
+        try:
+            index_data = json.loads(index_path.read_text(encoding="utf-8"))
+            entries = index_data.get("characters") if isinstance(index_data, dict) else None
+            if isinstance(entries, list):
+                for entry in entries:
+                    if not isinstance(entry, dict):
+                        continue
+                    char_id = str(entry.get("character_id") or "").strip()
+                    state_path = str(entry.get("state_path") or "").strip()
+                    if char_id and state_path:
+                        index_map[char_id] = state_path
+        except json.JSONDecodeError:
+            pass
+
     states: List[Dict[str, Any]] = []
     for char_id in cast_ids:
-        slug = _character_slug(str(char_id))
-        state_path = book_root / "draft" / "context" / "characters" / f"{slug}.state.json"
+        char_id_str = str(char_id)
+        state_path = None
+        indexed = index_map.get(char_id_str)
+        if indexed:
+            state_path = book_root / indexed
+        if state_path is None or not state_path.exists():
+            slug = _character_slug(char_id_str)
+            state_path = book_root / "draft" / "context" / "characters" / f"{slug}.state.json"
         if state_path.exists():
             try:
                 states.append(json.loads(state_path.read_text(encoding="utf-8")))
                 continue
             except json.JSONDecodeError:
                 pass
-        states.append({"character_id": str(char_id), "missing": True})
+        states.append({"character_id": char_id_str, "missing": True})
     return states
 
 
@@ -476,10 +543,11 @@ def _summary_from_state(state: Dict[str, Any]) -> Dict[str, List[str]]:
         "story_so_far": _summary_list(summary.get("story_so_far")),
         "key_facts_ring": _summary_list(summary.get("key_facts_ring")),
         "must_stay_true": _summary_list(summary.get("must_stay_true")),
+        "pending_story_rollups": _summary_list(summary.get("pending_story_rollups")),
     }
 
 
-def _merge_summary_update(state: Dict[str, Any], summary_update: Dict[str, Any]) -> None:
+def _merge_summary_update(state: Dict[str, Any], summary_update: Dict[str, Any], chapter_end: bool = False) -> None:
     summary = _summary_from_state(state)
 
     last_scene = _summary_list(summary_update.get("last_scene"))
@@ -490,9 +558,19 @@ def _merge_summary_update(state: Dict[str, Any], summary_update: Dict[str, Any])
     if chapter_add:
         summary["chapter_so_far"] = (summary.get("chapter_so_far", []) + chapter_add)[-SUMMARY_CHAPTER_SO_FAR_CAP:]
 
+    pending = _summary_list(summary.get("pending_story_rollups"))
     story_add = _summary_list(summary_update.get("story_so_far_add"))
-    if story_add:
-        summary["story_so_far"] = (summary.get("story_so_far", []) + story_add)[-SUMMARY_STORY_SO_FAR_CAP:]
+    if chapter_end:
+        if pending or story_add:
+            summary["story_so_far"] = (
+                summary.get("story_so_far", []) + pending + story_add
+            )[-SUMMARY_STORY_SO_FAR_CAP:]
+        summary["pending_story_rollups"] = []
+    else:
+        if story_add:
+            summary["pending_story_rollups"] = (pending + story_add)[-SUMMARY_STORY_SO_FAR_CAP:]
+        else:
+            summary["pending_story_rollups"] = pending
 
     key_events = _summary_list(summary_update.get("key_events"))
     must_stay_true = _summary_list(summary_update.get("must_stay_true"))
@@ -911,13 +989,24 @@ def _chat(
     extra = merged_extra or None
     request = {"model": model, "temperature": temperature, "max_tokens": max_tokens}
     retries = _empty_response_retries()
+    error_retries = _request_error_retries()
     attempt = 0
+    error_attempt = 0
     while True:
         try:
             response = client.chat(messages, model=model, temperature=temperature, max_tokens=max_tokens)
         except LLMRequestError as exc:
             if should_log_llm():
                 log_llm_error(workspace, f"{label}_error", exc, request=request, messages=messages, extra=extra)
+            if exc.status_code in {429, 500, 502, 503, 504} and error_attempt < error_retries:
+                delay = exc.retry_after_seconds
+                if delay is None:
+                    delay = DEFAULT_REQUEST_ERROR_BACKOFF_SECONDS * (2 ** error_attempt)
+                delay = min(delay, DEFAULT_REQUEST_ERROR_MAX_SLEEP)
+                if delay > 0:
+                    time.sleep(delay)
+                error_attempt += 1
+                continue
             raise
         label_used = label if attempt == 0 else f"{label}_retry{attempt}"
         if should_log_llm():
@@ -925,6 +1014,65 @@ def _chat(
         if str(response.text).strip() or attempt >= retries:
             return response
         attempt += 1
+
+def _write_pause_marker(
+    book_root: Path,
+    phase: str,
+    error: LLMRequestError,
+    scene_card: Optional[Dict[str, Any]] = None,
+) -> Path:
+    context_dir = book_root / "draft" / "context"
+    context_dir.mkdir(parents=True, exist_ok=True)
+    payload: Dict[str, Any] = {
+        "book_id": book_root.name,
+        "phase": phase,
+        "status_code": error.status_code,
+        "message": error.message,
+        "retry_after_seconds": error.retry_after_seconds,
+        "quota_violations": [
+            {
+                "quota_metric": item.quota_metric,
+                "quota_id": item.quota_id,
+                "quota_dimensions": item.quota_dimensions,
+                "quota_value": item.quota_value,
+            }
+            for item in error.quota_violations
+        ],
+        "created_at": _now_iso(),
+    }
+    if scene_card:
+        chapter = _maybe_int(scene_card.get("chapter"))
+        scene = _maybe_int(scene_card.get("scene"))
+        if chapter is not None:
+            payload["chapter"] = chapter
+        if scene is not None:
+            payload["scene"] = scene
+    pause_path = context_dir / "run_paused.json"
+    pause_path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
+    return pause_path
+
+
+def _pause_on_quota(
+    book_root: Path,
+    state_path: Path,
+    state: Optional[Dict[str, Any]],
+    phase: str,
+    error: LLMRequestError,
+    scene_card: Optional[Dict[str, Any]] = None,
+) -> None:
+    if error.status_code != 429 and not error.quota_violations:
+        raise error
+    if state is not None:
+        try:
+            validate_json(state, "state")
+            state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
+        except Exception:
+            pass
+    _write_pause_marker(book_root, phase, error, scene_card)
+    _status(f"Run paused due to quota in phase '{phase}': {error}")
+    raise SystemExit(PAUSE_EXIT_CODE)
+
+
 
 
 
@@ -1302,11 +1450,10 @@ def _apply_state_patch(state: Dict[str, Any], patch: Dict[str, Any], chapter_end
 
     summary_update = patch.get("summary_update")
     if isinstance(summary_update, dict):
-        if not chapter_end and "story_so_far_add" in summary_update:
-            summary_update = dict(summary_update)
-            summary_update.pop("story_so_far_add", None)
-        _merge_summary_update(state, summary_update)
+        _merge_summary_update(state, summary_update, chapter_end=chapter_end)
     else:
+        if chapter_end:
+            _merge_summary_update(state, {}, chapter_end=True)
         if "summary" not in state:
             state["summary"] = _summary_from_state(state)
 
@@ -1324,14 +1471,35 @@ def _apply_character_updates(book_root: Path, patch: Dict[str, Any], chapter_num
         return
     characters_dir = book_root / "draft" / "context" / "characters"
     characters_dir.mkdir(parents=True, exist_ok=True)
+    index_map: Dict[str, str] = {}
+    index_path = characters_dir / "index.json"
+    if index_path.exists():
+        try:
+            index_data = json.loads(index_path.read_text(encoding="utf-8"))
+            entries = index_data.get("characters") if isinstance(index_data, dict) else None
+            if isinstance(entries, list):
+                for entry in entries:
+                    if not isinstance(entry, dict):
+                        continue
+                    cid = str(entry.get("character_id") or "").strip()
+                    spath = str(entry.get("state_path") or "").strip()
+                    if cid and spath:
+                        index_map[cid] = spath
+        except json.JSONDecodeError:
+            pass
     for update in updates:
         if not isinstance(update, dict):
             continue
         char_id = str(update.get("character_id") or "").strip()
         if not char_id:
             continue
-        slug = _character_slug(char_id)
-        state_path = characters_dir / f"{slug}.state.json"
+        state_path = None
+        indexed = index_map.get(char_id)
+        if indexed:
+            state_path = book_root / indexed
+        if state_path is None or not state_path.exists():
+            slug = _character_slug(char_id)
+            state_path = characters_dir / f"{slug}.state.json"
         state: Dict[str, Any] = {
             "schema_version": "1.0",
             "character_id": char_id,
@@ -1515,14 +1683,17 @@ def run_loop(
     state_repair_model = resolve_model("state_repair", config)
     linter_model = resolve_model("linter", config)
 
-    style_anchor = _ensure_style_anchor(
-        workspace,
-        book_root,
-        book,
-        system_path,
-        writer_client,
-        writer_model,
-    )
+    try:
+        style_anchor = _ensure_style_anchor(
+            workspace,
+            book_root,
+            book,
+            system_path,
+            writer_client,
+            writer_model,
+        )
+    except LLMRequestError as exc:
+        _pause_on_quota(book_root, state_path, None, "style_anchor", exc)
 
     while True:
         state = _load_json(state_path)
@@ -1543,12 +1714,15 @@ def run_loop(
         scene_card_path = _existing_scene_card(state, book_root) if resume else None
         if scene_card_path is None:
             _status(f"Planning chapter {chapter} scene {scene}...")
-            scene_card_path = plan_scene(
-                workspace=workspace,
-                book_id=book_id,
-                client=planner_client,
-                model=planner_model,
-            )
+            try:
+                scene_card_path = plan_scene(
+                    workspace=workspace,
+                    book_id=book_id,
+                    client=planner_client,
+                    model=planner_model,
+                )
+            except LLMRequestError as exc:
+                _pause_on_quota(book_root, state_path, state, "plan_scene", exc)
             _status(f"Planned scene card: ch{chapter:03d} sc{scene:03d} OK")
         else:
             _status(f"Using existing scene card: ch{chapter:03d} sc{scene:03d}")
@@ -1568,55 +1742,64 @@ def run_loop(
         _status("Character states loaded OK")
 
         _status(f"Generating continuity pack: ch{chapter_num:03d} sc{scene_num:03d}...")
-        continuity_pack = _generate_continuity_pack(
-            workspace,
-            book_root,
-            system_path,
-            state,
-            scene_card,
-            character_registry,
-            thread_registry,
-            character_states,
-            continuity_client,
-            continuity_model,
-        )
+        try:
+            continuity_pack = _generate_continuity_pack(
+                workspace,
+                book_root,
+                system_path,
+                state,
+                scene_card,
+                character_registry,
+                thread_registry,
+                character_states,
+                continuity_client,
+                continuity_model,
+            )
+        except LLMRequestError as exc:
+            _pause_on_quota(book_root, state_path, state, "continuity_pack", exc, scene_card)
         _status("Continuity pack ready OK")
 
         base_invariants = book.get("invariants", []) if isinstance(book.get("invariants", []), list) else []
 
         _status(f"Writing scene: ch{chapter_num:03d} sc{scene_num:03d}...")
-        prose, patch = _write_scene(
-            workspace,
-            book_root,
-            system_path,
-            scene_card,
-            continuity_pack,
-            state,
-            style_anchor,
-            character_registry,
-            thread_registry,
-            character_states,
-            writer_client,
-            writer_model,
-        )
+        try:
+            prose, patch = _write_scene(
+                workspace,
+                book_root,
+                system_path,
+                scene_card,
+                continuity_pack,
+                state,
+                style_anchor,
+                character_registry,
+                thread_registry,
+                character_states,
+                writer_client,
+                writer_model,
+            )
+        except LLMRequestError as exc:
+            _pause_on_quota(book_root, state_path, state, "write_scene", exc, scene_card)
         _status("Write complete OK")
 
         _status(f"Repairing state: ch{chapter_num:03d} sc{scene_num:03d}...")
-        patch = _state_repair(
-            workspace,
-            book_root,
-            system_path,
-            prose,
-            state,
-            scene_card,
-            continuity_pack,
-            patch,
-            character_registry,
-            thread_registry,
-            character_states,
-            state_repair_client,
-            state_repair_model,
-        )
+        try:
+            patch = _state_repair(
+                workspace,
+                book_root,
+                system_path,
+                prose,
+                state,
+                scene_card,
+                continuity_pack,
+                patch,
+                character_registry,
+                thread_registry,
+                character_states,
+                state_repair_client,
+                state_repair_model,
+            )
+        except LLMRequestError as exc:
+            _pause_on_quota(book_root, state_path, state, "state_repair", exc, scene_card)
         _status("State repair complete OK")
 
         lint_state = json.loads(json.dumps(state))
@@ -1633,57 +1816,66 @@ def run_loop(
             _status("Linting disabled (mode=off).")
         else:
             _status(f"Linting scene: ch{chapter_num:03d} sc{scene_num:03d}...")
-            lint_report = _lint_scene(
-                workspace,
-                book_root,
-                system_path,
-                prose,
-                lint_state,
-                patch,
-                scene_card,
-                invariants,
-                character_states,
-                linter_client,
-                linter_model,
-            )
+            try:
+                lint_report = _lint_scene(
+                    workspace,
+                    book_root,
+                    system_path,
+                    prose,
+                    lint_state,
+                    patch,
+                    scene_card,
+                    invariants,
+                    character_states,
+                    linter_client,
+                    linter_model,
+                )
+            except LLMRequestError as exc:
+                _pause_on_quota(book_root, state_path, state, "lint_scene", exc, scene_card)
             _status(f"Lint status: {lint_report.get('status', 'unknown')}")
 
         write_attempts = 1
         if lint_mode != "off" and lint_report.get("status") == "fail":
             _status(f"Repairing scene: ch{chapter_num:03d} sc{scene_num:03d}...")
-            prose, patch = _repair_scene(
-                workspace,
-                book_root,
-                system_path,
-                prose,
-                lint_report,
-                state,
-                scene_card,
-                character_registry,
-                thread_registry,
-                character_states,
-                repair_client,
-                repair_model,
-            )
+            try:
+                prose, patch = _repair_scene(
+                    workspace,
+                    book_root,
+                    system_path,
+                    prose,
+                    lint_report,
+                    state,
+                    scene_card,
+                    character_registry,
+                    thread_registry,
+                    character_states,
+                    repair_client,
+                    repair_model,
+                )
+            except LLMRequestError as exc:
+                _pause_on_quota(book_root, state_path, state, "repair_scene", exc, scene_card)
             _status("Repair complete OK")
             write_attempts += 1
 
             _status(f"Repairing state: ch{chapter_num:03d} sc{scene_num:03d}...")
-            patch = _state_repair(
-                workspace,
-                book_root,
-                system_path,
-                prose,
-                state,
-                scene_card,
-                continuity_pack,
-                patch,
-                character_registry,
-                thread_registry,
-                character_states,
-                state_repair_client,
-                state_repair_model,
-            )
+            try:
+                patch = _state_repair(
+                    workspace,
+                    book_root,
+                    system_path,
+                    prose,
+                    state,
+                    scene_card,
+                    continuity_pack,
+                    patch,
+                    character_registry,
+                    thread_registry,
+                    character_states,
+                    state_repair_client,
+                    state_repair_model,
+                )
+            except LLMRequestError as exc:
+                _pause_on_quota(book_root, state_path, state, "state_repair", exc, scene_card)
             _status("State repair complete OK")
 
             lint_state = json.loads(json.dumps(state))
@@ -1694,19 +1886,22 @@ def run_loop(
             invariants += summary.get("key_facts_ring", [])
 
             _status(f"Linting scene: ch{chapter_num:03d} sc{scene_num:03d}...")
-            lint_report = _lint_scene(
-                workspace,
-                book_root,
-                system_path,
-                prose,
-                lint_state,
-                patch,
-                scene_card,
-                invariants,
-                character_states,
-                linter_client,
-                linter_model,
-            )
+            try:
+                lint_report = _lint_scene(
+                    workspace,
+                    book_root,
+                    system_path,
+                    prose,
+                    lint_state,
+                    patch,
+                    scene_card,
+                    invariants,
+                    character_states,
+                    linter_client,
+                    linter_model,
+                )
+            except LLMRequestError as exc:
+                _pause_on_quota(book_root, state_path, state, "lint_scene", exc, scene_card)
             _status(f"Lint status: {lint_report.get('status', 'unknown')}")
             if lint_report.get("status") == "fail" and lint_mode == "strict":
                 raise ValueError("Lint failed after repair; see lint logs for details.")

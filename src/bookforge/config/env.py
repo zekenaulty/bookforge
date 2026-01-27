@@ -88,7 +88,8 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
             env_file = _default_env_path()
     elif env_path:
         env_file = Path(env_path)
-    merged.update(os.environ)
+    if env is None:
+        merged.update(os.environ)
     if env_file:
         merged.update(_parse_env_file(env_file))
     if env is not None:

@@ -232,8 +232,6 @@ def log_llm_response(
     }
     if request:
         payload["request"] = request
-    if request:
-        payload["request"] = request
     if extra:
         payload["extra"] = extra
     if system_text or non_system:

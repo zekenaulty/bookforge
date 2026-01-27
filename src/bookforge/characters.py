@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 import ast
 import json
 import re
+import hashlib
 
 from bookforge.config.env import load_config
 from bookforge.llm.client import LLMClient
@@ -104,6 +105,18 @@ def _series_root(workspace: Path, book: Dict[str, Any]) -> Path:
         return workspace / series_ref
     series_id = str(book.get("series_id") or book.get("book_id") or "series").strip()
     return workspace / "series" / (series_id or "series")
+
+def _short_id_hash(value: str) -> str:
+    digest = hashlib.sha1(value.encode("utf-8")).hexdigest()
+    return digest[:8]
+
+
+def _character_state_filename(character_id: str) -> str:
+    slug = _character_slug(character_id)
+    return f"{slug}__{_short_id_hash(character_id)}.state.json"
+
+
+
 
 
 def _ensure_series_dirs(series_root: Path) -> None:
@@ -301,7 +314,7 @@ def generate_characters(
 
         characters_dir = book_root / "draft" / "context" / "characters"
         characters_dir.mkdir(parents=True, exist_ok=True)
-        state_path = characters_dir / f"{slug}.state.json"
+        state_path = characters_dir / _character_state_filename(char_id)
         state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
         updated_paths.append(state_path)
 

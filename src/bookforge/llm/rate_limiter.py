@@ -16,22 +16,21 @@ class RateLimiter:
     def wait(self) -> None:
         if self.requests_per_minute <= 0:
             return
-        with self._lock:
-            now = time.monotonic()
-            window = 60.0
-            while self._timestamps and now - self._timestamps[0] >= window:
-                self._timestamps.popleft()
+        window = 60.0
+        while True:
+            with self._lock:
+                now = time.monotonic()
+                while self._timestamps and now - self._timestamps[0] >= window:
+                    self._timestamps.popleft()
 
-            if len(self._timestamps) < self.requests_per_minute:
-                self._timestamps.append(now)
-                return
+                if len(self._timestamps) < self.requests_per_minute:
+                    self._timestamps.append(now)
+                    return
 
-            earliest = self._timestamps[0]
-            sleep_for = max(0.0, window - (now - earliest))
-        if sleep_for > 0:
-            time.sleep(sleep_for)
-        with self._lock:
-            now = time.monotonic()
-            while self._timestamps and now - self._timestamps[0] >= window:
-                self._timestamps.popleft()
-            self._timestamps.append(now)
+                earliest = self._timestamps[0]
+                sleep_for = max(0.0, window - (now - earliest))
+            if sleep_for > 0:
+                time.sleep(sleep_for)
+            else:
+                # If the window advanced while unlocked, re-check immediately.
+                continue
