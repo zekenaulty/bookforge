@@ -1,0 +1,144 @@
+{
+  "chapter_id": 3,
+  "title": "Math-Boss vs. The Glitch",
+  "goal": "Survive the Floor Guardian and secure the first major loot drop.",
+  "chapter_role": "pressure",
+  "stakes_shift": "If Artie wins, he becomes the first Level 10 'Anomaly'; if he loses, it's Game Over.",
+  "bridge": {
+    "from_prev": "The Bone Golem is ready to smash Artie.",
+    "to_next": "Artie leaves the crypts with a legendary-tier item that he can't actually use yet."
+  },
+  "pacing": {
+    "intensity": 5,
+    "tempo": "steady",
+    "expected_scene_count": 10
+  },
+  "sections": [
+    {
+      "section_id": 1,
+      "title": "The Dance of Death",
+      "intent": "A high-octane fight where Artie must dodge every single attack.",
+      "scenes": [
+        {
+          "scene_id": 1,
+          "summary": "Artie uses the Crypt environment to kite the Bone Golem, using 'Crit-Punches' to chip away at its armor.",
+          "type": "action",
+          "outcome": "The Golem's armor is shattered, but Artie is running out of stamina.",
+          "characters": [
+            "CHAR_ARTIE"
+          ]
+        },
+        {
+          "scene_id": 2,
+          "summary": "Fizz discovers that the Golem has a 'Crit-Resist' buff, making Artie's main weapon useless.",
+          "type": "reveal",
+          "outcome": "Artie must find a way to bypass the resistance or die.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_FIZZ"
+          ]
+        },
+        {
+          "scene_id": 3,
+          "summary": "Artie attempts to 'Crit' the ground beneath the Golem, hoping for a physics glitch.",
+          "type": "choice",
+          "outcome": "The floor collapses, trapping the Golem in a hole.",
+          "characters": [
+            "CHAR_ARTIE"
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": 2,
+      "title": "The Final Blow",
+      "intent": "Resolve the boss fight with a comedic but effective exploit.",
+      "scenes": [
+        {
+          "scene_id": 4,
+          "summary": "While the Golem is stuck, Artie spends five minutes 'charging' a punch, which the System interprets as a 'Heavy Attack'.",
+          "type": "setup",
+          "outcome": "Artie prepares his most powerful hit yet.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_FIZZ"
+          ]
+        },
+        {
+          "scene_id": 5,
+          "summary": "Artie lands the hit, but instead of damage, the System rolls a 'Cosmetic Crit,' turning the Golem into a pile of very expensive porcelain teacups.",
+          "type": "action",
+          "outcome": "The boss is defeated, but the loot is... unconventional.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_CRIT_EXPLOIT"
+          ]
+        },
+        {
+          "scene_id": 6,
+          "summary": "The System panics and tries to 'recalculate' the XP, resulting in Artie jumping five levels instantly.",
+          "type": "aftermath",
+          "outcome": "Artie is now Level 10, but the System is watching him more closely.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_FIZZ"
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": 3,
+      "title": "Looting the Teacups",
+      "intent": "Examine the rewards and the consequences of the fight.",
+      "scenes": [
+        {
+          "scene_id": 7,
+          "summary": "Artie finds a 'Ring of the Gambler' among the teacups, which doubles crit damage but makes every 20th hit a self-crit.",
+          "type": "reveal",
+          "outcome": "Artie accepts the double-edged sword.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "introduces": [
+            "CHAR_BOSS"
+          ]
+        },
+        {
+          "scene_id": 8,
+          "summary": "A hidden door opens, revealing a mural of the 'First Glitch'\u2014a hero who looked suspiciously like Artie's high school gym teacher.",
+          "type": "reveal",
+          "outcome": "Artie realizes he isn't the first person to break this game.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_FIZZ"
+          ],
+          "threads": [
+            "THREAD_THE_ASCENSION"
+          ]
+        },
+        {
+          "scene_id": 9,
+          "summary": "Artie exits the crypt to find Vane waiting for him, looking very confused by the lack of a boss.",
+          "type": "escalation",
+          "outcome": "Vane realizes Artie stole his kill.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_VANE"
+          ]
+        },
+        {
+          "scene_id": 10,
+          "summary": "Artie uses his new level-up speed to outrun Vane's party, heading toward the capital city.",
+          "type": "transition",
+          "outcome": "The chase is on.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_VANE"
+          ]
+        }
+      ]
+    }
+  ]
+}

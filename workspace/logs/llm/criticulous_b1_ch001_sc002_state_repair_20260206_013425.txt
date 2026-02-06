@@ -1,0 +1,152 @@
+{
+  "character_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "pockets",
+          "contents": [
+            "Smartphone (dead)",
+            "Wallet"
+          ],
+          "location": "legs",
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "hand_right",
+          "contents": [
+            "Rusty Shortsword (Prop)"
+          ],
+          "location": "arm_right",
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "invariants_add": [
+        "stat: HP = 1/1",
+        "stat: Crit Rate = 100%",
+        "stat: Critical Multiplier = 500%",
+        "trait: Glass Cannon (Legendary/Cursed)",
+        "status: Statistical Anomaly"
+      ],
+      "inventory": [
+        {
+          "container": "pockets",
+          "item": "Smartphone (dead)",
+          "status": "stowed"
+        },
+        {
+          "container": "pockets",
+          "item": "Wallet",
+          "status": "stowed"
+        },
+        {
+          "container": "hand_right",
+          "item": "Rusty Shortsword (Prop)",
+          "status": "carried"
+        }
+      ],
+      "persona_updates": [
+        "Artie is horrified by his extreme fragility but recognizes the 'Crit or Quit' nature of his new existence.",
+        "Artie remains deeply cynical about the System's logic and Fizz's guidance."
+      ],
+      "scene": 2
+    },
+    {
+      "chapter": 1,
+      "character_id": "CHAR_FIZZ",
+      "containers": [
+        {
+          "container": "pouch",
+          "contents": [
+            "Guidebook",
+            "Sparkle Dust"
+          ],
+          "location": "waist",
+          "owner": "CHAR_FIZZ"
+        },
+        {
+          "container": "hand_left",
+          "contents": [
+            "System Clipboard"
+          ],
+          "location": "arm_left",
+          "owner": "CHAR_FIZZ"
+        }
+      ],
+      "invariants_add": [
+        "role: Legally mandated System Guide",
+        "inventory: CHAR_FIZZ -> System Clipboard (carried, hand_left)"
+      ],
+      "inventory": [
+        {
+          "container": "pouch",
+          "item": "Guidebook",
+          "status": "stowed"
+        },
+        {
+          "container": "pouch",
+          "item": "Sparkle Dust",
+          "status": "stowed"
+        },
+        {
+          "container": "hand_left",
+          "item": "System Clipboard",
+          "status": "carried"
+        }
+      ],
+      "persona_updates": [
+        "Fizz finds Artie's 'Stupidity-Induced Electrical Discharge' and subsequent build glitch hilarious.",
+        "Fizz is snarky and impatient with Artie's lack of gaming knowledge."
+      ],
+      "scene": 2
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie has been forced into a broken 1 HP 'Glass Cannon' build due to a System glitch."
+    ],
+    "key_events": [
+      "Fizz is introduced as Artie's snarky, winged System Guide.",
+      "Artie attempts to allocate points into Vitality to build a 'tank' character.",
+      "Residual electrical charge from Artie's death causes a UI glitch during stat allocation.",
+      "All 100 stat points are involuntarily dumped into Critical Probability.",
+      "The System forces a balance correction, reducing Artie's Vitality to the minimum threshold.",
+      "Artie is locked into a 'Glass Cannon' build with 1 HP and 100% Critical Hit rate.",
+      "The System Void begins to dissolve, initiating transport to the tutorial zone."
+    ],
+    "last_scene": [
+      "Artie met his snarky System Guide, Fizz, within the flickering System Void. A residual electrical charge from his death glitched the character creation interface, dumping all his stat points into Critical Probability.",
+      "The System balanced this anomaly by reducing his health to a single hit point and granting him the 'Glass Cannon' trait.",
+      "The scene ended with the System Void collapsing as Artie was forcibly transported to the game world."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: system_entry = DONE",
+      "milestone: stat_allocation = DONE",
+      "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, hand_right)",
+      "stat: CHAR_ARTIE -> HP = 1 (hard constraint)",
+      "stat: CHAR_ARTIE -> Crit Rate = 100%",
+      "trait: CHAR_ARTIE -> Glass Cannon (Legendary/Cursed)",
+      "location: Transitioning from System Void to Tutorial Zone"
+    ]
+  },
+  "world_updates": {
+    "cast_present_ids": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "System Void",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie met his guide, Fizz, in the System Void.",
+      "A residual electrical charge from Artie's death glitched the character creation UI.",
+      "Artie's stat points were involuntarily dumped into Critical Probability due to the glitch.",
+      "The System balanced Artie's 100% Crit Rate by reducing his Vitality to the absolute minimum.",
+      "Artie is now locked into a 'Glass Cannon' build with exactly 1 HP and 100% Crit Rate."
+    ]
+  }
+}

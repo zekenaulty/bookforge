@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "cursor_advance": {
+    "chapter": 1,
+    "scene": 2
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "persona_updates": [
+        "Artie is deeply cynical and frustrated by his mundane life and his even more absurd death.",
+        "He is now aware of the System and resentful of his forced 'Glass Anomaly' build."
+      ],
+      "invariants_add": [
+        "stat: HP = 1 (locked)",
+        "stat: Critical Hit Rate = 100%",
+        "class: The Glass Anomaly",
+        "trait: Crit or Quit (Passive)",
+        "milestone: vending_machine_death = DONE"
+      ],
+      "inventory": [
+        {
+          "item": "Rusty Shortsword",
+          "status": "carried",
+          "container": "hand_right"
+        },
+        {
+          "item": "Smartphone (dead)",
+          "status": "stowed",
+          "container": "pockets"
+        },
+        {
+          "item": "Wallet",
+          "status": "stowed",
+          "container": "pockets"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pockets",
+          "location": "legs",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "Smartphone (dead)",
+            "Wallet"
+          ]
+        },
+        {
+          "container": "hand_right",
+          "location": "arm_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "Rusty Shortsword"
+          ]
+        }
+      ]
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "The Whispering Woods",
+    "open_threads": [],
+    "recent_facts": [
+      "Artie died from a vending machine electrocution in an office breakroom.",
+      "Artie's stats were glitched into a 1 HP, 100% Crit build due to a stack overflow.",
+      "Artie has been deployed to the Whispering Woods tutorial zone."
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "Arthur Penhaligon died in a mundane office breakroom after a vending machine electrocuted him through a rusty award sword.",
+      "In the afterlife void, the System processed his death as a 'Terminal Irony' event, leading to a statistical stack overflow.",
+      "Consequently, Artie was assigned a glitched character build with 100% Critical Hit rate and a permanent 1 HP lock before being sent to the tutorial zone."
+    ],
+    "key_events": [
+      "Artie struggles with a vending machine named Greg over a stuck bag of Zesty Ranchero Rings.",
+      "A 'System Overload' in the machine causes a lethal electrical arc to travel through Artie's 'Rusty Shortsword' award.",
+      "Artie dies and meets the System UI in the 'After-Lobby' for a performance review.",
+      "The System detects a logic loop caused by Artie's extreme negative luck and the energy-conducting sword.",
+      "Artie is assigned the 'Glass Anomaly' class, which grants 100% Crit Rate but locks HP at 1.",
+      "The System initiates deployment of Artie to the 'Whispering Woods' tutorial zone."
+    ],
+    "must_stay_true": [
+      "milestone: vending_machine_death = DONE",
+      "milestone: system_initialization = DONE",
+      "stat: CHAR_ARTIE -> HP (value=1, invariant=true)",
+      "stat: CHAR_ARTIE -> Crit_Rate (value=100%, invariant=true)",
+      "inventory: CHAR_ARTIE -> Rusty Shortsword (carried, container=hand_right)",
+      "trait: CHAR_ARTIE -> Crit or Quit (Every hit is a critical hit, but HP is locked at 1)"
+    ],
+    "chapter_so_far_add": [
+      "Artie died an absurd death via vending machine and was reincarnated as a 'Glass Anomaly' with 1 HP and 100% Crit Rate."
+    ]
+  }
+}

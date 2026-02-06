@@ -1,0 +1,37 @@
+- Artie died via electrocution while trying to retrieve a bag of chips from a vending machine.
+- The Rusty Shortsword prop acted as a conductor for the fatal surge.
+- Artie's soul has been transitioned into the System's character creation interface.
+- Artie met his System Guide, Fizz.
+- A residual electrical charge from Artie's death glitched the character creation UI.
+- Artie's stat points were accidentally dumped into Critical Probability.
+- The System balanced Artie's 100% Crit rate by reducing his HP to 1.
+- Artie acquired the 'Glass Cannon' Legendary/Cursed trait.
+- Artie spawned into the Tutorial Zone and survived the landing due to a brief grace period.
+- Artie encountered a Level 1 Lesser Forest Slime.
+- Artie realized that even 2 damage from a slime is lethal to his 1 HP build.
+- Artie is currently backed against a large oak tree by the slime.
+- Artie's stamina is currently 14/20.
+- A twenty-foot wide, ten-foot deep crater now exists in the Tutorial Zone.
+- A massive oak tree was vaporized by a 'SUPER-MEGA-ULTRA-CRIT'.
+- The System is tracking environmental destruction caused by Artie's overkill damage.
+- Artie has 5 unallocated stat points available.
+- Artie reached Level 2 but refused to allocate his 5 stat points.
+- The System awarded Artie the 'Participation Trophy (Tutorial Edition)', which is cursed.
+- The trophy possesses a hidden 'Aggro Aura' that attracts all nearby monsters.
+- Artie is currently being hunted by a pack of monsters including Level 4 Mangy Coyotes.
+- Artie is sprinting toward the Tutorial Zone boundary to escape the aggroed swarm.
+- Artie reached the gates of Oakhaven while fleeing a Level 5 Mangy Coyote.
+- The gate guards, Hovis and Barnaby, were betting on Artie's stats as he approached.
+- The Oakhaven scanner triggered a loud 'Statistical Anomaly' alert due to Artie's 1 HP and 100% Crit Rate.
+- The Participation Trophy's Aggro Aura lured the coyote into the scanning perimeter, causing a brief combat encounter.
+- Artie was officially flagged as an anomaly and issued an 'Anomaly ID Tag' before being allowed entry into Oakhaven.
+- Artie entered the Gilded Tankard to hide from the public attention at the gates.
+- The Participation Trophy's Aggro Aura attracted a Level 1 Tavern Rat, which Artie killed with a single critical hit.
+- Mayor Whitlock introduced himself and explained the 'Crit-Economy', where critical hits are used to mint Essence Shards.
+- The Mayor attempted to recruit Artie as a 'Crit-Battery' to generate wealth in a secure vault.
+- Artie refused to allocate his 5 unspent stat points and fled the tavern to avoid being exploited.
+- Vane challenged Artie to a System Duel in an Oakhaven alley.
+- Artie used the 'Prop' status of his sword to invalidate the duel parameters.
+- Artie used the Participation Trophy to summon Level 4 Alley Rats as a distraction.
+- Artie discarded the Participation Trophy and fled into the backstreets.
+- Vane has sworn a vendetta against Artie.

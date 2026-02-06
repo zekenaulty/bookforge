@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "character_id": "CHAR_BOSS",
+  "name": "The System Administrator",
+  "inventory": [
+    {
+      "item": "Master Key",
+      "status": "stowed",
+      "container": "void_storage"
+    },
+    {
+      "item": "Data Tablet",
+      "status": "stowed",
+      "container": "void_storage"
+    }
+  ],
+  "containers": [
+    {
+      "container": "void_storage",
+      "owner": "CHAR_BOSS",
+      "location": "non_spatial",
+      "contents": [
+        "Master Key",
+        "Data Tablet"
+      ]
+    }
+  ],
+  "invariants": [
+    "inventory: CHAR_BOSS -> Master Key (status=stowed, container=void_storage)",
+    "inventory: CHAR_BOSS -> Data Tablet (status=stowed, container=void_storage)",
+    "container: void_storage (owner=CHAR_BOSS, contents=[Master Key, Data Tablet])"
+  ],
+  "history": [],
+  "updated_at": "2026-02-06T01:21:05Z"
+}

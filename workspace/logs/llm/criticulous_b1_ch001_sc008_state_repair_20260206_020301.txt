@@ -1,0 +1,156 @@
+{
+  "character_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "Rusty Shortsword (Prop)"
+          ],
+          "location": "arm_right"
+        },
+        {
+          "container": "hand_left",
+          "contents": [],
+          "location": "arm_left"
+        },
+        {
+          "container": "pockets",
+          "contents": [
+            "Smartphone (dead)",
+            "Wallet",
+            "Anomaly ID Tag"
+          ],
+          "location": "legs"
+        }
+      ],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "Rusty Shortsword (Prop)",
+          "status": "carried"
+        },
+        {
+          "container": "pockets",
+          "item": "Smartphone (dead)",
+          "status": "stowed"
+        },
+        {
+          "container": "pockets",
+          "item": "Wallet",
+          "status": "stowed"
+        },
+        {
+          "container": "pockets",
+          "item": "Anomaly ID Tag",
+          "status": "stowed"
+        }
+      ],
+      "invariants_add": [
+        "status: CHAR_ARTIE -> 5/100 Stamina",
+        "milestone: duel_avoided_technicality = DONE"
+      ],
+      "persona_updates": [
+        "Artie is now actively using the System's literal-minded logic to survive encounters with high-level players.",
+        "Artie is beginning to understand that his 'Anomaly' status is a tool for social and mechanical disruption."
+      ],
+      "scene": 8
+    },
+    {
+      "chapter": 1,
+      "character_id": "CHAR_VANE",
+      "containers": [
+        {
+          "container": "belt_sheath",
+          "contents": [
+            "Ornate Rapier"
+          ],
+          "location": "waist_left",
+          "owner": "CHAR_VANE"
+        },
+        {
+          "container": "belt_pouch",
+          "contents": [
+            "Health Potion"
+          ],
+          "location": "waist_right",
+          "owner": "CHAR_VANE"
+        }
+      ],
+      "inventory": [
+        {
+          "container": "belt_sheath",
+          "item": "Ornate Rapier",
+          "status": "carried"
+        },
+        {
+          "container": "belt_pouch",
+          "item": "Health Potion",
+          "status": "stowed"
+        }
+      ],
+      "invariants_add": [
+        "milestone: vane_encounter = DONE",
+        "trait: Vane Vendetta (active thread)"
+      ],
+      "persona_updates": [
+        "Vane is deeply offended by Artie's existence and his use of 'technicalities' to avoid combat.",
+        "Vane now views Artie as a personal insult to his status as a top-tier player."
+      ],
+      "scene": 8
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie encountered his first major rival, Vane, and used the System's own weapon-validity rules to avoid a lethal duel.",
+      "Artie lost the Participation Trophy (Tutorial Edition) while using it as a distraction to escape a swarm of rats and a high-level player."
+    ],
+    "key_events": [
+      "milestone: vane_encounter = DONE",
+      "Vane challenged Artie to a 'Friendly Duel' with a 100 gold stake.",
+      "Artie invalidated the duel by demonstrating his sword is a 'Prop' and not a valid weapon.",
+      "Artie used the Aggro Aura of the Participation Trophy to summon Alley Rats to distract Vane.",
+      "Artie threw the Participation Trophy (Tutorial Edition) behind Vane to lure the swarm away.",
+      "Artie successfully fled into the Oakhaven backstreets with 5 Stamina remaining.",
+      "milestone: duel_avoided_technicality = DONE"
+    ],
+    "last_scene": [
+      "Artie was cornered in an alley by Vane, a Level 24 Paladin who attempted to force a System Duel to test Artie's anomaly status.",
+      "Artie successfully avoided the duel by citing the 'Prop' status of his sword and used his Participation Trophy's Aggro Aura to summon a swarm of rats as a distraction.",
+      "After throwing the trophy to lure the rats toward Vane, Artie escaped into the backstreets with only 5 Stamina remaining."
+    ],
+    "must_stay_true": [
+      "status: CHAR_ARTIE -> 1 HP (hard constraint)",
+      "status: CHAR_ARTIE -> 100% Critical Hit Rate (hard constraint)",
+      "milestone: vane_encounter = DONE",
+      "milestone: duel_avoided_technicality = DONE",
+      "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, hand_right)",
+      "inventory: CHAR_ARTIE -> Anomaly ID Tag (stowed, container=pockets)",
+      "ownership: Participation Trophy (Tutorial Edition) (dropped, location=Oakhaven Alley)",
+      "status: CHAR_ARTIE -> 5/100 Stamina"
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_VANE"
+    ],
+    "location": "Oakhaven Backstreets",
+    "open_threads": [
+      "THREAD_VANE_RIVALRY",
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ],
+    "recent_facts": [
+      "Artie was intercepted by Vane, a high-level Paladin, in an alleyway.",
+      "Vane attempted to force a System Duel to test Artie's 100% Crit Rate.",
+      "Artie successfully argued that the duel was invalid because his sword is a 'Prop'.",
+      "Artie used the Participation Trophy's Aggro Aura to summon a swarm of rats as a distraction.",
+      "Artie threw the trophy behind Vane and escaped into the backstreets.",
+      "A formal rivalry has been established between Artie and Vane via the 'Vane Vendetta' thread."
+    ]
+  }
+}

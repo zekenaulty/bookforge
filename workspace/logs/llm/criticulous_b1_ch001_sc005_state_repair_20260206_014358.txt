@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "cursor_advance": {
+    "chapter": 1,
+    "scene": 6
+  },
+  "summary_update": {
+    "last_scene": [
+      "Artie reached Level 2 and received 'The Participation Trophy (Tutorial Edition)' as a reward, which immediately activated a high-intensity Aggro Aura.",
+      "He was forced to flee a swarm of tutorial monsters, including six slimes and two Level 4 Mangy Coyotes, while refusing to spend his five new stat points on Vitality.",
+      "Artie successfully crossed the boundary into the Oakhaven Outskirts, where the trophy's aura was suppressed, leaving him safe but still at 1 HP."
+    ],
+    "key_events": [
+      "Artie reached Level 2 and gained 5 unallocated stat points, which he chose not to spend.",
+      "Artie acquired 'The Participation Trophy (Tutorial Edition)', a Rare Cursed item with a hidden 'Aggro Aura'.",
+      "The trophy's aura reached a 'Spinal Tap' loudness level of 11/10, attracting all nearby monsters.",
+      "A swarm consisting of six Lesser Forest Slimes and two Level 4 Mangy Coyotes pursued Artie.",
+      "Artie narrowly escaped a coyote attack, triggering a 'Near-Miss' system warning.",
+      "Artie crossed the shimmering energy boundary into the Oakhaven Outskirts.",
+      "The Aggro Aura was suppressed by regional restrictions upon entering the Outskirts."
+    ],
+    "must_stay_true": [
+      "milestone: first_kill = DONE",
+      "milestone: level_2_reached = DONE",
+      "milestone: trophy_acquired = DONE",
+      "status: CHAR_ARTIE -> 1/1 HP (hard constraint)",
+      "status: CHAR_ARTIE -> 100% Critical Hit Rate (hard constraint)",
+      "inventory: CHAR_ARTIE -> The Participation Trophy (Tutorial Edition) (carried, container=hand_left)",
+      "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, container=hand_right)",
+      "stat_points: 5 (unallocated)",
+      "location: Oakhaven Outskirts"
+    ],
+    "chapter_so_far_add": [
+      "Artie survived a monster swarm triggered by a cursed 'Participation Trophy' reward.",
+      "Artie reached Level 2 but maintained his 1 HP build by hoarding his stat points.",
+      "Artie transitioned from the Tutorial Zone to the Oakhaven Outskirts."
+    ]
+  },
+  "world_updates": {
+    "cast_present_ids": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Oakhaven Outskirts",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie is now Level 2 with 5 unallocated stat points.",
+      "The Participation Trophy (Tutorial Edition) has a hidden Aggro Aura that is currently suppressed in the Oakhaven Outskirts.",
+      "The Tutorial Zone boundary prevents monsters like the Level 4 Mangy Coyotes from pursuing players into the Outskirts.",
+      "Artie's 1 HP status remains his primary tactical constraint."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 5,
+      "persona_updates": [
+        "Artie is now deeply suspicious of System rewards and views them as tactical liabilities.",
+        "He is becoming more adept at navigating high-stakes physical hazards despite his fragility."
+      ],
+      "invariants_add": [
+        "inventory: CHAR_ARTIE -> The Participation Trophy (Tutorial Edition) (carried, container=hand_left)",
+        "status: Level 2",
+        "stat_points: 5 (unallocated)"
+      ],
+      "inventory": [
+        {
+          "item": "Rusty Shortsword (Prop)",
+          "container": "hand_right",
+          "status": "carried"
+        },
+        {
+          "item": "The Participation Trophy (Tutorial Edition)",
+          "container": "hand_left",
+          "status": "carried"
+        },
+        {
+          "item": "Smartphone (dead)",
+          "container": "pockets",
+          "status": "stowed"
+        },
+        {
+          "item": "Wallet",
+          "container": "pockets",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "location": "arm_right",
+          "contents": [
+            "Rusty Shortsword (Prop)"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "location": "arm_left",
+          "contents": [
+            "The Participation Trophy (Tutorial Edition)"
+          ]
+        },
+        {
+          "container": "pockets",
+          "location": "legs",
+          "contents": [
+            "Smartphone (dead)",
+            "Wallet"
+          ]
+        }
+      ]
+    }
+  ]
+}

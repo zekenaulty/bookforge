@@ -1,0 +1,164 @@
+{
+  "chapter_id": 6,
+  "title": "The Final Roll",
+  "goal": "Defeat Vane and survive the System's attempt to delete Artie.",
+  "chapter_role": "climax",
+  "stakes_shift": "The survival of the entire game world is threatened as Artie's crits start breaking the source code.",
+  "bridge": {
+    "from_prev": "Artie enters the ring for the final match.",
+    "to_next": "The System crashes, and Artie is left in the wreckage."
+  },
+  "pacing": {
+    "intensity": 5,
+    "tempo": "rush",
+    "expected_scene_count": 12
+  },
+  "sections": [
+    {
+      "section_id": 1,
+      "title": "Vane's Ultimate Build",
+      "intent": "Show the power of a 'Whale' player vs. a 'Glitch' player.",
+      "scenes": [
+        {
+          "scene_id": 1,
+          "summary": "Vane enters with legendary armor that reflects 50% of all damage. Artie realizes if he crits Vane, he crits himself.",
+          "type": "setup",
+          "outcome": "Artie's main weapon is now a suicide button.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_VANE"
+          ]
+        },
+        {
+          "scene_id": 2,
+          "summary": "Vane uses the 'System Override' scroll to turn off Artie's Evasion stat.",
+          "type": "escalation",
+          "outcome": "Artie is now a 1 HP character who can't dodge.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_VANE"
+          ]
+        },
+        {
+          "scene_id": 3,
+          "summary": "Fizz sacrifices her 'Guide' status to temporarily hack the arena's gravity, giving Artie a few seconds of weightlessness.",
+          "type": "choice",
+          "outcome": "Artie can move in 3D, bypassing the 'No-Evasion' ground rule.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_FIZZ"
+          ]
+        },
+        {
+          "scene_id": 4,
+          "summary": "Artie realizes he doesn't need to hit Vane; he needs to hit the 'Reflect' buff itself.",
+          "type": "reveal",
+          "outcome": "Artie targets the magic aura around Vane's armor.",
+          "characters": [
+            "CHAR_ARTIE"
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": 2,
+      "title": "Breaking the Game",
+      "intent": "The moment of peak absurdity and power.",
+      "scenes": [
+        {
+          "scene_id": 5,
+          "summary": "Artie lands a 'Meta-Crit' on the Reflect buff. The System can't handle the math of a crit reflecting a crit reflecting a crit.",
+          "type": "action",
+          "outcome": "The arena begins to pixelate and dissolve.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_VANE"
+          ],
+          "threads": [
+            "THREAD_CRIT_EXPLOIT"
+          ]
+        },
+        {
+          "scene_id": 6,
+          "summary": "Vane panics as his armor turns into a swarm of error messages.",
+          "type": "escalation",
+          "outcome": "Vane is defenseless and terrified.",
+          "characters": [
+            "CHAR_VANE"
+          ]
+        },
+        {
+          "scene_id": 7,
+          "summary": "Artie delivers the final blow\u2014a crit so powerful it deletes Vane's character data (but not the person).",
+          "type": "action",
+          "outcome": "Vane is kicked from the game, and Artie is the champion of a broken world.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_VANE"
+          ]
+        },
+        {
+          "scene_id": 8,
+          "summary": "The System Administrator (a giant floating head) appears to manually delete Artie.",
+          "type": "reveal",
+          "outcome": "The true antagonist is revealed.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_BOSS"
+          ],
+          "introduces": [
+            "CHAR_BOSS"
+          ]
+        },
+        {
+          "scene_id": 9,
+          "summary": "Artie crits the Admin's 'Delete' button, causing the entire world to freeze.",
+          "type": "action",
+          "outcome": "Artie has successfully 'paused' reality.",
+          "characters": [
+            "CHAR_ARTIE"
+          ]
+        },
+        {
+          "scene_id": 10,
+          "summary": "Fizz uses the pause to rewrite Artie's location data, teleporting them out of the arena.",
+          "type": "choice",
+          "outcome": "They escape the deletion, but the world is now in 'Safe Mode'.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_FIZZ"
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": 3,
+      "title": "The Aftermath of the Crash",
+      "intent": "Show the immediate consequences of the climax.",
+      "scenes": [
+        {
+          "scene_id": 11,
+          "summary": "Artie and Fizz wake up in a 'Null-Zone' where the graphics are all wireframes.",
+          "type": "aftermath",
+          "outcome": "They are safe for now, but the world is dying.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_FIZZ"
+          ]
+        },
+        {
+          "scene_id": 12,
+          "summary": "Artie looks at his stats and sees his HP is now 'NaN' (Not a Number).",
+          "type": "reveal",
+          "outcome": "Artie is no longer a player; he is a virus.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_SYSTEM_GLITCH"
+          ]
+        }
+      ]
+    }
+  ]
+}

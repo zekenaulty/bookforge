@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {
+      "code": "duplication",
+      "message": "The prose depicts the encounter with the Level 1 Lesser Forest Slime, the 'SUPER-MEGA-ULTRA-CRIT', and the level-up to Level 2. These events are already recorded as completed in the state summary, last_scene, and key_facts_ring.",
+      "severity": "error"
+    },
+    {
+      "code": "invariant_contradiction",
+      "message": "The scene takes place in the 'Tutorial Zone', which contradicts the invariant 'location: System Void' listed in the must_stay_true block.",
+      "severity": "error"
+    },
+    {
+      "code": "state_inconsistency",
+      "message": "The must_stay_true and key_facts_ring blocks contain mutually exclusive facts: 'milestone: tutorial_arrival' is listed as both 'NOT_YET' and 'DONE'.",
+      "severity": "warning"
+    },
+    {
+      "code": "timeline_lock",
+      "message": "The scene depicts the resolution of 'milestone: first_kill', which is already marked as 'DONE' in the state summary, violating the rule against re-depicting completed milestones.",
+      "severity": "error"
+    }
+  ]
+}

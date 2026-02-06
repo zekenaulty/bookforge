@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_004",
+  "chapter": 1,
+  "scene": 4,
+  "scene_target": "Artie defeats his first enemy and discovers the absurdity of his damage output.",
+  "goal": "Survive the slime attack and gain a level.",
+  "conflict": "Artie's 1 HP fragility versus a slow but lethal slime; his own mechanical incompetence and the System's erratic hit detection.",
+  "required_callbacks": [
+    "status: CHAR_ARTIE -> 1 HP",
+    "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop)",
+    "status: CHAR_ARTIE -> 100% Critical Hit Rate",
+    "location: Tutorial Zone"
+  ],
+  "constraints": [
+    "target_words: 2000",
+    "Artie must miss the slime exactly five times before landing a hit.",
+    "The final hit must be labeled as a 'Super-Mega-Ultra-Crit' or similar high-tier crit.",
+    "The impact must vaporize the slime and destroy the oak tree Artie was backed against.",
+    "Artie must not take any damage, as 1 HP is a hard constraint.",
+    "Include a [System Notification] for the kill and the level up to Level 2."
+  ],
+  "end_condition": "The slime is dead, Artie reaches Level 2, and he is left standing in a crater where the tree used to be.",
+  "cast_present": [
+    "Artie",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "THREAD_CRIT_EXPLOIT"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {
+      "code": "duplication",
+      "message": "The scene depicts events (entering the Gilded Tankard, killing the Tavern Rat, and meeting Mayor Whitlock) that are already recorded as completed in the 'last_scene' and 'recent_facts' sections of the state.",
+      "severity": "error"
+    },
+    {
+      "code": "location_contradiction",
+      "message": "The scene takes place in Oakhaven, but the 'must_stay_true' invariants explicitly require the location to be 'Tutorial Zone'.",
+      "severity": "error"
+    },
+    {
+      "code": "inventory_mismatch",
+      "message": "The 'Anomaly ID Tag' is described as pinned to Artie's chest, contradicting the state invariant and character inventory which specify it is stowed in 'pockets'.",
+      "severity": "warning"
+    },
+    {
+      "code": "cast_mismatch",
+      "message": "Mayor Whitlock (CHAR_MAYOR) is a primary participant in the scene prose but is missing from the 'cast_present_ids' array in the world state.",
+      "severity": "error"
+    }
+  ]
+}

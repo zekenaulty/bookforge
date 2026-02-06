@@ -1,0 +1,85 @@
+The System Void didn’t look like the majestic, star-dusted expanse the movies promised. It looked like the inside of a broken monitor—a flickering, neon-blue purgatory that smelled faintly of ozone and regret. Arthur 'Artie' Penhaligon drifted in the center of it, still clutching the Rusty Shortsword (Prop) in his right hand. The plastic hilt felt absurdly real for something that had just helped conduct enough electricity to fry his nervous system into a blackened crisp.
+
+"Welcome, User 4,029,381," a voice echoed, sounding like a text-to-speech program with a severe attitude problem. "Cause of Death: Terminal Embarrassment by Snack-O-Matic 3000. Congratulations. You are the first person this century to be killed by a bag of 'Nacho Average Jalapeño' chips."
+
+"It was a faulty wire," Artie snapped, his voice echoing in the emptiness. He tried to cross his arms, but floating in zero-G made the gesture look more like a clumsy interpretive dance. "And for the record, the chips fell. I won that encounter. It was a trade-kill at worst."
+
+"You died for a snack that is forty percent sawdust by volume," the voice replied. Suddenly, a spark of golden light erupted a few feet from his nose. It swirled, compressed, and popped into the shape of a small, translucent woman with shimmering wings and a clipboard that looked suspiciously like an iPad.
+
+"Who are you? The ghost of customer service?" Artie asked, squinting at the glowing figure.
+
+The creature sighed, a sound like static on a radio. "I’m Fizz. I’m your legally mandated System Guide. My job is to make sure you don't immediately walk into a spike pit the second you spawn. Though, looking at your current equipment..." She gestured with a tiny, glowing hand at the LARP sword. "A 'Rusty Shortsword (Prop)'? Really? You're bringing a toy to a death-match? I’ve seen people spawn with kitchen spatulas that had more lethality."
+
+"It has sentimental value," Artie lied, tightening his grip on the hilt. "And a conductive core, apparently. Where am I? Is this the part where I get reincarnated as a slime or a vending machine? Because if I’m a vending machine, I’m overcharging for the jalapeño chips. Pure spite."
+
+"Don't give the System ideas," Fizz muttered, tapping her clipboard with a translucent stylus. A massive, blue screen shimmered into existence between them. "This is Character Creation. Usually, we do the whole 'sculpting your cheekbones' thing, but since you died with a 'Stupidity-Induced Electrical Discharge,' the System has flagged you for an accelerated start. You’ve got 100 Stat Points. Spend them, or I’m spending them for you on 'Agility' so I don't have to watch you move this slowly for the next three levels."
+
+Artie squinted at the screen. The text flickered, lines of code occasionally bleeding into the margins like ink in water.
+
+[Character Name: Arthur Penhaligon]
+[Class: Unassigned]
+[Level: 1]
+[HP: 10/10]
+[MP: 10/10]
+
+[Attributes]
+[Strength: 5]
+[Vitality: 5]
+[Agility: 5]
+[Intelligence: 5]
+[Luck: 5]
+
+[Available Points: 100]
+
+"Okay," Artie said, his cynical instincts kicking into high gear. He’d played enough RPGs to know that 'Glass Cannon' builds were for people who enjoyed seeing a 'Game Over' screen every five minutes. "If I’m going into a world where slimes can actually kill me, I want to be a tank. Put eighty points into Vitality and twenty into Strength. I want to be a walking brick wall. I want to be the guy who takes a dragon’s breath to the face and asks if it’s getting drafty."
+
+"Boring," Fizz said, yawning so wide her wings fluttered. "But fine. It’s your funeral. Again. I’ll just mark you down as 'Future Meat Shield' and call it a day."
+
+Artie reached out, his finger hovering over the plus sign next to 'Vitality.' He pressed it.
+
+The screen didn't respond. He pressed it again, harder this time. A spark jumped from the 'Vitality' bar to his fingertip—a sharp, stinging reminder of the Snack-O-Matic’s final revenge. 
+
+"Uh, Fizz? The screen is doing that thing again. The 'I’m about to explode' thing."
+
+"What thing?" Fizz looked up from her clipboard. "Oh, the glitching? Yeah, the System’s been a bit twitchy since the last patch. Just give it a firm—"
+
+Before she could finish, the screen went wild. The lines of text began to scroll at terminal velocity. The 'Vitality' bar started to drain, the numbers dropping into the negatives before looping back around into symbols Artie didn't recognize. A phantom image of a 'Nacho Average Jalapeño' bag flashed across the UI, accompanied by a loud, crunchy sound effect that vibrated in his very marrow.
+
+"What is happening?!" Artie yelled, trying to grab the edges of the screen to steady it.
+
+"The electrical surge!" Fizz shouted, her wings flapping frantically as she flew backward. "Your soul is still carrying a residual charge from the vending machine! It’s overloading the input buffer! The System thinks you're trying to enter a cheat code through your nervous system!"
+
+Artie watched in horror as the 'Available Points' counter plummeted to zero in a fraction of a second. The numbers weren't going into Vitality. They were pouring into a sub-stat he hadn't even noticed at the bottom of the list, a hidden menu that had expanded like a parasitic lung.
+
+[Critical Probability: 100%]
+[Critical Multiplier: 500%]
+
+"Wait, stop! Undo! Ctrl-Z!" Artie lunged for the 'Reset' button, but his hand passed right through the flickering light. 
+
+The System voice boomed, sounding remarkably smug for a collection of algorithms. "Stat Allocation Finalized. Recalculating survivability parameters... Error. Logic Loop Detected. Balancing 'Absolute Offense' with 'Absolute Fragility.' Applying corrective nerfs to maintain world-tier equilibrium."
+
+[System Notification]
+[Warning: Statistical Anomaly Detected.]
+[Attribute 'Vitality' has been reduced to minimum threshold to compensate for 'Critical Probability' overflow.]
+[Trait Acquired: Glass Cannon (Legendary/Cursed)]
+[Description: You hit like a god, but you have the structural integrity of a wet paper towel.]
+
+Artie’s jaw dropped as he watched his HP bar shrink. It didn't just go down; it withered. It became a tiny, pathetic sliver of red that looked like it would vanish if he even thought about a sharp object.
+
+[HP: 1/1]
+
+"One?" Artie whispered, his voice cracking. "I have one hit point? Fizz, I have one hit point! That’s not a health bar, that’s a binary state! I’m either alive or a puddle! If I trip over a pebble, I’m dead! If I get a papercut from a quest scroll, I’m dead!"
+
+Fizz flew closer, squinting at the screen through a pair of tiny, conjured spectacles. She whistled low. "On the bright side, you have a one hundred percent critical hit rate. That’s... actually impossible. The cap is usually forty percent for Level 1s. You’ve basically broken the math of the universe before even stepping foot in it. You're a walking glitch, Arthur."
+
+"I don't care about the math!" Artie waved the Rusty Shortsword (Prop) around, nearly hitting Fizz. "A stiff breeze will kill me! A moderately aggressive squirrel could end my entire second life! I wanted to be a brick wall, not a soap bubble!"
+
+"Well, look at it this way," Fizz said, tucking her clipboard away as the void began to dissolve into white pixels at the edges. The ozone smell was being replaced by the scent of pine needles and damp earth. "You won't have to worry about long-term medical bills. It’s a 'Crit or Quit' build, Arthur. Very trendy. Very high-stakes. You just have to be perfect. Every. Single. Time."
+
+"I hate high-stakes! I’m a middle-manager! I live for low-stakes!"
+
+"Too late," Fizz said, her form beginning to fade into a shower of golden sparks. "The transport sequence is already locked in. Pro tip: Don't get hit. At all. Ever. If you see something pointy, run. If you see something blunt, run faster. See you on the other side, Anomaly!"
+
+"Fizz! Wait! Fix the math! Carry the one! Do something!"
+
+Artie reached out, but the System Void collapsed in on itself with the sound of a thousand crashing servers. His last thought, before the world turned into a blinding flash of light and the sensation of gravity suddenly returning with a vengeance, was that he really should have just bought the granola bar instead.

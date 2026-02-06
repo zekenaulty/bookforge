@@ -1,0 +1,94 @@
+{
+  "character_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "Rusty Shortsword (Prop)"
+          ],
+          "location": "arm_right"
+        },
+        {
+          "container": "pockets",
+          "contents": [
+            "Smartphone (dead)",
+            "Wallet"
+          ],
+          "location": "legs"
+        }
+      ],
+      "invariants_add": [
+        "status: Level 2",
+        "milestone: first_kill = DONE",
+        "stat_points_unallocated: 5"
+      ],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "Rusty Shortsword (Prop)",
+          "status": "carried"
+        },
+        {
+          "container": "pockets",
+          "item": "Smartphone (dead)",
+          "status": "stowed"
+        },
+        {
+          "container": "pockets",
+          "item": "Wallet",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": [
+        "Artie is terrified by the environmental destruction his crits cause.",
+        "Artie feels a sense of hysterical triumph after reaching Level 2."
+      ],
+      "scene": 4
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie survived his first combat encounter by vaporizing a slime and an oak tree with a massive critical hit.",
+      "Artie reached Level 2, discovering that his damage output is world-breaking while his survivability remains non-existent."
+    ],
+    "key_events": [
+      "Artie missed the slime exactly five times, confirming the mechanical difficulty of his 1 HP build.",
+      "Artie landed a 'SUPER-MEGA-ULTRA-CRIT!' on his sixth attempt, dealing 9,999,999 damage.",
+      "The impact vaporized the slime and completely destroyed a massive oak tree, leaving a scorched crater.",
+      "The System issued a warning regarding environmental destruction and the janitorial sub-routines.",
+      "Artie reached Level 2 and gained 5 unallocated stat points.",
+      "Artie confirmed his HP remains at 1/1 despite the level up."
+    ],
+    "last_scene": [
+      "Artie was cornered by a Level 1 Lesser Forest Slime against an oak tree in the Tutorial Zone.",
+      "After missing five swings due to poor hit detection, he landed a 'SUPER-MEGA-ULTRA-CRIT!' that vaporized the monster and the tree.",
+      "The resulting explosion left a scorched crater and propelled Artie to Level 2."
+    ],
+    "must_stay_true": [
+      "milestone: first_kill = DONE",
+      "status: CHAR_ARTIE -> 1/1 HP (hard constraint)",
+      "status: CHAR_ARTIE -> 100% Critical Hit Rate (hard constraint)",
+      "status: CHAR_ARTIE -> Level 2",
+      "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, hand_right)",
+      "location: Tutorial Zone (Crater)"
+    ]
+  },
+  "world_updates": {
+    "cast_present_ids": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Tutorial Zone",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie vaporized a Level 1 slime and an oak tree with a single hit.",
+      "Artie reached Level 2.",
+      "A scorched crater now exists in the Tutorial Zone."
+    ]
+  }
+}

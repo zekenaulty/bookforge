@@ -1,0 +1,659 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+
+
+USER:
+
+# LINT
+
+Check the scene for continuity, invariant violations, and duplication.
+Flag invariant contradictions against must_stay_true/key facts.
+Return ONLY JSON matching the lint_report schema.
+
+Required keys:
+- schema_version ("1.0")
+- status ("pass" or "fail")
+- issues (array of objects)
+
+Each issue object must include:
+- code
+- message
+Optional:
+- severity
+
+If there are no issues, return:
+{
+  "schema_version": "1.0",
+  "status": "pass",
+  "issues": []
+}
+
+If there are issues, return:
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {"code": "continuity", "message": "Example issue", "severity": "error"}
+  ]
+}
+
+Scene:
+The Gilded Tankard was exactly the kind of place a man with 1 HP should avoid: it had slippery floors, heavy oak furniture with sharp corners, and a chandelier that looked like it was held up by a single, optimistic piece of twine. But Oakhaven’t streets were currently teeming with people who had seen the "Statistical Anomaly" flare at the gate, and Artie needed a roof that didn't involve a public execution.
+
+He stepped through the swinging doors, still clutching the Rusty Shortsword (Prop) in his right hand and the glowing, neon-purple Participation Trophy in his left. The trophy was vibrating. It wasn't a "you did a good job" vibration; it was a "I am a beacon for every hungry thing within a three-mile radius" hum.
+
+[Warning: Aggro Aura (Active)]
+[Radius: 15 Meters]
+[Current Threat Level: Low (For now...)]
+
+"I hate this thing," Artie whispered, his knuckles white around the trophy’s base. "Fizz, if you can hear me, I’m going to melt this down into a very expensive paperweight the first chance I get."
+
+The tavern was surprisingly quiet for midday. A few patrons sat in the shadows, their eyes tracking the Anomaly ID Tag pinned to Artie’s chest. It was a bright, shimmering piece of brass that felt like a bullseye. He tried to find a corner, but the System had other plans.
+
+A floorboard creaked. Then came the scratching.
+
+From beneath a nearby table, a pair of red eyes ignited. It wasn't a wolf or a goblin, but in this world, scale was relative.
+
+[Tavern Rat - Lvl 1]
+[HP: 3/3]
+[Status: Extremely Agitated by Your Existence]
+
+The rat was the size of a small badger and had a jagged scar across its snout. It hissed, its whiskers twitching in time with the trophy’s hum.
+
+"Oh, come on," Artie muttered, shifting his weight. "I’m Level 2. I’ve killed a... well, I’ve caused the death of a coyote. You really want to do this, Templeton?"
+
+The rat lunged. 
+
+It was a blur of grey fur and yellow teeth, aiming straight for Artie’s ankle. At 1 HP, a nip from a rodent wasn't a nuisance; it was a Game Over screen. Artie swung the Prop sword in a panicked arc. He didn't have the Agility for a clean parry, but he had the math.
+
+[Critical Hit! -999 Damage]
+[Overkill Bonus: +5 XP]
+
+The sword didn't just hit the rat. It seemed to distort the air around it. Upon contact, the rat didn't die so much as it ceased to be a biological entity. There was a sound like a pressurized steam pipe bursting, and the rodent vanished in a cloud of fine, grey mist and a single, shimmering copper coin that clattered onto the floor.
+
+"Clean-up on aisle four," Artie breathed, his heart hammering against his ribs. He looked at his health bar, which remained a terrifying, solitary [1/1]. "One hit. That’s all it takes. I’m living in a world made of needles and I’m a balloon."
+
+"Impressive," a voice boomed from the back of the room. "Most adventurers at your level struggle with the vermin. You simply... deleted it."
+
+Artie spun around, nearly tripping over his own feet. A man stood by the hearth, dressed in robes of deep burgundy and gold silk that probably cost more than Artie’s entire previous life. He held a Bag of Gold in his left hand, the coins clinking with a heavy, rhythmic weight. On his chest sat a heavy silver medallion: the Seal of Office.
+
+[Mayor of Oakhaven - Lvl ???]
+[Disposition: Opportunistic]
+
+"You're the Mayor," Artie said, not lowering the sword. He knew how these games worked. The higher the level of the NPC, the more likely they were to give you a quest that involved your certain demise.
+
+"I am Mayor Whitlock," the man said, stepping forward. The light of the hearth caught the Anomaly Tag on Artie’s chest. "And you are the 100% Crit. The gate guards haven't stopped talking about the man who critted the very air itself to survive a coyote."
+
+"It was a glitch," Artie said quickly. "A fluke. I’m actually very weak. Look at my HP. I’m basically a stiff breeze away from a funeral."
+
+Whitlock smiled, but it didn't reach his eyes. "In most places, 1 HP is a tragedy. In Oakhaven, it’s a curiosity. But a 100% Critical Hit rate? That, my friend, is an industry."
+
+The Mayor gestured to a private booth. "Sit. Please. I believe we have much to discuss regarding your... utility."
+
+Artie hesitated, then sat, keeping the trophy on the table where he could see it. The Aggro Aura was still humming, making the nearby ale-mugs rattle. 
+
+"Utility?" Artie asked. "I'm not a Swiss Army knife. I'm a glass ornament."
+
+"You don't understand our economy, Arthur," Whitlock said, leaning in. He pulled a small, glowing crystal from a pouch at his belt. It pulsed with a soft, blue light. "This is an Essence Shard. It is the fuel for our enchantments, the power for our wards, and the only currency the High Priests of RNG accept for Tier-3 gear."
+
+Artie looked at the shard. "And let me guess. You don't find these in the dirt."
+
+"No," Whitlock said. "Essence Shards are minted. They are the crystallized residue of 'Excessive Force.' When a blow lands with enough mathematical perfection—a Critical Hit, specifically—the System bleeds off a small amount of raw data. We capture that data and forge it into shards."
+
+Artie felt a cold lump form in his stomach. "So, a normal fighter crits maybe five percent of the time?"
+
+"If they're lucky," the Mayor said. "They spend hours in the pits, swinging until their arms go numb, hoping for that one-in-twenty spark to fill a single shard. But you... you are a font. Every strike you land, no matter how small, is a perfect release of energy. You aren't just an adventurer, Arthur. You are a walking mint."
+
+[New Discovery: The Crit-Economy]
+[Information: Your 100% Crit rate can be harnessed to generate Essence Shards. Value: Extreme.]
+
+"You want to turn me into a battery," Artie said, his voice flat. 
+
+"I want to offer you protection," Whitlock countered. "Oakhaven is a dangerous place for an Anomaly. There are... elements... who would see your 1 HP as an invitation. But under my patronage, you would have the finest guards. You would spend your days in a secure vault, striking a target dummy. We would provide the Shard-Cages, and you would provide the hits. You’d be the wealthiest man in the province without ever having to risk a scratch."
+
+Artie looked at his character sheet, which flickered in his peripheral vision.
+
+[Name: Artie Penhaligon]
+[Level: 2]
+[HP: 1/1]
+[Unallocated Stat Points: 5]
+
+The "plus" icons next to Vitality and Strength pulsed, urging him to commit. If he put all five into Vitality, maybe he’d have 50 HP. Maybe he’d survive a fall or a stray splinter. But the moment he spent those points, he was playing the System’s game. He was accepting the 'proper' path. And the 'proper' path in this world seemed to lead directly into a gilded cage.
+
+"I'm not interested in being a battery," Artie said.
+
+Whitlock’s smile faltered. "Arthur, be reasonable. Look at your stats. You have five points sitting there, unspent. You're terrified to use them because you know that even with them, you’re still fragile. Why struggle in the wild when you can be a god in a basement?"
+
+"Because in the basement, you own the key," Artie said. He stood up, grabbing the trophy. The Aggro Aura flared as he moved, and another rat scurried across the rafters above, lured by the scent of his existence.
+
+"You're making a mistake," Whitlock said, his voice dropping an octave. "There are others who won't be as polite as I am. Vane, for instance, has very little patience for 'anomalies' that don't serve the greater good. And by 'greater good,' he means his own ego."
+
+Artie didn't wait to hear more. The word 'scouted' was flashing in his mind like a neon sign. He wasn't a guest; he was a resource.
+
+He turned and bolted for the exit, the Participation Trophy's purple glow trailing behind him like a comet's tail. He burst through the swinging doors back into the afternoon sun of Oakhaven. He needed to hide. He needed to find a place where the math didn't matter, or at least a place where people didn't know how to count his crits.
+
+Behind him, in the dim light of the Gilded Tankard, the Mayor watched him go, slowly tapping the Bag of Gold against his palm.
+
+
+Character states (per cast_present_ids):
+[
+  {
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "hand_right",
+        "contents": [
+          "Rusty Shortsword (Prop)"
+        ],
+        "location": "arm_right"
+      },
+      {
+        "container": "hand_left",
+        "contents": [
+          "Participation Trophy (Tutorial Edition)"
+        ],
+        "location": "arm_left"
+      },
+      {
+        "container": "pockets",
+        "contents": [
+          "Smartphone (dead)",
+          "Wallet",
+          "Anomaly ID Tag"
+        ],
+        "location": "legs"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is deeply cynical about his own death and the System's snarky commentary."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is now terrified of his own fragility and furious at the System's 'balancing' logic."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is hyper-aware of his fragility and views the world as a series of lethal hazards.",
+          "Artie feels insulted by being hunted by a 'dessert' but is genuinely terrified of the System's mechanics."
+        ],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie now views his 'Prop' sword as a high-yield detonator rather than a conventional weapon.",
+          "He is developing a cynical understanding of the System's mathematical inevitability and its disregard for collateral damage."
+        ],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is now convinced that the System's rewards are actively trying to kill him.",
+          "Artie is prioritizing survival over stat progression, fearing that any small HP increase is a trap."
+        ],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is now officially recognized as a 'Statistical Anomaly' and feels the weight of the System's scrutiny.",
+          "Artie is increasingly paranoid about his 1 HP status given the lack of functional respawn points in Oakhaven."
+        ],
+        "scene": 6
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> Smartphone (dead) (status=stowed, container=pockets)",
+      "inventory: CHAR_ARTIE -> Wallet (status=stowed, container=pockets)",
+      "inventory: CHAR_ARTIE -> Rusty Shortsword (status=carried, container=hand_right)",
+      "container: pockets (owner=CHAR_ARTIE, contents=[Smartphone (dead), Wallet])",
+      "container: hand_right (owner=CHAR_ARTIE, contents=[Rusty Shortsword])",
+      "status: deceased (Earth)",
+      "status: active (System Void)",
+      "status: 1 HP (Glass Cannon)",
+      "status: 100% Critical Hit Rate",
+      "trait: Glass Cannon (Legendary/Cursed)",
+      "status: 1/1 HP",
+      "location: Tutorial Zone",
+      "milestone: tutorial_arrival = DONE",
+      "status: Level 2",
+      "stat_points: 5 (unallocated)",
+      "milestone: first_kill = DONE",
+      "milestone: level_2_reached = DONE",
+      "inventory: Participation Trophy (Tutorial Edition) (carried, hand_left)",
+      "inventory: CHAR_ARTIE -> Anomaly ID Tag (status=stowed, container=pockets)",
+      "milestone: oakhaven_arrival = DONE",
+      "milestone: scanner_anomaly_triggered = DONE",
+      "milestone: anomaly_tag_acquired = DONE"
+    ],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "Rusty Shortsword (Prop)",
+        "status": "carried"
+      },
+      {
+        "container": "hand_left",
+        "item": "Participation Trophy (Tutorial Edition)",
+        "status": "carried"
+      },
+      {
+        "container": "pockets",
+        "item": "Smartphone (dead)",
+        "status": "stowed"
+      },
+      {
+        "container": "pockets",
+        "item": "Wallet",
+        "status": "stowed"
+      },
+      {
+        "container": "pockets",
+        "item": "Anomaly ID Tag",
+        "status": "stowed"
+      }
+    ],
+    "name": "Arthur 'Artie' Penhaligon",
+    "schema_version": "1.0",
+    "updated_at": "2026-02-06T01:53:37Z"
+  },
+  {
+    "character_id": "CHAR_MAYOR",
+    "containers": [
+      {
+        "container": "inner_pocket",
+        "contents": [
+          "Seal of Office"
+        ],
+        "location": "chest",
+        "owner": "CHAR_MAYOR"
+      },
+      {
+        "container": "hand_left",
+        "contents": [
+          "Bag of Gold"
+        ],
+        "location": "arm_left",
+        "owner": "CHAR_MAYOR"
+      }
+    ],
+    "history": [],
+    "invariants": [
+      "inventory: CHAR_MAYOR -> Seal of Office (status=stowed, container=inner_pocket)",
+      "inventory: CHAR_MAYOR -> Bag of Gold (status=carried, container=hand_left)",
+      "container: inner_pocket (owner=CHAR_MAYOR, contents=[Seal of Office])",
+      "container: hand_left (owner=CHAR_MAYOR, contents=[Bag of Gold])"
+    ],
+    "inventory": [
+      {
+        "container": "inner_pocket",
+        "item": "Seal of Office",
+        "status": "stowed"
+      },
+      {
+        "container": "hand_left",
+        "item": "Bag of Gold",
+        "status": "carried"
+      }
+    ],
+    "name": "Mayor of Oakhaven",
+    "schema_version": "1.0",
+    "updated_at": "2026-02-06T01:21:05Z"
+  }
+]
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-06T01:21:05Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 7
+  },
+  "duplication_warnings_in_row": 0,
+  "outline": {
+    "path": "outline/outline.json"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_007.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Artie died in a mundane office accident and has been drafted into a System-driven world.",
+      "Artie met Fizz and accidentally created a broken 'Glass Cannon' build with 1 HP and 100% Crit rate.",
+      "Artie arrived in the Tutorial Zone and discovered that even the weakest monsters and environmental hazards are lethal to his 1 HP build.",
+      "Artie survived his first combat encounter by accidentally triggering a catastrophic environmental glitch.",
+      "The 'Prop' sword has been established as a conduit for massive overkill damage due to Artie's broken stats.",
+      "Artie reached Level 2, confirming that his progression is tied to high-magnitude 'System Overload' events.",
+      "Artie discovered that System rewards like the Participation Trophy can be as dangerous as the monsters themselves.",
+      "Artie is now Level 2 but remains at 1 HP, choosing to hoard stat points rather than commit to a build.",
+      "Artie reached Oakhaven and was immediately flagged as a 'Statistical Anomaly' by the gate scanners.",
+      "The town guards are now aware of Artie's 1 HP status and treat him as a high-risk liability.",
+      "Artie acquired the 'Anomaly ID Tag', marking him as a bug in the System.",
+      "Artie discovered the 'Crit-Economy', where critical hits are used to mint Essence Shards.",
+      "Mayor Whitlock attempted to recruit Artie as a 'Crit-Battery', revealing that his anomaly status is a high-value economic asset."
+    ],
+    "key_facts_ring": [
+      "milestone: trophy_acquired = DONE",
+      "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, hand_right)",
+      "inventory: CHAR_ARTIE -> Participation Trophy (Tutorial Edition) (carried, hand_left)",
+      "trait: Aggro Aura (active on Participation Trophy)",
+      "Artie arrived at the Oakhaven gates while fleeing a Level 5 Mangy Coyote lured by his trophy.",
+      "Guards Hovis and Barnaby were observed betting on Artie's stats as he approached the scanner.",
+      "The gate scanner triggered a loud 'Statistical Anomaly' alarm, publicly displaying Artie's 1 HP and 100% Crit stats.",
+      "Artie 'critted the air' with his prop sword, creating a localized vacuum that saved him from the coyote's lunge.",
+      "Guards Hovis and Barnaby killed the coyote and issued Artie an Anomaly ID Tag.",
+      "Artie entered Oakhaven with the 'Mark of Shame' (Anomaly Tag) and learned the town's respawn shrine is under renovation.",
+      "milestone: oakhaven_arrival = DONE",
+      "milestone: scanner_anomaly_triggered = DONE",
+      "milestone: anomaly_tag_acquired = DONE",
+      "status: CHAR_ARTIE -> 100% Critical Hit Rate (hard constraint)",
+      "inventory: CHAR_ARTIE -> Anomaly ID Tag (stowed, container=pockets)",
+      "Artie enters the Gilded Tankard with the Participation Trophy's Aggro Aura active.",
+      "Artie vaporizes a Level 1 Tavern Rat with a 999-damage overkill critical hit.",
+      "Mayor Whitlock introduces the Crit-Economy and the concept of Essence Shards.",
+      "The Mayor attempts to coerce Artie into becoming a 'Crit-Battery' for Oakhaven.",
+      "Artie refuses to allocate his 5 unspent stat points to maintain his 'glitch' status.",
+      "Artie realizes he is being scouted as an economic resource and flees the tavern.",
+      "milestone: crit_economy_revealed = DONE",
+      "milestone: mayor_meeting = DONE",
+      "milestone: vane_encounter = NOT_YET",
+      "stat_points: 5 (unallocated)"
+    ],
+    "last_scene": [
+      "Artie entered the Gilded Tankard and vaporized a Tavern Rat with a massive overkill crit, drawing the attention of Mayor Whitlock.",
+      "The Mayor explained that crits are used to mint Essence Shards and tried to recruit Artie as a 'Crit-Battery'.",
+      "Artie refused to spend his stat points or accept the Mayor's patronage, fleeing the tavern to avoid being exploited as a resource."
+    ],
+    "must_stay_true": [
+      "status: CHAR_ARTIE -> 1 HP (hard constraint)",
+      "status: CHAR_ARTIE -> 100% Critical Hit Rate (hard constraint)",
+      "milestone: tutorial_arrival = DONE",
+      "location: Tutorial Zone",
+      "milestone: first_kill = DONE",
+      "milestone: level_2_reached = DONE",
+      "status: CHAR_ARTIE -> 1/1 HP (hard constraint)",
+      "status: CHAR_ARTIE -> 100% Critical Hit Rate",
+      "location: Tutorial Zone (Crater Site)",
+      "milestone: trophy_acquired = DONE",
+      "inventory: CHAR_ARTIE -> Participation Trophy (Tutorial Edition) (carried, hand_left)",
+      "trait: Aggro Aura (active on Participation Trophy)",
+      "milestone: oakhaven_arrival = DONE",
+      "milestone: scanner_anomaly_triggered = DONE",
+      "milestone: anomaly_tag_acquired = DONE",
+      "inventory: CHAR_ARTIE -> Anomaly ID Tag (stowed, container=pockets)",
+      "milestone: crit_economy_revealed = DONE",
+      "milestone: mayor_meeting = DONE",
+      "milestone: vane_encounter = NOT_YET",
+      "stat_points: 5 (unallocated)"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_MAYOR"
+    ],
+    "cast_present_ids": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Oakhaven (Gilded Tankard / Streets)",
+    "open_threads": [],
+    "recent_facts": [
+      "Artie entered the Gilded Tankard and was immediately targeted by a Tavern Rat due to the Participation Trophy's Aggro Aura.",
+      "Artie killed the Tavern Rat with a single 'Overkill' crit, demonstrating his 100% crit rate to the tavern patrons.",
+      "Mayor Whitlock revealed that Critical Hits are used to mint 'Essence Shards', the primary resource for high-tier economy and enchanting.",
+      "The Mayor attempted to recruit Artie as a 'Crit-Battery' to generate Essence Shards in a controlled environment.",
+      "Artie refused to allocate his 5 unspent stat points despite the Mayor's pressure.",
+      "Artie realized he is being scouted as a political and economic asset and fled the tavern."
+    ],
+    "time": {}
+  }
+}
+
+Summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie died in a mundane office accident and has been drafted into a System-driven world.",
+    "Artie met Fizz and accidentally created a broken 'Glass Cannon' build with 1 HP and 100% Crit rate.",
+    "Artie arrived in the Tutorial Zone and discovered that even the weakest monsters and environmental hazards are lethal to his 1 HP build.",
+    "Artie survived his first combat encounter by accidentally triggering a catastrophic environmental glitch.",
+    "The 'Prop' sword has been established as a conduit for massive overkill damage due to Artie's broken stats.",
+    "Artie reached Level 2, confirming that his progression is tied to high-magnitude 'System Overload' events.",
+    "Artie discovered that System rewards like the Participation Trophy can be as dangerous as the monsters themselves.",
+    "Artie is now Level 2 but remains at 1 HP, choosing to hoard stat points rather than commit to a build.",
+    "Artie reached Oakhaven and was immediately flagged as a 'Statistical Anomaly' by the gate scanners.",
+    "The town guards are now aware of Artie's 1 HP status and treat him as a high-risk liability.",
+    "Artie acquired the 'Anomaly ID Tag', marking him as a bug in the System.",
+    "Artie discovered the 'Crit-Economy', where critical hits are used to mint Essence Shards.",
+    "Mayor Whitlock attempted to recruit Artie as a 'Crit-Battery', revealing that his anomaly status is a high-value economic asset."
+  ],
+  "key_facts_ring": [
+    "milestone: trophy_acquired = DONE",
+    "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, hand_right)",
+    "inventory: CHAR_ARTIE -> Participation Trophy (Tutorial Edition) (carried, hand_left)",
+    "trait: Aggro Aura (active on Participation Trophy)",
+    "Artie arrived at the Oakhaven gates while fleeing a Level 5 Mangy Coyote lured by his trophy.",
+    "Guards Hovis and Barnaby were observed betting on Artie's stats as he approached the scanner.",
+    "The gate scanner triggered a loud 'Statistical Anomaly' alarm, publicly displaying Artie's 1 HP and 100% Crit stats.",
+    "Artie 'critted the air' with his prop sword, creating a localized vacuum that saved him from the coyote's lunge.",
+    "Guards Hovis and Barnaby killed the coyote and issued Artie an Anomaly ID Tag.",
+    "Artie entered Oakhaven with the 'Mark of Shame' (Anomaly Tag) and learned the town's respawn shrine is under renovation.",
+    "milestone: oakhaven_arrival = DONE",
+    "milestone: scanner_anomaly_triggered = DONE",
+    "milestone: anomaly_tag_acquired = DONE",
+    "status: CHAR_ARTIE -> 100% Critical Hit Rate (hard constraint)",
+    "inventory: CHAR_ARTIE -> Anomaly ID Tag (stowed, container=pockets)",
+    "Artie enters the Gilded Tankard with the Participation Trophy's Aggro Aura active.",
+    "Artie vaporizes a Level 1 Tavern Rat with a 999-damage overkill critical hit.",
+    "Mayor Whitlock introduces the Crit-Economy and the concept of Essence Shards.",
+    "The Mayor attempts to coerce Artie into becoming a 'Crit-Battery' for Oakhaven.",
+    "Artie refuses to allocate his 5 unspent stat points to maintain his 'glitch' status.",
+    "Artie realizes he is being scouted as an economic resource and flees the tavern.",
+    "milestone: crit_economy_revealed = DONE",
+    "milestone: mayor_meeting = DONE",
+    "milestone: vane_encounter = NOT_YET",
+    "stat_points: 5 (unallocated)"
+  ],
+  "last_scene": [
+    "Artie entered the Gilded Tankard and vaporized a Tavern Rat with a massive overkill crit, drawing the attention of Mayor Whitlock.",
+    "The Mayor explained that crits are used to mint Essence Shards and tried to recruit Artie as a 'Crit-Battery'.",
+    "Artie refused to spend his stat points or accept the Mayor's patronage, fleeing the tavern to avoid being exploited as a resource."
+  ],
+  "must_stay_true": [
+    "status: CHAR_ARTIE -> 1 HP (hard constraint)",
+    "status: CHAR_ARTIE -> 100% Critical Hit Rate (hard constraint)",
+    "milestone: tutorial_arrival = DONE",
+    "location: Tutorial Zone",
+    "milestone: first_kill = DONE",
+    "milestone: level_2_reached = DONE",
+    "status: CHAR_ARTIE -> 1/1 HP (hard constraint)",
+    "status: CHAR_ARTIE -> 100% Critical Hit Rate",
+    "location: Tutorial Zone (Crater Site)",
+    "milestone: trophy_acquired = DONE",
+    "inventory: CHAR_ARTIE -> Participation Trophy (Tutorial Edition) (carried, hand_left)",
+    "trait: Aggro Aura (active on Participation Trophy)",
+    "milestone: oakhaven_arrival = DONE",
+    "milestone: scanner_anomaly_triggered = DONE",
+    "milestone: anomaly_tag_acquired = DONE",
+    "inventory: CHAR_ARTIE -> Anomaly ID Tag (stowed, container=pockets)",
+    "milestone: crit_economy_revealed = DONE",
+    "milestone: mayor_meeting = DONE",
+    "milestone: vane_encounter = NOT_YET",
+    "stat_points: 5 (unallocated)"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "status: CHAR_ARTIE -> 1 HP (hard constraint)",
+  "status: CHAR_ARTIE -> 100% Critical Hit Rate (hard constraint)",
+  "milestone: tutorial_arrival = DONE",
+  "location: Tutorial Zone",
+  "milestone: first_kill = DONE",
+  "milestone: level_2_reached = DONE",
+  "status: CHAR_ARTIE -> 1/1 HP (hard constraint)",
+  "status: CHAR_ARTIE -> 100% Critical Hit Rate",
+  "location: Tutorial Zone (Crater Site)",
+  "milestone: trophy_acquired = DONE",
+  "inventory: CHAR_ARTIE -> Participation Trophy (Tutorial Edition) (carried, hand_left)",
+  "trait: Aggro Aura (active on Participation Trophy)",
+  "milestone: oakhaven_arrival = DONE",
+  "milestone: scanner_anomaly_triggered = DONE",
+  "milestone: anomaly_tag_acquired = DONE",
+  "inventory: CHAR_ARTIE -> Anomaly ID Tag (stowed, container=pockets)",
+  "milestone: crit_economy_revealed = DONE",
+  "milestone: mayor_meeting = DONE",
+  "milestone: vane_encounter = NOT_YET",
+  "stat_points: 5 (unallocated)",
+  "milestone: trophy_acquired = DONE",
+  "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, hand_right)",
+  "inventory: CHAR_ARTIE -> Participation Trophy (Tutorial Edition) (carried, hand_left)",
+  "trait: Aggro Aura (active on Participation Trophy)",
+  "Artie arrived at the Oakhaven gates while fleeing a Level 5 Mangy Coyote lured by his trophy.",
+  "Guards Hovis and Barnaby were observed betting on Artie's stats as he approached the scanner.",
+  "The gate scanner triggered a loud 'Statistical Anomaly' alarm, publicly displaying Artie's 1 HP and 100% Crit stats.",
+  "Artie 'critted the air' with his prop sword, creating a localized vacuum that saved him from the coyote's lunge.",
+  "Guards Hovis and Barnaby killed the coyote and issued Artie an Anomaly ID Tag.",
+  "Artie entered Oakhaven with the 'Mark of Shame' (Anomaly Tag) and learned the town's respawn shrine is under renovation.",
+  "milestone: oakhaven_arrival = DONE",
+  "milestone: scanner_anomaly_triggered = DONE",
+  "milestone: anomaly_tag_acquired = DONE",
+  "status: CHAR_ARTIE -> 100% Critical Hit Rate (hard constraint)",
+  "inventory: CHAR_ARTIE -> Anomaly ID Tag (stowed, container=pockets)",
+  "Artie enters the Gilded Tankard with the Participation Trophy's Aggro Aura active.",
+  "Artie vaporizes a Level 1 Tavern Rat with a 999-damage overkill critical hit.",
+  "Mayor Whitlock introduces the Crit-Economy and the concept of Essence Shards.",
+  "The Mayor attempts to coerce Artie into becoming a 'Crit-Battery' for Oakhaven.",
+  "Artie refuses to allocate his 5 unspent stat points to maintain his 'glitch' status.",
+  "Artie realizes he is being scouted as an economic resource and flees the tavern.",
+  "milestone: crit_economy_revealed = DONE",
+  "milestone: mayor_meeting = DONE",
+  "milestone: vane_encounter = NOT_YET",
+  "stat_points: 5 (unallocated)"
+]

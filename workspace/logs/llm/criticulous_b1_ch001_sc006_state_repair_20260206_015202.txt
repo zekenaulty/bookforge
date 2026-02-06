@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "Artie reached the gates of Oakhaven while being pursued by a Level 5 Mangy Coyote attracted by his trophy's Aggro Aura.",
+      "The town's scanner flagged his 1 HP and 100% Crit build as a 'Statistical Anomaly', triggering a high-level siren and alerting the guards.",
+      "After narrowly surviving the coyote's attack thanks to a physics-defying 'Air-Crit', Artie was issued an 'Anomaly ID Tag' and granted entry into the town."
+    ],
+    "key_events": [
+      "Artie reached the Oakhaven gate while fleeing a pack of coyotes.",
+      "Guards Hovis and Barnaby were introduced, establishing the town's culture of betting on traveler stats.",
+      "The gate scanner triggered a 'Statistical Anomaly' alert for Artie's 1 HP / 100% Crit build, causing a system-wide siren.",
+      "The Participation Trophy's Aggro Aura lured a Level 5 Mangy Coyote into the scanning perimeter, nearly killing Artie.",
+      "Artie performed an 'Air-Crit' that created a localized vacuum, displacing the coyote and saving his life.",
+      "The guards killed the coyote and issued Artie an 'Anomaly ID Tag' (Mark of Shame).",
+      "Artie entered Oakhaven, officially recognized as a system glitch and flagged for observation."
+    ],
+    "must_stay_true": [
+      "milestone: tutorial_arrival = DONE",
+      "milestone: first_kill = DONE",
+      "milestone: level_2_reached = DONE",
+      "milestone: trophy_acquired = DONE",
+      "milestone: oakhaven_entry = DONE",
+      "status: CHAR_ARTIE -> 1/1 HP (hard constraint)",
+      "status: CHAR_ARTIE -> 100% Critical Hit Rate (hard constraint)",
+      "inventory: CHAR_ARTIE -> Anomaly ID Tag (carried, container=belt)",
+      "trait: Aggro Aura (active on Participation Trophy)",
+      "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, hand_right)"
+    ],
+    "chapter_so_far_add": [
+      "Artie has reached the first hub city, Oakhaven, but is now publicly marked as a 'Statistical Anomaly'.",
+      "The System's security measures are unable to reconcile Artie's extreme stats, leading to social friction and the 'Anomaly ID Tag' quest item."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "persona_updates": [
+        "Artie is developing a deep distrust of 'System Rewards' and 'Quest Items' after the trophy nearly got him killed.",
+        "He is becoming aware that his 'Anomaly' status makes him a social pariah and a target for observation by authorities."
+      ],
+      "invariants_add": [
+        "inventory: CHAR_ARTIE -> Anomaly ID Tag (status=carried, container=belt)",
+        "status: Statistical Anomaly (Flagged)"
+      ],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "Rusty Shortsword (Prop)",
+          "status": "carried"
+        },
+        {
+          "container": "hand_left",
+          "item": "Participation Trophy (Tutorial Edition)",
+          "status": "carried"
+        },
+        {
+          "container": "pockets",
+          "item": "Smartphone (dead)",
+          "status": "stowed"
+        },
+        {
+          "container": "pockets",
+          "item": "Wallet",
+          "status": "stowed"
+        },
+        {
+          "container": "belt",
+          "item": "Anomaly ID Tag",
+          "status": "carried"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "Rusty Shortsword (Prop)"
+          ],
+          "location": "arm_right"
+        },
+        {
+          "container": "hand_left",
+          "contents": [
+            "Participation Trophy (Tutorial Edition)"
+          ],
+          "location": "arm_left"
+        },
+        {
+          "container": "pockets",
+          "contents": [
+            "Smartphone (dead)",
+            "Wallet"
+          ],
+          "location": "legs"
+        },
+        {
+          "container": "belt",
+          "contents": [
+            "Anomaly ID Tag"
+          ],
+          "location": "waist"
+        }
+      ],
+      "chapter": 1,
+      "scene": 6
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Oakhaven Town Square",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ],
+    "recent_facts": [
+      "Artie reached the Oakhaven gate and was scanned by the System's security perimeter.",
+      "The scanner identified Artie as a 'Statistical Anomaly' due to his 1 HP and 100% Crit Rate, triggering a siren.",
+      "The Participation Trophy's Aggro Aura attracted a Level 5 Mangy Coyote to the gate.",
+      "Artie performed an 'Air-Crit' that displaced the coyote, allowing the guards to finish it off.",
+      "Artie was issued an 'Anomaly ID Tag' and allowed entry into Oakhaven for observation.",
+      "Oakhaven's respawn shrine is currently under renovation, increasing the stakes of Artie's 1 HP build."
+    ]
+  }
+}

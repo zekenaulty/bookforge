@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "character_id": "CHAR_VANE",
+  "inventory": [
+    {
+      "container": "belt_sheath",
+      "item": "Ornate Rapier",
+      "status": "carried"
+    },
+    {
+      "container": "belt_pouch",
+      "item": "Health Potion",
+      "status": "stowed"
+    }
+  ],
+  "containers": [
+    {
+      "container": "belt_sheath",
+      "contents": [
+        "Ornate Rapier"
+      ],
+      "location": "waist_left"
+    },
+    {
+      "container": "belt_pouch",
+      "contents": [
+        "Health Potion"
+      ],
+      "location": "waist_right"
+    }
+  ],
+  "invariants": [
+    "inventory: CHAR_VANE -> Ornate Rapier (status=carried, container=belt_sheath)",
+    "inventory: CHAR_VANE -> Health Potion (status=stowed, container=belt_pouch)",
+    "container: belt_sheath (owner=CHAR_VANE, contents=[Ornate Rapier])",
+    "container: belt_pouch (owner=CHAR_VANE, contents=[Health Potion])",
+    "milestone: vane_encounter = DONE"
+  ],
+  "history": [
+    {
+      "chapter": 1,
+      "scene": 8,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "persona_updates": [
+        "Vane is obsessed with 'metrics' and views Artie's existence as an affront to the System's order.",
+        "Vane now harbors a personal vendetta against Artie for the 'Prop' technicality and the rat swarm."
+      ]
+    }
+  ],
+  "name": "Vane",
+  "updated_at": "2026-02-06T02:09:26Z"
+}

@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "Artie reached Level 2 and received a 'Participation Trophy' as a reward for his first kill.",
+      "The trophy triggered an 'Aggro Aura', drawing a swarm of monsters toward Artie's location.",
+      "Artie refused to spend his new stat points and fled toward the Tutorial Zone boundary to escape the pursuit."
+    ],
+    "key_events": [
+      "Artie reached Level 2 and gained 5 unallocated stat points.",
+      "Artie acquired the 'Participation Trophy (Tutorial Edition)' (Rare/Cursed).",
+      "The trophy's 'Aggro Aura' activated, attracting Level 4 Mangy Coyotes and slimes.",
+      "Artie maintained his 1 HP build by refusing to allocate points into Vitality.",
+      "Artie began a desperate sprint toward the Tutorial Zone exit to suppress the Aggro Aura."
+    ],
+    "must_stay_true": [
+      "milestone: first_kill = DONE",
+      "milestone: level_2_reached = DONE",
+      "milestone: trophy_acquired = DONE",
+      "status: CHAR_ARTIE -> 1/1 HP (hard constraint)",
+      "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, hand_right)",
+      "inventory: CHAR_ARTIE -> Participation Trophy (Tutorial Edition) (carried, hand_left)",
+      "trait: Aggro Aura (active on Participation Trophy)"
+    ],
+    "chapter_so_far_add": [
+      "Artie discovered that System rewards like the Participation Trophy can be as dangerous as the monsters themselves.",
+      "Artie is now Level 2 but remains at 1 HP, choosing to hoard stat points rather than commit to a build."
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Tutorial Zone (Edge)",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie reached Level 2 but refused to allocate his 5 stat points.",
+      "The System awarded Artie the 'Participation Trophy (Tutorial Edition)', which is cursed.",
+      "The trophy possesses a hidden 'Aggro Aura' that attracts all nearby monsters.",
+      "Artie is currently being hunted by a pack of monsters including Level 4 Mangy Coyotes.",
+      "Artie is sprinting toward the Tutorial Zone boundary to escape the aggroed swarm."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 5,
+      "persona_updates": [
+        "Artie is now convinced that the System's rewards are actively trying to kill him.",
+        "Artie is prioritizing survival over stat progression, fearing that any small HP increase is a trap."
+      ],
+      "invariants_add": [
+        "status: Level 2",
+        "stat_points: 5 (unallocated)",
+        "inventory: Participation Trophy (Tutorial Edition) (carried, hand_left)"
+      ],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "Rusty Shortsword (Prop)",
+          "status": "carried"
+        },
+        {
+          "container": "hand_left",
+          "item": "Participation Trophy (Tutorial Edition)",
+          "status": "carried"
+        },
+        {
+          "container": "pockets",
+          "item": "Smartphone (dead)",
+          "status": "stowed"
+        },
+        {
+          "container": "pockets",
+          "item": "Wallet",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "Rusty Shortsword (Prop)"
+          ],
+          "location": "arm_right"
+        },
+        {
+          "container": "hand_left",
+          "contents": [
+            "Participation Trophy (Tutorial Edition)"
+          ],
+          "location": "arm_left"
+        },
+        {
+          "container": "pockets",
+          "contents": [
+            "Smartphone (dead)",
+            "Wallet"
+          ],
+          "location": "legs"
+        }
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "chapter": 1,
+      "scene": 5,
+      "persona_updates": [
+        "Fizz is amused by the 'Aggro Aura' and enjoys watching Artie's panicked cardio."
+      ],
+      "invariants_add": []
+    }
+  ]
+}

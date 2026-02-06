@@ -1,0 +1,477 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+
+
+USER:
+
+# CONTINUITY PACK
+
+Create a continuity pack JSON object with these fields:
+- scene_end_anchor: 2-4 factual sentences about how the last scene ended (no prose).
+- constraints: list of immediate continuity constraints.
+- open_threads: list of active thread ids.
+- cast_present: list of character names present next.
+- location: location id or name.
+- next_action: the implied next action.
+- summary: echo state.summary (facts-only arrays; do not paraphrase).
+
+Return ONLY JSON.
+
+Rules:
+- Use only characters listed in scene_card.cast_present. Do not introduce new names.
+- summary must match state.summary and remain facts-only; do not add prose.
+- constraints must include the highest-priority invariants from summary.must_stay_true and summary.key_facts_ring (copy exact strings when possible).
+- constraints must include the highest-priority inventory/container invariants from summary.must_stay_true (copy exact strings when possible).
+- If character_states are provided, prefer their inventory/container facts for constraints; do not invent conflicting facts.
+- If scene_card.cast_present is empty, cast_present must be an empty array.
+- open_threads must be a subset of thread_registry thread_id values.
+- If scene_card.thread_ids is present, prefer those thread ids.
+- Do not invent new thread ids or character names.
+
+Scene card:
+{
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "chapter": 1,
+  "conflict": "Artie must avoid a seemingly harmless Level 1 Slime because any contact results in instant death.",
+  "constraints": [
+    "target_words: 2000",
+    "milestone: tutorial_arrival = DONE",
+    "status: CHAR_ARTIE -> 1 HP (hard constraint)",
+    "status: CHAR_ARTIE -> 100% Critical Hit Rate (hard constraint)",
+    "no-recaps"
+  ],
+  "end_condition": "Artie is backed against a tree by the slime, realizing his survival depends on never being touched.",
+  "goal": "Establish the terrifying reality of the 1 HP Glass Cannon build.",
+  "introduces": [],
+  "introduces_ids": [],
+  "required_callbacks": [
+    "stat_allocation",
+    "artie_death"
+  ],
+  "scene": 3,
+  "scene_id": "SC_001_003",
+  "scene_target": "Artie spawns into the tutorial zone and faces his first immediate threat.",
+  "schema_version": "1.1",
+  "thread_ids": []
+}
+
+Character registry (id -> name):
+[
+  {
+    "character_id": "CHAR_ARTIE",
+    "name": "Arthur 'Artie' Penhaligon"
+  },
+  {
+    "character_id": "CHAR_FIZZ",
+    "name": "Fizz"
+  },
+  {
+    "character_id": "CHAR_VANE",
+    "name": "Vane"
+  },
+  {
+    "character_id": "CHAR_MAYOR",
+    "name": "Mayor of Oakhaven"
+  },
+  {
+    "character_id": "CHAR_BOSS",
+    "name": "The System Administrator"
+  }
+]
+
+Thread registry:
+[
+  {
+    "label": "The 100% Crit Glitch",
+    "status": "open",
+    "thread_id": "THREAD_CRIT_EXPLOIT"
+  },
+  {
+    "label": "The Vane Vendetta",
+    "status": "open",
+    "thread_id": "THREAD_VANE_RIVALRY"
+  },
+  {
+    "label": "The System's Stability",
+    "status": "open",
+    "thread_id": "THREAD_SYSTEM_GLITCH"
+  },
+  {
+    "label": "The Path of the First Glitch",
+    "status": "open",
+    "thread_id": "THREAD_THE_ASCENSION"
+  }
+]
+
+
+Character states (per cast_present_ids):
+[
+  {
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "hand_right",
+        "contents": [
+          "Rusty Shortsword (Prop)"
+        ],
+        "location": "arm_right"
+      },
+      {
+        "container": "pockets",
+        "contents": [
+          "Smartphone (dead)",
+          "Wallet"
+        ],
+        "location": "legs"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is deeply cynical about his own death and the System's snarky commentary."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is now terrified of his own fragility and furious at the System's 'balancing' logic."
+        ],
+        "scene": 2
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> Smartphone (dead) (status=stowed, container=pockets)",
+      "inventory: CHAR_ARTIE -> Wallet (status=stowed, container=pockets)",
+      "inventory: CHAR_ARTIE -> Rusty Shortsword (status=carried, container=hand_right)",
+      "container: pockets (owner=CHAR_ARTIE, contents=[Smartphone (dead), Wallet])",
+      "container: hand_right (owner=CHAR_ARTIE, contents=[Rusty Shortsword])",
+      "status: deceased (Earth)",
+      "status: active (System Void)",
+      "status: 1 HP (Glass Cannon)",
+      "status: 100% Critical Hit Rate",
+      "trait: Glass Cannon (Legendary/Cursed)"
+    ],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "Rusty Shortsword (Prop)",
+        "status": "carried"
+      },
+      {
+        "container": "pockets",
+        "item": "Smartphone (dead)",
+        "status": "stowed"
+      },
+      {
+        "container": "pockets",
+        "item": "Wallet",
+        "status": "stowed"
+      }
+    ],
+    "name": "Arthur 'Artie' Penhaligon",
+    "schema_version": "1.0",
+    "updated_at": "2026-02-06T01:36:21Z"
+  },
+  {
+    "character_id": "CHAR_FIZZ",
+    "containers": [
+      {
+        "container": "pouch",
+        "contents": [
+          "Guidebook",
+          "Sparkle Dust"
+        ],
+        "location": "waist"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz finds Artie's 'Anomaly' status amusing and is curious to see how long he lasts."
+        ],
+        "scene": 2
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_FIZZ -> Guidebook (status=stowed, container=pouch)",
+      "inventory: CHAR_FIZZ -> Sparkle Dust (status=stowed, container=pouch)",
+      "container: pouch (owner=CHAR_FIZZ, contents=[Guidebook, Sparkle Dust])",
+      "role: System Guide"
+    ],
+    "inventory": [
+      {
+        "container": "pouch",
+        "item": "Guidebook",
+        "status": "stowed"
+      },
+      {
+        "container": "pouch",
+        "item": "Sparkle Dust",
+        "status": "stowed"
+      }
+    ],
+    "name": "Fizz",
+    "schema_version": "1.0",
+    "updated_at": "2026-02-06T01:36:21Z"
+  }
+]
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-06T01:21:05Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 3
+  },
+  "duplication_warnings_in_row": 0,
+  "outline": {
+    "path": "outline/outline.json"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_003.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Artie died in a mundane office accident and has been drafted into a System-driven world.",
+      "Artie met Fizz and accidentally created a broken 'Glass Cannon' build with 1 HP and 100% Crit rate."
+    ],
+    "key_facts_ring": [
+      "Artie is introduced as a cynical office drone carrying a LARP prop (Rusty Shortsword).",
+      "A bag of 'Nacho Average Jalape\u00f1o' chips gets stuck in the Snack-O-Matic 3000.",
+      "Artie attempts to shake the machine and reach into the bin for the chips.",
+      "The Rusty Shortsword conducts a fatal electrical surge from a frayed wire into Artie.",
+      "Artie dies and his consciousness enters the System Void.",
+      "The System mocks Artie's 'Stupidity-Induced Electrical Discharge' and begins character creation.",
+      "milestone: artie_death = DONE",
+      "milestone: system_entry = DONE",
+      "milestone: chips_retrieved = DONE",
+      "location: System Void",
+      "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, hand_right)",
+      "inventory: CHAR_ARTIE -> Smartphone (dead) (stowed, pockets)",
+      "inventory: CHAR_ARTIE -> Wallet (stowed, pockets)",
+      "Fizz introduced herself as the legally mandated System Guide.",
+      "Artie attempted to allocate 80 points into Vitality to become a 'tank'.",
+      "Residual electricity from the Snack-O-Matic caused a UI malfunction.",
+      "All 100 stat points were forced into Critical Probability and Multiplier.",
+      "The System assigned the 'Glass Cannon' trait and set Artie's HP to 1/1.",
+      "The System Void dissolved, beginning Artie's transport to the game world.",
+      "milestone: stat_allocation = DONE",
+      "milestone: tutorial_arrival = NOT_YET",
+      "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, container=hand_right)",
+      "status: CHAR_ARTIE -> 1 HP (hard constraint)",
+      "status: CHAR_ARTIE -> 100% Critical Hit Rate (hard constraint)"
+    ],
+    "last_scene": [
+      "Artie met his System Guide, Fizz, in the flickering blue void of character creation.",
+      "A residual electrical surge from his death glitched the UI, dumping all his stat points into Critical Probability instead of Vitality.",
+      "The System finalized his build as a 'Glass Cannon' with 100% Crit and a precarious 1 HP before transport began."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: system_entry = DONE",
+      "milestone: chips_retrieved = DONE",
+      "location: System Void",
+      "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, hand_right)",
+      "inventory: CHAR_ARTIE -> Smartphone (dead) (stowed, pockets)",
+      "inventory: CHAR_ARTIE -> Wallet (stowed, pockets)",
+      "milestone: stat_allocation = DONE",
+      "milestone: tutorial_arrival = NOT_YET",
+      "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, container=hand_right)",
+      "status: CHAR_ARTIE -> 1 HP (hard constraint)",
+      "status: CHAR_ARTIE -> 100% Critical Hit Rate (hard constraint)"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [],
+    "cast_present_ids": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "System Void",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie met his System Guide, Fizz.",
+      "A residual electrical charge from Artie's death glitched the character creation UI.",
+      "Artie's stat points were accidentally dumped into Critical Probability.",
+      "The System balanced Artie's 100% Crit rate by reducing his HP to 1.",
+      "Artie acquired the 'Glass Cannon' Legendary/Cursed trait."
+    ],
+    "time": {}
+  }
+}
+
+Summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie died in a mundane office accident and has been drafted into a System-driven world.",
+    "Artie met Fizz and accidentally created a broken 'Glass Cannon' build with 1 HP and 100% Crit rate."
+  ],
+  "key_facts_ring": [
+    "Artie is introduced as a cynical office drone carrying a LARP prop (Rusty Shortsword).",
+    "A bag of 'Nacho Average Jalape\u00f1o' chips gets stuck in the Snack-O-Matic 3000.",
+    "Artie attempts to shake the machine and reach into the bin for the chips.",
+    "The Rusty Shortsword conducts a fatal electrical surge from a frayed wire into Artie.",
+    "Artie dies and his consciousness enters the System Void.",
+    "The System mocks Artie's 'Stupidity-Induced Electrical Discharge' and begins character creation.",
+    "milestone: artie_death = DONE",
+    "milestone: system_entry = DONE",
+    "milestone: chips_retrieved = DONE",
+    "location: System Void",
+    "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, hand_right)",
+    "inventory: CHAR_ARTIE -> Smartphone (dead) (stowed, pockets)",
+    "inventory: CHAR_ARTIE -> Wallet (stowed, pockets)",
+    "Fizz introduced herself as the legally mandated System Guide.",
+    "Artie attempted to allocate 80 points into Vitality to become a 'tank'.",
+    "Residual electricity from the Snack-O-Matic caused a UI malfunction.",
+    "All 100 stat points were forced into Critical Probability and Multiplier.",
+    "The System assigned the 'Glass Cannon' trait and set Artie's HP to 1/1.",
+    "The System Void dissolved, beginning Artie's transport to the game world.",
+    "milestone: stat_allocation = DONE",
+    "milestone: tutorial_arrival = NOT_YET",
+    "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, container=hand_right)",
+    "status: CHAR_ARTIE -> 1 HP (hard constraint)",
+    "status: CHAR_ARTIE -> 100% Critical Hit Rate (hard constraint)"
+  ],
+  "last_scene": [
+    "Artie met his System Guide, Fizz, in the flickering blue void of character creation.",
+    "A residual electrical surge from his death glitched the UI, dumping all his stat points into Critical Probability instead of Vitality.",
+    "The System finalized his build as a 'Glass Cannon' with 100% Crit and a precarious 1 HP before transport began."
+  ],
+  "must_stay_true": [
+    "milestone: artie_death = DONE",
+    "milestone: system_entry = DONE",
+    "milestone: chips_retrieved = DONE",
+    "location: System Void",
+    "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, hand_right)",
+    "inventory: CHAR_ARTIE -> Smartphone (dead) (stowed, pockets)",
+    "inventory: CHAR_ARTIE -> Wallet (stowed, pockets)",
+    "milestone: stat_allocation = DONE",
+    "milestone: tutorial_arrival = NOT_YET",
+    "inventory: CHAR_ARTIE -> Rusty Shortsword (Prop) (carried, container=hand_right)",
+    "status: CHAR_ARTIE -> 1 HP (hard constraint)",
+    "status: CHAR_ARTIE -> 100% Critical Hit Rate (hard constraint)"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Recent facts:
+[
+  "Artie met his System Guide, Fizz.",
+  "A residual electrical charge from Artie's death glitched the character creation UI.",
+  "Artie's stat points were accidentally dumped into Critical Probability.",
+  "The System balanced Artie's 100% Crit rate by reducing his HP to 1.",
+  "Artie acquired the 'Glass Cannon' Legendary/Cursed trait."
+]

@@ -496,6 +496,21 @@ def _coerce_character_updates(patch: Dict[str, Any]) -> None:
             if key in update:
                 update[key] = _summary_list(update.get(key))
 
+def _fill_character_update_context(patch: Dict[str, Any], scene_card: Dict[str, Any]) -> None:
+    updates = patch.get("character_updates") if isinstance(patch, dict) else None
+    if not isinstance(updates, list):
+        return
+    chapter = _maybe_int(scene_card.get("chapter")) if isinstance(scene_card, dict) else None
+    scene = _maybe_int(scene_card.get("scene")) if isinstance(scene_card, dict) else None
+    for update in updates:
+        if not isinstance(update, dict):
+            continue
+        if "chapter" not in update and chapter is not None:
+            update["chapter"] = chapter
+        if "scene" not in update and scene is not None:
+            update["scene"] = scene
+
+
 
 
 
@@ -1271,6 +1286,7 @@ def _write_scene(
 
     _coerce_summary_update(patch)
     _coerce_character_updates(patch)
+    _fill_character_update_context(patch, scene_card)
     validate_json(patch, "state_patch")
     return prose, patch
 
@@ -1429,6 +1445,7 @@ def _repair_scene(
 
     _coerce_summary_update(patch)
     _coerce_character_updates(patch)
+    _fill_character_update_context(patch, scene_card)
     validate_json(patch, "state_patch")
     return prose, patch
 
@@ -1509,6 +1526,7 @@ def _state_repair(
         patch["schema_version"] = "1.0"
     _coerce_summary_update(patch)
     _coerce_character_updates(patch)
+    _fill_character_update_context(patch, scene_card)
     validate_json(patch, "state_patch")
     return patch
 

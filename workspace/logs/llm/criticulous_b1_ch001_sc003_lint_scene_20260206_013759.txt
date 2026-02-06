@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {
+      "code": "logic_error",
+      "message": "The scene describes a 'Critical Impact Detected' upon landing, yet Artie's HP remains at 1/1. Since his maximum HP is 1, any damage\u2014especially a 'critical' one\u2014should result in immediate death. The prose implies he survived a lethal-level event without HP loss.",
+      "severity": "error"
+    },
+    {
+      "code": "invariant_contradiction",
+      "message": "The 'must_stay_true' and 'key_facts_ring' lists contain contradictory milestones: 'tutorial_arrival' is simultaneously marked as 'NOT_YET' and 'DONE'.",
+      "severity": "error"
+    },
+    {
+      "code": "spatial_contradiction",
+      "message": "The invariant list specifies 'location: System Void', but the scene and world state correctly identify the location as the 'Tutorial Zone'. The invariant needs to be updated to reflect the transition.",
+      "severity": "warning"
+    },
+    {
+      "code": "continuity",
+      "message": "The system notification [HP: 1/1] appears after the 'Critical Impact' warning. If the impact was critical, the HP should reflect a change or the character should be dead. If no damage was taken, the 'Critical Impact' label is misleading within the established 1 HP constraint.",
+      "severity": "error"
+    }
+  ]
+}

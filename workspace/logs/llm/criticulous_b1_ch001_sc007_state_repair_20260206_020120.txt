@@ -1,0 +1,157 @@
+{
+  "character_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "Rusty Shortsword (Prop)"
+          ],
+          "location": "arm_right"
+        },
+        {
+          "container": "hand_left",
+          "contents": [
+            "Participation Trophy (Tutorial Edition)"
+          ],
+          "location": "arm_left"
+        },
+        {
+          "container": "pockets",
+          "contents": [
+            "Smartphone (dead)",
+            "Wallet",
+            "Anomaly ID Tag"
+          ],
+          "location": "legs"
+        }
+      ],
+      "invariants_add": [
+        "stat_points: 5 (unallocated)",
+        "milestone: crit_economy_revealed = DONE",
+        "milestone: stat_allocation_refused = DONE"
+      ],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "Rusty Shortsword (Prop)",
+          "status": "carried"
+        },
+        {
+          "container": "hand_left",
+          "item": "Participation Trophy (Tutorial Edition)",
+          "status": "carried"
+        },
+        {
+          "container": "pockets",
+          "item": "Smartphone (dead)",
+          "status": "stowed"
+        },
+        {
+          "container": "pockets",
+          "item": "Wallet",
+          "status": "stowed"
+        },
+        {
+          "container": "pockets",
+          "item": "Anomaly ID Tag",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": [
+        "Artie is now aware that his 'broken' stat makes him a valuable economic resource, not just a combat fluke.",
+        "Artie is resisting the System's pressure to allocate stats, fearing it will lock him into a role he doesn't want."
+      ],
+      "scene": 7
+    },
+    {
+      "chapter": 1,
+      "character_id": "CHAR_MAYOR",
+      "containers": [
+        {
+          "container": "inner_pocket",
+          "contents": [
+            "Seal of Office"
+          ],
+          "location": "chest",
+          "owner": "CHAR_MAYOR"
+        },
+        {
+          "container": "hand_left",
+          "contents": [
+            "Bag of Gold"
+          ],
+          "location": "arm_left",
+          "owner": "CHAR_MAYOR"
+        }
+      ],
+      "invariants_add": [
+        "inventory: CHAR_MAYOR -> Seal of Office (status=stowed, container=inner_pocket)",
+        "inventory: CHAR_MAYOR -> Bag of Gold (status=carried, container=hand_left)"
+      ],
+      "inventory": [
+        {
+          "container": "inner_pocket",
+          "item": "Seal of Office",
+          "status": "stowed"
+        },
+        {
+          "container": "hand_left",
+          "item": "Bag of Gold",
+          "status": "carried"
+        }
+      ],
+      "persona_updates": [
+        "Mayor Whitlock views Artie as a 'walking mint' and is willing to use political pressure to secure him."
+      ],
+      "scene": 7
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie learned that his 'Anomaly' status makes him a target for economic exploitation by Oakhaven's leadership.",
+      "The 'Crit-Economy' was established, linking Artie's combat glitch to the world's primary currency generation."
+    ],
+    "key_events": [
+      "Artie entered the Gilded Tankard while carrying the Participation Trophy (Tutorial Edition) in his left hand.",
+      "The trophy's Aggro Aura attracted a Level 1 Tavern Rat, which Artie killed with a 999-damage critical hit.",
+      "Mayor Whitlock explained the Crit-Economy, where Essence Shards are minted from the 'Excessive Force' of critical hits.",
+      "The Mayor attempted to recruit Artie as a 'Crit-Battery' to generate wealth in a secure vault.",
+      "Artie refused to allocate his 5 unspent stat points despite the Mayor's pressure.",
+      "Artie fled the Gilded Tankard to avoid being scouted as a political and economic resource.",
+      "milestone: crit_economy_revealed = DONE"
+    ],
+    "last_scene": [
+      "Artie entered the Gilded Tankard to hide, but his Participation Trophy's Aggro Aura immediately lured a tavern rat into an attack.",
+      "After vaporizing the rodent with a massive critical hit, he was approached by Mayor Whitlock, who revealed that Oakhaven's economy relies on Essence Shards minted from critical hits.",
+      "Realizing the Mayor intended to exploit him as a 'Crit-Battery,' Artie refused to allocate his stat points and fled the tavern."
+    ],
+    "must_stay_true": [
+      "inventory: CHAR_ARTIE -> Participation Trophy (Tutorial Edition) (carried, hand_left)",
+      "status: CHAR_ARTIE -> 1/1 HP (hard constraint)",
+      "status: CHAR_ARTIE -> 100% Critical Hit Rate (hard constraint)",
+      "milestone: stat_allocation = NOT_YET",
+      "milestone: vane_encounter = NOT_YET",
+      "milestone: crit_economy_revealed = DONE",
+      "milestone: stat_allocation_refused = DONE"
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_MAYOR"
+    ],
+    "location": "Oakhaven (The Gilded Tankard)",
+    "open_threads": [],
+    "recent_facts": [
+      "Artie entered the Gilded Tankard to hide from the public attention at the gates.",
+      "The Participation Trophy's Aggro Aura attracted a Level 1 Tavern Rat, which Artie killed with a single critical hit.",
+      "Mayor Whitlock introduced himself and explained the 'Crit-Economy', where critical hits are used to mint Essence Shards.",
+      "The Mayor attempted to recruit Artie as a 'Crit-Battery' to generate wealth in a secure vault.",
+      "Artie refused to allocate his 5 unspent stat points and fled the tavern to avoid being exploited."
+    ]
+  }
+}

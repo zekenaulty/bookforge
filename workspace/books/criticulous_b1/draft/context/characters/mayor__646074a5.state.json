@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "character_id": "CHAR_MAYOR",
+  "inventory": [
+    {
+      "container": "inner_pocket",
+      "item": "Seal of Office",
+      "status": "stowed"
+    },
+    {
+      "container": "hand_left",
+      "item": "Bag of Gold",
+      "status": "carried"
+    }
+  ],
+  "containers": [
+    {
+      "container": "inner_pocket",
+      "contents": [
+        "Seal of Office"
+      ],
+      "location": "chest",
+      "owner": "CHAR_MAYOR"
+    },
+    {
+      "container": "hand_left",
+      "contents": [
+        "Bag of Gold"
+      ],
+      "location": "arm_left",
+      "owner": "CHAR_MAYOR"
+    }
+  ],
+  "invariants": [
+    "inventory: CHAR_MAYOR -> Seal of Office (status=stowed, container=inner_pocket)",
+    "inventory: CHAR_MAYOR -> Bag of Gold (status=carried, container=hand_left)",
+    "container: inner_pocket (owner=CHAR_MAYOR, contents=[Seal of Office])",
+    "container: hand_left (owner=CHAR_MAYOR, contents=[Bag of Gold])"
+  ],
+  "history": [
+    {
+      "chapter": 1,
+      "scene": 7,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "persona_updates": [
+        "Mayor Whitlock views Artie as a 'walking mint' and is willing to use political pressure to secure him."
+      ]
+    }
+  ],
+  "name": "Mayor of Oakhaven",
+  "updated_at": "2026-02-06T02:01:35Z"
+}
