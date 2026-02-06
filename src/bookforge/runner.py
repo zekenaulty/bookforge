@@ -510,6 +510,291 @@ def _fill_character_update_context(patch: Dict[str, Any], scene_card: Dict[str, 
         if "scene" not in update and scene is not None:
             update["scene"] = scene
 
+def _coerce_stat_updates(patch: Dict[str, Any]) -> None:
+    if not isinstance(patch, dict):
+        return
+    for key in ("character_stat_updates", "character_skill_updates"):
+        updates = patch.get(key)
+        if updates is None:
+            continue
+        if not isinstance(updates, list):
+            patch[key] = []
+            continue
+        for update in updates:
+            if not isinstance(update, dict):
+                continue
+            if "set" in update and not isinstance(update.get("set"), dict):
+                update["set"] = {}
+            if "delta" in update and not isinstance(update.get("delta"), dict):
+                update["delta"] = {}
+    for key in ("run_stat_updates", "run_skill_updates"):
+        updates = patch.get(key)
+        if updates is None:
+            continue
+        if not isinstance(updates, dict):
+            patch[key] = {}
+            continue
+        if "set" in updates and not isinstance(updates.get("set"), dict):
+            updates["set"] = {}
+        if "delta" in updates and not isinstance(updates.get("delta"), dict):
+            updates["delta"] = {}
+
+
+def _normalize_stat_key(value: str) -> str:
+    cleaned = re.sub(r"[^a-zA-Z0-9]+", "_", str(value).strip().lower())
+    return cleaned.strip("_")
+
+
+def _parse_stat_value(raw: str) -> Any:
+    if raw is None:
+        return None
+    text = str(raw).strip()
+    locked = "locked" in text.lower()
+    text = re.sub(r"\(.*?\)", "", text).strip()
+    if "/" in text:
+        parts = [part.strip() for part in text.split("/", 1)]
+        if len(parts) == 2 and parts[0].replace(".", "", 1).isdigit() and parts[1].replace(".", "", 1).isdigit():
+            current = float(parts[0]) if "." in parts[0] else int(parts[0])
+            maximum = float(parts[1]) if "." in parts[1] else int(parts[1])
+            result = {"current": current, "max": maximum}
+            if locked:
+                result["locked"] = True
+            return result
+    numeric = text.replace("%", "").strip()
+    if numeric.replace(".", "", 1).isdigit():
+        value = float(numeric) if "." in numeric else int(numeric)
+        if text.endswith("%"):
+            value = f"{value}%"
+        if locked:
+            return {"value": value, "locked": True}
+        return value
+    return text
+
+
+def _upsert_stat_update(updates: list, character_id: str) -> dict:
+    for update in updates:
+        if isinstance(update, dict) and update.get("character_id") == character_id:
+            return update
+    new_item = {"character_id": character_id, "set": {}, "delta": {}}
+    updates.append(new_item)
+    return new_item
+
+
+def _migrate_numeric_invariants(patch: Dict[str, Any]) -> None:
+    updates = patch.get("character_updates") if isinstance(patch, dict) else None
+    if not isinstance(updates, list):
+        return
+    stat_updates = patch.setdefault("character_stat_updates", [])
+    skill_updates = patch.setdefault("character_skill_updates", [])
+    if not isinstance(stat_updates, list):
+        stat_updates = []
+        patch["character_stat_updates"] = stat_updates
+    if not isinstance(skill_updates, list):
+        skill_updates = []
+        patch["character_skill_updates"] = skill_updates
+
+    for update in updates:
+        if not isinstance(update, dict):
+            continue
+        char_id = str(update.get("character_id") or "").strip()
+        if not char_id:
+            continue
+        invariants = update.get("invariants_add")
+        if not isinstance(invariants, list):
+            continue
+        kept = []
+        for item in invariants:
+            text = str(item).strip()
+            match = re.match(r"^(stat|skill)\s*:\s*([^=]+?)\s*=\s*(.+)$", text, re.IGNORECASE)
+            if not match:
+                kept.append(item)
+                continue
+            kind = match.group(1).lower()
+            key = _normalize_stat_key(match.group(2))
+            value = _parse_stat_value(match.group(3))
+            if not key:
+                kept.append(item)
+                continue
+            if kind == "stat":
+                target = _upsert_stat_update(stat_updates, char_id)
+            else:
+                target = _upsert_stat_update(skill_updates, char_id)
+            target.setdefault("set", {})
+            target["set"][key] = value
+        update["invariants_add"] = kept
+
+
+def _apply_bag_updates(bag: Dict[str, Any], updates: Dict[str, Any]) -> None:
+    if not isinstance(bag, dict) or not isinstance(updates, dict):
+        return
+    set_block = updates.get("set")
+    if isinstance(set_block, dict):
+        for key, value in set_block.items():
+            bag[str(key)] = value
+    delta_block = updates.get("delta")
+    if isinstance(delta_block, dict):
+        for key, value in delta_block.items():
+            if isinstance(value, (int, float)):
+                existing = bag.get(key)
+                if isinstance(existing, (int, float)):
+                    bag[key] = existing + value
+                elif isinstance(existing, dict) and isinstance(existing.get("current"), (int, float)):
+                    existing["current"] = existing.get("current", 0) + value
+                    bag[key] = existing
+                else:
+                    bag[key] = value
+            elif isinstance(value, dict):
+                existing = bag.get(key)
+                if not isinstance(existing, dict):
+                    existing = {}
+                for sub_key, sub_val in value.items():
+                    if isinstance(sub_val, (int, float)):
+                        prior = existing.get(sub_key)
+                        if isinstance(prior, (int, float)):
+                            existing[sub_key] = prior + sub_val
+                        else:
+                            existing[sub_key] = sub_val
+                bag[key] = existing
+
+
+def _apply_character_stat_updates(book_root: Path, patch: Dict[str, Any]) -> None:
+    for field, bag_name in (("character_stat_updates", "stats"), ("character_skill_updates", "skills")):
+        updates = patch.get(field) if isinstance(patch, dict) else None
+        if not isinstance(updates, list):
+            continue
+        ensure_character_index(book_root)
+        for update in updates:
+            if not isinstance(update, dict):
+                continue
+            char_id = str(update.get("character_id") or "").strip()
+            if not char_id:
+                continue
+            state_path = resolve_character_state_path(book_root, char_id)
+            if state_path is None:
+                state_path = create_character_state_path(book_root, char_id)
+            try:
+                state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
+            except json.JSONDecodeError:
+                state = {}
+            if not isinstance(state, dict):
+                state = {}
+            bag = state.get(bag_name)
+            if not isinstance(bag, dict):
+                bag = {}
+            _apply_bag_updates(bag, update)
+            state[bag_name] = bag
+            state.setdefault("history", [])
+            if isinstance(state.get("history"), list):
+                note = update.get("reason")
+                entry = {"changes": [f"{bag_name}_updated"]}
+                if isinstance(note, str) and note.strip():
+                    entry["notes"] = note.strip()
+                state["history"].append(entry)
+            state["updated_at"] = _now_iso()
+            state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
+
+
+def _apply_run_stat_updates(state: Dict[str, Any], patch: Dict[str, Any]) -> None:
+    for field, bag_name in (("run_stat_updates", "run_stats"), ("run_skill_updates", "run_skills")):
+        updates = patch.get(field)
+        if not isinstance(updates, dict):
+            continue
+        bag = state.get(bag_name)
+        if not isinstance(bag, dict):
+            bag = {}
+        _apply_bag_updates(bag, updates)
+        state[bag_name] = bag
+
+
+def _extract_ui_stat_lines(prose: str) -> List[Dict[str, Any]]:
+    lines: List[Dict[str, Any]] = []
+    for match in re.finditer(r"\[([^\]:]{1,40}):\s*([0-9]+)(?:/([0-9]+))?\s*%?\]", prose):
+        key = match.group(1).strip()
+        current = int(match.group(2))
+        maximum = int(match.group(3)) if match.group(3) else None
+        lines.append({"key": key, "current": current, "max": maximum})
+    return lines
+
+
+def _stat_key_aliases() -> Dict[str, str]:
+    return {
+        "critical_hit_rate": "crit_rate",
+        "crit_rate": "crit_rate",
+        "critical_rate": "crit_rate",
+        "hp": "hp",
+        "stamina": "stamina",
+        "mp": "mp",
+        "mana": "mp",
+        "level": "level",
+    }
+
+
+def _stat_mismatch_issues(prose: str, character_states: List[Dict[str, Any]], run_stats: Dict[str, Any]) -> List[Dict[str, Any]]:
+    lines = _extract_ui_stat_lines(prose)
+    if not lines:
+        return []
+    stats: Dict[str, Any] = {}
+    if character_states:
+        first = character_states[0]
+        if isinstance(first, dict):
+            stats = first.get("stats", {}) if isinstance(first.get("stats"), dict) else {}
+    aliases = _stat_key_aliases()
+    issues: List[Dict[str, Any]] = []
+    for line in lines:
+        key = _normalize_stat_key(line["key"])
+        key = aliases.get(key, key)
+        stat_val = None
+        if key in stats:
+            stat_val = stats.get(key)
+        elif isinstance(run_stats, dict) and key in run_stats:
+            stat_val = run_stats.get(key)
+        if stat_val is None:
+            issues.append({
+                "code": "stat_unowned",
+                "message": f"UI stat '{line['key']}' not found in state stats/run_stats.",
+                "severity": "warning",
+            })
+            continue
+        if isinstance(stat_val, dict):
+            current = stat_val.get("current") if isinstance(stat_val.get("current"), (int, float)) else None
+            maximum = stat_val.get("max") if isinstance(stat_val.get("max"), (int, float)) else None
+            if current is not None and current != line["current"]:
+                issues.append({
+                    "code": "stat_mismatch",
+                    "message": f"UI stat '{line['key']}' current={line['current']} but state has {current}.",
+                    "severity": "warning",
+                })
+            if line["max"] is not None and maximum is not None and maximum != line["max"]:
+                issues.append({
+                    "code": "stat_mismatch",
+                    "message": f"UI stat '{line['key']}' max={line['max']} but state has {maximum}.",
+                    "severity": "warning",
+                })
+        elif isinstance(stat_val, (int, float)):
+            if line["current"] != stat_val:
+                issues.append({
+                    "code": "stat_mismatch",
+                    "message": f"UI stat '{line['key']}' value={line['current']} but state has {stat_val}.",
+                    "severity": "warning",
+                })
+    return issues
+
+
+def _pov_drift_issues(prose: str, pov: Optional[str]) -> List[Dict[str, Any]]:
+    if not pov:
+        return []
+    pov_key = str(pov).lower()
+    if not pov_key.startswith("third"):
+        return []
+    if re.search(r"(I|I'm|I've|I'd|me|my|mine)", prose):
+        return [{
+            "code": "pov_drift",
+            "message": "First-person pronouns detected in third-person POV scene.",
+            "severity": "warning",
+        }]
+    return []
+
+
 
 
 
@@ -1286,6 +1571,8 @@ def _write_scene(
 
     _coerce_summary_update(patch)
     _coerce_character_updates(patch)
+    _coerce_stat_updates(patch)
+    _migrate_numeric_invariants(patch)
     _fill_character_update_context(patch, scene_card)
     validate_json(patch, "state_patch")
     return prose, patch
@@ -1301,6 +1588,7 @@ def _lint_scene(
     scene_card: Dict[str, Any],
     invariants: List[str],
     character_states: List[Dict[str, Any]],
+    pov: Optional[str],
     client: LLMClient,
     model: str,
 ) -> Dict[str, Any]:
@@ -1362,8 +1650,11 @@ def _lint_scene(
     if not isinstance(summary_update, dict):
         summary_update = {}
     heuristic_issues = _heuristic_invariant_issues(prose, summary_update, invariants)
-    if heuristic_issues:
-        report["issues"] = list(report.get("issues", [])) + heuristic_issues
+    extra_issues = _stat_mismatch_issues(prose, character_states, state.get("run_stats", {}))
+    extra_issues += _pov_drift_issues(prose, pov)
+    combined = heuristic_issues + extra_issues
+    if combined:
+        report["issues"] = list(report.get("issues", [])) + combined
         report["status"] = "fail"
         report.setdefault("mode", "heuristic")
     validate_json(report, "lint_report")
@@ -1445,6 +1736,8 @@ def _repair_scene(
 
     _coerce_summary_update(patch)
     _coerce_character_updates(patch)
+    _coerce_stat_updates(patch)
+    _migrate_numeric_invariants(patch)
     _fill_character_update_context(patch, scene_card)
     validate_json(patch, "state_patch")
     return prose, patch
@@ -1526,12 +1819,16 @@ def _state_repair(
         patch["schema_version"] = "1.0"
     _coerce_summary_update(patch)
     _coerce_character_updates(patch)
+    _coerce_stat_updates(patch)
+    _migrate_numeric_invariants(patch)
     _fill_character_update_context(patch, scene_card)
     validate_json(patch, "state_patch")
     return patch
 
 
 def _apply_state_patch(state: Dict[str, Any], patch: Dict[str, Any], chapter_end: bool = False) -> Dict[str, Any]:
+    _apply_run_stat_updates(state, patch)
+
     world_updates = patch.get("world_updates")
     if world_updates is None and isinstance(patch.get("world"), dict):
         world_updates = patch.get("world")
@@ -1932,6 +2229,7 @@ def run_loop(
                     scene_card,
                     invariants,
                     character_states,
+                    book.get("pov"),
                     linter_client,
                     linter_model,
                 )
@@ -2002,6 +2300,7 @@ def run_loop(
                     scene_card,
                     invariants,
                     character_states,
+                    book.get("pov"),
                     linter_client,
                     linter_model,
                 )
@@ -2022,9 +2321,11 @@ def run_loop(
         if isinstance(updates, list) and updates:
             _status("Updating character states...")
             _apply_character_updates(book_root, patch, chapter_num, scene_num)
+            _apply_character_stat_updates(book_root, patch)
             _status("Character states updated OK")
         else:
             _apply_character_updates(book_root, patch, chapter_num, scene_num)
+            _apply_character_stat_updates(book_root, patch)
 
         cursor_override = patch.get("cursor_advance") if isinstance(patch.get("cursor_advance"), dict) else None
         if cursor_override:

@@ -3,6 +3,8 @@
 Check the scene for continuity, invariant violations, and duplication.
 Flag invariant contradictions against must_stay_true/key facts.
 Return ONLY JSON matching the lint_report schema.
+- Check that any UI numbers or skill values in prose match state stats/skills. If not, emit a failure.
+- Check for POV drift vs book POV (no first-person in third-person scenes).
 
 Required keys:
 - schema_version ("1.0")

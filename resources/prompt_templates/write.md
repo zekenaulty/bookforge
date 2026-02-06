@@ -11,6 +11,9 @@ Write the scene described by the scene card.
 - Milestone uniqueness: if a milestone is marked DONE in must_stay_true, do not depict it again. If marked NOT_YET, do not depict it now.
 - Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
 - Inventory contract: track ownership and container location for key items; update must_stay_true when items move or change hands.
+- Numbers must be owned: any UI/prose number shown must exist in state or be added in the patch.
+- Skills must be owned: any skill names, ranks, cooldowns, or charges shown must exist in state or be added in the patch.
+- Canonical descriptors (colors, item names, effect IDs) must be reused exactly; do not paraphrase.
 - For held items, specify container=hand_left or container=hand_right.
 - If a required event is not in the Scene Card, do not perform it.
 - summary_update arrays are mandatory; do not omit or leave empty unless explicitly stated.
@@ -29,10 +32,14 @@ STATE_PATCH rules:
 - Include story_so_far_add only at chapter end (or when scene_card explicitly requests).
 - Use threads_touched only if you can reference thread ids from scene_card.thread_ids.
 - Use cursor_advance only if you need to override the default cursor.
+- Include character_stat_updates for cast_present_ids when stats change (set/delta).
+- Include character_skill_updates for cast_present_ids when skills change (set/delta).
+- Include run_stat_updates/run_skill_updates only if global mechanics change.
 - Include character_updates entries for cast_present_ids that change state (inventory, containers, persona shifts).
   - Each entry must include character_id, chapter, scene, inventory (full current list), containers (full current list), invariants_add (array), persona_updates (array).
   - If you have a single persona update, still wrap it in an array of strings.
 - must_stay_true must include a milestone ledger and invariants using standard phrasing, e.g.:
+  - Avoid numeric stats in must_stay_true; store them in stats/skills updates instead.
   - inventory: CHAR_example -> shard (carried, container=satchel)
   - inventory: CHAR_example -> longsword (carried, container=hand_right)
   - container: satchel (owner=CHAR_example, contents=[shard, maps])

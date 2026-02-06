@@ -430,6 +430,8 @@ def generate_characters(
             "name": char.get("name", ""),
             "inventory": char.get("inventory", []),
             "containers": char.get("containers", []),
+            "stats": char.get("stats", {}),
+            "skills": char.get("skills", {}),
             "invariants": char.get("invariants", []),
             "history": [],
             "updated_at": _now_iso(),

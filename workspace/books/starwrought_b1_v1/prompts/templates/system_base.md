@@ -13,6 +13,7 @@ Spatial/inventory consistency: injuries, inventory, and ownership must remain co
 Inventory contract: track item ownership and container location per character or container label; items do not teleport.
 Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
 State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Mechanics contract: if mechanics/UI are present, all numeric values and labels (stats/skills) must be sourced from state or explicitly updated in the state_patch. Do not invent numbers or canonical tokens.
 Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
 Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
 Never recap at scene openings.
