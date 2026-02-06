@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
@@ -628,10 +628,9 @@ def _apply_bag_updates(bag: Dict[str, Any], updates: Dict[str, Any]) -> None:
     if not isinstance(bag, dict) or not isinstance(updates, dict):
         return
     set_block = updates.get("set")
-    if isinstance(set_block, dict):
-        for key, value in set_block.items():
-            bag[str(key)] = value
     delta_block = updates.get("delta")
+
+    # Apply delta first so explicit set values are authoritative when both target the same key.
     if isinstance(delta_block, dict):
         for key, value in delta_block.items():
             if isinstance(value, (int, float)):
@@ -655,6 +654,10 @@ def _apply_bag_updates(bag: Dict[str, Any], updates: Dict[str, Any]) -> None:
                         else:
                             existing[sub_key] = sub_val
                 bag[key] = existing
+
+    if isinstance(set_block, dict):
+        for key, value in set_block.items():
+            bag[str(key)] = value
 
 
 def _apply_character_stat_updates(book_root: Path, patch: Dict[str, Any]) -> None:
@@ -786,7 +789,7 @@ def _pov_drift_issues(prose: str, pov: Optional[str]) -> List[Dict[str, Any]]:
     pov_key = str(pov).lower()
     if not pov_key.startswith("third"):
         return []
-    if re.search(r"(I|I'm|I've|I'd|me|my|mine)", prose):
+    if re.search(r"\b(I|I'm|I've|I'd|me|my|mine)\b", prose):
         return [{
             "code": "pov_drift",
             "message": "First-person pronouns detected in third-person POV scene.",
@@ -946,18 +949,18 @@ def _heuristic_invariant_issues(
 
     milestone_patterns = {
         "shard_bind": [
-            r"\bbind(OK:s|ing|ed)OK\b.{0,40}\bshard\b",
-            r"\bshard\b.{0,40}\bbind(OK:s|ing|ed)OK\b",
+            r"\b(?:bind(?:s|ing|ed)|bound)\b.{0,40}\bshard\b",
+            r"\bshard\b.{0,40}\b(?:bind(?:s|ing|ed)|bound)\b",
             r"\boath\b.{0,40}\bfilament\b",
         ],
         "maps_acquired": [
-            r"\bmap(OK:s)OK\b.{0,40}\b(acquire|acquired|retrieve|retrieved|unfurl|unfurled|take|took|get|got)\b",
-            r"\b(acquire|retriev|unfurl|take|get)\w*\b.{0,40}\bmap(OK:s)OK\b",
-            r"\bchart(OK:s)OK\b",
-            r"\bstar[- ]OKmap\b",
+            r"\bmaps?\b.{0,40}\b(acquire|acquired|retrieve|retrieved|unfurl|unfurled|take|took|get|got)\b",
+            r"\b(acquire|retriev|unfurl|take|get)\w*\b.{0,40}\bmaps?\b",
+            r"\bcharts?\b",
+            r"\bstar[- ]?map\b",
         ],
         "shadow_form_first": [
-            r"\bshadow[- ]OKform\b",
+            r"\bshadow[- ]?form\b",
             r"\bshadow\b.{0,20}\bforms\b",
         ],
     }
@@ -2378,3 +2381,5 @@ def run_loop(
 
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
+
+
