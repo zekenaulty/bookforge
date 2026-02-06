@@ -1,0 +1,163 @@
+{
+  "character_skill_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "skills": {
+        "super_mega_ultra_crit": {
+          "cooldown_remaining": "23:58:12",
+          "status": "cooldown"
+        }
+      }
+    }
+  ],
+  "character_stat_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "stats": {
+        "hp": 1,
+        "mp": 1,
+        "level": 2,
+        "stamina": 42,
+        "luck": 104,
+        "dexterity": 2
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "Broken Tutorial Sword"
+          ],
+          "location": "arm_right"
+        },
+        {
+          "container": "hand_left",
+          "contents": [
+            "Participation Trophy"
+          ],
+          "location": "arm_left"
+        },
+        {
+          "container": "body",
+          "contents": [
+            "Linen Tunic"
+          ],
+          "location": "torso"
+        },
+        {
+          "container": "pockets",
+          "contents": [
+            "Single Copper Coin"
+          ],
+          "location": "legs"
+        }
+      ],
+      "invariants_add": [
+        "inventory: CHAR_ARTIE -> Participation Trophy (status=carried, container=hand_left)",
+        "milestone: trophy_acquired = DONE",
+        "milestone: patch_note_oak_destroyed = DONE",
+        "effect: Aura of the Beacon (Active)",
+        "effect: Magnetic Failure (Active)",
+        "effect: Inevitability (Active)"
+      ],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "Broken Tutorial Sword",
+          "status": "carried"
+        },
+        {
+          "container": "body",
+          "item": "Linen Tunic",
+          "status": "equipped"
+        },
+        {
+          "container": "pockets",
+          "item": "Single Copper Coin",
+          "status": "stowed"
+        },
+        {
+          "container": "hand_left",
+          "item": "Participation Trophy",
+          "status": "carried"
+        }
+      ],
+      "persona_updates": [
+        "Artie realizes that System rewards can be actively malicious.",
+        "Artie is experiencing the true terror of a 1 HP build under extreme pressure."
+      ],
+      "scene": 5
+    },
+    {
+      "chapter": 1,
+      "character_id": "CHAR_FIZZ",
+      "persona_updates": [
+        "Fizz's professional guide persona is cracking under the stress of Artie's mechanical anomalies.",
+        "Fizz is genuinely concerned for Artie's survival given the trophy's hidden stats."
+      ],
+      "scene": 5
+    }
+  ],
+  "run_stat_updates": [
+    {
+      "label": "Environmental Stability",
+      "stat_id": "zone_stability",
+      "value": 84
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie received a cursed Participation Trophy that acts as a high-intensity monster beacon.",
+      "The tutorial zone has become hyper-hostile, forcing Artie into a desperate flight for survival."
+    ],
+    "key_events": [
+      "Artie acquired the 'Participation Trophy' (Cursed/Soul-bound) for causing a Tier 3 System Error.",
+      "Fizz revealed the trophy's hidden stats: 'Aura of the Beacon' (+500% Aggro) and 'Magnetic Failure' (95% projectile redirection).",
+      "The destruction of the Patch-Note Oak was flagged as a violation of the world's structural code.",
+      "A massive mob of Tutorial Wolves and Slimes aggroed on Artie, forcing a retreat.",
+      "Artie's Super-Mega-Ultra-Crit entered a 24-hour cooldown (23:58:12 remaining).",
+      "The System issued an Environmental Alert as zone stability dropped to 84% due to aggro density.",
+      "Artie's Stamina dropped to 42/100 during the high-speed flight toward a northern ravine."
+    ],
+    "last_scene": [
+      "Artie received a cursed 'Participation Trophy' after destroying a Patch-Note Oak, which Fizz identified as a massive aggro magnet.",
+      "The trophy's hidden stats caused the entire tutorial zone to converge on Artie's location.",
+      "He is currently fleeing toward a northern ravine while his ultimate ability remains on cooldown."
+    ],
+    "must_stay_true": [
+      "milestone: trophy_acquired = DONE",
+      "milestone: patch_note_oak_destroyed = DONE",
+      "inventory: CHAR_ARTIE -> Participation Trophy (carried, container=hand_left)",
+      "Artie has 1 HP and 1 MP; any damage taken is lethal.",
+      "Artie is under the permanent effect of 'Inevitability' (item cannot be unequipped or stowed).",
+      "Super-Mega-Ultra-Crit is on a 24-hour cooldown."
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "cast_present_ids": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "The Whispering Woods",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie acquired the Participation Trophy (Cursed).",
+      "The trophy provides a 500% Aggro boost and attracts projectiles.",
+      "Tutorial zone stability has dropped to 84%.",
+      "Artie is fleeing toward a ravine to the north.",
+      "Artie's Super-Mega-Ultra-Crit is on cooldown."
+    ]
+  }
+}

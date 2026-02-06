@@ -1,0 +1,608 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Mechanics contract: if mechanics/UI are present, all numeric values and labels (stats/skills) must be sourced from state or explicitly updated in the state_patch. Do not invent numbers or canonical tokens.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+
+
+USER:
+
+# CONTINUITY PACK
+
+Create a continuity pack JSON object with these fields:
+- scene_end_anchor: 2-4 factual sentences about how the last scene ended (no prose).
+- constraints: list of immediate continuity constraints.
+- open_threads: list of active thread ids.
+- cast_present: list of character names present next.
+- location: location id or name.
+- next_action: the implied next action.
+- summary: echo state.summary (facts-only arrays; do not paraphrase).
+
+Return ONLY JSON.
+
+Rules:
+- Use only characters listed in scene_card.cast_present. Do not introduce new names.
+- summary must match state.summary and remain facts-only; do not add prose.
+- constraints must include the highest-priority invariants from summary.must_stay_true and summary.key_facts_ring (copy exact strings when possible).
+- constraints must include the highest-priority inventory/container invariants from summary.must_stay_true (copy exact strings when possible).
+- If character_states are provided, prefer their inventory/container facts for constraints; do not invent conflicting facts.
+- If scene_card.cast_present is empty, cast_present must be an empty array.
+- open_threads must be a subset of thread_registry thread_id values.
+- If scene_card.thread_ids is present, prefer those thread ids.
+- Do not invent new thread ids or character names.
+
+Scene card:
+{
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "chapter": 1,
+  "conflict": "The gate guards' automated scanners malfunction when trying to process Artie's impossible luck and the aggro-aura of his trophy.",
+  "constraints": [
+    "target_words: 2000",
+    "no-recaps",
+    "forward-motion"
+  ],
+  "end_condition": "Artie is allowed entry into Oakhaven but is assigned a persistent 'Statistical Anomaly' UI tag.",
+  "goal": "Establish the world's obsession with stats and the danger of Artie's visible 100% Crit-Rate.",
+  "introduces": [],
+  "introduces_ids": [],
+  "required_callbacks": [
+    "participation_trophy_acquired",
+    "level_two_reached"
+  ],
+  "scene": 6,
+  "scene_id": "SC_001_006",
+  "scene_target": "Artie reaches the gates of Oakhaven and is flagged as a Statistical Anomaly by the gate scanners.",
+  "schema_version": "1.1",
+  "thread_ids": []
+}
+
+Character registry (id -> name):
+[
+  {
+    "character_id": "CHAR_ARTIE",
+    "name": "Arthur 'Artie' Penhaligon"
+  },
+  {
+    "character_id": "CHAR_FIZZ",
+    "name": "Fizz"
+  },
+  {
+    "character_id": "CHAR_VANE",
+    "name": "Vane"
+  },
+  {
+    "character_id": "CHAR_MAYOR",
+    "name": "Mayor of Oakhaven"
+  },
+  {
+    "character_id": "CHAR_BOSS",
+    "name": "The System Administrator"
+  }
+]
+
+Thread registry:
+[
+  {
+    "label": "The 100% Crit Glitch",
+    "status": "open",
+    "thread_id": "THREAD_CRIT_EXPLOIT"
+  },
+  {
+    "label": "The Vane Vendetta",
+    "status": "open",
+    "thread_id": "THREAD_VANE_RIVALRY"
+  },
+  {
+    "label": "The System's Stability",
+    "status": "open",
+    "thread_id": "THREAD_SYSTEM_GLITCH"
+  },
+  {
+    "label": "The Path of the First Glitch",
+    "status": "open",
+    "thread_id": "THREAD_THE_ASCENSION"
+  }
+]
+
+
+Character states (per cast_present_ids):
+[
+  {
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "hand_right",
+        "contents": [
+          "Broken Tutorial Sword"
+        ],
+        "location": "arm_right"
+      },
+      {
+        "container": "hand_left",
+        "contents": [
+          "Participation Trophy"
+        ],
+        "location": "arm_left"
+      },
+      {
+        "container": "body",
+        "contents": [
+          "Linen Tunic"
+        ],
+        "location": "torso"
+      },
+      {
+        "container": "pockets",
+        "contents": [
+          "Single Copper Coin"
+        ],
+        "location": "legs"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is stubborn and refuses to accept unfair losses, even from inanimate objects.",
+          "Artie is quick to recognize 'System' logic and treats life like a game to be optimized."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is committed to his 'glass cannon' optimization strategy despite the extreme risk.",
+          "Artie views the System's mechanics as a puzzle to be solved through extreme variance."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is hyper-aware of his 1 HP fragility.",
+          "Artie is learning to read the environment for tactical advantages."
+        ],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is beginning to realize the destructive potential of his 'broken' build.",
+          "Artie feels like the System's biggest mistake rather than its victim."
+        ],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "skills_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is realizing that System rewards can be as dangerous as its monsters.",
+          "Artie is developing a 'run-first' instinct due to his 1 HP build."
+        ],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "skills_updated"
+        ]
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> Broken Tutorial Sword (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Linen Tunic (status=equipped, container=body)",
+      "inventory: CHAR_ARTIE -> Single Copper Coin (status=stowed, container=pockets)",
+      "container: hand_right (owner=CHAR_ARTIE, contents=[Broken Tutorial Sword])",
+      "container: pockets (owner=CHAR_ARTIE, contents=[Single Copper Coin])",
+      "milestone: artie_died = DONE",
+      "milestone: system_login = DONE",
+      "ownership: Broken Tutorial Sword (carried)",
+      "title: Statistical Anomaly",
+      "title: The Glassest Cannon",
+      "milestone: build_confirmed = DONE",
+      "location: The Whispering Woods",
+      "milestone: first_spawn = DONE",
+      "milestone: slime_encounter_start = DONE",
+      "milestone: slime_defeated = DONE",
+      "milestone: level_two_reached = DONE",
+      "location: The Whispering Woods (Status: Near smoking crater)",
+      "effect: Super-Mega-Ultra-Crit Cooldown (Active)",
+      "inventory: CHAR_ARTIE -> Participation Trophy (carried, container=hand_left)",
+      "milestone: participation_trophy_acquired = DONE",
+      "effect: Aura of the Beacon (Active)",
+      "effect: Magnetic Failure (Active)",
+      "effect: Inevitability (Active)"
+    ],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "Broken Tutorial Sword",
+        "status": "carried"
+      },
+      {
+        "container": "body",
+        "item": "Linen Tunic",
+        "status": "equipped"
+      },
+      {
+        "container": "pockets",
+        "item": "Single Copper Coin",
+        "status": "stowed"
+      },
+      {
+        "container": "hand_left",
+        "item": "Participation Trophy",
+        "status": "carried"
+      }
+    ],
+    "name": "Arthur 'Artie' Penhaligon",
+    "schema_version": "1.0",
+    "skills": {},
+    "stats": {},
+    "updated_at": "2026-02-06T22:22:40Z"
+  },
+  {
+    "character_id": "CHAR_FIZZ",
+    "containers": [
+      {
+        "container": "hand_left",
+        "contents": [
+          "Data Slate"
+        ],
+        "location": "arm_left",
+        "owner": "CHAR_FIZZ"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is professionally bored but genuinely shocked by Artie's reckless stat allocation."
+        ],
+        "scene": 2
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_FIZZ -> Data Slate (status=carried, container=hand_left)",
+      "container: hand_left (owner=CHAR_FIZZ, contents=[Data Slate])"
+    ],
+    "inventory": [
+      {
+        "container": "hand_left",
+        "item": "Data Slate",
+        "status": "carried"
+      }
+    ],
+    "name": "Fizz",
+    "schema_version": "1.0",
+    "skills": {},
+    "stats": {},
+    "updated_at": "2026-02-06T21:56:54Z"
+  }
+]
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-06T21:45:27Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 6
+  },
+  "duplication_warnings_in_row": 0,
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_006.meta.json"
+  },
+  "run_stats": {},
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Artie has died on Earth and entered the System's character creation void after a vending machine accident.",
+      "Artie met his guide, Fizz, and reviewed the details of his death.",
+      "Artie exploited the character creation system to create a high-variance 'Crit-Only' build.",
+      "Artie entered the Whispering Woods and engaged in his first combat encounter.",
+      "Artie discovered that the System's rounding mechanics make his 1 HP build extremely fragile.",
+      "Artie survived his first combat encounter by accidentally nuking the tutorial zone.",
+      "Artie discovered that his crits can overwrite System rules and destroy world objects.",
+      "Artie received a cursed Participation Trophy that makes him a magnet for all monsters and projectiles in the area."
+    ],
+    "key_facts_ring": [
+      "The Whispering Woods are mechanically hostile and recite patch notes.",
+      "Artie missed the Level 1 Slime 5 times due to his 1 Dexterity stat.",
+      "The slime charged a Heavy Attack that threatened to dissolve Artie.",
+      "Artie landed a Super-Mega-Ultra-Crit on the slime's core, deleting the creature.",
+      "The resulting blast destroyed a Patch-Note Oak and carved a fifty-foot furrow into the earth.",
+      "Artie reached Level 2.",
+      "Artie's Luck increased to 104 and he received a +1 Dexterity 'Pity Bonus'.",
+      "The Super-Mega-Ultra-Crit ability entered a 24-hour cooldown.",
+      "milestone: slime_defeated = DONE",
+      "milestone: level_two_reached = DONE",
+      "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)",
+      "Artie has 100% Critical Hit rate.",
+      "The Super-Mega-Ultra-Crit has a 24-hour cooldown.",
+      "Artie received the 'Participation Trophy' (Cursed/Soul-bound) as an achievement for causing a Tier 3 System Error.",
+      "Fizz identified the trophy's hidden stats: Aura of the Beacon (+500% aggro) and Magnetic Failure (projectile attraction).",
+      "A Level 4 Tutorial Wolf and a swarm of other mobs aggroed on Artie due to the trophy's effects.",
+      "Artie fled North toward a ravine as the tutorial zone's stability dropped to 84%.",
+      "Artie narrowly dodged a slime projectile that curved toward him due to the trophy's Magnetic Failure.",
+      "Artie's stamina dropped to 42/100 during the frantic retreat.",
+      "milestone: artie_died = DONE",
+      "milestone: participation_trophy_acquired = DONE",
+      "Artie has 1 HP and 1 MP; any damage taken is lethal.",
+      "Artie is carrying the Participation Trophy in his left hand; it cannot be unequipped or stowed.",
+      "The Participation Trophy increases aggro by 500% and attracts projectiles.",
+      "Artie's Super-Mega-Ultra-Crit is on a 24-hour cooldown."
+    ],
+    "last_scene": [
+      "Artie received a cursed Participation Trophy that massively increases monster aggro and attracts projectiles.",
+      "The entire tutorial zone, including a Level 4 Tutorial Wolf, aggroed on Artie, forcing a desperate retreat.",
+      "He is currently fleeing North toward a ravine with Fizz while his main ability is on cooldown."
+    ],
+    "must_stay_true": [
+      "inventory: CHAR_ARTIE -> Linen Tunic (equipped, container=body)",
+      "inventory: CHAR_ARTIE -> Single Copper Coin (stowed, container=pockets)",
+      "location: The System Void (current status)",
+      "milestone: build_confirmed = DONE",
+      "location: The System Void (status: transitioning to Whispering Woods)",
+      "milestone: artie_died = DONE, milestone: system_login = DONE, milestone: build_confirmed = DONE",
+      "milestone: first_spawn = DONE, milestone: slime_encounter_start = DONE",
+      "Artie has 1 HP and 1 MP; any damage taken is lethal due to rounding rules.",
+      "location: The Whispering Woods",
+      "Artie is currently in physical contact with a Level 1 Slime.",
+      "The Whispering Woods are mechanically hostile and recite patch notes.",
+      "milestone: slime_defeated = DONE",
+      "milestone: level_two_reached = DONE",
+      "Artie has 100% Critical Hit rate.",
+      "The Super-Mega-Ultra-Crit has a 24-hour cooldown.",
+      "milestone: participation_trophy_acquired = DONE",
+      "Artie has 1 HP and 1 MP; any damage taken is lethal.",
+      "Artie is carrying the Participation Trophy in his left hand; it cannot be unequipped or stowed.",
+      "The Participation Trophy increases aggro by 500% and attracts projectiles.",
+      "Artie's Super-Mega-Ultra-Crit is on a 24-hour cooldown."
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "cast_present_ids": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "The Whispering Woods",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie received the 'Participation Trophy' (Cursed/Soul-bound).",
+      "The trophy grants 'Aura of the Beacon' (+500% aggro) and 'Magnetic Failure' (projectile attraction).",
+      "A Level 4 Tutorial Wolf and a mass of slimes are pursuing Artie.",
+      "The tutorial zone stability has dropped to 84% due to excessive aggro.",
+      "Artie is retreating toward a ravine to the North."
+    ],
+    "time": {}
+  }
+}
+
+Summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie has died on Earth and entered the System's character creation void after a vending machine accident.",
+    "Artie met his guide, Fizz, and reviewed the details of his death.",
+    "Artie exploited the character creation system to create a high-variance 'Crit-Only' build.",
+    "Artie entered the Whispering Woods and engaged in his first combat encounter.",
+    "Artie discovered that the System's rounding mechanics make his 1 HP build extremely fragile.",
+    "Artie survived his first combat encounter by accidentally nuking the tutorial zone.",
+    "Artie discovered that his crits can overwrite System rules and destroy world objects.",
+    "Artie received a cursed Participation Trophy that makes him a magnet for all monsters and projectiles in the area."
+  ],
+  "key_facts_ring": [
+    "The Whispering Woods are mechanically hostile and recite patch notes.",
+    "Artie missed the Level 1 Slime 5 times due to his 1 Dexterity stat.",
+    "The slime charged a Heavy Attack that threatened to dissolve Artie.",
+    "Artie landed a Super-Mega-Ultra-Crit on the slime's core, deleting the creature.",
+    "The resulting blast destroyed a Patch-Note Oak and carved a fifty-foot furrow into the earth.",
+    "Artie reached Level 2.",
+    "Artie's Luck increased to 104 and he received a +1 Dexterity 'Pity Bonus'.",
+    "The Super-Mega-Ultra-Crit ability entered a 24-hour cooldown.",
+    "milestone: slime_defeated = DONE",
+    "milestone: level_two_reached = DONE",
+    "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)",
+    "Artie has 100% Critical Hit rate.",
+    "The Super-Mega-Ultra-Crit has a 24-hour cooldown.",
+    "Artie received the 'Participation Trophy' (Cursed/Soul-bound) as an achievement for causing a Tier 3 System Error.",
+    "Fizz identified the trophy's hidden stats: Aura of the Beacon (+500% aggro) and Magnetic Failure (projectile attraction).",
+    "A Level 4 Tutorial Wolf and a swarm of other mobs aggroed on Artie due to the trophy's effects.",
+    "Artie fled North toward a ravine as the tutorial zone's stability dropped to 84%.",
+    "Artie narrowly dodged a slime projectile that curved toward him due to the trophy's Magnetic Failure.",
+    "Artie's stamina dropped to 42/100 during the frantic retreat.",
+    "milestone: artie_died = DONE",
+    "milestone: participation_trophy_acquired = DONE",
+    "Artie has 1 HP and 1 MP; any damage taken is lethal.",
+    "Artie is carrying the Participation Trophy in his left hand; it cannot be unequipped or stowed.",
+    "The Participation Trophy increases aggro by 500% and attracts projectiles.",
+    "Artie's Super-Mega-Ultra-Crit is on a 24-hour cooldown."
+  ],
+  "last_scene": [
+    "Artie received a cursed Participation Trophy that massively increases monster aggro and attracts projectiles.",
+    "The entire tutorial zone, including a Level 4 Tutorial Wolf, aggroed on Artie, forcing a desperate retreat.",
+    "He is currently fleeing North toward a ravine with Fizz while his main ability is on cooldown."
+  ],
+  "must_stay_true": [
+    "inventory: CHAR_ARTIE -> Linen Tunic (equipped, container=body)",
+    "inventory: CHAR_ARTIE -> Single Copper Coin (stowed, container=pockets)",
+    "location: The System Void (current status)",
+    "milestone: build_confirmed = DONE",
+    "location: The System Void (status: transitioning to Whispering Woods)",
+    "milestone: artie_died = DONE, milestone: system_login = DONE, milestone: build_confirmed = DONE",
+    "milestone: first_spawn = DONE, milestone: slime_encounter_start = DONE",
+    "Artie has 1 HP and 1 MP; any damage taken is lethal due to rounding rules.",
+    "location: The Whispering Woods",
+    "Artie is currently in physical contact with a Level 1 Slime.",
+    "The Whispering Woods are mechanically hostile and recite patch notes.",
+    "milestone: slime_defeated = DONE",
+    "milestone: level_two_reached = DONE",
+    "Artie has 100% Critical Hit rate.",
+    "The Super-Mega-Ultra-Crit has a 24-hour cooldown.",
+    "milestone: participation_trophy_acquired = DONE",
+    "Artie has 1 HP and 1 MP; any damage taken is lethal.",
+    "Artie is carrying the Participation Trophy in his left hand; it cannot be unequipped or stowed.",
+    "The Participation Trophy increases aggro by 500% and attracts projectiles.",
+    "Artie's Super-Mega-Ultra-Crit is on a 24-hour cooldown."
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Recent facts:
+[
+  "Artie received the 'Participation Trophy' (Cursed/Soul-bound).",
+  "The trophy grants 'Aura of the Beacon' (+500% aggro) and 'Magnetic Failure' (projectile attraction).",
+  "A Level 4 Tutorial Wolf and a mass of slimes are pursuing Artie.",
+  "The tutorial zone stability has dropped to 84% due to excessive aggro.",
+  "Artie is retreating toward a ravine to the North."
+]

@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {
+      "code": "milestone_uniqueness",
+      "message": "The scene depicts 'slime_defeated' and 'level_two_reached', but these milestones are already marked as DONE in the state invariants and key facts. Per the Milestone Uniqueness rule, these events must not be depicted again.",
+      "severity": "error"
+    },
+    {
+      "code": "stat_mismatch",
+      "message": "The prose includes specific UI stat values (Dexterity: 1, Luck: 104, HP: 1/1), but the character state object for CHAR_ARTIE contains an empty 'stats' map. UI numbers must be sourced from the state.",
+      "severity": "error"
+    },
+    {
+      "code": "continuity",
+      "message": "Invariant contradiction: 'must_stay_true' lists 'The System Void (current status)' as the location, which contradicts the scene's setting in 'The Whispering Woods'.",
+      "severity": "error"
+    },
+    {
+      "code": "invariant_violation",
+      "message": "The invariant 'Artie is currently in physical contact with a Level 1 Slime' is violated at the start of the scene (where he is three inches away) and at the end (where the slime is deleted).",
+      "severity": "error"
+    },
+    {
+      "code": "duplication",
+      "message": "The scene prose depicts the exact sequence of events already summarized in the 'last_scene' and 'chapter_so_far' blocks, indicating a repetition of previously established narrative.",
+      "severity": "error"
+    }
+  ]
+}

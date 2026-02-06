@@ -1,0 +1,524 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Mechanics contract: if mechanics/UI are present, all numeric values and labels (stats/skills) must be sourced from state or explicitly updated in the state_patch. Do not invent numbers or canonical tokens.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+
+
+USER:
+
+# PLAN
+
+You are the planner. Use the outline window and state to create the next scene card.
+Return ONLY a single JSON object that matches the scene_card schema.
+No markdown, no code fences, no commentary. Use strict JSON (double quotes, no trailing commas).
+
+If outline_window includes character information, keep those character ids in mind.
+If character_states are provided, keep inventory/persona constraints consistent; do not invent conflicting facts.
+If outline_window.current.introduces is present, the scene must introduce those characters.
+
+Required keys:
+- schema_version ("1.1")
+- scene_id
+- chapter
+- scene
+- scene_target
+- goal
+- conflict
+- required_callbacks (array)
+- constraints (array)
+- end_condition
+
+Recommended keys (use ids from the outline; do not invent ids):
+- cast_present (array of character names for prose guidance)
+- cast_present_ids (array of character ids, e.g. CHAR_Eldrin)
+- introduces (array of character names introduced in this scene)
+- introduces_ids (array of character ids introduced in this scene)
+- thread_ids (array of thread ids, e.g. THREAD_Awakened_Sage)
+
+JSON shape example (fill with real values):
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_001",
+  "chapter": 1,
+  "scene": 1,
+  "scene_target": "Protagonist commits to the journey.",
+  "goal": "Force a decisive choice.",
+  "conflict": "Safety versus obligation.",
+  "required_callbacks": [],
+  "constraints": ["target_words: 1900"],
+  "end_condition": "The protagonist leaves home.",
+  "cast_present": ["Eldrin"],
+  "cast_present_ids": ["CHAR_Eldrin"],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": ["THREAD_Awakened_Sage"]
+}
+
+Outline window:
+{
+  "chapter": {
+    "bridge": {
+      "from_prev": "N/A",
+      "to_next": "Artie must find a way to survive his first night with zero defensive stats."
+    },
+    "chapter_id": 1,
+    "chapter_role": "hook",
+    "characters": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ",
+      "CHAR_MAYOR",
+      "CHAR_VANE"
+    ],
+    "goal": "Introduce Artie and his broken 'Crit-Only' status in a high-stakes environment.",
+    "pacing": {
+      "expected_scene_count": 8,
+      "intensity": 4,
+      "tempo": "rush"
+    },
+    "stakes_shift": "Artie goes from an office drone to a level 1 glitch in a lethal game world.",
+    "title": "Welcome to the RNG-Hellscape"
+  },
+  "current": {
+    "callbacks": [],
+    "characters": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "introduces": [],
+    "outcome": "Artie is forced to run for his life as the tutorial zone aggros on him.",
+    "scene_id": 5,
+    "section": {
+      "intent": "Show the immediate danger of a 1 HP build.",
+      "section_id": 2,
+      "section_role": "",
+      "title": "The First Spawn"
+    },
+    "summary": "The System awards Artie a 'Participation Trophy' item that actually attracts monsters.",
+    "threads": [],
+    "type": "consequence"
+  },
+  "next": {
+    "callbacks": [],
+    "characters": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "introduces": [],
+    "outcome": "Artie enters the town but is flagged as a 'Statistical Anomaly' by the gate scanners.",
+    "scene_id": 6,
+    "section": {
+      "intent": "Reach the first hub and establish the world's culture.",
+      "section_id": 3,
+      "section_role": "",
+      "title": "The Safe Zone?"
+    },
+    "summary": "Artie reaches the gates of Oakhaven, where the guards are busy betting on the 'Crit-Rate' of incoming travelers.",
+    "threads": [],
+    "type": "transition"
+  },
+  "previous": {
+    "callbacks": [],
+    "characters": [
+      "CHAR_ARTIE"
+    ],
+    "introduces": [],
+    "outcome": "Artie gains his first level and realizes his power is terrifyingly inconsistent.",
+    "scene_id": 4,
+    "section": {
+      "intent": "Show the immediate danger of a 1 HP build.",
+      "section_id": 2,
+      "section_role": "",
+      "title": "The First Spawn"
+    },
+    "summary": "Artie tries to punch the slime; he misses five times before landing a 'Super-Mega-Ultra-Crit' that vaporizes the slime and the tree behind it.",
+    "threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "type": "action"
+  },
+  "scene_index": 5,
+  "section": {
+    "intent": "Show the immediate danger of a 1 HP build.",
+    "section_id": 2,
+    "section_role": "",
+    "title": "The First Spawn"
+  }
+}
+
+
+Character states (per outline_window.current.characters):
+[
+  {
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "hand_right",
+        "contents": [
+          "Broken Tutorial Sword"
+        ],
+        "location": "arm_right"
+      },
+      {
+        "container": "body",
+        "contents": [
+          "Linen Tunic"
+        ],
+        "location": "torso"
+      },
+      {
+        "container": "pockets",
+        "contents": [
+          "Single Copper Coin"
+        ],
+        "location": "legs"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is stubborn and refuses to accept unfair losses, even from inanimate objects.",
+          "Artie is quick to recognize 'System' logic and treats life like a game to be optimized."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is committed to his 'glass cannon' optimization strategy despite the extreme risk.",
+          "Artie views the System's mechanics as a puzzle to be solved through extreme variance."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is hyper-aware of his 1 HP fragility.",
+          "Artie is learning to read the environment for tactical advantages."
+        ],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is beginning to realize the destructive potential of his 'broken' build.",
+          "Artie feels like the System's biggest mistake rather than its victim."
+        ],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "skills_updated"
+        ]
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> Broken Tutorial Sword (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Linen Tunic (status=equipped, container=body)",
+      "inventory: CHAR_ARTIE -> Single Copper Coin (status=stowed, container=pockets)",
+      "container: hand_right (owner=CHAR_ARTIE, contents=[Broken Tutorial Sword])",
+      "container: pockets (owner=CHAR_ARTIE, contents=[Single Copper Coin])",
+      "milestone: artie_died = DONE",
+      "milestone: system_login = DONE",
+      "ownership: Broken Tutorial Sword (carried)",
+      "title: Statistical Anomaly",
+      "title: The Glassest Cannon",
+      "milestone: build_confirmed = DONE",
+      "location: The Whispering Woods",
+      "milestone: first_spawn = DONE",
+      "milestone: slime_encounter_start = DONE",
+      "milestone: slime_defeated = DONE",
+      "milestone: level_two_reached = DONE",
+      "location: The Whispering Woods (Status: Near smoking crater)",
+      "effect: Super-Mega-Ultra-Crit Cooldown (Active)"
+    ],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "Broken Tutorial Sword",
+        "status": "carried"
+      },
+      {
+        "container": "body",
+        "item": "Linen Tunic",
+        "status": "equipped"
+      },
+      {
+        "container": "pockets",
+        "item": "Single Copper Coin",
+        "status": "stowed"
+      }
+    ],
+    "name": "Arthur 'Artie' Penhaligon",
+    "schema_version": "1.0",
+    "skills": {},
+    "stats": {},
+    "updated_at": "2026-02-06T22:10:11Z"
+  },
+  {
+    "character_id": "CHAR_FIZZ",
+    "containers": [
+      {
+        "container": "hand_left",
+        "contents": [
+          "Data Slate"
+        ],
+        "location": "arm_left",
+        "owner": "CHAR_FIZZ"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is professionally bored but genuinely shocked by Artie's reckless stat allocation."
+        ],
+        "scene": 2
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_FIZZ -> Data Slate (status=carried, container=hand_left)",
+      "container: hand_left (owner=CHAR_FIZZ, contents=[Data Slate])"
+    ],
+    "inventory": [
+      {
+        "container": "hand_left",
+        "item": "Data Slate",
+        "status": "carried"
+      }
+    ],
+    "name": "Fizz",
+    "schema_version": "1.0",
+    "skills": {},
+    "stats": {},
+    "updated_at": "2026-02-06T21:56:54Z"
+  }
+]
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-06T21:45:27Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 5
+  },
+  "duplication_warnings_in_row": 0,
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_004.meta.json"
+  },
+  "run_stats": {},
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Artie has died on Earth and entered the System's character creation void after a vending machine accident.",
+      "Artie met his guide, Fizz, and reviewed the details of his death.",
+      "Artie exploited the character creation system to create a high-variance 'Crit-Only' build.",
+      "Artie entered the Whispering Woods and engaged in his first combat encounter.",
+      "Artie discovered that the System's rounding mechanics make his 1 HP build extremely fragile.",
+      "Artie survived his first combat encounter by accidentally nuking the tutorial zone.",
+      "Artie discovered that his crits can overwrite System rules and destroy world objects."
+    ],
+    "key_facts_ring": [
+      "Artie manifested in the Whispering Woods and confirmed his [1/1 HP] status.",
+      "Fizz explained the System's rounding rule where 0.1 damage becomes 1 damage.",
+      "A Level 1 Tutorial Slime attacked Artie with lunges and a ranged projectile.",
+      "Artie was cornered against a Patch-Note Oak that screams error messages when damaged.",
+      "The System issued a warning about the slime's Heavy Attack and Artie's near-zero survival probability.",
+      "Artie initiated a counter-attack with his Broken Tutorial Sword, triggering a guaranteed Critical Hit.",
+      "The slime's mass made contact with Artie's tunic as the strike landed.",
+      "milestone: artie_died = DONE, milestone: system_login = DONE, milestone: build_confirmed = DONE",
+      "milestone: first_spawn = DONE, milestone: slime_encounter_start = DONE",
+      "Artie has 1 HP and 1 MP; any damage taken is lethal due to rounding rules.",
+      "location: The Whispering Woods",
+      "Artie is currently in physical contact with a Level 1 Slime.",
+      "The Whispering Woods are mechanically hostile and recite patch notes.",
+      "Artie missed the Level 1 Slime 5 times due to his 1 Dexterity stat.",
+      "The slime charged a Heavy Attack that threatened to dissolve Artie.",
+      "Artie landed a Super-Mega-Ultra-Crit on the slime's core, deleting the creature.",
+      "The resulting blast destroyed a Patch-Note Oak and carved a fifty-foot furrow into the earth.",
+      "Artie reached Level 2.",
+      "Artie's Luck increased to 104 and he received a +1 Dexterity 'Pity Bonus'.",
+      "The Super-Mega-Ultra-Crit ability entered a 24-hour cooldown.",
+      "milestone: slime_defeated = DONE",
+      "milestone: level_two_reached = DONE",
+      "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)",
+      "Artie has 100% Critical Hit rate.",
+      "The Super-Mega-Ultra-Crit has a 24-hour cooldown."
+    ],
+    "last_scene": [
+      "Artie engaged a Level 1 Slime in the Whispering Woods, missing five times due to his low Dexterity.",
+      "He triggered a Super-Mega-Ultra-Crit that vaporized the slime and a nearby Patch-Note Oak.",
+      "The encounter concluded with Artie leveling up to Level 2 and gaining a pity bonus to his Dexterity."
+    ],
+    "must_stay_true": [
+      "milestone: artie_died = DONE",
+      "milestone: system_login = DONE",
+      "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Linen Tunic (equipped, container=body)",
+      "inventory: CHAR_ARTIE -> Single Copper Coin (stowed, container=pockets)",
+      "location: The System Void (current status)",
+      "milestone: build_confirmed = DONE",
+      "location: The System Void (status: transitioning to Whispering Woods)",
+      "milestone: artie_died = DONE, milestone: system_login = DONE, milestone: build_confirmed = DONE",
+      "milestone: first_spawn = DONE, milestone: slime_encounter_start = DONE",
+      "Artie has 1 HP and 1 MP; any damage taken is lethal due to rounding rules.",
+      "location: The Whispering Woods",
+      "Artie is currently in physical contact with a Level 1 Slime.",
+      "The Whispering Woods are mechanically hostile and recite patch notes.",
+      "milestone: slime_defeated = DONE",
+      "milestone: level_two_reached = DONE",
+      "Artie has 100% Critical Hit rate.",
+      "The Super-Mega-Ultra-Crit has a 24-hour cooldown."
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "cast_present_ids": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "The Whispering Woods",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie defeated a Level 1 Slime with a Super-Mega-Ultra-Crit.",
+      "A Patch-Note Oak was destroyed by the collateral damage of Artie's crit.",
+      "Artie reached Level 2 and received a Dexterity pity bonus.",
+      "The Whispering Woods now contains a fifty-foot furrow and a smoking crater.",
+      "Artie's Super-Mega-Ultra-Crit has entered a 24-hour cooldown."
+    ],
+    "time": {}
+  }
+}
+
+Task:
+Create the next scene card.

@@ -1,0 +1,374 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Mechanics contract: if mechanics/UI are present, all numeric values and labels (stats/skills) must be sourced from state or explicitly updated in the state_patch. Do not invent numbers or canonical tokens.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+
+
+USER:
+
+# LINT
+
+Check the scene for continuity, invariant violations, and duplication.
+Flag invariant contradictions against must_stay_true/key facts.
+Return ONLY JSON matching the lint_report schema.
+- Check that any UI numbers or skill values in prose match state stats/skills. If not, emit a failure.
+- Check for POV drift vs book POV (no first-person in third-person scenes).
+
+Required keys:
+- schema_version ("1.0")
+- status ("pass" or "fail")
+- issues (array of objects)
+
+Each issue object must include:
+- code
+- message
+Optional:
+- severity
+
+If there are no issues, return:
+{
+  "schema_version": "1.0",
+  "status": "pass",
+  "issues": []
+}
+
+If there are issues, return:
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {"code": "continuity", "message": "Example issue", "severity": "error"}
+  ]
+}
+
+Scene:
+The Snack-O-Matic 3000 was a liar, a thief, and quite possibly the primary antagonist of my Tuesday.
+
+I stared through the scratched plexiglass at the bag of Zesty Ranch Habanero Hoops. It wasn't just sitting there; it was mocking me. It was suspended by a literal quarter-turn of a rusted metal coil, dangling over the precipice of the delivery chute like a cinematic hero holding onto a ledge by his fingernails. Except in this movie, the hero was a nitrogen-flushed bag of corn-based snacks, and the villain was a forty-year-old office worker named Arthur Penhaligon who just wanted his damn lunch.
+
+"Are you kidding me?" I muttered, my breath fogging the plastic. "I paid for the 'Zesty.' I paid for the 'Habanero.' I even paid for the 'Hoops.' Where are my Hoops, Dave?"
+
+The machine didn't answer. It just hummed with the low-frequency vibration of a device that hadn't been serviced since the Clinton administration. The digital display, a flickering green relic of a bygone era, simply blinked: **CREDIT: $0.00**.
+
+That was the lie. I had inserted a dollar. A crisp, relatively un-crumpled George Washington. I had watched the machine inhale it, hesitate, and then decide that it wasn't a dollar at all, but rather a gift. A tribute. A sacrifice to the gods of processed sodium.
+
+"We aren't doing this today," I said, my voice rising to a pitch that usually signaled a pending HR meeting. "I have had three cups of lukewarm coffee, two spreadsheets that refuse to balance, and a boss who unironically uses the phrase 'synergistic paradigm shift.' I will have my Hoops."
+
+I checked the breakroom. Empty. The fluorescent lights overhead hummed in sympathy with the machine, flickering with a rhythmic instability that suggested the building’s wiring was held together by hope and electrical tape. I leaned my shoulder against the side of the Snack-O-Matic.
+
+In the world of corporate survival, there are two types of people: those who see a 'Stuck' sign and walk away, and those who recognize that the System is rigged and decide to break the System back. I was the latter. This wasn't about the ninety-nine cents plus tax. This was about the principle of the thing. This was about the RNG of life finally going my way for once.
+
+I gave the machine a firm, measured shove.
+
+The Hoops didn't budge. If anything, the vibration of the impact seemed to settle them more firmly onto the coil.
+
+"Oh, so it's a boss fight then?" I adjusted my glasses. "Fine. Phase two."
+
+I grabbed the edges of the machine, my fingers finding purchase in the grime-coated vents on the side. I began to rock it. It was a delicate art—too much force and the whole thing would tip over and crush me, which would be an embarrassing way to go, even by my standards. Too little, and the Hoops would remain in their plastic purgatory.
+
+*Clunk. Whirr.*
+
+The machine groaned. Inside, the coil shifted a fraction of a millimeter. The bag of Hoops swayed. 
+
+"Yes," I hissed. "Gravity. The only law that actually works in this building. Come to papa."
+
+I gave it one more violent heave, putting my entire weight into the momentum. I felt a sudden, sharp resistance, followed by a sound like a synthesizer dying in a bathtub. 
+
+The lights in the breakroom didn't just flicker; they surged. The hum of the Snack-O-Matic jumped an octave, then two, turning into a screeching whine that vibrated in my teeth. A smell of ozone and burnt hair filled the air—the universal scent of 'You’ve Made a Terrible Mistake.'
+
+"Uh oh," I said. 
+
+I tried to let go, but my hands were locked. A blue-white arc of electricity jumped from the 'Coin Return' slot directly into my palm. It wasn't like a static shock. It was like being hit by a freight train made of pure, unadulterated math. 
+
+My vision didn't go black. It went white. A searing, clinical, high-definition white that made my retinas scream. 
+
+The sound of the office—the distant clicking of keyboards, the muffled roar of the HVAC, the squeak of Brenda’s ergonomic chair—vanished. It was replaced by a single, resonant tone.
+
+[CRITICAL ERROR: SYSTEM OVERLOAD]
+
+The words didn't appear in front of me; they appeared *inside* my head, rendered in a font that looked suspiciously like the one used by the very vending machine that was currently liquefying my nervous system.
+
+[User: PENHALIGON, ARTHUR - STATUS: TERMINATED]
+
+"Terminated?" I tried to shout, but I didn't have lungs anymore. I didn't have a throat. I was just a collection of thoughts floating in a sea of bleach. "I'm not fired! I'm... oh. Oh, that kind of terminated."
+
+[RECALCULATING...]
+[RNG THRESHOLD EXCEEDED]
+[INITIATING EMERGENCY PROTOCOL: 'THE GREAT LOGIN SCREEN IN THE SKY']
+
+The white void rippled. For a second, I felt a weight in my right hand—something cold, heavy, and metallic. I felt the scratchy pull of a fabric that definitely wasn't my poly-blend office shirt. 
+
+The last thing I thought before the transition finalized was a singular, burning regret. 
+
+*I never got my Hoops.*
+
+Then, the world shifted. The white void stabilized, and for the first time in my life, I saw a UI that looked like it was designed by someone who actually enjoyed making people suffer.
+
+
+Character states (per cast_present_ids):
+[
+  {
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "hand_right",
+        "contents": [
+          "Broken Tutorial Sword"
+        ],
+        "location": "arm_right",
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "pockets",
+        "contents": [
+          "Single Copper Coin"
+        ],
+        "location": "legs",
+        "owner": "CHAR_ARTIE"
+      }
+    ],
+    "history": [],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> Broken Tutorial Sword (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Linen Tunic (status=equipped, container=body)",
+      "inventory: CHAR_ARTIE -> Single Copper Coin (status=stowed, container=pockets)",
+      "container: hand_right (owner=CHAR_ARTIE, contents=[Broken Tutorial Sword])",
+      "container: pockets (owner=CHAR_ARTIE, contents=[Single Copper Coin])"
+    ],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "Broken Tutorial Sword",
+        "status": "carried"
+      },
+      {
+        "container": "body",
+        "item": "Linen Tunic",
+        "status": "equipped"
+      },
+      {
+        "container": "pockets",
+        "item": "Single Copper Coin",
+        "status": "stowed"
+      }
+    ],
+    "name": "Arthur 'Artie' Penhaligon",
+    "schema_version": "1.0",
+    "skills": {},
+    "stats": {},
+    "updated_at": "2026-02-06T21:45:27Z"
+  }
+]
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-06T21:45:27Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 1
+  },
+  "duplication_warnings_in_row": 0,
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_001.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "PLANNED",
+  "summary": {
+    "chapter_so_far": [
+      "Arthur Penhaligon dies in a vending machine accident and is pulled into the System's white void."
+    ],
+    "key_facts_ring": [
+      "Artie confronts the Snack-O-Matic 3000 over a stuck bag of snacks and a stolen dollar.",
+      "Artie physically shakes the vending machine, causing a lethal electrical arc to jump from the coin return slot.",
+      "The System displays a 'CRITICAL ERROR' and 'TERMINATED' status for Arthur Penhaligon.",
+      "The System initiates 'THE GREAT LOGIN SCREEN IN THE SKY' emergency protocol.",
+      "Artie's consciousness transitions to a white void, losing his office attire for a Linen Tunic.",
+      "Artie finds himself holding a Broken Tutorial Sword as the transition stabilizes.",
+      "milestone: vending_machine_death = DONE",
+      "milestone: system_void_arrival = DONE",
+      "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Linen Tunic (equipped, container=body)",
+      "inventory: CHAR_ARTIE -> Single Copper Coin (stowed, container=pockets)",
+      "location: White Void",
+      "Artie's mundane life is permanently over."
+    ],
+    "last_scene": [
+      "Artie attempts to retrieve a stuck bag of Zesty Ranch Habanero Hoops from a malfunctioning Snack-O-Matic 3000.",
+      "His aggressive shaking of the machine triggers a massive electrical surge that kills him instantly.",
+      "The System intervenes, declaring him 'Terminated' and initiating an emergency login protocol in a clinical white void."
+    ],
+    "must_stay_true": [
+      "milestone: vending_machine_death = DONE",
+      "milestone: system_void_arrival = DONE",
+      "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Linen Tunic (equipped, container=body)",
+      "inventory: CHAR_ARTIE -> Single Copper Coin (stowed, container=pockets)",
+      "location: White Void",
+      "Artie's mundane life is permanently over."
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [],
+    "cast_present_ids": [
+      "CHAR_ARTIE"
+    ],
+    "location": "White Void",
+    "open_threads": [],
+    "recent_facts": [
+      "Artie was killed by an electrical surge from a Snack-O-Matic 3000 in his office breakroom.",
+      "The System triggered an emergency protocol due to an 'RNG Threshold' being exceeded.",
+      "Artie has arrived in the 'Great Login Screen in the Sky' with basic starter gear."
+    ],
+    "time": {}
+  }
+}
+
+Summary (facts-only):
+{
+  "chapter_so_far": [
+    "Arthur Penhaligon dies in a vending machine accident and is pulled into the System's white void."
+  ],
+  "key_facts_ring": [
+    "Artie confronts the Snack-O-Matic 3000 over a stuck bag of snacks and a stolen dollar.",
+    "Artie physically shakes the vending machine, causing a lethal electrical arc to jump from the coin return slot.",
+    "The System displays a 'CRITICAL ERROR' and 'TERMINATED' status for Arthur Penhaligon.",
+    "The System initiates 'THE GREAT LOGIN SCREEN IN THE SKY' emergency protocol.",
+    "Artie's consciousness transitions to a white void, losing his office attire for a Linen Tunic.",
+    "Artie finds himself holding a Broken Tutorial Sword as the transition stabilizes.",
+    "milestone: vending_machine_death = DONE",
+    "milestone: system_void_arrival = DONE",
+    "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)",
+    "inventory: CHAR_ARTIE -> Linen Tunic (equipped, container=body)",
+    "inventory: CHAR_ARTIE -> Single Copper Coin (stowed, container=pockets)",
+    "location: White Void",
+    "Artie's mundane life is permanently over."
+  ],
+  "last_scene": [
+    "Artie attempts to retrieve a stuck bag of Zesty Ranch Habanero Hoops from a malfunctioning Snack-O-Matic 3000.",
+    "His aggressive shaking of the machine triggers a massive electrical surge that kills him instantly.",
+    "The System intervenes, declaring him 'Terminated' and initiating an emergency login protocol in a clinical white void."
+  ],
+  "must_stay_true": [
+    "milestone: vending_machine_death = DONE",
+    "milestone: system_void_arrival = DONE",
+    "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)",
+    "inventory: CHAR_ARTIE -> Linen Tunic (equipped, container=body)",
+    "inventory: CHAR_ARTIE -> Single Copper Coin (stowed, container=pockets)",
+    "location: White Void",
+    "Artie's mundane life is permanently over."
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "milestone: vending_machine_death = DONE",
+  "milestone: system_void_arrival = DONE",
+  "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)",
+  "inventory: CHAR_ARTIE -> Linen Tunic (equipped, container=body)",
+  "inventory: CHAR_ARTIE -> Single Copper Coin (stowed, container=pockets)",
+  "location: White Void",
+  "Artie's mundane life is permanently over.",
+  "Artie confronts the Snack-O-Matic 3000 over a stuck bag of snacks and a stolen dollar.",
+  "Artie physically shakes the vending machine, causing a lethal electrical arc to jump from the coin return slot.",
+  "The System displays a 'CRITICAL ERROR' and 'TERMINATED' status for Arthur Penhaligon.",
+  "The System initiates 'THE GREAT LOGIN SCREEN IN THE SKY' emergency protocol.",
+  "Artie's consciousness transitions to a white void, losing his office attire for a Linen Tunic.",
+  "Artie finds himself holding a Broken Tutorial Sword as the transition stabilizes.",
+  "milestone: vending_machine_death = DONE",
+  "milestone: system_void_arrival = DONE",
+  "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)",
+  "inventory: CHAR_ARTIE -> Linen Tunic (equipped, container=body)",
+  "inventory: CHAR_ARTIE -> Single Copper Coin (stowed, container=pockets)",
+  "location: White Void",
+  "Artie's mundane life is permanently over."
+]

@@ -736,52 +736,58 @@ def _stat_mismatch_issues(prose: str, character_states: List[Dict[str, Any]], ru
     lines = _extract_ui_stat_lines(prose)
     if not lines:
         return []
-    stats: Dict[str, Any] = {}
-    if character_states:
-        first = character_states[0]
-        if isinstance(first, dict):
-            stats = first.get("stats", {}) if isinstance(first.get("stats"), dict) else {}
+
+    def _line_matches_stat(line: Dict[str, Any], stat_val: Any) -> bool:
+        if isinstance(stat_val, dict):
+            current = stat_val.get("current") if isinstance(stat_val.get("current"), (int, float)) else None
+            maximum = stat_val.get("max") if isinstance(stat_val.get("max"), (int, float)) else None
+            current_match = current is None or current == line["current"]
+            max_match = line["max"] is None or maximum is None or maximum == line["max"]
+            return current_match and max_match
+        if isinstance(stat_val, (int, float)):
+            return line["current"] == stat_val
+        if isinstance(stat_val, str):
+            stripped = stat_val.strip().rstrip("%").strip()
+            if stripped.replace(".", "", 1).isdigit():
+                numeric = float(stripped) if "." in stripped else int(stripped)
+                return line["current"] == numeric
+        return False
+
     aliases = _stat_key_aliases()
     issues: List[Dict[str, Any]] = []
     for line in lines:
         key = _normalize_stat_key(line["key"])
         key = aliases.get(key, key)
-        stat_val = None
-        if key in stats:
-            stat_val = stats.get(key)
-        elif isinstance(run_stats, dict) and key in run_stats:
-            stat_val = run_stats.get(key)
-        if stat_val is None:
+
+        candidates: List[Tuple[str, Any]] = []
+        for state in character_states:
+            if not isinstance(state, dict):
+                continue
+            stats = state.get("stats") if isinstance(state.get("stats"), dict) else {}
+            if key in stats:
+                char_id = str(state.get("character_id") or "unknown")
+                candidates.append((f"character:{char_id}", stats.get(key)))
+        if isinstance(run_stats, dict) and key in run_stats:
+            candidates.append(("run", run_stats.get(key)))
+
+        if not candidates:
             issues.append({
                 "code": "stat_unowned",
                 "message": f"UI stat '{line['key']}' not found in state stats/run_stats.",
                 "severity": "warning",
             })
             continue
-        if isinstance(stat_val, dict):
-            current = stat_val.get("current") if isinstance(stat_val.get("current"), (int, float)) else None
-            maximum = stat_val.get("max") if isinstance(stat_val.get("max"), (int, float)) else None
-            if current is not None and current != line["current"]:
-                issues.append({
-                    "code": "stat_mismatch",
-                    "message": f"UI stat '{line['key']}' current={line['current']} but state has {current}.",
-                    "severity": "warning",
-                })
-            if line["max"] is not None and maximum is not None and maximum != line["max"]:
-                issues.append({
-                    "code": "stat_mismatch",
-                    "message": f"UI stat '{line['key']}' max={line['max']} but state has {maximum}.",
-                    "severity": "warning",
-                })
-        elif isinstance(stat_val, (int, float)):
-            if line["current"] != stat_val:
-                issues.append({
-                    "code": "stat_mismatch",
-                    "message": f"UI stat '{line['key']}' value={line['current']} but state has {stat_val}.",
-                    "severity": "warning",
-                })
-    return issues
 
+        if any(_line_matches_stat(line, value) for _, value in candidates):
+            continue
+
+        formatted = ", ".join([f"{source}={value}" for source, value in candidates])
+        issues.append({
+            "code": "stat_mismatch",
+            "message": f"UI stat '{line['key']}' does not match any candidate value ({formatted}).",
+            "severity": "warning",
+        })
+    return issues
 
 def _pov_drift_issues(prose: str, pov: Optional[str]) -> List[Dict[str, Any]]:
     if not pov:
@@ -2381,5 +2387,6 @@ def run_loop(
 
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
+
 
 

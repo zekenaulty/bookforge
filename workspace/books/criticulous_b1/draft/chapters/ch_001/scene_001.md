@@ -1,0 +1,63 @@
+The Snack-O-Matic 3000 was a liar, a thief, and quite possibly the primary antagonist of Arthur Penhaligon’s Tuesday. 
+
+Artie stared through the scratched plexiglass at the bag of Zesty Ranch Habanero Hoops. It wasn't just sitting there; it was mocking him. The bag was suspended by a literal quarter-turn of a rusted metal coil, dangling over the precipice of the delivery chute like a cinematic hero holding onto a ledge by his fingernails. Except in this movie, the hero was a nitrogen-flushed bag of corn-based snacks, and the villain was a forty-year-old office worker who just wanted his damn lunch.
+
+"Are you kidding me?" Artie muttered, his breath fogging the plastic. "I paid for the 'Zesty.' I paid for the 'Habanero.' I even paid for the 'Hoops.' Where are my Hoops, Dave?"
+
+The machine didn't answer. It just hummed with the low-frequency vibration of a device that hadn't been serviced since the Clinton administration. The digital display, a flickering green relic of a bygone era, simply blinked: **CREDIT: $0.00**.
+
+That was the lie. Artie had inserted a dollar. A crisp, relatively un-crumpled George Washington. He had watched the machine inhale it, hesitate, and then decide that it wasn't a dollar at all, but rather a gift. A tribute. A sacrifice to the gods of processed sodium.
+
+"We aren't doing this today," Artie said, his voice rising to a pitch that usually signaled a pending HR meeting. "I have had three cups of lukewarm coffee, two spreadsheets that refuse to balance, and a boss who unironically uses the phrase 'synergistic paradigm shift.' I will have my Hoops."
+
+He checked the breakroom. Empty. The fluorescent lights overhead hummed in sympathy with the machine, flickering with a rhythmic instability that suggested the building’s wiring was held together by hope and electrical tape. Artie leaned his shoulder against the side of the Snack-O-Matic.
+
+In the world of corporate survival, Artie knew there were two types of people: those who saw a 'Stuck' sign and walked away, and those who recognized that the System was rigged and decided to break the System back. He was the latter. This wasn't about the ninety-nine cents plus tax. This was about the principle of the thing. This was about the RNG of life finally going his way for once.
+
+He gave the machine a firm, measured shove.
+
+The Hoops didn't budge. If anything, the vibration of the impact seemed to settle them more firmly onto the coil.
+
+"Oh, so it's a boss fight then?" Artie adjusted his glasses. "Fine. Phase two."
+
+He grabbed the edges of the machine, his fingers finding purchase in the grime-coated vents on the side. He began to rock it. It was a delicate art—too much force and the whole thing would tip over and crush him, which would be an embarrassing way to go, even by his standards. Too little, and the Hoops would remain in their plastic purgatory.
+
+*Clunk. Whirr.*
+
+The machine groaned. Inside, the coil shifted a fraction of a millimeter. The bag of Hoops swayed. 
+
+"Yes," Artie hissed. "Gravity. The only law that actually works in this building. Come to papa."
+
+He gave it one more violent heave, putting his entire weight into the momentum. He felt a sudden, sharp resistance, followed by a sound like a synthesizer dying in a bathtub. 
+
+The lights in the breakroom didn't just flicker; they surged. The hum of the Snack-O-Matic jumped an octave, then two, turning into a screeching whine that vibrated in Artie's teeth. A smell of ozone and burnt hair filled the air—the universal scent of a terrible mistake.
+
+"Uh oh," Artie said. 
+
+He tried to let go, but his hands were locked. A blue-white arc of electricity jumped from the 'Coin Return' slot directly into his palm. It wasn't like a static shock. It was like being hit by a freight train made of pure, unadulterated math. 
+
+His vision didn't go black. It went white. A searing, clinical, high-definition white that made his retinas scream. 
+
+The sound of the office—the distant clicking of keyboards, the muffled roar of the HVAC, the squeak of Brenda’s ergonomic chair—vanished. It was replaced by a single, resonant tone.
+
+[SYSTEM NOTIFICATION: CRITICAL ERROR - SYSTEM OVERLOAD]
+
+The words didn't appear in front of him; they appeared *inside* his head, rendered in a font that looked suspiciously like the one used by the very vending machine that was currently liquefying his nervous system.
+
+[USER: PENHALIGON, ARTHUR - STATUS: TERMINATED]
+
+"Terminated?" Artie tried to shout, but he didn't have lungs anymore. He didn't have a throat. He was just a collection of thoughts floating in a sea of bleach. "I'm not fired! I'm... oh. Oh, that kind of terminated."
+
+[RECALCULATING...]
+[RNG THRESHOLD EXCEEDED]
+[INITIATING EMERGENCY PROTOCOL: 'THE GREAT LOGIN SCREEN IN THE SKY']
+
+The white void rippled. As the reality of the breakroom dissolved, Artie felt his corporate attire unravel. His poly-blend shirt coarsened, the fibers thickening into a rough, cream-colored Linen Tunic. The weight of his wallet vanished, replaced by the distinct, heavy clink of a Single Copper Coin settling into a new pocket.
+
+Most jarringly, his right hand—the one that had been fused to the Snack-O-Matic—clenched around a hilt. It was cold, heavy, and metallic. As the light stabilized, he looked down to see a Broken Tutorial Sword gripped in his hand.
+
+The last thing Artie thought before the transition finalized was a singular, burning regret. 
+
+*I never got my Hoops.*
+
+Then, the world shifted. The white void stabilized, and Artie stood in the silence of the System, waiting for the next prompt.

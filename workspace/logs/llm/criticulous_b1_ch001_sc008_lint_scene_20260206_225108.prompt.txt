@@ -1,0 +1,749 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Mechanics contract: if mechanics/UI are present, all numeric values and labels (stats/skills) must be sourced from state or explicitly updated in the state_patch. Do not invent numbers or canonical tokens.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+
+
+USER:
+
+# LINT
+
+Check the scene for continuity, invariant violations, and duplication.
+Flag invariant contradictions against must_stay_true/key facts.
+Return ONLY JSON matching the lint_report schema.
+- Check that any UI numbers or skill values in prose match state stats/skills. If not, emit a failure.
+- Check for POV drift vs book POV (no first-person in third-person scenes).
+
+Required keys:
+- schema_version ("1.0")
+- status ("pass" or "fail")
+- issues (array of objects)
+
+Each issue object must include:
+- code
+- message
+Optional:
+- severity
+
+If there are no issues, return:
+{
+  "schema_version": "1.0",
+  "status": "pass",
+  "issues": []
+}
+
+If there are issues, return:
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {"code": "continuity", "message": "Example issue", "severity": "error"}
+  ]
+}
+
+Scene:
+The heavy oak doors of the Mayor’s office clicked shut behind Artie, the sound echoing through the marble-floored hallway like a judge’s gavel. He stood there for a moment, his fingers cramping around the handle of the Participation Trophy in his left hand. It was cold, heavy, and currently pulsing with a faint, rhythmic light that seemed to scream for attention.
+
+[Quest Updated: The Mayor’s Cut]
+[Objective: Pay 500 Gold or provide 10 Crit-Forged items.]
+[Time Remaining: 23:58:12]
+[Penalty for Failure: Deportation to the Unpatched Wilds (Instant Death for 1 HP builds).]
+
+"Great," Artie whispered, his voice sounding thin in the grand corridor. He had been in this world for less than three hours and was already being shaken down by the local government. It felt uncomfortably like his internship at the accounting firm, only with a significantly higher probability of being eaten by a wolf.
+
+He started down the hallway, his Broken Tutorial Sword still gripped tightly in his right hand. He was acutely aware of how he must look—a man in a simple linen tunic carrying a rusted piece of scrap metal and a glowing trophy that smelled vaguely of ozone and disappointment. He needed a plan, he needed gold, and most importantly, he needed to avoid being breathed on by anything with an offensive stat higher than zero.
+
+Artie didn't even make it to the grand staircase before the air in the hallway changed. It grew heavy, smelling of expensive incense and polished steel. 
+
+Leaning against a white marble pillar was a man who looked like he had been designed by a committee of people who thought 'protagonist' was a personality trait. He was tall, draped in a Silk Cloak that likely cost more than Artie's entire life insurance policy back home, and he possessed a jawline sharp enough to chip ice. Above his head, the System labels flickered in a golden hue that made Artie’s eyes ache.
+
+[Vane - Lvl 28] [Class: Sun-Blessed Paladin] [Affiliation: Order of the Golden Ratio]
+
+Twenty-eight. The number sat like a lead weight in Artie’s stomach. He was Level 2. He was a 'Statistical Anomaly' with 1 HP. Vane was a literal god-king in comparison. 
+
+Vane didn't move as Artie approached, but his eyes followed him with predatory focus. They weren't looking at Artie’s face; they were locked onto the flickering neon text that hovered above his head, the one the gate scanners had so graciously gifted him.
+
+[Title: Statistical Anomaly]
+
+"So," Vane said, his voice a smooth baritone. "You’re the glitch the Mayor is so worried about. The 'walking mint' with the broken numbers."
+
+Artie stopped five paces back, maintaining a careful distance. "I prefer the term 'optimization specialist,' but 'glitch' works if you’re into brevity. And you are?"
+
+"Vane," the man said, pushing off the pillar. He moved with a fluid grace that suggested high Dexterity. "I lead the local contingent of the Order. We maintain the balance of the System. And usually, when something is as... unbalanced... as you appear to be, it’s my job to see if it needs a patch."
+
+Artie felt a cold sweat break out on his neck. His 1 HP bar was invisible to Vane—he hoped—but the [Statistical Anomaly] tag was a massive neon sign inviting scrutiny.
+
+"I’m already under a Variance Tax, Vane," Artie said, forcing his voice to remain steady. "The Mayor’s already got his hand in my pockets. If you’re looking for a bribe, you’re about 500 gold too late."
+
+Vane smiled, though the expression didn't reach his eyes. He reached down to the hilt of the weapon at his hip. It was a Masterwork Rapier, the handguard shaped like a sunburst, the steel so bright it seemed to hold its own light.
+
+"I don't care for gold," Vane said. "I care for data. The gate scanners reported a 100% Critical Hit rate. Statistically impossible. Even the most dedicated Luck-builds cap out at forty percent before the diminishing returns kick in. You’re a walking impossibility, Arthur."
+
+"Artie," he corrected. "And it’s not impossible if the math allows it. It’s just... unlikely."
+
+"Is it?" Vane took a step forward, and the hallway suddenly felt much smaller. "I want to see it. A friendly spar. Just to see how the 'Anomaly' handles a real blade. I’ll even set my damage output to 'Training' mode."
+
+[System Notification: Vane has initiated a Duel Request (Friendly).]
+[Rules: First to 10% HP or First Yield.]
+[Warning: Even in 'Training' mode, minimum damage is 1 HP.]
+
+Artie’s heart did a frantic tap-dance against his ribs. Minimum damage was 1 HP. If Vane so much as grazed his sleeve, it was game over. The 'Friendly' duel would be the shortest, most lethal encounter in the history of Oakhaven.
+
+"I don’t spar for free," Artie said, forcing a smirk. He shifted his weight, making sure the Participation Trophy was visible in his left hand. "And honestly? You’re not geared for it."
+
+Vane paused, his hand tightening on the rapier’s hilt. "Excuse me?"
+
+"You’re a Paladin. High defense, high sustain, moderate burst," Artie said, leaning into the bluff he had established with the Mayor. "But you’re looking at my HP and thinking I’m a glass cannon. You think you can just tap me and the duel is over."
+
+"You have 1 Health, Anomaly," Vane said, his voice dropping to a dangerous whisper. "I can see the bar. It’s a single red pixel."
+
+"Exactly," Artie said, stepping closer. He was within Vane's reach now. If the Paladin drew that rapier, Artie was dead before he could blink. "Do you really think someone would walk into a Level 28 zone with 1 HP if they didn't have a way to make sure that 1 HP never moves? Have you ever heard of the 'Perfect Guard' build, Vane? Or are you too busy polishing your cape to read the high-level theory-crafting forums?"
+
+Vane’s eyes narrowed. The rapier stayed in its sheath, but only just. "Perfect Guard is a myth. A theoretical build that requires frame-perfect timing and a 100% reflection rate. No one can maintain that."
+
+"No one normal," Artie said, tapping the [Statistical Anomaly] tag above his head. "But I’m the guy who broke the gate scanner. I don't dodge, Vane. I don't need to. Every hit you land on me while my guard is up doesn't just do zero damage—it reflects 200% of the force back at the attacker. That’s why my HP is 1. It’s a bait. A lure for people like you who think a small number means a weak player."
+
+He could see the gears turning in Vane's head. In a world governed by stats, a 1 HP build was either a joke or a terrifying exploit. And since Artie was covered in 'Anomaly' flags and carrying a soul-bound trophy that was currently vibrating with energy, Vane was leaning toward the latter.
+
+"A reflection build," Vane muttered. He looked at Artie's Broken Tutorial Sword. "And the 100% Crit rate?"
+
+"If I reflect your attack, the counter-hit is a guaranteed Critical," Artie lied. "It’s a closed loop of mathematical inevitability. You swing, you die. I stay at 1 HP. It’s very efficient. Saves a fortune on health potions."
+
+Vane drew his Masterwork Rapier. The sound of steel on leather was like a whistle. He didn't lunge, but he held the point inches from Artie's chest. Artie didn't move. He couldn't. His legs were effectively made of jelly, but he forced his eyes to stay locked on Vane's.
+
+"One touch," Vane said. "If your 'Perfect Guard' is real, I’ll feel the kickback. If it’s not... well, the System will have one less bug to worry about."
+
+"Go ahead," Artie said, his voice steady despite the internal screaming. "But fair warning: Oakhaven’s insurance doesn't cover 'Suicide by Math.' If you break your fancy sword on my chest, don't come crying to me for the repair bill."
+
+Vane hesitated. The rapier’s tip quivered. He was looking for a tell—a flinch, a shift in posture, anything that betrayed terror. But Artie was so terrified he had reached a state of catatonic stillness that apparently looked like supreme confidence.
+
+[Status: Bluffed_Perfect_Guard is highly effective!]
+[Vane is reconsidering his tactical approach.]
+
+"You’re either the most dangerous man in this town," Vane said, slowly lowering the blade, "or the luckiest liar I’ve ever met."
+
+"In this world, is there a difference?" Artie asked.
+
+He didn't wait for a response. Artie turned his back on the Paladin—a move that was either the ultimate power play or the stupidest thing he had ever done—and started walking toward the stairs. Every step felt like he was walking on a tightrope over a pit of spikes. He expected to feel a rapier through his spine at any second.
+
+"This isn't over, Anomaly!" Vane called out behind him. The sound of the rapier returning to its sheath followed. "The Variance Tax isn't the only thing you have to worry about. The Order will be watching. If you’re a virus, we’ll find the cure."
+
+"Good luck with that," Artie muttered under his breath, finally reaching the stairs and rounding the corner. "I’ve been trying to find the cure for my own life for years."
+
+He didn't stop moving until he was out of the building and half a block away, tucked into the shadows of a merchant’s stall. He leaned against the cold stone wall, his breath coming in ragged gasps.
+
+[Stamina: 14/100]
+[Hunger: 10/100 (Flickering Orange)]
+
+"Fizz?" Artie whispered.
+
+A small, pixelated sprite popped into existence near his ear, her wings buzzing with nervous energy. "Artie! That was... wow. I actually thought I was going to have to find a new protagonist. Do you have any idea how hard it is to fill out the 'Death by Paladin' paperwork?"
+
+"I almost died, Fizz. He had a Level 28 rapier. I could feel the heat coming off it."
+
+"But you didn't!" Fizz chirped, doing a loop-de-loop. "You successfully bluffed a Sun-Blessed Paladin! Do you know what that does for your hidden 'Charisma-Exploit' modifier? Nothing, because I just made that up, but it was still impressive!"
+
+Artie looked down at his hands. They were shaking. He still had 1 HP. He still had a 500-gold tax due in twenty-four hours. And now, he had a high-level fanatic convinced he was a walking WMD of reflection damage.
+
+"I need gear," Artie said, pushing off the wall. "Real gear. Something that actually gives me Evasion. If Vane sees me trip over a rug and die, the bluff is over."
+
+"Well," Fizz said, pointing her tiny wand toward the town gates. "The Mayor mentioned the Low-Level Crypts. Lots of skeletons, very predictable patterns, and most importantly? High drop rates for 'Coward’s Gear.' It’s perfect for you!"
+
+"Coward’s gear," Artie sighed. "Fine. Lead the way. But if I see Vane again, I’m hiding in a barrel."
+
+"A barrel? How classic! I’ll mark it on your map as a 'Tactical Stealth Container'."
+
+Artie started walking, the Participation Trophy glowing in his hand, a beacon for every monster and rival in Oakhaven. He was a Statistical Anomaly, a 1 HP glitch in a world of giants, and somehow, he had to find a way to make the math work in his favor before the System decided to delete him for good.
+
+
+Character states (per cast_present_ids):
+[
+  {
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "hand_right",
+        "contents": [
+          "Broken Tutorial Sword"
+        ],
+        "location": "arm_right"
+      },
+      {
+        "container": "hand_left",
+        "contents": [
+          "Participation Trophy"
+        ],
+        "location": "arm_left"
+      },
+      {
+        "container": "body",
+        "contents": [
+          "Linen Tunic"
+        ],
+        "location": "torso"
+      },
+      {
+        "container": "pockets",
+        "contents": [
+          "Single Copper Coin"
+        ],
+        "location": "legs"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is stubborn and refuses to accept unfair losses, even from inanimate objects.",
+          "Artie is quick to recognize 'System' logic and treats life like a game to be optimized."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is committed to his 'glass cannon' optimization strategy despite the extreme risk.",
+          "Artie views the System's mechanics as a puzzle to be solved through extreme variance."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is hyper-aware of his 1 HP fragility.",
+          "Artie is learning to read the environment for tactical advantages."
+        ],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is beginning to realize the destructive potential of his 'broken' build.",
+          "Artie feels like the System's biggest mistake rather than its victim."
+        ],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "skills_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is realizing that System rewards can be as dangerous as its monsters.",
+          "Artie is developing a 'run-first' instinct due to his 1 HP build."
+        ],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "skills_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is beginning to accept his role as a System-breaking anomaly.",
+          "Artie views 'under protest' as his new baseline for interacting with the world."
+        ],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "skills_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is becoming adept at using 'System-speak' to bluff more powerful NPCs.",
+          "Artie recognizes that his economic value is as dangerous as his combat potential."
+        ],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> Broken Tutorial Sword (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Linen Tunic (status=equipped, container=body)",
+      "inventory: CHAR_ARTIE -> Single Copper Coin (status=stowed, container=pockets)",
+      "container: hand_right (owner=CHAR_ARTIE, contents=[Broken Tutorial Sword])",
+      "container: pockets (owner=CHAR_ARTIE, contents=[Single Copper Coin])",
+      "milestone: artie_died = DONE",
+      "milestone: system_login = DONE",
+      "ownership: Broken Tutorial Sword (carried)",
+      "title: Statistical Anomaly",
+      "title: The Glassest Cannon",
+      "milestone: build_confirmed = DONE",
+      "location: The Whispering Woods",
+      "milestone: first_spawn = DONE",
+      "milestone: slime_encounter_start = DONE",
+      "milestone: slime_defeated = DONE",
+      "milestone: level_two_reached = DONE",
+      "location: The Whispering Woods (Status: Near smoking crater)",
+      "effect: Super-Mega-Ultra-Crit Cooldown (Active)",
+      "inventory: CHAR_ARTIE -> Participation Trophy (carried, container=hand_left)",
+      "milestone: participation_trophy_acquired = DONE",
+      "effect: Aura of the Beacon (Active)",
+      "effect: Magnetic Failure (Active)",
+      "effect: Inevitability (Active)",
+      "milestone: oakhaven_entry = DONE",
+      "milestone: statistical_anomaly_tagged = DONE",
+      "location: Oakhaven",
+      "status: Winded (Recovery Rate -50%)",
+      "milestone: mayor_meeting = DONE",
+      "milestone: variance_tax_imposed = DONE",
+      "status: bluffed_perfect_guard"
+    ],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "Broken Tutorial Sword",
+        "status": "carried"
+      },
+      {
+        "container": "hand_left",
+        "item": "Participation Trophy",
+        "status": "carried"
+      },
+      {
+        "container": "body",
+        "item": "Linen Tunic",
+        "status": "equipped"
+      },
+      {
+        "container": "pockets",
+        "item": "Single Copper Coin",
+        "status": "stowed"
+      }
+    ],
+    "name": "Arthur 'Artie' Penhaligon",
+    "schema_version": "1.0",
+    "skills": {},
+    "stats": {},
+    "updated_at": "2026-02-06T22:47:36Z"
+  },
+  {
+    "character_id": "CHAR_VANE",
+    "containers": [
+      {
+        "container": "sheath",
+        "contents": [
+          "Masterwork Rapier"
+        ],
+        "location": "belt_left",
+        "owner": "CHAR_VANE"
+      }
+    ],
+    "history": [],
+    "invariants": [
+      "inventory: CHAR_VANE -> Masterwork Rapier (status=stowed, container=sheath)",
+      "inventory: CHAR_VANE -> Silk Cloak (status=equipped, container=shoulders)",
+      "container: sheath (owner=CHAR_VANE, contents=[Masterwork Rapier])"
+    ],
+    "inventory": [
+      {
+        "container": "sheath",
+        "item": "Masterwork Rapier",
+        "status": "stowed"
+      },
+      {
+        "container": "shoulders",
+        "item": "Silk Cloak",
+        "status": "equipped"
+      }
+    ],
+    "name": "Vane",
+    "schema_version": "1.0",
+    "skills": {},
+    "stats": {},
+    "updated_at": "2026-02-06T21:45:27Z"
+  }
+]
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-06T21:45:27Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 8
+  },
+  "duplication_warnings_in_row": 0,
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_008.meta.json"
+  },
+  "run_stats": {},
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Artie has died on Earth and entered the System's character creation void after a vending machine accident.",
+      "Artie met his guide, Fizz, and reviewed the details of his death.",
+      "Artie exploited the character creation system to create a high-variance 'Crit-Only' build.",
+      "Artie entered the Whispering Woods and engaged in his first combat encounter.",
+      "Artie discovered that the System's rounding mechanics make his 1 HP build extremely fragile.",
+      "Artie survived his first combat encounter by accidentally nuking the tutorial zone.",
+      "Artie discovered that his crits can overwrite System rules and destroy world objects.",
+      "Artie received a cursed Participation Trophy that makes him a magnet for all monsters and projectiles in the area.",
+      "Artie reached Oakhaven and was flagged as a Statistical Anomaly by the gate scanners.",
+      "Artie met the Mayor of Oakhaven and was identified as a 'walking mint' due to his 100% Crit rate.",
+      "The Mayor imposed a 500-gold 'Variance Tax' via the quest 'The Mayor's Cut'.",
+      "Artie successfully bluffed that his 1 HP was a 'Perfect Guard' build to maintain his safety.",
+      "Artie successfully bluffed the Paladin Vane into avoiding a duel by claiming to have a 'Perfect Guard' reflection build."
+    ],
+    "key_facts_ring": [
+      "Artie's stamina dropped to 9/100 during the final sprint.",
+      "milestone: oakhaven_entry = DONE",
+      "milestone: statistical_anomaly_tagged = DONE",
+      "Artie has 1 HP and 100% Crit Rate.",
+      "Artie is carrying the Participation Trophy in his left hand (Soul-bound).",
+      "Artie is carrying the Broken Tutorial Sword in his right hand.",
+      "location: Oakhaven",
+      "title: Statistical Anomaly",
+      "Artie entered the Mayor's office, noticing the high-level stats and opulent environment.",
+      "The Mayor identified Artie as a 'walking mint' due to his 100% Crit rate's economic potential.",
+      "The System issued the quest 'The Mayor\u2019s Cut', demanding 500 gold or 10 crit-forged items.",
+      "Artie bluffed that his 1 HP was a 'Perfect Guard' build to prevent the Mayor from attacking.",
+      "Artie's stamina dropped to 12/100 and his hunger bar began flickering orange.",
+      "milestone: mayor_meeting = DONE",
+      "milestone: variance_tax_imposed = DONE",
+      "Artie exited the Mayor's office with the 'Mayor's Cut' quest active.",
+      "Vane intercepted Artie and identified him as a 'Statistical Anomaly'.",
+      "Vane initiated a 'Friendly' duel request which Artie declined through psychological manipulation.",
+      "Artie bluffed that his 1 HP build reflects 200% damage and guarantees crits on counters.",
+      "Vane sheathed his Masterwork Rapier and allowed Artie to leave, though he remains suspicious.",
+      "Artie's stamina dropped to 14/100 and hunger to 10/100.",
+      "Artie and Fizz decided to travel to the Low-Level Crypts to farm evasion gear.",
+      "milestone: vane_first_encounter = DONE",
+      "milestone: duel_avoided = DONE",
+      "status: bluffed_perfect_guard = ACTIVE"
+    ],
+    "last_scene": [
+      "Artie encountered the Paladin Vane outside the Mayor's office and was challenged to a duel.",
+      "Artie successfully extended his 'Perfect Guard' bluff, convincing Vane that attacking him would result in lethal damage reflection.",
+      "Vane backed down but declared Artie a potential virus that the Order would be monitoring.",
+      "Artie retreated to the shadows of a merchant stall to recover and plan his next move toward the Low-Level Crypts."
+    ],
+    "must_stay_true": [
+      "milestone: level_two_reached = DONE",
+      "Artie has 100% Critical Hit rate.",
+      "The Super-Mega-Ultra-Crit has a 24-hour cooldown.",
+      "milestone: participation_trophy_acquired = DONE",
+      "Artie has 1 HP and 1 MP; any damage taken is lethal.",
+      "Artie is carrying the Participation Trophy in his left hand; it cannot be unequipped or stowed.",
+      "The Participation Trophy increases aggro by 500% and attracts projectiles.",
+      "Artie's Super-Mega-Ultra-Crit is on a 24-hour cooldown.",
+      "milestone: oakhaven_entry = DONE",
+      "milestone: statistical_anomaly_tagged = DONE",
+      "Artie has 1 HP and 100% Crit Rate.",
+      "Artie is carrying the Participation Trophy in his left hand (Soul-bound).",
+      "Artie is carrying the Broken Tutorial Sword in his right hand.",
+      "location: Oakhaven",
+      "title: Statistical Anomaly",
+      "milestone: mayor_meeting = DONE",
+      "milestone: variance_tax_imposed = DONE",
+      "milestone: vane_first_encounter = DONE",
+      "milestone: duel_avoided = DONE",
+      "status: bluffed_perfect_guard = ACTIVE"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_VANE"
+    ],
+    "cast_present_ids": [
+      "CHAR_ARTIE",
+      "CHAR_MAYOR"
+    ],
+    "location": "Oakhaven - Merchant's Stall",
+    "open_threads": [
+      "THREAD_VANE_RIVALRY",
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie encountered Vane, a Level 28 Paladin, outside the Mayor's office.",
+      "Vane challenged Artie to a duel to test his 'Statistical Anomaly' status.",
+      "Artie successfully bluffed Vane into believing his 1 HP is a 'Perfect Guard' reflection build.",
+      "Vane withdrew the duel request but remains suspicious and promised to watch Artie.",
+      "Artie decided to head to the Low-Level Crypts to find evasion gear."
+    ],
+    "time": {}
+  }
+}
+
+Summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie has died on Earth and entered the System's character creation void after a vending machine accident.",
+    "Artie met his guide, Fizz, and reviewed the details of his death.",
+    "Artie exploited the character creation system to create a high-variance 'Crit-Only' build.",
+    "Artie entered the Whispering Woods and engaged in his first combat encounter.",
+    "Artie discovered that the System's rounding mechanics make his 1 HP build extremely fragile.",
+    "Artie survived his first combat encounter by accidentally nuking the tutorial zone.",
+    "Artie discovered that his crits can overwrite System rules and destroy world objects.",
+    "Artie received a cursed Participation Trophy that makes him a magnet for all monsters and projectiles in the area.",
+    "Artie reached Oakhaven and was flagged as a Statistical Anomaly by the gate scanners.",
+    "Artie met the Mayor of Oakhaven and was identified as a 'walking mint' due to his 100% Crit rate.",
+    "The Mayor imposed a 500-gold 'Variance Tax' via the quest 'The Mayor's Cut'.",
+    "Artie successfully bluffed that his 1 HP was a 'Perfect Guard' build to maintain his safety.",
+    "Artie successfully bluffed the Paladin Vane into avoiding a duel by claiming to have a 'Perfect Guard' reflection build."
+  ],
+  "key_facts_ring": [
+    "Artie's stamina dropped to 9/100 during the final sprint.",
+    "milestone: oakhaven_entry = DONE",
+    "milestone: statistical_anomaly_tagged = DONE",
+    "Artie has 1 HP and 100% Crit Rate.",
+    "Artie is carrying the Participation Trophy in his left hand (Soul-bound).",
+    "Artie is carrying the Broken Tutorial Sword in his right hand.",
+    "location: Oakhaven",
+    "title: Statistical Anomaly",
+    "Artie entered the Mayor's office, noticing the high-level stats and opulent environment.",
+    "The Mayor identified Artie as a 'walking mint' due to his 100% Crit rate's economic potential.",
+    "The System issued the quest 'The Mayor\u2019s Cut', demanding 500 gold or 10 crit-forged items.",
+    "Artie bluffed that his 1 HP was a 'Perfect Guard' build to prevent the Mayor from attacking.",
+    "Artie's stamina dropped to 12/100 and his hunger bar began flickering orange.",
+    "milestone: mayor_meeting = DONE",
+    "milestone: variance_tax_imposed = DONE",
+    "Artie exited the Mayor's office with the 'Mayor's Cut' quest active.",
+    "Vane intercepted Artie and identified him as a 'Statistical Anomaly'.",
+    "Vane initiated a 'Friendly' duel request which Artie declined through psychological manipulation.",
+    "Artie bluffed that his 1 HP build reflects 200% damage and guarantees crits on counters.",
+    "Vane sheathed his Masterwork Rapier and allowed Artie to leave, though he remains suspicious.",
+    "Artie's stamina dropped to 14/100 and hunger to 10/100.",
+    "Artie and Fizz decided to travel to the Low-Level Crypts to farm evasion gear.",
+    "milestone: vane_first_encounter = DONE",
+    "milestone: duel_avoided = DONE",
+    "status: bluffed_perfect_guard = ACTIVE"
+  ],
+  "last_scene": [
+    "Artie encountered the Paladin Vane outside the Mayor's office and was challenged to a duel.",
+    "Artie successfully extended his 'Perfect Guard' bluff, convincing Vane that attacking him would result in lethal damage reflection.",
+    "Vane backed down but declared Artie a potential virus that the Order would be monitoring.",
+    "Artie retreated to the shadows of a merchant stall to recover and plan his next move toward the Low-Level Crypts."
+  ],
+  "must_stay_true": [
+    "milestone: level_two_reached = DONE",
+    "Artie has 100% Critical Hit rate.",
+    "The Super-Mega-Ultra-Crit has a 24-hour cooldown.",
+    "milestone: participation_trophy_acquired = DONE",
+    "Artie has 1 HP and 1 MP; any damage taken is lethal.",
+    "Artie is carrying the Participation Trophy in his left hand; it cannot be unequipped or stowed.",
+    "The Participation Trophy increases aggro by 500% and attracts projectiles.",
+    "Artie's Super-Mega-Ultra-Crit is on a 24-hour cooldown.",
+    "milestone: oakhaven_entry = DONE",
+    "milestone: statistical_anomaly_tagged = DONE",
+    "Artie has 1 HP and 100% Crit Rate.",
+    "Artie is carrying the Participation Trophy in his left hand (Soul-bound).",
+    "Artie is carrying the Broken Tutorial Sword in his right hand.",
+    "location: Oakhaven",
+    "title: Statistical Anomaly",
+    "milestone: mayor_meeting = DONE",
+    "milestone: variance_tax_imposed = DONE",
+    "milestone: vane_first_encounter = DONE",
+    "milestone: duel_avoided = DONE",
+    "status: bluffed_perfect_guard = ACTIVE"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "milestone: level_two_reached = DONE",
+  "Artie has 100% Critical Hit rate.",
+  "The Super-Mega-Ultra-Crit has a 24-hour cooldown.",
+  "milestone: participation_trophy_acquired = DONE",
+  "Artie has 1 HP and 1 MP; any damage taken is lethal.",
+  "Artie is carrying the Participation Trophy in his left hand; it cannot be unequipped or stowed.",
+  "The Participation Trophy increases aggro by 500% and attracts projectiles.",
+  "Artie's Super-Mega-Ultra-Crit is on a 24-hour cooldown.",
+  "milestone: oakhaven_entry = DONE",
+  "milestone: statistical_anomaly_tagged = DONE",
+  "Artie has 1 HP and 100% Crit Rate.",
+  "Artie is carrying the Participation Trophy in his left hand (Soul-bound).",
+  "Artie is carrying the Broken Tutorial Sword in his right hand.",
+  "location: Oakhaven",
+  "title: Statistical Anomaly",
+  "milestone: mayor_meeting = DONE",
+  "milestone: variance_tax_imposed = DONE",
+  "milestone: vane_first_encounter = DONE",
+  "milestone: duel_avoided = DONE",
+  "status: bluffed_perfect_guard = ACTIVE",
+  "Artie's stamina dropped to 9/100 during the final sprint.",
+  "milestone: oakhaven_entry = DONE",
+  "milestone: statistical_anomaly_tagged = DONE",
+  "Artie has 1 HP and 100% Crit Rate.",
+  "Artie is carrying the Participation Trophy in his left hand (Soul-bound).",
+  "Artie is carrying the Broken Tutorial Sword in his right hand.",
+  "location: Oakhaven",
+  "title: Statistical Anomaly",
+  "Artie entered the Mayor's office, noticing the high-level stats and opulent environment.",
+  "The Mayor identified Artie as a 'walking mint' due to his 100% Crit rate's economic potential.",
+  "The System issued the quest 'The Mayor\u2019s Cut', demanding 500 gold or 10 crit-forged items.",
+  "Artie bluffed that his 1 HP was a 'Perfect Guard' build to prevent the Mayor from attacking.",
+  "Artie's stamina dropped to 12/100 and his hunger bar began flickering orange.",
+  "milestone: mayor_meeting = DONE",
+  "milestone: variance_tax_imposed = DONE",
+  "Artie exited the Mayor's office with the 'Mayor's Cut' quest active.",
+  "Vane intercepted Artie and identified him as a 'Statistical Anomaly'.",
+  "Vane initiated a 'Friendly' duel request which Artie declined through psychological manipulation.",
+  "Artie bluffed that his 1 HP build reflects 200% damage and guarantees crits on counters.",
+  "Vane sheathed his Masterwork Rapier and allowed Artie to leave, though he remains suspicious.",
+  "Artie's stamina dropped to 14/100 and hunger to 10/100.",
+  "Artie and Fizz decided to travel to the Low-Level Crypts to farm evasion gear.",
+  "milestone: vane_first_encounter = DONE",
+  "milestone: duel_avoided = DONE",
+  "status: bluffed_perfect_guard = ACTIVE"
+]

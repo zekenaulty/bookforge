@@ -1,0 +1,567 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Mechanics contract: if mechanics/UI are present, all numeric values and labels (stats/skills) must be sourced from state or explicitly updated in the state_patch. Do not invent numbers or canonical tokens.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+
+
+USER:
+
+# LINT
+
+Check the scene for continuity, invariant violations, and duplication.
+Flag invariant contradictions against must_stay_true/key facts.
+Return ONLY JSON matching the lint_report schema.
+- Check that any UI numbers or skill values in prose match state stats/skills. If not, emit a failure.
+- Check for POV drift vs book POV (no first-person in third-person scenes).
+
+Required keys:
+- schema_version ("1.0")
+- status ("pass" or "fail")
+- issues (array of objects)
+
+Each issue object must include:
+- code
+- message
+Optional:
+- severity
+
+If there are no issues, return:
+{
+  "schema_version": "1.0",
+  "status": "pass",
+  "issues": []
+}
+
+If there are issues, return:
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {"code": "continuity", "message": "Example issue", "severity": "error"}
+  ]
+}
+
+Scene:
+The rusted edge of the Broken Tutorial Sword sliced through the air exactly three inches above the Level 1 Slime’s translucent, wobbling crest. 
+
+[Attack Missed!]
+[Dexterity Check Failed: 1 vs 5]
+
+The momentum of the swing, fueled by Artie’s pathetic Strength stat of 1, dragged him forward. He felt the cold, gelatinous mass of the creature brush against the hem of his Linen Tunic. It was a sensation like wet, vibrating rubber, and it was the most terrifying thing he had ever felt.
+
+"Don't touch me, don't touch me, don't touch me," Artie hissed, his boots skidding on the damp moss. 
+
+The System’s rounding rule was a guillotine hanging over his neck. In this world, 0.1 damage didn't just hurt; it rounded up to 1. And since Artie only had 1 HP, a vigorous high-five from a friendly NPC would likely result in a funeral. The slime gurgled, a sound like a clogged drain, and lunged.
+
+Artie pivoted, or at least he tried to. With 1 Agility, his body responded to his brain’s commands with the urgency of a dial-up modem. He swung again, a desperate backhand meant to keep the creature at bay.
+
+[Attack Missed!]
+[Dexterity Check Failed: 1 vs 3]
+
+The sword whistled through the space the slime had occupied a microsecond before. The creature was a tutorial mob—the bottom of the food chain—yet to Artie, it moved like a blur of neon-green malice. He was fighting a living puddle, and the puddle was winning.
+
+"Come on, you stupid pile of Jell-O!" 
+
+He lunged forward for a third strike, putting all his weight behind a thrust. The tip of the rusted blade caught on a protruding root. Artie stumbled, his nose nearly grazing the slime’s acidic surface. He could smell it now: a sharp, chemical odor like industrial floor cleaner mixed with old lemon peels.
+
+[Attack Missed!]
+[Dexterity Check Failed: 1 vs 8]
+
+Behind him, the Whispering Woods lived up to their name. A nearby Patch-Note Oak, its bark etched with shimmering lines of code, began to groan. The sound wasn't the rustle of leaves, but a synthesized, monotone voice that vibrated in Artie's teeth.
+
+*“Patch 1.2.0: Reduced the aggro radius of Lesser Slimes by fifteen percent to accommodate players with sub-optimal motor skills,”* the tree recited. *“Fixed an issue where tutorial trees would occasionally scream during combat. Error. Error. Scream.exe not found.”*
+
+"Shut up!" Artie roared, spinning around to deliver a horizontal slash. The slime flattened itself against the ground, the blade passing harmlessly through the air where its 'head' had been.
+
+[Attack Missed!]
+[Dexterity Check Failed: 1 vs 4]
+
+Four misses. His heart was hammering against his ribs, a frantic rhythm that felt like it might do the 1 point of damage necessary to kill him from the inside. He was cornered. To his left, a cluster of thorny brambles; to his right, the screaming Oak; and in front of him, the slime, which was now vibrating with the intensity of a heavy attack.
+
+The creature’s green core began to glow. This was the Heavy Attack the System had warned him about. If it landed, he wouldn't just be dead; he’d be dissolved into a puddle of Arthur-flavored soup.
+
+"Fifth time's the charm," Artie grunted, swinging the Broken Tutorial Sword in a wide, panicked arc. 
+
+[Attack Missed!]
+[Dexterity Check Failed: 1 vs 12]
+
+The sword struck the trunk of the Patch-Note Oak with a dull *thwack*. The tree didn't just take damage; it reacted.
+
+*“Warning: Unauthorized modification of world geometry detected,”* the tree droned. *“Applying hotfix… Error. Error. Exception: NullPointerInMyFace.”*
+
+The slime launched. It was a full-body leap, a sphere of corrosive slime flying through the air toward Artie’s chest. He had no time to dodge. His 1 Agility wouldn't allow it. He had no armor to speak of. He had 1 HP.
+
+He did the only thing a man with 99 Luck and 100% Critical Hit rate could do. He closed his eyes and shoved the sword forward in a blind, pathetic jab.
+
+The world didn't just make a sound; it broke.
+
+[System Notification: Super-Mega-Ultra-Crit!]
+
+The moment the rusted tip of the Broken Tutorial Sword made contact with the slime’s glowing core, the math of the universe folded in on itself. A guaranteed critical hit from a Statistical Anomaly wasn't just a "harder hit." It was a violation of the local reality.
+
+A pillar of white-hot light erupted from the point of impact. The slime didn't die; it was deleted. Its mass was converted into pure kinetic energy that expanded outward in a perfect, devastating sphere. The shockwave hit Artie like a physical wall, but because he was the source of the crit, the System’s 'Friendly Fire' protocols—or perhaps just sheer confusion—kept him from vaporizing.
+
+The Patch-Note Oak behind the slime didn't fare as well. The tree, which had been busy reciting notes about improved lighting effects, was caught in the blast. Its trunk shattered into millions of glowing pixels. 
+
+*“Patch 1.3.1: Removed the ability for players to—OH GOD THE ERRORS—AAAAAAAGH!”* 
+
+The tree’s synthesized scream cut off as it was leveled, its entire structure reduced to a stump that continued to leak flickering red error messages into the grass. The slime was gone. The tree was gone. A fifty-foot furrow had been carved into the earth, ending in a smoking crater where a peaceful tutorial path had once been.
+
+Artie stood in the center of the destruction, his hand still gripping the hilt of the sword. The blade was no longer rusted; it was glowing with a faint, dying ember of the power it had just channeled.
+
+Silence fell over the Whispering Woods, save for the distant, faint sound of other trees whispering about a bug fix for "sudden explosive deforestation."
+
+A golden light washed over Artie, warmer and more pleasant than the crit-blast.
+
+[Level Up!]
+[Level 1 -> Level 2]
+
+[Reward: 5 Stat Points allocated to 'Luck' (Automatic)]
+[Reward: 1 Stat Point allocated to 'Dexterity' (Pity Bonus)]
+
+Artie exhaled a breath he felt he’d been holding since he died in front of that vending machine. He blinked, and his new stat sheet flickered into view.
+
+***
+
+**Character: Arthur 'Artie' Penhaligon**
+**Level: 2**
+**Class: [Locked - Statistical Anomaly]**
+**HP: 1/1**
+**MP: 1/1**
+
+**Stats:**
+*   **Strength:** 1
+*   **Agility:** 1
+*   **Intelligence:** 1
+*   **Vitality:** 1
+*   **Dexterity:** 2 (+1 Pity Bonus!)
+*   **Luck:** 104
+
+**Active Effects:**
+*   **[The Glassest Cannon]:** All damage taken is lethal. All hits landed are Critical.
+*   **[Super-Mega-Ultra-Crit Cooldown]:** 23:59:52 remaining.
+
+***
+
+"A pity bonus?" Artie muttered, looking at the smoking crater where his first enemy had been. He looked at his hand, which was still shaking. "I just nuked a tree and a puddle because I’m bad at aiming. This... this is going to be a very weird game."
+
+He looked down at his Linen Tunic. It was perfectly clean, despite the carnage. He still had his single copper coin. He was still Level 2 with 1 HP. But for the first time, he didn't feel like a victim of the System. He felt like its biggest mistake.
+
+
+Character states (per cast_present_ids):
+[
+  {
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "hand_right",
+        "contents": [
+          "Broken Tutorial Sword"
+        ],
+        "location": "arm_right",
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "pockets",
+        "contents": [
+          "Single Copper Coin"
+        ],
+        "location": "legs",
+        "owner": "CHAR_ARTIE"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is stubborn and refuses to accept unfair losses, even from inanimate objects.",
+          "Artie is quick to recognize 'System' logic and treats life like a game to be optimized."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is committed to his 'glass cannon' optimization strategy despite the extreme risk.",
+          "Artie views the System's mechanics as a puzzle to be solved through extreme variance."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is hyper-aware of his 1 HP fragility.",
+          "Artie is learning to read the environment for tactical advantages."
+        ],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> Broken Tutorial Sword (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Linen Tunic (status=equipped, container=body)",
+      "inventory: CHAR_ARTIE -> Single Copper Coin (status=stowed, container=pockets)",
+      "container: hand_right (owner=CHAR_ARTIE, contents=[Broken Tutorial Sword])",
+      "container: pockets (owner=CHAR_ARTIE, contents=[Single Copper Coin])",
+      "milestone: artie_died = DONE",
+      "milestone: system_login = DONE",
+      "ownership: Broken Tutorial Sword (carried)",
+      "title: Statistical Anomaly",
+      "title: The Glassest Cannon",
+      "milestone: build_confirmed = DONE",
+      "location: The Whispering Woods",
+      "milestone: first_spawn = DONE",
+      "milestone: slime_encounter_start = DONE"
+    ],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "Broken Tutorial Sword",
+        "status": "carried"
+      },
+      {
+        "container": "body",
+        "item": "Linen Tunic",
+        "status": "equipped"
+      },
+      {
+        "container": "pockets",
+        "item": "Single Copper Coin",
+        "status": "stowed"
+      }
+    ],
+    "name": "Arthur 'Artie' Penhaligon",
+    "schema_version": "1.0",
+    "skills": {},
+    "stats": {},
+    "updated_at": "2026-02-06T22:06:38Z"
+  }
+]
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-06T21:45:27Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 4
+  },
+  "duplication_warnings_in_row": 0,
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_004.meta.json"
+  },
+  "run_stats": {},
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Artie has died on Earth and entered the System's character creation void after a vending machine accident.",
+      "Artie met his guide, Fizz, and reviewed the details of his death.",
+      "Artie exploited the character creation system to create a high-variance 'Crit-Only' build.",
+      "Artie entered the Whispering Woods and engaged in his first combat encounter.",
+      "Artie discovered that the System's rounding mechanics make his 1 HP build extremely fragile.",
+      "Artie defeated his first enemy with a physics-breaking critical hit.",
+      "Artie discovered that his Luck-based build can cause massive collateral damage.",
+      "Artie reached Level 2 and received a 'Pity Bonus' to his Dexterity."
+    ],
+    "key_facts_ring": [
+      "location: The System Void (status: transitioning to Whispering Woods)",
+      "Artie manifested in the Whispering Woods and confirmed his [1/1 HP] status.",
+      "Fizz explained the System's rounding rule where 0.1 damage becomes 1 damage.",
+      "A Level 1 Tutorial Slime attacked Artie with lunges and a ranged projectile.",
+      "Artie was cornered against a Patch-Note Oak that screams error messages when damaged.",
+      "The System issued a warning about the slime's Heavy Attack and Artie's near-zero survival probability.",
+      "Artie initiated a counter-attack with his Broken Tutorial Sword, triggering a guaranteed Critical Hit.",
+      "The slime's mass made contact with Artie's tunic as the strike landed.",
+      "milestone: artie_died = DONE, milestone: system_login = DONE, milestone: build_confirmed = DONE",
+      "milestone: first_spawn = DONE, milestone: slime_encounter_start = DONE",
+      "Artie has 1 HP and 1 MP; any damage taken is lethal due to rounding rules.",
+      "location: The Whispering Woods",
+      "Artie is currently in physical contact with a Level 1 Slime.",
+      "The Whispering Woods are mechanically hostile and recite patch notes.",
+      "Artie missed the slime five times due to failing Dexterity checks.",
+      "A Patch-Note Oak recited patch notes and screamed error messages during the fight.",
+      "Artie triggered a [Super-Mega-Ultra-Crit] on his sixth attack.",
+      "The slime was deleted and the Patch-Note Oak was destroyed by the crit's shockwave.",
+      "Artie reached Level 2.",
+      "Artie's Luck increased to 104 and his Dexterity increased to 2 as a 'Pity Bonus'.",
+      "The [Super-Mega-Ultra-Crit Cooldown] was activated for 24 hours.",
+      "milestone: slime_defeated = DONE",
+      "milestone: level_two_reached = DONE",
+      "Artie's Luck is 104 and Dexterity is 2.",
+      "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)"
+    ],
+    "last_scene": [
+      "Artie engaged a Level 1 Slime in the Whispering Woods, missing five times due to his low Dexterity.",
+      "On his sixth strike, he triggered a 'Super-Mega-Ultra-Crit' that vaporized the slime and a nearby Patch-Note Oak.",
+      "Artie leveled up to Level 2 and received a pity bonus to his Dexterity stat."
+    ],
+    "must_stay_true": [
+      "milestone: artie_died = DONE",
+      "milestone: system_login = DONE",
+      "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Linen Tunic (equipped, container=body)",
+      "inventory: CHAR_ARTIE -> Single Copper Coin (stowed, container=pockets)",
+      "location: The System Void (current status)",
+      "milestone: build_confirmed = DONE",
+      "location: The System Void (status: transitioning to Whispering Woods)",
+      "milestone: artie_died = DONE, milestone: system_login = DONE, milestone: build_confirmed = DONE",
+      "milestone: first_spawn = DONE, milestone: slime_encounter_start = DONE",
+      "Artie has 1 HP and 1 MP; any damage taken is lethal due to rounding rules.",
+      "location: The Whispering Woods",
+      "Artie is currently in physical contact with a Level 1 Slime.",
+      "The Whispering Woods are mechanically hostile and recite patch notes.",
+      "milestone: slime_defeated = DONE",
+      "milestone: level_two_reached = DONE",
+      "Artie's Luck is 104 and Dexterity is 2."
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "cast_present_ids": [
+      "CHAR_ARTIE"
+    ],
+    "location": "The Whispering Woods",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie missed the Level 1 Slime 5 times due to his 1 Dexterity.",
+      "Artie landed a 'Super-Mega-Ultra-Crit' on his 6th attempt.",
+      "The crit vaporized the slime and destroyed a Patch-Note Oak tree.",
+      "The Patch-Note Oak screamed error messages and recited patch notes before destruction.",
+      "Artie reached Level 2 and received a 'Pity Bonus' to Dexterity.",
+      "The Super-Mega-Ultra-Crit Cooldown is active for 24 hours."
+    ],
+    "time": {}
+  }
+}
+
+Summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie has died on Earth and entered the System's character creation void after a vending machine accident.",
+    "Artie met his guide, Fizz, and reviewed the details of his death.",
+    "Artie exploited the character creation system to create a high-variance 'Crit-Only' build.",
+    "Artie entered the Whispering Woods and engaged in his first combat encounter.",
+    "Artie discovered that the System's rounding mechanics make his 1 HP build extremely fragile.",
+    "Artie defeated his first enemy with a physics-breaking critical hit.",
+    "Artie discovered that his Luck-based build can cause massive collateral damage.",
+    "Artie reached Level 2 and received a 'Pity Bonus' to his Dexterity."
+  ],
+  "key_facts_ring": [
+    "location: The System Void (status: transitioning to Whispering Woods)",
+    "Artie manifested in the Whispering Woods and confirmed his [1/1 HP] status.",
+    "Fizz explained the System's rounding rule where 0.1 damage becomes 1 damage.",
+    "A Level 1 Tutorial Slime attacked Artie with lunges and a ranged projectile.",
+    "Artie was cornered against a Patch-Note Oak that screams error messages when damaged.",
+    "The System issued a warning about the slime's Heavy Attack and Artie's near-zero survival probability.",
+    "Artie initiated a counter-attack with his Broken Tutorial Sword, triggering a guaranteed Critical Hit.",
+    "The slime's mass made contact with Artie's tunic as the strike landed.",
+    "milestone: artie_died = DONE, milestone: system_login = DONE, milestone: build_confirmed = DONE",
+    "milestone: first_spawn = DONE, milestone: slime_encounter_start = DONE",
+    "Artie has 1 HP and 1 MP; any damage taken is lethal due to rounding rules.",
+    "location: The Whispering Woods",
+    "Artie is currently in physical contact with a Level 1 Slime.",
+    "The Whispering Woods are mechanically hostile and recite patch notes.",
+    "Artie missed the slime five times due to failing Dexterity checks.",
+    "A Patch-Note Oak recited patch notes and screamed error messages during the fight.",
+    "Artie triggered a [Super-Mega-Ultra-Crit] on his sixth attack.",
+    "The slime was deleted and the Patch-Note Oak was destroyed by the crit's shockwave.",
+    "Artie reached Level 2.",
+    "Artie's Luck increased to 104 and his Dexterity increased to 2 as a 'Pity Bonus'.",
+    "The [Super-Mega-Ultra-Crit Cooldown] was activated for 24 hours.",
+    "milestone: slime_defeated = DONE",
+    "milestone: level_two_reached = DONE",
+    "Artie's Luck is 104 and Dexterity is 2.",
+    "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)"
+  ],
+  "last_scene": [
+    "Artie engaged a Level 1 Slime in the Whispering Woods, missing five times due to his low Dexterity.",
+    "On his sixth strike, he triggered a 'Super-Mega-Ultra-Crit' that vaporized the slime and a nearby Patch-Note Oak.",
+    "Artie leveled up to Level 2 and received a pity bonus to his Dexterity stat."
+  ],
+  "must_stay_true": [
+    "milestone: artie_died = DONE",
+    "milestone: system_login = DONE",
+    "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)",
+    "inventory: CHAR_ARTIE -> Linen Tunic (equipped, container=body)",
+    "inventory: CHAR_ARTIE -> Single Copper Coin (stowed, container=pockets)",
+    "location: The System Void (current status)",
+    "milestone: build_confirmed = DONE",
+    "location: The System Void (status: transitioning to Whispering Woods)",
+    "milestone: artie_died = DONE, milestone: system_login = DONE, milestone: build_confirmed = DONE",
+    "milestone: first_spawn = DONE, milestone: slime_encounter_start = DONE",
+    "Artie has 1 HP and 1 MP; any damage taken is lethal due to rounding rules.",
+    "location: The Whispering Woods",
+    "Artie is currently in physical contact with a Level 1 Slime.",
+    "The Whispering Woods are mechanically hostile and recite patch notes.",
+    "milestone: slime_defeated = DONE",
+    "milestone: level_two_reached = DONE",
+    "Artie's Luck is 104 and Dexterity is 2."
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "milestone: artie_died = DONE",
+  "milestone: system_login = DONE",
+  "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)",
+  "inventory: CHAR_ARTIE -> Linen Tunic (equipped, container=body)",
+  "inventory: CHAR_ARTIE -> Single Copper Coin (stowed, container=pockets)",
+  "location: The System Void (current status)",
+  "milestone: build_confirmed = DONE",
+  "location: The System Void (status: transitioning to Whispering Woods)",
+  "milestone: artie_died = DONE, milestone: system_login = DONE, milestone: build_confirmed = DONE",
+  "milestone: first_spawn = DONE, milestone: slime_encounter_start = DONE",
+  "Artie has 1 HP and 1 MP; any damage taken is lethal due to rounding rules.",
+  "location: The Whispering Woods",
+  "Artie is currently in physical contact with a Level 1 Slime.",
+  "The Whispering Woods are mechanically hostile and recite patch notes.",
+  "milestone: slime_defeated = DONE",
+  "milestone: level_two_reached = DONE",
+  "Artie's Luck is 104 and Dexterity is 2.",
+  "location: The System Void (status: transitioning to Whispering Woods)",
+  "Artie manifested in the Whispering Woods and confirmed his [1/1 HP] status.",
+  "Fizz explained the System's rounding rule where 0.1 damage becomes 1 damage.",
+  "A Level 1 Tutorial Slime attacked Artie with lunges and a ranged projectile.",
+  "Artie was cornered against a Patch-Note Oak that screams error messages when damaged.",
+  "The System issued a warning about the slime's Heavy Attack and Artie's near-zero survival probability.",
+  "Artie initiated a counter-attack with his Broken Tutorial Sword, triggering a guaranteed Critical Hit.",
+  "The slime's mass made contact with Artie's tunic as the strike landed.",
+  "milestone: artie_died = DONE, milestone: system_login = DONE, milestone: build_confirmed = DONE",
+  "milestone: first_spawn = DONE, milestone: slime_encounter_start = DONE",
+  "Artie has 1 HP and 1 MP; any damage taken is lethal due to rounding rules.",
+  "location: The Whispering Woods",
+  "Artie is currently in physical contact with a Level 1 Slime.",
+  "The Whispering Woods are mechanically hostile and recite patch notes.",
+  "Artie missed the slime five times due to failing Dexterity checks.",
+  "A Patch-Note Oak recited patch notes and screamed error messages during the fight.",
+  "Artie triggered a [Super-Mega-Ultra-Crit] on his sixth attack.",
+  "The slime was deleted and the Patch-Note Oak was destroyed by the crit's shockwave.",
+  "Artie reached Level 2.",
+  "Artie's Luck increased to 104 and his Dexterity increased to 2 as a 'Pity Bonus'.",
+  "The [Super-Mega-Ultra-Crit Cooldown] was activated for 24 hours.",
+  "milestone: slime_defeated = DONE",
+  "milestone: level_two_reached = DONE",
+  "Artie's Luck is 104 and Dexterity is 2.",
+  "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)"
+]

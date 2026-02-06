@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {
+      "code": "invariant_contradiction",
+      "message": "The scene takes place in the Mayor's office in Oakhaven, but the invariant 'Artie is currently in physical contact with a Level 1 Slime' is still active in the state, creating a spatial and narrative contradiction.",
+      "severity": "error"
+    },
+    {
+      "code": "milestone_violation",
+      "message": "The scene depicts the meeting with the Mayor and the imposition of the Variance Tax, but the milestones 'mayor_meeting' and 'variance_tax_imposed' are already marked as DONE in the must_stay_true invariants. Per the Milestone Uniqueness rule, these cannot be depicted happening again.",
+      "severity": "error"
+    },
+    {
+      "code": "spatial_contradiction",
+      "message": "The state contains conflicting location invariants: 'location: The Whispering Woods' and 'location: Oakhaven'. The scene depicts Oakhaven, contradicting the former.",
+      "severity": "error"
+    },
+    {
+      "code": "continuity_error",
+      "message": "The state invariant 'Artie's stamina dropped to 9/100 during the final sprint' contradicts the prose UI element '[Stamina: 12/100]', although a later key fact in the ring supports the 12/100 value.",
+      "severity": "warning"
+    }
+  ]
+}

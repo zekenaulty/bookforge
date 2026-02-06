@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "character_skill_updates": [],
+  "character_stat_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "stats": {
+        "stamina": {
+          "set": 14
+        },
+        "hunger": {
+          "set": 10
+        }
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 8,
+      "persona_updates": [
+        "Artie has adopted a 'Perfect Guard' persona to mask his 1 HP vulnerability from high-level threats.",
+        "Artie is prioritizing 'Coward's Gear' (Evasion) to sustain his survival bluff and avoid accidental death."
+      ],
+      "invariants_add": [
+        "status: bluffed_perfect_guard",
+        "milestone: vane_first_encounter = DONE",
+        "milestone: perfect_guard_bluff_established = DONE"
+      ],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "Broken Tutorial Sword",
+          "status": "carried"
+        },
+        {
+          "container": "hand_left",
+          "item": "Participation Trophy",
+          "status": "carried"
+        },
+        {
+          "container": "body",
+          "item": "Linen Tunic",
+          "status": "equipped"
+        },
+        {
+          "container": "pockets",
+          "item": "Single Copper Coin",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "location": "arm_right",
+          "contents": [
+            "Broken Tutorial Sword"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "location": "arm_left",
+          "contents": [
+            "Participation Trophy"
+          ]
+        },
+        {
+          "container": "body",
+          "location": "torso",
+          "contents": [
+            "Linen Tunic"
+          ]
+        },
+        {
+          "container": "pockets",
+          "location": "legs",
+          "contents": [
+            "Single Copper Coin"
+          ]
+        }
+      ]
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "chapter": 1,
+      "scene": 8,
+      "persona_updates": [
+        "Vane is suspicious of Artie's 'Anomaly' status and views him as a potential System virus that needs patching.",
+        "Vane values System balance and data over gold, acting as a self-appointed enforcer of the Order of the Golden Ratio."
+      ],
+      "invariants_add": [
+        "milestone: vane_first_encounter = DONE"
+      ],
+      "inventory": [
+        {
+          "container": "sheath",
+          "item": "Masterwork Rapier",
+          "status": "stowed"
+        },
+        {
+          "container": "shoulders",
+          "item": "Silk Cloak",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "sheath",
+          "location": "belt_left",
+          "owner": "CHAR_VANE",
+          "contents": [
+            "Masterwork Rapier"
+          ]
+        }
+      ]
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie encountered the Level 28 Paladin Vane outside the Mayor's office, who challenged him to a duel to test his 'Anomaly' status.",
+      "By bluffing that his 1 HP was actually a 'Perfect Guard' reflection build, Artie convinced the high-level warrior to stand down.",
+      "Shaken but successful, Artie began heading toward the Low-Level Crypts to find evasion gear before his bluff is exposed."
+    ],
+    "key_events": [
+      "Artie received a formal quest update for 'The Mayor\u2019s Cut' with a 24-hour deadline.",
+      "Vane, a Level 28 Sun-Blessed Paladin, intercepted Artie and initiated a Duel Request.",
+      "Artie successfully bluffed that his 1 HP is a 'Perfect Guard' mechanic that reflects 200% damage.",
+      "Vane withdrew his challenge but promised to monitor Artie for 'System instability'.",
+      "Artie's stamina and hunger reached critical levels (14 and 10 respectively).",
+      "Fizz suggested the Low-Level Crypts as a source for 'Coward\u2019s Gear' to bolster Artie's survival."
+    ],
+    "must_stay_true": [
+      "milestone: vane_first_encounter = DONE",
+      "milestone: perfect_guard_bluff_established = DONE",
+      "Artie has 1 HP and 100% Crit Rate.",
+      "Artie is carrying the Participation Trophy in his left hand (Soul-bound, +500% aggro).",
+      "Vane is a Level 28 Paladin and a member of the Order of the Golden Ratio.",
+      "Artie has 24 hours to pay the 500-gold Variance Tax.",
+      "Artie's Super-Mega-Ultra-Crit is on a 24-hour cooldown."
+    ],
+    "chapter_so_far_add": [
+      "Artie successfully bluffed the Paladin Vane into believing he possesses a 'Perfect Guard' reflection build.",
+      "Vane has been established as a high-level antagonist who views Artie as a potential System virus."
+    ]
+  },
+  "threads_touched": [
+    "THREAD_VANE_RIVALRY",
+    "THREAD_CRIT_EXPLOIT"
+  ],
+  "world_updates": {
+    "cast_present_ids": [
+      "CHAR_ARTIE",
+      "CHAR_VANE"
+    ],
+    "location": "Oakhaven - Hallway and Streets",
+    "recent_facts": [
+      "Artie bluffed Vane into believing he has a reflection build.",
+      "Vane is a Level 28 Paladin from the Order of the Golden Ratio.",
+      "Artie is heading to the Low-Level Crypts to farm evasion gear."
+    ]
+  }
+}

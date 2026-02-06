@@ -1,0 +1,699 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Mechanics contract: if mechanics/UI are present, all numeric values and labels (stats/skills) must be sourced from state or explicitly updated in the state_patch. Do not invent numbers or canonical tokens.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+
+
+USER:
+
+# LINT
+
+Check the scene for continuity, invariant violations, and duplication.
+Flag invariant contradictions against must_stay_true/key facts.
+Return ONLY JSON matching the lint_report schema.
+- Check that any UI numbers or skill values in prose match state stats/skills. If not, emit a failure.
+- Check for POV drift vs book POV (no first-person in third-person scenes).
+
+Required keys:
+- schema_version ("1.0")
+- status ("pass" or "fail")
+- issues (array of objects)
+
+Each issue object must include:
+- code
+- message
+Optional:
+- severity
+
+If there are no issues, return:
+{
+  "schema_version": "1.0",
+  "status": "pass",
+  "issues": []
+}
+
+If there are issues, return:
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {"code": "continuity", "message": "Example issue", "severity": "error"}
+  ]
+}
+
+Scene:
+My lungs felt like they had been scrubbed with industrial-grade sandpaper and then set on fire. Every breath was a jagged reminder that a Dexterity score of two—even with the "Pity Bonus" I’d clawed out of the System’s cold, dead hands—was not built for a cross-country sprint.
+
+[Stamina: 9/100]
+[Status: Winded (Recovery Rate -50%)]
+
+"Faster, Artie! It’s gaining! And by 'it,' I mean the entire local ecosystem!" Fizz hovered alongside me, her wings a blur of cyan pixels. She wasn't running, of course. She was a guide. She just floated there, looking professionally concerned while I did all the dying.
+
+Behind us, the Level 4 Tutorial Wolf let out a howl that sounded less like a predator and more like a dial-up modem screaming at a wall. It wasn't just the wolf. Thanks to the gold-plated monstrosity fused to my left hand, I had a trail of angry slimes, two disgruntled squirrels, and a very confused-looking badger following me like I was the messiah of the misunderstood.
+
+The Participation Trophy hummed. It didn't just vibrate; it sang with the frequency of a thousand "You Tried" stickers. 
+
+[Participation Trophy (Cursed/Soul-bound)]
+[Effect: Aura of the Beacon (+500% Aggro)]
+[Effect: Magnetic Failure (Projectile Attraction)]
+
+"I hate this thing," I wheezed, my boots skidding on the gravel as the treeline finally broke. "I hate the System. I hate math."
+
+"Math loves you, Artie! It just has a very aggressive way of showing it!" Fizz pointed ahead. "Look! The Oakhaven Safe Zone! If we cross the threshold, the aggro-leash should snap!"
+
+The gates of Oakhaven weren't just wood and iron. They were a sprawling monument to the System’s obsession with order. Massive white stone pillars rose from the earth, inscribed with glowing blue runes that pulsed in time with the world’s heartbeat. Above the archway, a massive floating UI display read: [WELCOME TO OAKHAVEN - POPULATION: 1,242 (98.4% STABLE)].
+
+I didn't care about the stability. I cared about the invisible line in the dirt.
+
+I threw myself forward, my right hand white-knuckling the Broken Tutorial Sword. The wolf lunged, its jaws snapping inches from my Linen Tunic. If those teeth touched me, I was gone. One hit point. One. I was a soap bubble in a world made of needles.
+
+I crossed the line.
+
+*BZZZT.*
+
+The wolf hit an invisible wall of shimmering blue force and bounced backward, its snarl turning into a series of glitched whimpers. The slimes and the badger followed suit, piling up against the barrier like a crowd at a sold-out concert.
+
+[Entering: Oakhaven (Safe Zone)]
+[Aggro Cleared. Welcome, Traveler.]
+
+I collapsed onto the cobbles, the Participation Trophy clattering against the stones. It didn't fall out of my hand, of course. It was soul-bound. It just sat there, glowing with a smug, golden light, attracting the curious stares of a few nearby NPCs.
+
+"We... we made it," I gasped, watching my stamina bar begin its agonizingly slow crawl back toward double digits.
+
+"Don't get too comfortable," Fizz said, landing on my shoulder. "We still have to pass the Gate Scanner. And usually, the System likes its travelers to have, you know, more than one hit point and a luck stat that doesn't look like a typo."
+
+I looked up. Suspended from the center of the gate’s arch was a massive, crystalline eye. It wasn't a biological eye; it was a multifaceted diamond that rotated with a series of mechanical clicks. As I stood up, the eye swiveled toward me.
+
+A beam of pale green light shot out, sweeping from my boots to my head.
+
+[Initiating Standard Entry Scan...]
+[Analyzing Player Data: Arthur 'Artie' Penhaligon...]
+[Level: 2]
+[Class: N/A (Unassigned)]
+
+The green light hit the Participation Trophy. The beam immediately flickered, turning a sickly shade of yellow. 
+
+"Oh, here we go," Fizz muttered, her Data Slate beginning to spark.
+
+[Warning: High-Level Aggro-Beacon Detected.]
+[Analyzing Item: Participation Trophy...]
+[Result: Cursed. Soul-bound. Tier 3 System Error Source.]
+
+The scanner’s mechanical clicking accelerated. The green light turned a violent, pulsing red. The floating UI display above the gate began to scroll through text at a speed that made my head spin.
+
+[Error: Statistical Inconsistency Detected.]
+[Checking HP...]
+[Value: 1/1]
+[Result: Within Bounds (Technically).]
+
+[Checking Luck...]
+[Value: 104]
+[Result: Out of Range for Level 2. Recalculating...]
+
+[Checking Critical Hit Rate...]
+[Value: 100%]
+[Result: FATAL ERROR.]
+
+"Fizz, what’s it doing?" I asked, backing away as the crystalline eye began to smoke.
+
+"It's trying to find a category for you!" she shouted over the rising whine of the scanner. "The System hates anomalies, Artie! It wants everyone in a neat little box! A 'Warrior' box or a 'Mage' box! You’re a 'One-Hit-Point-Walking-Nuclear-Option' box!"
+
+Two guards in polished silver plate armor stepped forward, their hands on the pommels of their swords. Above their heads, their tags read [Oakhaven Gate Guard - Lvl 25]. They looked bored, but as the scanner began to wail, that boredom shifted into visible confusion.
+
+"Identify yourself, traveler!" the lead guard shouted. "And put that... whatever that golden thing is... away!"
+
+"I can't!" I yelled back, holding up my left hand. "It's stuck! It's a reward! Sort of!"
+
+The scanner reached a crescendo. A bolt of red energy shot from the eye, striking the ground in front of me and forming a massive, shimmering holographic window that everyone in the vicinity could see.
+
+[CRITICAL SYSTEM FAILURE: DATA OVERFLOW]
+[Subject: CHAR_ARTIE]
+[Logic Loop: 100% Crit + 1 HP = Does Not Compute.]
+[Applying Emergency Classification...]
+
+The red light suddenly vanished, replaced by a dull, persistent purple glow that settled over me like a heavy blanket. I felt a weight on my chest, not physical, but digital. A new icon appeared next to my name in my peripheral vision.
+
+[New Title Assigned: Statistical Anomaly]
+[Description: You are a glitch in the grand design. A rounding error with a pulse. The System cannot account for your existence, so it has simply decided to label you 'Problematic.']
+
+[Entry Permitted (Under Protest).]
+
+The guards looked at the purple tag hovering over my head. They looked at each other. The lead guard sighed and stepped aside.
+
+"An Anomaly, huh?" he muttered, shaking his head. "Great. Another one of those. Just don't go critting the fountain, kid. The Mayor hates cleaning up the logic-leaks."
+
+The gates groaned open, revealing the bustling streets of Oakhaven. 
+
+"See?" Fizz said, her wings fluttering with relief. "Entry granted. And you only broke one automated security system to do it. That’s a new personal record."
+
+I looked at the purple 'Statistical Anomaly' tag reflecting in a nearby puddle. It pulsed with a steady, rhythmic light, marking me as something different, something broken.
+
+"I have a feeling," I said, stepping into the city, "that 'under protest' is going to be the theme of my life here."
+
+[Level 2 reached: Confirmed]
+[Participation Trophy: Still stuck.]
+[Oakhaven: Entered.]
+
+The hunt for a way to survive with 1 HP had officially begun, and now, everyone in the city knew exactly who the glitch was.
+
+
+Character states (per cast_present_ids):
+[
+  {
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "hand_right",
+        "contents": [
+          "Broken Tutorial Sword"
+        ],
+        "location": "arm_right"
+      },
+      {
+        "container": "hand_left",
+        "contents": [
+          "Participation Trophy"
+        ],
+        "location": "arm_left"
+      },
+      {
+        "container": "body",
+        "contents": [
+          "Linen Tunic"
+        ],
+        "location": "torso"
+      },
+      {
+        "container": "pockets",
+        "contents": [
+          "Single Copper Coin"
+        ],
+        "location": "legs"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is stubborn and refuses to accept unfair losses, even from inanimate objects.",
+          "Artie is quick to recognize 'System' logic and treats life like a game to be optimized."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is committed to his 'glass cannon' optimization strategy despite the extreme risk.",
+          "Artie views the System's mechanics as a puzzle to be solved through extreme variance."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is hyper-aware of his 1 HP fragility.",
+          "Artie is learning to read the environment for tactical advantages."
+        ],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is beginning to realize the destructive potential of his 'broken' build.",
+          "Artie feels like the System's biggest mistake rather than its victim."
+        ],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "skills_updated"
+        ]
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is realizing that System rewards can be as dangerous as its monsters.",
+          "Artie is developing a 'run-first' instinct due to his 1 HP build."
+        ],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "stats_updated"
+        ]
+      },
+      {
+        "changes": [
+          "skills_updated"
+        ]
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> Broken Tutorial Sword (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Linen Tunic (status=equipped, container=body)",
+      "inventory: CHAR_ARTIE -> Single Copper Coin (status=stowed, container=pockets)",
+      "container: hand_right (owner=CHAR_ARTIE, contents=[Broken Tutorial Sword])",
+      "container: pockets (owner=CHAR_ARTIE, contents=[Single Copper Coin])",
+      "milestone: artie_died = DONE",
+      "milestone: system_login = DONE",
+      "ownership: Broken Tutorial Sword (carried)",
+      "title: Statistical Anomaly",
+      "title: The Glassest Cannon",
+      "milestone: build_confirmed = DONE",
+      "location: The Whispering Woods",
+      "milestone: first_spawn = DONE",
+      "milestone: slime_encounter_start = DONE",
+      "milestone: slime_defeated = DONE",
+      "milestone: level_two_reached = DONE",
+      "location: The Whispering Woods (Status: Near smoking crater)",
+      "effect: Super-Mega-Ultra-Crit Cooldown (Active)",
+      "inventory: CHAR_ARTIE -> Participation Trophy (carried, container=hand_left)",
+      "milestone: participation_trophy_acquired = DONE",
+      "effect: Aura of the Beacon (Active)",
+      "effect: Magnetic Failure (Active)",
+      "effect: Inevitability (Active)"
+    ],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "Broken Tutorial Sword",
+        "status": "carried"
+      },
+      {
+        "container": "body",
+        "item": "Linen Tunic",
+        "status": "equipped"
+      },
+      {
+        "container": "pockets",
+        "item": "Single Copper Coin",
+        "status": "stowed"
+      },
+      {
+        "container": "hand_left",
+        "item": "Participation Trophy",
+        "status": "carried"
+      }
+    ],
+    "name": "Arthur 'Artie' Penhaligon",
+    "schema_version": "1.0",
+    "skills": {},
+    "stats": {},
+    "updated_at": "2026-02-06T22:22:40Z"
+  },
+  {
+    "character_id": "CHAR_FIZZ",
+    "containers": [
+      {
+        "container": "hand_left",
+        "contents": [
+          "Data Slate"
+        ],
+        "location": "arm_left",
+        "owner": "CHAR_FIZZ"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is professionally bored but genuinely shocked by Artie's reckless stat allocation."
+        ],
+        "scene": 2
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_FIZZ -> Data Slate (status=carried, container=hand_left)",
+      "container: hand_left (owner=CHAR_FIZZ, contents=[Data Slate])"
+    ],
+    "inventory": [
+      {
+        "container": "hand_left",
+        "item": "Data Slate",
+        "status": "carried"
+      }
+    ],
+    "name": "Fizz",
+    "schema_version": "1.0",
+    "skills": {},
+    "stats": {},
+    "updated_at": "2026-02-06T21:56:54Z"
+  }
+]
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-06T21:45:27Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 6
+  },
+  "duplication_warnings_in_row": 0,
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_006.meta.json"
+  },
+  "run_stats": {},
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Artie has died on Earth and entered the System's character creation void after a vending machine accident.",
+      "Artie met his guide, Fizz, and reviewed the details of his death.",
+      "Artie exploited the character creation system to create a high-variance 'Crit-Only' build.",
+      "Artie entered the Whispering Woods and engaged in his first combat encounter.",
+      "Artie discovered that the System's rounding mechanics make his 1 HP build extremely fragile.",
+      "Artie survived his first combat encounter by accidentally nuking the tutorial zone.",
+      "Artie discovered that his crits can overwrite System rules and destroy world objects.",
+      "Artie received a cursed Participation Trophy that makes him a magnet for all monsters and projectiles in the area.",
+      "Artie reached Oakhaven and was officially flagged as a 'Statistical Anomaly' by the gate security system."
+    ],
+    "key_facts_ring": [
+      "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)",
+      "Artie has 100% Critical Hit rate.",
+      "The Super-Mega-Ultra-Crit has a 24-hour cooldown.",
+      "Artie received the 'Participation Trophy' (Cursed/Soul-bound) as an achievement for causing a Tier 3 System Error.",
+      "Fizz identified the trophy's hidden stats: Aura of the Beacon (+500% aggro) and Magnetic Failure (projectile attraction).",
+      "A Level 4 Tutorial Wolf and a swarm of other mobs aggroed on Artie due to the trophy's effects.",
+      "Artie fled North toward a ravine as the tutorial zone's stability dropped to 84%.",
+      "Artie narrowly dodged a slime projectile that curved toward him due to the trophy's Magnetic Failure.",
+      "Artie's stamina dropped to 42/100 during the frantic retreat.",
+      "milestone: artie_died = DONE",
+      "milestone: participation_trophy_acquired = DONE",
+      "Artie has 1 HP and 1 MP; any damage taken is lethal.",
+      "Artie is carrying the Participation Trophy in his left hand; it cannot be unequipped or stowed.",
+      "The Participation Trophy increases aggro by 500% and attracts projectiles.",
+      "Artie's Super-Mega-Ultra-Crit is on a 24-hour cooldown.",
+      "Artie crossed the Oakhaven Safe Zone boundary, successfully clearing aggro from the tutorial mobs.",
+      "The Oakhaven Gate Scanner triggered a 'Critical System Failure: Data Overflow' due to Artie's 100% Crit-Rate.",
+      "Artie was assigned the 'Statistical Anomaly' title, manifesting as a visible purple UI tag.",
+      "The System granted Artie entry to Oakhaven 'under protest' to resolve the logic loop.",
+      "Artie's stamina dropped to 9/100, inflicting the 'Winded' status effect.",
+      "milestone: oakhaven_entry = DONE",
+      "Artie has a 100% Critical Hit rate.",
+      "The 'Statistical Anomaly' tag is a visible purple UI element.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (carried, container=hand_left).",
+      "Artie is currently under the 'Winded' status effect (Recovery Rate -50%)."
+    ],
+    "last_scene": [
+      "Artie and Fizz reached the gates of Oakhaven while fleeing a Level 4 Tutorial Wolf and a swarm of aggroed mobs.",
+      "The automated gate scanner malfunctioned while processing Artie's impossible 100% Crit-Rate and cursed trophy, resulting in a system error.",
+      "Consequently, the System assigned Artie the 'Statistical Anomaly' title and permitted his entry into the city under protest."
+    ],
+    "must_stay_true": [
+      "milestone: artie_died = DONE, milestone: system_login = DONE, milestone: build_confirmed = DONE",
+      "milestone: first_spawn = DONE, milestone: slime_encounter_start = DONE",
+      "Artie has 1 HP and 1 MP; any damage taken is lethal due to rounding rules.",
+      "location: The Whispering Woods",
+      "Artie is currently in physical contact with a Level 1 Slime.",
+      "The Whispering Woods are mechanically hostile and recite patch notes.",
+      "milestone: slime_defeated = DONE",
+      "milestone: level_two_reached = DONE",
+      "Artie has 100% Critical Hit rate.",
+      "The Super-Mega-Ultra-Crit has a 24-hour cooldown.",
+      "milestone: participation_trophy_acquired = DONE",
+      "Artie has 1 HP and 1 MP; any damage taken is lethal.",
+      "Artie is carrying the Participation Trophy in his left hand; it cannot be unequipped or stowed.",
+      "The Participation Trophy increases aggro by 500% and attracts projectiles.",
+      "Artie's Super-Mega-Ultra-Crit is on a 24-hour cooldown.",
+      "Artie has a 100% Critical Hit rate.",
+      "The 'Statistical Anomaly' tag is a visible purple UI element.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (carried, container=hand_left).",
+      "Artie is currently under the 'Winded' status effect (Recovery Rate -50%).",
+      "milestone: oakhaven_entry = DONE"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "cast_present_ids": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Oakhaven",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ],
+    "recent_facts": [
+      "Artie reached the gates of Oakhaven while being pursued by a Level 4 Tutorial Wolf.",
+      "The Oakhaven automated gate scanner malfunctioned while processing Artie's 100% Crit-Rate and the Participation Trophy.",
+      "The System assigned Artie the 'Statistical Anomaly' title and tag to resolve the data overflow.",
+      "Artie has been granted entry to Oakhaven 'under protest' by the System."
+    ],
+    "time": {}
+  }
+}
+
+Summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie has died on Earth and entered the System's character creation void after a vending machine accident.",
+    "Artie met his guide, Fizz, and reviewed the details of his death.",
+    "Artie exploited the character creation system to create a high-variance 'Crit-Only' build.",
+    "Artie entered the Whispering Woods and engaged in his first combat encounter.",
+    "Artie discovered that the System's rounding mechanics make his 1 HP build extremely fragile.",
+    "Artie survived his first combat encounter by accidentally nuking the tutorial zone.",
+    "Artie discovered that his crits can overwrite System rules and destroy world objects.",
+    "Artie received a cursed Participation Trophy that makes him a magnet for all monsters and projectiles in the area.",
+    "Artie reached Oakhaven and was officially flagged as a 'Statistical Anomaly' by the gate security system."
+  ],
+  "key_facts_ring": [
+    "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)",
+    "Artie has 100% Critical Hit rate.",
+    "The Super-Mega-Ultra-Crit has a 24-hour cooldown.",
+    "Artie received the 'Participation Trophy' (Cursed/Soul-bound) as an achievement for causing a Tier 3 System Error.",
+    "Fizz identified the trophy's hidden stats: Aura of the Beacon (+500% aggro) and Magnetic Failure (projectile attraction).",
+    "A Level 4 Tutorial Wolf and a swarm of other mobs aggroed on Artie due to the trophy's effects.",
+    "Artie fled North toward a ravine as the tutorial zone's stability dropped to 84%.",
+    "Artie narrowly dodged a slime projectile that curved toward him due to the trophy's Magnetic Failure.",
+    "Artie's stamina dropped to 42/100 during the frantic retreat.",
+    "milestone: artie_died = DONE",
+    "milestone: participation_trophy_acquired = DONE",
+    "Artie has 1 HP and 1 MP; any damage taken is lethal.",
+    "Artie is carrying the Participation Trophy in his left hand; it cannot be unequipped or stowed.",
+    "The Participation Trophy increases aggro by 500% and attracts projectiles.",
+    "Artie's Super-Mega-Ultra-Crit is on a 24-hour cooldown.",
+    "Artie crossed the Oakhaven Safe Zone boundary, successfully clearing aggro from the tutorial mobs.",
+    "The Oakhaven Gate Scanner triggered a 'Critical System Failure: Data Overflow' due to Artie's 100% Crit-Rate.",
+    "Artie was assigned the 'Statistical Anomaly' title, manifesting as a visible purple UI tag.",
+    "The System granted Artie entry to Oakhaven 'under protest' to resolve the logic loop.",
+    "Artie's stamina dropped to 9/100, inflicting the 'Winded' status effect.",
+    "milestone: oakhaven_entry = DONE",
+    "Artie has a 100% Critical Hit rate.",
+    "The 'Statistical Anomaly' tag is a visible purple UI element.",
+    "inventory: CHAR_ARTIE -> Participation Trophy (carried, container=hand_left).",
+    "Artie is currently under the 'Winded' status effect (Recovery Rate -50%)."
+  ],
+  "last_scene": [
+    "Artie and Fizz reached the gates of Oakhaven while fleeing a Level 4 Tutorial Wolf and a swarm of aggroed mobs.",
+    "The automated gate scanner malfunctioned while processing Artie's impossible 100% Crit-Rate and cursed trophy, resulting in a system error.",
+    "Consequently, the System assigned Artie the 'Statistical Anomaly' title and permitted his entry into the city under protest."
+  ],
+  "must_stay_true": [
+    "milestone: artie_died = DONE, milestone: system_login = DONE, milestone: build_confirmed = DONE",
+    "milestone: first_spawn = DONE, milestone: slime_encounter_start = DONE",
+    "Artie has 1 HP and 1 MP; any damage taken is lethal due to rounding rules.",
+    "location: The Whispering Woods",
+    "Artie is currently in physical contact with a Level 1 Slime.",
+    "The Whispering Woods are mechanically hostile and recite patch notes.",
+    "milestone: slime_defeated = DONE",
+    "milestone: level_two_reached = DONE",
+    "Artie has 100% Critical Hit rate.",
+    "The Super-Mega-Ultra-Crit has a 24-hour cooldown.",
+    "milestone: participation_trophy_acquired = DONE",
+    "Artie has 1 HP and 1 MP; any damage taken is lethal.",
+    "Artie is carrying the Participation Trophy in his left hand; it cannot be unequipped or stowed.",
+    "The Participation Trophy increases aggro by 500% and attracts projectiles.",
+    "Artie's Super-Mega-Ultra-Crit is on a 24-hour cooldown.",
+    "Artie has a 100% Critical Hit rate.",
+    "The 'Statistical Anomaly' tag is a visible purple UI element.",
+    "inventory: CHAR_ARTIE -> Participation Trophy (carried, container=hand_left).",
+    "Artie is currently under the 'Winded' status effect (Recovery Rate -50%).",
+    "milestone: oakhaven_entry = DONE"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "milestone: artie_died = DONE, milestone: system_login = DONE, milestone: build_confirmed = DONE",
+  "milestone: first_spawn = DONE, milestone: slime_encounter_start = DONE",
+  "Artie has 1 HP and 1 MP; any damage taken is lethal due to rounding rules.",
+  "location: The Whispering Woods",
+  "Artie is currently in physical contact with a Level 1 Slime.",
+  "The Whispering Woods are mechanically hostile and recite patch notes.",
+  "milestone: slime_defeated = DONE",
+  "milestone: level_two_reached = DONE",
+  "Artie has 100% Critical Hit rate.",
+  "The Super-Mega-Ultra-Crit has a 24-hour cooldown.",
+  "milestone: participation_trophy_acquired = DONE",
+  "Artie has 1 HP and 1 MP; any damage taken is lethal.",
+  "Artie is carrying the Participation Trophy in his left hand; it cannot be unequipped or stowed.",
+  "The Participation Trophy increases aggro by 500% and attracts projectiles.",
+  "Artie's Super-Mega-Ultra-Crit is on a 24-hour cooldown.",
+  "Artie has a 100% Critical Hit rate.",
+  "The 'Statistical Anomaly' tag is a visible purple UI element.",
+  "inventory: CHAR_ARTIE -> Participation Trophy (carried, container=hand_left).",
+  "Artie is currently under the 'Winded' status effect (Recovery Rate -50%).",
+  "milestone: oakhaven_entry = DONE",
+  "inventory: CHAR_ARTIE -> Broken Tutorial Sword (carried, container=hand_right)",
+  "Artie has 100% Critical Hit rate.",
+  "The Super-Mega-Ultra-Crit has a 24-hour cooldown.",
+  "Artie received the 'Participation Trophy' (Cursed/Soul-bound) as an achievement for causing a Tier 3 System Error.",
+  "Fizz identified the trophy's hidden stats: Aura of the Beacon (+500% aggro) and Magnetic Failure (projectile attraction).",
+  "A Level 4 Tutorial Wolf and a swarm of other mobs aggroed on Artie due to the trophy's effects.",
+  "Artie fled North toward a ravine as the tutorial zone's stability dropped to 84%.",
+  "Artie narrowly dodged a slime projectile that curved toward him due to the trophy's Magnetic Failure.",
+  "Artie's stamina dropped to 42/100 during the frantic retreat.",
+  "milestone: artie_died = DONE",
+  "milestone: participation_trophy_acquired = DONE",
+  "Artie has 1 HP and 1 MP; any damage taken is lethal.",
+  "Artie is carrying the Participation Trophy in his left hand; it cannot be unequipped or stowed.",
+  "The Participation Trophy increases aggro by 500% and attracts projectiles.",
+  "Artie's Super-Mega-Ultra-Crit is on a 24-hour cooldown.",
+  "Artie crossed the Oakhaven Safe Zone boundary, successfully clearing aggro from the tutorial mobs.",
+  "The Oakhaven Gate Scanner triggered a 'Critical System Failure: Data Overflow' due to Artie's 100% Crit-Rate.",
+  "Artie was assigned the 'Statistical Anomaly' title, manifesting as a visible purple UI tag.",
+  "The System granted Artie entry to Oakhaven 'under protest' to resolve the logic loop.",
+  "Artie's stamina dropped to 9/100, inflicting the 'Winded' status effect.",
+  "milestone: oakhaven_entry = DONE",
+  "Artie has a 100% Critical Hit rate.",
+  "The 'Statistical Anomaly' tag is a visible purple UI element.",
+  "inventory: CHAR_ARTIE -> Participation Trophy (carried, container=hand_left).",
+  "Artie is currently under the 'Winded' status effect (Recovery Rate -50%)."
+]

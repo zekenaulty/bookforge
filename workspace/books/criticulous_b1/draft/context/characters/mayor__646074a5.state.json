@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "character_id": "CHAR_MAYOR",
+  "inventory": [
+    {
+      "container": "hand_left",
+      "item": "Town Seal",
+      "status": "carried"
+    },
+    {
+      "container": "belt_pouch",
+      "item": "Scroll of Tasks",
+      "status": "stowed"
+    }
+  ],
+  "containers": [
+    {
+      "container": "hand_left",
+      "contents": [
+        "Town Seal"
+      ],
+      "location": "arm_left",
+      "owner": "CHAR_MAYOR"
+    },
+    {
+      "container": "belt_pouch",
+      "contents": [
+        "Scroll of Tasks"
+      ],
+      "location": "waist",
+      "owner": "CHAR_MAYOR"
+    }
+  ],
+  "invariants": [
+    "inventory: CHAR_MAYOR -> Town Seal (status=carried, container=hand_left)",
+    "inventory: CHAR_MAYOR -> Scroll of Tasks (status=stowed, container=belt_pouch)",
+    "container: hand_left (owner=CHAR_MAYOR, contents=[Town Seal])",
+    "container: belt_pouch (owner=CHAR_MAYOR, contents=[Scroll of Tasks])",
+    "status: opportunistic",
+    "standing: exalted"
+  ],
+  "history": [
+    {
+      "chapter": 1,
+      "scene": 7,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "persona_updates": [
+        "The Mayor is opportunistic and views anomalies as economic resources.",
+        "The Mayor holds the 'Exalted' social standing in Oakhaven."
+      ]
+    },
+    {
+      "changes": [
+        "stats_updated"
+      ]
+    }
+  ],
+  "name": "Mayor of Oakhaven",
+  "stats": {},
+  "skills": {},
+  "updated_at": "2026-02-06T22:47:36Z"
+}
