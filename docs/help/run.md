@@ -43,6 +43,8 @@ Environment
   - BOOKFORGE_REPAIR_INCLUDE_OUTLINE=1
   - BOOKFORGE_CONTINUITY_PACK_INCLUDE_OUTLINE=0
   - BOOKFORGE_LINT_INCLUDE_OUTLINE=0
+- BOOKFORGE_DURABLE_SLICE_MAX_EXPANSIONS=<int> (default: 2)
+  - Max targeted durable context expansion retries per scene before strict-mode pause.
 
 Examples
 - Minimal:

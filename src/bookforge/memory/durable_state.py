@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, Set, Tuple
 import hashlib
 import json
 import re
@@ -53,6 +53,7 @@ def _default_durable_commits() -> Dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         "applied_hashes": [],
+        "latest_scene": {"chapter": 0, "scene": 0},
     }
 
 
@@ -89,6 +90,154 @@ def _coerce_int(value: Any) -> int:
         return int(value)
     except (TypeError, ValueError):
         return 0
+
+
+def _extract_thread_tokens(text: str) -> Set[str]:
+    tokens: Set[str] = set()
+    for match in re.findall(r"\bTHREAD_[A-Za-z0-9_]+\b", str(text)):
+        token = str(match).strip()
+        if token:
+            tokens.add(token)
+    return tokens
+
+
+def _humanize_thread_id(thread_id: str) -> str:
+    token = str(thread_id).strip()
+    if token.upper().startswith("THREAD_"):
+        token = token[7:]
+    words = re.sub(r"[_\-]+", " ", token).strip()
+    if not words:
+        return "Unclassified Thread"
+    return " ".join([part.capitalize() for part in words.split()])
+
+
+def _derived_device_id(thread_id: str, label: str) -> str:
+    slug = _slugify(label or thread_id)
+    digest = hashlib.sha1(f"{thread_id}|{label}".encode("utf-8")).hexdigest()[:8]
+    return f"DEVICE_{slug}_{digest}"
+
+
+def _extract_thread_hints_from_outline(book_root: Path) -> Dict[str, str]:
+    outline_path = book_root / "outline" / "outline.json"
+    if not outline_path.exists():
+        return {}
+    try:
+        outline = json.loads(outline_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+    if not isinstance(outline, dict):
+        return {}
+    thread_map: Dict[str, str] = {}
+    raw_threads = outline.get("threads")
+    if not isinstance(raw_threads, list):
+        return thread_map
+    for entry in raw_threads:
+        if isinstance(entry, dict):
+            thread_id = str(entry.get("thread_id") or "").strip()
+            label = str(entry.get("label") or "").strip()
+        else:
+            thread_id = str(entry).strip()
+            label = ""
+        if not thread_id:
+            continue
+        if not label:
+            label = _humanize_thread_id(thread_id)
+        thread_map[thread_id] = label
+    return thread_map
+
+
+def _extract_thread_hints_from_state(book_root: Path) -> Dict[str, str]:
+    state_path = book_root / "state.json"
+    if not state_path.exists():
+        return {}
+    try:
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+    if not isinstance(state, dict):
+        return {}
+
+    thread_map: Dict[str, str] = {}
+
+    world = state.get("world")
+    if isinstance(world, dict):
+        open_threads = world.get("open_threads")
+        if isinstance(open_threads, list):
+            for value in open_threads:
+                thread_id = str(value).strip()
+                if not thread_id:
+                    continue
+                thread_map[thread_id] = _humanize_thread_id(thread_id)
+
+        recent_facts = world.get("recent_facts")
+        if isinstance(recent_facts, list):
+            for fact in recent_facts:
+                for token in _extract_thread_tokens(str(fact)):
+                    thread_map.setdefault(token, _humanize_thread_id(token))
+
+    summary = state.get("summary")
+    if isinstance(summary, dict):
+        for key in (
+            "last_scene",
+            "chapter_so_far",
+            "story_so_far",
+            "key_facts_ring",
+            "must_stay_true",
+            "pending_story_rollups",
+        ):
+            values = summary.get(key)
+            if not isinstance(values, list):
+                continue
+            for value in values:
+                for token in _extract_thread_tokens(str(value)):
+                    thread_map.setdefault(token, _humanize_thread_id(token))
+
+    return thread_map
+
+
+def _extract_thread_hints_from_continuity(book_root: Path) -> Dict[str, str]:
+    continuity_path = _context_root(book_root) / "continuity_pack.json"
+    if not continuity_path.exists():
+        return {}
+    try:
+        payload = json.loads(continuity_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+    thread_map: Dict[str, str] = {}
+
+    def _walk(value: Any) -> None:
+        if isinstance(value, dict):
+            thread_id = str(value.get("thread_id") or "").strip()
+            label = str(value.get("label") or "").strip()
+            if thread_id:
+                thread_map[thread_id] = label or _humanize_thread_id(thread_id)
+            for nested in value.values():
+                _walk(nested)
+            return
+        if isinstance(value, list):
+            for nested in value:
+                _walk(nested)
+            return
+        for token in _extract_thread_tokens(str(value)):
+            thread_map.setdefault(token, _humanize_thread_id(token))
+
+    _walk(payload)
+    return thread_map
+
+
+def _collect_thread_hints(book_root: Path) -> List[Tuple[str, str]]:
+    merged: Dict[str, str] = {}
+    for source in (
+        _extract_thread_hints_from_state(book_root),
+        _extract_thread_hints_from_outline(book_root),
+        _extract_thread_hints_from_continuity(book_root),
+    ):
+        for thread_id, label in source.items():
+            token = str(thread_id).strip()
+            if not token:
+                continue
+            merged[token] = str(label).strip() or _humanize_thread_id(token)
+    return [(thread_id, merged[thread_id]) for thread_id in sorted(merged.keys())]
 
 
 def _iter_character_state_files(book_root: Path) -> list[Path]:
@@ -172,6 +321,42 @@ def _migrate_item_registry_from_character_states(book_root: Path) -> bool:
     return True
 
 
+def _migrate_plot_devices_from_continuity_hints(book_root: Path) -> bool:
+    path = plot_devices_path(book_root)
+    try:
+        payload = _normalize_registry(json.loads(path.read_text(encoding="utf-8")), "devices")
+    except json.JSONDecodeError:
+        payload = _default_plot_devices()
+
+    if payload.get("devices"):
+        return False
+
+    thread_hints = _collect_thread_hints(book_root)
+    if not thread_hints:
+        return False
+
+    devices: List[Dict[str, Any]] = []
+    for thread_id, label in thread_hints:
+        device_id = _derived_device_id(thread_id, label)
+        devices.append(
+            {
+                "device_id": device_id,
+                "name": label,
+                "custody_scope": "thread",
+                "custody_ref": thread_id,
+                "activation_state": "tracked",
+                "linked_threads": [thread_id],
+                "constraints": [],
+                "last_seen": {"chapter": 0, "scene": 0, "location": ""},
+                "state_tags": ["unclassified", "seed_from_thread_hint"],
+            }
+        )
+
+    payload["devices"] = devices
+    save_plot_devices(book_root, payload)
+    return True
+
+
 def ensure_item_registry(book_root: Path) -> Path:
     path = item_registry_path(book_root)
     if not path.exists():
@@ -209,6 +394,7 @@ def ensure_durable_state_files(book_root: Path) -> None:
     ensure_item_registry(book_root)
     ensure_plot_devices(book_root)
     _migrate_item_registry_from_character_states(book_root)
+    _migrate_plot_devices_from_continuity_hints(book_root)
 
 
 def load_item_registry(book_root: Path) -> Dict[str, Any]:
@@ -271,17 +457,37 @@ def load_durable_commits(book_root: Path) -> Dict[str, Any]:
         text = str(value).strip()
         if text:
             normalized_hashes.append(text)
-    payload = {"schema_version": SCHEMA_VERSION, "applied_hashes": normalized_hashes}
+    latest_scene_raw = data.get("latest_scene") if isinstance(data.get("latest_scene"), dict) else {}
+    latest_scene = {
+        "chapter": max(0, _coerce_int(latest_scene_raw.get("chapter"))),
+        "scene": max(0, _coerce_int(latest_scene_raw.get("scene"))),
+    }
+
+    payload = {
+        "schema_version": SCHEMA_VERSION,
+        "applied_hashes": normalized_hashes,
+        "latest_scene": latest_scene,
+    }
     _write_json(path, payload)
     return payload
 
 
 def save_durable_commits(book_root: Path, payload: Dict[str, Any]) -> None:
-    data = {"schema_version": SCHEMA_VERSION, "applied_hashes": []}
+    data = {
+        "schema_version": SCHEMA_VERSION,
+        "applied_hashes": [],
+        "latest_scene": {"chapter": 0, "scene": 0},
+    }
     if isinstance(payload, dict):
         hashes = payload.get("applied_hashes")
         if isinstance(hashes, list):
             data["applied_hashes"] = [str(item).strip() for item in hashes if str(item).strip()]
+
+        latest_scene_raw = payload.get("latest_scene") if isinstance(payload.get("latest_scene"), dict) else {}
+        data["latest_scene"] = {
+            "chapter": max(0, _coerce_int(latest_scene_raw.get("chapter"))),
+            "scene": max(0, _coerce_int(latest_scene_raw.get("scene"))),
+        }
     _write_json(durable_commits_path(book_root), data)
 
 

@@ -56,6 +56,7 @@ DEFAULT_REQUEST_ERROR_RETRIES = 1
 DEFAULT_REQUEST_ERROR_BACKOFF_SECONDS = 2.0
 DEFAULT_REQUEST_ERROR_MAX_SLEEP = 60.0
 DEFAULT_JSON_RETRY_COUNT = 1
+DEFAULT_DURABLE_SLICE_MAX_EXPANSIONS = 2
 PAUSE_EXIT_CODE = 75
 
 SUMMARY_CHAPTER_SO_FAR_CAP = 20
@@ -82,6 +83,7 @@ ALLOWED_NON_PRESENT_REASON_CATEGORIES = {
     "timeline_override",
     "linkage_metadata_update",
 }
+INTANGIBLE_CUSTODY_SCOPES = {"knowledge", "thread", "faction", "global", "rule", "memory"}
 
 
 def _int_env(name: str, default: int) -> int:
@@ -127,6 +129,8 @@ def _json_retry_count() -> int:
     return max(0, _int_env("BOOKFORGE_JSON_RETRY_COUNT", DEFAULT_JSON_RETRY_COUNT))
 
 
+def _durable_slice_max_expansions() -> int:
+    return max(0, _int_env("BOOKFORGE_DURABLE_SLICE_MAX_EXPANSIONS", DEFAULT_DURABLE_SLICE_MAX_EXPANSIONS))
 
 
 def _lint_mode() -> str:
@@ -296,6 +300,7 @@ def _durable_state_context(
     book_root: Path,
     state: Optional[Dict[str, Any]] = None,
     scene_card: Optional[Dict[str, Any]] = None,
+    expanded_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     ensure_durable_state_files(book_root)
     item_registry = load_item_registry(book_root)
@@ -307,22 +312,132 @@ def _durable_state_context(
     else:
         world_location = ""
     cast_ids = _scene_cast_ids(scene_card)
+    thread_ids = set()
+    if isinstance(scene_card, dict):
+        raw_threads = scene_card.get("thread_ids")
+        if isinstance(raw_threads, list):
+            thread_ids = {str(value).strip() for value in raw_threads if str(value).strip()}
 
-    item_entries: List[Dict[str, Any]] = []
+    requested_ids: set[str] = set()
+    if isinstance(scene_card, dict):
+        for key in (
+            "required_in_custody",
+            "required_scene_accessible",
+            "required_visible_on_page",
+            "forbidden_visible",
+            "device_presence",
+        ):
+            raw = scene_card.get(key)
+            if isinstance(raw, list):
+                for value in raw:
+                    token = str(value).strip()
+                    if token:
+                        requested_ids.add(token)
+    if isinstance(expanded_ids, list):
+        for value in expanded_ids:
+            token = str(value).strip()
+            if token:
+                requested_ids.add(token)
+
+    item_entries_all: List[Dict[str, Any]] = []
     for raw_entry in item_registry.get("items", []) if isinstance(item_registry.get("items"), list) else []:
         if not isinstance(raw_entry, dict):
             continue
         entry = dict(raw_entry)
         entry.update(_derive_item_scene_flags(entry, world_location, cast_ids))
-        item_entries.append(entry)
+        item_entries_all.append(entry)
 
-    device_entries: List[Dict[str, Any]] = []
+    device_entries_all: List[Dict[str, Any]] = []
     for raw_entry in plot_devices.get("devices", []) if isinstance(plot_devices.get("devices"), list) else []:
         if not isinstance(raw_entry, dict):
             continue
         entry = dict(raw_entry)
         entry.update(_derive_plot_device_scene_flags(entry, world_location, cast_ids))
-        device_entries.append(entry)
+        device_entries_all.append(entry)
+
+    # If no scene scope exists, expose full canonical datasets.
+    if not isinstance(scene_card, dict) and not requested_ids:
+        item_registry_view = dict(item_registry)
+        item_registry_view["items"] = item_entries_all
+        plot_devices_view = dict(plot_devices)
+        plot_devices_view["devices"] = device_entries_all
+        return {
+            "item_registry": item_registry_view,
+            "plot_devices": plot_devices_view,
+        }
+
+    item_map = {
+        str(entry.get("item_id") or "").strip(): entry
+        for entry in item_entries_all
+        if str(entry.get("item_id") or "").strip()
+    }
+    device_map = {
+        str(entry.get("device_id") or "").strip(): entry
+        for entry in device_entries_all
+        if str(entry.get("device_id") or "").strip()
+    }
+
+    selected_item_ids: set[str] = set()
+    selected_device_ids: set[str] = set()
+
+    for item_id, entry in item_map.items():
+        linked_threads = entry.get("linked_threads") if isinstance(entry.get("linked_threads"), list) else []
+        linked_threads_set = {str(value).strip() for value in linked_threads if str(value).strip()}
+        custodian = str(entry.get("custodian") or "").strip()
+        carrier_ref = str(entry.get("carrier_ref") or "").strip()
+        location_ref = str(entry.get("location_ref") or "").strip()
+
+        include = False
+        include = include or item_id in requested_ids
+        include = include or bool(linked_threads_set.intersection(thread_ids))
+        include = include or bool(entry.get("derived_scene_accessible"))
+        include = include or bool(entry.get("derived_visible"))
+        include = include or (custodian in cast_ids if custodian else False)
+        include = include or (carrier_ref in cast_ids if carrier_ref else False)
+        include = include or (bool(world_location) and bool(location_ref) and location_ref == world_location)
+        linked_device_id = str(entry.get("linked_device_id") or "").strip()
+        include = include or (linked_device_id in requested_ids if linked_device_id else False)
+        if include:
+            selected_item_ids.add(item_id)
+
+    for device_id, entry in device_map.items():
+        linked_threads = entry.get("linked_threads") if isinstance(entry.get("linked_threads"), list) else []
+        linked_threads_set = {str(value).strip() for value in linked_threads if str(value).strip()}
+        custody_ref = str(entry.get("custody_ref") or "").strip()
+        linked_item_id = str(entry.get("linked_item_id") or "").strip()
+
+        include = False
+        include = include or device_id in requested_ids
+        include = include or bool(linked_threads_set.intersection(thread_ids))
+        include = include or bool(entry.get("derived_scene_accessible"))
+        include = include or (custody_ref in cast_ids if custody_ref else False)
+        include = include or (linked_item_id in requested_ids if linked_item_id else False)
+        if include:
+            selected_device_ids.add(device_id)
+
+    # Close linked pairs so canonical counterparts are available in a single slice.
+    changed = True
+    while changed:
+        changed = False
+        for item_id in list(selected_item_ids):
+            entry = item_map.get(item_id)
+            if not isinstance(entry, dict):
+                continue
+            linked_device_id = str(entry.get("linked_device_id") or "").strip()
+            if linked_device_id and linked_device_id in device_map and linked_device_id not in selected_device_ids:
+                selected_device_ids.add(linked_device_id)
+                changed = True
+        for device_id in list(selected_device_ids):
+            entry = device_map.get(device_id)
+            if not isinstance(entry, dict):
+                continue
+            linked_item_id = str(entry.get("linked_item_id") or "").strip()
+            if linked_item_id and linked_item_id in item_map and linked_item_id not in selected_item_ids:
+                selected_item_ids.add(linked_item_id)
+                changed = True
+
+    item_entries = [item_map[item_id] for item_id in sorted(selected_item_ids) if item_id in item_map]
+    device_entries = [device_map[device_id] for device_id in sorted(selected_device_ids) if device_id in device_map]
 
     item_registry_view = dict(item_registry)
     item_registry_view["items"] = item_entries
@@ -334,6 +449,7 @@ def _durable_state_context(
         "item_registry": item_registry_view,
         "plot_devices": plot_devices_view,
     }
+
 
 def _response_truncated(response: LLMResponse) -> bool:
     raw = response.raw
@@ -1447,6 +1563,25 @@ def _block_touches_physical_keys(update: Dict[str, Any], keys: set[str]) -> bool
     return False
 
 
+def _plot_device_update_is_intangible(update: Dict[str, Any]) -> bool:
+    if not isinstance(update, dict):
+        return False
+    set_block = update.get("set") if isinstance(update.get("set"), dict) else {}
+    delta_block = update.get("delta") if isinstance(update.get("delta"), dict) else {}
+
+    # Explicit intangible scope marks custody updates as non-physical semantic transitions.
+    scope = str(set_block.get("custody_scope") or "").strip().lower()
+    if scope not in INTANGIBLE_CUSTODY_SCOPES:
+        return False
+
+    # Any explicit location/container/carrier mutation is still physical.
+    for key in ("container_ref", "carrier_ref", "location_ref"):
+        if key in set_block or key in delta_block:
+            return False
+
+    return True
+
+
 def _enforce_scope_policy(scene_card: Optional[Dict[str, Any]], mutations: Dict[str, Any]) -> None:
     timeline_scope, ontological_scope = _scene_scopes(scene_card)
     present_real = timeline_scope == "present" and ontological_scope == "real"
@@ -1490,14 +1625,23 @@ def _enforce_scope_policy(scene_card: Optional[Dict[str, Any]], mutations: Dict[
         if not isinstance(update, dict):
             continue
         physical_change = _block_touches_physical_keys(update, PHYSICAL_DEVICE_MUTATION_KEYS)
+        if physical_change and _plot_device_update_is_intangible(update):
+            physical_change = False
+
         if physical_change and not _scope_override_enabled(update):
             raise ValueError(
                 "Scope policy violation: physical plot_device_updates require timeline_scope=present and "
                 "ontological_scope=real unless explicit scope override is set."
             )
+
         if not physical_change:
             category = _reason_category(update)
-            if category and category not in ALLOWED_NON_PRESENT_REASON_CATEGORIES:
+            if not category:
+                raise ValueError(
+                    "Scope policy violation: non-physical plot_device_updates in non-present/non-real scope "
+                    "must include an allowed reason_category."
+                )
+            if category not in ALLOWED_NON_PRESENT_REASON_CATEGORIES:
                 raise ValueError(
                     "Scope policy violation: non-physical plot_device_updates in non-present/non-real scope "
                     "must use an allowed reason_category."
@@ -1872,6 +2016,15 @@ def _apply_durable_state_updates(
     commit_data = load_durable_commits(book_root)
     applied_hashes = commit_data.get("applied_hashes") if isinstance(commit_data.get("applied_hashes"), list) else []
 
+    latest_scene_raw = commit_data.get("latest_scene") if isinstance(commit_data.get("latest_scene"), dict) else {}
+    latest_chapter = max(0, int(latest_scene_raw.get("chapter") or 0))
+    latest_scene = max(0, int(latest_scene_raw.get("scene") or 0))
+    if chapter < latest_chapter or (chapter == latest_chapter and scene < latest_scene):
+        raise ValueError(
+            f"Chronology conflict: durable state already committed through ch{latest_chapter:03d} "
+            f"sc{latest_scene:03d}; cannot apply older scene ch{chapter:03d} sc{scene:03d}."
+        )
+
     mutation_hash = _durable_mutation_hash(patch, chapter, scene, phase)
     if mutation_hash in applied_hashes:
         return False
@@ -1953,6 +2106,7 @@ def _apply_durable_state_updates(
     if len(applied_hashes) > DURABLE_COMMIT_HASH_CAP:
         applied_hashes = applied_hashes[-DURABLE_COMMIT_HASH_CAP:]
     commit_data["applied_hashes"] = applied_hashes
+    commit_data["latest_scene"] = {"chapter": chapter, "scene": scene}
     save_durable_commits(book_root, commit_data)
     return True
 
@@ -3000,6 +3154,19 @@ def _lint_has_issue_code(report: Dict[str, Any], code: str) -> bool:
     return bool(_lint_issue_entries(report, code))
 
 
+def _durable_slice_retry_ids(report: Dict[str, Any]) -> List[str]:
+    ids: List[str] = []
+    for issue in _lint_issue_entries(report, "durable_slice_missing"):
+        hint = str(issue.get("retry_hint") or "").strip()
+        prefix = "expand_durable_slice:id:"
+        if not hint.startswith(prefix):
+            continue
+        token = hint[len(prefix):].strip()
+        if token and token not in ids:
+            ids.append(token)
+    return ids
+
+
 def _write_reason_pause_marker(
     book_root: Path,
     phase: str,
@@ -3110,6 +3277,46 @@ def _pause_on_quota(
     raise SystemExit(PAUSE_EXIT_CODE)
 
 
+def _apply_durable_updates_or_pause(
+    book_root: Path,
+    state_path: Path,
+    state: Optional[Dict[str, Any]],
+    patch: Dict[str, Any],
+    chapter: int,
+    scene: int,
+    phase: str,
+    scene_card: Optional[Dict[str, Any]] = None,
+) -> bool:
+    try:
+        return _apply_durable_state_updates(
+            book_root=book_root,
+            patch=patch,
+            chapter=chapter,
+            scene=scene,
+            phase=phase,
+            state=state,
+            scene_card=scene_card,
+        )
+    except ValueError as exc:
+        msg = str(exc).strip() or "Durable apply validation failed."
+        code = "durable_apply_validation_failed"
+        if "Chronology conflict" in msg:
+            code = "durable_chronology_conflict"
+        _pause_on_reason(
+            book_root=book_root,
+            state_path=state_path,
+            state=state,
+            phase=f"durable_apply_{phase}",
+            reason_code=code,
+            message=msg,
+            scene_card=scene_card,
+            details={
+                "chapter": int(chapter),
+                "scene": int(scene),
+                "phase": str(phase),
+            },
+        )
+    return False
 
 
 
@@ -3205,10 +3412,11 @@ def _scene_state_preflight(
     character_states: List[Dict[str, Any]],
     client: LLMClient,
     model: str,
+    durable_expand_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "preflight.md")
     context = _build_preflight_context(book_root, outline, chapter_order, scene_counts, scene_card)
-    durable = _durable_state_context(book_root, state, scene_card)
+    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
     prompt = render_template_file(
         template,
         {
@@ -3288,9 +3496,10 @@ def _generate_continuity_pack(
     character_states: List[Dict[str, Any]],
     client: LLMClient,
     model: str,
+    durable_expand_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "continuity_pack.md")
-    durable = _durable_state_context(book_root, state, scene_card)
+    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
     recent_facts = state.get("world", {}).get("recent_facts", [])
     prompt = render_template_file(
         template,
@@ -3368,9 +3577,10 @@ def _write_scene(
     character_states: List[Dict[str, Any]],
     client: LLMClient,
     model: str,
+    durable_expand_ids: Optional[List[str]] = None,
 ) -> Tuple[str, Dict[str, Any]]:
     template = _resolve_template(book_root, "write.md")
-    durable = _durable_state_context(book_root, state, scene_card)
+    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
     prompt = render_template_file(
         template,
         {
@@ -3454,9 +3664,10 @@ def _lint_scene(
     pov: Optional[str],
     client: LLMClient,
     model: str,
+    durable_expand_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "lint.md")
-    durable = _durable_state_context(book_root, state, scene_card)
+    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
     authoritative_surfaces = _extract_authoritative_surfaces(prose)
     prompt = render_template_file(
         template,
@@ -3549,9 +3760,10 @@ def _repair_scene(
     character_states: List[Dict[str, Any]],
     client: LLMClient,
     model: str,
+    durable_expand_ids: Optional[List[str]] = None,
 ) -> Tuple[str, Dict[str, Any]]:
     template = _resolve_template(book_root, "repair.md")
-    durable = _durable_state_context(book_root, state, scene_card)
+    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
     prompt = render_template_file(
         template,
         {
@@ -3636,9 +3848,10 @@ def _state_repair(
     character_states: List[Dict[str, Any]],
     client: LLMClient,
     model: str,
+    durable_expand_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "state_repair.md")
-    durable = _durable_state_context(book_root, state, scene_card)
+    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
     prompt = render_template_file(
         template,
         {
@@ -4024,6 +4237,10 @@ def run_loop(
         chapter_total = scene_counts.get(chapter_num)
         chapter_end = isinstance(chapter_total, int) and chapter_total > 0 and scene_num >= chapter_total
 
+        durable_expand_ids: set[str] = set()
+        durable_expand_attempts = 0
+        durable_expand_max = _durable_slice_max_expansions()
+
         _status(f"Loading character states (cast only): ch{chapter_num:03d} sc{scene_num:03d}...")
         character_states = _load_character_states(book_root, scene_card)
         _status("Character states loaded OK")
@@ -4047,6 +4264,7 @@ def run_loop(
                 character_states,
                 preflight_client,
                 preflight_model,
+                durable_expand_ids=sorted(durable_expand_ids),
             )
         except LLMRequestError as exc:
             _pause_on_quota(book_root, state_path, state, "scene_state_preflight", exc, scene_card)
@@ -4054,13 +4272,14 @@ def run_loop(
         state = _apply_state_patch(state, preflight_patch, chapter_end=False)
         _apply_character_updates(book_root, preflight_patch, chapter_num, scene_num)
         _apply_character_stat_updates(book_root, preflight_patch)
-        if _apply_durable_state_updates(
-            book_root,
-            preflight_patch,
-            chapter_num,
-            scene_num,
-            phase="preflight",
+        if _apply_durable_updates_or_pause(
+            book_root=book_root,
+            state_path=state_path,
             state=state,
+            patch=preflight_patch,
+            chapter=chapter_num,
+            scene=scene_num,
+            phase="preflight",
             scene_card=scene_card,
         ):
             _status("Durable state updated (preflight) OK")
@@ -4080,6 +4299,7 @@ def run_loop(
                 character_states,
                 continuity_client,
                 continuity_model,
+                durable_expand_ids=sorted(durable_expand_ids),
             )
         except LLMRequestError as exc:
             _pause_on_quota(book_root, state_path, state, "continuity_pack", exc, scene_card)
@@ -4102,6 +4322,7 @@ def run_loop(
                 character_states,
                 writer_client,
                 writer_model,
+                durable_expand_ids=sorted(durable_expand_ids),
             )
         except LLMRequestError as exc:
             _pause_on_quota(book_root, state_path, state, "write_scene", exc, scene_card)
@@ -4123,6 +4344,7 @@ def run_loop(
                 character_states,
                 state_repair_client,
                 state_repair_model,
+                durable_expand_ids=sorted(durable_expand_ids),
             )
         except LLMRequestError as exc:
             _pause_on_quota(book_root, state_path, state, "state_repair", exc, scene_card)
@@ -4156,6 +4378,7 @@ def run_loop(
                     book.get("pov"),
                     linter_client,
                     linter_model,
+                    durable_expand_ids=sorted(durable_expand_ids),
                 )
             except LLMRequestError as exc:
                 _pause_on_quota(book_root, state_path, state, "lint_scene", exc, scene_card)
@@ -4163,74 +4386,107 @@ def run_loop(
 
         write_attempts = 1
         if lint_mode != "off" and lint_report.get("status") == "fail":
-            _status(f"Repairing scene: ch{chapter_num:03d} sc{scene_num:03d}...")
-            try:
-                prose, patch = _repair_scene(
-                    workspace,
-                    book_root,
-                    system_path,
-                    prose,
-                    lint_report,
-                    state,
-                    scene_card,
-                    character_registry,
-                    thread_registry,
-                    character_states,
-                    repair_client,
-                    repair_model,
-                )
-            except LLMRequestError as exc:
-                _pause_on_quota(book_root, state_path, state, "repair_scene", exc, scene_card)
-            _status("Repair complete OK")
-            write_attempts += 1
+            while True:
+                if _lint_has_issue_code(lint_report, "durable_slice_missing"):
+                    requested_ids = _durable_slice_retry_ids(lint_report)
+                    new_ids = [item for item in requested_ids if item not in durable_expand_ids]
+                    if new_ids and durable_expand_attempts < durable_expand_max:
+                        capacity = max(0, durable_expand_max - durable_expand_attempts)
+                        selected = new_ids[:capacity]
+                        durable_expand_ids.update(selected)
+                        durable_expand_attempts += len(selected)
+                        _status(
+                            "Expanding durable slice ("
+                            + f"{durable_expand_attempts}/{durable_expand_max}"
+                            + "): "
+                            + ", ".join(selected)
+                        )
 
-            _status(f"Repairing state: ch{chapter_num:03d} sc{scene_num:03d}...")
-            try:
-                patch = _state_repair(
-                    workspace,
-                    book_root,
-                    system_path,
-                    prose,
-                    state,
-                    scene_card,
-                    continuity_pack,
-                    patch,
-                    character_registry,
-                    thread_registry,
-                    character_states,
-                    state_repair_client,
-                    state_repair_model,
-                )
-            except LLMRequestError as exc:
-                _pause_on_quota(book_root, state_path, state, "state_repair", exc, scene_card)
-            _status("State repair complete OK")
+                _status(f"Repairing scene: ch{chapter_num:03d} sc{scene_num:03d}...")
+                try:
+                    prose, patch = _repair_scene(
+                        workspace,
+                        book_root,
+                        system_path,
+                        prose,
+                        lint_report,
+                        state,
+                        scene_card,
+                        character_registry,
+                        thread_registry,
+                        character_states,
+                        repair_client,
+                        repair_model,
+                        durable_expand_ids=sorted(durable_expand_ids),
+                    )
+                except LLMRequestError as exc:
+                    _pause_on_quota(book_root, state_path, state, "repair_scene", exc, scene_card)
+                _status("Repair complete OK")
+                write_attempts += 1
 
-            lint_state = json.loads(json.dumps(state))
-            lint_state = _apply_state_patch(lint_state, patch, chapter_end=chapter_end)
-            summary = _summary_from_state(lint_state)
-            invariants = list(base_invariants)
-            invariants += summary.get("must_stay_true", [])
-            invariants += summary.get("key_facts_ring", [])
+                _status(f"Repairing state: ch{chapter_num:03d} sc{scene_num:03d}...")
+                try:
+                    patch = _state_repair(
+                        workspace,
+                        book_root,
+                        system_path,
+                        prose,
+                        state,
+                        scene_card,
+                        continuity_pack,
+                        patch,
+                        character_registry,
+                        thread_registry,
+                        character_states,
+                        state_repair_client,
+                        state_repair_model,
+                        durable_expand_ids=sorted(durable_expand_ids),
+                    )
+                except LLMRequestError as exc:
+                    _pause_on_quota(book_root, state_path, state, "state_repair", exc, scene_card)
+                _status("State repair complete OK")
 
-            _status(f"Linting scene: ch{chapter_num:03d} sc{scene_num:03d}...")
-            try:
-                lint_report = _lint_scene(
-                    workspace,
-                    book_root,
-                    system_path,
-                    prose,
-                    lint_state,
-                    patch,
-                    scene_card,
-                    invariants,
-                    character_states,
-                    book.get("pov"),
-                    linter_client,
-                    linter_model,
-                )
-            except LLMRequestError as exc:
-                _pause_on_quota(book_root, state_path, state, "lint_scene", exc, scene_card)
-            _status(f"Lint status: {lint_report.get('status', 'unknown')}")
+                lint_state = json.loads(json.dumps(state))
+                lint_state = _apply_state_patch(lint_state, patch, chapter_end=chapter_end)
+                summary = _summary_from_state(lint_state)
+                invariants = list(base_invariants)
+                invariants += summary.get("must_stay_true", [])
+                invariants += summary.get("key_facts_ring", [])
+
+                _status(f"Linting scene: ch{chapter_num:03d} sc{scene_num:03d}...")
+                try:
+                    lint_report = _lint_scene(
+                        workspace,
+                        book_root,
+                        system_path,
+                        prose,
+                        lint_state,
+                        patch,
+                        scene_card,
+                        invariants,
+                        character_states,
+                        book.get("pov"),
+                        linter_client,
+                        linter_model,
+                        durable_expand_ids=sorted(durable_expand_ids),
+                    )
+                except LLMRequestError as exc:
+                    _pause_on_quota(book_root, state_path, state, "lint_scene", exc, scene_card)
+                _status(f"Lint status: {lint_report.get('status', 'unknown')}")
+
+                if lint_report.get("status") != "fail":
+                    break
+                if lint_mode != "strict":
+                    break
+                if not _lint_has_issue_code(lint_report, "durable_slice_missing"):
+                    break
+                requested_ids = _durable_slice_retry_ids(lint_report)
+                new_ids = [item for item in requested_ids if item not in durable_expand_ids]
+                if not new_ids:
+                    break
+                if durable_expand_attempts >= durable_expand_max:
+                    break
+
             if lint_report.get("status") == "fail" and lint_mode == "strict":
                 if _lint_has_issue_code(lint_report, "durable_slice_missing"):
                     _pause_on_reason(
@@ -4241,7 +4497,12 @@ def run_loop(
                         "durable_slice_missing",
                         "Durable canonical context is missing one or more required ids; run paused to avoid retry thrash.",
                         scene_card,
-                        details={"issues": _lint_issue_entries(lint_report, "durable_slice_missing")},
+                        details={
+                            "issues": _lint_issue_entries(lint_report, "durable_slice_missing"),
+                            "durable_expand_attempts": durable_expand_attempts,
+                            "durable_expand_max": durable_expand_max,
+                            "expanded_ids": sorted(durable_expand_ids),
+                        },
                     )
                 raise ValueError("Lint failed after repair; see lint logs for details.")
 
@@ -4262,13 +4523,14 @@ def run_loop(
             _apply_character_updates(book_root, patch, chapter_num, scene_num)
             _apply_character_stat_updates(book_root, patch)
 
-        if _apply_durable_state_updates(
-            book_root,
-            patch,
-            chapter_num,
-            scene_num,
-            phase="scene",
+        if _apply_durable_updates_or_pause(
+            book_root=book_root,
+            state_path=state_path,
             state=state,
+            patch=patch,
+            chapter=chapter_num,
+            scene=scene_num,
+            phase="scene",
             scene_card=scene_card,
         ):
             _status("Durable state updated OK")

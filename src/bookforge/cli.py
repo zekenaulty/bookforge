@@ -6,7 +6,7 @@ from bookforge.author import generate_author
 from bookforge.outline import generate_outline
 from bookforge.runner import run_loop
 from bookforge.characters import generate_characters
-from bookforge.workspace import init_book_workspace, parse_genre, parse_targets, reset_book_workspace, update_book_templates
+from bookforge.workspace import init_book_workspace, parse_genre, parse_targets, reset_book_workspace_detailed, update_book_templates
 
 
 def _init(args: argparse.Namespace) -> int:
@@ -102,14 +102,25 @@ def _book_update_templates(args: argparse.Namespace) -> int:
 def _book_reset(args: argparse.Namespace) -> int:
     workspace = Path(args.workspace)
     try:
-        book_root = reset_book_workspace(workspace=workspace, book_id=args.book)
+        book_root, report = reset_book_workspace_detailed(
+            workspace=workspace,
+            book_id=args.book,
+            keep_logs=bool(args.keep_logs),
+            logs_scope=str(args.logs_scope),
+        )
     except Exception as exc:
         sys.stderr.write(f"Reset failed: {exc}\n")
         return 1
     sys.stdout.write(f"Book reset at {book_root}\n")
+    sys.stdout.write(
+        "Reset summary: "
+        f"files_deleted={report.get('files_deleted', 0)} "
+        f"dirs_deleted={report.get('dirs_deleted', 0)} "
+        f"dirs_recreated={report.get('dirs_recreated', 0)} "
+        f"book_log_files_deleted={report.get('book_log_files_deleted', 0)} "
+        f"all_log_files_deleted={report.get('all_log_files_deleted', 0)}\n"
+    )
     return 0
-
-
 
 
 def _characters_generate(args: argparse.Namespace) -> int:
@@ -231,6 +242,17 @@ def build_parser() -> argparse.ArgumentParser:
 
     book_reset = book_sub.add_parser("reset", help="Reset book draft state.")
     book_reset.add_argument("--book", required=True, help="Book id.")
+    book_reset.add_argument(
+        "--keep-logs",
+        action="store_true",
+        help="Do not clear workspace/logs/llm artifacts during reset.",
+    )
+    book_reset.add_argument(
+        "--logs-scope",
+        choices=["book", "all"],
+        default="book",
+        help="When logs are cleared, remove only this book's logs or all logs.",
+    )
     book_reset.set_defaults(func=_book_reset)
 
     book_clear_current = book_sub.add_parser("clear-current", help="Clear current book.")

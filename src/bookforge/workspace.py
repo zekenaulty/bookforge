@@ -351,10 +351,80 @@ def update_book_templates(workspace: Path, book_id: Optional[str] = None) -> Lis
     return updated
 
 
-def reset_book_workspace(workspace: Path, book_id: str) -> Path:
+def _remove_file_if_exists(path: Path, report: Dict[str, Any], key: str) -> bool:
+    if not path.exists() or not path.is_file():
+        return False
+    path.unlink()
+    report["files_deleted"] = int(report.get("files_deleted", 0)) + 1
+    report[key] = int(report.get(key, 0)) + 1
+    return True
+
+
+def _remove_dir_if_exists(path: Path, report: Dict[str, Any], key: str) -> bool:
+    if not path.exists() or not path.is_dir():
+        return False
+    shutil.rmtree(path)
+    report["dirs_deleted"] = int(report.get("dirs_deleted", 0)) + 1
+    report[key] = int(report.get(key, 0)) + 1
+    return True
+
+
+def _ensure_dir(path: Path, report: Dict[str, Any], key: str) -> None:
+    created = not path.exists()
+    path.mkdir(parents=True, exist_ok=True)
+    if created:
+        report["dirs_recreated"] = int(report.get("dirs_recreated", 0)) + 1
+        report[key] = int(report.get(key, 0)) + 1
+
+
+def _clear_workspace_logs(workspace: Path, book_id: str, logs_scope: str, report: Dict[str, Any]) -> None:
+    logs_root = workspace / "logs" / "llm"
+    if not logs_root.exists() or not logs_root.is_dir():
+        return
+
+    deleted = 0
+    if logs_scope == "all":
+        for candidate in logs_root.iterdir():
+            if candidate.is_file():
+                candidate.unlink()
+                deleted += 1
+        report["all_log_files_deleted"] = int(report.get("all_log_files_deleted", 0)) + deleted
+    else:
+        pattern = f"{book_id}_*"
+        for candidate in logs_root.glob(pattern):
+            if candidate.is_file():
+                candidate.unlink()
+                deleted += 1
+        report["book_log_files_deleted"] = int(report.get("book_log_files_deleted", 0)) + deleted
+
+    report["files_deleted"] = int(report.get("files_deleted", 0)) + deleted
+
+
+def reset_book_workspace_detailed(
+    workspace: Path,
+    book_id: str,
+    keep_logs: bool = False,
+    logs_scope: str = "book",
+) -> Tuple[Path, Dict[str, Any]]:
     book_root = workspace / "books" / book_id
     if not book_root.exists():
         raise FileNotFoundError(f"Book workspace not found: {book_root}")
+
+    logs_scope = str(logs_scope).strip().lower()
+    if logs_scope not in {"book", "all"}:
+        raise ValueError("logs_scope must be 'book' or 'all'.")
+
+    report: Dict[str, Any] = {
+        "book_id": book_id,
+        "files_deleted": 0,
+        "dirs_deleted": 0,
+        "dirs_recreated": 0,
+        "state_rewritten": 0,
+        "context_files_rewritten": 0,
+        "book_log_files_deleted": 0,
+        "all_log_files_deleted": 0,
+        "durable_reinitialized": 0,
+    }
 
     book_path = book_root / "book.json"
     state_path = book_root / "state.json"
@@ -413,51 +483,46 @@ def reset_book_workspace(workspace: Path, book_id: str) -> Path:
 
     validate_json(state, "state")
     state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
+    report["state_rewritten"] = int(report.get("state_rewritten", 0)) + 1
 
-    chapters_dir = book_root / "draft" / "chapters"
-    if chapters_dir.exists():
-        shutil.rmtree(chapters_dir)
-    chapters_dir.mkdir(parents=True, exist_ok=True)
+    _remove_dir_if_exists(book_root / "draft" / "chapters", report, "chapters_dirs_deleted")
+    _ensure_dir(book_root / "draft" / "chapters", report, "chapters_dirs_recreated")
+
+    _remove_dir_if_exists(book_root / "exports", report, "exports_dirs_deleted")
+    _ensure_dir(book_root / "exports", report, "exports_dirs_recreated")
+
+    _remove_dir_if_exists(book_root / "logs", report, "book_logs_dirs_deleted")
+    _ensure_dir(book_root / "logs", report, "book_logs_dirs_recreated")
 
     context_dir = book_root / "draft" / "context"
-    context_dir.mkdir(parents=True, exist_ok=True)
+    _ensure_dir(context_dir, report, "context_dirs_recreated")
     (context_dir / "bible.md").write_text("", encoding="utf-8")
     (context_dir / "last_excerpt.md").write_text("", encoding="utf-8")
-    continuity_path = context_dir / "continuity_pack.json"
-    if continuity_path.exists():
-        continuity_path.unlink()
+    report["context_files_rewritten"] = int(report.get("context_files_rewritten", 0)) + 2
 
-    continuity_history_dir = context_dir / "continuity_history"
-    if continuity_history_dir.exists():
-        shutil.rmtree(continuity_history_dir)
+    _remove_file_if_exists(context_dir / "continuity_pack.json", report, "continuity_files_deleted")
+    _remove_file_if_exists(context_dir / "run_paused.json", report, "pause_markers_deleted")
 
-    chapter_summaries_dir = context_dir / "chapter_summaries"
-    if chapter_summaries_dir.exists():
-        shutil.rmtree(chapter_summaries_dir)
+    _remove_dir_if_exists(context_dir / "continuity_history", report, "continuity_dirs_deleted")
+    _remove_dir_if_exists(context_dir / "chapter_summaries", report, "chapter_summary_dirs_deleted")
+    _remove_dir_if_exists(context_dir / "characters", report, "character_dirs_deleted")
 
-    characters_dir = context_dir / "characters"
-    if characters_dir.exists():
-        shutil.rmtree(characters_dir)
-    item_registry_file = context_dir / "item_registry.json"
-    if item_registry_file.exists():
-        item_registry_file.unlink()
+    _remove_file_if_exists(context_dir / "item_registry.json", report, "durable_files_deleted")
+    _remove_file_if_exists(context_dir / "plot_devices.json", report, "durable_files_deleted")
+    _remove_file_if_exists(context_dir / "durable_commits.json", report, "durable_files_deleted")
 
-    plot_devices_file = context_dir / "plot_devices.json"
-    if plot_devices_file.exists():
-        plot_devices_file.unlink()
+    _remove_dir_if_exists(context_dir / "items", report, "durable_dirs_deleted")
+    _remove_dir_if_exists(context_dir / "plot_devices", report, "durable_dirs_deleted")
 
-    items_context_dir = context_dir / "items"
-    if items_context_dir.exists():
-        shutil.rmtree(items_context_dir)
-
-    plot_devices_context_dir = context_dir / "plot_devices"
-    if plot_devices_context_dir.exists():
-        shutil.rmtree(plot_devices_context_dir)
-
-    durable_commits_file = context_dir / "durable_commits.json"
-    if durable_commits_file.exists():
-        durable_commits_file.unlink()
+    if not keep_logs:
+        _clear_workspace_logs(workspace, book_id, logs_scope, report)
 
     ensure_durable_state_files(book_root)
+    report["durable_reinitialized"] = int(report.get("durable_reinitialized", 0)) + 1
 
+    return book_root, report
+
+
+def reset_book_workspace(workspace: Path, book_id: str) -> Path:
+    book_root, _ = reset_book_workspace_detailed(workspace=workspace, book_id=book_id)
     return book_root

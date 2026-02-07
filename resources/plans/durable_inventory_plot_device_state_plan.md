@@ -368,9 +368,9 @@
 - [x] Story B (`done`): Apply Engine Semantics
 - [x] Story C (`done`): Transfer + Visibility Chain
 - [x] Story D (`done`): Loop-Wide Prompt And Context Upgrade
-- [ ] Story E (`in_progress`): Lint/Repair Retry Discipline
-- [ ] Story F (`in_progress`): Migration, Snapshots, Reset
-- [ ] Story G (`pending`): Long-Run Regression Suite
+- [x] Story E (`done`): Lint/Repair Retry Discipline
+- [x] Story F (`done`): Migration, Snapshots, Reset
+- [x] Story G (`done`): Long-Run Regression Suite
 
 ### Implemented So Far (Turn Log)
 - Turn 1 (completed):
@@ -429,6 +429,44 @@
   - Added regression test ensuring reason-coded pause marker creation.
   - Validation: `74 passed`.
 
+- Turn 7 (completed):
+  - Implemented bounded durable-slice expansion retries in run loop:
+    - Scene-level expansion tracking (`durable_expand_ids`, attempts, max).
+    - Targeted expansion IDs extracted from lint `retry_hint` entries.
+    - Re-run repair/state_repair/lint with expanded durable slice until pass or bounds reached.
+  - Added durable slice sizing support in context builder:
+    - `_durable_state_context(..., expanded_ids=...)` now returns scene-relevant slices by default and includes targeted expansions.
+  - Added helper APIs for expansion flow:
+    - `_durable_slice_max_expansions`
+    - `_durable_slice_retry_ids`
+  - Extended strict failure pause details with expansion telemetry (`attempts`, `max`, `expanded_ids`).
+  - Added regression tests for durable slicing and retry-hint extraction.
+  - Validation: `76 passed`.
+- Turn 8 (completed):
+  - Completed deterministic plot-device migration backfill from continuity hints (state/outline/continuity thread references) when `plot_devices.json` is empty.
+  - Added stable seeded device IDs and thread-linked canonical defaults (`custody_scope=thread`, `activation_state=tracked`).
+  - Hardened `book reset` with detailed runtime cleanup reporting and log-scope controls (`book|all`, optional `--keep-logs`).
+  - Expanded reset cleanup to include pause markers and full durable runtime reinitialization.
+  - Added regression tests for plot-device migration determinism and reset log-clearing behavior.
+  - Validation: `79 passed`.
+
+- Turn 9 (completed):
+  - Added durable commit chronology guard to block out-of-order scene applies (prevents stale rollback drift).
+  - Extended durable commit ledger format with `latest_scene` tracking (`chapter`, `scene`).
+  - Added regression test for chronology conflict handling in long-run rerun scenarios.
+  - Updated durable commit normalization tests for new ledger shape.
+  - Validation: `81 passed`.
+
+- Turn 10 (completed):
+  - Enabled non-present/non-real intangible plot-device custody transitions with explicit `reason_category` policy enforcement.
+  - Added durable-apply pause wrapper so chronology conflicts create deterministic `run_paused.json` markers (`durable_chronology_conflict`) instead of silent hard-fail exits.
+  - Added regression tests for:
+    - intangible custody transition allow/block behavior in flashback/non-real scenes,
+    - strict pause marker generation for chronology conflicts,
+    - linked item/device drift detection after real mutation across scene progression.
+  - Validation: `85 passed`.
+
+
 ### Remaining Scope By Story
 - Story B remaining:
   - None (DoD met in current implementation pass).
@@ -437,13 +475,11 @@
 - Story D remaining:
   - None (DoD met in current implementation pass).
 - Story E remaining:
-  - Implement bounded slice-expansion retry contract for targeted durable context expansion.
-  - Add bounded expansion counters/telemetry per phase to prevent repeated expansion thrash.
+  - None (DoD met in current implementation pass).
 - Story F remaining:
-  - Extend migration/backfill to plot-device seed hints (currently item-registry backfill is implemented).
-  - Complete reset hardening/log summaries for all new durable artifacts and histories.
+  - None (DoD met in current implementation pass).
 - Story G remaining:
-  - Add long-run multi-chapter regression fixtures for chronology conflicts, linked item/device drift, and intangible custody transitions.
+  - None (DoD met in current implementation pass).
   
 ## Stories (Implementation Order)
 
@@ -487,4 +523,5 @@
 - Add multi-chapter fixtures including human-edit, out-of-order generation, thread-device overlap, intangible custody transitions.
 - DoD:
   - no unresolved blocking continuity failures in long-run scenarios.
+
 

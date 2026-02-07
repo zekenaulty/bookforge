@@ -104,6 +104,7 @@ def test_load_durable_commits_normalizes_file(tmp_path: Path) -> None:
 
     assert commits["schema_version"] == "1.0"
     assert commits["applied_hashes"] == []
+    assert commits["latest_scene"] == {"chapter": 0, "scene": 0}
 
 
 def test_durable_state_snapshots_created(tmp_path: Path) -> None:
@@ -158,3 +159,62 @@ def test_ensure_durable_state_files_backfills_item_registry_from_character_state
     registry2 = load_item_registry(book_root)
     assert len(registry2.get("items", [])) == 1
     assert registry2["items"][0]["item_id"] == entry["item_id"]
+
+def test_ensure_durable_state_files_backfills_plot_devices_from_thread_hints(tmp_path: Path) -> None:
+    book_root = _book_root(tmp_path)
+
+    # Seed thread hints in state and outline so migration has deterministic inputs.
+    state_path = book_root / "state.json"
+    state_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0",
+                "world": {"open_threads": ["THREAD_void_breach"], "recent_facts": []},
+                "summary": {
+                    "last_scene": [],
+                    "chapter_so_far": [],
+                    "story_so_far": [],
+                    "key_facts_ring": ["Escalation on THREAD_void_breach"],
+                    "must_stay_true": [],
+                    "pending_story_rollups": [],
+                },
+            },
+            ensure_ascii=True,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    outline_dir = book_root / "outline"
+    outline_dir.mkdir(parents=True, exist_ok=True)
+    (outline_dir / "outline.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "1.1",
+                "threads": [
+                    {"thread_id": "THREAD_void_breach", "label": "Void Breach"},
+                    {"thread_id": "THREAD_oath_chain", "label": "Oath Chain"},
+                ],
+            },
+            ensure_ascii=True,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    ensure_durable_state_files(book_root)
+    devices = load_plot_devices(book_root).get("devices", [])
+
+    assert len(devices) == 2
+    by_thread = {tuple(device.get("linked_threads", []))[0]: device for device in devices}
+    assert "THREAD_void_breach" in by_thread
+    assert "THREAD_oath_chain" in by_thread
+    assert by_thread["THREAD_void_breach"]["custody_scope"] == "thread"
+    assert by_thread["THREAD_void_breach"]["custody_ref"] == "THREAD_void_breach"
+
+    # Migration is deterministic and should not duplicate on subsequent ensures.
+    ensure_durable_state_files(book_root)
+    devices2 = load_plot_devices(book_root).get("devices", [])
+    assert len(devices2) == 2
+    assert sorted([entry["device_id"] for entry in devices2]) == sorted([entry["device_id"] for entry in devices])
+
