@@ -1,23 +1,23 @@
-# Durable Inventory And Plot Device State Plan (Refined v3)
+# Durable Inventory And Plot Device State Plan (Refined v4)
 
 ## Purpose
-- Prevent long-run inventory and plot-device continuity drift without turning BookForge into a simulation engine.
-- Keep the current design principle: LLM proposes state, engine validates/apply atomically, prose parsing only detects/escalates.
-- Make durable state explicit and auditable, including off-screen transitions such as "stowed at inn".
+- Prevent long-run inventory and plot-device continuity drift while keeping BookForge a thin orchestration engine.
+- Preserve prose freedom, enforce canonical truth only on authoritative state surfaces.
+- Support off-screen transitions (for example: "stowed at inn") with deterministic, auditable state alignment.
 
 ## In-Scope
-- Inventory posture and custody continuity.
+- Inventory posture/custody continuity.
 - Physical and intangible plot-device continuity.
-- Retry-safe/idempotent apply behavior.
+- Idempotent, retry-safe state commits.
 - Full writing loop integration: planning, preflight, continuity, write, state repair, lint, repair, apply/commit, reset.
 
 ## Out-Of-Scope
-- Full RPG combat/stat simulation.
-- Deterministic prose understanding as primary truth.
-- Broad NLP extraction of inventory facts from prose.
+- Full game simulation.
+- Broad prose-to-state extraction as primary truth.
+- Genre-specific hardcoding beyond shared continuity mechanics.
 
 ## Fixed Architecture Decisions
-- Prefer explicit domain files over overloaded monoliths.
+- Prefer explicit domain files over overloaded state monoliths.
 - Canonical files:
   - `draft/context/item_registry.json`
   - `draft/context/plot_devices.json`
@@ -26,224 +26,264 @@
   - `draft/context/items/history/*.json`
   - `draft/context/plot_devices/history/*.json`
 - Keep thread linkage in canonical entries (`linked_threads`).
-- Lint semantics remain:
-  - `warn` = advisory
-  - `fail` = blocking and enters retry flow
-- Inventory/device contradictions default to blocking `fail`.
+- Lint severity semantics:
+  - `warn`: advisory
+  - `fail`: blocking and enters retry flow
+- Inventory/device high-confidence contradictions default to `fail`.
 
 ## Operational Semantics (Authoritative)
 
-### 1) Authority Boundary And Conflict Precedence
+### 1) Authority Boundary And Precedence
 - Canonical custody truth:
   - `item_registry` for items
   - `plot_devices` for devices
-- Scene posture/view truth:
-  - character inventory/posture in character state file
-- Conflict rule:
-  - if custody and posture disagree, custody wins
-  - preflight/state repair/repair must normalize posture toward custody unless scene card or patch explicitly changes custody
-- Prose-only statements never mutate canonical state.
+- Character inventory is scene-local posture/view.
+- Conflict resolution:
+  - if registry custody and character posture disagree, custody wins
+  - preflight/state_repair/repair normalize posture toward custody unless scene intent/patch explicitly changes custody
+- Prose never mutates canon directly.
 
-### 2) State Mutation Channels (No Silent Mutations)
+### 2) Authoritative Surface Detection (Critical For Prose Freedom)
+- Canonical naming/ID enforcement applies only to authoritative blocks:
+  - system UI panels
+  - inventory/stat blocks
+  - system notifications
+  - structured patch payloads
+- Non-authoritative narrative prose can use aliases/synonyms.
+- Lint must classify block type before applying canonical-name checks.
+- Unknown block type defaults to non-authoritative unless explicitly tagged authoritative.
+
+### 3) Mutation Channels (No Silent Mutations)
 - Valid mutation channels:
-  - scene card intent (planning output)
+  - planning intent fields
   - patch blocks from `preflight`, `write`, `state_repair`, `repair`
-- Invalid mutation channel:
-  - direct prose implication without patch representation
+- Invalid channel:
+  - prose implication without patch representation
 - Blocking condition:
-  - prose claims handoff/consumption/breakage while patch omits required canonical updates.
+  - prose claims transfer/consumption/breakage and patch omits canonical updates.
 
-### 3) Deletion/Tombstone Policy
-- Durable entries are not hard-deleted by default.
-- `remove` for durable items/devices is interpreted as tombstone transition unless explicitly ephemeral.
-- Tombstone minimum fields:
-  - `state_tags` includes one of `destroyed|consumed|lost|retired`
+### 4) Mutation Preconditions (Stale Overwrite Guard)
+- Canonical mutation blocks may include optional preconditions:
+  - `expected_before` snapshots or hashes
+  - expected custody/status/quantity before apply
+- If precondition mismatch occurs:
+  - fail with conflict code and route to repair/retry
+- Prevents stale state overwrites during reruns and delayed retries.
+
+### 5) Deletion And Tombstone Policy
+- Durable records are tombstoned by default, not hard-deleted.
+- `remove` for durable entries maps to tombstone transition unless explicitly ephemeral.
+- Tombstone minimum:
+  - `state_tags` includes `destroyed|consumed|lost|retired`
   - `last_seen`
-  - `resolution_note` (optional but recommended)
-- Hard delete allowed only for:
-  - explicitly ephemeral runtime artifacts
-  - migration cleanup under deterministic mapping rules.
+  - optional `resolution_note`
+- Hard delete reserved for ephemeral runtime artifacts and deterministic migration cleanup only.
 
-### 4) Transfer Semantics (Atomic + Closed-World)
-- Add `transfer_updates` block for ownership/custody transfer.
-- One transfer must update in one atomic apply unit:
+### 6) Transfer Semantics: Atomic, Closed-World, Multi-Hop
+- Standard transfer uses `transfer_updates` with atomic requirements:
   - source posture/state
   - destination posture/state
   - registry custody
-- Partial transfer apply => invalid (`fail`) and no partial commit.
+- Multi-hop transfer support:
+  - one transaction can include carrier/container/location chain updates
+  - example: `character -> pouch -> chest -> inn`
+- Partial apply is invalid and must abort commit.
 
-### 5) Stack And Instance Identity Rules
-- Decide and enforce stack identity model:
-  - unique items: single `item_id`, quantity usually `1`
-  - fungible stacks: same `item_id` with `quantity` deltas OR split into `inventory_instance_id`
-- For split transfers, patch must express source and destination quantities explicitly.
-- Invalid state example to block:
-  - same unique `item_id` simultaneously marked as carried by two characters.
+### 7) Stack And Identity Rules
+- Unique items: single `item_id`, no concurrent duplicate custody.
+- Fungible stacks:
+  - either quantity deltas under shared `item_id`
+  - or split `inventory_instance_id` entries
+- Split transfer patches must specify source and destination quantity effects explicitly.
 
-### 6) Timeline Scope Gating
-- Add `timeline_scope` to scene card and per-phase context:
-  - `present|flashback|dream|simulation|hypothetical`
-- Canonical apply policy:
-  - `present`: canonical item/device mutations allowed
-  - non-`present`: canonical physical custody mutation blocked by default
-- Allowed non-present mutation subset (controlled):
-  - knowledge-like intangible device updates (for example secret known_by updates)
-  - linkage metadata updates when explicitly justified
-- Any non-present canonical mutation requires explicit override + reason.
+### 8) Timeline And Ontology Scope Gating
+- Add scene-level scope fields:
+  - `timeline_scope`: `present|flashback|dream|simulation|hypothetical`
+  - `ontological_scope`: `real|non_real`
+- Canonical mutation policy:
+  - physical custody changes allowed only when `timeline_scope=present` and `ontological_scope=real`, unless explicit override
+- Controlled non-present/non-real allowed updates:
+  - knowledge-like intangible updates
+  - linkage metadata updates with reason category
 
-### 7) Custody-Chain Visibility Normalization
-- Preflight computes scene visibility from custody chain, not just local posture text.
-- Example normalization rule:
-  - item says `container=pack_a`
-  - pack has `location_ref=inn_room_3`
-  - character is in `market_square`
-  - result: item exists in custody but is not visible/carried in scene
-- This rule directly supports "stowed at inn" transitions.
+### 9) Visibility Semantics Split
+- Distinguish constraints:
+  - `required_in_custody` (exists in canonical custody)
+  - `required_scene_accessible` (retrievable/usable without continuity break)
+  - `required_visible_on_page` (optional narrative requirement)
+  - `forbidden_visible`
+- Default strict enforcement focuses on custody/accessibility, not forced prose mention.
 
-### 8) Canonical Naming Policy (UI vs Prose)
-- Authoritative UI/system surfaces must use canonical names/IDs.
-- Narrative prose may use aliases/synonyms.
-- Lint should fail only when authoritative UI labels drift from canon, not for prose synonymy.
+### 10) Custody-Chain Visibility Normalization
+- Preflight computes visibility/accessibility from chain pointers:
+  - `container_ref`, `carrier_ref`, `location_ref`
+- Example:
+  - item in `pack_a`, pack at `inn_room_3`, character in `market_square`
+  - result: item in custody, not scene-accessible unless retrieval transition is declared.
 
-### 9) Slice-Aware Missing Canon Handling
-- Scene prompts use compact canonical slices, not full registry by default.
-- If phase references unknown-in-slice ID, do not treat as unknown-in-canon immediately.
-- Failure mode should request targeted slice expansion for the missing ID/thread and retry.
-- Prevents retry thrash due to context omission.
+### 11) Canonical Naming And Alias Layer
+- Canonical names/IDs mandatory on authoritative surfaces.
+- Add optional alias map in registry for matching/expansion support.
+- Block only taxonomy drift in authoritative surfaces, not prose synonym variation.
 
-### 10) Idempotent Commit Beyond Attempt IDs
-- Add commit ledger with two guards:
-  - scene commit finalization guard (`book/chapter/scene/phase`)
+### 12) Slice-Aware Retry Expansion With Bounds
+- Unknown-in-slice is not immediately unknown-in-canon.
+- On missing slice reference, use deterministic slice request contract:
+  - by `item_id`
+  - by `device_id`
+  - by `thread_id`
+  - by linked container/custody chain
+- Expansion retries are bounded per phase (max N expansions) to avoid thrash loops.
+
+### 13) Idempotent Commit Model (Beyond Attempt IDs)
+- Two-level dedupe guards:
+  - scene-phase finalization guard
   - mutation hash guard over canonical mutation blocks
-- Reapplying logically identical patch under a different attempt id must no-op.
-- Prevents double decrement/double transfer during retries/replays.
+- Replaying same logical mutation under different attempt IDs must no-op.
+
+### 14) Linked Item-Device Consistency Rules
+- For linked entries (`linked_item_id`/`linked_device_id`):
+  - custody refs cannot contradict each other without explicit transition
+  - activation states cannot imply presence of tombstoned counterpart
+- Lint emits paired-consistency failures where violated.
+
+### 15) Tombstone Revival Rules
+- Revival must be explicit:
+  - `revive` transition with reason and lineage
+- If replacing rather than reviving:
+  - create new instance with `replacement_of=<old_id>` linkage
+- Silent resurrection is invalid.
 
 ## Canonical Data Model
 
 ### Character Inventory (Scene View)
-- Keep character posture as local scene-facing view:
+- Fields:
   - `inventory_instances`
   - `inventory_posture`
   - `inventory_notes`
-- Minimum item fields:
-  - `item_id`
-  - `item_name`
-  - `quantity`
-  - `owner_scope`
-  - `status` (`equipped|carried|stowed|cached|lost|consumed|broken`)
-  - `container`
-  - `scene_last_updated`
-  - optional custody-chain pointers (`container_ref`, `carrier_ref`, `location_ref`)
+- Minimum per instance:
+  - `item_id`, `item_name`, `quantity`, `owner_scope`, `status`, `container`, `scene_last_updated`
+  - optional: `container_ref`, `carrier_ref`, `location_ref`
 
 ### Item Registry (Durable Canon)
 - File: `draft/context/item_registry.json`
 - Required fields:
-  - `item_id`, `name`, `type`
-  - `owner_scope`
-  - `custodian`
-  - `linked_threads`
-  - `state_tags`
-  - `last_seen`
-  - optional `linked_device_id`
+  - `item_id`, `name`, `type`, `owner_scope`, `custodian`, `linked_threads`, `state_tags`, `last_seen`
+- Optional:
+  - `aliases`
+  - `linked_device_id`
+  - `replacement_of`
 
 ### Plot Device Registry (Durable Canon)
 - File: `draft/context/plot_devices.json`
-- Handles physical and intangible devices.
-- Required fields:
-  - `device_id`, `name`
-  - `custody_scope`, `custody_ref`
-  - `activation_state`
-  - `linked_threads`
-  - `constraints`
-  - `last_seen`
-  - optional `linked_item_id`
+- Supports physical and intangible devices.
+- Required:
+  - `device_id`, `name`, `custody_scope`, `custody_ref`, `activation_state`, `linked_threads`, `constraints`, `last_seen`
+- Optional:
+  - `aliases`
+  - `linked_item_id`
 
 ## State Patch Contract Extensions
-- Add or enforce blocks:
+- Add/enforce blocks:
   - `inventory_alignment_updates`
   - `item_registry_updates`
   - `plot_device_updates`
   - `transfer_updates`
-- Operation model:
-  - `set`, `delta`, `remove`, `reason`
-- Require `reason` for:
-  - off-screen transition normalizations
-  - non-present allowed canonical updates
+- Block operation model:
+  - `set`, `delta`, `remove`, `reason`, optional `reason_category`, optional `expected_before`
+- Required fields by case:
+  - off-screen normalization must include `reason` + `reason_category`
+  - non-present/non-real allowed updates must include explicit override intent
+
+## Reason Category Taxonomy
+- Machine-readable categories for off-screen and exceptional transitions:
+  - `time_skip_normalize`
+  - `location_jump_normalize`
+  - `after_combat_cleanup`
+  - `stowed_at_inn`
+  - `handoff_transfer`
+  - `knowledge_reveal`
+  - `timeline_override`
+- Keep freeform note text optional in addition to category.
 
 ## Full Writing Loop Integration (Structural + Prompt)
 
 ### Planning
-- Extend scene card schema with:
+- Scene card fields:
   - `required_in_custody`
-  - `required_visible`
+  - `required_scene_accessible`
+  - `required_visible_on_page` (optional)
   - `forbidden_visible`
   - `device_presence`
-  - `transition_type` (`continuous|time_skip|location_jump|aftermath|flashback`)
+  - `transition_type`
   - `timeline_scope`
-- Prompt hardening:
-  - explicit distinction between existence and visibility constraints.
+  - `ontological_scope`
+- Prompt updates:
+  - explicit custody/accessibility/visibility distinction
+  - intent requirements for custody/device changes
 
 ### Preflight
 - Inputs:
   - cast character states
-  - item registry slice
-  - plot-device slice
-  - previous scene prose / cast last appearance prose
-  - minified full outline (system context)
+  - item/device canonical slices
+  - previous scene + last-appearance context
+  - minified full outline in system context
 - Responsibilities:
-  - posture normalization
-  - custody-chain visibility resolution
-  - transfer prep if scene intent requires
-  - emit reasons for implicit transitions
+  - posture/custody-chain normalization
+  - apply intended transitions
+  - generate explicit reason categories
+  - reject ambiguous transitions as `fail`
 - Output:
   - patch-only canonical updates
 
 ### Continuity Pack
 - Build from post-preflight canonical state.
-- Include compact state slices:
-  - visible equipment now
-  - stowed-but-critical items
-  - active devices relevant to scene threads
-- Optional minified outline injection when ordering drift occurs.
+- Include compact slices:
+  - visible now
+  - scene-accessible but off-page critical items
+  - active thread-relevant devices
+- Optional outline injection when ordering drift appears.
 
 ### Write
-- Inputs include aligned canonical slices + minified full outline.
-- Writer must mirror any inventory/device mutation in patch blocks.
-- Prose-only mutations are invalid and should fail downstream.
+- Receives canonical slices + minified outline.
+- Any mutation must be mirrored in patch blocks.
+- Prompt forbids prose-only canonical mutation.
 
 ### State Repair
-- Inputs include prose + patch + canonical slices + minified full outline.
-- Completes missing canonical updates conservatively.
-- Must respect timeline scope gating.
+- Receives prose + patch + canonical slices + minified outline.
+- Conservative completion only when high-confidence and scene intent compatible.
+- Ambiguous mutation => fail with explicit guidance, not guessed repair.
 
 ### Lint
-- Deterministic tripwires only (smoke detectors, not extractors):
-  - custody/posture contradiction
-  - transfer incompleteness
-  - timeline policy violation
-  - canonical UI naming drift
-  - required/forbidden visibility violations
+- Deterministic checks only:
+  - authoritative-surface canonical checks
+  - custody/posture contradictions
+  - transfer completeness
+  - scope-policy violations
+  - linked pair consistency
+  - visibility/accessibility constraint violations
 
 ### Repair
 - Reconciles contradictions and outputs corrected patch.
-- Must preserve scene intent while restoring canonical consistency.
+- Preserves story intent while restoring canonical consistency.
 
 ### Apply/Commit
-- Enforce:
+- Enforces:
   - schema validity
-  - authority precedence
+  - precedence rules
+  - preconditions
   - transfer atomicity
-  - idempotent commit guards
-  - timeline mutation policy
-- Commit as one scene transaction.
+  - scope policy
+  - idempotent dedupe guards
+- Commit remains scene-transactional.
 
 ## Minified Outline Injection Policy
 - Required by default:
   - `preflight`, `write`, `state_repair`, `repair`
 - Optional/toggled:
-  - `continuity_pack` (on when ordering drift patterns observed)
-  - `lint` (off by default)
-- Add per-phase env toggles for outline injection control to manage token cost.
+  - `continuity_pack`
+  - `lint`
+- Add per-phase env toggles for outline injection to manage token budget.
 
 ## Prompt Hardening Scope
 - Update templates:
@@ -254,108 +294,107 @@
   - `state_repair.md`
   - `lint.md`
   - `repair.md`
-- Enforce language:
-  - state mutation must be in patch
-  - non-present canonical mutation policy
-  - transfer must be atomic
-  - canonical IDs on authoritative surfaces
+- Enforce language for:
+  - authoritative mutation surfaces
+  - transfer requirements
+  - scope gating
+  - reason categories
+  - ambiguity handling
 
 ## Parser And Apply Hardening
-- Strictly validate new blocks and transfer shapes.
-- Keep non-LLM fixups limited to shape coercion/type normalization.
-- No canonical inference from prose.
-- Return actionable path-level errors.
+- Strict schema and path-level errors for all new blocks.
+- Non-LLM fixups limited to structural coercion and type normalization.
+- No canonical mutation inference from prose.
 
 ## Migration And Deterministic IDs
-- First-run migration:
+- First run migration:
   - backfill item registry from character inventories
-  - backfill plot devices from known continuity/device hints
+  - backfill plot devices from known continuity hints
   - mark uncertain entries `unclassified`
-- Deterministic ID policy:
-  - same source data maps to same IDs across reruns/resets
-- Migration idempotent by design.
+- Deterministic ID generation required.
+- Idempotent migration required.
 
 ## History And Debugability
-- Keep character snapshots before preflight mutation.
-- Add registry snapshots before mutation:
+- Keep character snapshots pre-preflight.
+- Add item/device snapshot artifacts pre-mutation:
   - `draft/context/items/history/chXXX_scYYY_item_registry.json`
   - `draft/context/plot_devices/history/chXXX_scYYY_plot_devices.json`
-- Add per-scene commit ledger entries with:
-  - `scene_patch_id`
-  - mutation hash
-  - phase
-  - commit outcome
+- Add commit ledger entries:
+  - `scene_patch_id`, mutation hash, phase, apply status, conflict reason if any.
 
 ## Reset Command Hardening
-- Extend `bookforge reset-book` to clear runtime-only context:
+- `bookforge reset-book` clears runtime-only artifacts:
   - continuity pack/history
   - chapter summaries
   - generated scene/chapter output
-  - item/plot registries + indexes + histories
+  - item/device registries + indexes + histories
   - character histories
-  - runtime preflight/state-repair artifacts
-- Preserve author/library canonical assets.
-- Regenerate missing runtime state at next run start.
-- Log cleanup flags:
+  - preflight/state-repair runtime artifacts
+- Preserve author/library assets.
+- Regenerate runtime state at run start deterministically.
+- Flags:
   - `--keep-logs` default false
   - `--logs-scope book|all` default `book`
-- Console output must include:
+- Console output:
   - stage start/end
   - per-domain deletion counts
   - final summary totals
 
 ## Expanded Edge Cases
-- "Stowed at inn" chain correctness across travel/time-skip scenes.
-- Character absent for many scenes returns with stale carried state.
+- Stowed-at-inn chain across travel jump.
+- Human prose edit implies mutation but no patch exists.
+- Out-of-order scene generation and chronology conflict.
 - Handoff implied in prose without transfer block.
-- Quantity split transfers across two characters.
-- Item consumed/broken and later referenced.
-- Duplicate display names with different IDs.
-- Flashback/dream/sim scene tries to mutate present canonical custody.
-- Non-present scene legitimately updates knowledge-type intangible device.
-- Retry after partial failure attempts to reapply same mutation.
-- Missing slice data causes unknown-ID false failure.
-- Device linked to multiple threads where one resolves earlier.
-- Truncated/missing previous scene prose in preflight context.
+- Partial stack split transfer with nested containers.
+- Item consumed/broken then referenced later.
+- Duplicate display names with distinct IDs.
+- Non-present/non-real scenes mutating present canon improperly.
+- Legitimate knowledge reveal in non-present scope.
+- Retry replay with logically identical mutation under different attempt IDs.
+- Missing slice data causing repeated unknown-ID failures.
+- Linked item/device diverge after one-sided mutation.
+- Thread retires device while another thread still depends on it.
+- Truncated previous scene prose in preflight context.
 
 ## Stories (Implementation Order)
 
-### Story A: Schema + Canonical Files
-- Implement schemas and bootstrap files for item/device domains and patch blocks.
+### Story A: Schema And Canonical Contracts
+- Implement schemas for new blocks and canonical files.
+- Add authoritative-surface tagging rules and reason category enums.
 - DoD:
   - schema validators pass
-  - bootstrap files generated deterministically
+  - authoritative-surface detection fixtures pass
 
-### Story B: Authority + Timeline + Idempotent Commit
-- Implement precedence, timeline scope gating, and two-level commit dedupe.
+### Story B: Apply Engine Semantics
+- Implement precedence, preconditions, scope gating, transfer atomicity, and idempotent dedupe.
 - DoD:
-  - duplicate apply no-op verified
-  - non-present physical custody mutations blocked unless override
+  - no duplicate apply on retries
+  - stale overwrite precondition conflicts surfaced cleanly
 
-### Story C: Transfers + Custody-Chain Visibility
-- Implement `transfer_updates` atomic apply and visibility normalization chain.
+### Story C: Transfer + Visibility Chain
+- Implement transfer graph updates and custody-chain visibility normalization.
 - DoD:
-  - handoff and stowed-at-inn fixtures pass without drift
+  - stowed-at-inn and multi-hop transfer fixtures pass
 
-### Story D: Loop-Wide Prompt + Context Upgrade
-- Update all phase prompts and payload builders.
+### Story D: Loop-Wide Prompt And Context Upgrade
+- Update all phase prompts/context payloads.
 - Inject minified outline by policy.
 - DoD:
-  - no missing fields
-  - phase prompts contain explicit mutation constraints
+  - no missing prompt fields
+  - mutation guidance consistent across phases
 
-### Story E: Lint/Repair Blocking Pipeline
-- Add deterministic checks and slice-aware retry expansion logic.
+### Story E: Lint/Repair Retry Discipline
+- Add deterministic checks, slice-aware expansion contract, bounded expansion retries, conservative repair confidence rules.
 - DoD:
-  - contradiction fixtures block, repair, and either pass or pause with explicit reason
+  - contradiction fixtures resolve or pause with explicit reason codes
 
-### Story F: Migration + History + Reset
-- Implement deterministic migration, snapshots, and reset hardening/logging.
+### Story F: Migration, Snapshots, Reset
+- Implement deterministic migration, history snapshots, and reset hardening/logging.
 - DoD:
   - reset returns post-outline baseline
-  - histories and logs are clear and reproducible
+  - deterministic IDs preserved across reruns
 
-### Story G: End-To-End Regression
-- Add long-run chapter fixtures for LitRPG/fantasy/intangible-device scenarios.
+### Story G: Long-Run Regression Suite
+- Add multi-chapter fixtures including human-edit, out-of-order generation, thread-device overlap, intangible custody transitions.
 - DoD:
-  - chapter runs complete with no unresolved blocking inventory/device continuity failures.
+  - no unresolved blocking continuity failures in long-run scenarios.
