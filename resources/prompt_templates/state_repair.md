@@ -1,4 +1,4 @@
-# STATE REPAIR
+﻿# STATE REPAIR
 
 You are the state repair step. You must output a corrected STATE_PATCH JSON only.
 No prose, no commentary, no code fences.
@@ -26,6 +26,13 @@ Rules:
 - character_updates entries must use arrays: persona_updates (array), invariants_add (array).
 - Use character_continuity_system_updates / global_continuity_system_updates to reconcile mechanics.
 - If a new mechanic family appears in prose/UI, add it under set with a stable key.
+- Durable-state mutation blocks are mandatory when applicable:
+  - `inventory_alignment_updates` for scene-fit posture normalization.
+  - `item_registry_updates` for durable item metadata/custody changes.
+  - `plot_device_updates` for durable plot-device custody/activation changes.
+  - `transfer_updates` for item handoffs (source, destination, reason, optional transfer_chain).
+- For off-screen normalization and non-trivial durable mutations, include `reason_category` with stable values like `time_skip_normalize`, `location_jump_normalize`, `after_combat_cleanup`, `stowed_at_inn`, `handoff_transfer`, `knowledge_reveal`.
+- If durable mutation is implied but ambiguous, keep canonical state unchanged and emit an explicit repair note in reason fields.
 
 Inputs
 - prose: final scene text
@@ -66,3 +73,4 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
+

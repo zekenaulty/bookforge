@@ -1,4 +1,4 @@
-# REPAIR
+﻿# REPAIR
 
 Fix the scene based on lint issues.
 Summaries are reference-only; do not recap them in prose unless scene_card explicitly requires recap.
@@ -45,6 +45,13 @@ STATE_PATCH rules:
   - titles must be arrays of objects with stable name fields (example: [{"name": "Novice", "source": "starting_class", "active": true}]).
   - If a new mechanic family appears, add it under set with a stable key.
 - Include global_continuity_system_updates only if global mechanics change.
+- Durable-state mutation blocks are mandatory when applicable:
+  - `inventory_alignment_updates` for scene-fit posture normalization.
+  - `item_registry_updates` for durable item metadata/custody changes.
+  - `plot_device_updates` for durable plot-device custody/activation changes.
+  - `transfer_updates` for item handoffs (source, destination, reason, optional transfer_chain).
+- For off-screen normalization and non-trivial durable mutations, include `reason_category` with stable values like `time_skip_normalize`, `location_jump_normalize`, `after_combat_cleanup`, `stowed_at_inn`, `handoff_transfer`, `knowledge_reveal`.
+- If you mutate durable state, do not leave the same mutation only in prose.
 - Include character_updates entries for cast_present_ids that change state (inventory, containers, persona shifts).
   - Each entry must include character_id, chapter, scene, inventory (full current list), containers (full current list), invariants_add (array), persona_updates (array).
   - If you have a single persona update, still wrap it in an array of strings.
@@ -84,3 +91,4 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
+

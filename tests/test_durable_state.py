@@ -1,11 +1,15 @@
-from pathlib import Path
+﻿from pathlib import Path
 import json
 
 from bookforge.memory.durable_state import (
+    durable_commits_path,
     ensure_durable_state_files,
     item_registry_path,
+    items_index_path,
+    load_durable_commits,
     load_item_registry,
     load_plot_devices,
+    plot_devices_index_path,
     plot_devices_path,
     save_item_registry,
     save_plot_devices,
@@ -29,6 +33,9 @@ def test_ensure_durable_state_files_creates_defaults(tmp_path: Path) -> None:
     device_path = plot_devices_path(book_root)
     assert item_path.exists()
     assert device_path.exists()
+    assert items_index_path(book_root).exists()
+    assert plot_devices_index_path(book_root).exists()
+    assert durable_commits_path(book_root).exists()
 
     item_data = json.loads(item_path.read_text(encoding="utf-8"))
     device_data = json.loads(device_path.read_text(encoding="utf-8"))
@@ -82,6 +89,21 @@ def test_load_and_save_durable_state_roundtrip(tmp_path: Path) -> None:
 
     assert item_data["items"][0]["item_id"] == "ITEM_ring"
     assert device_data["devices"][0]["device_id"] == "DEVICE_oath"
+
+    item_index = json.loads(items_index_path(book_root).read_text(encoding="utf-8"))
+    device_index = json.loads(plot_devices_index_path(book_root).read_text(encoding="utf-8"))
+    assert item_index["item_ids"] == ["ITEM_ring"]
+    assert device_index["device_ids"] == ["DEVICE_oath"]
+
+
+def test_load_durable_commits_normalizes_file(tmp_path: Path) -> None:
+    book_root = _book_root(tmp_path)
+    ensure_durable_state_files(book_root)
+
+    commits = load_durable_commits(book_root)
+
+    assert commits["schema_version"] == "1.0"
+    assert commits["applied_hashes"] == []
 
 
 def test_durable_state_snapshots_created(tmp_path: Path) -> None:

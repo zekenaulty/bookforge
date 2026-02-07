@@ -1,4 +1,4 @@
-# PREFLIGHT
+﻿# PREFLIGHT
 
 You are the scene state preflight aligner.
 Return ONLY a single JSON object that matches the state_patch schema.
@@ -33,6 +33,11 @@ Dynamic continuity rules:
 - Update operations use set/delta/remove/reason.
 - Dynamic mechanic families are allowed (stats, skills, titles, resources, effects, statuses, classes, custom systems).
 - titles must be arrays of objects with stable `name` fields, never arrays of strings.
+- Durable-state updates are authoritative and must be explicit in patch blocks.
+- If inventory posture is changed for scene fit, include `inventory_alignment_updates` with `reason` and `reason_category`.
+- If durable item custody or metadata changes, include `item_registry_updates` and/or `transfer_updates`.
+- If plot-device custody or activation changes, include `plot_device_updates`.
+- Never rely on prose implication for durable state mutation.
 
 Scene card:
 {{scene_card}}
@@ -84,7 +89,18 @@ Output JSON shape reminder:
       "reason": "align pre-scene state"
     }
   ],
-  "global_continuity_system_updates": []
+  "global_continuity_system_updates": [],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_example",
+      "set": {"inventory": [], "containers": []},
+      "reason": "scene posture alignment",
+      "reason_category": "after_combat_cleanup"
+    }
+  ],
+  "item_registry_updates": [],
+  "plot_device_updates": [],
+  "transfer_updates": []
 }
 
 Item registry (canonical):
@@ -92,3 +108,4 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
+

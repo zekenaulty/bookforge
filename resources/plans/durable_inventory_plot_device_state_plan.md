@@ -356,6 +356,59 @@
 - Thread retires device while another thread still depends on it.
 - Truncated previous scene prose in preflight context.
 
+## Progress Tracking (Live)
+- As-of: 2026-02-07
+- Tracking mode:
+  - `done`: DoD met end-to-end.
+  - `in_progress`: partially implemented; remaining scope listed.
+  - `pending`: not implemented yet.
+
+### Current Story Status
+- [x] Story A (`done`): Schema And Canonical Contracts
+- [ ] Story B (`in_progress`): Apply Engine Semantics
+- [ ] Story C (`in_progress`): Transfer + Visibility Chain
+- [ ] Story D (`in_progress`): Loop-Wide Prompt And Context Upgrade
+- [ ] Story E (`pending`): Lint/Repair Retry Discipline
+- [ ] Story F (`in_progress`): Migration, Snapshots, Reset
+- [ ] Story G (`pending`): Long-Run Regression Suite
+
+### Implemented So Far (Turn Log)
+- Turn 1 (completed):
+  - Added durable canonical schemas and schema registration.
+  - Extended `state_patch` for durable blocks.
+  - Added durable state module and exports.
+  - Wired workspace init/reset for durable runtime artifacts.
+  - Wired runner phase contexts for `item_registry` and `plot_devices`.
+  - Added authoritative-surface extraction and surface-aware stat mismatch checks.
+  - Updated prompt templates for durable canonical context.
+  - Validation: `60 passed`.
+- Turn 2 (completed):
+  - Added persistent durable commit ledger and index maintenance.
+  - Implemented transactional durable mutation apply path.
+  - Added atomic transfer handling and mutation hash dedupe across reruns.
+  - Wired durable apply into preflight and final scene apply.
+  - Reset now clears durable commit ledger.
+  - Prompt hardening for explicit durable mutation blocks.
+  - Validation: `64 passed`.
+
+### Remaining Scope By Story
+- Story B remaining:
+  - Implement explicit `timeline_scope` and `ontological_scope` gating in apply layer.
+  - Enforce non-present/non-real mutation policy (allow/deny matrix with explicit override handling).
+- Story C remaining:
+  - Implement custody-chain visibility normalization (`container_ref`, `carrier_ref`, `location_ref`).
+  - Validate stowed-at-inn and multi-hop transfer fixtures end-to-end.
+- Story D remaining:
+  - Complete all phase prompt/context updates and ensure policy-consistent wording across phases.
+  - Add/verify per-phase minified outline injection toggles and defaults.
+- Story E remaining:
+  - Add deterministic contradiction checks for new durable semantics.
+  - Implement bounded slice-expansion retry contract and explicit reason-code pauses.
+- Story F remaining:
+  - Implement deterministic migration/backfill for item/device canonical files.
+  - Complete reset hardening/log summaries for all new durable artifacts and histories.
+- Story G remaining:
+  - Add long-run multi-chapter regression fixtures for chronology conflicts, linked item/device drift, and intangible custody transitions.
 ## Stories (Implementation Order)
 
 ### Story A: Schema And Canonical Contracts

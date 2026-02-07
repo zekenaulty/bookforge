@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
@@ -453,6 +453,10 @@ def reset_book_workspace(workspace: Path, book_id: str) -> Path:
     plot_devices_context_dir = context_dir / "plot_devices"
     if plot_devices_context_dir.exists():
         shutil.rmtree(plot_devices_context_dir)
+
+    durable_commits_file = context_dir / "durable_commits.json"
+    if durable_commits_file.exists():
+        durable_commits_file.unlink()
 
     ensure_durable_state_files(book_root)
 

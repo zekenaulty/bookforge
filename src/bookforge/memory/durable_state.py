@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
@@ -29,6 +29,10 @@ def plot_devices_index_path(book_root: Path) -> Path:
     return _context_root(book_root) / "plot_devices" / "index.json"
 
 
+def durable_commits_path(book_root: Path) -> Path:
+    return _context_root(book_root) / "durable_commits.json"
+
+
 def _default_item_registry() -> Dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
@@ -40,6 +44,13 @@ def _default_plot_devices() -> Dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         "devices": [],
+    }
+
+
+def _default_durable_commits() -> Dict[str, Any]:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "applied_hashes": [],
     }
 
 
@@ -91,6 +102,8 @@ def ensure_durable_state_files(book_root: Path) -> None:
         _write_json(items_index_path(book_root), {"schema_version": SCHEMA_VERSION, "item_ids": []})
     if not plot_devices_index_path(book_root).exists():
         _write_json(plot_devices_index_path(book_root), {"schema_version": SCHEMA_VERSION, "device_ids": []})
+    if not durable_commits_path(book_root).exists():
+        _write_json(durable_commits_path(book_root), _default_durable_commits())
 
     ensure_item_registry(book_root)
     ensure_plot_devices(book_root)
@@ -114,12 +127,60 @@ def save_item_registry(book_root: Path, payload: Dict[str, Any]) -> None:
     normalized = _normalize_registry(payload, "items")
     validate_json(normalized, "item_registry")
     _write_json(item_registry_path(book_root), normalized)
+    item_ids = []
+    for item in normalized.get("items", []):
+        if not isinstance(item, dict):
+            continue
+        item_id = str(item.get("item_id") or "").strip()
+        if item_id:
+            item_ids.append(item_id)
+    _write_json(items_index_path(book_root), {"schema_version": SCHEMA_VERSION, "item_ids": item_ids})
 
 
 def save_plot_devices(book_root: Path, payload: Dict[str, Any]) -> None:
     normalized = _normalize_registry(payload, "devices")
     validate_json(normalized, "plot_devices")
     _write_json(plot_devices_path(book_root), normalized)
+    device_ids = []
+    for device in normalized.get("devices", []):
+        if not isinstance(device, dict):
+            continue
+        device_id = str(device.get("device_id") or "").strip()
+        if device_id:
+            device_ids.append(device_id)
+    _write_json(plot_devices_index_path(book_root), {"schema_version": SCHEMA_VERSION, "device_ids": device_ids})
+
+
+def load_durable_commits(book_root: Path) -> Dict[str, Any]:
+    ensure_durable_state_files(book_root)
+    path = durable_commits_path(book_root)
+    data: Any
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        data = {}
+    if not isinstance(data, dict):
+        data = {}
+    hashes = data.get("applied_hashes")
+    if not isinstance(hashes, list):
+        hashes = []
+    normalized_hashes = []
+    for value in hashes:
+        text = str(value).strip()
+        if text:
+            normalized_hashes.append(text)
+    payload = {"schema_version": SCHEMA_VERSION, "applied_hashes": normalized_hashes}
+    _write_json(path, payload)
+    return payload
+
+
+def save_durable_commits(book_root: Path, payload: Dict[str, Any]) -> None:
+    data = {"schema_version": SCHEMA_VERSION, "applied_hashes": []}
+    if isinstance(payload, dict):
+        hashes = payload.get("applied_hashes")
+        if isinstance(hashes, list):
+            data["applied_hashes"] = [str(item).strip() for item in hashes if str(item).strip()]
+    _write_json(durable_commits_path(book_root), data)
 
 
 def _history_stamp() -> str:
@@ -144,3 +205,4 @@ def snapshot_plot_devices(book_root: Path, chapter: int, scene: int) -> Path:
     )
     shutil.copyfile(src, target)
     return target
+

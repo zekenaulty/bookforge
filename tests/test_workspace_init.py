@@ -1,7 +1,7 @@
-from pathlib import Path
+﻿from pathlib import Path
 import json
 
-from bookforge.workspace import init_book_workspace
+from bookforge.workspace import init_book_workspace, reset_book_workspace
 
 
 def test_init_book_workspace(tmp_path: Path) -> None:
@@ -45,3 +45,32 @@ def test_init_book_workspace(tmp_path: Path) -> None:
     assert (book_dir / "draft" / "context" / "plot_devices.json").exists()
     assert (book_dir / "draft" / "context" / "items" / "index.json").exists()
     assert (book_dir / "draft" / "context" / "plot_devices" / "index.json").exists()
+    assert (book_dir / "draft" / "context" / "durable_commits.json").exists()
+
+
+def test_reset_book_workspace_resets_durable_context(tmp_path: Path) -> None:
+    author_dir = tmp_path / "authors" / "eldrik-vale" / "v1"
+    author_dir.mkdir(parents=True)
+    (author_dir / "system_fragment.md").write_text("Author fragment.", encoding="utf-8")
+
+    book_dir = init_book_workspace(
+        workspace=tmp_path,
+        book_id="my_book",
+        author_ref="eldrik-vale/v1",
+        title="Untitled",
+        genre=["fantasy"],
+        targets={"chapters": 24},
+        series_id=None,
+    )
+
+    commits_path = book_dir / "draft" / "context" / "durable_commits.json"
+    commits_path.write_text(json.dumps({"schema_version": "1.0", "applied_hashes": ["abc"]}), encoding="utf-8")
+    history_path = book_dir / "draft" / "context" / "items" / "history" / "junk.json"
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    history_path.write_text("{}", encoding="utf-8")
+
+    reset_book_workspace(tmp_path, "my_book")
+
+    reset_commits = json.loads(commits_path.read_text(encoding="utf-8"))
+    assert reset_commits.get("applied_hashes") == []
+    assert not history_path.exists()
