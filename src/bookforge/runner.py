@@ -1220,6 +1220,72 @@ def _coerce_stat_updates(patch: Dict[str, Any]) -> None:
             _ensure_update_dict(update)
             _normalize_titles_in_update(update)
 
+def _coerce_transfer_updates(patch: Dict[str, Any]) -> None:
+    if not isinstance(patch, dict):
+        return
+    raw_updates = patch.get("transfer_updates")
+    if raw_updates is None:
+        return
+    if not isinstance(raw_updates, list):
+        patch["transfer_updates"] = []
+        return
+
+    normalized: List[Dict[str, Any]] = []
+    for update in raw_updates:
+        if not isinstance(update, dict):
+            continue
+        fixed = dict(update)
+
+        if "from" in fixed and not isinstance(fixed.get("from"), dict):
+            fixed["from"] = {}
+        if "to" in fixed and not isinstance(fixed.get("to"), dict):
+            fixed["to"] = {}
+        if "transfer_chain" in fixed and not isinstance(fixed.get("transfer_chain"), list):
+            fixed["transfer_chain"] = []
+
+        reason = fixed.get("reason")
+        if not isinstance(reason, str) or not reason.strip():
+            category = str(fixed.get("reason_category") or "").strip()
+            fixed["reason"] = category or "transfer_alignment"
+
+        normalized.append(fixed)
+
+    patch["transfer_updates"] = normalized
+
+
+def _normalize_state_patch_for_validation(
+    patch: Dict[str, Any],
+    scene_card: Dict[str, Any],
+    *,
+    preflight: bool = False,
+) -> Dict[str, Any]:
+    normalized = _sanitize_preflight_patch(patch) if preflight else patch
+    if "schema_version" not in normalized:
+        normalized["schema_version"] = "1.0"
+    _coerce_summary_update(normalized)
+    _coerce_character_updates(normalized)
+    _coerce_stat_updates(normalized)
+    _coerce_transfer_updates(normalized)
+    _migrate_numeric_invariants(normalized)
+    _fill_character_update_context(normalized, scene_card)
+    _fill_character_continuity_update_context(normalized, scene_card)
+    return normalized
+
+
+def _state_patch_schema_retry_message(error: ValueError, *, prose_required: bool) -> str:
+    base = (
+        "Your previous STATE_PATCH JSON failed schema validation: "
+        f"{error}. Return corrected output that fully satisfies the state_patch schema."
+    )
+    rules = (
+        "Critical rules: every transfer_updates entry must be an object with item_id and "
+        "reason (string); all *_updates arrays must contain objects, never strings."
+    )
+    if prose_required:
+        return base + " Return PROSE plus STATE_PATCH. Output format: PROSE: <text> then STATE_PATCH: <json>. No markdown. " + rules
+    return base + " Return ONLY the corrected JSON object. No prose, no markdown, no commentary. " + rules
+
+
 def _normalize_stat_key(value: str) -> str:
     cleaned = re.sub(r"[^a-zA-Z0-9]+", "_", str(value).strip().lower())
     return cleaned.strip("_")
@@ -3579,15 +3645,32 @@ def _scene_state_preflight(
             )
             attempt += 1
 
-    patch = _sanitize_preflight_patch(patch)
-    _coerce_summary_update(patch)
-    _coerce_character_updates(patch)
-    _coerce_stat_updates(patch)
-    _migrate_numeric_invariants(patch)
-    _fill_character_update_context(patch, scene_card)
-    _fill_character_continuity_update_context(patch, scene_card)
-    validate_json(patch, "state_patch")
-    return patch
+    schema_attempt = 0
+    while True:
+        patch = _normalize_state_patch_for_validation(patch, scene_card, preflight=True)
+        try:
+            validate_json(patch, "state_patch")
+            return patch
+        except ValueError as exc:
+            if schema_attempt >= retries:
+                raise
+            retry_messages = list(messages)
+            retry_messages.append({
+                "role": "user",
+                "content": _state_patch_schema_retry_message(exc, prose_required=False),
+            })
+            response = _chat(
+                workspace,
+                f"scene_state_preflight_schema_retry{schema_attempt + 1}",
+                client,
+                retry_messages,
+                model=model,
+                temperature=0.2,
+                max_tokens=_preflight_max_tokens(),
+                log_extra=_log_scope(book_root, scene_card),
+            )
+            patch = _extract_json(response.text)
+            schema_attempt += 1
 
 def _generate_continuity_pack(
     workspace: Path,
@@ -3745,14 +3828,32 @@ def _write_scene(
             )
             attempt += 1
 
-    _coerce_summary_update(patch)
-    _coerce_character_updates(patch)
-    _coerce_stat_updates(patch)
-    _migrate_numeric_invariants(patch)
-    _fill_character_update_context(patch, scene_card)
-    _fill_character_continuity_update_context(patch, scene_card)
-    validate_json(patch, "state_patch")
-    return prose, patch
+    schema_attempt = 0
+    while True:
+        patch = _normalize_state_patch_for_validation(patch, scene_card)
+        try:
+            validate_json(patch, "state_patch")
+            return prose, patch
+        except ValueError as exc:
+            if schema_attempt >= retries:
+                raise
+            retry_messages = list(messages)
+            retry_messages.append({
+                "role": "user",
+                "content": _state_patch_schema_retry_message(exc, prose_required=True),
+            })
+            response = _chat(
+                workspace,
+                f"write_scene_schema_retry{schema_attempt + 1}",
+                client,
+                retry_messages,
+                model=model,
+                temperature=0.7,
+                max_tokens=_write_max_tokens(),
+                log_extra=_log_scope(book_root, scene_card),
+            )
+            prose, patch = _extract_prose_and_patch(response.text)
+            schema_attempt += 1
 
 
 def _lint_scene(
@@ -3928,14 +4029,32 @@ def _repair_scene(
             )
             attempt += 1
 
-    _coerce_summary_update(patch)
-    _coerce_character_updates(patch)
-    _coerce_stat_updates(patch)
-    _migrate_numeric_invariants(patch)
-    _fill_character_update_context(patch, scene_card)
-    _fill_character_continuity_update_context(patch, scene_card)
-    validate_json(patch, "state_patch")
-    return prose, patch
+    schema_attempt = 0
+    while True:
+        patch = _normalize_state_patch_for_validation(patch, scene_card)
+        try:
+            validate_json(patch, "state_patch")
+            return prose, patch
+        except ValueError as exc:
+            if schema_attempt >= retries:
+                raise
+            retry_messages = list(messages)
+            retry_messages.append({
+                "role": "user",
+                "content": _state_patch_schema_retry_message(exc, prose_required=True),
+            })
+            response = _chat(
+                workspace,
+                f"repair_scene_schema_retry{schema_attempt + 1}",
+                client,
+                retry_messages,
+                model=model,
+                temperature=0.4,
+                max_tokens=_repair_max_tokens(),
+                log_extra=_log_scope(book_root, scene_card),
+            )
+            prose, patch = _extract_prose_and_patch(response.text)
+            schema_attempt += 1
 
 
 def _state_repair(
@@ -4014,16 +4133,32 @@ def _state_repair(
                 log_extra=_log_scope(book_root, scene_card),
             )
             attempt += 1
-    if "schema_version" not in patch:
-        patch["schema_version"] = "1.0"
-    _coerce_summary_update(patch)
-    _coerce_character_updates(patch)
-    _coerce_stat_updates(patch)
-    _migrate_numeric_invariants(patch)
-    _fill_character_update_context(patch, scene_card)
-    _fill_character_continuity_update_context(patch, scene_card)
-    validate_json(patch, "state_patch")
-    return patch
+    schema_attempt = 0
+    while True:
+        patch = _normalize_state_patch_for_validation(patch, scene_card)
+        try:
+            validate_json(patch, "state_patch")
+            return patch
+        except ValueError as exc:
+            if schema_attempt >= retries:
+                raise
+            retry_messages = list(messages)
+            retry_messages.append({
+                "role": "user",
+                "content": _state_patch_schema_retry_message(exc, prose_required=False),
+            })
+            response = _chat(
+                workspace,
+                f"state_repair_schema_retry{schema_attempt + 1}",
+                client,
+                retry_messages,
+                model=model,
+                temperature=0.2,
+                max_tokens=_state_repair_max_tokens(),
+                log_extra=_log_scope(book_root, scene_card),
+            )
+            patch = _extract_json(response.text)
+            schema_attempt += 1
 
 
 def _apply_state_patch(state: Dict[str, Any], patch: Dict[str, Any], chapter_end: bool = False) -> Dict[str, Any]:

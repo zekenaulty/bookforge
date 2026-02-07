@@ -1,6 +1,7 @@
 from bookforge.runner import (
     _apply_bag_updates,
     _coerce_stat_updates,
+    _coerce_transfer_updates,
     _coerce_character_updates,
     _heuristic_invariant_issues,
     _pov_drift_issues,
@@ -351,3 +352,31 @@ def test_coerce_character_updates_normalizes_dict_item_id_and_derived_status() -
 
     inventory = patch["character_updates"][0]["inventory"]
     assert inventory == [{"item_id": "ITEM_broken_tutorial_sword", "container": "hand_left", "item": "ITEM_broken_tutorial_sword", "status": "held"}]
+
+
+def test_coerce_transfer_updates_adds_required_reason_when_missing() -> None:
+    patch = {
+        "transfer_updates": [
+            {
+                "item_id": "ITEM_broken_tutorial_sword",
+                "from": "bad",
+                "to": {"character_id": "CHAR_ARTIE"},
+                "reason_category": "after_combat_cleanup",
+            }
+        ]
+    }
+
+    _coerce_transfer_updates(patch)
+
+    updates = patch["transfer_updates"]
+    assert isinstance(updates, list) and len(updates) == 1
+    assert updates[0]["reason"] == "after_combat_cleanup"
+    assert updates[0]["from"] == {}
+
+
+def test_coerce_transfer_updates_uses_default_reason_when_missing_category() -> None:
+    patch = {"transfer_updates": [{"item_id": "ITEM_pocket_lint"}]}
+
+    _coerce_transfer_updates(patch)
+
+    assert patch["transfer_updates"][0]["reason"] == "transfer_alignment"

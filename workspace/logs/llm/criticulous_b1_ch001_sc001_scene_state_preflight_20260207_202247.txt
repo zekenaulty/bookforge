@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 1,
+      "inventory": [
+        {
+          "item": "ITEM_earth_hoodie_7c7c3483",
+          "container": "body",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "body",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_earth_hoodie_7c7c3483"
+          ],
+          "location": "torso"
+        }
+      ],
+      "persona_updates": [
+        "Artie is currently a mundane office worker on Earth, unaware of the System."
+      ],
+      "invariants_add": [
+        "location: Earth (Office Breakroom)",
+        "status: Mundane"
+      ],
+      "notes": "Stripping isekai gear for the prologue scene."
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "titles": [],
+        "stats": {
+          "hp": {
+            "current": 10,
+            "max": 10
+          },
+          "str": 3,
+          "dex": 5,
+          "int": 7,
+          "luck": {
+            "current": 10,
+            "max": 10
+          }
+        }
+      },
+      "reason": "Aligning stats for pre-isekai Earth environment; Luck is not yet glitched."
+    }
+  ],
+  "global_continuity_system_updates": [],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_earth_hoodie_7c7c3483",
+            "container": "body",
+            "status": "equipped"
+          }
+        ],
+        "containers": [
+          {
+            "container": "body",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_earth_hoodie_7c7c3483"
+            ],
+            "location": "torso"
+          }
+        ]
+      },
+      "reason": "Removing forbidden isekai items (Sword, Pebble) for Earth-based scene.",
+      "reason_category": "scene_start_alignment"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_broken_tutorial_sword_95469774",
+      "custodian": null,
+      "state_tags": [
+        "hidden",
+        "not_yet_acquired"
+      ]
+    },
+    {
+      "item_id": "ITEM_mysterious_glowing_pebble_aa412450",
+      "custodian": null,
+      "state_tags": [
+        "hidden",
+        "not_yet_acquired"
+      ]
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "DEVICE_vending_machine",
+      "name": "Malfunctioning Vending Machine",
+      "activation_state": "active",
+      "custody_scope": "scene",
+      "state_tags": [
+        "lethal",
+        "electrical_hazard"
+      ]
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_broken_tutorial_sword_95469774",
+      "previous_custodian": "CHAR_ARTIE",
+      "new_custodian": null,
+      "transfer_reason": "Timeline lock: item does not exist in Earth scope."
+    },
+    {
+      "item_id": "ITEM_mysterious_glowing_pebble_aa412450",
+      "previous_custodian": "CHAR_ARTIE",
+      "new_custodian": null,
+      "transfer_reason": "Timeline lock: item does not exist in Earth scope."
+    }
+  ]
+}

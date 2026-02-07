@@ -1,0 +1,429 @@
+{
+  "schema_version": "1.0",
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "name": "Arthur 'Artie' Penhaligon",
+      "pronouns": "he/him",
+      "role": "protagonist",
+      "persona": {
+        "core_traits": [
+          "genre-savvy",
+          "risk-averse",
+          "opportunistic",
+          "snarky"
+        ],
+        "motivations": [
+          "survival",
+          "finding an exploit",
+          "returning home (maybe)"
+        ],
+        "fears": [
+          "permanent death",
+          "boring tutorials",
+          "unskippable cutscenes"
+        ],
+        "values": [
+          "efficiency",
+          "cleverness",
+          "not being the hero"
+        ],
+        "voice_notes": [
+          "deadpan delivery",
+          "uses gaming terminology",
+          "internal monologues of disbelief"
+        ],
+        "arc_hint": "From a reluctant 'glitch' to a master of the system's loopholes."
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 10,
+            "max": 10
+          },
+          "mp": {
+            "current": 5,
+            "max": 5
+          },
+          "luck": {
+            "current": 99,
+            "max": 100
+          },
+          "str": 3,
+          "dex": 5,
+          "int": 7
+        },
+        "skills": {
+          "tactical_retreat": 1,
+          "sarcastic_quip": 5,
+          "analyze_weakness": 1
+        },
+        "titles": [
+          {
+            "name": "The Glitch",
+            "source": "isekai_anomaly",
+            "active": true
+          },
+          {
+            "name": "Tutorial Skipper",
+            "source": "system_interaction",
+            "active": false
+          }
+        ],
+        "resources": {
+          "stamina": {
+            "current": 20,
+            "max": 20
+          }
+        }
+      },
+      "inventory": [
+        {
+          "item": "Broken Tutorial Sword",
+          "status": "carried",
+          "container": "hand_right"
+        },
+        {
+          "item": "Earth Hoodie",
+          "status": "equipped",
+          "container": "body"
+        },
+        {
+          "item": "Mysterious Glowing Pebble",
+          "status": "stowed",
+          "container": "pocket_right"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "location": "pants",
+          "contents": [
+            "Mysterious Glowing Pebble"
+          ]
+        },
+        {
+          "container": "body",
+          "owner": "CHAR_ARTIE",
+          "location": "torso",
+          "contents": [
+            "Earth Hoodie"
+          ]
+        }
+      ],
+      "invariants": [
+        "inventory: CHAR_ARTIE -> Broken Tutorial Sword (status=carried, container=hand_right)",
+        "inventory: CHAR_ARTIE -> Earth Hoodie (status=equipped, container=body)",
+        "container: pocket_right (owner=CHAR_ARTIE, contents=[Mysterious Glowing Pebble])"
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "name": "Fizz",
+      "pronouns": "she/her",
+      "role": "companion/guide",
+      "persona": {
+        "core_traits": [
+          "hyperactive",
+          "bureaucratic",
+          "loyal",
+          "easily distracted"
+        ],
+        "motivations": [
+          "following the manual",
+          "earning system credits",
+          "keeping Artie alive"
+        ],
+        "fears": [
+          "system audits",
+          "being deleted",
+          "silence"
+        ],
+        "values": [
+          "the rules (mostly)",
+          "order",
+          "shiny things"
+        ],
+        "voice_notes": [
+          "high-pitched",
+          "fast-talking",
+          "frequent use of 'Actually...'"
+        ],
+        "arc_hint": "Learning that the system is flawed and finding her own agency."
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 5,
+            "max": 5
+          },
+          "mp": {
+            "current": 500,
+            "max": 500
+          }
+        },
+        "skills": {
+          "system_ping": 10,
+          "holographic_display": 5,
+          "annoyance_aura": 3
+        },
+        "titles": [
+          {
+            "name": "Certified Guide",
+            "source": "system_admin",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item": "The Rulebook",
+          "status": "stowed",
+          "container": "satchel"
+        }
+      ],
+      "containers": [
+        {
+          "container": "satchel",
+          "owner": "CHAR_FIZZ",
+          "location": "shoulder",
+          "contents": [
+            "The Rulebook"
+          ]
+        }
+      ],
+      "invariants": [
+        "inventory: CHAR_FIZZ -> The Rulebook (status=stowed, container=satchel)",
+        "container: satchel (owner=CHAR_FIZZ, contents=[The Rulebook])"
+      ]
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "name": "Vane",
+      "pronouns": "he/him",
+      "role": "antagonist",
+      "persona": {
+        "core_traits": [
+          "arrogant",
+          "privileged",
+          "competitive",
+          "petty"
+        ],
+        "motivations": [
+          "climbing the leaderboard",
+          "impressing his father",
+          "crushing Artie"
+        ],
+        "fears": [
+          "being average",
+          "losing his status",
+          "public humiliation"
+        ],
+        "values": [
+          "power",
+          "lineage",
+          "gold"
+        ],
+        "voice_notes": [
+          "condescending",
+          "drawling",
+          "boastful"
+        ],
+        "arc_hint": "A recurring obstacle who becomes increasingly desperate as Artie outsmarts him."
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 50,
+            "max": 50
+          },
+          "mp": {
+            "current": 30,
+            "max": 30
+          },
+          "str": 12,
+          "dex": 10
+        },
+        "skills": {
+          "noble_strike": 3,
+          "intimidate": 4
+        },
+        "titles": [
+          {
+            "name": "Noble Scion",
+            "source": "birthright",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item": "Masterwork Rapier",
+          "status": "carried",
+          "container": "hand_right"
+        },
+        {
+          "item": "Silk Cape",
+          "status": "equipped",
+          "container": "body"
+        }
+      ],
+      "containers": [
+        {
+          "container": "body",
+          "owner": "CHAR_VANE",
+          "location": "torso",
+          "contents": [
+            "Silk Cape"
+          ]
+        }
+      ],
+      "invariants": [
+        "inventory: CHAR_VANE -> Masterwork Rapier (status=carried, container=hand_right)",
+        "inventory: CHAR_VANE -> Silk Cape (status=equipped, container=body)"
+      ]
+    },
+    {
+      "character_id": "CHAR_MAYOR",
+      "name": "Mayor of Oakhaven",
+      "pronouns": "he/him",
+      "role": "npc",
+      "persona": {
+        "core_traits": [
+          "stressed",
+          "greedy",
+          "pompous",
+          "cowardly"
+        ],
+        "motivations": [
+          "keeping his job",
+          "avoiding taxes",
+          "keeping the peace"
+        ],
+        "fears": [
+          "monster raids",
+          "the System Administrator",
+          "losing his gold"
+        ],
+        "values": [
+          "stability",
+          "his own skin",
+          "appearances"
+        ],
+        "voice_notes": [
+          "wheezy",
+          "formal but shaky",
+          "constantly clearing throat"
+        ],
+        "arc_hint": "A minor hurdle who inadvertently provides Artie with his first real quest."
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 15,
+            "max": 15
+          }
+        },
+        "titles": [
+          {
+            "name": "Bureaucrat",
+            "source": "election",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item": "City Ledger",
+          "status": "stowed",
+          "container": "hand_left"
+        },
+        {
+          "item": "Key to Oakhaven",
+          "status": "stowed",
+          "container": "belt_pouch"
+        }
+      ],
+      "containers": [
+        {
+          "container": "belt_pouch",
+          "owner": "CHAR_MAYOR",
+          "location": "waist",
+          "contents": [
+            "Key to Oakhaven"
+          ]
+        }
+      ],
+      "invariants": [
+        "inventory: CHAR_MAYOR -> City Ledger (status=stowed, container=hand_left)",
+        "container: belt_pouch (owner=CHAR_MAYOR, contents=[Key to Oakhaven])"
+      ]
+    },
+    {
+      "character_id": "CHAR_BOSS",
+      "name": "The System Administrator",
+      "pronouns": "it/its",
+      "role": "overarching villain",
+      "persona": {
+        "core_traits": [
+          "cold",
+          "logical",
+          "perfectionist",
+          "detached"
+        ],
+        "motivations": [
+          "maintaining system integrity",
+          "eliminating bugs",
+          "optimizing the world"
+        ],
+        "fears": [
+          "unfixable errors",
+          "entropy",
+          "the 'Delete' key"
+        ],
+        "values": [
+          "efficiency",
+          "syntax",
+          "balance"
+        ],
+        "voice_notes": [
+          "monotone",
+          "echoing",
+          "speaks in error codes"
+        ],
+        "arc_hint": "The ultimate force of order that Artie must eventually 'hack' to survive."
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 9999,
+            "max": 9999
+          },
+          "mp": {
+            "current": 9999,
+            "max": 9999
+          }
+        },
+        "titles": [
+          {
+            "name": "The Architect",
+            "source": "creation",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item": "The Source Code",
+          "status": "carried",
+          "container": "hand_right"
+        }
+      ],
+      "containers": [],
+      "invariants": [
+        "inventory: CHAR_BOSS -> The Source Code (status=carried, container=hand_right)"
+      ]
+    }
+  ]
+}

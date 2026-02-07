@@ -36,6 +36,7 @@ Rules:
   - `item_registry_updates` for durable item metadata/custody changes.
   - `plot_device_updates` for durable plot-device custody/activation changes.
   - `transfer_updates` for item handoffs (source, destination, reason, optional transfer_chain).
+  - Every `transfer_updates` entry must include `item_id` and `reason` (non-empty string).
 - For off-screen normalization and non-trivial durable mutations, include `reason_category` with stable values like `time_skip_normalize`, `location_jump_normalize`, `after_combat_cleanup`, `stowed_at_inn`, `handoff_transfer`, `knowledge_reveal`.
 - If durable mutation is implied but ambiguous, keep canonical state unchanged and emit an explicit repair note in reason fields.
 - Honor scene-card durable constraints (`required_in_custody`, `required_scene_accessible`, `forbidden_visible`, `device_presence`; optional `required_visible_on_page`).

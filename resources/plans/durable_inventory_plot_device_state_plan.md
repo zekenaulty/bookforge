@@ -473,6 +473,14 @@
   - Added regression tests for inventory-string coercion and object normalization in `tests/test_state_bag_and_milestones.py`.
   - Validation: `87 passed`.
 
+- Turn 12 (completed):
+  - Added schema-validation retry loops for all state-patch emitting phases (`preflight`, `write`, `repair`, `state_repair`) so schema misses trigger corrective LLM retries before hard fail.
+  - Added centralized state-patch normalization helper and transfer-update coercion (`_coerce_transfer_updates`) to enforce object-shape arrays and required `reason` fallback semantics before schema validation.
+  - Hardened system/output and phase prompt contracts with explicit rule: every `transfer_updates` object must include `item_id` and non-empty `reason`.
+  - Synced updated templates into active book workspace (`book update-templates --book criticulous_b1`).
+  - Added regression tests for transfer-update coercion and required reason fallback in `tests/test_state_bag_and_milestones.py`.
+  - Validation: `91 passed`.
+
 
 ### Remaining Scope By Story
 - Story B remaining:

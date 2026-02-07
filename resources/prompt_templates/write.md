@@ -47,6 +47,7 @@ STATE_PATCH rules:
   - `item_registry_updates` for durable item metadata/custody changes.
   - `plot_device_updates` for durable plot-device custody/activation changes.
   - `transfer_updates` for item handoffs (source, destination, reason, optional transfer_chain).
+  - Every `transfer_updates` entry must include `item_id` and `reason` (non-empty string).
 - For off-screen normalization and non-trivial durable mutations, include `reason_category` with stable values like `time_skip_normalize`, `location_jump_normalize`, `after_combat_cleanup`, `stowed_at_inn`, `handoff_transfer`, `knowledge_reveal`.
 - If you mutate durable state, do not leave the same mutation only in prose.
 - Include character_updates entries for cast_present_ids that change state (inventory, containers, persona shifts).
