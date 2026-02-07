@@ -40,6 +40,8 @@ STATE_PATCH rules:
   - titles must be arrays of objects with stable name fields (example: [{"name": "Novice", "source": "starting_class", "active": true}]).
   - If a new mechanic family appears, add it under set with a stable key.
 - Include global_continuity_system_updates only if global mechanics change.
+- All *_updates arrays must contain objects; never emit bare strings as array entries.
+- character_updates.containers must be an array of objects with at least: container, owner, contents (array).
 - Durable-state mutation blocks are mandatory when applicable:
   - `inventory_alignment_updates` for scene-fit posture normalization.
   - `item_registry_updates` for durable item metadata/custody changes.
@@ -49,6 +51,9 @@ STATE_PATCH rules:
 - If you mutate durable state, do not leave the same mutation only in prose.
 - Include character_updates entries for cast_present_ids that change state (inventory, containers, persona shifts).
   - Each entry must include character_id, chapter, scene, inventory (full current list), containers (full current list), invariants_add (array), persona_updates (array).
+  - character_updates.inventory MUST be an array of objects, never string item ids.
+  - Inventory object shape: {"item": "ITEM_or_name", "container": "hand_left|hand_right|<container>", "status": "held|carried|equipped|stowed"}.
+  - Container object shape: {"container": "<name>", "owner": "CHAR_id", "contents": ["ITEM_id", "..."]}.
   - If you have a single persona update, still wrap it in an array of strings.
 - must_stay_true must include a milestone ledger and invariants using standard phrasing, e.g.:
   - Avoid numeric mechanics in must_stay_true; store them in continuity system updates instead.

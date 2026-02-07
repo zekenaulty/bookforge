@@ -25,6 +25,7 @@ Hard rules:
 
 Inventory transition rules:
 - Ensure carried/equipped/stowed posture is scene-appropriate.
+- character_updates.inventory and inventory_alignment_updates.set.inventory must be arrays of inventory objects, never id strings.
 - Preserve ownership and container consistency.
 - For held items use `container=hand_left` or `container=hand_right`.
 
@@ -40,6 +41,8 @@ Dynamic continuity rules:
 - If durable item custody or metadata changes, include `item_registry_updates` and/or `transfer_updates`.
 - If plot-device custody or activation changes, include `plot_device_updates`.
 - Never rely on prose implication for durable state mutation.
+- All *_updates arrays must contain objects; never emit bare strings as array entries.
+- character_updates.containers must be an array of objects with at least: container, owner, contents (array).
 
 Scene card:
 {{scene_card}}
@@ -73,7 +76,7 @@ Output JSON shape reminder:
       "character_id": "CHAR_example",
       "chapter": 1,
       "scene": 2,
-      "inventory": [],
+      "inventory": [{"item": "ITEM_example", "container": "pockets", "status": "stowed"}],
       "containers": [],
       "persona_updates": [],
       "invariants_add": [],
@@ -95,7 +98,7 @@ Output JSON shape reminder:
   "inventory_alignment_updates": [
     {
       "character_id": "CHAR_example",
-      "set": {"inventory": [], "containers": []},
+      "set": {"inventory": [{"item": "ITEM_example", "container": "hand_right", "status": "held"}], "containers": []},
       "reason": "scene posture alignment",
       "reason_category": "after_combat_cleanup"
     }
@@ -110,4 +113,5 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
+
 

@@ -466,6 +466,13 @@
     - linked item/device drift detection after real mutation across scene progression.
   - Validation: `85 passed`.
 
+- Turn 11 (completed):
+  - Root-caused first schema hard-fail from live run: `character_updates[].inventory` emitted as string item ids in repair output.
+  - Hardened prompts (`write`, `repair`, `state_repair`, `preflight`) to require inventory object arrays explicitly and added strict object-shape examples.
+  - Added defensive coercion in `runner` so string inventory entries are normalized to object entries using in-patch inventory alignment and container hints before schema validation.
+  - Added regression tests for inventory-string coercion and object normalization in `tests/test_state_bag_and_milestones.py`.
+  - Validation: `87 passed`.
+
 
 ### Remaining Scope By Story
 - Story B remaining:

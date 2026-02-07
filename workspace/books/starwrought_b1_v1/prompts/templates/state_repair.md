@@ -24,8 +24,13 @@ Rules:
 - If an event appears in prose, it must appear in key_events.
 - must_stay_true must include milestone ledger entries and any inventory/injury/ownership invariants implied by prose.
 - character_updates entries must use arrays: persona_updates (array), invariants_add (array).
+- character_updates.inventory must be an array of objects, never item-id strings.
+- Inventory object shape: {"item": "ITEM_or_name", "container": "hand_left|hand_right|<container>", "status": "held|carried|equipped|stowed"}.
+  - Container object shape: {"container": "<name>", "owner": "CHAR_id", "contents": ["ITEM_id", "..."]}.
 - Use character_continuity_system_updates / global_continuity_system_updates to reconcile mechanics.
 - If a new mechanic family appears in prose/UI, add it under set with a stable key.
+- All *_updates arrays must contain objects; never emit bare strings as array entries.
+- character_updates.containers must be an array of objects with at least: container, owner, contents (array).
 - Durable-state mutation blocks are mandatory when applicable:
   - `inventory_alignment_updates` for scene-fit posture normalization.
   - `item_registry_updates` for durable item metadata/custody changes.
@@ -75,4 +80,5 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
+
 

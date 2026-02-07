@@ -1,6 +1,7 @@
 from bookforge.runner import (
     _apply_bag_updates,
     _coerce_stat_updates,
+    _coerce_character_updates,
     _heuristic_invariant_issues,
     _pov_drift_issues,
     _extract_authoritative_surfaces,
@@ -290,3 +291,63 @@ def test_linked_durable_consistency_detects_tombstone_activation_conflict() -> N
     issues = _linked_durable_consistency_issues(durable)
 
     assert any(issue.get("code") == "durable_link_state_conflict" for issue in issues)
+
+
+def test_coerce_character_updates_converts_string_inventory_from_alignment_and_containers() -> None:
+    patch = {
+        "inventory_alignment_updates": [
+            {
+                "character_id": "CHAR_ARTIE",
+                "inventory": [
+                    {"item": "ITEM_smartphone_dead_1dc98ace", "container": "hand_right", "status": "held"},
+                    {"item": "ITEM_pocket_lint_d2b2744e", "container": "pockets", "status": "stowed"},
+                ],
+            }
+        ],
+        "character_updates": [
+            {
+                "character_id": "CHAR_ARTIE",
+                "chapter": 1,
+                "scene": 1,
+                "inventory": ["ITEM_smartphone_dead_1dc98ace", "ITEM_pocket_lint_d2b2744e"],
+                "containers": [
+                    {"container": "hand_right", "contents": ["ITEM_smartphone_dead_1dc98ace"]},
+                    {"container": "pockets", "contents": ["ITEM_pocket_lint_d2b2744e"]},
+                ],
+                "persona_updates": [],
+                "invariants_add": [],
+            }
+        ],
+    }
+
+    _coerce_character_updates(patch)
+
+    inventory = patch["character_updates"][0]["inventory"]
+    assert isinstance(inventory, list)
+    assert inventory[0]["item"] == "ITEM_smartphone_dead_1dc98ace"
+    assert inventory[0]["container"] == "hand_right"
+    assert inventory[0]["status"] == "held"
+    assert inventory[1]["item"] == "ITEM_pocket_lint_d2b2744e"
+    assert inventory[1]["container"] == "pockets"
+    assert inventory[1]["status"] == "stowed"
+
+
+def test_coerce_character_updates_normalizes_dict_item_id_and_derived_status() -> None:
+    patch = {
+        "character_updates": [
+            {
+                "character_id": "CHAR_ARTIE",
+                "chapter": 1,
+                "scene": 1,
+                "inventory": [{"item_id": "ITEM_broken_tutorial_sword", "container": "hand_left"}],
+                "containers": [],
+                "persona_updates": [],
+                "invariants_add": [],
+            }
+        ]
+    }
+
+    _coerce_character_updates(patch)
+
+    inventory = patch["character_updates"][0]["inventory"]
+    assert inventory == [{"item_id": "ITEM_broken_tutorial_sword", "container": "hand_left", "item": "ITEM_broken_tutorial_sword", "status": "held"}]

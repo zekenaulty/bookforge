@@ -942,12 +942,116 @@ def _coerce_character_updates(patch: Dict[str, Any]) -> None:
     updates = patch.get("character_updates") if isinstance(patch, dict) else None
     if not isinstance(updates, list):
         return
+
+    alignment_lookup: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    alignment_updates = patch.get("inventory_alignment_updates") if isinstance(patch, dict) else None
+    if isinstance(alignment_updates, list):
+        for entry in alignment_updates:
+            if not isinstance(entry, dict):
+                continue
+            char_id = str(entry.get("character_id") or "").strip()
+            if not char_id:
+                continue
+            raw_inventory = entry.get("inventory")
+            if not isinstance(raw_inventory, list):
+                set_block = entry.get("set") if isinstance(entry.get("set"), dict) else {}
+                raw_inventory = set_block.get("inventory") if isinstance(set_block.get("inventory"), list) else []
+            if not isinstance(raw_inventory, list):
+                continue
+            char_map = alignment_lookup.get(char_id, {})
+            for item in raw_inventory:
+                if not isinstance(item, dict):
+                    continue
+                token = str(item.get("item") or item.get("item_id") or "").strip()
+                if not token:
+                    continue
+                normalized = dict(item)
+                if "item" not in normalized:
+                    normalized["item"] = token
+                status = str(normalized.get("status") or "").strip().lower()
+                container = str(normalized.get("container") or "").strip()
+                if not status:
+                    if container in {"hand_left", "hand_right"}:
+                        normalized["status"] = "held"
+                    else:
+                        normalized["status"] = "stowed"
+                char_map[token] = normalized
+            alignment_lookup[char_id] = char_map
+
     for update in updates:
         if not isinstance(update, dict):
             continue
         for key in ("persona_updates", "invariants_add"):
             if key in update:
                 update[key] = _summary_list(update.get(key))
+
+        inventory = update.get("inventory")
+        if not isinstance(inventory, list):
+            continue
+
+        char_id = str(update.get("character_id") or "").strip()
+        container_by_item: Dict[str, str] = {}
+        containers = update.get("containers")
+        if isinstance(containers, list):
+            for container_entry in containers:
+                if not isinstance(container_entry, dict):
+                    continue
+                container_name = str(container_entry.get("container") or "").strip()
+                contents = container_entry.get("contents")
+                if not container_name or not isinstance(contents, list):
+                    continue
+                for value in contents:
+                    token = str(value).strip()
+                    if token:
+                        container_by_item[token] = container_name
+
+        normalized_inventory: List[Dict[str, Any]] = []
+        for entry in inventory:
+            if isinstance(entry, dict):
+                normalized = dict(entry)
+                token = str(
+                    normalized.get("item")
+                    or normalized.get("item_id")
+                    or normalized.get("name")
+                    or normalized.get("label")
+                    or ""
+                ).strip()
+                if token and "item" not in normalized:
+                    normalized["item"] = token
+                if token and "container" not in normalized:
+                    mapped = container_by_item.get(token)
+                    if mapped:
+                        normalized["container"] = mapped
+                status = str(normalized.get("status") or "").strip().lower()
+                container = str(normalized.get("container") or "").strip()
+                if not status:
+                    if container in {"hand_left", "hand_right"}:
+                        normalized["status"] = "held"
+                    else:
+                        normalized["status"] = "stowed"
+                normalized_inventory.append(normalized)
+                continue
+
+            token = str(entry).strip()
+            if not token:
+                continue
+            fallback = alignment_lookup.get(char_id, {}).get(token, {}) if char_id else {}
+            normalized = dict(fallback) if isinstance(fallback, dict) else {}
+            normalized["item"] = str(normalized.get("item") or token)
+            if "container" not in normalized:
+                mapped = container_by_item.get(token)
+                if mapped:
+                    normalized["container"] = mapped
+            status = str(normalized.get("status") or "").strip().lower()
+            container = str(normalized.get("container") or "").strip()
+            if not status:
+                if container in {"hand_left", "hand_right"}:
+                    normalized["status"] = "held"
+                else:
+                    normalized["status"] = "stowed"
+            normalized_inventory.append(normalized)
+
+        update["inventory"] = normalized_inventory
 
 def _fill_character_update_context(patch: Dict[str, Any], scene_card: Dict[str, Any]) -> None:
     updates = patch.get("character_updates") if isinstance(patch, dict) else None
