@@ -27,7 +27,17 @@ Recommended keys (use ids from the outline; do not invent ids):
 - introduces_ids (array of character ids introduced in this scene)
 - thread_ids (array of thread ids, e.g. THREAD_Awakened_Sage)
 
-Optional, that are required when needed by the genre, continuity-planning keys:
+Optional continuity-planning keys:
+- required_in_custody (array of item/device ids that must still be owned by scene start)
+- required_scene_accessible (array of item/device ids that must be retrievable without continuity break)
+- required_visible_on_page (array of ids that must be explicitly shown in-scene; use sparingly)
+- forbidden_visible (array of ids that must not be visibly carried/active in-scene)
+- device_presence (array of plot-device ids expected to matter in-scene)
+- transition_type (string, e.g. "time_skip", "travel_arrival", "combat_aftermath")
+- timeline_scope ("present"|"flashback"|"dream"|"simulation"|"hypothetical")
+- ontological_scope ("real"|"non_real")
+
+Optional genre/system keys:
 - continuity_system_focus (array of mechanic domains likely to change this scene, e.g. ["stats", "resources", "titles"])
 - ui_mechanics_expected (array of UI labels likely to appear, e.g. ["HP", "Stamina", "Crit Rate"])
 
@@ -48,6 +58,14 @@ JSON shape example (fill with real values):
   "introduces": [],
   "introduces_ids": [],
   "thread_ids": ["THREAD_Awakened_Sage"],
+  "required_in_custody": ["ITEM_broken_tutorial_sword"],
+  "required_scene_accessible": ["ITEM_broken_tutorial_sword"],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": ["DEVICE_anomaly_tag"],
+  "transition_type": "travel_arrival",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
   "continuity_system_focus": ["stats", "resources"],
   "ui_mechanics_expected": ["HP", "Stamina"]
 }
@@ -63,3 +81,4 @@ State:
 
 Task:
 Create the next scene card.
+

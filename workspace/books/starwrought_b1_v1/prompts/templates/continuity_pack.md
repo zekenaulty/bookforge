@@ -17,6 +17,7 @@ Rules:
 - constraints must include the highest-priority invariants from summary.must_stay_true and summary.key_facts_ring (copy exact strings when possible).
 - constraints must include the highest-priority inventory/container invariants from summary.must_stay_true (copy exact strings when possible).
 - If character_states are provided, prefer their inventory/container facts and continuity mechanic facts; do not invent conflicting values.
+- If item_registry or plot_devices are provided, reuse canonical names/ids in constraints when referencing durable items/devices.
 - If state.global_continuity_system_state contains canonical mechanic labels/values, reuse those exact labels in constraints.
 - If scene_card.cast_present is empty, cast_present must be an empty array.
 - open_threads must be a subset of thread_registry thread_id values.
@@ -43,3 +44,8 @@ Summary (facts-only):
 
 Recent facts:
 {{recent_facts}}
+Item registry (canonical):
+{{item_registry}}
+
+Plot devices (canonical):
+{{plot_devices}}

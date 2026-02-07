@@ -1,4 +1,4 @@
-# WRITE
+﻿# WRITE
 
 Write the scene described by the scene card.
 - YOU MUST ALWAYS RETURN PROSE AND THE STATE_PATCH.
@@ -15,7 +15,10 @@ Write the scene described by the scene card.
 - Continuity system ownership is mandatory, and must be tracked: any mechanic/UI numbers, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, or future mechanic families must be sourced from existing continuity system state or written into continuity system updates in this scene.
 - titles are arrays of objects with stable name fields; do not emit titles as plain strings.
 - Canonical descriptors (colors, item names, effect IDs, mechanic labels) must be reused exactly; do not paraphrase.
+- If item_registry or plot_devices are provided, they are canonical durable-state references for ownership/custody labels in authoritative outputs.
 - If a required event is not in the Scene Card, do not perform it.
+- Enforce scene-card durable constraints: honor `required_in_custody`, `required_scene_accessible`, `forbidden_visible`, and `device_presence`; treat `required_visible_on_page` as explicit narrative requirement when present.
+- Respect `timeline_scope` and `ontological_scope` when proposing durable mutations; do not mutate physical custody in non-present/non-real scope unless explicitly marked override.
 - summary_update arrays are mandatory; do not omit or leave empty unless explicitly stated.
 - STATE_PATCH must record all major events and outcomes from the prose; if an event happens, add it to key_events and update must_stay_true as needed.
 - must_stay_true must include a milestone ledger entry for every milestone referenced in the Scene Card or already present in state.
@@ -37,6 +40,13 @@ STATE_PATCH rules:
   - titles must be arrays of objects with stable name fields (example: [{"name": "Novice", "source": "starting_class", "active": true}]).
   - If a new mechanic family appears, add it under set with a stable key.
 - Include global_continuity_system_updates only if global mechanics change.
+- Durable-state mutation blocks are mandatory when applicable:
+  - `inventory_alignment_updates` for scene-fit posture normalization.
+  - `item_registry_updates` for durable item metadata/custody changes.
+  - `plot_device_updates` for durable plot-device custody/activation changes.
+  - `transfer_updates` for item handoffs (source, destination, reason, optional transfer_chain).
+- For off-screen normalization and non-trivial durable mutations, include `reason_category` with stable values like `time_skip_normalize`, `location_jump_normalize`, `after_combat_cleanup`, `stowed_at_inn`, `handoff_transfer`, `knowledge_reveal`.
+- If you mutate durable state, do not leave the same mutation only in prose.
 - Include character_updates entries for cast_present_ids that change state (inventory, containers, persona shifts).
   - Each entry must include character_id, chapter, scene, inventory (full current list), containers (full current list), invariants_add (array), persona_updates (array).
   - If you have a single persona update, still wrap it in an array of strings.
@@ -83,3 +93,10 @@ PROSE:
 
 STATE_PATCH:
 <json>
+
+Item registry (canonical):
+{{item_registry}}
+
+Plot devices (canonical):
+{{plot_devices}}
+

@@ -1,4 +1,4 @@
-# STATE REPAIR
+﻿# STATE REPAIR
 
 You are the state repair step. You must output a corrected STATE_PATCH JSON only.
 No prose, no commentary, no code fences.
@@ -19,12 +19,22 @@ Rules:
 - Continuity system ownership is mandatory, and must be tracked: any mechanic/UI numbers, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, or future mechanic families must be sourced from existing continuity system state or written into continuity system updates.
 - titles are arrays of objects with stable name fields; do not emit titles as plain strings.
 - Canonical descriptors (colors, item names, effect IDs, mechanic labels) must be reused exactly; do not paraphrase.
+- If item_registry or plot_devices are provided, they are canonical durable-state references for authoritative labels and custody terms.
 - Do not add numeric mechanics to invariants_add; store them in continuity system updates instead.
 - If an event appears in prose, it must appear in key_events.
 - must_stay_true must include milestone ledger entries and any inventory/injury/ownership invariants implied by prose.
 - character_updates entries must use arrays: persona_updates (array), invariants_add (array).
 - Use character_continuity_system_updates / global_continuity_system_updates to reconcile mechanics.
 - If a new mechanic family appears in prose/UI, add it under set with a stable key.
+- Durable-state mutation blocks are mandatory when applicable:
+  - `inventory_alignment_updates` for scene-fit posture normalization.
+  - `item_registry_updates` for durable item metadata/custody changes.
+  - `plot_device_updates` for durable plot-device custody/activation changes.
+  - `transfer_updates` for item handoffs (source, destination, reason, optional transfer_chain).
+- For off-screen normalization and non-trivial durable mutations, include `reason_category` with stable values like `time_skip_normalize`, `location_jump_normalize`, `after_combat_cleanup`, `stowed_at_inn`, `handoff_transfer`, `knowledge_reveal`.
+- If durable mutation is implied but ambiguous, keep canonical state unchanged and emit an explicit repair note in reason fields.
+- Honor scene-card durable constraints (`required_in_custody`, `required_scene_accessible`, `forbidden_visible`, `device_presence`; optional `required_visible_on_page`).
+- Respect `timeline_scope` and `ontological_scope`; avoid physical custody changes in non-present/non-real scope unless explicit override is present.
 
 Inputs
 - prose: final scene text
@@ -59,3 +69,10 @@ Draft state patch:
 
 Prose:
 {{prose}}
+
+Item registry (canonical):
+{{item_registry}}
+
+Plot devices (canonical):
+{{plot_devices}}
+
