@@ -117,3 +117,44 @@ def test_durable_state_snapshots_created(tmp_path: Path) -> None:
     assert device_snapshot.exists()
     assert "ch001_sc002_item_registry" in item_snapshot.name
     assert "ch001_sc002_plot_devices" in device_snapshot.name
+
+def test_ensure_durable_state_files_backfills_item_registry_from_character_states(tmp_path: Path) -> None:
+    book_root = _book_root(tmp_path)
+    chars_dir = book_root / "draft" / "context" / "characters"
+    chars_dir.mkdir(parents=True, exist_ok=True)
+    state_path = chars_dir / "artie__abc12345.state.json"
+    state_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0",
+                "character_id": "CHAR_artie",
+                "inventory": [
+                    {
+                        "item": "Broken Tutorial Sword",
+                        "container": "hand_right",
+                        "status": "carried",
+                    }
+                ],
+                "last_touched": {"chapter": 1, "scene": 1},
+            },
+            ensure_ascii=True,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    ensure_durable_state_files(book_root)
+    registry = load_item_registry(book_root)
+
+    assert len(registry.get("items", [])) == 1
+    entry = registry["items"][0]
+    assert entry["name"] == "Broken Tutorial Sword"
+    assert entry["custodian"] == "CHAR_artie"
+    assert entry["last_seen"]["chapter"] == 1
+    assert entry["last_seen"]["scene"] == 1
+
+    # Migration is deterministic and should not duplicate on subsequent ensures.
+    ensure_durable_state_files(book_root)
+    registry2 = load_item_registry(book_root)
+    assert len(registry2.get("items", [])) == 1
+    assert registry2["items"][0]["item_id"] == entry["item_id"]

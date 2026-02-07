@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
@@ -63,6 +63,25 @@ SUMMARY_KEY_FACTS_CAP = 25
 SUMMARY_MUST_STAY_TRUE_CAP = 20
 SUMMARY_STORY_SO_FAR_CAP = 40
 DURABLE_COMMIT_HASH_CAP = 2000
+PHYSICAL_ITEM_MUTATION_KEYS = {
+    "custodian",
+    "container_ref",
+    "carrier_ref",
+    "location_ref",
+    "owner_scope",
+}
+PHYSICAL_DEVICE_MUTATION_KEYS = {
+    "custody_scope",
+    "custody_ref",
+    "container_ref",
+    "carrier_ref",
+    "location_ref",
+}
+ALLOWED_NON_PRESENT_REASON_CATEGORIES = {
+    "knowledge_reveal",
+    "timeline_override",
+    "linkage_metadata_update",
+}
 
 
 def _int_env(name: str, default: int) -> int:
@@ -118,6 +137,36 @@ def _lint_mode() -> str:
     if raw in {"strict", "warn", "off"}:
         return raw
     return "warn"
+
+
+def _bool_env(name: str, default: bool) -> bool:
+    raw = read_env_value(name)
+    if raw is None:
+        return default
+    text = str(raw).strip().lower()
+    if text in {"1", "true", "yes", "on"}:
+        return True
+    if text in {"0", "false", "no", "off"}:
+        return False
+    return default
+
+
+def _phase_include_outline(phase: str, default: bool) -> bool:
+    name = f"BOOKFORGE_{str(phase).strip().upper()}_INCLUDE_OUTLINE"
+    return _bool_env(name, default)
+
+
+def _system_prompt_for_phase(system_path: Path, outline_path: Path, phase: str) -> str:
+    defaults = {
+        "preflight": True,
+        "write": True,
+        "state_repair": True,
+        "repair": True,
+        "continuity_pack": False,
+        "lint": False,
+    }
+    include = _phase_include_outline(phase, defaults.get(phase, False))
+    return load_system_prompt(system_path, outline_path, include_outline=include)
 
 
 def _now_iso() -> str:
@@ -1220,6 +1269,102 @@ def _durable_mutation_payload(patch: Dict[str, Any]) -> Dict[str, Any]:
     return payload
 
 
+def _scene_scopes(scene_card: Optional[Dict[str, Any]]) -> Tuple[str, str]:
+    if not isinstance(scene_card, dict):
+        return "present", "real"
+    timeline_scope = str(scene_card.get("timeline_scope") or "present").strip().lower() or "present"
+    ontological_scope = str(scene_card.get("ontological_scope") or "real").strip().lower() or "real"
+    return timeline_scope, ontological_scope
+
+
+def _scope_override_enabled(update: Dict[str, Any]) -> bool:
+    if not isinstance(update, dict):
+        return False
+    for key in ("timeline_override", "scope_override", "allow_scope_override", "allow_non_present_mutation"):
+        value = update.get(key)
+        if isinstance(value, bool) and value:
+            return True
+        if isinstance(value, str) and value.strip().lower() in {"1", "true", "yes", "on"}:
+            return True
+    return False
+
+
+def _reason_category(update: Dict[str, Any]) -> str:
+    return str(update.get("reason_category") or "").strip().lower()
+
+
+def _block_touches_physical_keys(update: Dict[str, Any], keys: set[str]) -> bool:
+    if not isinstance(update, dict):
+        return False
+    for block_name in ("set", "delta"):
+        block = update.get(block_name)
+        if not isinstance(block, dict):
+            continue
+        if any(key in block for key in keys):
+            return True
+    remove_block = update.get("remove")
+    if isinstance(remove_block, list) and any(str(key) in keys for key in remove_block):
+        return True
+    return False
+
+
+def _enforce_scope_policy(scene_card: Optional[Dict[str, Any]], mutations: Dict[str, Any]) -> None:
+    timeline_scope, ontological_scope = _scene_scopes(scene_card)
+    present_real = timeline_scope == "present" and ontological_scope == "real"
+    if present_real:
+        return
+
+    for transfer in mutations.get("transfer_updates", []):
+        if not isinstance(transfer, dict):
+            continue
+        if _scope_override_enabled(transfer):
+            continue
+        raise ValueError(
+            "Scope policy violation: transfer_updates require timeline_scope=present and "
+            "ontological_scope=real unless explicit scope override is set."
+        )
+
+    for update in mutations.get("inventory_alignment_updates", []):
+        if not isinstance(update, dict):
+            continue
+        if _scope_override_enabled(update):
+            continue
+        raise ValueError(
+            "Scope policy violation: inventory_alignment_updates require timeline_scope=present and "
+            "ontological_scope=real unless explicit scope override is set."
+        )
+
+    for update in mutations.get("item_registry_updates", []):
+        if not isinstance(update, dict):
+            continue
+        physical_change = _block_touches_physical_keys(update, PHYSICAL_ITEM_MUTATION_KEYS)
+        if not physical_change:
+            continue
+        if _scope_override_enabled(update):
+            continue
+        raise ValueError(
+            "Scope policy violation: physical item_registry_updates require timeline_scope=present and "
+            "ontological_scope=real unless explicit scope override is set."
+        )
+
+    for update in mutations.get("plot_device_updates", []):
+        if not isinstance(update, dict):
+            continue
+        physical_change = _block_touches_physical_keys(update, PHYSICAL_DEVICE_MUTATION_KEYS)
+        if physical_change and not _scope_override_enabled(update):
+            raise ValueError(
+                "Scope policy violation: physical plot_device_updates require timeline_scope=present and "
+                "ontological_scope=real unless explicit scope override is set."
+            )
+        if not physical_change:
+            category = _reason_category(update)
+            if category and category not in ALLOWED_NON_PRESENT_REASON_CATEGORIES:
+                raise ValueError(
+                    "Scope policy violation: non-physical plot_device_updates in non-present/non-real scope "
+                    "must use an allowed reason_category."
+                )
+
+
 def _durable_mutation_hash(patch: Dict[str, Any], chapter: int, scene: int, phase: str) -> str:
     payload = {
         "chapter": int(chapter),
@@ -1573,6 +1718,7 @@ def _apply_durable_state_updates(
     scene: int,
     phase: str,
     state: Optional[Dict[str, Any]] = None,
+    scene_card: Optional[Dict[str, Any]] = None,
 ) -> bool:
     mutations = _durable_mutation_payload(patch)
     if not mutations:
@@ -1585,6 +1731,8 @@ def _apply_durable_state_updates(
     mutation_hash = _durable_mutation_hash(patch, chapter, scene, phase)
     if mutation_hash in applied_hashes:
         return False
+
+    _enforce_scope_policy(scene_card, mutations)
 
     item_registry = load_item_registry(book_root)
     plot_devices = load_plot_devices(book_root)
@@ -2651,7 +2799,7 @@ def _scene_state_preflight(
     )
 
     messages: List[Message] = [
-        {"role": "system", "content": load_system_prompt(system_path, book_root / "outline" / "outline.json", include_outline=True)},
+        {"role": "system", "content": _system_prompt_for_phase(system_path, book_root / "outline" / "outline.json", "preflight")},
         {"role": "user", "content": prompt},
     ]
 
@@ -2733,7 +2881,7 @@ def _generate_continuity_pack(
     )
 
     messages: List[Message] = [
-        {"role": "system", "content": system_path.read_text(encoding="utf-8")},
+        {"role": "system", "content": _system_prompt_for_phase(system_path, book_root / "outline" / "outline.json", "continuity_pack")},
         {"role": "user", "content": prompt},
     ]
 
@@ -2812,7 +2960,7 @@ def _write_scene(
     )
 
     messages: List[Message] = [
-        {"role": "system", "content": load_system_prompt(system_path, book_root / "outline" / "outline.json", include_outline=True)},
+        {"role": "system", "content": _system_prompt_for_phase(system_path, book_root / "outline" / "outline.json", "write")},
         {"role": "user", "content": prompt},
     ]
 
@@ -2898,7 +3046,7 @@ def _lint_scene(
     )
 
     messages: List[Message] = [
-        {"role": "system", "content": system_path.read_text(encoding="utf-8")},
+        {"role": "system", "content": _system_prompt_for_phase(system_path, book_root / "outline" / "outline.json", "lint")},
         {"role": "user", "content": prompt},
     ]
 
@@ -2991,7 +3139,7 @@ def _repair_scene(
     )
 
     messages: List[Message] = [
-        {"role": "system", "content": load_system_prompt(system_path, book_root / "outline" / "outline.json", include_outline=True)},
+        {"role": "system", "content": _system_prompt_for_phase(system_path, book_root / "outline" / "outline.json", "repair")},
         {"role": "user", "content": prompt},
     ]
 
@@ -3080,7 +3228,7 @@ def _state_repair(
     )
 
     messages: List[Message] = [
-        {"role": "system", "content": load_system_prompt(system_path, book_root / "outline" / "outline.json", include_outline=True)},
+        {"role": "system", "content": _system_prompt_for_phase(system_path, book_root / "outline" / "outline.json", "state_repair")},
         {"role": "user", "content": prompt},
     ]
 
@@ -3484,6 +3632,7 @@ def run_loop(
             scene_num,
             phase="preflight",
             state=state,
+            scene_card=scene_card,
         ):
             _status("Durable state updated (preflight) OK")
         character_states = _load_character_states(book_root, scene_card)
@@ -3680,6 +3829,7 @@ def run_loop(
             scene_num,
             phase="scene",
             state=state,
+            scene_card=scene_card,
         ):
             _status("Durable state updated OK")
 
@@ -3734,6 +3884,15 @@ def run_loop(
 
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
+
+
+
+
+
+
+
+
+
 
 
 

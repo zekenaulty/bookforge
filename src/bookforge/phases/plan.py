@@ -300,14 +300,43 @@ def _normalize_scene_card(
         card["required_callbacks"] = list(callbacks)
     if not isinstance(card.get("constraints"), list):
         card["constraints"] = []
+
     card["cast_present"] = list(cast_present)
     card["cast_present_ids"] = list(cast_present_ids)
     card["introduces"] = list(introduces)
     card["introduces_ids"] = list(introduces_ids)
     card["thread_ids"] = list(thread_ids)
 
-    return card
+    for key in (
+        "required_in_custody",
+        "required_scene_accessible",
+        "required_visible_on_page",
+        "forbidden_visible",
+        "device_presence",
+    ):
+        value = card.get(key)
+        if isinstance(value, list):
+            card[key] = [str(item) for item in value if str(item).strip()]
+        else:
+            card[key] = []
 
+    transition_type = card.get("transition_type")
+    if transition_type is None:
+        card["transition_type"] = ""
+    else:
+        card["transition_type"] = str(transition_type)
+
+    timeline_scope = str(card.get("timeline_scope") or "present").strip().lower() or "present"
+    if timeline_scope not in {"present", "flashback", "dream", "simulation", "hypothetical"}:
+        timeline_scope = "present"
+    card["timeline_scope"] = timeline_scope
+
+    ontological_scope = str(card.get("ontological_scope") or "real").strip().lower() or "real"
+    if ontological_scope not in {"real", "non_real"}:
+        ontological_scope = "real"
+    card["ontological_scope"] = ontological_scope
+
+    return card
 
 def plan_scene(
     workspace: Path,
@@ -507,3 +536,4 @@ def plan_scene(
     state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
 
     return scene_path
+

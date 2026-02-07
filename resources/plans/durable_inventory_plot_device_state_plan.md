@@ -365,7 +365,7 @@
 
 ### Current Story Status
 - [x] Story A (`done`): Schema And Canonical Contracts
-- [ ] Story B (`in_progress`): Apply Engine Semantics
+- [x] Story B (`done`): Apply Engine Semantics
 - [ ] Story C (`in_progress`): Transfer + Visibility Chain
 - [ ] Story D (`in_progress`): Loop-Wide Prompt And Context Upgrade
 - [ ] Story E (`pending`): Lint/Repair Retry Discipline
@@ -390,25 +390,33 @@
   - Reset now clears durable commit ledger.
   - Prompt hardening for explicit durable mutation blocks.
   - Validation: `64 passed`.
+- Turn 3 (completed):
+  - Added scene-scope gating (`timeline_scope`, `ontological_scope`) for durable mutations in apply path.
+  - Enforced non-present/non-real scope policy with explicit override support for physical mutations.
+  - Added per-phase minified-outline system prompt toggles via env (`BOOKFORGE_<PHASE>_INCLUDE_OUTLINE`).
+  - Extended scene-card schema and planner normalization with continuity scope/visibility fields.
+  - Added deterministic item-registry backfill migration from character runtime state when registry is empty.
+  - Added regression tests for scope gating, scene-card defaults, and migration determinism.
+  - Validation: `67 passed`.
 
 ### Remaining Scope By Story
 - Story B remaining:
-  - Implement explicit `timeline_scope` and `ontological_scope` gating in apply layer.
-  - Enforce non-present/non-real mutation policy (allow/deny matrix with explicit override handling).
+  - None (DoD met in current implementation pass).
 - Story C remaining:
   - Implement custody-chain visibility normalization (`container_ref`, `carrier_ref`, `location_ref`).
   - Validate stowed-at-inn and multi-hop transfer fixtures end-to-end.
 - Story D remaining:
-  - Complete all phase prompt/context updates and ensure policy-consistent wording across phases.
-  - Add/verify per-phase minified outline injection toggles and defaults.
+  - Extend policy-consistent prompt wording for the new scope/visibility keys across all remaining templates.
+  - Add explicit docs/help examples for per-phase outline-injection toggles.
 - Story E remaining:
   - Add deterministic contradiction checks for new durable semantics.
   - Implement bounded slice-expansion retry contract and explicit reason-code pauses.
 - Story F remaining:
-  - Implement deterministic migration/backfill for item/device canonical files.
+  - Extend migration/backfill to plot-device seed hints (currently item-registry backfill is implemented).
   - Complete reset hardening/log summaries for all new durable artifacts and histories.
 - Story G remaining:
   - Add long-run multi-chapter regression fixtures for chronology conflicts, linked item/device drift, and intangible custody transitions.
+  
 ## Stories (Implementation Order)
 
 ### Story A: Schema And Canonical Contracts
@@ -451,3 +459,4 @@
 - Add multi-chapter fixtures including human-edit, out-of-order generation, thread-device overlap, intangible custody transitions.
 - DoD:
   - no unresolved blocking continuity failures in long-run scenarios.
+

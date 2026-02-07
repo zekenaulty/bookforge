@@ -1,9 +1,11 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict
+import hashlib
 import json
+import re
 import shutil
 
 from bookforge.util.schema import SCHEMA_VERSION, validate_json
@@ -71,6 +73,105 @@ def _normalize_registry(data: Any, list_key: str) -> Dict[str, Any]:
     return normalized
 
 
+def _slugify(value: str) -> str:
+    text = re.sub(r"[^a-zA-Z0-9]+", "_", str(value)).strip("_").lower()
+    return text or "item"
+
+
+def _derived_item_id(character_id: str, item_name: str) -> str:
+    slug = _slugify(item_name)
+    digest = hashlib.sha1(f"{character_id}|{item_name}".encode("utf-8")).hexdigest()[:8]
+    return f"ITEM_{slug}_{digest}"
+
+
+def _coerce_int(value: Any) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _iter_character_state_files(book_root: Path) -> list[Path]:
+    chars_dir = _context_root(book_root) / "characters"
+    if not chars_dir.exists():
+        return []
+    return sorted(chars_dir.glob("*.state.json"))
+
+
+def _migrate_item_registry_from_character_states(book_root: Path) -> bool:
+    path = item_registry_path(book_root)
+    try:
+        payload = _normalize_registry(json.loads(path.read_text(encoding="utf-8")), "items")
+    except json.JSONDecodeError:
+        payload = _default_item_registry()
+
+    if payload.get("items"):
+        return False
+
+    items_by_id: Dict[str, Dict[str, Any]] = {}
+    for state_path in _iter_character_state_files(book_root):
+        try:
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(state, dict):
+            continue
+
+        character_id = str(state.get("character_id") or "").strip()
+        if not character_id:
+            continue
+
+        inventory = state.get("inventory")
+        if not isinstance(inventory, list):
+            continue
+
+        last_touched = state.get("last_touched") if isinstance(state.get("last_touched"), dict) else {}
+        chapter = _coerce_int(last_touched.get("chapter"))
+        scene = _coerce_int(last_touched.get("scene"))
+
+        for entry in inventory:
+            if not isinstance(entry, dict):
+                continue
+            item_name = str(entry.get("item_name") or entry.get("item") or "").strip()
+            item_id = str(entry.get("item_id") or "").strip()
+            if not item_id and item_name:
+                item_id = _derived_item_id(character_id, item_name)
+            if not item_id:
+                continue
+            if not item_name:
+                item_name = item_id
+
+            status = str(entry.get("status") or "").strip().lower()
+            state_tags = ["unclassified"]
+            if status:
+                state_tags.append(status)
+
+            if item_id in items_by_id:
+                continue
+
+            items_by_id[item_id] = {
+                "item_id": item_id,
+                "name": item_name,
+                "type": str(entry.get("type") or "unclassified"),
+                "owner_scope": str(entry.get("owner_scope") or "character"),
+                "custodian": character_id,
+                "linked_threads": [],
+                "state_tags": state_tags,
+                "last_seen": {
+                    "chapter": chapter,
+                    "scene": scene,
+                    "location": "",
+                },
+            }
+
+    if not items_by_id:
+        return False
+
+    payload["items"] = [items_by_id[key] for key in sorted(items_by_id.keys())]
+    save_item_registry(book_root, payload)
+    return True
+
+
 def ensure_item_registry(book_root: Path) -> Path:
     path = item_registry_path(book_root)
     if not path.exists():
@@ -107,6 +208,7 @@ def ensure_durable_state_files(book_root: Path) -> None:
 
     ensure_item_registry(book_root)
     ensure_plot_devices(book_root)
+    _migrate_item_registry_from_character_states(book_root)
 
 
 def load_item_registry(book_root: Path) -> Dict[str, Any]:
@@ -205,4 +307,3 @@ def snapshot_plot_devices(book_root: Path, chapter: int, scene: int) -> Path:
     )
     shutil.copyfile(src, target)
     return target
-

@@ -153,3 +153,112 @@ def test_apply_durable_updates_precondition_mismatch_fails(tmp_path: Path) -> No
             phase="scene",
             state={"world": {"location": "inn"}},
         )
+
+def test_apply_durable_transfer_scope_policy_blocks_non_present_without_override(tmp_path: Path) -> None:
+    book_root = _book_root(tmp_path)
+
+    save_item_registry(
+        book_root,
+        {
+            "schema_version": "1.0",
+            "items": [
+                {
+                    "item_id": "ITEM_sword",
+                    "name": "Broken Tutorial Sword",
+                    "type": "weapon",
+                    "owner_scope": "character",
+                    "custodian": "CHAR_artie",
+                    "linked_threads": [],
+                    "state_tags": ["carried"],
+                    "last_seen": {"chapter": 1, "scene": 1, "location": "office"},
+                }
+            ],
+        },
+    )
+
+    _write_character_state(
+        book_root,
+        "CHAR_artie",
+        [{"item_id": "ITEM_sword", "item": "Broken Tutorial Sword", "container": "hand_right", "status": "carried"}],
+    )
+    _write_character_state(book_root, "CHAR_fizz", [])
+
+    patch = {
+        "schema_version": "1.0",
+        "transfer_updates": [
+            {
+                "item_id": "ITEM_sword",
+                "from": {"character_id": "CHAR_artie"},
+                "to": {"character_id": "CHAR_fizz", "container": "hand_right", "status": "carried"},
+                "reason": "flashback handoff",
+                "reason_category": "handoff_transfer",
+            }
+        ],
+    }
+
+    with pytest.raises(ValueError, match="Scope policy violation"):
+        _apply_durable_state_updates(
+            book_root=book_root,
+            patch=patch,
+            chapter=1,
+            scene=2,
+            phase="scene",
+            state={"world": {"location": "market"}},
+            scene_card={"timeline_scope": "flashback", "ontological_scope": "real"},
+        )
+
+
+def test_apply_durable_transfer_scope_policy_allows_override(tmp_path: Path) -> None:
+    book_root = _book_root(tmp_path)
+
+    save_item_registry(
+        book_root,
+        {
+            "schema_version": "1.0",
+            "items": [
+                {
+                    "item_id": "ITEM_sword",
+                    "name": "Broken Tutorial Sword",
+                    "type": "weapon",
+                    "owner_scope": "character",
+                    "custodian": "CHAR_artie",
+                    "linked_threads": [],
+                    "state_tags": ["carried"],
+                    "last_seen": {"chapter": 1, "scene": 1, "location": "office"},
+                }
+            ],
+        },
+    )
+
+    _write_character_state(
+        book_root,
+        "CHAR_artie",
+        [{"item_id": "ITEM_sword", "item": "Broken Tutorial Sword", "container": "hand_right", "status": "carried"}],
+    )
+    _write_character_state(book_root, "CHAR_fizz", [])
+
+    patch = {
+        "schema_version": "1.0",
+        "transfer_updates": [
+            {
+                "item_id": "ITEM_sword",
+                "from": {"character_id": "CHAR_artie"},
+                "to": {"character_id": "CHAR_fizz", "container": "hand_right", "status": "carried"},
+                "reason": "flashback handoff",
+                "reason_category": "timeline_override",
+                "timeline_override": True,
+            }
+        ],
+    }
+
+    changed = _apply_durable_state_updates(
+        book_root=book_root,
+        patch=patch,
+        chapter=1,
+        scene=2,
+        phase="scene",
+        state={"world": {"location": "market"}},
+        scene_card={"timeline_scope": "flashback", "ontological_scope": "real"},
+    )
+
+    assert changed is True

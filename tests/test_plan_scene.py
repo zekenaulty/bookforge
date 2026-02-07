@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 import json
 
 from bookforge.llm.types import LLMResponse
@@ -95,3 +95,12 @@ def test_plan_scene_writes_scene_card(tmp_path: Path) -> None:
     assert state["cursor"]["chapter"] == 1
     assert state["cursor"]["scene"] == 1
     assert state.get("plan", {}).get("scene_card")
+    planned = json.loads(scene_path.read_text(encoding="utf-8"))
+    assert planned["timeline_scope"] == "present"
+    assert planned["ontological_scope"] == "real"
+    assert planned["required_in_custody"] == []
+    assert planned["required_scene_accessible"] == []
+    assert planned["required_visible_on_page"] == []
+    assert planned["forbidden_visible"] == []
+    assert planned["device_presence"] == []
+
