@@ -15,6 +15,8 @@ summary_update arrays are mandatory; do not omit or leave empty unless explicitl
 STATE_PATCH must record all major events and outcomes from the prose; if an event happens, add it to key_events and update must_stay_true as needed.
 must_stay_true must include a milestone ledger entry for every milestone referenced in the Scene Card or already present in state.
 If state lacks a key invariant needed for this scene, seed it in must_stay_true using standard phrasing.
+Enforce scene-card durable constraints: `required_in_custody`, `required_scene_accessible`, `forbidden_visible`, `device_presence`; treat `required_visible_on_page` as explicit narrative requirement when present.
+Respect `timeline_scope` and `ontological_scope`; avoid physical durable custody changes in non-present/non-real scope unless explicit override is present.
 Return corrected prose plus a corrected state_patch JSON block.
 
 Output format (required, no code fences, no commentary):

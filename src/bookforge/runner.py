@@ -188,13 +188,152 @@ def _load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _durable_state_context(book_root: Path) -> Dict[str, Any]:
-    ensure_durable_state_files(book_root)
+def _scene_cast_ids(scene_card: Optional[Dict[str, Any]]) -> List[str]:
+    if not isinstance(scene_card, dict):
+        return []
+    values = scene_card.get("cast_present_ids")
+    if not isinstance(values, list):
+        return []
+    return [str(value).strip() for value in values if str(value).strip()]
+
+
+def _is_tombstoned(entry: Dict[str, Any]) -> bool:
+    tags = entry.get("state_tags")
+    if not isinstance(tags, list):
+        return False
+    lowered = {str(tag).strip().lower() for tag in tags if str(tag).strip()}
+    return bool(lowered.intersection({"destroyed", "consumed", "lost", "retired"}))
+
+
+def _derive_item_scene_flags(entry: Dict[str, Any], world_location: str, cast_ids: List[str]) -> Dict[str, Any]:
+    if not isinstance(entry, dict):
+        return {
+            "derived_scene_accessible": False,
+            "derived_visible": False,
+            "derived_access_reason": "invalid_entry",
+        }
+
+    custodian = str(entry.get("custodian") or "").strip()
+    carrier_ref = str(entry.get("carrier_ref") or "").strip()
+    location_ref = str(entry.get("location_ref") or "").strip()
+    container_ref = str(entry.get("container_ref") or "").strip()
+    status = str(entry.get("status") or "").strip().lower()
+
+    tombstoned = _is_tombstoned(entry)
+    custodian_is_cast = custodian in cast_ids if custodian else False
+    carrier_is_cast = carrier_ref in cast_ids if carrier_ref else False
+    same_location = not location_ref or (world_location and location_ref == world_location)
+
+    accessible = False
+    reason = "not_accessible"
+    if tombstoned:
+        reason = "tombstoned"
+    elif custodian_is_cast and same_location:
+        accessible = True
+        reason = "custodian_in_cast"
+    elif carrier_is_cast and same_location:
+        accessible = True
+        reason = "carrier_in_cast"
+    elif world_location and location_ref and location_ref == world_location and not carrier_ref:
+        accessible = True
+        reason = "location_match"
+
+    carried_statuses = {"carried", "equipped", "held", "in_hand", "active", "worn"}
+    non_visible_statuses = {"stowed", "cached", "stored", "packed"}
+    in_hand_container = container_ref in {"hand_right", "hand_left"}
+
+    visible = False
+    if accessible:
+        if status in non_visible_statuses:
+            visible = False
+        elif status in carried_statuses or in_hand_container:
+            visible = True
+        elif custodian_is_cast and not container_ref:
+            visible = True
+
     return {
-        "item_registry": load_item_registry(book_root),
-        "plot_devices": load_plot_devices(book_root),
+        "derived_scene_accessible": bool(accessible),
+        "derived_visible": bool(visible),
+        "derived_access_reason": reason,
     }
 
+
+def _derive_plot_device_scene_flags(entry: Dict[str, Any], world_location: str, cast_ids: List[str]) -> Dict[str, Any]:
+    if not isinstance(entry, dict):
+        return {
+            "derived_scene_accessible": False,
+            "derived_access_reason": "invalid_entry",
+        }
+
+    custody_scope = str(entry.get("custody_scope") or "").strip().lower()
+    custody_ref = str(entry.get("custody_ref") or "").strip()
+
+    if custody_scope in {"knowledge", "thread", "faction", "global"}:
+        return {
+            "derived_scene_accessible": True,
+            "derived_access_reason": "intangible_scope",
+        }
+
+    if custody_scope in {"character", "person", "party"} and custody_ref in cast_ids:
+        return {
+            "derived_scene_accessible": True,
+            "derived_access_reason": "custody_ref_in_cast",
+        }
+
+    if custody_scope in {"location", "world", "region"} and world_location and custody_ref == world_location:
+        return {
+            "derived_scene_accessible": True,
+            "derived_access_reason": "custody_ref_location_match",
+        }
+
+    return {
+        "derived_scene_accessible": False,
+        "derived_access_reason": "not_accessible",
+    }
+
+
+def _durable_state_context(
+    book_root: Path,
+    state: Optional[Dict[str, Any]] = None,
+    scene_card: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    ensure_durable_state_files(book_root)
+    item_registry = load_item_registry(book_root)
+    plot_devices = load_plot_devices(book_root)
+
+    if isinstance(state, dict):
+        world = state.get("world") if isinstance(state.get("world"), dict) else {}
+        world_location = str(world.get("location") or "").strip()
+    else:
+        world_location = ""
+    cast_ids = _scene_cast_ids(scene_card)
+
+    item_entries: List[Dict[str, Any]] = []
+    for raw_entry in item_registry.get("items", []) if isinstance(item_registry.get("items"), list) else []:
+        if not isinstance(raw_entry, dict):
+            continue
+        entry = dict(raw_entry)
+        entry.update(_derive_item_scene_flags(entry, world_location, cast_ids))
+        item_entries.append(entry)
+
+    device_entries: List[Dict[str, Any]] = []
+    for raw_entry in plot_devices.get("devices", []) if isinstance(plot_devices.get("devices"), list) else []:
+        if not isinstance(raw_entry, dict):
+            continue
+        entry = dict(raw_entry)
+        entry.update(_derive_plot_device_scene_flags(entry, world_location, cast_ids))
+        device_entries.append(entry)
+
+    item_registry_view = dict(item_registry)
+    item_registry_view["items"] = item_entries
+
+    plot_devices_view = dict(plot_devices)
+    plot_devices_view["devices"] = device_entries
+
+    return {
+        "item_registry": item_registry_view,
+        "plot_devices": plot_devices_view,
+    }
 
 def _response_truncated(response: LLMResponse) -> bool:
     raw = response.raw
@@ -1625,6 +1764,9 @@ def _apply_transfer_update(
     to_endpoint = transfer.get("to") if isinstance(transfer.get("to"), dict) else {}
     transfer_chain = transfer.get("transfer_chain")
     if isinstance(transfer_chain, list) and transfer_chain:
+        first = transfer_chain[0]
+        if not from_endpoint and isinstance(first, dict):
+            from_endpoint = first
         last = transfer_chain[-1]
         if isinstance(last, dict):
             to_endpoint = last
@@ -1658,6 +1800,8 @@ def _apply_transfer_update(
 
     if "state_tags" in to_endpoint and isinstance(to_endpoint.get("state_tags"), list):
         item_entry["state_tags"] = to_endpoint.get("state_tags")
+    if isinstance(transfer_chain, list) and transfer_chain:
+        item_entry["last_transfer_chain"] = transfer_chain
 
     item_entry["last_seen"] = _normalize_last_seen(chapter, scene, location)
     item_entries[item_index] = item_entry
@@ -1998,9 +2142,222 @@ def _pov_drift_issues(prose: str, pov: Optional[str]) -> List[Dict[str, Any]]:
     return []
 
 
+def _scene_card_ids(scene_card: Dict[str, Any], key: str) -> List[str]:
+    values = scene_card.get(key)
+    if not isinstance(values, list):
+        return []
+    return [str(value).strip() for value in values if str(value).strip()]
 
 
+def _entry_aliases(entry: Dict[str, Any]) -> List[str]:
+    aliases = entry.get("aliases")
+    if not isinstance(aliases, list):
+        return []
+    return [str(value).strip() for value in aliases if str(value).strip()]
 
+
+def _entry_mentioned_on_page(prose: str, entry: Dict[str, Any], id_key: str) -> bool:
+    if not isinstance(entry, dict):
+        return False
+    tokens: List[str] = []
+    primary_id = str(entry.get(id_key) or "").strip()
+    if primary_id:
+        tokens.append(primary_id)
+    for key in ("name", "item_name", "item", "label"):
+        value = str(entry.get(key) or "").strip()
+        if value:
+            tokens.append(value)
+    tokens.extend(_entry_aliases(entry))
+
+    text = prose.lower()
+    for token in tokens:
+        normalized = token.strip().lower()
+        if not normalized:
+            continue
+        if " " in normalized:
+            if normalized in text:
+                return True
+        else:
+            if re.search(r"\b" + re.escape(normalized) + r"\b", text):
+                return True
+    return False
+
+
+def _durable_scene_constraint_issues(
+    prose: str,
+    scene_card: Dict[str, Any],
+    durable: Dict[str, Any],
+) -> List[Dict[str, Any]]:
+    if not isinstance(scene_card, dict):
+        return []
+
+    item_entries = durable.get("item_registry", {}).get("items", []) if isinstance(durable, dict) else []
+    device_entries = durable.get("plot_devices", {}).get("devices", []) if isinstance(durable, dict) else []
+    item_map = {
+        str(entry.get("item_id") or "").strip(): entry
+        for entry in item_entries
+        if isinstance(entry, dict) and str(entry.get("item_id") or "").strip()
+    }
+    device_map = {
+        str(entry.get("device_id") or "").strip(): entry
+        for entry in device_entries
+        if isinstance(entry, dict) and str(entry.get("device_id") or "").strip()
+    }
+
+    def _lookup(ref_id: str) -> Tuple[Optional[str], Optional[Dict[str, Any]]]:
+        if ref_id in item_map:
+            return "item", item_map.get(ref_id)
+        if ref_id in device_map:
+            return "device", device_map.get(ref_id)
+        return None, None
+
+    issues: List[Dict[str, Any]] = []
+
+    for ref_id in _scene_card_ids(scene_card, "required_in_custody"):
+        kind, entry = _lookup(ref_id)
+        if entry is None:
+            issues.append({
+                "code": "durable_slice_missing",
+                "message": f"Required custody id '{ref_id}' is not present in durable context slice.",
+                "severity": "error",
+                "retry_hint": f"expand_durable_slice:id:{ref_id}",
+            })
+            continue
+        if _is_tombstoned(entry):
+            issues.append({
+                "code": "durable_required_not_in_custody",
+                "message": f"Required {kind} '{ref_id}' is tombstoned and cannot satisfy required_in_custody.",
+                "severity": "error",
+            })
+
+    for ref_id in _scene_card_ids(scene_card, "required_scene_accessible"):
+        kind, entry = _lookup(ref_id)
+        if entry is None:
+            issues.append({
+                "code": "durable_slice_missing",
+                "message": f"Required accessible id '{ref_id}' is not present in durable context slice.",
+                "severity": "error",
+                "retry_hint": f"expand_durable_slice:id:{ref_id}",
+            })
+            continue
+        if not bool(entry.get("derived_scene_accessible")):
+            issues.append({
+                "code": "durable_required_inaccessible",
+                "message": (
+                    f"Required scene-accessible {kind} '{ref_id}' is not accessible "
+                    f"(reason={entry.get('derived_access_reason')})."
+                ),
+                "severity": "error",
+            })
+
+    for ref_id in _scene_card_ids(scene_card, "forbidden_visible"):
+        kind, entry = _lookup(ref_id)
+        if entry is None:
+            continue
+        visible = bool(entry.get("derived_visible"))
+        if kind == "device" and "derived_visible" not in entry:
+            visible = bool(entry.get("derived_scene_accessible"))
+        if visible:
+            issues.append({
+                "code": "durable_forbidden_visible",
+                "message": f"Forbidden visible {kind} '{ref_id}' appears visible in current scene context.",
+                "severity": "error",
+            })
+
+    for ref_id in _scene_card_ids(scene_card, "device_presence"):
+        _, entry = _lookup(ref_id)
+        if entry is None:
+            issues.append({
+                "code": "durable_slice_missing",
+                "message": f"Required device_presence id '{ref_id}' is not present in durable context slice.",
+                "severity": "error",
+                "retry_hint": f"expand_durable_slice:id:{ref_id}",
+            })
+            continue
+        if not bool(entry.get("derived_scene_accessible")):
+            issues.append({
+                "code": "durable_device_presence_missing",
+                "message": (
+                    f"Device '{ref_id}' required by device_presence is not scene-accessible "
+                    f"(reason={entry.get('derived_access_reason')})."
+                ),
+                "severity": "error",
+            })
+
+    for ref_id in _scene_card_ids(scene_card, "required_visible_on_page"):
+        kind, entry = _lookup(ref_id)
+        if entry is None:
+            issues.append({
+                "code": "durable_slice_missing",
+                "message": f"Required visible-on-page id '{ref_id}' is not present in durable context slice.",
+                "severity": "error",
+                "retry_hint": f"expand_durable_slice:id:{ref_id}",
+            })
+            continue
+        if not _entry_mentioned_on_page(prose, entry, "item_id" if kind == "item" else "device_id"):
+            issues.append({
+                "code": "durable_required_visible_missing",
+                "message": f"{kind.capitalize()} '{ref_id}' is required_visible_on_page but was not mentioned.",
+                "severity": "warning",
+            })
+
+    return issues
+
+
+def _linked_durable_consistency_issues(durable: Dict[str, Any]) -> List[Dict[str, Any]]:
+    item_entries = durable.get("item_registry", {}).get("items", []) if isinstance(durable, dict) else []
+    device_entries = durable.get("plot_devices", {}).get("devices", []) if isinstance(durable, dict) else []
+    item_map = {
+        str(entry.get("item_id") or "").strip(): entry
+        for entry in item_entries
+        if isinstance(entry, dict) and str(entry.get("item_id") or "").strip()
+    }
+    device_map = {
+        str(entry.get("device_id") or "").strip(): entry
+        for entry in device_entries
+        if isinstance(entry, dict) and str(entry.get("device_id") or "").strip()
+    }
+
+    issues: List[Dict[str, Any]] = []
+    for item_id, item in item_map.items():
+        linked_device_id = str(item.get("linked_device_id") or "").strip()
+        if not linked_device_id:
+            continue
+        device = device_map.get(linked_device_id)
+        if device is None:
+            issues.append({
+                "code": "durable_link_missing",
+                "message": f"Item '{item_id}' links to missing device '{linked_device_id}' in current slice.",
+                "severity": "warning",
+                "retry_hint": f"expand_durable_slice:id:{linked_device_id}",
+            })
+            continue
+
+        activation = str(device.get("activation_state") or "").strip().lower()
+        if _is_tombstoned(item) and activation in {"active", "enabled", "bound", "equipped", "on"}:
+            issues.append({
+                "code": "durable_link_state_conflict",
+                "message": (
+                    f"Item '{item_id}' is tombstoned but linked device '{linked_device_id}' is activation_state='{activation}'."
+                ),
+                "severity": "error",
+            })
+
+        device_scope = str(device.get("custody_scope") or "").strip().lower()
+        device_ref = str(device.get("custody_ref") or "").strip()
+        item_custodian = str(item.get("custodian") or "").strip()
+        if device_scope in {"character", "person", "party", "location", "world", "region"}:
+            if device_ref and item_custodian and device_ref != item_custodian:
+                issues.append({
+                    "code": "durable_link_custody_conflict",
+                    "message": (
+                        f"Item '{item_id}' custodian='{item_custodian}' conflicts with linked device "
+                        f"'{linked_device_id}' custody_ref='{device_ref}'."
+                    ),
+                    "severity": "error",
+                })
+
+    return issues
 
 
 def _summary_from_state(state: Dict[str, Any]) -> Dict[str, List[str]]:
@@ -2625,6 +2982,76 @@ def _chat(
             return response
         attempt += 1
 
+def _lint_issue_entries(report: Dict[str, Any], code: Optional[str] = None) -> List[Dict[str, Any]]:
+    raw = report.get("issues") if isinstance(report, dict) else []
+    if not isinstance(raw, list):
+        return []
+    out: List[Dict[str, Any]] = []
+    for issue in raw:
+        if not isinstance(issue, dict):
+            continue
+        if code is not None and str(issue.get("code") or "").strip() != code:
+            continue
+        out.append(issue)
+    return out
+
+
+def _lint_has_issue_code(report: Dict[str, Any], code: str) -> bool:
+    return bool(_lint_issue_entries(report, code))
+
+
+def _write_reason_pause_marker(
+    book_root: Path,
+    phase: str,
+    reason_code: str,
+    message: str,
+    scene_card: Optional[Dict[str, Any]] = None,
+    details: Optional[Dict[str, Any]] = None,
+) -> Path:
+    context_dir = book_root / "draft" / "context"
+    context_dir.mkdir(parents=True, exist_ok=True)
+    payload: Dict[str, Any] = {
+        "book_id": book_root.name,
+        "phase": str(phase).strip(),
+        "reason_code": str(reason_code).strip(),
+        "message": str(message).strip(),
+        "created_at": _now_iso(),
+    }
+    if scene_card:
+        chapter = _maybe_int(scene_card.get("chapter"))
+        scene = _maybe_int(scene_card.get("scene"))
+        if chapter is not None:
+            payload["chapter"] = chapter
+        if scene is not None:
+            payload["scene"] = scene
+    if isinstance(details, dict) and details:
+        payload["details"] = details
+    pause_path = context_dir / "run_paused.json"
+    pause_path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
+    return pause_path
+
+
+def _pause_on_reason(
+    book_root: Path,
+    state_path: Path,
+    state: Optional[Dict[str, Any]],
+    phase: str,
+    reason_code: str,
+    message: str,
+    scene_card: Optional[Dict[str, Any]] = None,
+    details: Optional[Dict[str, Any]] = None,
+) -> None:
+    if state is not None:
+        try:
+            validate_json(state, "state")
+            state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
+        except Exception:
+            pass
+    _write_reason_pause_marker(book_root, phase, reason_code, message, scene_card, details)
+    _status(f"Run paused ({reason_code}) in phase '{phase}': {message}")
+    raise SystemExit(PAUSE_EXIT_CODE)
+
+
 def _write_pause_marker(
     book_root: Path,
     phase: str,
@@ -2781,7 +3208,7 @@ def _scene_state_preflight(
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "preflight.md")
     context = _build_preflight_context(book_root, outline, chapter_order, scene_counts, scene_card)
-    durable = _durable_state_context(book_root)
+    durable = _durable_state_context(book_root, state, scene_card)
     prompt = render_template_file(
         template,
         {
@@ -2863,7 +3290,7 @@ def _generate_continuity_pack(
     model: str,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "continuity_pack.md")
-    durable = _durable_state_context(book_root)
+    durable = _durable_state_context(book_root, state, scene_card)
     recent_facts = state.get("world", {}).get("recent_facts", [])
     prompt = render_template_file(
         template,
@@ -2943,7 +3370,7 @@ def _write_scene(
     model: str,
 ) -> Tuple[str, Dict[str, Any]]:
     template = _resolve_template(book_root, "write.md")
-    durable = _durable_state_context(book_root)
+    durable = _durable_state_context(book_root, state, scene_card)
     prompt = render_template_file(
         template,
         {
@@ -3029,7 +3456,7 @@ def _lint_scene(
     model: str,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "lint.md")
-    durable = _durable_state_context(book_root)
+    durable = _durable_state_context(book_root, state, scene_card)
     authoritative_surfaces = _extract_authoritative_surfaces(prose)
     prompt = render_template_file(
         template,
@@ -3098,7 +3525,9 @@ def _lint_scene(
         authoritative_surfaces=authoritative_surfaces,
     )
     extra_issues += _pov_drift_issues(prose, pov)
-    combined = heuristic_issues + extra_issues
+    durable_issues = _durable_scene_constraint_issues(prose, scene_card, durable)
+    durable_issues += _linked_durable_consistency_issues(durable)
+    combined = heuristic_issues + extra_issues + durable_issues
     if combined:
         report["issues"] = list(report.get("issues", [])) + combined
         report["status"] = "fail"
@@ -3122,7 +3551,7 @@ def _repair_scene(
     model: str,
 ) -> Tuple[str, Dict[str, Any]]:
     template = _resolve_template(book_root, "repair.md")
-    durable = _durable_state_context(book_root)
+    durable = _durable_state_context(book_root, state, scene_card)
     prompt = render_template_file(
         template,
         {
@@ -3209,7 +3638,7 @@ def _state_repair(
     model: str,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "state_repair.md")
-    durable = _durable_state_context(book_root)
+    durable = _durable_state_context(book_root, state, scene_card)
     prompt = render_template_file(
         template,
         {
@@ -3803,6 +4232,17 @@ def run_loop(
                 _pause_on_quota(book_root, state_path, state, "lint_scene", exc, scene_card)
             _status(f"Lint status: {lint_report.get('status', 'unknown')}")
             if lint_report.get("status") == "fail" and lint_mode == "strict":
+                if _lint_has_issue_code(lint_report, "durable_slice_missing"):
+                    _pause_on_reason(
+                        book_root,
+                        state_path,
+                        state,
+                        "lint_scene",
+                        "durable_slice_missing",
+                        "Durable canonical context is missing one or more required ids; run paused to avoid retry thrash.",
+                        scene_card,
+                        details={"issues": _lint_issue_entries(lint_report, "durable_slice_missing")},
+                    )
                 raise ValueError("Lint failed after repair; see lint logs for details.")
 
         chapter_total = scene_counts.get(chapter_num)
@@ -3884,6 +4324,9 @@ def run_loop(
 
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
+
+
+
 
 
 

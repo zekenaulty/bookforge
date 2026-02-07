@@ -36,9 +36,19 @@ Environment
   - strict: lint + repair enforced; run stops if lint still fails.
   - warn: lint + repair attempted; failures are logged and run continues.
   - off: skip lint and repair; lint report is recorded as pass.
+- Per-phase minified outline injection (default shown):
+  - BOOKFORGE_PREFLIGHT_INCLUDE_OUTLINE=1
+  - BOOKFORGE_WRITE_INCLUDE_OUTLINE=1
+  - BOOKFORGE_STATE_REPAIR_INCLUDE_OUTLINE=1
+  - BOOKFORGE_REPAIR_INCLUDE_OUTLINE=1
+  - BOOKFORGE_CONTINUITY_PACK_INCLUDE_OUTLINE=0
+  - BOOKFORGE_LINT_INCLUDE_OUTLINE=0
 
 Examples
 - Minimal:
   bookforge run --book my_novel_v1
 - With optional parameters:
   bookforge --workspace workspace run --book my_novel_v1 --steps 10 --until chapter:3 --resume
+
+- Force outline context on continuity and lint too:
+  BOOKFORGE_CONTINUITY_PACK_INCLUDE_OUTLINE=1 BOOKFORGE_LINT_INCLUDE_OUTLINE=1 bookforge run --book my_novel_v1 --until chapter:1

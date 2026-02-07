@@ -366,9 +366,9 @@
 ### Current Story Status
 - [x] Story A (`done`): Schema And Canonical Contracts
 - [x] Story B (`done`): Apply Engine Semantics
-- [ ] Story C (`in_progress`): Transfer + Visibility Chain
-- [ ] Story D (`in_progress`): Loop-Wide Prompt And Context Upgrade
-- [ ] Story E (`pending`): Lint/Repair Retry Discipline
+- [x] Story C (`done`): Transfer + Visibility Chain
+- [x] Story D (`done`): Loop-Wide Prompt And Context Upgrade
+- [ ] Story E (`in_progress`): Lint/Repair Retry Discipline
 - [ ] Story F (`in_progress`): Migration, Snapshots, Reset
 - [ ] Story G (`pending`): Long-Run Regression Suite
 
@@ -398,19 +398,47 @@
   - Added deterministic item-registry backfill migration from character runtime state when registry is empty.
   - Added regression tests for scope gating, scene-card defaults, and migration determinism.
   - Validation: `67 passed`.
+- Turn 4 (completed):
+  - Completed transfer-chain semantics so transfer endpoints can be derived from `transfer_chain` (first hop source, last hop destination).
+  - Persisted `last_transfer_chain` on durable item entries for forensic debugging and replay analysis.
+  - Added deterministic durable lint checks driven by scene-card constraints:
+    - `required_in_custody`
+    - `required_scene_accessible`
+    - `required_visible_on_page`
+    - `forbidden_visible`
+    - `device_presence`
+  - Added linked item/device consistency checks for tombstone-vs-activation and custody conflicts.
+  - Added structured `durable_slice_missing` retry hints for missing context IDs.
+  - Added regression tests for durable constraint checks and link consistency checks.
+  - Validation: `73 passed`.
+
+- Turn 5 (completed):
+  - Hardened phase prompts (`preflight`, `write`, `lint`, `state_repair`, `repair`) to explicitly enforce scene-card durable constraints and scope gates.
+  - Added deterministic lint checks for scene-card durable constraints and linked item/device consistency in runner.
+  - Added regression tests for durable constraint failures, slice-missing detection, and link-state conflicts.
+  - Updated run help docs with per-phase outline injection env toggles and usage example.
+  - Validation: `73 passed`.
+- Turn 6 (completed):
+  - Added strict-mode reason-coded pause behavior for unresolved `durable_slice_missing` lint failures after repair.
+  - Added generic pause helpers for non-quota deterministic stop conditions:
+    - `_write_reason_pause_marker`
+    - `_pause_on_reason`
+  - Added lint issue helpers for targeted issue-code extraction:
+    - `_lint_issue_entries`
+    - `_lint_has_issue_code`
+  - Added regression test ensuring reason-coded pause marker creation.
+  - Validation: `74 passed`.
 
 ### Remaining Scope By Story
 - Story B remaining:
   - None (DoD met in current implementation pass).
 - Story C remaining:
-  - Implement custody-chain visibility normalization (`container_ref`, `carrier_ref`, `location_ref`).
-  - Validate stowed-at-inn and multi-hop transfer fixtures end-to-end.
+  - None (DoD met in current implementation pass).
 - Story D remaining:
-  - Extend policy-consistent prompt wording for the new scope/visibility keys across all remaining templates.
-  - Add explicit docs/help examples for per-phase outline-injection toggles.
+  - None (DoD met in current implementation pass).
 - Story E remaining:
-  - Add deterministic contradiction checks for new durable semantics.
-  - Implement bounded slice-expansion retry contract and explicit reason-code pauses.
+  - Implement bounded slice-expansion retry contract for targeted durable context expansion.
+  - Add bounded expansion counters/telemetry per phase to prevent repeated expansion thrash.
 - Story F remaining:
   - Extend migration/backfill to plot-device seed hints (currently item-registry backfill is implemented).
   - Complete reset hardening/log summaries for all new durable artifacts and histories.

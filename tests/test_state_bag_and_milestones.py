@@ -5,6 +5,8 @@ from bookforge.runner import (
     _pov_drift_issues,
     _extract_authoritative_surfaces,
     _stat_mismatch_issues,
+    _durable_scene_constraint_issues,
+    _linked_durable_consistency_issues,
 )
 
 
@@ -203,3 +205,88 @@ def test_stat_mismatch_uses_only_authoritative_surfaces_when_provided() -> None:
 
     # No authoritative UI surfaces means no UI stat drift check for this text.
     assert not any(issue.get("code") in {"stat_mismatch", "stat_unowned"} for issue in issues)
+
+def test_durable_scene_constraint_detects_required_access_failure() -> None:
+    prose = "Narrative only."
+    scene_card = {"required_scene_accessible": ["ITEM_sword"]}
+    durable = {
+        "item_registry": {
+            "items": [
+                {
+                    "item_id": "ITEM_sword",
+                    "name": "Broken Tutorial Sword",
+                    "derived_scene_accessible": False,
+                    "derived_access_reason": "location_mismatch",
+                }
+            ]
+        },
+        "plot_devices": {"devices": []},
+    }
+
+    issues = _durable_scene_constraint_issues(prose, scene_card, durable)
+
+    assert any(issue.get("code") == "durable_required_inaccessible" for issue in issues)
+
+
+def test_durable_scene_constraint_detects_required_visible_on_page_missing() -> None:
+    prose = "Artie runs through the alley."
+    scene_card = {"required_visible_on_page": ["ITEM_sword"]}
+    durable = {
+        "item_registry": {
+            "items": [
+                {
+                    "item_id": "ITEM_sword",
+                    "name": "Broken Tutorial Sword",
+                    "aliases": ["tutorial blade"],
+                    "derived_scene_accessible": True,
+                    "derived_visible": True,
+                }
+            ]
+        },
+        "plot_devices": {"devices": []},
+    }
+
+    issues = _durable_scene_constraint_issues(prose, scene_card, durable)
+
+    assert any(issue.get("code") == "durable_required_visible_missing" for issue in issues)
+
+
+def test_durable_scene_constraint_detects_slice_missing() -> None:
+    issues = _durable_scene_constraint_issues(
+        "Prose",
+        {"required_in_custody": ["ITEM_missing"]},
+        {"item_registry": {"items": []}, "plot_devices": {"devices": []}},
+    )
+
+    assert any(issue.get("code") == "durable_slice_missing" for issue in issues)
+
+
+def test_linked_durable_consistency_detects_tombstone_activation_conflict() -> None:
+    durable = {
+        "item_registry": {
+            "items": [
+                {
+                    "item_id": "ITEM_shard",
+                    "name": "Shard",
+                    "state_tags": ["destroyed"],
+                    "custodian": "CHAR_artie",
+                    "linked_device_id": "DEV_shard_core",
+                }
+            ]
+        },
+        "plot_devices": {
+            "devices": [
+                {
+                    "device_id": "DEV_shard_core",
+                    "name": "Shard Core",
+                    "activation_state": "active",
+                    "custody_scope": "character",
+                    "custody_ref": "CHAR_artie",
+                }
+            ]
+        },
+    }
+
+    issues = _linked_durable_consistency_issues(durable)
+
+    assert any(issue.get("code") == "durable_link_state_conflict" for issue in issues)

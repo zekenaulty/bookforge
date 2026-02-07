@@ -20,6 +20,8 @@ Hard rules:
 - Keep updates scoped to current cast and global continuity only.
 - Do not emit cursor_advance, summary_update, duplication counters, or chapter rollup changes.
 - Keep timeline lock: only prepare state needed for the current scene card.
+- Respect scene-card durable constraints: `required_in_custody`, `required_scene_accessible`, `forbidden_visible`, `device_presence`, and optional `required_visible_on_page`.
+- Respect scene scope gates: `timeline_scope` and `ontological_scope`; only use scope override when explicitly justified by reason_category.
 
 Inventory transition rules:
 - Ensure carried/equipped/stowed posture is scene-appropriate.

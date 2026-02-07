@@ -1,11 +1,11 @@
-﻿from pathlib import Path
+from pathlib import Path
 import json
 
 import pytest
 
 from bookforge.characters import create_character_state_path
 from bookforge.memory.durable_state import ensure_durable_state_files, load_item_registry, load_durable_commits, save_item_registry
-from bookforge.runner import _apply_durable_state_updates
+from bookforge.runner import _apply_durable_state_updates, _durable_state_context
 
 
 def _book_root(tmp_path: Path) -> Path:
@@ -262,3 +262,106 @@ def test_apply_durable_transfer_scope_policy_allows_override(tmp_path: Path) -> 
     )
 
     assert changed is True
+
+
+def test_apply_durable_transfer_chain_uses_first_as_source_and_last_as_destination(tmp_path: Path) -> None:
+    book_root = _book_root(tmp_path)
+
+    save_item_registry(
+        book_root,
+        {
+            "schema_version": "1.0",
+            "items": [
+                {
+                    "item_id": "ITEM_sword",
+                    "name": "Broken Tutorial Sword",
+                    "type": "weapon",
+                    "owner_scope": "character",
+                    "custodian": "CHAR_artie",
+                    "linked_threads": [],
+                    "state_tags": ["carried"],
+                    "last_seen": {"chapter": 1, "scene": 1, "location": "office"},
+                }
+            ],
+        },
+    )
+
+    artie = _write_character_state(
+        book_root,
+        "CHAR_artie",
+        [{"item_id": "ITEM_sword", "item": "Broken Tutorial Sword", "container": "hand_right", "status": "carried"}],
+    )
+
+    patch = {
+        "schema_version": "1.0",
+        "transfer_updates": [
+            {
+                "item_id": "ITEM_sword",
+                "transfer_chain": [
+                    {"character_id": "CHAR_artie", "container": "hand_right", "status": "carried"},
+                    {"location_ref": "LOC_inn_room_3", "container_ref": "CHEST_1", "status": "cached"},
+                ],
+                "reason": "Artie stashes the sword at the inn chest.",
+                "reason_category": "stowed_at_inn",
+            }
+        ],
+    }
+
+    changed = _apply_durable_state_updates(
+        book_root=book_root,
+        patch=patch,
+        chapter=1,
+        scene=3,
+        phase="scene",
+        state={"world": {"location": "market"}},
+        scene_card={"timeline_scope": "present", "ontological_scope": "real"},
+    )
+
+    assert changed is True
+    registry = load_item_registry(book_root)
+    item = registry["items"][0]
+    assert item["custodian"] == "LOC_inn_room_3"
+    assert item["container_ref"] == "CHEST_1"
+    assert item.get("last_transfer_chain")
+
+    artie_state = json.loads(artie.read_text(encoding="utf-8"))
+    assert artie_state["inventory"] == []
+
+
+def test_durable_context_derives_scene_accessibility_for_stowed_item(tmp_path: Path) -> None:
+    book_root = _book_root(tmp_path)
+
+    save_item_registry(
+        book_root,
+        {
+            "schema_version": "1.0",
+            "items": [
+                {
+                    "item_id": "ITEM_sword",
+                    "name": "Broken Tutorial Sword",
+                    "type": "weapon",
+                    "owner_scope": "character",
+                    "custodian": "CHAR_artie",
+                    "carrier_ref": "CHAR_artie",
+                    "container_ref": "pack_main",
+                    "location_ref": "LOC_market",
+                    "status": "stowed",
+                    "linked_threads": [],
+                    "state_tags": ["carried"],
+                    "last_seen": {"chapter": 1, "scene": 1, "location": "market"},
+                }
+            ],
+        },
+    )
+
+    scene_card = {"cast_present_ids": ["CHAR_artie"]}
+    state_market = {"world": {"location": "LOC_market"}}
+    ctx_market = _durable_state_context(book_root, state_market, scene_card)
+    item_market = ctx_market["item_registry"]["items"][0]
+    assert item_market["derived_scene_accessible"] is True
+    assert item_market["derived_visible"] is False
+
+    state_inn = {"world": {"location": "LOC_inn_room_3"}}
+    ctx_inn = _durable_state_context(book_root, state_inn, scene_card)
+    item_inn = ctx_inn["item_registry"]["items"][0]
+    assert item_inn["derived_scene_accessible"] is False

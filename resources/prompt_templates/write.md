@@ -17,6 +17,8 @@ Write the scene described by the scene card.
 - Canonical descriptors (colors, item names, effect IDs, mechanic labels) must be reused exactly; do not paraphrase.
 - If item_registry or plot_devices are provided, they are canonical durable-state references for ownership/custody labels in authoritative outputs.
 - If a required event is not in the Scene Card, do not perform it.
+- Enforce scene-card durable constraints: honor `required_in_custody`, `required_scene_accessible`, `forbidden_visible`, and `device_presence`; treat `required_visible_on_page` as explicit narrative requirement when present.
+- Respect `timeline_scope` and `ontological_scope` when proposing durable mutations; do not mutate physical custody in non-present/non-real scope unless explicitly marked override.
 - summary_update arrays are mandatory; do not omit or leave empty unless explicitly stated.
 - STATE_PATCH must record all major events and outcomes from the prose; if an event happens, add it to key_events and update must_stay_true as needed.
 - must_stay_true must include a milestone ledger entry for every milestone referenced in the Scene Card or already present in state.
