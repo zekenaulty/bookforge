@@ -13,13 +13,13 @@ from .ollama_client import OllamaClient
 _RATE_LIMITERS: dict[tuple[str, str], RateLimiter] = {}
 
 
-
-
 def _select_api_key(config: AppConfig, phase: Optional[str], default_key: Optional[str]) -> tuple[Optional[str], str]:
     phase_key = (phase or "").lower()
     override = None
     if phase_key == "planner":
         override = config.planner_api_key
+    elif phase_key == "preflight":
+        override = config.preflight_api_key
     elif phase_key == "writer":
         override = config.writer_api_key
     elif phase_key == "repair":
@@ -37,8 +37,6 @@ def _select_api_key(config: AppConfig, phase: Optional[str], default_key: Option
     return default_key, "default"
 
 
-
-
 def _shared_rate_limiter(provider: str, key_slot: str, rpm: int | None) -> RateLimiter | None:
     if not rpm or rpm <= 0:
         return None
@@ -49,6 +47,7 @@ def _shared_rate_limiter(provider: str, key_slot: str, rpm: int | None) -> RateL
         limiter = RateLimiter(rpm)
         _RATE_LIMITERS[key] = limiter
     return limiter
+
 
 def get_llm_client(config: AppConfig, phase: Optional[str] = None) -> LLMClient:
     validate_provider_config(config)
@@ -74,6 +73,8 @@ def resolve_model(phase: str, config: AppConfig) -> str:
     model: Optional[str] = None
     if phase_key == "planner":
         model = config.planner_model
+    elif phase_key == "preflight":
+        model = config.preflight_model
     elif phase_key == "writer":
         model = config.writer_model
     elif phase_key == "repair":

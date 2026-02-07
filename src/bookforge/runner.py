@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import ast
 import json
 import re
+import shutil
 import time
 
 from bookforge.config.env import load_config, read_env_value, read_int_env
@@ -36,6 +37,7 @@ DEFAULT_LINT_MAX_TOKENS = 147456
 DEFAULT_REPAIR_MAX_TOKENS = 147456
 DEFAULT_STATE_REPAIR_MAX_TOKENS = 147456
 DEFAULT_CONTINUITY_MAX_TOKENS = 147456
+DEFAULT_PREFLIGHT_MAX_TOKENS = 147456
 DEFAULT_STYLE_ANCHOR_MAX_TOKENS = 32768
 DEFAULT_EMPTY_RESPONSE_RETRIES = 2
 DEFAULT_REQUEST_ERROR_RETRIES = 1
@@ -73,6 +75,9 @@ def _state_repair_max_tokens() -> int:
 def _continuity_max_tokens() -> int:
     return _int_env("BOOKFORGE_CONTINUITY_MAX_TOKENS", DEFAULT_CONTINUITY_MAX_TOKENS)
 
+
+def _preflight_max_tokens() -> int:
+    return _int_env("BOOKFORGE_PREFLIGHT_MAX_TOKENS", DEFAULT_PREFLIGHT_MAX_TOKENS)
 
 def _style_anchor_max_tokens() -> int:
     return _int_env("BOOKFORGE_STYLE_ANCHOR_MAX_TOKENS", DEFAULT_STYLE_ANCHOR_MAX_TOKENS)
@@ -402,6 +407,61 @@ def _load_character_states(book_root: Path, scene_card: Dict[str, Any]) -> List[
         states.append({"character_id": str(char_id), "missing": True})
     return states
 
+def _last_touched_from_character_state(state: Dict[str, Any]) -> Tuple[int, int]:
+    if isinstance(state.get("last_touched"), dict):
+        chapter = _maybe_int(state.get("last_touched", {}).get("chapter"))
+        scene = _maybe_int(state.get("last_touched", {}).get("scene"))
+        if chapter is not None and scene is not None:
+            return chapter, scene
+
+    history = state.get("history")
+    if isinstance(history, list):
+        for entry in reversed(history):
+            if not isinstance(entry, dict):
+                continue
+            chapter = _maybe_int(entry.get("chapter"))
+            scene = _maybe_int(entry.get("scene"))
+            if chapter is not None and scene is not None:
+                return chapter, scene
+    return 0, 0
+
+
+def _snapshot_character_states_before_preflight(
+    book_root: Path,
+    scene_card: Dict[str, Any],
+) -> List[Path]:
+    cast_ids = scene_card.get("cast_present_ids", []) if isinstance(scene_card, dict) else []
+    if not isinstance(cast_ids, list):
+        cast_ids = []
+    cast_ids = [str(item) for item in cast_ids if str(item).strip()]
+    if not cast_ids:
+        return []
+
+    history_dir = book_root / "draft" / "context" / "characters" / "history"
+    history_dir.mkdir(parents=True, exist_ok=True)
+    ensure_character_index(book_root)
+
+    snapshots: List[Path] = []
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    for char_id in cast_ids:
+        state_path = resolve_character_state_path(book_root, char_id)
+        if state_path is None or not state_path.exists():
+            continue
+        try:
+            loaded = json.loads(state_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(loaded, dict):
+            continue
+
+        touched_ch, touched_sc = _last_touched_from_character_state(loaded)
+        prefix = f"ch{touched_ch:03d}_sc{touched_sc:03d}_"
+        candidate = history_dir / f"{prefix}{state_path.name}"
+        if candidate.exists():
+            candidate = history_dir / f"{prefix}{stamp}_{state_path.name}"
+        shutil.copyfile(state_path, candidate)
+        snapshots.append(candidate)
+    return snapshots
 def _normalize_continuity_pack(
     pack: Dict[str, Any],
     scene_card: Dict[str, Any],
@@ -578,6 +638,20 @@ def _fill_character_update_context(patch: Dict[str, Any], scene_card: Dict[str, 
         if "scene" not in update and scene is not None:
             update["scene"] = scene
 
+
+def _fill_character_continuity_update_context(patch: Dict[str, Any], scene_card: Dict[str, Any]) -> None:
+    updates = patch.get("character_continuity_system_updates") if isinstance(patch, dict) else None
+    if not isinstance(updates, list):
+        return
+    chapter = _maybe_int(scene_card.get("chapter")) if isinstance(scene_card, dict) else None
+    scene = _maybe_int(scene_card.get("scene")) if isinstance(scene_card, dict) else None
+    for update in updates:
+        if not isinstance(update, dict):
+            continue
+        if "chapter" not in update and chapter is not None:
+            update["chapter"] = chapter
+        if "scene" not in update and scene is not None:
+            update["scene"] = scene
 def _coerce_stat_updates(patch: Dict[str, Any]) -> None:
     if not isinstance(patch, dict):
         return
@@ -1052,10 +1126,18 @@ def _apply_character_continuity_system_updates(book_root: Path, patch: Dict[str,
         state.setdefault("history", [])
         if isinstance(state.get("history"), list):
             note = update.get("reason")
+            chapter = _maybe_int(update.get("chapter"))
+            scene = _maybe_int(update.get("scene"))
             entry = {"changes": ["continuity_system_state_updated"]}
             if isinstance(note, str) and note.strip():
                 entry["notes"] = note.strip()
+            if chapter is not None:
+                entry["chapter"] = chapter
+            if scene is not None:
+                entry["scene"] = scene
             state["history"].append(entry)
+            if chapter is not None and scene is not None:
+                state["last_touched"] = {"chapter": chapter, "scene": scene}
 
         state["updated_at"] = _now_iso()
         state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
@@ -1673,6 +1755,133 @@ def _maybe_int(value: Any) -> Optional[int]:
         return None
 
 
+def _previous_scene_ref(
+    chapter_order: List[int],
+    scene_counts: Dict[int, int],
+    chapter: int,
+    scene: int,
+) -> Optional[Tuple[int, int]]:
+    if scene > 1:
+        return chapter, scene - 1
+    if chapter in chapter_order:
+        idx = chapter_order.index(chapter)
+        if idx > 0:
+            prev_chapter = chapter_order[idx - 1]
+            prev_count = int(scene_counts.get(prev_chapter, 0) or 0)
+            if prev_count > 0:
+                return prev_chapter, prev_count
+    return None
+
+
+def _scene_prose_path(book_root: Path, chapter: int, scene: int) -> Path:
+    return book_root / "draft" / "chapters" / f"ch_{chapter:03d}" / f"scene_{scene:03d}.md"
+
+
+def _read_scene_prose(book_root: Path, chapter: int, scene: int) -> str:
+    path = _scene_prose_path(book_root, chapter, scene)
+    if not path.exists():
+        return ""
+    return path.read_text(encoding="utf-8")
+
+
+def _last_appearance_for_character(
+    book_root: Path,
+    outline: Dict[str, Any],
+    chapter_order: List[int],
+    scene_counts: Dict[int, int],
+    chapter: int,
+    scene: int,
+    character_id: str,
+) -> Optional[Dict[str, Any]]:
+    pointer = _previous_scene_ref(chapter_order, scene_counts, chapter, scene)
+    while pointer is not None:
+        ref_ch, ref_sc = pointer
+        cast_ids = _scene_cast_ids_from_outline(outline, ref_ch, ref_sc)
+        if character_id in cast_ids:
+            prose = _read_scene_prose(book_root, ref_ch, ref_sc)
+            if prose.strip():
+                return {
+                    "character_id": character_id,
+                    "chapter": ref_ch,
+                    "scene": ref_sc,
+                    "prose": prose,
+                }
+        pointer = _previous_scene_ref(chapter_order, scene_counts, ref_ch, ref_sc)
+    return None
+
+
+def _build_preflight_context(
+    book_root: Path,
+    outline: Dict[str, Any],
+    chapter_order: List[int],
+    scene_counts: Dict[int, int],
+    scene_card: Dict[str, Any],
+) -> Dict[str, Any]:
+    chapter = _maybe_int(scene_card.get("chapter")) or 0
+    scene = _maybe_int(scene_card.get("scene")) or 0
+    cast_ids = scene_card.get("cast_present_ids", [])
+    if not isinstance(cast_ids, list):
+        cast_ids = []
+    cast_ids = [str(item) for item in cast_ids if str(item).strip()]
+
+    immediate_previous: Dict[str, Any] = {"available": False}
+    immediate_cast_ids: List[str] = []
+    previous = _previous_scene_ref(chapter_order, scene_counts, chapter, scene)
+    if previous is not None:
+        prev_ch, prev_sc = previous
+        prose = _read_scene_prose(book_root, prev_ch, prev_sc)
+        immediate_previous = {
+            "available": bool(prose.strip()),
+            "chapter": prev_ch,
+            "scene": prev_sc,
+            "prose": prose,
+        }
+        immediate_cast_ids = _scene_cast_ids_from_outline(outline, prev_ch, prev_sc)
+
+    cast_last_appearance: List[Dict[str, Any]] = []
+    for char_id in cast_ids:
+        if char_id in immediate_cast_ids:
+            continue
+        item = _last_appearance_for_character(
+            book_root,
+            outline,
+            chapter_order,
+            scene_counts,
+            chapter,
+            scene,
+            char_id,
+        )
+        if item:
+            cast_last_appearance.append(item)
+
+    return {
+        "immediate_previous_scene": immediate_previous,
+        "cast_last_appearance": cast_last_appearance,
+    }
+
+
+def _sanitize_preflight_patch(patch: Dict[str, Any]) -> Dict[str, Any]:
+    allowed_keys = {
+        "schema_version",
+        "world_updates",
+        "thread_updates",
+        "world",
+        "canon_updates",
+        "character_updates",
+        "character_continuity_system_updates",
+        "global_continuity_system_updates",
+        "character_stat_updates",
+        "character_skill_updates",
+        "run_stat_updates",
+        "run_skill_updates",
+    }
+    sanitized: Dict[str, Any] = {}
+    for key, value in patch.items():
+        if key in allowed_keys:
+            sanitized[key] = value
+    sanitized.setdefault("schema_version", "1.0")
+    return sanitized
+
 def _log_scope(book_root: Path, scene_card: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     scope: Dict[str, Any] = {"book_id": book_root.name}
     if scene_card:
@@ -1869,6 +2078,89 @@ def _ensure_style_anchor(
     return text
 
 
+def _scene_state_preflight(
+    workspace: Path,
+    book_root: Path,
+    system_path: Path,
+    scene_card: Dict[str, Any],
+    state: Dict[str, Any],
+    outline: Dict[str, Any],
+    chapter_order: List[int],
+    scene_counts: Dict[int, int],
+    character_registry: List[Dict[str, str]],
+    thread_registry: List[Dict[str, str]],
+    character_states: List[Dict[str, Any]],
+    client: LLMClient,
+    model: str,
+) -> Dict[str, Any]:
+    template = _resolve_template(book_root, "preflight.md")
+    context = _build_preflight_context(book_root, outline, chapter_order, scene_counts, scene_card)
+    prompt = render_template_file(
+        template,
+        {
+            "scene_card": scene_card,
+            "state": state,
+            "summary": _summary_from_state(state),
+            "character_registry": character_registry,
+            "thread_registry": thread_registry,
+            "character_states": character_states,
+            "immediate_previous_scene": context.get("immediate_previous_scene", {}),
+            "cast_last_appearance": context.get("cast_last_appearance", []),
+        },
+    )
+
+    messages: List[Message] = [
+        {"role": "system", "content": load_system_prompt(system_path, book_root / "outline" / "outline.json", include_outline=True)},
+        {"role": "user", "content": prompt},
+    ]
+
+    response = _chat(
+        workspace,
+        "scene_state_preflight",
+        client,
+        messages,
+        model=model,
+        temperature=0.2,
+        max_tokens=_preflight_max_tokens(),
+        log_extra=_log_scope(book_root, scene_card),
+    )
+
+    retries = _json_retry_count()
+    attempt = 0
+    while True:
+        try:
+            patch = _extract_json(response.text)
+            break
+        except ValueError as exc:
+            if attempt >= retries:
+                raise exc
+            retry_messages = list(messages)
+            retry_messages.append({
+                "role": "user",
+                "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
+            })
+            response = _chat(
+                workspace,
+                f"scene_state_preflight_json_retry{attempt + 1}",
+                client,
+                retry_messages,
+                model=model,
+                temperature=0.2,
+                max_tokens=_preflight_max_tokens(),
+                log_extra=_log_scope(book_root, scene_card),
+            )
+            attempt += 1
+
+    patch = _sanitize_preflight_patch(patch)
+    _coerce_summary_update(patch)
+    _coerce_character_updates(patch)
+    _coerce_stat_updates(patch)
+    _migrate_numeric_invariants(patch)
+    _fill_character_update_context(patch, scene_card)
+    _fill_character_continuity_update_context(patch, scene_card)
+    validate_json(patch, "state_patch")
+    return patch
+
 def _generate_continuity_pack(
     workspace: Path,
     book_root: Path,
@@ -2022,6 +2314,7 @@ def _write_scene(
     _coerce_stat_updates(patch)
     _migrate_numeric_invariants(patch)
     _fill_character_update_context(patch, scene_card)
+    _fill_character_continuity_update_context(patch, scene_card)
     validate_json(patch, "state_patch")
     return prose, patch
 
@@ -2187,6 +2480,7 @@ def _repair_scene(
     _coerce_stat_updates(patch)
     _migrate_numeric_invariants(patch)
     _fill_character_update_context(patch, scene_card)
+    _fill_character_continuity_update_context(patch, scene_card)
     validate_json(patch, "state_patch")
     return prose, patch
 
@@ -2270,6 +2564,7 @@ def _state_repair(
     _coerce_stat_updates(patch)
     _migrate_numeric_invariants(patch)
     _fill_character_update_context(patch, scene_card)
+    _fill_character_continuity_update_context(patch, scene_card)
     validate_json(patch, "state_patch")
     return patch
 
@@ -2385,9 +2680,9 @@ def _apply_character_updates(book_root: Path, patch: Dict[str, Any], chapter_num
             history.append(history_entry)
             state["history"] = history
 
+        state["last_touched"] = {"chapter": chapter, "scene": scene}
         state["updated_at"] = _now_iso()
         state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
-
 
 
 def _update_bible(book_root: Path, patch: Dict[str, Any]) -> None:
@@ -2494,12 +2789,14 @@ def run_loop(
     config = load_config()
     planner_client = get_llm_client(config, phase="planner")
     continuity_client = get_llm_client(config, phase="continuity")
+    preflight_client = get_llm_client(config, phase="preflight")
     writer_client = get_llm_client(config, phase="writer")
     repair_client = get_llm_client(config, phase="repair")
     state_repair_client = get_llm_client(config, phase="state_repair")
     linter_client = get_llm_client(config, phase="linter")
     planner_model = resolve_model("planner", config)
     continuity_model = resolve_model("continuity", config)
+    preflight_model = resolve_model("preflight", config)
 
     if not characters_ready(book_root):
         try:
@@ -2590,6 +2887,35 @@ def run_loop(
         _status(f"Loading character states (cast only): ch{chapter_num:03d} sc{scene_num:03d}...")
         character_states = _load_character_states(book_root, scene_card)
         _status("Character states loaded OK")
+        snapshots = _snapshot_character_states_before_preflight(book_root, scene_card)
+        if snapshots:
+            _status(f"Character state snapshots written: {len(snapshots)}")
+
+        _status(f"Preflight state alignment: ch{chapter_num:03d} sc{scene_num:03d}...")
+        try:
+            preflight_patch = _scene_state_preflight(
+                workspace,
+                book_root,
+                system_path,
+                scene_card,
+                state,
+                outline,
+                chapter_order,
+                scene_counts,
+                character_registry,
+                thread_registry,
+                character_states,
+                preflight_client,
+                preflight_model,
+            )
+        except LLMRequestError as exc:
+            _pause_on_quota(book_root, state_path, state, "scene_state_preflight", exc, scene_card)
+
+        state = _apply_state_patch(state, preflight_patch, chapter_end=False)
+        _apply_character_updates(book_root, preflight_patch, chapter_num, scene_num)
+        _apply_character_stat_updates(book_root, preflight_patch)
+        character_states = _load_character_states(book_root, scene_card)
+        _status("Preflight alignment complete OK")
 
         _status(f"Generating continuity pack: ch{chapter_num:03d} sc{scene_num:03d}...")
         try:
@@ -2826,7 +3152,4 @@ def run_loop(
 
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
-
-
-
 

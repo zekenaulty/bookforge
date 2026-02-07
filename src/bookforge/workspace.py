@@ -37,6 +37,7 @@ DEFAULT_BUDGETS = {
 PROMPT_TEMPLATE_FILES = [
     "outline.md",
     "plan.md",
+    "preflight.md",
     "write.md",
     "lint.md",
     "repair.md",
@@ -437,3 +438,4 @@ def reset_book_workspace(workspace: Path, book_id: str) -> Path:
         shutil.rmtree(characters_dir)
 
     return book_root
+

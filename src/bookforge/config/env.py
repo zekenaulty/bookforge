@@ -13,6 +13,7 @@ class AppConfig:
     openai_api_key: Optional[str]
     gemini_api_key: Optional[str]
     planner_api_key: Optional[str]
+    preflight_api_key: Optional[str]
     writer_api_key: Optional[str]
     repair_api_key: Optional[str]
     state_repair_api_key: Optional[str]
@@ -24,6 +25,7 @@ class AppConfig:
     gemini_api_url: str
     request_timeout_seconds: int
     planner_model: Optional[str]
+    preflight_model: Optional[str]
     writer_model: Optional[str]
     repair_model: Optional[str]
     state_repair_model: Optional[str]
@@ -113,6 +115,7 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
         openai_api_key=merged.get("OPENAI_API_KEY"),
         gemini_api_key=merged.get("GEMINI_API_KEY"),
         planner_api_key=merged.get("PLANNER_API_KEY"),
+        preflight_api_key=merged.get("PREFLIGHT_API_KEY") or merged.get("SCENE_PREFLIGHT_API_KEY"),
         writer_api_key=merged.get("WRITER_API_KEY"),
         repair_api_key=merged.get("REPAIR_API_KEY"),
         state_repair_api_key=merged.get("STATE_REPAIR_API_KEY"),
@@ -124,6 +127,7 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
         gemini_api_url=gemini_url,
         request_timeout_seconds=timeout_val,
         planner_model=merged.get("PLANNER_MODEL"),
+        preflight_model=merged.get("PREFLIGHT_MODEL") or merged.get("SCENE_PREFLIGHT_MODEL"),
         writer_model=merged.get("WRITER_MODEL"),
         repair_model=merged.get("REPAIR_MODEL"),
         state_repair_model=merged.get("STATE_REPAIR_MODEL"),
@@ -164,6 +168,7 @@ def read_int_env(name: str, default: int) -> int:
 def _has_phase_api_keys(config: AppConfig) -> bool:
     return any([
         config.planner_api_key,
+        config.preflight_api_key,
         config.writer_api_key,
         config.repair_api_key,
         config.state_repair_api_key,
@@ -187,3 +192,4 @@ def validate_provider_config(config: AppConfig) -> None:
             raise ValueError("OLLAMA_URL is required when LLM_PROVIDER=ollama")
         return
     raise ValueError(f"Unsupported LLM_PROVIDER: {config.provider}")
+
