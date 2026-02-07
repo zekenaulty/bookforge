@@ -8,6 +8,21 @@ from .continuity import (
     save_style_anchor,
     style_anchor_path,
 )
+from .durable_state import (
+    ensure_durable_state_files,
+    ensure_item_registry,
+    ensure_plot_devices,
+    item_registry_path,
+    items_index_path,
+    load_item_registry,
+    load_plot_devices,
+    plot_devices_index_path,
+    plot_devices_path,
+    save_item_registry,
+    save_plot_devices,
+    snapshot_item_registry,
+    snapshot_plot_devices,
+)
 
 __all__ = [
     "ContinuityPack",
@@ -18,4 +33,17 @@ __all__ = [
     "save_continuity_pack",
     "save_style_anchor",
     "style_anchor_path",
+    "ensure_durable_state_files",
+    "ensure_item_registry",
+    "ensure_plot_devices",
+    "item_registry_path",
+    "items_index_path",
+    "load_item_registry",
+    "load_plot_devices",
+    "plot_devices_index_path",
+    "plot_devices_path",
+    "save_item_registry",
+    "save_plot_devices",
+    "snapshot_item_registry",
+    "snapshot_plot_devices",
 ]

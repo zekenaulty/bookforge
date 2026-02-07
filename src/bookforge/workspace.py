@@ -6,6 +6,7 @@ import json
 import shutil
 
 from bookforge.prompt.system import write_system_prompt
+from bookforge.memory.durable_state import ensure_durable_state_files
 from bookforge.util.paths import repo_root
 from bookforge.util.schema import SCHEMA_VERSION, validate_json
 
@@ -279,6 +280,7 @@ def init_book_workspace(
     (book_root / "canon" / "rules").mkdir(parents=True, exist_ok=True)
     (book_root / "canon" / "threads").mkdir(parents=True, exist_ok=True)
     (book_root / "draft" / "context").mkdir(parents=True, exist_ok=True)
+    ensure_durable_state_files(book_root)
     (book_root / "draft" / "chapters").mkdir(parents=True, exist_ok=True)
     (book_root / "exports").mkdir(parents=True, exist_ok=True)
     (book_root / "logs").mkdir(parents=True, exist_ok=True)
@@ -436,6 +438,22 @@ def reset_book_workspace(workspace: Path, book_id: str) -> Path:
     characters_dir = context_dir / "characters"
     if characters_dir.exists():
         shutil.rmtree(characters_dir)
+    item_registry_file = context_dir / "item_registry.json"
+    if item_registry_file.exists():
+        item_registry_file.unlink()
+
+    plot_devices_file = context_dir / "plot_devices.json"
+    if plot_devices_file.exists():
+        plot_devices_file.unlink()
+
+    items_context_dir = context_dir / "items"
+    if items_context_dir.exists():
+        shutil.rmtree(items_context_dir)
+
+    plot_devices_context_dir = context_dir / "plot_devices"
+    if plot_devices_context_dir.exists():
+        shutil.rmtree(plot_devices_context_dir)
+
+    ensure_durable_state_files(book_root)
 
     return book_root
-

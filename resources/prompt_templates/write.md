@@ -15,6 +15,7 @@ Write the scene described by the scene card.
 - Continuity system ownership is mandatory, and must be tracked: any mechanic/UI numbers, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, or future mechanic families must be sourced from existing continuity system state or written into continuity system updates in this scene.
 - titles are arrays of objects with stable name fields; do not emit titles as plain strings.
 - Canonical descriptors (colors, item names, effect IDs, mechanic labels) must be reused exactly; do not paraphrase.
+- If item_registry or plot_devices are provided, they are canonical durable-state references for ownership/custody labels in authoritative outputs.
 - If a required event is not in the Scene Card, do not perform it.
 - summary_update arrays are mandatory; do not omit or leave empty unless explicitly stated.
 - STATE_PATCH must record all major events and outcomes from the prose; if an event happens, add it to key_events and update must_stay_true as needed.
@@ -83,3 +84,9 @@ PROSE:
 
 STATE_PATCH:
 <json>
+
+Item registry (canonical):
+{{item_registry}}
+
+Plot devices (canonical):
+{{plot_devices}}

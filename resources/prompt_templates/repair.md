@@ -10,6 +10,7 @@ Inventory contract: track ownership and container location for key items; update
 For held items, specify container=hand_left or container=hand_right.
 Continuity system ownership is mandatory, and must be tracked: any mechanic/UI numbers, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, or future mechanic families must be sourced from existing continuity system state or written into continuity system updates.
 Canonical descriptors (colors, item names, effect IDs, mechanic labels) must be reused exactly; do not paraphrase.
+If item_registry or plot_devices are provided, they are canonical durable-state references for authoritative labels and custody terms.
 summary_update arrays are mandatory; do not omit or leave empty unless explicitly stated.
 STATE_PATCH must record all major events and outcomes from the prose; if an event happens, add it to key_events and update must_stay_true as needed.
 must_stay_true must include a milestone ledger entry for every milestone referenced in the Scene Card or already present in state.
@@ -77,3 +78,9 @@ Scene:
 
 State:
 {{state}}
+
+Item registry (canonical):
+{{item_registry}}
+
+Plot devices (canonical):
+{{plot_devices}}

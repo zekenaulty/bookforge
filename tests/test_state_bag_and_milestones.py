@@ -3,6 +3,7 @@ from bookforge.runner import (
     _coerce_stat_updates,
     _heuristic_invariant_issues,
     _pov_drift_issues,
+    _extract_authoritative_surfaces,
     _stat_mismatch_issues,
 )
 
@@ -172,3 +173,33 @@ def test_coerce_stat_updates_normalizes_title_objects_from_mixed_values() -> Non
         {"name": "Novice"},
         {"title": "Anomaly", "source": "system", "name": "Anomaly"},
     ]
+
+
+def test_authoritative_surfaces_extracts_ui_blocks() -> None:
+    prose = """Narrative line.
+[HP: 1/1]
+[System Notification: Entering Oakhaven]
+[Warning: Near-Miss!]
+Another line."""
+
+    surfaces = _extract_authoritative_surfaces(prose)
+
+    assert len(surfaces) == 3
+    assert surfaces[0]["kind"] == "ui_stat"
+    assert surfaces[1]["kind"] == "system_notification"
+
+
+def test_stat_mismatch_uses_only_authoritative_surfaces_when_provided() -> None:
+    prose = "Narrative with [HP: 999/999] in dialogue but no actual UI block."
+    character_states = [{"character_id": "CHAR_a", "stats": {"hp": {"current": 1, "max": 1}}}]
+    authoritative_surfaces = []
+
+    issues = _stat_mismatch_issues(
+        prose,
+        character_states,
+        {},
+        authoritative_surfaces=authoritative_surfaces,
+    )
+
+    # No authoritative UI surfaces means no UI stat drift check for this text.
+    assert not any(issue.get("code") in {"stat_mismatch", "stat_unowned"} for issue in issues)

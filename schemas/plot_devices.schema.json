@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Plot Devices",
+  "type": "object",
+  "required": ["schema_version", "devices"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "devices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "device_id",
+          "name",
+          "custody_scope",
+          "custody_ref",
+          "activation_state",
+          "linked_threads",
+          "constraints",
+          "last_seen"
+        ],
+        "properties": {
+          "device_id": {"type": "string", "minLength": 1},
+          "name": {"type": "string", "minLength": 1},
+          "custody_scope": {"type": "string", "minLength": 1},
+          "custody_ref": {
+            "anyOf": [
+              {"type": "string", "minLength": 1},
+              {"type": "object"}
+            ]
+          },
+          "activation_state": {"type": "string"},
+          "linked_threads": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "constraints": {
+            "anyOf": [
+              {"type": "array"},
+              {"type": "object"},
+              {"type": "string"}
+            ]
+          },
+          "last_seen": {
+            "type": "object",
+            "required": ["chapter", "scene", "location"],
+            "properties": {
+              "chapter": {"type": "integer", "minimum": 0},
+              "scene": {"type": "integer", "minimum": 0},
+              "location": {"type": "string"}
+            },
+            "additionalProperties": true
+          },
+          "aliases": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "linked_item_id": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -19,6 +19,7 @@ Rules:
 - Continuity system ownership is mandatory, and must be tracked: any mechanic/UI numbers, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, or future mechanic families must be sourced from existing continuity system state or written into continuity system updates.
 - titles are arrays of objects with stable name fields; do not emit titles as plain strings.
 - Canonical descriptors (colors, item names, effect IDs, mechanic labels) must be reused exactly; do not paraphrase.
+- If item_registry or plot_devices are provided, they are canonical durable-state references for authoritative labels and custody terms.
 - Do not add numeric mechanics to invariants_add; store them in continuity system updates instead.
 - If an event appears in prose, it must appear in key_events.
 - must_stay_true must include milestone ledger entries and any inventory/injury/ownership invariants implied by prose.
@@ -59,3 +60,9 @@ Draft state patch:
 
 Prose:
 {{prose}}
+
+Item registry (canonical):
+{{item_registry}}
+
+Plot devices (canonical):
+{{plot_devices}}

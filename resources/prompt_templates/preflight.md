@@ -86,3 +86,9 @@ Output JSON shape reminder:
   ],
   "global_continuity_system_updates": []
 }
+
+Item registry (canonical):
+{{item_registry}}
+
+Plot devices (canonical):
+{{plot_devices}}

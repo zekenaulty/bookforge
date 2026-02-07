@@ -41,3 +41,7 @@ def test_init_book_workspace(tmp_path: Path) -> None:
 
     assert (book_dir / "prompts" / "templates" / "plan.md").exists()
     assert (book_dir / "prompts" / "registry.json").exists()
+    assert (book_dir / "draft" / "context" / "item_registry.json").exists()
+    assert (book_dir / "draft" / "context" / "plot_devices.json").exists()
+    assert (book_dir / "draft" / "context" / "items" / "index.json").exists()
+    assert (book_dir / "draft" / "context" / "plot_devices" / "index.json").exists()

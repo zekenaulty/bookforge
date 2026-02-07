@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,6 +23,11 @@ from bookforge.memory.continuity import (
     save_continuity_pack,
     save_style_anchor,
     style_anchor_path,
+)
+from bookforge.memory.durable_state import (
+    ensure_durable_state_files,
+    load_item_registry,
+    load_plot_devices,
 )
 from bookforge.phases.plan import plan_scene
 from bookforge.prompt.renderer import render_template_file
@@ -124,6 +129,14 @@ def _resolve_template(book_root: Path, name: str) -> Path:
 
 def _load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _durable_state_context(book_root: Path) -> Dict[str, Any]:
+    ensure_durable_state_files(book_root)
+    return {
+        "item_registry": load_item_registry(book_root),
+        "plot_devices": load_plot_devices(book_root),
+    }
 
 
 def _response_truncated(response: LLMResponse) -> bool:
@@ -656,7 +669,18 @@ def _coerce_stat_updates(patch: Dict[str, Any]) -> None:
     if not isinstance(patch, dict):
         return
 
-    continuity_reserved = {"character_id", "set", "delta", "remove", "reason", "chapter", "scene", "notes"}
+    continuity_reserved = {
+        "character_id",
+        "set",
+        "delta",
+        "remove",
+        "reason",
+        "reason_category",
+        "expected_before",
+        "chapter",
+        "scene",
+        "notes",
+    }
     known_families = (
         "stats",
         "skills",
@@ -1173,17 +1197,54 @@ def _apply_character_stat_updates(book_root: Path, patch: Dict[str, Any]) -> Non
 def _apply_run_stat_updates(state: Dict[str, Any], patch: Dict[str, Any]) -> None:
     _apply_global_continuity_system_updates(state, patch)
 
-def _extract_ui_stat_lines(prose: str) -> List[Dict[str, Any]]:
+def _extract_authoritative_surfaces(prose: str) -> List[Dict[str, Any]]:
+    surfaces: List[Dict[str, Any]] = []
+    for line_no, raw_line in enumerate(str(prose).splitlines(), start=1):
+        text = raw_line.strip()
+        if not text:
+            continue
+        if not (text.startswith("[") and text.endswith("]")):
+            continue
+
+        kind = "ui_block"
+        if re.match(r"^\[[^\]:]{1,80}:\s*[-+0-9]", text):
+            kind = "ui_stat"
+        elif text.lower().startswith("[system"):
+            kind = "system_notification"
+        elif text.lower().startswith("[warning"):
+            kind = "system_notification"
+
+        surfaces.append({"line": line_no, "kind": kind, "text": text})
+    return surfaces
+
+
+def _extract_ui_stat_lines(
+    prose: str,
+    authoritative_surfaces: Optional[List[Dict[str, Any]]] = None,
+) -> List[Dict[str, Any]]:
     lines: List[Dict[str, Any]] = []
-    for match in re.finditer(r"\[([^\]:]{1,80}):\s*([0-9]+(?:\.[0-9]+)?)(?:/([0-9]+(?:\.[0-9]+)?))?\s*%?\]", prose):
-        key = match.group(1).strip()
-        current_raw = match.group(2)
-        max_raw = match.group(3)
-        current = float(current_raw) if "." in current_raw else int(current_raw)
-        maximum: Any = None
-        if max_raw is not None:
-            maximum = float(max_raw) if "." in max_raw else int(max_raw)
-        lines.append({"key": key, "current": current, "max": maximum})
+    source_texts: List[str] = []
+
+    if authoritative_surfaces is not None:
+        for surface in authoritative_surfaces:
+            if not isinstance(surface, dict):
+                continue
+            text = surface.get("text")
+            if isinstance(text, str) and text.strip():
+                source_texts.append(text)
+    else:
+        source_texts = [str(prose)]
+
+    for chunk in source_texts:
+        for match in re.finditer(r"\[([^\]:]{1,80}):\s*([0-9]+(?:\.[0-9]+)?)(?:/([0-9]+(?:\.[0-9]+)?))?\s*%?\]", chunk):
+            key = match.group(1).strip()
+            current_raw = match.group(2)
+            max_raw = match.group(3)
+            current = float(current_raw) if "." in current_raw else int(current_raw)
+            maximum: Any = None
+            if max_raw is not None:
+                maximum = float(max_raw) if "." in max_raw else int(max_raw)
+            lines.append({"key": key, "current": current, "max": maximum})
     return lines
 
 
@@ -1200,8 +1261,13 @@ def _stat_key_aliases() -> Dict[str, str]:
     }
 
 
-def _stat_mismatch_issues(prose: str, character_states: List[Dict[str, Any]], run_stats: Dict[str, Any]) -> List[Dict[str, Any]]:
-    lines = _extract_ui_stat_lines(prose)
+def _stat_mismatch_issues(
+    prose: str,
+    character_states: List[Dict[str, Any]],
+    run_stats: Dict[str, Any],
+    authoritative_surfaces: Optional[List[Dict[str, Any]]] = None,
+) -> List[Dict[str, Any]]:
+    lines = _extract_ui_stat_lines(prose, authoritative_surfaces)
     if not lines:
         return []
 
@@ -1874,6 +1940,10 @@ def _sanitize_preflight_patch(patch: Dict[str, Any]) -> Dict[str, Any]:
         "character_skill_updates",
         "run_stat_updates",
         "run_skill_updates",
+        "inventory_alignment_updates",
+        "item_registry_updates",
+        "plot_device_updates",
+        "transfer_updates",
     }
     sanitized: Dict[str, Any] = {}
     for key, value in patch.items():
@@ -2095,6 +2165,7 @@ def _scene_state_preflight(
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "preflight.md")
     context = _build_preflight_context(book_root, outline, chapter_order, scene_counts, scene_card)
+    durable = _durable_state_context(book_root)
     prompt = render_template_file(
         template,
         {
@@ -2104,6 +2175,8 @@ def _scene_state_preflight(
             "character_registry": character_registry,
             "thread_registry": thread_registry,
             "character_states": character_states,
+            "item_registry": durable.get("item_registry", {}),
+            "plot_devices": durable.get("plot_devices", {}),
             "immediate_previous_scene": context.get("immediate_previous_scene", {}),
             "cast_last_appearance": context.get("cast_last_appearance", []),
         },
@@ -2174,6 +2247,7 @@ def _generate_continuity_pack(
     model: str,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "continuity_pack.md")
+    durable = _durable_state_context(book_root)
     recent_facts = state.get("world", {}).get("recent_facts", [])
     prompt = render_template_file(
         template,
@@ -2185,6 +2259,8 @@ def _generate_continuity_pack(
             "character_registry": character_registry,
             "thread_registry": thread_registry,
             "character_states": character_states,
+            "item_registry": durable.get("item_registry", {}),
+            "plot_devices": durable.get("plot_devices", {}),
         },
     )
 
@@ -2251,6 +2327,7 @@ def _write_scene(
     model: str,
 ) -> Tuple[str, Dict[str, Any]]:
     template = _resolve_template(book_root, "write.md")
+    durable = _durable_state_context(book_root)
     prompt = render_template_file(
         template,
         {
@@ -2261,6 +2338,8 @@ def _write_scene(
             "character_registry": character_registry,
             "thread_registry": thread_registry,
             "character_states": character_states,
+            "item_registry": durable.get("item_registry", {}),
+            "plot_devices": durable.get("plot_devices", {}),
         },
     )
 
@@ -2334,6 +2413,8 @@ def _lint_scene(
     model: str,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "lint.md")
+    durable = _durable_state_context(book_root)
+    authoritative_surfaces = _extract_authoritative_surfaces(prose)
     prompt = render_template_file(
         template,
         {
@@ -2341,6 +2422,9 @@ def _lint_scene(
             "state": state,
             "summary": _summary_from_state(state),
             "invariants": invariants,
+            "authoritative_surfaces": authoritative_surfaces,
+            "item_registry": durable.get("item_registry", {}),
+            "plot_devices": durable.get("plot_devices", {}),
             "character_states": character_states,
         },
     )
@@ -2391,7 +2475,12 @@ def _lint_scene(
     if not isinstance(summary_update, dict):
         summary_update = {}
     heuristic_issues = _heuristic_invariant_issues(prose, summary_update, invariants)
-    extra_issues = _stat_mismatch_issues(prose, character_states, _global_continuity_stats(state))
+    extra_issues = _stat_mismatch_issues(
+        prose,
+        character_states,
+        _global_continuity_stats(state),
+        authoritative_surfaces=authoritative_surfaces,
+    )
     extra_issues += _pov_drift_issues(prose, pov)
     combined = heuristic_issues + extra_issues
     if combined:
@@ -2417,6 +2506,7 @@ def _repair_scene(
     model: str,
 ) -> Tuple[str, Dict[str, Any]]:
     template = _resolve_template(book_root, "repair.md")
+    durable = _durable_state_context(book_root)
     prompt = render_template_file(
         template,
         {
@@ -2427,6 +2517,8 @@ def _repair_scene(
             "character_registry": character_registry,
             "thread_registry": thread_registry,
             "character_states": character_states,
+            "item_registry": durable.get("item_registry", {}),
+            "plot_devices": durable.get("plot_devices", {}),
         },
     )
 
@@ -2501,6 +2593,7 @@ def _state_repair(
     model: str,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "state_repair.md")
+    durable = _durable_state_context(book_root)
     prompt = render_template_file(
         template,
         {
@@ -2513,6 +2606,8 @@ def _state_repair(
             "character_registry": character_registry,
             "thread_registry": thread_registry,
             "character_states": character_states,
+            "item_registry": durable.get("item_registry", {}),
+            "plot_devices": durable.get("plot_devices", {}),
         },
     )
 

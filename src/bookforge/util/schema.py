@@ -21,7 +21,10 @@ _SCHEMA_MAP = {
     "scene_card": "scene_card.schema.json",
     "state_patch": "state_patch.schema.json",
     "lint_report": "lint_report.schema.json",
+    "item_registry": "item_registry.schema.json",
+    "plot_devices": "plot_devices.schema.json",
 }
+
 
 @dataclass
 class SchemaValidationError(Exception):
@@ -30,8 +33,10 @@ class SchemaValidationError(Exception):
     def __str__(self) -> str:
         return self.message
 
+
 def _root_dir() -> Path:
     return repo_root(Path(__file__).resolve())
+
 
 def load_schema(schema_name: str) -> dict:
     if schema_name not in _SCHEMA_MAP:
@@ -40,6 +45,7 @@ def load_schema(schema_name: str) -> dict:
     if not path.exists():
         raise SchemaValidationError(f"Schema not found: {path}")
     return json.loads(path.read_text(encoding="utf-8"))
+
 
 def validate_json(data: Any, schema_name: str) -> None:
     schema = load_schema(schema_name)
