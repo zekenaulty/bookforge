@@ -1,11 +1,12 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from typing import Iterable, List, Tuple
 import json
 import logging
+import socket
 import time
-import urllib.request
 import urllib.error
+import urllib.request
 
 from .types import Message
 from .errors import LLMRequestError, QuotaViolation
@@ -86,6 +87,11 @@ def post_json(
     max_retries: int = 0,
     retry_backoff: float = 1.0,
 ) -> dict:
+    def _retry_transport(reason: str, attempt_index: int) -> None:
+        delay = retry_backoff * (2 ** attempt_index)
+        logger.warning("Retrying after %.2fs due to %s", delay, reason)
+        time.sleep(delay)
+
     attempt = 0
     while True:
         data = json.dumps(payload).encode("utf-8")
@@ -107,11 +113,26 @@ def post_json(
                 attempt += 1
                 continue
             raise err from exc
-        except urllib.error.URLError as exc:
+        except (TimeoutError, socket.timeout) as exc:
             if attempt < max_retries:
-                delay = retry_backoff * (2 ** attempt)
-                logger.warning("Retrying after %.2fs due to transport error", delay)
-                time.sleep(delay)
+                _retry_transport("read timeout", attempt)
+                attempt += 1
+                continue
+            raise RuntimeError(
+                f"Transport timeout calling {url} after {attempt + 1} attempts (timeout={timeout}s): {exc}"
+            ) from exc
+        except urllib.error.URLError as exc:
+            reason = getattr(exc, "reason", None)
+            if isinstance(reason, (TimeoutError, socket.timeout)):
+                if attempt < max_retries:
+                    _retry_transport("read timeout", attempt)
+                    attempt += 1
+                    continue
+                raise RuntimeError(
+                    f"Transport timeout calling {url} after {attempt + 1} attempts (timeout={timeout}s): {reason}"
+                ) from exc
+            if attempt < max_retries:
+                _retry_transport("transport error", attempt)
                 attempt += 1
                 continue
             raise RuntimeError(f"Transport error calling {url}: {exc}") from exc
