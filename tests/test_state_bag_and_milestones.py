@@ -1,5 +1,6 @@
-﻿from bookforge.runner import (
+from bookforge.runner import (
     _apply_bag_updates,
+    _coerce_stat_updates,
     _heuristic_invariant_issues,
     _pov_drift_issues,
     _stat_mismatch_issues,
@@ -86,3 +87,88 @@ def test_stat_unowned_when_missing_in_cast_and_run() -> None:
     issues = _stat_mismatch_issues(prose, character_states, {})
 
     assert any(issue.get("code") == "stat_unowned" for issue in issues)
+
+
+def test_stat_mismatch_owner_key_uses_matching_cast_member() -> None:
+    prose = "[Artie HP: 1/1]"
+    character_states = [
+        {
+            "character_id": "CHAR_artie",
+            "name": "Artie",
+            "character_continuity_system_state": {"stats": {"hp": {"current": 1, "max": 1}}},
+        },
+        {
+            "character_id": "CHAR_fizz",
+            "name": "Fizz",
+            "character_continuity_system_state": {"stats": {"hp": {"current": 10, "max": 10}}},
+        },
+    ]
+
+    issues = _stat_mismatch_issues(prose, character_states, {})
+
+    assert not any(issue.get("code") == "stat_mismatch" for issue in issues)
+    assert not any(issue.get("code") == "stat_unowned" for issue in issues)
+
+
+def test_stat_mismatch_owner_key_does_not_fallback_to_other_cast() -> None:
+    prose = "[Artie HP: 10/10]"
+    character_states = [
+        {
+            "character_id": "CHAR_artie",
+            "name": "Artie",
+            "character_continuity_system_state": {"stats": {"hp": {"current": 1, "max": 1}}},
+        },
+        {
+            "character_id": "CHAR_fizz",
+            "name": "Fizz",
+            "character_continuity_system_state": {"stats": {"hp": {"current": 10, "max": 10}}},
+        },
+    ]
+
+    issues = _stat_mismatch_issues(prose, character_states, {})
+
+    assert any(issue.get("code") == "stat_mismatch" for issue in issues)
+
+
+def test_coerce_stat_updates_folds_dynamic_top_level_fields_into_set() -> None:
+    patch = {
+        "character_continuity_system_updates": [
+            {
+                "character_id": "CHAR_artie",
+                "stats": {"hp": {"current": 1, "max": 1}},
+                "titles": ["Anomaly"],
+                "system_tracking_metadata": {"ui_theme": "retro"},
+                "custom_mechanic_sheet": {"crit_chain": 3},
+            }
+        ]
+    }
+
+    _coerce_stat_updates(patch)
+    updates = patch["character_continuity_system_updates"][0]
+    set_block = updates.get("set", {})
+
+    assert set_block.get("stats", {}).get("hp", {}).get("current") == 1
+    assert set_block.get("titles") == [{"name": "Anomaly"}]
+    assert set_block.get("system_tracking_metadata", {}).get("ui_theme") == "retro"
+    assert set_block.get("custom_mechanic_sheet", {}).get("crit_chain") == 3
+
+
+def test_coerce_stat_updates_normalizes_title_objects_from_mixed_values() -> None:
+    patch = {
+        "character_continuity_system_updates": [
+            {
+                "character_id": "CHAR_artie",
+                "set": {
+                    "titles": ["Novice", {"title": "Anomaly", "source": "system"}],
+                },
+            }
+        ]
+    }
+
+    _coerce_stat_updates(patch)
+    set_block = patch["character_continuity_system_updates"][0].get("set", {})
+
+    assert set_block.get("titles") == [
+        {"name": "Novice"},
+        {"title": "Anomaly", "source": "system", "name": "Anomaly"},
+    ]

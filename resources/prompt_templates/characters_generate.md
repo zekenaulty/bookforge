@@ -18,6 +18,13 @@ Each character object must include:
 - containers (array)
 - invariants (array of strings)
 
+Recommended mechanic seed key (dynamic):
+- character_continuity_system_state (object)
+  - Include any starting mechanics known at setup time.
+  - Examples: stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses.
+  - titles must be an array of objects (not strings).
+  - You may add future mechanic families if relevant.
+
 Persona guidance (compact, factual):
 - core_traits (array)
 - motivations (array)
@@ -62,6 +69,12 @@ Output JSON:
         "values": [],
         "voice_notes": [],
         "arc_hint": ""
+      },
+      "character_continuity_system_state": {
+        "stats": {"hp": {"current": 10, "max": 10}},
+        "skills": {"sword": 1},
+        "titles": [{"name": "Novice", "source": "starting_class", "active": true}],
+        "resources": {"mana": {"current": 5, "max": 5}}
       },
       "inventory": [
         {"item": "longsword", "status": "carried", "container": "hand_right"}

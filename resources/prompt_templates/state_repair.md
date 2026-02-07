@@ -7,6 +7,7 @@ Goal:
 - Ensure state_patch fully and accurately captures the scene's events and outcomes.
 - Fill missing summary_update data and fix invalid formats from draft_patch.
 - Preserve state invariants; do not contradict must_stay_true.
+- Ensure mechanic/UI ownership in continuity system updates.
 
 Rules:
 - Output a single JSON object that matches the state_patch schema.
@@ -15,15 +16,15 @@ Rules:
 - Use scene_card.thread_ids for world_updates.open_threads.
 - Do not invent new character or thread ids.
 - summary_update arrays are required: last_scene (2-4 sentences), key_events (3-7 bullets), must_stay_true (3-7 bullets), chapter_so_far_add (bullets).
-- Numbers must be owned: any UI/prose number shown must exist in state or be added in the patch.
-- Skills must be owned: any skill names, ranks, cooldowns, or charges shown must exist in state or be added in the patch.
-- Canonical descriptors (colors, item names, effect IDs) must be reused exactly; do not paraphrase.
-- Do not add numeric stats to invariants_add; use stat/skill updates instead.
+- Continuity system ownership is mandatory, and must be tracked: any mechanic/UI numbers, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, or future mechanic families must be sourced from existing continuity system state or written into continuity system updates.
+- titles are arrays of objects with stable name fields; do not emit titles as plain strings.
+- Canonical descriptors (colors, item names, effect IDs, mechanic labels) must be reused exactly; do not paraphrase.
+- Do not add numeric mechanics to invariants_add; store them in continuity system updates instead.
 - If an event appears in prose, it must appear in key_events.
 - must_stay_true must include milestone ledger entries and any inventory/injury/ownership invariants implied by prose.
 - character_updates entries must use arrays: persona_updates (array), invariants_add (array).
-- Use character_stat_updates / character_skill_updates to reconcile stats or skills.
-- Use run_stat_updates / run_skill_updates for global mechanics.
+- Use character_continuity_system_updates / global_continuity_system_updates to reconcile mechanics.
+- If a new mechanic family appears in prose/UI, add it under set with a stable key.
 
 Inputs
 - prose: final scene text

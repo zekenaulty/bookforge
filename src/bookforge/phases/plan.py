@@ -78,14 +78,22 @@ def _load_character_states(book_root: Path, cast_present_ids: List[str]) -> List
         state_path = resolve_character_state_path(book_root, str(char_id))
         if state_path and state_path.exists():
             try:
-                states.append(json.loads(state_path.read_text(encoding="utf-8")))
+                loaded = json.loads(state_path.read_text(encoding="utf-8"))
+                if isinstance(loaded, dict):
+                    continuity = loaded.get("character_continuity_system_state")
+                    if not isinstance(continuity, dict):
+                        continuity = {}
+                    if "stats" not in continuity and isinstance(loaded.get("stats"), dict):
+                        continuity["stats"] = loaded.get("stats")
+                    if "skills" not in continuity and isinstance(loaded.get("skills"), dict):
+                        continuity["skills"] = loaded.get("skills")
+                    loaded["character_continuity_system_state"] = continuity
+                states.append(loaded)
                 continue
             except json.JSONDecodeError:
                 pass
         states.append({"character_id": str(char_id), "missing": True})
     return states
-
-
 
 def _find_chapter(outline: Dict[str, Any], chapter_number: int) -> Dict[str, Any]:
     chapters = outline.get("chapters", [])

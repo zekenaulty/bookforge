@@ -5,7 +5,7 @@ Return ONLY a single JSON object that matches the scene_card schema.
 No markdown, no code fences, no commentary. Use strict JSON (double quotes, no trailing commas).
 
 If outline_window includes character information, keep those character ids in mind.
-If character_states are provided, keep inventory/persona constraints consistent; do not invent conflicting facts.
+If character_states are provided, keep inventory/persona/continuity mechanics consistent; do not invent conflicting facts.
 If outline_window.current.introduces is present, the scene must introduce those characters.
 
 Required keys:
@@ -27,6 +27,10 @@ Recommended keys (use ids from the outline; do not invent ids):
 - introduces_ids (array of character ids introduced in this scene)
 - thread_ids (array of thread ids, e.g. THREAD_Awakened_Sage)
 
+Optional, that are required when needed by the genre, continuity-planning keys:
+- continuity_system_focus (array of mechanic domains likely to change this scene, e.g. ["stats", "resources", "titles"])
+- ui_mechanics_expected (array of UI labels likely to appear, e.g. ["HP", "Stamina", "Crit Rate"])
+
 JSON shape example (fill with real values):
 {
   "schema_version": "1.1",
@@ -43,12 +47,13 @@ JSON shape example (fill with real values):
   "cast_present_ids": ["CHAR_Eldrin"],
   "introduces": [],
   "introduces_ids": [],
-  "thread_ids": ["THREAD_Awakened_Sage"]
+  "thread_ids": ["THREAD_Awakened_Sage"],
+  "continuity_system_focus": ["stats", "resources"],
+  "ui_mechanics_expected": ["HP", "Stamina"]
 }
 
 Outline window:
 {{outline_window}}
-
 
 Character states (per outline_window.current.characters):
 {{character_states}}

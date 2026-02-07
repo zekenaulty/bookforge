@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -99,6 +99,73 @@ def _short_id_hash(value: str) -> str:
 def _character_state_filename(character_id: str) -> str:
     slug = _character_slug(character_id)
     return f"{slug}__{_short_id_hash(character_id)}.state.json"
+
+
+def _normalize_title_entry(value: Any) -> Optional[Dict[str, Any]]:
+    if isinstance(value, dict):
+        title = dict(value)
+        name = ""
+        for key in ("name", "title", "label", "id", "key"):
+            candidate = title.get(key)
+            if isinstance(candidate, str) and candidate.strip():
+                name = candidate.strip()
+                break
+        if not name:
+            return None
+        title["name"] = name
+        return title
+    text = str(value).strip()
+    if not text:
+        return None
+    return {"name": text}
+
+
+def _normalize_titles_value(value: Any) -> List[Dict[str, Any]]:
+    raw_items: List[Any] = []
+    if isinstance(value, list):
+        raw_items = value
+    elif isinstance(value, dict):
+        if any(key in value for key in ("name", "title", "label", "id", "key")):
+            raw_items = [value]
+        else:
+            for key, entry in value.items():
+                wrapped: Dict[str, Any] = {"name": str(key).strip()}
+                if isinstance(entry, dict):
+                    wrapped.update(entry)
+                elif entry is not None:
+                    wrapped["value"] = entry
+                raw_items.append(wrapped)
+    elif value is not None:
+        raw_items = [value]
+
+    normalized: List[Dict[str, Any]] = []
+    for item in raw_items:
+        title = _normalize_title_entry(item)
+        if title:
+            normalized.append(title)
+
+    by_name: Dict[str, Dict[str, Any]] = {}
+    order: List[str] = []
+    for title in normalized:
+        key = str(title.get("name") or "").strip().lower()
+        if not key:
+            continue
+        if key not in by_name:
+            by_name[key] = dict(title)
+            order.append(key)
+            continue
+        merged = dict(by_name[key])
+        merged.update(title)
+        by_name[key] = merged
+
+    return [by_name[key] for key in order]
+
+
+def _normalize_titles_in_continuity_state(continuity_state: Dict[str, Any]) -> None:
+    if not isinstance(continuity_state, dict):
+        return
+    if "titles" in continuity_state:
+        continuity_state["titles"] = _normalize_titles_value(continuity_state.get("titles"))
 
 
 def _unique_state_path(characters_dir: Path, character_id: str) -> Path:
@@ -424,19 +491,54 @@ def generate_characters(
         canon_path.write_text(json.dumps(canonical, ensure_ascii=True, indent=2), encoding="utf-8")
         updated_paths.append(canon_path)
 
+        continuity_state = char.get("character_continuity_system_state")
+        if not isinstance(continuity_state, dict):
+            continuity_state = {}
+        for key in (
+            "stats",
+            "skills",
+            "titles",
+            "effects",
+            "statuses",
+            "resources",
+            "classes",
+            "ranks",
+            "traits",
+            "flags",
+            "talents",
+            "perks",
+            "achievements",
+            "affinities",
+            "reputations",
+            "cooldowns",
+            "progression",
+            "system_tracking_metadata",
+            "extended_system_data",
+        ):
+            value = char.get(key)
+            if key in continuity_state:
+                continue
+            if isinstance(value, (dict, list, str, int, float, bool)):
+                continuity_state[key] = value
+
+        _normalize_titles_in_continuity_state(continuity_state)
+
+        stats_mirror = continuity_state.get("stats") if isinstance(continuity_state.get("stats"), dict) else {}
+        skills_mirror = continuity_state.get("skills") if isinstance(continuity_state.get("skills"), dict) else {}
+
         state = {
             "schema_version": "1.0",
             "character_id": char_id,
             "name": char.get("name", ""),
             "inventory": char.get("inventory", []),
             "containers": char.get("containers", []),
-            "stats": char.get("stats", {}),
-            "skills": char.get("skills", {}),
+            "character_continuity_system_state": continuity_state,
+            "stats": stats_mirror,
+            "skills": skills_mirror,
             "invariants": char.get("invariants", []),
             "history": [],
             "updated_at": _now_iso(),
         }
-
         characters_dir = book_root / "draft" / "context" / "characters"
         characters_dir.mkdir(parents=True, exist_ok=True)
         state_path = _unique_state_path(characters_dir, char_id)

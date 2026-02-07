@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
@@ -392,14 +392,15 @@ def _load_character_states(book_root: Path, scene_card: Dict[str, Any]) -> List[
         state_path = resolve_character_state_path(book_root, str(char_id))
         if state_path and state_path.exists():
             try:
-                states.append(json.loads(state_path.read_text(encoding="utf-8")))
+                loaded = json.loads(state_path.read_text(encoding="utf-8"))
+                if isinstance(loaded, dict):
+                    _ensure_character_continuity_system_state(loaded)
+                states.append(loaded)
                 continue
             except json.JSONDecodeError:
                 pass
         states.append({"character_id": str(char_id), "missing": True})
     return states
-
-
 
 def _normalize_continuity_pack(
     pack: Dict[str, Any],
@@ -458,6 +459,73 @@ def _summary_list(value: Any) -> List[str]:
     return cleaned
 
 
+def _normalize_title_entry(value: Any) -> Optional[Dict[str, Any]]:
+    if isinstance(value, dict):
+        title = dict(value)
+        name = ""
+        for key in ("name", "title", "label", "id", "key"):
+            candidate = title.get(key)
+            if isinstance(candidate, str) and candidate.strip():
+                name = candidate.strip()
+                break
+        if not name:
+            return None
+        title["name"] = name
+        return title
+    text = str(value).strip()
+    if not text:
+        return None
+    return {"name": text}
+
+
+def _normalize_titles_value(value: Any) -> List[Dict[str, Any]]:
+    raw_items: List[Any] = []
+    if isinstance(value, list):
+        raw_items = value
+    elif isinstance(value, dict):
+        if any(key in value for key in ("name", "title", "label", "id", "key")):
+            raw_items = [value]
+        else:
+            for key, entry in value.items():
+                wrapped: Dict[str, Any] = {"name": str(key).strip()}
+                if isinstance(entry, dict):
+                    wrapped.update(entry)
+                elif entry is not None:
+                    wrapped["value"] = entry
+                raw_items.append(wrapped)
+    elif value is not None:
+        raw_items = [value]
+
+    normalized: List[Dict[str, Any]] = []
+    for item in raw_items:
+        title = _normalize_title_entry(item)
+        if title:
+            normalized.append(title)
+
+    by_name: Dict[str, Dict[str, Any]] = {}
+    order: List[str] = []
+    for title in normalized:
+        key = str(title.get("name") or "").strip().lower()
+        if not key:
+            continue
+        if key not in by_name:
+            by_name[key] = dict(title)
+            order.append(key)
+            continue
+        merged = dict(by_name[key])
+        merged.update(title)
+        by_name[key] = merged
+
+    return [by_name[key] for key in order]
+
+
+def _normalize_titles_in_continuity_state(continuity: Dict[str, Any]) -> None:
+    if not isinstance(continuity, dict):
+        return
+    if "titles" in continuity:
+        continuity["titles"] = _normalize_titles_value(continuity.get("titles"))
+
+
 def _coerce_summary_update(patch: Dict[str, Any]) -> None:
     summary_update = patch.get("summary_update")
     if not isinstance(summary_update, dict):
@@ -513,32 +581,130 @@ def _fill_character_update_context(patch: Dict[str, Any], scene_card: Dict[str, 
 def _coerce_stat_updates(patch: Dict[str, Any]) -> None:
     if not isinstance(patch, dict):
         return
-    for key in ("character_stat_updates", "character_skill_updates"):
-        updates = patch.get(key)
-        if updates is None:
-            continue
-        if not isinstance(updates, list):
-            patch[key] = []
-            continue
-        for update in updates:
+
+    continuity_reserved = {"character_id", "set", "delta", "remove", "reason", "chapter", "scene", "notes"}
+    known_families = (
+        "stats",
+        "skills",
+        "titles",
+        "effects",
+        "statuses",
+        "resources",
+        "classes",
+        "ranks",
+        "traits",
+        "flags",
+        "talents",
+        "perks",
+        "achievements",
+        "affinities",
+        "reputations",
+        "cooldowns",
+        "progression",
+        "system_tracking_metadata",
+        "extended_system_data",
+    )
+
+    def _ensure_update_dict(update: Dict[str, Any]) -> None:
+        if "set" in update and not isinstance(update.get("set"), dict):
+            update["set"] = {}
+        if "delta" in update and not isinstance(update.get("delta"), dict):
+            update["delta"] = {}
+        if "remove" in update:
+            update["remove"] = _summary_list(update.get("remove"))
+        update.setdefault("set", {})
+        if not isinstance(update.get("set"), dict):
+            update["set"] = {}
+
+    def _is_dynamic_value(value: Any) -> bool:
+        return isinstance(value, (dict, list, str, int, float, bool))
+
+    def _fold_top_level_mechanics_into_set(update: Dict[str, Any]) -> None:
+        set_block = update.get("set")
+        if not isinstance(set_block, dict):
+            set_block = {}
+            update["set"] = set_block
+        for key, value in list(update.items()):
+            if key in continuity_reserved:
+                continue
+            if _is_dynamic_value(value):
+                set_block[key] = value
+                update.pop(key, None)
+        for family in known_families:
+            if family in update and _is_dynamic_value(update.get(family)):
+                set_block[family] = update.get(family)
+
+    def _normalize_titles_in_update(update: Dict[str, Any]) -> None:
+        for block_key in ("set", "delta"):
+            block = update.get(block_key)
+            if not isinstance(block, dict):
+                continue
+            if "titles" in block:
+                block["titles"] = _normalize_titles_value(block.get("titles"))
+
+    char_updates = patch.get("character_continuity_system_updates")
+    if not isinstance(char_updates, list):
+        char_updates = []
+        patch["character_continuity_system_updates"] = char_updates
+
+    global_updates = patch.get("global_continuity_system_updates")
+    if not isinstance(global_updates, list):
+        global_updates = []
+        patch["global_continuity_system_updates"] = global_updates
+
+    for update in char_updates:
+        if isinstance(update, dict):
+            _ensure_update_dict(update)
+            _fold_top_level_mechanics_into_set(update)
+            _normalize_titles_in_update(update)
+
+    for update in global_updates:
+        if isinstance(update, dict):
+            _ensure_update_dict(update)
+            _fold_top_level_mechanics_into_set(update)
+            _normalize_titles_in_update(update)
+
+    legacy_char_stat = patch.get("character_stat_updates")
+    if isinstance(legacy_char_stat, list):
+        for update in legacy_char_stat:
             if not isinstance(update, dict):
                 continue
-            if "set" in update and not isinstance(update.get("set"), dict):
-                update["set"] = {}
-            if "delta" in update and not isinstance(update.get("delta"), dict):
-                update["delta"] = {}
-    for key in ("run_stat_updates", "run_skill_updates"):
-        updates = patch.get(key)
-        if updates is None:
-            continue
-        if not isinstance(updates, dict):
-            patch[key] = {}
-            continue
-        if "set" in updates and not isinstance(updates.get("set"), dict):
-            updates["set"] = {}
-        if "delta" in updates and not isinstance(updates.get("delta"), dict):
-            updates["delta"] = {}
+            char_id = str(update.get("character_id") or "").strip()
+            if not char_id:
+                continue
+            target = _upsert_continuity_update(char_updates, char_id)
+            _coerce_legacy_family_update_into_continuity(target, update, "stats")
 
+    legacy_char_skill = patch.get("character_skill_updates")
+    if isinstance(legacy_char_skill, list):
+        for update in legacy_char_skill:
+            if not isinstance(update, dict):
+                continue
+            char_id = str(update.get("character_id") or "").strip()
+            if not char_id:
+                continue
+            target = _upsert_continuity_update(char_updates, char_id)
+            _coerce_legacy_family_update_into_continuity(target, update, "skills")
+
+    legacy_run_stat = patch.get("run_stat_updates")
+    if isinstance(legacy_run_stat, dict):
+        target = _upsert_global_continuity_update(global_updates)
+        _coerce_legacy_family_update_into_continuity(target, legacy_run_stat, "stats")
+
+    legacy_run_skill = patch.get("run_skill_updates")
+    if isinstance(legacy_run_skill, dict):
+        target = _upsert_global_continuity_update(global_updates)
+        _coerce_legacy_family_update_into_continuity(target, legacy_run_skill, "skills")
+
+    for update in char_updates:
+        if isinstance(update, dict):
+            _ensure_update_dict(update)
+            _normalize_titles_in_update(update)
+
+    for update in global_updates:
+        if isinstance(update, dict):
+            _ensure_update_dict(update)
+            _normalize_titles_in_update(update)
 
 def _normalize_stat_key(value: str) -> str:
     cleaned = re.sub(r"[^a-zA-Z0-9]+", "_", str(value).strip().lower())
@@ -571,27 +737,102 @@ def _parse_stat_value(raw: str) -> Any:
     return text
 
 
-def _upsert_stat_update(updates: list, character_id: str) -> dict:
+def _upsert_continuity_update(updates: list, character_id: str) -> dict:
     for update in updates:
-        if isinstance(update, dict) and update.get("character_id") == character_id:
+        if isinstance(update, dict) and str(update.get("character_id") or "") == character_id:
             return update
     new_item = {"character_id": character_id, "set": {}, "delta": {}}
     updates.append(new_item)
     return new_item
 
 
+def _upsert_global_continuity_update(updates: list) -> dict:
+    for update in updates:
+        if isinstance(update, dict):
+            return update
+    new_item = {"set": {}, "delta": {}}
+    updates.append(new_item)
+    return new_item
+
+
+def _merge_continuity_update_block(target: Dict[str, Any], key: str, payload: Any) -> None:
+    if payload is None:
+        return
+    if isinstance(payload, dict):
+        target.setdefault(key, {})
+        existing = target.get(key)
+        if not isinstance(existing, dict):
+            target[key] = dict(payload)
+            return
+        for sub_key, sub_value in payload.items():
+            existing[sub_key] = sub_value
+        target[key] = existing
+        return
+    target[key] = payload
+
+
+def _coerce_legacy_family_update_into_continuity(target: Dict[str, Any], legacy_update: Dict[str, Any], family_key: str) -> None:
+    target.setdefault("set", {})
+    target.setdefault("delta", {})
+
+    direct = legacy_update.get(family_key)
+    if isinstance(direct, (dict, list, str, int, float)):
+        _merge_continuity_update_block(target["set"], family_key, direct)
+
+    set_block = legacy_update.get("set")
+    if isinstance(set_block, dict):
+        _merge_continuity_update_block(target["set"], family_key, set_block)
+
+    delta_block = legacy_update.get("delta")
+    if isinstance(delta_block, dict):
+        _merge_continuity_update_block(target["delta"], family_key, delta_block)
+
+    reason = legacy_update.get("reason")
+    if isinstance(reason, str) and reason.strip() and not target.get("reason"):
+        target["reason"] = reason.strip()
+
+
+def _append_continuity_list_item(target_set: Dict[str, Any], key: str, value: str) -> None:
+    if key == "titles":
+        existing = target_set.get("titles")
+        normalized_existing = _normalize_titles_value(existing)
+        title = _normalize_title_entry(value)
+        if title:
+            normalized_existing.append(title)
+        target_set["titles"] = _normalize_titles_value(normalized_existing)
+        return
+    existing = target_set.get(key)
+    if isinstance(existing, list):
+        if value not in existing:
+            existing.append(value)
+            target_set[key] = existing
+        return
+    target_set[key] = [value]
+
 def _migrate_numeric_invariants(patch: Dict[str, Any]) -> None:
     updates = patch.get("character_updates") if isinstance(patch, dict) else None
     if not isinstance(updates, list):
         return
-    stat_updates = patch.setdefault("character_stat_updates", [])
-    skill_updates = patch.setdefault("character_skill_updates", [])
-    if not isinstance(stat_updates, list):
-        stat_updates = []
-        patch["character_stat_updates"] = stat_updates
-    if not isinstance(skill_updates, list):
-        skill_updates = []
-        patch["character_skill_updates"] = skill_updates
+
+    continuity_updates = patch.setdefault("character_continuity_system_updates", [])
+    if not isinstance(continuity_updates, list):
+        continuity_updates = []
+        patch["character_continuity_system_updates"] = continuity_updates
+
+    family_aliases = {
+        "title": "titles",
+        "titles": "titles",
+        "effect": "effects",
+        "effects": "effects",
+        "status": "statuses",
+        "statuses": "statuses",
+        "resource": "resources",
+        "resources": "resources",
+        "class": "classes",
+        "classes": "classes",
+        "rank": "ranks",
+        "ranks": "ranks",
+    }
 
     for update in updates:
         if not isinstance(update, dict):
@@ -602,37 +843,55 @@ def _migrate_numeric_invariants(patch: Dict[str, Any]) -> None:
         invariants = update.get("invariants_add")
         if not isinstance(invariants, list):
             continue
+
+        target = _upsert_continuity_update(continuity_updates, char_id)
+        target.setdefault("set", {})
+
         kept = []
         for item in invariants:
             text = str(item).strip()
-            match = re.match(r"^(stat|skill)\s*:\s*([^=]+?)\s*=\s*(.+)$", text, re.IGNORECASE)
-            if not match:
-                kept.append(item)
+            typed_match = re.match(r"^(stat|skill)\s*:\s*([^=]+?)\s*=\s*(.+)$", text, re.IGNORECASE)
+            if typed_match:
+                kind = typed_match.group(1).lower()
+                key = _normalize_stat_key(typed_match.group(2))
+                value = _parse_stat_value(typed_match.group(3))
+                if not key:
+                    kept.append(item)
+                    continue
+                family_key = "stats" if kind == "stat" else "skills"
+                family = target["set"].get(family_key)
+                if not isinstance(family, dict):
+                    family = {}
+                family[key] = value
+                target["set"][family_key] = family
                 continue
-            kind = match.group(1).lower()
-            key = _normalize_stat_key(match.group(2))
-            value = _parse_stat_value(match.group(3))
-            if not key:
-                kept.append(item)
-                continue
-            if kind == "stat":
-                target = _upsert_stat_update(stat_updates, char_id)
-            else:
-                target = _upsert_stat_update(skill_updates, char_id)
-            target.setdefault("set", {})
-            target["set"][key] = value
-        update["invariants_add"] = kept
 
+            generic_match = re.match(r"^([a-zA-Z_\- ]+)\s*:\s*(.+)$", text)
+            if generic_match:
+                prefix = _normalize_stat_key(generic_match.group(1))
+                value = generic_match.group(2).strip()
+                mapped_family = family_aliases.get(prefix)
+                if mapped_family and value:
+                    _append_continuity_list_item(target["set"], mapped_family, value)
+                    continue
+
+            kept.append(item)
+
+        update["invariants_add"] = kept
 
 def _apply_bag_updates(bag: Dict[str, Any], updates: Dict[str, Any]) -> None:
     if not isinstance(bag, dict) or not isinstance(updates, dict):
         return
     set_block = updates.get("set")
     delta_block = updates.get("delta")
+    remove_block = updates.get("remove")
 
     # Apply delta first so explicit set values are authoritative when both target the same key.
     if isinstance(delta_block, dict):
         for key, value in delta_block.items():
+            if str(key) == "titles":
+                bag["titles"] = _normalize_titles_value(value)
+                continue
             if isinstance(value, (int, float)):
                 existing = bag.get(key)
                 if isinstance(existing, (int, float)):
@@ -653,68 +912,195 @@ def _apply_bag_updates(bag: Dict[str, Any], updates: Dict[str, Any]) -> None:
                             existing[sub_key] = prior + sub_val
                         else:
                             existing[sub_key] = sub_val
+                    else:
+                        existing[sub_key] = sub_val
                 bag[key] = existing
+            else:
+                bag[key] = value
 
     if isinstance(set_block, dict):
         for key, value in set_block.items():
+            if str(key) == "titles":
+                bag["titles"] = _normalize_titles_value(value)
+                continue
             bag[str(key)] = value
+
+    if isinstance(remove_block, list):
+        for key in remove_block:
+            name = str(key).strip()
+            if name:
+                if "." not in name:
+                    bag.pop(name, None)
+                    continue
+                parts = [part for part in name.split(".") if part]
+                if not parts:
+                    continue
+                parent = bag
+                for part in parts[:-1]:
+                    next_obj = parent.get(part)
+                    if not isinstance(next_obj, dict):
+                        parent = {}
+                        break
+                    parent = next_obj
+                if isinstance(parent, dict):
+                    parent.pop(parts[-1], None)
+
+def _ensure_character_continuity_system_state(state: Dict[str, Any]) -> Dict[str, Any]:
+    continuity = state.get("character_continuity_system_state")
+    if not isinstance(continuity, dict):
+        continuity = {}
+
+    for source_key, target_key in (
+        ("stats", "stats"),
+        ("skills", "skills"),
+        ("titles", "titles"),
+        ("effects", "effects"),
+        ("statuses", "statuses"),
+        ("resources", "resources"),
+        ("classes", "classes"),
+        ("ranks", "ranks"),
+        ("traits", "traits"),
+        ("flags", "flags"),
+        ("talents", "talents"),
+        ("perks", "perks"),
+        ("achievements", "achievements"),
+        ("affinities", "affinities"),
+        ("reputations", "reputations"),
+        ("cooldowns", "cooldowns"),
+        ("progression", "progression"),
+        ("system_tracking_metadata", "system_tracking_metadata"),
+        ("extended_system_data", "extended_system_data"),
+    ):
+        legacy_value = state.get(source_key)
+        if target_key in continuity:
+            continue
+        if isinstance(legacy_value, (dict, list, str, int, float, bool)):
+            continuity[target_key] = legacy_value
+
+    _normalize_titles_in_continuity_state(continuity)
+    state["character_continuity_system_state"] = continuity
+
+    stats_family = continuity.get("stats")
+    if isinstance(stats_family, dict):
+        state["stats"] = stats_family
+    skills_family = continuity.get("skills")
+    if isinstance(skills_family, dict):
+        state["skills"] = skills_family
+
+    return continuity
+
+
+def _ensure_global_continuity_system_state(state: Dict[str, Any]) -> Dict[str, Any]:
+    continuity = state.get("global_continuity_system_state")
+    if not isinstance(continuity, dict):
+        continuity = {}
+
+    legacy_run_stats = state.get("run_stats")
+    if isinstance(legacy_run_stats, dict) and "stats" not in continuity:
+        continuity["stats"] = legacy_run_stats
+
+    legacy_run_skills = state.get("run_skills")
+    if isinstance(legacy_run_skills, dict) and "skills" not in continuity:
+        continuity["skills"] = legacy_run_skills
+
+    legacy_run_bags = state.get("run_bags")
+    if isinstance(legacy_run_bags, dict) and "bags" not in continuity:
+        continuity["bags"] = legacy_run_bags
+
+    legacy_global_bags = state.get("global_bags")
+    if isinstance(legacy_global_bags, dict) and "bags" not in continuity:
+        continuity["bags"] = legacy_global_bags
+
+    _normalize_titles_in_continuity_state(continuity)
+    state["global_continuity_system_state"] = continuity
+
+    stats_family = continuity.get("stats")
+    if isinstance(stats_family, dict):
+        state["run_stats"] = stats_family
+    skills_family = continuity.get("skills")
+    if isinstance(skills_family, dict):
+        state["run_skills"] = skills_family
+
+    return continuity
+
+
+def _apply_character_continuity_system_updates(book_root: Path, patch: Dict[str, Any]) -> None:
+    updates = patch.get("character_continuity_system_updates") if isinstance(patch, dict) else None
+    if not isinstance(updates, list):
+        return
+    ensure_character_index(book_root)
+    for update in updates:
+        if not isinstance(update, dict):
+            continue
+        char_id = str(update.get("character_id") or "").strip()
+        if not char_id:
+            continue
+        state_path = resolve_character_state_path(book_root, char_id)
+        if state_path is None:
+            state_path = create_character_state_path(book_root, char_id)
+        try:
+            state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
+        except json.JSONDecodeError:
+            state = {}
+        if not isinstance(state, dict):
+            state = {}
+
+        continuity = _ensure_character_continuity_system_state(state)
+        _apply_bag_updates(continuity, update)
+        state["character_continuity_system_state"] = continuity
+
+        state.setdefault("history", [])
+        if isinstance(state.get("history"), list):
+            note = update.get("reason")
+            entry = {"changes": ["continuity_system_state_updated"]}
+            if isinstance(note, str) and note.strip():
+                entry["notes"] = note.strip()
+            state["history"].append(entry)
+
+        state["updated_at"] = _now_iso()
+        state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
+
+
+def _apply_global_continuity_system_updates(state: Dict[str, Any], patch: Dict[str, Any]) -> None:
+    updates = patch.get("global_continuity_system_updates") if isinstance(patch, dict) else None
+    if not isinstance(updates, list):
+        updates = []
+
+    legacy_stat = patch.get("run_stat_updates") if isinstance(patch, dict) else None
+    if isinstance(legacy_stat, dict):
+        updates = list(updates)
+        updates.append({"set": {"stats": legacy_stat.get("set", {})}, "delta": {"stats": legacy_stat.get("delta", {})}})
+
+    legacy_skill = patch.get("run_skill_updates") if isinstance(patch, dict) else None
+    if isinstance(legacy_skill, dict):
+        updates = list(updates)
+        updates.append({"set": {"skills": legacy_skill.get("set", {})}, "delta": {"skills": legacy_skill.get("delta", {})}})
+
+    continuity = _ensure_global_continuity_system_state(state)
+    for update in updates:
+        if isinstance(update, dict):
+            _apply_bag_updates(continuity, update)
+
+    state["global_continuity_system_state"] = continuity
 
 
 def _apply_character_stat_updates(book_root: Path, patch: Dict[str, Any]) -> None:
-    for field, bag_name in (("character_stat_updates", "stats"), ("character_skill_updates", "skills")):
-        updates = patch.get(field) if isinstance(patch, dict) else None
-        if not isinstance(updates, list):
-            continue
-        ensure_character_index(book_root)
-        for update in updates:
-            if not isinstance(update, dict):
-                continue
-            char_id = str(update.get("character_id") or "").strip()
-            if not char_id:
-                continue
-            state_path = resolve_character_state_path(book_root, char_id)
-            if state_path is None:
-                state_path = create_character_state_path(book_root, char_id)
-            try:
-                state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
-            except json.JSONDecodeError:
-                state = {}
-            if not isinstance(state, dict):
-                state = {}
-            bag = state.get(bag_name)
-            if not isinstance(bag, dict):
-                bag = {}
-            _apply_bag_updates(bag, update)
-            state[bag_name] = bag
-            state.setdefault("history", [])
-            if isinstance(state.get("history"), list):
-                note = update.get("reason")
-                entry = {"changes": [f"{bag_name}_updated"]}
-                if isinstance(note, str) and note.strip():
-                    entry["notes"] = note.strip()
-                state["history"].append(entry)
-            state["updated_at"] = _now_iso()
-            state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
+    _apply_character_continuity_system_updates(book_root, patch)
 
 
 def _apply_run_stat_updates(state: Dict[str, Any], patch: Dict[str, Any]) -> None:
-    for field, bag_name in (("run_stat_updates", "run_stats"), ("run_skill_updates", "run_skills")):
-        updates = patch.get(field)
-        if not isinstance(updates, dict):
-            continue
-        bag = state.get(bag_name)
-        if not isinstance(bag, dict):
-            bag = {}
-        _apply_bag_updates(bag, updates)
-        state[bag_name] = bag
-
+    _apply_global_continuity_system_updates(state, patch)
 
 def _extract_ui_stat_lines(prose: str) -> List[Dict[str, Any]]:
     lines: List[Dict[str, Any]] = []
-    for match in re.finditer(r"\[([^\]:]{1,40}):\s*([0-9]+)(?:/([0-9]+))?\s*%?\]", prose):
+    for match in re.finditer(r"\[([^\]:]{1,80}):\s*([0-9]+(?:\.[0-9]+)?)(?:/([0-9]+(?:\.[0-9]+)?))?\s*%?\]", prose):
         key = match.group(1).strip()
-        current = int(match.group(2))
-        maximum = int(match.group(3)) if match.group(3) else None
+        current_raw = match.group(2)
+        max_raw = match.group(3)
+        current = float(current_raw) if "." in current_raw else int(current_raw)
+        maximum: Any = None
+        if max_raw is not None:
+            maximum = float(max_raw) if "." in max_raw else int(max_raw)
         lines.append({"key": key, "current": current, "max": maximum})
     return lines
 
@@ -754,26 +1140,71 @@ def _stat_mismatch_issues(prose: str, character_states: List[Dict[str, Any]], ru
         return False
 
     aliases = _stat_key_aliases()
+    alias_to_indices: Dict[str, List[int]] = {}
+    for idx, state in enumerate(character_states):
+        if not isinstance(state, dict):
+            continue
+        alias_values: List[str] = []
+        char_id = str(state.get("character_id") or "").strip()
+        if char_id:
+            alias_values.append(_normalize_stat_key(char_id))
+            if char_id.upper().startswith("CHAR_"):
+                alias_values.append(_normalize_stat_key(char_id[5:]))
+        name = str(state.get("name") or "").strip()
+        if name:
+            alias_values.append(_normalize_stat_key(name))
+        for alias in alias_values:
+            if not alias:
+                continue
+            current = alias_to_indices.get(alias, [])
+            if idx not in current:
+                current.append(idx)
+            alias_to_indices[alias] = current
+
+    sorted_aliases = sorted(alias_to_indices.keys(), key=len, reverse=True)
+
+    def _owner_and_stat_key(raw_key: str) -> Tuple[Optional[List[int]], str]:
+        normalized = _normalize_stat_key(raw_key)
+        for alias in sorted_aliases:
+            token_prefix = alias + "_"
+            token_suffix = "_" + alias
+            if normalized.startswith(token_prefix):
+                stat_key = normalized[len(token_prefix):]
+                if stat_key:
+                    return alias_to_indices.get(alias), stat_key
+            if normalized.endswith(token_suffix):
+                stat_key = normalized[: -len(token_suffix)]
+                if stat_key:
+                    return alias_to_indices.get(alias), stat_key
+        return None, normalized
+
     issues: List[Dict[str, Any]] = []
     for line in lines:
-        key = _normalize_stat_key(line["key"])
+        owner_indices, extracted_key = _owner_and_stat_key(line["key"])
+        key = aliases.get(extracted_key, extracted_key)
         key = aliases.get(key, key)
 
         candidates: List[Tuple[str, Any]] = []
-        for state in character_states:
+        state_indices = owner_indices if owner_indices is not None else list(range(len(character_states)))
+        for idx in state_indices:
+            state = character_states[idx]
             if not isinstance(state, dict):
                 continue
-            stats = state.get("stats") if isinstance(state.get("stats"), dict) else {}
+            continuity = state.get("character_continuity_system_state")
+            if isinstance(continuity, dict):
+                stats = continuity.get("stats") if isinstance(continuity.get("stats"), dict) else {}
+            else:
+                stats = state.get("stats") if isinstance(state.get("stats"), dict) else {}
             if key in stats:
                 char_id = str(state.get("character_id") or "unknown")
                 candidates.append((f"character:{char_id}", stats.get(key)))
-        if isinstance(run_stats, dict) and key in run_stats:
-            candidates.append(("run", run_stats.get(key)))
+        if owner_indices is None and isinstance(run_stats, dict) and key in run_stats:
+            candidates.append(("global", run_stats.get(key)))
 
         if not candidates:
             issues.append({
                 "code": "stat_unowned",
-                "message": f"UI stat '{line['key']}' not found in state stats/run_stats.",
+                "message": f"UI stat '{line['key']}' not found in character_continuity_system_state/global_continuity_system_state.",
                 "severity": "warning",
             })
             continue
@@ -788,7 +1219,6 @@ def _stat_mismatch_issues(prose: str, character_states: List[Dict[str, Any]], ru
             "severity": "warning",
         })
     return issues
-
 def _pov_drift_issues(prose: str, pov: Optional[str]) -> List[Dict[str, Any]]:
     if not pov:
         return []
@@ -823,6 +1253,15 @@ def _summary_from_state(state: Dict[str, Any]) -> Dict[str, List[str]]:
     }
 
 
+
+def _global_continuity_stats(state: Dict[str, Any]) -> Dict[str, Any]:
+    continuity = state.get("global_continuity_system_state")
+    if isinstance(continuity, dict):
+        stats = continuity.get("stats")
+        if isinstance(stats, dict):
+            return stats
+    legacy = state.get("run_stats")
+    return legacy if isinstance(legacy, dict) else {}
 def _merge_summary_update(state: Dict[str, Any], summary_update: Dict[str, Any], chapter_end: bool = False) -> None:
     summary = _summary_from_state(state)
 
@@ -1659,7 +2098,7 @@ def _lint_scene(
     if not isinstance(summary_update, dict):
         summary_update = {}
     heuristic_issues = _heuristic_invariant_issues(prose, summary_update, invariants)
-    extra_issues = _stat_mismatch_issues(prose, character_states, state.get("run_stats", {}))
+    extra_issues = _stat_mismatch_issues(prose, character_states, _global_continuity_stats(state))
     extra_issues += _pov_drift_issues(prose, pov)
     combined = heuristic_issues + extra_issues
     if combined:
@@ -2387,6 +2826,7 @@ def run_loop(
 
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
+
 
 
 

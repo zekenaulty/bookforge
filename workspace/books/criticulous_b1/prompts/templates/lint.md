@@ -3,7 +3,7 @@
 Check the scene for continuity, invariant violations, and duplication.
 Flag invariant contradictions against must_stay_true/key facts.
 Return ONLY JSON matching the lint_report schema.
-- Check that any UI numbers or skill values in prose match state stats/skills. If not, emit a failure.
+- Check and require that any UI mechanic values in prose are owned by continuity system state and match candidate values.
 - Check for POV drift vs book POV (no first-person in third-person scenes).
 
 Required keys:
@@ -35,7 +35,6 @@ If there are issues, return:
 
 Scene:
 {{prose}}
-
 
 Character states (per cast_present_ids):
 {{character_states}}

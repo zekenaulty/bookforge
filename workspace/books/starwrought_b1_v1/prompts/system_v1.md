@@ -17,7 +17,8 @@ Spatial/inventory consistency: injuries, inventory, and ownership must remain co
 Inventory contract: track item ownership and container location per character or container label; items do not teleport.
 Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
 State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
-Mechanics contract: if mechanics/UI are present, all numeric values and labels (stats/skills) must be sourced from state or explicitly updated in the state_patch. Do not invent numbers or canonical tokens.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
 Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
 Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
 Never recap at scene openings.
@@ -65,3 +66,5 @@ If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all
 If output must be JSON only, return a single JSON object with no commentary or code fences.
 When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
 If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+If mechanics are shown in prose or UI, they must be present in continuity system state or added in continuity system updates in the same STATE_PATCH.
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
