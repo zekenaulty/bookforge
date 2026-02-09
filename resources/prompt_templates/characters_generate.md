@@ -1,4 +1,4 @@
-# CHARACTERS GENERATE
+﻿# CHARACTERS GENERATE
 
 You are refining outline character stubs into canon character entries and initial per-book character state.
 Return ONLY a single JSON object. No markdown, no code fences, no commentary.
@@ -31,6 +31,11 @@ Naming and durable item guidance:
 - For items, use a human-readable item_name; do not use ITEM_* ids in prose strings.
 - Reserve ITEM_* ids for canonical JSON only; do not use them in prose strings.
 - If you emit an item_id here, include item_name as a human label.
+Starting scene alignment (important):
+- The initial inventory/containers/state must prepare each character for the book's first scene.
+- Use the Book + Outline characters in THIS prompt as your source of truth for the opening situation.
+- If the opening situation is unclear, default to a neutral, plausible posture (hands free, items stowed).
+- Example: office/briefing -> no weapons held; battle opener -> weapon may be in hand; travel -> stowed gear.
 
 Persona guidance (compact, factual):
 - core_traits (array)
@@ -58,6 +63,9 @@ Book:
 
 Outline characters:
 {{outline_characters}}
+
+Outline opening context (chapter/section/scene 1):
+{{outline_opening}}
 
 Series info (if any):
 {{series}}
@@ -98,3 +106,5 @@ Output JSON:
     }
   ]
 }
+
+

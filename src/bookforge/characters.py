@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -65,6 +65,69 @@ def _load_outline_characters(book_root: Path) -> List[Dict[str, Any]]:
         if isinstance(characters, list):
             return characters
     return []
+
+def _load_outline(book_root: Path) -> Dict[str, Any]:
+    outline_path = book_root / "outline" / "outline.json"
+    if not outline_path.exists():
+        return {}
+    try:
+        data = _read_json(outline_path)
+    except json.JSONDecodeError:
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    return data
+
+
+def _opening_outline_context(outline: Dict[str, Any]) -> Dict[str, Any]:
+    chapters = outline.get("chapters") if isinstance(outline, dict) else None
+    if not isinstance(chapters, list) or not chapters:
+        return {}
+
+    def chapter_key(value: Any) -> int:
+        if isinstance(value, dict):
+            raw = value.get("chapter_id")
+            if isinstance(raw, int):
+                return raw
+            if isinstance(raw, str) and raw.isdigit():
+                return int(raw)
+        return 10000
+
+    chapter = sorted(chapters, key=chapter_key)[0] if chapters else {}
+    sections = chapter.get("sections") if isinstance(chapter, dict) else None
+    if not isinstance(sections, list) or not sections:
+        sections = []
+    section = sections[0] if sections else {}
+    scenes = section.get("scenes") if isinstance(section, dict) else None
+    if not isinstance(scenes, list) or not scenes:
+        scenes = []
+    scene = scenes[0] if scenes else {}
+
+    return {
+        "chapter": {
+            "chapter_id": chapter.get("chapter_id"),
+            "title": chapter.get("title"),
+            "goal": chapter.get("goal"),
+            "chapter_role": chapter.get("chapter_role"),
+            "stakes_shift": chapter.get("stakes_shift"),
+            "bridge": chapter.get("bridge"),
+            "pacing": chapter.get("pacing"),
+        },
+        "section": {
+            "section_id": section.get("section_id"),
+            "title": section.get("title"),
+            "intent": section.get("intent"),
+        },
+        "scene": {
+            "scene_id": scene.get("scene_id"),
+            "summary": scene.get("summary"),
+            "type": scene.get("type"),
+            "outcome": scene.get("outcome"),
+            "characters": scene.get("characters"),
+            "introduces": scene.get("introduces"),
+            "threads": scene.get("threads"),
+        },
+    }
 
 
 def _slugify(value: str) -> str:
@@ -366,6 +429,9 @@ def generate_characters(
 
     book = _read_json(book_path)
     outline_characters = _load_outline_characters(book_root)
+    outline = _load_outline(book_root)
+    outline_opening = _opening_outline_context(outline)
+    outline_opening_json = json.dumps(outline_opening, ensure_ascii=True, indent=2) if outline_opening else "{}"
     if not outline_characters:
         raise ValueError("Outline characters not found; generate outline first.")
 
@@ -388,6 +454,7 @@ def generate_characters(
         {
             "book": book,
             "outline_characters": outline_characters,
+            "outline_opening": outline_opening_json,
             "series": series_manifest,
         },
     )
@@ -580,3 +647,10 @@ def characters_ready(book_root: Path) -> bool:
         if not (book_root / rel_path).exists():
             return False
     return True
+
+
+
+
+
+
+
