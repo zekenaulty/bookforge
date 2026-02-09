@@ -1,9 +1,15 @@
-# LINT
+﻿# LINT
 
 Check the scene for continuity, invariant violations, and duplication.
 Flag invariant contradictions against must_stay_true/key facts.
 Return ONLY JSON matching the lint_report schema.
-- Check and require that any UI mechanic values in prose are owned by continuity system state and match candidate values.
+- Classify UI/prose mechanic claims as DURABLE or EPHEMERAL before enforcing.
+  - DURABLE: persistent stats/caps, skills/titles acquired, lasting status effects, inventory/custody, named mechanics referenced as invariants.
+  - EPHEMERAL: roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat telemetry.
+- Enforce DURABLE claims against authoritative_surfaces/state/registries.
+- EPHEMERAL claims do not require state ownership; only flag EPHEMERAL contradictions inside the same scene as warnings.
+- If uncertain, default to EPHEMERAL (warning at most), not DURABLE (error).
+- status="fail" only if there is at least one issue with severity="error"; warnings alone => status="pass".
 - Treat only authoritative surfaces as canonical-check targets; do not enforce canonical labels in narrative prose.
 - For authoritative surfaces, prefer exact canonical item/device labels from registries.
 - Check for POV drift vs book POV (no first-person in third-person scenes).

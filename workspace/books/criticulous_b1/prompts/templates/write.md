@@ -1,5 +1,4 @@
 ﻿# WRITE
-
 Write the scene described by the scene card.
 - YOU MUST ALWAYS RETURN PROSE AND THE STATE_PATCH.
 - Start in motion. No recap.
@@ -12,9 +11,13 @@ Write the scene described by the scene card.
 - Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
 - Inventory contract: track ownership and container location for key items; update must_stay_true when items move or change hands.
 - For held items, specify container=hand_left or container=hand_right.
-- Continuity system ownership is mandatory, and must be tracked: any mechanic/UI numbers, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, or future mechanic families must be sourced from existing continuity system state or written into continuity system updates in this scene.
+- Continuity system ownership is mandatory, and must be tracked: any mechanic/UI numbers, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, or future mechanic families must be sourced from existing continuity system state or written into continuity system updates.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
 - titles are arrays of objects with stable name fields; do not emit titles as plain strings.
-- Canonical descriptors (colors, item names, effect IDs, mechanic labels) must be reused exactly; do not paraphrase.
 - If item_registry or plot_devices are provided, they are canonical durable-state references for ownership/custody labels in authoritative outputs.
 - Use item_registry.items[].display_name in prose; use item_id only in patches/JSON. The display_name must be human readable and not an escaped id/name.
 - If a required event is not in the Scene Card, do not perform it.
@@ -25,7 +28,6 @@ Write the scene described by the scene card.
 - must_stay_true must include a milestone ledger entry for every milestone referenced in the Scene Card or already present in state.
 - If state lacks a key invariant needed for this scene, seed it in must_stay_true using standard phrasing.
 - Return prose plus a state_patch JSON block.
-
 STATE_PATCH rules:
 - Use schema_version "1.0".
 - Use world_updates to update world state (cast_present, location, recent_facts, open_threads).
@@ -71,45 +73,31 @@ STATE_PATCH rules:
   - milestone: maps_acquired = DONE/NOT_YET
   - injury: right forearm scar / left arm filament
   - ownership: shard (carried) / shard (bound but physical)
-
 Scene card:
 {{scene_card}}
-
 Continuity pack:
 {{continuity_pack}}
-
 Character registry (id -> name):
 {{character_registry}}
-
 Thread registry:
 {{thread_registry}}
-
 Character states (per cast_present_ids):
 {{character_states}}
-
 Style anchor:
 {{style_anchor}}
-
 State:
 {{state}}
-
 Output (required, no code fences):
 COMPLIANCE:
 Scene ID: <scene_card.scene_id>
 Allowed events: <short list from Scene Card>
 Forbidden milestones: <from must_stay_true>
 Current arm-side / inventory facts: <from must_stay_true>
-
 PROSE:
 <scene prose>
-
 STATE_PATCH:
 <json>
-
 Item registry (canonical):
 {{item_registry}}
-
 Plot devices (canonical):
 {{plot_devices}}
-
-
