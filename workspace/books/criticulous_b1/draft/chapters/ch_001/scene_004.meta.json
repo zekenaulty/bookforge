@@ -1,0 +1,258 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_004",
+  "chapter": 1,
+  "scene": 4,
+  "scene_target": "Artie survives his first combat encounter by accidentally triggering a massive, environment-destroying critical hit.",
+  "goal": "Demonstrate the terrifying and inconsistent power of the 100% Crit Rate build while establishing Artie's combat incompetence.",
+  "conflict": "Artie's lack of coordination and 1 HP vulnerability versus the aggressive Level 1 Slime.",
+  "required_callbacks": [
+    "milestone: deployment_initiated",
+    "milestone: build_locked"
+  ],
+  "constraints": [
+    "target_words: 2000",
+    "no-recaps",
+    "forward-motion",
+    "must_depict_five_misses",
+    "must_depict_vaporization_of_tree"
+  ],
+  "end_condition": "Artie reaches Level 2 and the slime is completely obliterated.",
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "THREAD_CRIT_EXPLOIT"
+  ],
+  "required_in_custody": [
+    "ITEM_KEYS_001"
+  ],
+  "required_scene_accessible": [
+    "ITEM_KEYS_001"
+  ],
+  "required_visible_on_page": [
+    "ITEM_KEYS_001"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "action",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "level",
+    "resources"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Crit Rate",
+    "Level Up",
+    "Damage",
+    "System Notification"
+  ],
+  "prose_path": "draft/chapters/ch_001/scene_004.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "character_continuity_system_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "chapter": 1,
+        "scene": 4,
+        "reason": "Level up and combat achievement 'Super-Mega-Ultra-Crit'.",
+        "set": {
+          "stats": {
+            "level": 2,
+            "hp": {
+              "current": 1,
+              "max": 1
+            }
+          },
+          "resources": {
+            "attribute_points": 5
+          }
+        },
+        "delta": {
+          "resources": {
+            "anomaly_progress": 1
+          }
+        }
+      }
+    ],
+    "global_continuity_system_updates": [
+      {
+        "reason": "Environmental destruction and monster death due to nested critical hit multipliers.",
+        "set": {
+          "entities": {
+            "ENT_SLIME_001": {
+              "status": "Obliterated"
+            },
+            "ENT_OAK_TREE_001": {
+              "name": "Ancient Oak Tree",
+              "status": "Vaporized"
+            }
+          }
+        }
+      }
+    ],
+    "character_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "chapter": 1,
+        "scene": 4,
+        "persona_updates": [
+          "Artie is horrified by the destructive potential of his own build.",
+          "Artie views himself as a 'bug report' rather than a hero."
+        ],
+        "inventory": [
+          {
+            "item": "ITEM_KEYS_001",
+            "container": "hand_right",
+            "status": "held"
+          },
+          {
+            "item": "ITEM_WALLET_001",
+            "container": "pocket_left",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "hand_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_KEYS_001"
+            ]
+          },
+          {
+            "container": "pocket_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_WALLET_001"
+            ]
+          }
+        ]
+      }
+    ],
+    "inventory_alignment_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "item_id": "ITEM_SMARTPHONE_001",
+        "new_container": "none",
+        "new_status": "lost",
+        "reason": "Item left at death site in the office breakroom; not carried to Whispering Woods."
+      }
+    ],
+    "item_registry_updates": [
+      {
+        "item_id": "ITEM_KEYS_001",
+        "state_tags": [
+          "damaged",
+          "held"
+        ]
+      }
+    ],
+    "world_updates": {
+      "cast_present": [
+        "CHAR_ARTIE"
+      ],
+      "open_threads": [
+        "THREAD_CRIT_EXPLOIT"
+      ],
+      "recent_facts": [
+        "Artie survived his first combat encounter against a Lesser Forest Slime.",
+        "Artie triggered a 'Super-Mega-Ultra-Crit' that obliterated the slime and vaporized an ancient oak tree.",
+        "The combat area now contains a twenty-foot cauterized crater.",
+        "Artie reached Level 2."
+      ]
+    },
+    "summary_update": {
+      "last_scene": [
+        "Artie faced a Level 1 Slime and missed five consecutive attacks due to his lack of coordination.",
+        "An accidental brush of his thumb triggered a massive critical hit that vaporized the slime and a landmark oak tree.",
+        "Artie reached Level 2 and gained 5 attribute points, though his HP remains locked at 1."
+      ],
+      "key_events": [
+        "Artie missed five consecutive attacks against the Lesser Forest Slime.",
+        "An accidental contact triggered a 'Super-Mega-Ultra-Crit' that dealt 9,999,999 damage.",
+        "The Lesser Forest Slime was obliterated and the ancient oak tree was vaporized.",
+        "Artie leveled up from 1 to 2 and received 5 attribute points.",
+        "Artie's title progress for 'Anomaly' reached 1%.",
+        "A twenty-foot cauterized crater was left in the Whispering Woods."
+      ],
+      "must_stay_true": [
+        "milestone: artie_death = DONE",
+        "milestone: build_locked = DONE",
+        "milestone: deployment_initiated = DONE",
+        "milestone: first_kill = DONE",
+        "Artie's HP is permanently locked at 1/1.",
+        "Artie's Crit Rate is 100%.",
+        "The ancient oak tree in the Whispering Woods has been vaporized."
+      ],
+      "chapter_so_far_add": [
+        "Artie survived his first combat by accidentally vaporizing the enemy and the environment with a glitch-tier critical hit."
+      ]
+    }
+  },
+  "scene_summary": [
+    "Artie faced a Level 1 Slime and missed five consecutive attacks due to his lack of coordination.",
+    "An accidental brush of his thumb triggered a massive critical hit that vaporized the slime and a landmark oak tree.",
+    "Artie reached Level 2 and gained 5 attribute points, though his HP remains locked at 1."
+  ],
+  "key_events": [
+    "Artie missed five consecutive attacks against the Lesser Forest Slime.",
+    "An accidental contact triggered a 'Super-Mega-Ultra-Crit' that dealt 9,999,999 damage.",
+    "The Lesser Forest Slime was obliterated and the ancient oak tree was vaporized.",
+    "Artie leveled up from 1 to 2 and received 5 attribute points.",
+    "Artie's title progress for 'Anomaly' reached 1%.",
+    "A twenty-foot cauterized crater was left in the Whispering Woods."
+  ],
+  "must_stay_true": [
+    "milestone: artie_death = DONE",
+    "milestone: build_locked = DONE",
+    "milestone: deployment_initiated = DONE",
+    "milestone: first_kill = DONE",
+    "Artie's HP is permanently locked at 1/1.",
+    "Artie's Crit Rate is 100%.",
+    "The ancient oak tree in the Whispering Woods has been vaporized."
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "fail",
+    "issues": [
+      {
+        "code": "invariant_contradiction",
+        "message": "The scene contradicts multiple invariants in the must_stay_true block: 'Artie is currently in a non-physical void state within the Character Creation Suite' and 'Artie's HP is 0 and his current status is Deceased'. These invariants are stale and conflict with the current scene location (Whispering Woods) and Artie's active HP (1/1).",
+        "severity": "error"
+      },
+      {
+        "code": "mechanic_mismatch",
+        "message": "The UI block '[Title Progress: Anomaly - 1%]' references a title or mechanic ('Anomaly') that is not present in the character_continuity_system_state for CHAR_ARTIE. Only 'TITLE_CRIT_OR_QUIT' is currently registered.",
+        "severity": "error"
+      },
+      {
+        "code": "state_inconsistency",
+        "message": "The must_stay_true block is internally inconsistent, containing both 'Artie's HP is 0' and 'Artie's HP is permanently locked at 1/1', as well as conflicting location data ('void state' vs 'Whispering Woods').",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_mismatch",
+        "message": "UI stat 'HP' does not match any candidate value (character:CHAR_ARTIE={'current': 1, 'max': 1}).",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI stat 'Stat Points Awarded' not found in character_continuity_system_state/global_continuity_system_state.",
+        "severity": "warning"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 2,
+  "updated_at": "2026-02-09T07:11:06Z"
+}

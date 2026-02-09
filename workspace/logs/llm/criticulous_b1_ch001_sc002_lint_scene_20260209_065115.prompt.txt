@@ -1,0 +1,922 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Item naming: use display_name for prose; use item_id only in JSON/patches. The display_name must be human readable and not an escaped id/name.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+If mechanics are shown in prose or UI, they must be present in continuity system state or added in continuity system updates in the same STATE_PATCH.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+
+
+USER:
+
+# LINT
+
+Check the scene for continuity, invariant violations, and duplication.
+Flag invariant contradictions against must_stay_true/key facts.
+Return ONLY JSON matching the lint_report schema.
+- Check and require that any UI mechanic values in prose are owned by continuity system state and match candidate values.
+- Treat only authoritative surfaces as canonical-check targets; do not enforce canonical labels in narrative prose.
+- For authoritative surfaces, prefer exact canonical item/device labels from registries.
+- Check for POV drift vs book POV (no first-person in third-person scenes).
+- Deterministically enforce scene-card durable constraints (`required_in_custody`, `required_scene_accessible`, `forbidden_visible`, `device_presence`; optional `required_visible_on_page`).
+- Report missing durable context ids with explicit retry hints instead of guessing canon.
+
+Required keys:
+- schema_version ("1.0")
+- status ("pass" or "fail")
+- issues (array of objects)
+
+Each issue object must include:
+- code
+- message
+Optional:
+- severity
+
+If there are no issues, return:
+{
+  "schema_version": "1.0",
+  "status": "pass",
+  "issues": []
+}
+
+If there are issues, return:
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {"code": "continuity", "message": "Example issue", "severity": "error"}
+  ]
+}
+
+Scene:
+One hundred points. It was a nice, round number. A number that suggested competence, or at least a fair shake at a second chance. 
+
+Arthur 'Artie' Penhaligon hovered in the neon-blue hum of the Character Creation Suite, staring at the translucent windows that flickered with every beat of his non-existent heart. The UI was a chaotic sprawl of sliders and checkboxes, looking less like a divine interface and more like a spreadsheet that had survived a catastrophic crash.
+
+"Can we speed this up? I have a three-o'clock with a guy who died trying to parkour off a moving train, and honestly, his stats are already looking more promising than yours," Fizz said, her pixelated wings buzzing near Artie’s ear. She adjusted her miniature uniform, her expression one of practiced, professional impatience.
+
+Artie didn't look at her. He was too focused on the [Attribute Points: 100] blinking in the corner of his vision. Below it, his current stats were a depressing row of base tens, with one glaring exception.
+
+[STATS]
+- [Strength: 10]
+- [Agility: 10]
+- [Intelligence: 10]
+- [Constitution: 10]
+- [Luck: 1]
+- [Critical Hit Rate: 0.01%]
+
+"Constitution," Artie muttered, his translucent hand trembling. "I need Constitution. I’ve had enough of the 'Deceased' status for one lifetime. I want to be a tank. A glorious, unkillable slab of meat."
+
+"A noble goal for someone who just got taken out by a bag of Cool Ranch chips," Fizz remarked, inspecting her fingernails. "But the Void has a bit of latency. Or maybe it’s just your soul’s lingering trauma from the short circuit. Either way, move faster. I’m losing my 'Patient Guide' buff and it’s about to be replaced by 'Sarcastic Bystander.'"
+
+Artie reached out, aiming his finger at the Constitution slider. He intended to dump at least fifty points into it, enough to ensure that a stiff breeze wouldn't send him back to the respawn screen. But as his finger neared the glass-like interface, a sudden, violent spasm racked his ghostly frame—a final, dying echo of the several thousand volts that had recently reorganized his nervous system.
+
+His hand jerked. His finger didn't hit Constitution. It slammed into the 'Critical Hit Rate' slider and dragged it with the force of a desperate man.
+
+[Critical Hit Rate: 100%]
+[Remaining Attribute Points: 0]
+
+The UI emitted a sound like a jackpot hitting on a rigged slot machine.
+
+"Uh," Artie said, his heart—or the place where it used to be—sinking. "Is that... supposed to happen?"
+
+Fizz flew closer, her eyes widening as she scanned the display. "Did you just... you did. You put every single point into Crit. You didn't even touch Agility. Or Strength. Or, you know, the stat that keeps your lungs inflated."
+
+"I can fix it," Artie said, his voice rising in panic. He reached for the 'Reset' button, but the latency chose that exact moment to vanish. The UI snapped forward, and his frantic poking landed squarely on the 'Confirm Build' prompt.
+
+[System Notification: Build Confirmed!]
+[Recalculating physical integrity based on selected attributes...]
+[Warning: Constitution remains at base level (10) with severe 'Deceased' penalty applied.]
+[Warning: HP has been capped to minimum viable threshold.]
+
+"No, no! Undo! Where is the escape key?" Artie shouted, clawing at the air.
+
+"There is no escape key in the afterlife, Penhaligon," Fizz sighed, her voice dripping with a mix of pity and dark amusement. "You just locked in a build with the durability of a wet paper towel and the offensive potential of a supernova. You’re essentially a glass cannon, except the glass is already cracked."
+
+A new window erupted in front of Artie’s face, glowing with an ominous, golden light.
+
+[System Notification: Title Acquired!]
+[Title: Crit or Quit (ID: TITLE_CRIT_OR_QUIT)]
+[Description: You have achieved the impossible—a 100% Critical Hit rate at Level 1. You will either vaporize your enemies or be sneezed into oblivion. There is no middle ground.]
+[Effect: All successful hits are guaranteed Critical Hits. HP is permanently locked at 1. Any damage taken is fatal.]
+
+Artie stared at the final tally.
+
+[HP: 1/1]
+[Crit Rate: 100%]
+
+"One?" Artie whispered. "I have one hit point? I’ve had paper cuts more threatening than my entire life force."
+
+"On the bright side," Fizz said, patting him on the shoulder—which felt like a sharp static shock—"you’ll never have to worry about long-term healthcare. If anything touches you, you're just... gone. It’s very efficient, really."
+
+The blue light of the suite began to fragment. The neon lines of the void dissolved, replaced by the rough, dark textures of ancient bark and the smell of damp earth.
+
+"Wait, I'm not ready! Give me a re-spec! I'll give you a five-star review!"
+
+"Review all you want," Fizz said, her form becoming solid as she pulled the Standard Guide's Manual from her satchel. "But you’re live, Artie. Welcome to the Whispering Woods. Try not to trip on a pebble. It would be a very embarrassing way to end this."
+
+[System Notification: Deployment Commencing...]
+[Location: Tutorial Zone - Whispering Woods]
+[Good luck, Anomaly. You're going to need it.]
+
+Artie felt the sudden, jarring weight of gravity. His feet hit solid dirt. He wobbled, his heart hammering against his ribs—a single, fragile beat that represented his entire existence. He looked at the floating red '1' in the corner of his vision.
+
+"One HP," he muttered. "I'm a walking game-over screen."
+
+"And a walking miracle," Fizz added, hovering just above his head. "Now, look alive. We’ve got company."
+
+A low growl echoed from the thicket ahead. Artie’s 100% Crit Rate glowed in his peripheral vision, a golden promise of power that felt exactly like a death sentence.
+
+Authoritative surfaces:
+[
+  {
+    "kind": "ui_block",
+    "line": 9,
+    "text": "[STATS]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 25,
+    "text": "[Critical Hit Rate: 100%]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 26,
+    "text": "[Remaining Attribute Points: 0]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 36,
+    "text": "[System Notification: Build Confirmed!]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 37,
+    "text": "[Recalculating physical integrity based on selected attributes...]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 38,
+    "text": "[Warning: Constitution remains at base level (10) with severe 'Deceased' penalty applied.]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 39,
+    "text": "[Warning: HP has been capped to minimum viable threshold.]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 47,
+    "text": "[System Notification: Title Acquired!]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 48,
+    "text": "[Title: Crit or Quit (ID: TITLE_CRIT_OR_QUIT)]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 49,
+    "text": "[Description: You have achieved the impossible\u2014a 100% Critical Hit rate at Level 1. You will either vaporize your enemies or be sneezed into oblivion. There is no middle ground.]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 50,
+    "text": "[Effect: All successful hits are guaranteed Critical Hits. HP is permanently locked at 1. Any damage taken is fatal.]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 54,
+    "text": "[HP: 1/1]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 55,
+    "text": "[Crit Rate: 100%]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 67,
+    "text": "[System Notification: Deployment Commencing...]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 68,
+    "text": "[Location: Tutorial Zone - Whispering Woods]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 69,
+    "text": "[Good luck, Anomaly. You're going to need it.]"
+  }
+]
+
+Character states (per cast_present_ids):
+[
+  {
+    "character_continuity_system_state": {
+      "resources": {
+        "patience": {
+          "current": 0,
+          "max": 100
+        }
+      },
+      "skills": {
+        "cynicism": 3,
+        "procrastination": 5,
+        "spreadsheet_wizardry": 4
+      },
+      "stats": {
+        "hp": {
+          "current": 0,
+          "max": 100
+        }
+      },
+      "titles": [
+        {
+          "active": true,
+          "name": "Deceased",
+          "source": "Vending Machine Incident"
+        }
+      ]
+    },
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "pocket_left",
+        "contents": [
+          "ITEM_WALLET_001"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "pocket_right",
+        "contents": [
+          "ITEM_KEYS_001"
+        ],
+        "owner": "CHAR_ARTIE"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Smartphone moved to hand to satisfy required_visible_on_page constraint.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initialize scene focus mechanics",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Aligning for required_visible_on_page constraint.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie's cynical worldview is confirmed by his absurd death.",
+          "Artie is resigned to his fate, even in the afterlife."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie died from electrocution and entered the Character Creation Suite.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Smartphone removed from inventory as it was dropped in Scene 1.",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "notes": "Carry forward status from Scene 1",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Aligning state for Scene 2 and enforcing forbidden_visible constraint for smartphone.",
+        "scene": 2
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Keyring (status=stowed, container=pocket_right)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[Smartphone, Keyring])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[Leather Wallet])",
+      "milestone: artie_death = DONE",
+      "milestone: character_creation_entry = DONE"
+    ],
+    "inventory": [
+      {
+        "container": "pocket_left",
+        "item": "ITEM_WALLET_001",
+        "status": "stowed"
+      },
+      {
+        "container": "pocket_right",
+        "item": "ITEM_KEYS_001",
+        "status": "stowed"
+      }
+    ],
+    "last_touched": {
+      "chapter": 1,
+      "scene": 2
+    },
+    "name": "Arthur 'Artie' Penhaligon",
+    "schema_version": "1.0",
+    "skills": {
+      "cynicism": 3,
+      "procrastination": 5,
+      "spreadsheet_wizardry": 4
+    },
+    "stats": {
+      "hp": {
+        "current": 0,
+        "max": 100
+      }
+    },
+    "updated_at": "2026-02-09T06:37:31Z"
+  },
+  {
+    "character_continuity_system_state": {
+      "skills": {
+        "annoying_notification": 10,
+        "scan_entity": 5,
+        "teleport_short_range": 3
+      },
+      "stats": {
+        "hp": {
+          "current": 50,
+          "max": 50
+        },
+        "mp": {
+          "current": 500,
+          "max": 500
+        }
+      },
+      "titles": [
+        {
+          "active": true,
+          "name": "System Liaison (Tier 1)",
+          "source": "Employment"
+        }
+      ]
+    },
+    "character_id": "CHAR_FIZZ",
+    "containers": [
+      {
+        "container": "satchel",
+        "contents": [
+          "ITEM_GUIDE_BOOK_001"
+        ],
+        "owner": "CHAR_FIZZ"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initialize companion stats and skills",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial scene entry and equipment posture alignment.",
+        "scene": 2
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_FIZZ -> Standard Guide's Manual (status=stowed, container=satchel)",
+      "container: satchel (owner=CHAR_FIZZ, contents=[Standard Guide's Manual])"
+    ],
+    "inventory": [
+      {
+        "container": "satchel",
+        "item": "ITEM_GUIDE_BOOK_001",
+        "status": "stowed"
+      }
+    ],
+    "last_touched": {
+      "chapter": 1,
+      "scene": 2
+    },
+    "name": "Fizz",
+    "schema_version": "1.0",
+    "skills": {
+      "annoying_notification": 10,
+      "scan_entity": 5,
+      "teleport_short_range": 3
+    },
+    "stats": {
+      "hp": {
+        "current": 50,
+        "max": 50
+      },
+      "mp": {
+        "current": 500,
+        "max": 500
+      }
+    },
+    "updated_at": "2026-02-09T06:37:31Z"
+  }
+]
+
+Item registry (canonical):
+{
+  "items": [
+    {
+      "custodian": "CHAR_FIZZ",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Standard Guide's Manual",
+      "item_id": "ITEM_GUIDE_BOOK_001",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [],
+      "name": "Standard Guide's Manual",
+      "owner_scope": "character",
+      "state_tags": [
+        "unclassified",
+        "stowed"
+      ],
+      "type": "unclassified"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Keyring",
+      "item_id": "ITEM_KEYS_001",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [],
+      "name": "Keyring",
+      "owner_scope": "character",
+      "state_tags": [
+        "unclassified",
+        "stowed"
+      ],
+      "type": "unclassified"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Smartphone",
+      "item_id": "ITEM_SMARTPHONE_001",
+      "last_seen": {
+        "chapter": 1,
+        "location": "The Void / Character Creation Suite",
+        "scene": 2
+      },
+      "linked_threads": [],
+      "name": "Smartphone",
+      "owner_scope": "character",
+      "state_tags": [
+        "unclassified",
+        "stowed"
+      ],
+      "type": "unclassified"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Leather Wallet",
+      "item_id": "ITEM_WALLET_001",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [],
+      "name": "Leather Wallet",
+      "owner_scope": "character",
+      "state_tags": [
+        "unclassified",
+        "stowed"
+      ],
+      "type": "unclassified"
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Plot devices (canonical):
+{
+  "devices": [
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_CRIT_EXPLOIT",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_CRIT_EXPLOIT"
+      ],
+      "name": "The 100% Crit Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_THE_ASCENSION",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_path_of_the_first_glitch_c7dd4581",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_THE_ASCENSION"
+      ],
+      "name": "The Path of the First Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_SYSTEM_GLITCH",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_system_s_stability_da5be7b7",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_SYSTEM_GLITCH"
+      ],
+      "name": "The System's Stability",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_VANE_RIVALRY",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_vane_vendetta_bcf4bea1",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_VANE_RIVALRY"
+      ],
+      "name": "The Vane Vendetta",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-09T06:22:57Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 2
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {},
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_002.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Artie Penhaligon died in a mundane office accident.",
+      "The System has intercepted Artie's soul for character creation.",
+      "Artie finalized a 'glass cannon' build with 1 HP and 100% Crit Rate.",
+      "Artie and Fizz have entered the first tutorial zone, the Whispering Woods."
+    ],
+    "key_facts_ring": [
+      "Artie's Patience resource was depleted to 0 during a struggle with a vending machine.",
+      "Artie attempted 'percussive maintenance' on the machine, triggering a short circuit.",
+      "A Critical Hit of 100 damage was dealt to Artie via electrocution.",
+      "Artie's HP reached 0, resulting in the 'Deceased' status.",
+      "Artie's Smartphone was dropped and left behind on the breakroom floor.",
+      "The System flagged Artie for 'Exceptional Bad Luck' and initiated a compensation package.",
+      "Artie's consciousness transitioned to the Character Creation Suite.",
+      "milestone: artie_death = DONE",
+      "milestone: character_creation_entry = DONE",
+      "Artie's Smartphone (ITEM_SMARTPHONE_001) is located on the office breakroom floor.",
+      "Artie is currently in a non-physical void state within the Character Creation Suite.",
+      "Artie's HP is 0 and his current status is Deceased.",
+      "Artie accidentally allocated 100 attribute points to Critical Hit Rate due to a nervous spasm.",
+      "Artie confirmed his build, resulting in his HP being capped at 1/1.",
+      "The System awarded Artie the 'Crit or Quit' title, making all hits guaranteed crits but all damage fatal.",
+      "Fizz pulled her Standard Guide's Manual from her satchel as they transitioned to the physical world.",
+      "Artie and Fizz were deployed to the Whispering Woods tutorial zone.",
+      "A low growl from the thicket signaled the presence of a nearby monster.",
+      "milestone: build_locked = DONE",
+      "milestone: deployment_initiated = DONE",
+      "Artie's HP is permanently locked at 1/1.",
+      "Artie's Critical Hit Rate is 100%."
+    ],
+    "last_scene": [
+      "Artie Penhaligon navigated the Character Creation Suite under the supervision of Fizz.",
+      "Due to UI latency and a post-death nervous spasm, he accidentally allocated all 100 attribute points into his Critical Hit Rate.",
+      "This locked his build, granting him the 'Crit or Quit' title and capping his health at a fragile 1 HP before he was deployed to the Whispering Woods."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: character_creation_entry = DONE",
+      "Artie's Smartphone (ITEM_SMARTPHONE_001) is located on the office breakroom floor.",
+      "Artie is currently in a non-physical void state within the Character Creation Suite.",
+      "Artie's HP is 0 and his current status is Deceased.",
+      "milestone: build_locked = DONE",
+      "milestone: deployment_initiated = DONE",
+      "Artie's HP is permanently locked at 1/1.",
+      "Artie's Critical Hit Rate is 100%."
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Tutorial Zone - Whispering Woods",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie's build is locked with 1 HP and 100% Crit Rate.",
+      "Artie acquired the 'Crit or Quit' title.",
+      "Artie and Fizz have arrived in the Whispering Woods.",
+      "A monster is nearby."
+    ],
+    "time": {}
+  }
+}
+
+Summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie Penhaligon died in a mundane office accident.",
+    "The System has intercepted Artie's soul for character creation.",
+    "Artie finalized a 'glass cannon' build with 1 HP and 100% Crit Rate.",
+    "Artie and Fizz have entered the first tutorial zone, the Whispering Woods."
+  ],
+  "key_facts_ring": [
+    "Artie's Patience resource was depleted to 0 during a struggle with a vending machine.",
+    "Artie attempted 'percussive maintenance' on the machine, triggering a short circuit.",
+    "A Critical Hit of 100 damage was dealt to Artie via electrocution.",
+    "Artie's HP reached 0, resulting in the 'Deceased' status.",
+    "Artie's Smartphone was dropped and left behind on the breakroom floor.",
+    "The System flagged Artie for 'Exceptional Bad Luck' and initiated a compensation package.",
+    "Artie's consciousness transitioned to the Character Creation Suite.",
+    "milestone: artie_death = DONE",
+    "milestone: character_creation_entry = DONE",
+    "Artie's Smartphone (ITEM_SMARTPHONE_001) is located on the office breakroom floor.",
+    "Artie is currently in a non-physical void state within the Character Creation Suite.",
+    "Artie's HP is 0 and his current status is Deceased.",
+    "Artie accidentally allocated 100 attribute points to Critical Hit Rate due to a nervous spasm.",
+    "Artie confirmed his build, resulting in his HP being capped at 1/1.",
+    "The System awarded Artie the 'Crit or Quit' title, making all hits guaranteed crits but all damage fatal.",
+    "Fizz pulled her Standard Guide's Manual from her satchel as they transitioned to the physical world.",
+    "Artie and Fizz were deployed to the Whispering Woods tutorial zone.",
+    "A low growl from the thicket signaled the presence of a nearby monster.",
+    "milestone: build_locked = DONE",
+    "milestone: deployment_initiated = DONE",
+    "Artie's HP is permanently locked at 1/1.",
+    "Artie's Critical Hit Rate is 100%."
+  ],
+  "last_scene": [
+    "Artie Penhaligon navigated the Character Creation Suite under the supervision of Fizz.",
+    "Due to UI latency and a post-death nervous spasm, he accidentally allocated all 100 attribute points into his Critical Hit Rate.",
+    "This locked his build, granting him the 'Crit or Quit' title and capping his health at a fragile 1 HP before he was deployed to the Whispering Woods."
+  ],
+  "must_stay_true": [
+    "milestone: artie_death = DONE",
+    "milestone: character_creation_entry = DONE",
+    "Artie's Smartphone (ITEM_SMARTPHONE_001) is located on the office breakroom floor.",
+    "Artie is currently in a non-physical void state within the Character Creation Suite.",
+    "Artie's HP is 0 and his current status is Deceased.",
+    "milestone: build_locked = DONE",
+    "milestone: deployment_initiated = DONE",
+    "Artie's HP is permanently locked at 1/1.",
+    "Artie's Critical Hit Rate is 100%."
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "milestone: artie_death = DONE",
+  "milestone: character_creation_entry = DONE",
+  "Artie's Smartphone (ITEM_SMARTPHONE_001) is located on the office breakroom floor.",
+  "Artie is currently in a non-physical void state within the Character Creation Suite.",
+  "Artie's HP is 0 and his current status is Deceased.",
+  "milestone: build_locked = DONE",
+  "milestone: deployment_initiated = DONE",
+  "Artie's HP is permanently locked at 1/1.",
+  "Artie's Critical Hit Rate is 100%.",
+  "Artie's Patience resource was depleted to 0 during a struggle with a vending machine.",
+  "Artie attempted 'percussive maintenance' on the machine, triggering a short circuit.",
+  "A Critical Hit of 100 damage was dealt to Artie via electrocution.",
+  "Artie's HP reached 0, resulting in the 'Deceased' status.",
+  "Artie's Smartphone was dropped and left behind on the breakroom floor.",
+  "The System flagged Artie for 'Exceptional Bad Luck' and initiated a compensation package.",
+  "Artie's consciousness transitioned to the Character Creation Suite.",
+  "milestone: artie_death = DONE",
+  "milestone: character_creation_entry = DONE",
+  "Artie's Smartphone (ITEM_SMARTPHONE_001) is located on the office breakroom floor.",
+  "Artie is currently in a non-physical void state within the Character Creation Suite.",
+  "Artie's HP is 0 and his current status is Deceased.",
+  "Artie accidentally allocated 100 attribute points to Critical Hit Rate due to a nervous spasm.",
+  "Artie confirmed his build, resulting in his HP being capped at 1/1.",
+  "The System awarded Artie the 'Crit or Quit' title, making all hits guaranteed crits but all damage fatal.",
+  "Fizz pulled her Standard Guide's Manual from her satchel as they transitioned to the physical world.",
+  "Artie and Fizz were deployed to the Whispering Woods tutorial zone.",
+  "A low growl from the thicket signaled the presence of a nearby monster.",
+  "milestone: build_locked = DONE",
+  "milestone: deployment_initiated = DONE",
+  "Artie's HP is permanently locked at 1/1.",
+  "Artie's Critical Hit Rate is 100%."
+]

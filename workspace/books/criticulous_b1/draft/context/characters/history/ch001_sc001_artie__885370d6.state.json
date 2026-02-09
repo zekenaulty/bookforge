@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "character_id": "CHAR_ARTIE",
+  "inventory": [
+    {
+      "container": "pocket_left",
+      "item": "ITEM_WALLET_001",
+      "status": "stowed"
+    },
+    {
+      "container": "pocket_right",
+      "item": "ITEM_KEYS_001",
+      "status": "stowed"
+    }
+  ],
+  "containers": [
+    {
+      "container": "pocket_left",
+      "contents": [
+        "ITEM_WALLET_001"
+      ],
+      "owner": "CHAR_ARTIE"
+    },
+    {
+      "container": "pocket_right",
+      "contents": [
+        "ITEM_KEYS_001"
+      ],
+      "owner": "CHAR_ARTIE"
+    }
+  ],
+  "invariants": [
+    "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_right)",
+    "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_left)",
+    "inventory: CHAR_ARTIE -> Keyring (status=stowed, container=pocket_right)",
+    "container: pocket_right (owner=CHAR_ARTIE, contents=[Smartphone, Keyring])",
+    "container: pocket_left (owner=CHAR_ARTIE, contents=[Leather Wallet])",
+    "milestone: artie_death = DONE",
+    "milestone: character_creation_entry = DONE"
+  ],
+  "history": [
+    {
+      "chapter": 1,
+      "scene": 1,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "notes": "Smartphone moved to hand to satisfy required_visible_on_page constraint."
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "notes": "Initialize scene focus mechanics",
+      "chapter": 1,
+      "scene": 1
+    },
+    {
+      "chapter": 1,
+      "scene": 1,
+      "changes": [
+        "inventory_alignment_updated"
+      ],
+      "notes": "Aligning for required_visible_on_page constraint."
+    },
+    {
+      "chapter": 1,
+      "scene": 1,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "persona_updates": [
+        "Artie's cynical worldview is confirmed by his absurd death.",
+        "Artie is resigned to his fate, even in the afterlife."
+      ]
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "notes": "Artie died from electrocution and entered the Character Creation Suite.",
+      "chapter": 1,
+      "scene": 1
+    },
+    {
+      "chapter": 1,
+      "scene": 1,
+      "changes": [
+        "inventory_alignment_updated"
+      ]
+    }
+  ],
+  "name": "Arthur 'Artie' Penhaligon",
+  "character_continuity_system_state": {
+    "stats": {
+      "hp": {
+        "current": 0,
+        "max": 100
+      }
+    },
+    "skills": {
+      "spreadsheet_wizardry": 4,
+      "procrastination": 5,
+      "cynicism": 3
+    },
+    "titles": [
+      {
+        "active": true,
+        "name": "Deceased",
+        "source": "Vending Machine Incident"
+      }
+    ],
+    "resources": {
+      "patience": {
+        "current": 0,
+        "max": 100
+      }
+    }
+  },
+  "stats": {
+    "hp": {
+      "current": 100,
+      "max": 100
+    }
+  },
+  "skills": {
+    "spreadsheet_wizardry": 4,
+    "procrastination": 5,
+    "cynicism": 3
+  },
+  "updated_at": "2026-02-09T06:36:46Z",
+  "last_touched": {
+    "chapter": 1,
+    "scene": 1
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "reason": "Arrival in tutorial zone with locked build and active status effects.",
+      "scene": 3,
+      "set": {
+        "stats": {
+          "crit_rate": 100,
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "level": 1
+        },
+        "statuses": {
+          "fragile": "Any damage taken is fatal."
+        },
+        "titles": [
+          {
+            "active": true,
+            "id": "TITLE_CRIT_OR_QUIT",
+            "name": "Crit or Quit",
+            "source": "System Achievement"
+          }
+        ]
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "pocket_left",
+          "contents": [
+            "ITEM_WALLET_001"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "pocket_right",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "invariants_add": [
+        "Artie's HP is permanently locked at 1/1.",
+        "Artie's Critical Hit Rate is 100%."
+      ],
+      "inventory": [
+        {
+          "container": "pocket_left",
+          "item": "ITEM_WALLET_001",
+          "status": "stowed"
+        },
+        {
+          "container": "hand_right",
+          "item": "ITEM_KEYS_001",
+          "status": "held"
+        }
+      ],
+      "persona_updates": [
+        "Artie is experiencing acute survival anxiety due to his Fragile status.",
+        "Artie is beginning to view the world through the lens of tactical exploitation."
+      ],
+      "scene": 3
+    },
+    {
+      "chapter": 1,
+      "character_id": "CHAR_FIZZ",
+      "containers": [
+        {
+          "container": "satchel",
+          "contents": [],
+          "owner": "CHAR_FIZZ"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_GUIDE_BOOK_001",
+          "status": "held"
+        }
+      ],
+      "persona_updates": [
+        "Fizz is maintaining a detached, clinical observation of Artie's struggle."
+      ],
+      "scene": 3
+    }
+  ],
+  "global_continuity_system_updates": [],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "item_id": "ITEM_KEYS_001",
+      "new_container": "hand_right",
+      "new_status": "held",
+      "reason": "Artie is wielding his keys as a weapon."
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie has entered the Whispering Woods and faced his first enemy, a Level 1 Slime, while possessing only 1 HP."
+    ],
+    "key_events": [
+      "Artie transitioned to the Whispering Woods and confirmed the lethality of the 'Fragile' status.",
+      "A Level 1 Lesser Forest Slime appeared and targeted Artie.",
+      "Artie realized he has no traditional weapons and is forced to use his Keyring.",
+      "Artie was cornered against an ancient oak tree by the slime.",
+      "The slime initiated a leap attack against Artie."
+    ],
+    "last_scene": [
+      "Artie and Fizz arrived in the Whispering Woods, where Artie immediately felt the physical weight of his 1 HP build.",
+      "A Level 1 Slime ambushed them, forcing Artie into a panicked retreat.",
+      "Artie ended the scene backed against a tree, wielding his house keys as a makeshift weapon against the lunging monster."
+    ],
+    "must_stay_true": [
+      "milestone: deployment_initiated = DONE",
+      "milestone: first_monster_encounter = DONE",
+      "Artie's HP is permanently locked at 1/1.",
+      "Artie has the 'Fragile' status and 'Crit or Quit' title.",
+      "Artie is holding ITEM_KEYS_001 in his hand_right.",
+      "Fizz is holding ITEM_GUIDE_BOOK_001 in her hand_right.",
+      "milestone: build_locked = DONE"
+    ]
+  },
+  "transfer_updates": [
+    {
+      "destination": "hand_right",
+      "item_id": "ITEM_KEYS_001",
+      "reason": "Artie drew his keys to defend himself against the slime.",
+      "reason_category": "handoff_transfer",
+      "source": "pocket_right"
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Tutorial Zone - Whispering Woods",
+    "open_threads": [],
+    "recent_facts": [
+      "Artie and Fizz have arrived in the Whispering Woods.",
+      "Artie is being hunted by a Level 1 Lesser Forest Slime.",
+      "Artie has realized that his 1 HP status makes even the environment lethal.",
+      "Artie is backed against an oak tree, preparing to defend himself with his keys."
+    ]
+  }
+}

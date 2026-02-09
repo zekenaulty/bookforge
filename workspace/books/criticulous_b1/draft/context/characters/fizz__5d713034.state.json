@@ -1,46 +1,178 @@
 {
   "schema_version": "1.0",
   "character_id": "CHAR_FIZZ",
-  "name": "Fizz",
   "inventory": [
     {
-      "item_id": "ITEM_GUIDE_BOOK",
-      "item_name": "The System Manual",
-      "status": "stowed",
-      "container": "satchel"
+      "container": "hand_right",
+      "item": "ITEM_GUIDE_BOOK_001",
+      "status": "held"
     }
   ],
   "containers": [
     {
-      "container": "satchel",
-      "owner": "CHAR_FIZZ",
-      "location": "back",
+      "container": "hand_right",
       "contents": [
-        "ITEM_GUIDE_BOOK"
-      ]
+        "ITEM_GUIDE_BOOK_001"
+      ],
+      "owner": "CHAR_FIZZ"
+    },
+    {
+      "container": "satchel",
+      "contents": [],
+      "owner": "CHAR_FIZZ"
     }
   ],
+  "invariants": [
+    "inventory: CHAR_FIZZ -> Standard Guide's Manual (status=stowed, container=satchel)",
+    "container: satchel (owner=CHAR_FIZZ, contents=[Standard Guide's Manual])",
+    "Fizz is hovering near Artie, observing the combat with amusement.",
+    "Fizz is in full panic mode."
+  ],
+  "history": [
+    {
+      "chapter": 1,
+      "scene": 2,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ]
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "notes": "Initialize companion stats and skills",
+      "chapter": 1,
+      "scene": 2
+    },
+    {
+      "chapter": 1,
+      "scene": 2,
+      "changes": [
+        "inventory_alignment_updated"
+      ],
+      "notes": "Initial scene entry and equipment posture alignment."
+    },
+    {
+      "chapter": 1,
+      "scene": 2,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "persona_updates": [
+        "Fizz is losing her 'Patient Guide' buff and becoming a 'Sarcastic Bystander'."
+      ]
+    },
+    {
+      "chapter": 1,
+      "scene": 3,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "notes": "Fizz is holding her guide book, ready to assist (or mock) Artie."
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "notes": "Maintain companion stats for tutorial.",
+      "chapter": 1,
+      "scene": 3
+    },
+    {
+      "chapter": 1,
+      "scene": 3,
+      "changes": [
+        "inventory_alignment_updated"
+      ],
+      "notes": "Fizz has her manual out to guide the new player."
+    },
+    {
+      "chapter": 1,
+      "scene": 3,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "persona_updates": [
+        "Fizz is finding amusement in Artie's extreme fragility."
+      ]
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "notes": "Maintain companion status during tutorial arrival.",
+      "chapter": 1,
+      "scene": 3
+    },
+    {
+      "chapter": 1,
+      "scene": 3,
+      "changes": [
+        "inventory_alignment_updated"
+      ]
+    },
+    {
+      "chapter": 1,
+      "scene": 5,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "notes": "Fizz returns to the scene to provide 'guidance' on the aftermath."
+    },
+    {
+      "chapter": 1,
+      "scene": 5,
+      "changes": [
+        "inventory_alignment_updated"
+      ],
+      "notes": "Re-aligning Fizz's inventory as she re-enters the active cast."
+    },
+    {
+      "chapter": 1,
+      "scene": 5,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "persona_updates": [
+        "Fizz is in full panic mode, prioritizing Artie's survival over her usual snark."
+      ]
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "chapter": 1,
+      "scene": 5
+    }
+  ],
+  "name": "Fizz",
   "character_continuity_system_state": {
     "stats": {
       "hp": {
         "current": 50,
         "max": 50
       },
-      "speed": {
-        "current": 100,
-        "max": 100
+      "mp": {
+        "current": 500,
+        "max": 500
       }
     },
     "skills": {
-      "system_navigation": 10,
-      "appraisal": 8,
-      "annoying_buzz": 5
+      "annoying_notification": 10,
+      "scan_entity": 5,
+      "teleport_short_range": 3
     },
     "titles": [
       {
-        "name": "Level 1 Guide",
-        "source": "employment",
-        "active": true
+        "name": "System Liaison (Tier 1)",
+        "active": true,
+        "source": "Employment"
       }
     ]
   },
@@ -49,20 +181,19 @@
       "current": 50,
       "max": 50
     },
-    "speed": {
-      "current": 100,
-      "max": 100
+    "mp": {
+      "current": 500,
+      "max": 500
     }
   },
   "skills": {
-    "system_navigation": 10,
-    "appraisal": 8,
-    "annoying_buzz": 5
+    "annoying_notification": 10,
+    "scan_entity": 5,
+    "teleport_short_range": 3
   },
-  "invariants": [
-    "inventory: CHAR_FIZZ -> The System Manual (status=stowed, container=satchel)",
-    "container: satchel (owner=CHAR_FIZZ, contents=[The System Manual])"
-  ],
-  "history": [],
-  "updated_at": "2026-02-09T06:18:11Z"
+  "updated_at": "2026-02-09T07:24:21Z",
+  "last_touched": {
+    "chapter": 1,
+    "scene": 5
+  }
 }

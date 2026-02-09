@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {
+      "code": "pov_drift",
+      "message": "The scene is written in first-person POV ('I', 'my', 'me'), which violates the Book Constitution requirement for third_limited POV.",
+      "severity": "error"
+    },
+    {
+      "code": "invariant_violation",
+      "message": "Prose depicts Artie in the Whispering Woods with 1 HP, contradicting must_stay_true invariants: 'Artie is currently in a non-physical void state within the Character Creation Suite' and 'Artie's HP is 0 and his current status is Deceased'.",
+      "severity": "error"
+    },
+    {
+      "code": "inventory_consistency",
+      "message": "Prose implies 'Leather Wallet' and 'Keyring' are in the same pocket ('I reached into my pocket... brushing against my Leather Wallet and... Keyring'), but character state defines ITEM_WALLET_001 in pocket_left and ITEM_KEYS_001 in pocket_right.",
+      "severity": "warning"
+    },
+    {
+      "code": "continuity_missing_state",
+      "message": "UI mechanic values for 'Lesser Forest Slime' (HP: 10/10, Level 1) are displayed in prose but are not present in the continuity system state. Provide entity ID or update global_continuity_system_state.",
+      "severity": "error"
+    }
+  ]
+}

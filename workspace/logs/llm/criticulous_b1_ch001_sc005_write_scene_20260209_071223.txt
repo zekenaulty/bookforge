@@ -1,0 +1,220 @@
+COMPLIANCE:
+Scene ID: SC_001_005
+Allowed events: Artie receives cursed reward (Participation Trophy), high-aggro environment navigation, flee monster swarm toward Oakhaven.
+Forbidden milestones: Any travel arrival at Oakhaven (must be sprinting toward it, not arrived), any change to 1 HP limit, any resolution of Vane rivalry.
+Current arm-side / inventory facts: Artie holding Keyring (ITEM_KEYS_001) in hand_right; Leather Wallet (ITEM_WALLET_001) in pocket_left. Fizz holding Standard Guide's Manual (ITEM_GUIDE_BOOK_001) in hand_right.
+
+PROSE:
+
+The air still tasted like ozone and scorched slime. Artie Penhaligon stood at the center of a twenty-foot cauterized circle, his boots crunching on what used to be a very respectable, very ancient oak tree. Now, it was just carbon and regret. He looked down at his right hand, where his Keyring was still white-knuckled in his grip. The brass teeth of his house keys were slightly bent, humming with a residual heat that suggested they weren't designed for multi-million-damage output.
+
+"Well," Fizz said, her voice cutting through the ringing in his ears. She was hovering three feet to his left, her Standard Guide's Manual open to a page that was vibrating with frantic, golden text. "That was... statistically improbable."
+
+"Improbable?" Artie’s voice was a dry rasp. He didn't dare move. He was still Level 2, still possessed of exactly 1 Hit Point, and currently standing in the middle of a literal smoking gun. "I just vaporized a landmark with a Honda Civic key, Fizz. I think we’ve moved past improbable and into 'the developers are going to ban me' territory."
+
+[System Notification]
+[Achievement Unlocked: Overkill is Underrated]
+[Description: Deal 1,000,000% more damage than required to kill a Tutorial Mob.]
+[Reward: 1x Participation Trophy]
+
+A pillar of shimmering, sickly-yellow light descended from the canopy—or where the canopy used to be—and deposited a heavy, gold-plated object directly into Artie’s left hand. 
+
+It was a literal trophy. It featured a small, plastic-looking figure of a man tripping over his own feet while holding a giant '1'. 
+
+"A trophy?" Artie hoisted the thing. It was surprisingly heavy. "Is this a joke? I almost died because the physics engine had a stroke, and the System gives me a 'You Tried' award?"
+
+"Wait," Fizz said, her eyes widening as she scanned the object. "Artie, don't—"
+
+[Item Identified: Participation Trophy (Cursed/Unique)]
+[Type: Accessory]
+[Stats: +0 All Attributes]
+[Passive Effect: 'Look At Me!']
+[Description: Increases Aggro Radius by 1,000%. You wanted attention? You got it. Monsters within a 5-mile radius are now legally obligated to find you 'highly punchable.']
+
+Artie’s stomach did a slow, nauseous roll. "Fizz, what does 'highly punchable' mean in technical terms?"
+
+"In technical terms?" Fizz snapped her manual shut, her expression shifting from amusement to pure, unadulterated panic. "It means every Level 1 Slime, Level 5 Forest Wolf, and Level 10 Angry Badger in this zone just got a GPS ping on your forehead. And since you have 1 HP, 'punchable' is synonymous with 'dead'."
+
+A low, guttural growl echoed from the edge of the crater. Then another. And a third, this one accompanied by the sound of snapping branches and the rhythmic, squelching thud of multiple slimes converging.
+
+[Warning: Aggro Radius Overload]
+[Current Detection Range: 5,000 Meters]
+[Status: Anomaly Detected]
+
+"I'm dropping it," Artie said, trying to open his left hand. The trophy didn't fall. It felt like it was fused to his palm, a cold, metallic weight that refused to obey gravity. "It’s stuck. Fizz, it’s stuck!"
+
+"It’s Soul-Bound, Artie! Cursed items don't just 'drop'!" Fizz grabbed the back of his shirt with her free hand, her wings fluttering with frantic intensity. "We need to move. Now! The tutorial gates are three miles North. If we don't reach the Oakhaven Safe Zone, you’re going to be the first player in history to be killed by a swarm of squirrels."
+
+Artie didn't wait for a second invitation. He shoved his Keyring into his pocket—nearly stabbing himself in the thigh in his haste—and gripped the Participation Trophy like a football. He scrambled out of the crater, his lungs already burning. 
+
+Behind them, the treeline erupted. A dozen Lesser Forest Slimes, normally slow and passive, were moving with terrifying speed, their gelatinous bodies undulating toward the glowing yellow light of the trophy. Above them, a pack of Shadow-Stalking Wolves crested a ridge, their eyes locked onto Artie with a hunger that suggested he was the only steak in a world of salad.
+
+"Why is it glowing?!" Artie yelled, leaping over a fallen log. 
+
+[System Message: 'Look At Me!' effect is active.]
+[Visual Indicator: Neon Yellow Aura (Visible from Orbit)]
+
+"Because the System hates you!" Fizz screamed, flying backward to keep an eye on the pursuit. "Run, Artie! If anything even grazes your heel, you’re a ghost!"
+
+Artie sprinted. Every snap of a twig sounded like a death sentence. To his left, a Level 4 Wolf lunged, its teeth snapping inches from his shoulder. He didn't fight; he didn't have the coordination to swing and run at the same time. He just leaned right, the 'Fragile' status flashing in his peripheral vision like a strobe light.
+
+[HP: 1/1]
+[Stamina: 42/100]
+
+"I hate this game!" Artie roared, his heart hammering against his ribs. "I want a refund! I want a manager!"
+
+"Win first, complain later!" Fizz urged, pointing ahead through the dense thicket. "I see the stone markers! Oakhaven is just past the clearing! Don't stop!"
+
+Artie didn't stop. He couldn't. Behind him, the sound of the swarm was a physical wall of noise—snarls, barks, and the ominous *thwip-thwip* of slime projectiles. He was a 1 HP glitch in a world that suddenly, desperately, wanted to fix the error.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Tutorial Zone - Whispering Woods",
+    "recent_facts": [
+      "Artie received the cursed 'Participation Trophy' as an achievement reward.",
+      "The 'Participation Trophy' increased Artie's Aggro Radius by 1,000%.",
+      "A swarm of monsters (Slimes, Wolves) is actively pursuing Artie and Fizz.",
+      "Artie and Fizz are fleeing toward the Oakhaven Safe Zone."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ]
+  },
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "resources": {
+          "stamina": 42
+        },
+        "effects": {
+          "look_at_me": {
+            "name": "Look At Me!",
+            "description": "Increases Aggro Radius by 1,000%.",
+            "source": "ITEM_TROPHY_001"
+          }
+        }
+      },
+      "reason": "Acquired cursed Participation Trophy and engaged in high-intensity flight."
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "mechanics": {
+          "aggro_radius": {
+            "current_modifier": "Extreme (Participation Trophy Active)",
+            "value_meters": 5000
+          }
+        }
+      }
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_TROPHY_001",
+      "display_name": "Participation Trophy",
+      "name": "Participation Trophy of the Relentless Anomaly",
+      "type": "Accessory",
+      "custodian": "CHAR_ARTIE",
+      "state_tags": ["cursed", "soul-bound", "held"],
+      "owner_scope": "character"
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 5,
+      "inventory": [
+        {
+          "item": "ITEM_KEYS_001",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_WALLET_001",
+          "container": "pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_TROPHY_001",
+          "container": "hand_left",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": ["ITEM_TROPHY_001"]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": ["ITEM_KEYS_001"]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": ["ITEM_WALLET_001"]
+        }
+      ],
+      "persona_updates": [
+        "Artie is now in a state of high-alert panic, realizing his survival depends on absolute evasion.",
+        "Artie's frustration with the System's 'rewards' has reached a boiling point."
+      ]
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_TROPHY_001",
+      "reason": "System achievement reward for 'Overkill is Underrated'.",
+      "destination": "CHAR_ARTIE"
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "item_id": "ITEM_KEYS_001",
+      "new_container": "pocket_right",
+      "new_status": "stowed",
+      "reason_category": "after_combat_cleanup"
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie was awarded a cursed Participation Trophy after his massive critical hit obliterated the tutorial zone.",
+      "The trophy's 'Look At Me!' effect triggered a massive aggro surge, drawing all nearby monsters to Artie.",
+      "Artie and Fizz are currently sprinting for their lives toward the safety of Oakhaven."
+    ],
+    "key_events": [
+      "Artie unlocked the 'Overkill is Underrated' achievement.",
+      "Artie acquired the cursed Participation Trophy (ITEM_TROPHY_001).",
+      "Aggro Radius increased to 5,000 meters, attracting a swarm of monsters.",
+      "Artie stowed his Keyring (ITEM_KEYS_001) in his pocket to facilitate running.",
+      "Artie and Fizz began a desperate retreat toward the Oakhaven Safe Zone.",
+      "Artie's stamina dropped significantly during the flight."
+    ],
+    "must_stay_true": [
+      "milestone: first_kill = DONE",
+      "milestone: trophy_acquired = DONE",
+      "milestone: swarm_triggered = DONE",
+      "inventory: CHAR_ARTIE -> Participation Trophy (held, container=hand_left)",
+      "inventory: CHAR_ARTIE -> Keyring (stowed, container=pocket_right)",
+      "Artie's HP is permanently locked at 1/1.",
+      "The Participation Trophy is soul-bound and cannot be dropped.",
+      "Aggro Radius remains at Extreme levels while the trophy is held."
+    ],
+    "chapter_so_far_add": [
+      "Artie received a cursed trophy that makes him the most targeted entity in the Whispering Woods."
+    ]
+  }
+}

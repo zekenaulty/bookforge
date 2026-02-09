@@ -1,0 +1,180 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "reason": "Finalized character build in the Character Creation Suite.",
+      "scene": 2,
+      "set": {
+        "resources": {
+          "attribute_points": 0
+        },
+        "stats": {
+          "crit_rate": {
+            "current": 100,
+            "unit": "percent"
+          },
+          "hp": {
+            "current": 1,
+            "max": 1
+          }
+        },
+        "titles": [
+          {
+            "active": true,
+            "name": "Crit or Quit",
+            "source": "Character Creation Error"
+          }
+        ]
+      }
+    },
+    {
+      "chapter": 1,
+      "character_id": "CHAR_FIZZ",
+      "reason": "Entity stabilization upon deployment.",
+      "scene": 2,
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 50,
+            "max": 50
+          },
+          "mp": {
+            "current": 500,
+            "max": 500
+          }
+        }
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "pocket_left",
+          "contents": [
+            "ITEM_WALLET_001"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "pocket_right",
+          "contents": [
+            "ITEM_KEYS_001"
+          ],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "invariants_add": [
+        "milestone: build_locked = DONE"
+      ],
+      "inventory": [
+        {
+          "container": "pocket_left",
+          "item": "ITEM_WALLET_001",
+          "status": "stowed"
+        },
+        {
+          "container": "pocket_right",
+          "item": "ITEM_KEYS_001",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": [
+        "Artie is terrified of his extreme fragility but intrigued by his absolute critical potential.",
+        "Artie feels targeted by the System's lack of an 'undo' button."
+      ],
+      "scene": 2
+    },
+    {
+      "chapter": 1,
+      "character_id": "CHAR_FIZZ",
+      "containers": [
+        {
+          "container": "satchel",
+          "contents": [],
+          "owner": "CHAR_FIZZ"
+        }
+      ],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_GUIDE_BOOK_001",
+          "status": "held"
+        }
+      ],
+      "persona_updates": [
+        "Fizz is openly mocking Artie's build choices but committed to her role as a guide.",
+        "Fizz is impatient to move through the tutorial."
+      ],
+      "scene": 2
+    }
+  ],
+  "global_continuity_system_updates": [],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_FIZZ",
+      "item_id": "ITEM_GUIDE_BOOK_001",
+      "new_container": "hand_right",
+      "new_status": "held",
+      "reason": "Fizz produced the manual to begin the tutorial.",
+      "reason_category": "location_jump_normalize"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "custodian": "CHAR_FIZZ",
+      "item_id": "ITEM_GUIDE_BOOK_001",
+      "state_tags": [
+        "held"
+      ]
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie has locked in a high-risk 'Crit or Quit' build with 1 HP and 100% Crit Rate."
+    ],
+    "key_events": [
+      "Artie met Fizz, a pixelated sprite serving as his snarky System Guide.",
+      "Artie received a 'Compensation Package' of 100 Attribute Points due to his improbable death.",
+      "A UI glitch caused Artie to dump all 100 points into Critical Hit Rate instead of Constitution.",
+      "Artie accidentally confirmed the build, locking his stats at 1 HP and 100% Crit Rate.",
+      "The System issued the 'Crit or Quit' title, making any damage taken fatal.",
+      "Artie and Fizz were deployed to the Tutorial Zone in the Whispering Woods.",
+      "Fizz produced the Standard Guide's Manual to begin the tutorial."
+    ],
+    "last_scene": [
+      "Artie Penhaligon met his guide, Fizz, in the Character Creation Suite and received a compensation package of 100 attribute points.",
+      "Due to UI latency and lingering trauma from his death, Artie accidentally allocated all points into Critical Hit Rate and confirmed the build.",
+      "The System locked his HP at 1 and awarded him the 'Crit or Quit' title before deploying them to the Whispering Woods."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: character_creation_entry = DONE",
+      "milestone: build_locked = DONE",
+      "Artie's HP is permanently locked at 1.",
+      "Artie's Critical Hit Rate is permanently 100%.",
+      "Artie is located in the Whispering Woods tutorial zone.",
+      "Fizz is holding the Standard Guide's Manual (ITEM_GUIDE_BOOK_001)."
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Tutorial Zone - Whispering Woods",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie interacted with the Character Creation UI and accidentally allocated all 100 points into Critical Hit Rate.",
+      "The System locked Artie's build despite his attempts to reset it.",
+      "Artie received the 'Crit or Quit' title, locking his HP at 1.",
+      "Artie and Fizz were deployed to the Whispering Woods tutorial zone."
+    ]
+  }
+}

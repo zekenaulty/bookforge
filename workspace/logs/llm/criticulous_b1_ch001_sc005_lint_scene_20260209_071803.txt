@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {
+      "code": "invariant_contradiction",
+      "message": "The 'must_stay_true' block contains critical internal contradictions: Artie is listed as 'Deceased' and in the 'Character Creation Suite' (Scene 1/2 state) while simultaneously being 'Level 2' with '1 HP' in the 'Whispering Woods' (Scene 5 state).",
+      "severity": "error"
+    },
+    {
+      "code": "missing_registry_entry",
+      "message": "ITEM_TROPHY_001 (Participation Trophy) is central to the scene but is missing from the canonical Item Registry. Retry hint: Please provide the canonical registry entry for ITEM_TROPHY_001.",
+      "severity": "error"
+    },
+    {
+      "code": "missing_continuity_state",
+      "message": "The UI mechanic value 'Stamina: 42/100' displayed in prose is not owned by CHAR_ARTIE's 'character_continuity_system_state'.",
+      "severity": "error"
+    },
+    {
+      "code": "inventory_contradiction",
+      "message": "ITEM_SMARTPHONE_001 is listed as stowed in CHAR_ARTIE's pocket in 'character_states' invariants, but 'must_stay_true' states it is located on the office breakroom floor. Registry also incorrectly lists CHAR_ARTIE as custodian for an item left at the death site.",
+      "severity": "error"
+    },
+    {
+      "code": "posture_contradiction",
+      "message": "The 'character_states' invariants for CHAR_ARTIE and CHAR_FIZZ list ITEM_KEYS_001 and ITEM_GUIDE_BOOK_001 as 'stowed', which contradicts the active 'inventory' blocks and prose depicting them as 'held' at the start of the scene.",
+      "severity": "warning"
+    }
+  ]
+}

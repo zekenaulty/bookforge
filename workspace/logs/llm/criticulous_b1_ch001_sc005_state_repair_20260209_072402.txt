@@ -1,0 +1,220 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "reason": "Acquisition of cursed Participation Trophy and physical exertion.",
+      "scene": 5,
+      "set": {
+        "effects": {
+          "look_at_me": {
+            "description": "Increases Aggro Radius by 1,000%. Visual Indicator: Neon Yellow Aura.",
+            "name": "Look At Me!",
+            "source": "ITEM_TROPHY_001"
+          }
+        },
+        "resources": {
+          "stamina": {
+            "current": 42,
+            "max": 100
+          }
+        },
+        "statuses": {
+          "soulbound_curse": {
+            "effect": "Item cannot be dropped or unequipped.",
+            "name": "Soul-Bound Curse"
+          }
+        }
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "hand_left",
+          "contents": [
+            "ITEM_TROPHY_001"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "pocket_right",
+          "contents": [
+            "ITEM_KEYS_001"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "pocket_left",
+          "contents": [
+            "ITEM_WALLET_001"
+          ],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "invariants_add": [
+        "milestone: trophy_acquired = DONE",
+        "The Participation Trophy is soul-bound to Artie's left hand.",
+        "Artie's aggro radius is 5,000 meters."
+      ],
+      "inventory": [
+        {
+          "container": "hand_left",
+          "item": "ITEM_TROPHY_001",
+          "status": "held"
+        },
+        {
+          "container": "pocket_right",
+          "item": "ITEM_KEYS_001",
+          "status": "stowed"
+        },
+        {
+          "container": "pocket_left",
+          "item": "ITEM_WALLET_001",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": [
+        "Artie is overwhelmed by the System's aggressive 'reward' structure.",
+        "Artie's survival instinct is overriding his cynicism as he flees for his life."
+      ],
+      "scene": 5
+    },
+    {
+      "chapter": 1,
+      "character_id": "CHAR_FIZZ",
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_GUIDE_BOOK_001"
+          ],
+          "owner": "CHAR_FIZZ"
+        },
+        {
+          "container": "satchel",
+          "contents": [],
+          "owner": "CHAR_FIZZ"
+        }
+      ],
+      "invariants_add": [
+        "Fizz is in full panic mode."
+      ],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_GUIDE_BOOK_001",
+          "status": "held"
+        }
+      ],
+      "persona_updates": [
+        "Fizz is in full panic mode, prioritizing Artie's survival over her usual snark."
+      ],
+      "scene": 5
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "reason": "System-wide adjustment due to 'Look At Me!' effect.",
+      "set": {
+        "mechanics": {
+          "aggro_radius": {
+            "current_value": 5000,
+            "status": "Overload",
+            "unit": "meters"
+          }
+        }
+      }
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "container": "pocket_right",
+      "item_id": "ITEM_KEYS_001",
+      "reason_category": "after_combat_cleanup",
+      "status": "stowed"
+    },
+    {
+      "character_id": "CHAR_ARTIE",
+      "container": "hand_left",
+      "item_id": "ITEM_TROPHY_001",
+      "reason_category": "handoff_transfer",
+      "status": "held"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "custodian": "CHAR_ARTIE",
+      "display_name": "Participation Trophy",
+      "item_id": "ITEM_TROPHY_001",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Tutorial Zone - Whispering Woods",
+        "scene": 5
+      },
+      "name": "Participation Trophy",
+      "owner_scope": "character",
+      "state_tags": [
+        "cursed",
+        "soul-bound",
+        "held"
+      ],
+      "type": "Accessory"
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie received a cursed trophy that made him the most targeted entity in the tutorial zone."
+    ],
+    "key_events": [
+      "Artie unlocked the 'Overkill is Underrated' achievement.",
+      "Artie received the Participation Trophy (ITEM_TROPHY_001) as a reward.",
+      "The 'Look At Me!' effect increased Artie's aggro radius to 5,000 meters.",
+      "Artie discovered the trophy is soul-bound and cannot be removed.",
+      "Artie stowed his Keyring (ITEM_KEYS_001) in his pocket to facilitate running.",
+      "A monster swarm including slimes and wolves began pursuing Artie.",
+      "Artie and Fizz initiated a sprint toward the Oakhaven Safe Zone."
+    ],
+    "last_scene": [
+      "Artie received a cursed Participation Trophy as an achievement reward for his massive overkill of the tutorial slime.",
+      "The trophy's 'Look At Me!' effect increased his aggro radius by 1,000%, attracting every monster in the Whispering Woods.",
+      "Artie and Fizz are now fleeing toward the safety of Oakhaven while pursued by a swarm of slimes and wolves."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: build_locked = DONE",
+      "milestone: first_kill = DONE",
+      "milestone: trophy_acquired = DONE",
+      "Artie's HP is 1/1 and he has the Fragile status.",
+      "Artie's Crit Rate is 100%.",
+      "The Participation Trophy (ITEM_TROPHY_001) is soul-bound to Artie's left hand."
+    ]
+  },
+  "transfer_updates": [
+    {
+      "destination": "CHAR_ARTIE",
+      "item_id": "ITEM_TROPHY_001",
+      "reason": "Achievement reward: Overkill is Underrated",
+      "source": "SYSTEM"
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Tutorial Zone - Whispering Woods",
+    "open_threads": [],
+    "recent_facts": [
+      "Artie received the Participation Trophy as an achievement reward.",
+      "The Participation Trophy is cursed and soul-bound, increasing Aggro Radius by 1,000%.",
+      "A massive swarm of monsters is pursuing Artie and Fizz.",
+      "Artie and Fizz are sprinting toward the Oakhaven Safe Zone."
+    ]
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "location": "Tutorial Zone - Whispering Woods",
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 3,
+      "inventory": [
+        {
+          "item": "ITEM_WALLET_001",
+          "container": "pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_KEYS_001",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET_001"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_KEYS_001"
+          ]
+        }
+      ],
+      "notes": "Artie has arrived in the Whispering Woods with his 1 HP build active."
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "chapter": 1,
+      "scene": 3,
+      "inventory": [
+        {
+          "item": "ITEM_GUIDE_BOOK_001",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "satchel",
+          "owner": "CHAR_FIZZ",
+          "contents": []
+        }
+      ],
+      "notes": "Fizz is holding her guide book, ready to assist (or mock) Artie."
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100,
+          "level": 1
+        },
+        "statuses": {
+          "fragile": "Any damage taken is fatal."
+        },
+        "titles": [
+          {
+            "id": "TITLE_CRIT_OR_QUIT",
+            "name": "Crit or Quit",
+            "active": true,
+            "source": "System Achievement"
+          }
+        ]
+      },
+      "reason": "Initialize tutorial zone state and enforce build constraints."
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 50,
+            "max": 50
+          },
+          "mp": {
+            "current": 500,
+            "max": 500
+          }
+        }
+      },
+      "reason": "Maintain companion stats for tutorial."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_WALLET_001",
+            "container": "pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_KEYS_001",
+            "container": "pocket_right",
+            "status": "stowed"
+          }
+        ]
+      },
+      "reason": "Ensure required items are in custody and accessible at start of scene.",
+      "reason_category": "constraint_enforcement"
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_GUIDE_BOOK_001",
+            "container": "hand_right",
+            "status": "held"
+          }
+        ]
+      },
+      "reason": "Fizz has her manual out to guide the new player.",
+      "reason_category": "location_transition"
+    }
+  ]
+}

@@ -1,0 +1,849 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Item naming: use display_name for prose; use item_id only in JSON/patches. The display_name must be human readable and not an escaped id/name.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+If mechanics are shown in prose or UI, they must be present in continuity system state or added in continuity system updates in the same STATE_PATCH.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+
+
+USER:
+
+# CONTINUITY PACK
+
+Create a continuity pack JSON object with these fields:
+- scene_end_anchor: 2-4 factual sentences about how the last scene ended (no prose).
+- constraints: list of immediate continuity constraints.
+- open_threads: list of active thread ids.
+- cast_present: list of character names present next.
+- location: location id or name.
+- next_action: the implied next action.
+- summary: echo state.summary (facts-only arrays; do not paraphrase).
+
+Return ONLY JSON.
+
+Rules:
+- Use only characters listed in scene_card.cast_present. Do not introduce new names.
+- summary must match state.summary and remain facts-only; do not add prose.
+- constraints must include the highest-priority invariants from summary.must_stay_true and summary.key_facts_ring (copy exact strings when possible).
+- constraints must include the highest-priority inventory/container invariants from summary.must_stay_true (copy exact strings when possible).
+- If character_states are provided, prefer their inventory/container facts and continuity mechanic facts; do not invent conflicting values.
+- If item_registry or plot_devices are provided, reuse canonical names/ids in constraints when referencing durable items/devices.
+- Prefer item_registry.items[].display_name for prose references; reserve item_id for canonical JSON. The display_name must be human readable and not an escaped id/name.
+- If state.global_continuity_system_state contains canonical mechanic labels/values, reuse those exact labels in constraints.
+- If scene_card.cast_present is empty, cast_present must be an empty array.
+- open_threads must be a subset of thread_registry thread_id values.
+- If scene_card.thread_ids is present, prefer those thread ids.
+- Do not invent new thread ids or character names.
+
+Scene card:
+{
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE"
+  ],
+  "chapter": 1,
+  "conflict": "Artie's lack of coordination and 1 HP vulnerability versus the aggressive Level 1 Slime.",
+  "constraints": [
+    "target_words: 2000",
+    "no-recaps",
+    "forward-motion",
+    "must_depict_five_misses",
+    "must_depict_vaporization_of_tree"
+  ],
+  "continuity_system_focus": [
+    "stats",
+    "level",
+    "resources"
+  ],
+  "device_presence": [],
+  "end_condition": "Artie reaches Level 2 and the slime is completely obliterated.",
+  "forbidden_visible": [],
+  "goal": "Demonstrate the terrifying and inconsistent power of the 100% Crit Rate build while establishing Artie's combat incompetence.",
+  "introduces": [],
+  "introduces_ids": [],
+  "ontological_scope": "real",
+  "required_callbacks": [
+    "milestone: deployment_initiated",
+    "milestone: build_locked"
+  ],
+  "required_in_custody": [
+    "ITEM_KEYS_001"
+  ],
+  "required_scene_accessible": [
+    "ITEM_KEYS_001"
+  ],
+  "required_visible_on_page": [
+    "ITEM_KEYS_001"
+  ],
+  "scene": 4,
+  "scene_id": "SC_001_004",
+  "scene_target": "Artie survives his first combat encounter by accidentally triggering a massive, environment-destroying critical hit.",
+  "schema_version": "1.1",
+  "thread_ids": [
+    "THREAD_CRIT_EXPLOIT"
+  ],
+  "timeline_scope": "present",
+  "transition_type": "action",
+  "ui_mechanics_expected": [
+    "HP",
+    "Crit Rate",
+    "Level Up",
+    "Damage",
+    "System Notification"
+  ]
+}
+
+Character registry (id -> name):
+[
+  {
+    "character_id": "CHAR_ARTIE",
+    "name": "Arthur 'Artie' Penhaligon"
+  },
+  {
+    "character_id": "CHAR_FIZZ",
+    "name": "Fizz"
+  },
+  {
+    "character_id": "CHAR_VANE",
+    "name": "Vane"
+  },
+  {
+    "character_id": "CHAR_MAYOR",
+    "name": "Mayor of Oakhaven"
+  },
+  {
+    "character_id": "CHAR_BOSS",
+    "name": "The System Administrator"
+  }
+]
+
+Thread registry:
+[
+  {
+    "label": "The 100% Crit Glitch",
+    "status": "open",
+    "thread_id": "THREAD_CRIT_EXPLOIT"
+  },
+  {
+    "label": "The Vane Vendetta",
+    "status": "open",
+    "thread_id": "THREAD_VANE_RIVALRY"
+  },
+  {
+    "label": "The System's Stability",
+    "status": "open",
+    "thread_id": "THREAD_SYSTEM_GLITCH"
+  },
+  {
+    "label": "The Path of the First Glitch",
+    "status": "open",
+    "thread_id": "THREAD_THE_ASCENSION"
+  }
+]
+
+Character states (per cast_present_ids):
+[
+  {
+    "character_continuity_system_state": {
+      "resources": {
+        "attribute_points": 0
+      },
+      "skills": {
+        "cynicism": 3,
+        "procrastination": 5,
+        "spreadsheet_wizardry": 4
+      },
+      "stats": {
+        "crit_rate": 100,
+        "hp": {
+          "current": 1,
+          "max": 1
+        },
+        "level": 1
+      },
+      "statuses": {
+        "fragile": {
+          "effect": "Any damage taken is fatal.",
+          "name": "Fragile"
+        }
+      },
+      "titles": [
+        {
+          "active": true,
+          "id": "TITLE_CRIT_OR_QUIT",
+          "name": "Crit or Quit",
+          "source": "System Achievement"
+        }
+      ]
+    },
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "pocket_left",
+        "contents": [
+          "ITEM_WALLET_001"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "pocket_right",
+        "contents": [],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "hand_right",
+        "contents": [
+          "ITEM_KEYS_001"
+        ],
+        "owner": "CHAR_ARTIE"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Smartphone moved to hand to satisfy required_visible_on_page constraint.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initialize scene focus mechanics",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Aligning for required_visible_on_page constraint.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie's cynical worldview is confirmed by his absurd death.",
+          "Artie is resigned to his fate, even in the afterlife."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie died from electrocution and entered the Character Creation Suite.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Smartphone removed from inventory as it was dropped in Scene 1.",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "notes": "Carry forward status from Scene 1",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Aligning state for Scene 2 and enforcing forbidden_visible constraint for smartphone.",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is now terrified of physical contact due to his 1 HP status.",
+          "Artie feels cheated by the System's latency but is forced to adapt."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "notes": "Build finalized in Character Creation Suite.",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Item left behind in the office breakroom upon death.",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie has arrived in the Whispering Woods with his 1 HP build active.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initialize tutorial zone state and enforce build constraints.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Ensure required items are in custody and accessible at start of scene.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is experiencing extreme physical vulnerability for the first time.",
+          "Artie is attempting to apply his analytical mindset to a lethal combat situation."
+        ],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "notes": "Deployment to physical world with locked build and active Fragile status.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is holding his Keyring as a weapon; Fizz is not in the immediate focus of this scene card per cast_present_ids.",
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Aligning for combat focus; cast narrowed to Artie.",
+        "scene": 4
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Keyring (status=stowed, container=pocket_right)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[Smartphone, Keyring])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[Leather Wallet])",
+      "milestone: artie_death = DONE",
+      "milestone: character_creation_entry = DONE",
+      "milestone: build_locked = DONE",
+      "milestone: deployment_initiated = DONE",
+      "Artie's HP is 1/1.",
+      "Artie's Crit Rate is 100%.",
+      "Artie is cornered against an ancient oak tree.",
+      "Artie is holding his Keyring as a makeshift weapon."
+    ],
+    "inventory": [
+      {
+        "container": "pocket_left",
+        "item": "ITEM_WALLET_001",
+        "status": "stowed"
+      },
+      {
+        "container": "hand_right",
+        "item": "ITEM_KEYS_001",
+        "status": "held"
+      }
+    ],
+    "last_touched": {
+      "chapter": 1,
+      "scene": 4
+    },
+    "name": "Arthur 'Artie' Penhaligon",
+    "schema_version": "1.0",
+    "skills": {
+      "cynicism": 3,
+      "procrastination": 5,
+      "spreadsheet_wizardry": 4
+    },
+    "stats": {
+      "crit_rate": 100,
+      "hp": {
+        "current": 1,
+        "max": 1
+      },
+      "level": 1
+    },
+    "updated_at": "2026-02-09T06:58:19Z"
+  }
+]
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-09T06:22:57Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 4
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {
+    "entities": {
+      "ENT_SLIME_001": {
+        "name": "Lesser Forest Slime",
+        "stats": {
+          "hp": {
+            "current": 10,
+            "max": 10
+          },
+          "level": 1
+        },
+        "statuses": {
+          "aggressive": true
+        }
+      }
+    }
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_004.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Artie Penhaligon died in a mundane office accident.",
+      "The System has intercepted Artie's soul for character creation.",
+      "Artie finalized a 'glass cannon' build with 1 HP and 100% Crit Rate.",
+      "Artie and Fizz have entered the first tutorial zone, the Whispering Woods.",
+      "Artie arrived in the Whispering Woods and encountered his first enemy, a Level 1 Slime."
+    ],
+    "key_facts_ring": [
+      "Artie's consciousness transitioned to the Character Creation Suite.",
+      "milestone: artie_death = DONE",
+      "milestone: character_creation_entry = DONE",
+      "Artie's Smartphone (ITEM_SMARTPHONE_001) is located on the office breakroom floor.",
+      "Artie is currently in a non-physical void state within the Character Creation Suite.",
+      "Artie's HP is 0 and his current status is Deceased.",
+      "Artie accidentally allocated 100 attribute points to Critical Hit Rate due to a nervous spasm.",
+      "Artie confirmed his build, resulting in his HP being capped at 1/1.",
+      "The System awarded Artie the 'Crit or Quit' title, making all hits guaranteed crits but all damage fatal.",
+      "Fizz pulled her Standard Guide's Manual from her satchel as they transitioned to the physical world.",
+      "Artie and Fizz were deployed to the Whispering Woods tutorial zone.",
+      "A low growl from the thicket signaled the presence of a nearby monster.",
+      "milestone: build_locked = DONE",
+      "milestone: deployment_initiated = DONE",
+      "Artie's HP is permanently locked at 1/1.",
+      "Artie's Critical Hit Rate is 100%.",
+      "Artie transitioned from the Character Creation Suite to the Whispering Woods.",
+      "The System confirmed the [Fragile] status and 1/1 HP cap.",
+      "Artie checked his inventory, confirming he still possessed his Leather Wallet and Keyring.",
+      "A Level 1 Lesser Forest Slime emerged and aggressively pursued Artie.",
+      "Artie backed into an ancient oak tree, becoming cornered by the slime.",
+      "Artie drew his Keyring (ITEM_KEYS_001) to use as a weapon.",
+      "The slime launched its first attack as Artie dropped into a combat stance.",
+      "Artie is holding his Keyring (ITEM_KEYS_001) in his hand_right.",
+      "Artie is cornered against an ancient oak tree in the Whispering Woods."
+    ],
+    "last_scene": [
+      "Artie and Fizz arrived in the Whispering Woods, where Artie immediately felt the lethal weight of his 1 HP build.",
+      "A Level 1 Lesser Forest Slime ambushed them, forcing Artie to retreat until he was cornered against an ancient oak tree.",
+      "With no other options, he drew his keyring as a makeshift weapon, preparing for a desperate first combat."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: character_creation_entry = DONE",
+      "Artie's Smartphone (ITEM_SMARTPHONE_001) is located on the office breakroom floor.",
+      "Artie is currently in a non-physical void state within the Character Creation Suite.",
+      "Artie's HP is 0 and his current status is Deceased.",
+      "milestone: build_locked = DONE",
+      "milestone: deployment_initiated = DONE",
+      "Artie's HP is permanently locked at 1/1.",
+      "Artie's Critical Hit Rate is 100%.",
+      "Artie is holding his Keyring (ITEM_KEYS_001) in his hand_right.",
+      "Artie is cornered against an ancient oak tree in the Whispering Woods."
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Tutorial Zone - Whispering Woods",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie and Fizz have arrived in the Whispering Woods tutorial zone.",
+      "Artie is being hunted by a Lesser Forest Slime.",
+      "Artie has drawn his Keyring as a makeshift weapon and is cornered against a tree."
+    ],
+    "time": {}
+  }
+}
+
+Summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie Penhaligon died in a mundane office accident.",
+    "The System has intercepted Artie's soul for character creation.",
+    "Artie finalized a 'glass cannon' build with 1 HP and 100% Crit Rate.",
+    "Artie and Fizz have entered the first tutorial zone, the Whispering Woods.",
+    "Artie arrived in the Whispering Woods and encountered his first enemy, a Level 1 Slime."
+  ],
+  "key_facts_ring": [
+    "Artie's consciousness transitioned to the Character Creation Suite.",
+    "milestone: artie_death = DONE",
+    "milestone: character_creation_entry = DONE",
+    "Artie's Smartphone (ITEM_SMARTPHONE_001) is located on the office breakroom floor.",
+    "Artie is currently in a non-physical void state within the Character Creation Suite.",
+    "Artie's HP is 0 and his current status is Deceased.",
+    "Artie accidentally allocated 100 attribute points to Critical Hit Rate due to a nervous spasm.",
+    "Artie confirmed his build, resulting in his HP being capped at 1/1.",
+    "The System awarded Artie the 'Crit or Quit' title, making all hits guaranteed crits but all damage fatal.",
+    "Fizz pulled her Standard Guide's Manual from her satchel as they transitioned to the physical world.",
+    "Artie and Fizz were deployed to the Whispering Woods tutorial zone.",
+    "A low growl from the thicket signaled the presence of a nearby monster.",
+    "milestone: build_locked = DONE",
+    "milestone: deployment_initiated = DONE",
+    "Artie's HP is permanently locked at 1/1.",
+    "Artie's Critical Hit Rate is 100%.",
+    "Artie transitioned from the Character Creation Suite to the Whispering Woods.",
+    "The System confirmed the [Fragile] status and 1/1 HP cap.",
+    "Artie checked his inventory, confirming he still possessed his Leather Wallet and Keyring.",
+    "A Level 1 Lesser Forest Slime emerged and aggressively pursued Artie.",
+    "Artie backed into an ancient oak tree, becoming cornered by the slime.",
+    "Artie drew his Keyring (ITEM_KEYS_001) to use as a weapon.",
+    "The slime launched its first attack as Artie dropped into a combat stance.",
+    "Artie is holding his Keyring (ITEM_KEYS_001) in his hand_right.",
+    "Artie is cornered against an ancient oak tree in the Whispering Woods."
+  ],
+  "last_scene": [
+    "Artie and Fizz arrived in the Whispering Woods, where Artie immediately felt the lethal weight of his 1 HP build.",
+    "A Level 1 Lesser Forest Slime ambushed them, forcing Artie to retreat until he was cornered against an ancient oak tree.",
+    "With no other options, he drew his keyring as a makeshift weapon, preparing for a desperate first combat."
+  ],
+  "must_stay_true": [
+    "milestone: artie_death = DONE",
+    "milestone: character_creation_entry = DONE",
+    "Artie's Smartphone (ITEM_SMARTPHONE_001) is located on the office breakroom floor.",
+    "Artie is currently in a non-physical void state within the Character Creation Suite.",
+    "Artie's HP is 0 and his current status is Deceased.",
+    "milestone: build_locked = DONE",
+    "milestone: deployment_initiated = DONE",
+    "Artie's HP is permanently locked at 1/1.",
+    "Artie's Critical Hit Rate is 100%.",
+    "Artie is holding his Keyring (ITEM_KEYS_001) in his hand_right.",
+    "Artie is cornered against an ancient oak tree in the Whispering Woods."
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Recent facts:
+[
+  "Artie and Fizz have arrived in the Whispering Woods tutorial zone.",
+  "Artie is being hunted by a Lesser Forest Slime.",
+  "Artie has drawn his Keyring as a makeshift weapon and is cornered against a tree."
+]
+Item registry (canonical):
+{
+  "items": [
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Keyring",
+      "item_id": "ITEM_KEYS_001",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Tutorial Zone - Whispering Woods",
+        "scene": 3
+      },
+      "linked_threads": [],
+      "name": "Keyring",
+      "owner_scope": "character",
+      "state_tags": [
+        "unclassified",
+        "stowed"
+      ],
+      "type": "unclassified"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Smartphone",
+      "item_id": "ITEM_SMARTPHONE_001",
+      "last_seen": {
+        "chapter": 1,
+        "location": "The Void / Character Creation Suite",
+        "scene": 2
+      },
+      "linked_threads": [],
+      "name": "Smartphone",
+      "owner_scope": "character",
+      "state_tags": [
+        "unclassified",
+        "stowed"
+      ],
+      "type": "unclassified"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Leather Wallet",
+      "item_id": "ITEM_WALLET_001",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [],
+      "name": "Leather Wallet",
+      "owner_scope": "character",
+      "state_tags": [
+        "unclassified",
+        "stowed"
+      ],
+      "type": "unclassified"
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Plot devices (canonical):
+{
+  "devices": [
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_CRIT_EXPLOIT",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Tutorial Zone - Whispering Woods",
+        "scene": 3
+      },
+      "linked_threads": [
+        "THREAD_CRIT_EXPLOIT"
+      ],
+      "name": "The 100% Crit Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_THE_ASCENSION",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_path_of_the_first_glitch_c7dd4581",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_THE_ASCENSION"
+      ],
+      "name": "The Path of the First Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_SYSTEM_GLITCH",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_system_s_stability_da5be7b7",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_SYSTEM_GLITCH"
+      ],
+      "name": "The System's Stability",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_VANE_RIVALRY",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_vane_vendetta_bcf4bea1",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_VANE_RIVALRY"
+      ],
+      "name": "The Vane Vendetta",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    }
+  ],
+  "schema_version": "1.0"
+}

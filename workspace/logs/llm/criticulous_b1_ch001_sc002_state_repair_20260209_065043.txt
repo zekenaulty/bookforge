@@ -1,0 +1,164 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "reason": "Build finalized in Character Creation Suite.",
+      "scene": 2,
+      "set": {
+        "resources": {
+          "attribute_points": 0
+        },
+        "stats": {
+          "agility": 10,
+          "constitution": 10,
+          "crit_rate": 100,
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "intelligence": 10,
+          "luck": 1,
+          "strength": 10
+        },
+        "statuses": {
+          "fragile": "Any damage taken is fatal."
+        },
+        "titles": [
+          {
+            "active": true,
+            "id": "TITLE_CRIT_OR_QUIT",
+            "name": "Crit or Quit",
+            "source": "System Achievement"
+          }
+        ]
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "pocket_left",
+          "contents": [
+            "ITEM_WALLET_001"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "pocket_right",
+          "contents": [
+            "ITEM_KEYS_001"
+          ],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "invariants_add": [
+        "milestone: build_locked = DONE",
+        "milestone: deployment_initiated = DONE",
+        "Artie's HP is 1/1.",
+        "Artie's Crit Rate is 100%."
+      ],
+      "inventory": [
+        {
+          "container": "pocket_left",
+          "item": "ITEM_WALLET_001",
+          "status": "stowed"
+        },
+        {
+          "container": "pocket_right",
+          "item": "ITEM_KEYS_001",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": [
+        "Artie is now terrified of physical contact due to his 1 HP status.",
+        "Artie feels cheated by the System's latency but is forced to adapt."
+      ],
+      "scene": 2
+    },
+    {
+      "chapter": 1,
+      "character_id": "CHAR_FIZZ",
+      "containers": [
+        {
+          "container": "satchel",
+          "contents": [
+            "ITEM_GUIDE_BOOK_001"
+          ],
+          "owner": "CHAR_FIZZ"
+        }
+      ],
+      "inventory": [
+        {
+          "container": "satchel",
+          "item": "ITEM_GUIDE_BOOK_001",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": [
+        "Fizz is losing her 'Patient Guide' buff and becoming a 'Sarcastic Bystander'."
+      ],
+      "scene": 2
+    }
+  ],
+  "global_continuity_system_updates": [],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "item_id": "ITEM_SMARTPHONE_001",
+      "new_container": "none",
+      "new_status": "lost",
+      "reason": "Item left behind in the office breakroom upon death.",
+      "reason_category": "location_jump_normalize"
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie finalized a 'glass cannon' build with 1 HP and 100% Crit Rate.",
+      "Artie and Fizz have entered the first tutorial zone, the Whispering Woods."
+    ],
+    "key_events": [
+      "Artie accidentally allocated 100 attribute points to Critical Hit Rate due to a nervous spasm.",
+      "Artie confirmed his build, resulting in his HP being capped at 1/1.",
+      "The System awarded Artie the 'Crit or Quit' title, making all hits guaranteed crits but all damage fatal.",
+      "Fizz pulled her Standard Guide's Manual from her satchel as they transitioned to the physical world.",
+      "Artie and Fizz were deployed to the Whispering Woods tutorial zone.",
+      "A low growl from the thicket signaled the presence of a nearby monster."
+    ],
+    "last_scene": [
+      "Artie Penhaligon navigated the Character Creation Suite under the supervision of Fizz.",
+      "Due to UI latency and a post-death nervous spasm, he accidentally allocated all 100 attribute points into his Critical Hit Rate.",
+      "This locked his build, granting him the 'Crit or Quit' title and capping his health at a fragile 1 HP before he was deployed to the Whispering Woods."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: character_creation_entry = DONE",
+      "milestone: build_locked = DONE",
+      "milestone: deployment_initiated = DONE",
+      "Artie's HP is permanently locked at 1/1.",
+      "Artie's Critical Hit Rate is 100%.",
+      "Artie's Smartphone (ITEM_SMARTPHONE_001) is located on the office breakroom floor."
+    ]
+  },
+  "transfer_updates": [],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Tutorial Zone - Whispering Woods",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie's build is locked with 1 HP and 100% Crit Rate.",
+      "Artie acquired the 'Crit or Quit' title.",
+      "Artie and Fizz have arrived in the Whispering Woods.",
+      "A monster is nearby."
+    ]
+  }
+}

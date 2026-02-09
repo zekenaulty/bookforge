@@ -1,0 +1,733 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Item naming: use display_name for prose; use item_id only in JSON/patches. The display_name must be human readable and not an escaped id/name.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+If mechanics are shown in prose or UI, they must be present in continuity system state or added in continuity system updates in the same STATE_PATCH.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+
+
+USER:
+
+# LINT
+
+Check the scene for continuity, invariant violations, and duplication.
+Flag invariant contradictions against must_stay_true/key facts.
+Return ONLY JSON matching the lint_report schema.
+- Check and require that any UI mechanic values in prose are owned by continuity system state and match candidate values.
+- Treat only authoritative surfaces as canonical-check targets; do not enforce canonical labels in narrative prose.
+- For authoritative surfaces, prefer exact canonical item/device labels from registries.
+- Check for POV drift vs book POV (no first-person in third-person scenes).
+- Deterministically enforce scene-card durable constraints (`required_in_custody`, `required_scene_accessible`, `forbidden_visible`, `device_presence`; optional `required_visible_on_page`).
+- Report missing durable context ids with explicit retry hints instead of guessing canon.
+
+Required keys:
+- schema_version ("1.0")
+- status ("pass" or "fail")
+- issues (array of objects)
+
+Each issue object must include:
+- code
+- message
+Optional:
+- severity
+
+If there are no issues, return:
+{
+  "schema_version": "1.0",
+  "status": "pass",
+  "issues": []
+}
+
+If there are issues, return:
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {"code": "continuity", "message": "Example issue", "severity": "error"}
+  ]
+}
+
+Scene:
+The Zesty Ranch Zings hung by a literal thread—a plastic coil that had decided to stop rotating exactly three millimeters short of a successful delivery. I stared at the bag, my reflection in the vending machine’s scratched plexiglass looking back with the hollowed-out eyes of a man who had spent eight hours auditing spreadsheets for a company that sold industrial-grade adhesives.
+
+[Patience: 4/100]
+
+"You’ve got to be kidding me," I muttered. My voice sounded thin in the empty breakroom, competing with the low-frequency hum of a refrigerator that had been dying since the late nineties. 
+
+I looked down at the Smartphone in my right hand. The screen flickered to life: 4:58 PM. Two minutes. I had two minutes left on the clock before I could legally flee this fluorescent purgatory, and the only thing standing between me and a dignified commute was a seventy-five-cent bag of corn-based disappointment. 
+
+I tapped my thumb against the glass of the phone. My current build—if you could call a thirty-two-year-old accountant a 'build'—was heavily specced into [Cynicism] and [Procrastination]. It wasn't a winning meta.
+
+[Skill Check: Cynicism (Level 3) – Success!]
+[Observation: The vending machine isn't broken; it's malicious. It knows you’re at your breaking point. It feeds on the tears of the underpaid.]
+
+"I know," I whispered to the empty room. "I know."
+
+I shoved the Smartphone into my pocket for a second to free up my hand, then changed my mind and kept it gripped tight. It was my only connection to a world that didn't smell like burnt coffee and despair. I reached into my left pocket, fingers brushing against the cool, cracked surface of my Leather Wallet. I didn't need more money; I’d already paid. The machine’s digital display was mocking me with a steady, unblinking '0.00'.
+
+I leaned my forehead against the cool plexiglass. "Listen, you oversized toaster. I’ve had a day. Brenda from HR asked me to 'circle back' on a memo six times. My car is making a sound like a cat in a blender. Just give me the Zings."
+
+The machine didn't respond. It just hummed, a steady, vibrating drone that I felt in my teeth. 
+
+[Patience: 2/100]
+
+This was the boss fight of my mundane existence. The Breakroom Golem. Its armor was made of reinforced steel and bad luck. Its loot table was exclusively snacks that expired during the Obama administration. And right now, it was winning.
+
+I shifted my weight, the Keyring in my right pocket jingling as I prepared for a tactical maneuver. In the world of corporate survival, this was known as 'Percussive Maintenance.' To anyone else, it was just kicking the crap out of a machine.
+
+I checked my stats. 
+
+[HP: 100/100]
+[Status: Disgruntled]
+
+I was at full health, but my mental resources were tapped. I took a deep breath, shifted my Smartphone to a more secure grip in my right hand, and delivered a measured, frustrated kick to the base of the machine.
+
+*Thud.*
+
+The bag of Zings didn't even quiver. If anything, it seemed to settle deeper into the coil, nestling in for a long winter’s nap.
+
+"Oh, so that’s how it’s going to be?" I snarled. 
+
+[Patience: 1/100]
+
+I grabbed the sides of the machine. It was heavy, bolted to the floor or just weighted down by the collective misery of the accounting department. I began to shake it. The hum from the machine changed pitch—a rising, angry whine that sounded less like a cooling fan and more like a jet engine preparing for takeoff.
+
+"Give! Me! My! Chips!"
+
+I gave it one final, desperate heave. 
+
+Inside the machine, something snapped. Not the plastic coil—that stayed perfectly still. No, the sound came from the back, a sharp, electric *crack* that echoed like a gunshot in the small room. A blue arc of light danced behind the rows of chocolate bars, illuminating the interior with a hellish, flickering glow.
+
+[Warning: Environmental Hazard Detected!]
+[System Note: Maybe stop touching the high-voltage equipment, Artie?]
+
+"I don't care about the hazard! I want my—"
+
+The machine didn't just short-circuit. It exhaled. 
+
+A surge of raw, unbridled electricity surged through the metal frame, jumping the gap between the chassis and my sweat-slicked palms. The world didn't go black immediately. First, it went white. A blinding, searing neon white that turned my skeleton into a silhouette.
+
+[Critical Hit! -100 HP]
+
+The pain was brief, mostly because my nerves didn't have time to process the fact that they were being cooked medium-well. I felt a strange sensation of weightlessness, followed by the distinct sound of my Smartphone hitting the linoleum floor with a pathetic *clack*. 
+
+My Leather Wallet felt heavy in my pocket for one last second before the sensation of 'having a body' became a legacy feature I no longer supported.
+
+[HP: 0/100]
+[Status: Deceased]
+
+"Well," I thought, the last spark of my consciousness flickering like a dying lightbulb. "At least I don't have to circle back with Brenda."
+
+The breakroom faded. The smell of ozone and Zesty Ranch Zings vanished. The floor, the ceiling, and the crushing weight of my thirty-year mortgage dissolved into a vast, shimmering void of darkness. 
+
+I wasn't standing. I wasn't sitting. I just *was*. 
+
+And then, a window appeared. Not a window made of glass, but a floating, translucent box of light that pulsed with a soft, rhythmic glow.
+
+[Welcome to the Character Creation Suite!]
+[Error: Unexpected Termination Detected.]
+[Recalculating... Recalculating...]
+[User 'Arthur Penhaligon' flagged for 'Exceptional Bad Luck'.]
+[Applying Compensation Package: 'The RNG Special'.]
+
+"Great," I thought, or whatever the ethereal equivalent of thinking was. "Even in death, I’m getting a participation trophy."
+
+Authoritative surfaces:
+[
+  {
+    "kind": "ui_stat",
+    "line": 3,
+    "text": "[Patience: 4/100]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 11,
+    "text": "[Skill Check: Cynicism (Level 3) \u2013 Success!]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 12,
+    "text": "[Observation: The vending machine isn't broken; it's malicious. It knows you\u2019re at your breaking point. It feeds on the tears of the underpaid.]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 22,
+    "text": "[Patience: 2/100]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 30,
+    "text": "[HP: 100/100]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 31,
+    "text": "[Status: Disgruntled]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 41,
+    "text": "[Patience: 1/100]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 51,
+    "text": "[Warning: Environmental Hazard Detected!]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 52,
+    "text": "[System Note: Maybe stop touching the high-voltage equipment, Artie?]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 60,
+    "text": "[Critical Hit! -100 HP]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 66,
+    "text": "[HP: 0/100]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 67,
+    "text": "[Status: Deceased]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 77,
+    "text": "[Welcome to the Character Creation Suite!]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 78,
+    "text": "[Error: Unexpected Termination Detected.]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 79,
+    "text": "[Recalculating... Recalculating...]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 80,
+    "text": "[User 'Arthur Penhaligon' flagged for 'Exceptional Bad Luck'.]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 81,
+    "text": "[Applying Compensation Package: 'The RNG Special'.]"
+  }
+]
+
+Character states (per cast_present_ids):
+[
+  {
+    "character_continuity_system_state": {
+      "resources": {
+        "patience": {
+          "current": 5,
+          "max": 100
+        }
+      },
+      "skills": {
+        "cynicism": 3,
+        "procrastination": 5,
+        "spreadsheet_wizardry": 4
+      },
+      "stats": {
+        "hp": {
+          "current": 100,
+          "max": 100
+        }
+      },
+      "titles": [
+        {
+          "active": true,
+          "name": "Disgruntled Employee",
+          "source": "Career Path"
+        }
+      ]
+    },
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "hand_right",
+        "contents": [
+          "ITEM_SMARTPHONE_001"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "pocket_left",
+        "contents": [
+          "ITEM_WALLET_001"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "pocket_right",
+        "contents": [
+          "ITEM_KEYS_001"
+        ],
+        "owner": "CHAR_ARTIE"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Smartphone moved to hand to satisfy required_visible_on_page constraint.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initialize scene focus mechanics",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Aligning for required_visible_on_page constraint.",
+        "scene": 1
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Keyring (status=stowed, container=pocket_right)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[Smartphone, Keyring])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[Leather Wallet])"
+    ],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "ITEM_SMARTPHONE_001",
+        "status": "held"
+      },
+      {
+        "container": "pocket_left",
+        "item": "ITEM_WALLET_001",
+        "status": "stowed"
+      },
+      {
+        "container": "pocket_right",
+        "item": "ITEM_KEYS_001",
+        "status": "stowed"
+      }
+    ],
+    "last_touched": {
+      "chapter": 1,
+      "scene": 1
+    },
+    "name": "Arthur 'Artie' Penhaligon",
+    "schema_version": "1.0",
+    "skills": {
+      "cynicism": 3,
+      "procrastination": 5,
+      "spreadsheet_wizardry": 4
+    },
+    "stats": {
+      "hp": {
+        "current": 100,
+        "max": 100
+      }
+    },
+    "updated_at": "2026-02-09T06:24:11Z"
+  }
+]
+
+Item registry (canonical):
+{
+  "items": [
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Keyring",
+      "item_id": "ITEM_KEYS_001",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [],
+      "name": "Keyring",
+      "owner_scope": "character",
+      "state_tags": [
+        "unclassified",
+        "stowed"
+      ],
+      "type": "unclassified"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Smartphone",
+      "item_id": "ITEM_SMARTPHONE_001",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [],
+      "name": "Smartphone",
+      "owner_scope": "character",
+      "state_tags": [
+        "unclassified",
+        "stowed"
+      ],
+      "type": "unclassified"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Leather Wallet",
+      "item_id": "ITEM_WALLET_001",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [],
+      "name": "Leather Wallet",
+      "owner_scope": "character",
+      "state_tags": [
+        "unclassified",
+        "stowed"
+      ],
+      "type": "unclassified"
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Plot devices (canonical):
+{
+  "devices": [
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_CRIT_EXPLOIT",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_CRIT_EXPLOIT"
+      ],
+      "name": "The 100% Crit Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_THE_ASCENSION",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_path_of_the_first_glitch_c7dd4581",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_THE_ASCENSION"
+      ],
+      "name": "The Path of the First Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_SYSTEM_GLITCH",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_system_s_stability_da5be7b7",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_SYSTEM_GLITCH"
+      ],
+      "name": "The System's Stability",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_VANE_RIVALRY",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_vane_vendetta_bcf4bea1",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_VANE_RIVALRY"
+      ],
+      "name": "The Vane Vendetta",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-09T06:22:57Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 1
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {},
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_001.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "PLANNED",
+  "summary": {
+    "chapter_so_far": [
+      "Artie Penhaligon died in a vending machine accident in his office breakroom.",
+      "Artie's consciousness entered the System's Character Creation Suite."
+    ],
+    "key_facts_ring": [
+      "Artie reaches zero patience while arguing with a stuck bag of Zesty Ranch Zings.",
+      "Artie attempts percussive maintenance, shaking the vending machine.",
+      "A massive electrical surge delivers a lethal 100 HP critical hit to Artie.",
+      "Artie's smartphone falls to the floor as he dies.",
+      "Artie's consciousness transitions to a shimmering dark void.",
+      "The System UI greets Artie and flags him for an 'Exceptional Bad Luck' compensation package.",
+      "milestone: death_by_vending_machine = DONE",
+      "milestone: character_creation_entry = DONE",
+      "inventory: CHAR_ARTIE -> none (all items abandoned in real world)",
+      "location: Character Creation Suite",
+      "status: Artie is deceased in the real world",
+      "continuity: CHAR_ARTIE hp is 0"
+    ],
+    "last_scene": [
+      "Artie Penhaligon died in his office breakroom after a malfunctioning vending machine electrocuted him during a dispute over a bag of chips.",
+      "His physical body and personal belongings were left behind in the real world.",
+      "Artie's soul awakened in the Character Creation Suite, where the System began calculating his compensation for 'Exceptional Bad Luck'."
+    ],
+    "must_stay_true": [
+      "milestone: death_by_vending_machine = DONE",
+      "milestone: character_creation_entry = DONE",
+      "inventory: CHAR_ARTIE -> none (all items abandoned in real world)",
+      "location: Character Creation Suite",
+      "status: Artie is deceased in the real world",
+      "continuity: CHAR_ARTIE hp is 0"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "The Character Creation Void",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_VANE_RIVALRY",
+      "THREAD_SYSTEM_GLITCH",
+      "THREAD_THE_ASCENSION"
+    ],
+    "recent_facts": [
+      "Artie died from a 100 HP critical hit delivered by a vending machine.",
+      "Artie's smartphone, wallet, and keys remain in the office breakroom.",
+      "Artie is currently being processed by the System's Character Creation Suite."
+    ],
+    "time": {}
+  }
+}
+
+Summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie Penhaligon died in a vending machine accident in his office breakroom.",
+    "Artie's consciousness entered the System's Character Creation Suite."
+  ],
+  "key_facts_ring": [
+    "Artie reaches zero patience while arguing with a stuck bag of Zesty Ranch Zings.",
+    "Artie attempts percussive maintenance, shaking the vending machine.",
+    "A massive electrical surge delivers a lethal 100 HP critical hit to Artie.",
+    "Artie's smartphone falls to the floor as he dies.",
+    "Artie's consciousness transitions to a shimmering dark void.",
+    "The System UI greets Artie and flags him for an 'Exceptional Bad Luck' compensation package.",
+    "milestone: death_by_vending_machine = DONE",
+    "milestone: character_creation_entry = DONE",
+    "inventory: CHAR_ARTIE -> none (all items abandoned in real world)",
+    "location: Character Creation Suite",
+    "status: Artie is deceased in the real world",
+    "continuity: CHAR_ARTIE hp is 0"
+  ],
+  "last_scene": [
+    "Artie Penhaligon died in his office breakroom after a malfunctioning vending machine electrocuted him during a dispute over a bag of chips.",
+    "His physical body and personal belongings were left behind in the real world.",
+    "Artie's soul awakened in the Character Creation Suite, where the System began calculating his compensation for 'Exceptional Bad Luck'."
+  ],
+  "must_stay_true": [
+    "milestone: death_by_vending_machine = DONE",
+    "milestone: character_creation_entry = DONE",
+    "inventory: CHAR_ARTIE -> none (all items abandoned in real world)",
+    "location: Character Creation Suite",
+    "status: Artie is deceased in the real world",
+    "continuity: CHAR_ARTIE hp is 0"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "milestone: death_by_vending_machine = DONE",
+  "milestone: character_creation_entry = DONE",
+  "inventory: CHAR_ARTIE -> none (all items abandoned in real world)",
+  "location: Character Creation Suite",
+  "status: Artie is deceased in the real world",
+  "continuity: CHAR_ARTIE hp is 0",
+  "Artie reaches zero patience while arguing with a stuck bag of Zesty Ranch Zings.",
+  "Artie attempts percussive maintenance, shaking the vending machine.",
+  "A massive electrical surge delivers a lethal 100 HP critical hit to Artie.",
+  "Artie's smartphone falls to the floor as he dies.",
+  "Artie's consciousness transitions to a shimmering dark void.",
+  "The System UI greets Artie and flags him for an 'Exceptional Bad Luck' compensation package.",
+  "milestone: death_by_vending_machine = DONE",
+  "milestone: character_creation_entry = DONE",
+  "inventory: CHAR_ARTIE -> none (all items abandoned in real world)",
+  "location: Character Creation Suite",
+  "status: Artie is deceased in the real world",
+  "continuity: CHAR_ARTIE hp is 0"
+]

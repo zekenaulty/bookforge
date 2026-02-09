@@ -4,8 +4,8 @@
   "name": "Mayor of Oakhaven",
   "inventory": [
     {
-      "item_id": "ITEM_OFFICE_KEY",
-      "item_name": "Key to Oakhaven",
+      "item_id": "ITEM_MAYOR_SEAL_001",
+      "item_name": "Mayor's Seal",
       "status": "stowed",
       "container": "pocket"
     }
@@ -14,33 +14,45 @@
     {
       "container": "pocket",
       "owner": "CHAR_MAYOR",
-      "location": "waist",
+      "location": "coat",
       "contents": [
-        "ITEM_OFFICE_KEY"
+        "Mayor's Seal"
       ]
     }
   ],
   "character_continuity_system_state": {
     "stats": {
-      "level": 5,
-      "charisma": 12
+      "hp": {
+        "current": 150,
+        "max": 150
+      }
+    },
+    "skills": {
+      "diplomacy": 6,
+      "tax_calculation": 8
     },
     "titles": [
       {
-        "name": "Mayor",
-        "source": "position",
+        "name": "Local Authority",
+        "source": "Position",
         "active": true
       }
     ]
   },
   "stats": {
-    "level": 5,
-    "charisma": 12
+    "hp": {
+      "current": 150,
+      "max": 150
+    }
   },
-  "skills": {},
+  "skills": {
+    "diplomacy": 6,
+    "tax_calculation": 8
+  },
   "invariants": [
-    "inventory: CHAR_MAYOR -> Key to Oakhaven (status=stowed, container=pocket)"
+    "inventory: CHAR_MAYOR -> Mayor's Seal (status=stowed, container=pocket)",
+    "container: pocket (owner=CHAR_MAYOR, contents=[Mayor's Seal])"
   ],
   "history": [],
-  "updated_at": "2026-02-09T06:18:11Z"
+  "updated_at": "2026-02-09T06:22:57Z"
 }

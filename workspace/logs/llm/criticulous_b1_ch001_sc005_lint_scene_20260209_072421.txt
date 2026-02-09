@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {
+      "code": "invariant_contradiction",
+      "message": "The 'must_stay_true' block contains mutually exclusive facts: Artie is listed as being in a 'non-physical void state' with 'HP 0' while simultaneously being in the 'Whispering Woods' with 'HP 1/1'.",
+      "severity": "error"
+    },
+    {
+      "code": "invariant_contradiction",
+      "message": "The 'must_stay_true' block contains a contradiction regarding ITEM_SMARTPHONE_001: it is listed as being 'on the office breakroom floor' and also 'stowed in pocket_right'.",
+      "severity": "error"
+    },
+    {
+      "code": "invariant_contradiction",
+      "message": "The 'must_stay_true' block requires Artie to be 'cornered against an ancient oak tree', but also states the tree 'has been vaporized'. The prose depicts the tree as vaporized, violating the 'cornered' constraint.",
+      "severity": "error"
+    },
+    {
+      "code": "missing_durable_id",
+      "message": "The item 'Participation Trophy' (referenced as ITEM_TROPHY_001 in summary) is missing from the item_registry. Please provide a canonical entry for ITEM_TROPHY_001.",
+      "severity": "error"
+    },
+    {
+      "code": "continuity_system_mismatch",
+      "message": "The UI block displays 'Stamina: 42/100', but the 'stamina' resource is not defined in CHAR_ARTIE's character_continuity_system_state.",
+      "severity": "error"
+    },
+    {
+      "code": "continuity",
+      "message": "The summary states Artie 'stowed his Keyring (ITEM_KEYS_001) in his pocket', but the 'must_stay_true' invariant still requires him to be 'holding his Keyring in his hand_right'.",
+      "severity": "warning"
+    }
+  ]
+}

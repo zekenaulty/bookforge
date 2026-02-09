@@ -1,0 +1,14 @@
+- Artie was killed by a malfunctioning vending machine in his office breakroom.
+- Artie's Smartphone was dropped on the breakroom floor during his death.
+- Artie has entered the Character Creation Suite after his death.
+- Artie's build is locked with 1 HP and 100% Crit Rate.
+- Artie acquired the 'Crit or Quit' title.
+- Artie and Fizz have arrived in the Whispering Woods.
+- A monster is nearby.
+- Artie and Fizz have arrived in the Whispering Woods tutorial zone.
+- Artie is being hunted by a Lesser Forest Slime.
+- Artie has drawn his Keyring as a makeshift weapon and is cornered against a tree.
+- Artie survived his first combat encounter against a Lesser Forest Slime.
+- Artie triggered a 'Super-Mega-Ultra-Crit' that obliterated the slime and vaporized an ancient oak tree.
+- The combat area now contains a twenty-foot cauterized crater.
+- Artie reached Level 2.
