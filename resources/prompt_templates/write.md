@@ -16,6 +16,7 @@ Write the scene described by the scene card.
 - titles are arrays of objects with stable name fields; do not emit titles as plain strings.
 - Canonical descriptors (colors, item names, effect IDs, mechanic labels) must be reused exactly; do not paraphrase.
 - If item_registry or plot_devices are provided, they are canonical durable-state references for ownership/custody labels in authoritative outputs.
+- Use item_registry.items[].display_name in prose; use item_id only in patches/JSON. The display_name must be human readable and not an escaped id/name.
 - If a required event is not in the Scene Card, do not perform it.
 - Enforce scene-card durable constraints: honor `required_in_custody`, `required_scene_accessible`, `forbidden_visible`, and `device_presence`; treat `required_visible_on_page` as explicit narrative requirement when present.
 - Respect `timeline_scope` and `ontological_scope` when proposing durable mutations; do not mutate physical custody in non-present/non-real scope unless explicitly marked override.
@@ -48,6 +49,7 @@ STATE_PATCH rules:
   - `plot_device_updates` for durable plot-device custody/activation changes.
   - `transfer_updates` for item handoffs (source, destination, reason, optional transfer_chain).
   - Every `transfer_updates` entry must include `item_id` and `reason` (non-empty string).
+  - `inventory_alignment_updates` must be an array of objects; never an object with an `updates` field.
 - For off-screen normalization and non-trivial durable mutations, include `reason_category` with stable values like `time_skip_normalize`, `location_jump_normalize`, `after_combat_cleanup`, `stowed_at_inn`, `handoff_transfer`, `knowledge_reveal`.
 - If you mutate durable state, do not leave the same mutation only in prose.
 - Include character_updates entries for cast_present_ids that change state (inventory, containers, persona shifts).

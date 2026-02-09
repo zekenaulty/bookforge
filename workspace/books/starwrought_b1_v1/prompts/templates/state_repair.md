@@ -20,6 +20,7 @@ Rules:
 - titles are arrays of objects with stable name fields; do not emit titles as plain strings.
 - Canonical descriptors (colors, item names, effect IDs, mechanic labels) must be reused exactly; do not paraphrase.
 - If item_registry or plot_devices are provided, they are canonical durable-state references for authoritative labels and custody terms.
+- Use item_registry.items[].display_name in prose; use item_id only in patches/JSON. The display_name must be human readable and not an escaped id/name.
 - Do not add numeric mechanics to invariants_add; store them in continuity system updates instead.
 - If an event appears in prose, it must appear in key_events.
 - must_stay_true must include milestone ledger entries and any inventory/injury/ownership invariants implied by prose.
@@ -36,6 +37,8 @@ Rules:
   - `item_registry_updates` for durable item metadata/custody changes.
   - `plot_device_updates` for durable plot-device custody/activation changes.
   - `transfer_updates` for item handoffs (source, destination, reason, optional transfer_chain).
+  - Every `transfer_updates` entry must include `item_id` and `reason` (non-empty string).
+  - `inventory_alignment_updates` must be an array of objects; never an object with an `updates` field.
 - For off-screen normalization and non-trivial durable mutations, include `reason_category` with stable values like `time_skip_normalize`, `location_jump_normalize`, `after_combat_cleanup`, `stowed_at_inn`, `handoff_transfer`, `knowledge_reveal`.
 - If durable mutation is implied but ambiguous, keep canonical state unchanged and emit an explicit repair note in reason fields.
 - Honor scene-card durable constraints (`required_in_custody`, `required_scene_accessible`, `forbidden_visible`, `device_presence`; optional `required_visible_on_page`).

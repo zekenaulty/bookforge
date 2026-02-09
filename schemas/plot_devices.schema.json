@@ -2,9 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Plot Devices",
   "type": "object",
-  "required": ["schema_version", "devices"],
+  "required": [
+    "schema_version",
+    "devices"
+  ],
   "properties": {
-    "schema_version": {"const": "1.0"},
+    "schema_version": {
+      "const": "1.0"
+    },
     "devices": {
       "type": "array",
       "items": {
@@ -20,42 +25,85 @@
           "last_seen"
         ],
         "properties": {
-          "device_id": {"type": "string", "minLength": 1},
-          "name": {"type": "string", "minLength": 1},
-          "custody_scope": {"type": "string", "minLength": 1},
+          "device_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "custody_scope": {
+            "type": "string",
+            "minLength": 1
+          },
           "custody_ref": {
             "anyOf": [
-              {"type": "string", "minLength": 1},
-              {"type": "object"}
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "object"
+              }
             ]
           },
-          "activation_state": {"type": "string"},
+          "activation_state": {
+            "type": "string"
+          },
           "linked_threads": {
             "type": "array",
-            "items": {"type": "string"}
+            "items": {
+              "type": "string"
+            }
           },
           "constraints": {
             "anyOf": [
-              {"type": "array"},
-              {"type": "object"},
-              {"type": "string"}
+              {
+                "type": "array"
+              },
+              {
+                "type": "object"
+              },
+              {
+                "type": "string"
+              }
             ]
           },
           "last_seen": {
             "type": "object",
-            "required": ["chapter", "scene", "location"],
+            "required": [
+              "chapter",
+              "scene",
+              "location"
+            ],
             "properties": {
-              "chapter": {"type": "integer", "minimum": 0},
-              "scene": {"type": "integer", "minimum": 0},
-              "location": {"type": "string"}
+              "chapter": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "scene": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "location": {
+                "type": "string"
+              }
             },
             "additionalProperties": true
           },
           "aliases": {
             "type": "array",
-            "items": {"type": "string"}
+            "items": {
+              "type": "string"
+            }
           },
-          "linked_item_id": {"type": "string"}
+          "linked_item_id": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          }
         },
         "additionalProperties": true
       }

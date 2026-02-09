@@ -16,10 +16,12 @@ Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you
 Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
 Inventory contract: track item ownership and container location per character or container label; items do not teleport.
 Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Item naming: use display_name for prose; use item_id only in JSON/patches. The display_name must be human readable and not an escaped id/name.
 State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
 Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
 Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
 Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
 Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
 Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
 Never recap at scene openings.
@@ -75,5 +77,7 @@ If output must be JSON only, return a single JSON object with no commentary or c
 When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
 If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
 If mechanics are shown in prose or UI, they must be present in continuity system state or added in continuity system updates in the same STATE_PATCH.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
 For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
 Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.

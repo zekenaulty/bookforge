@@ -481,6 +481,23 @@
   - Added regression tests for transfer-update coercion and required reason fallback in `tests/test_state_bag_and_milestones.py`.
   - Validation: `91 passed`.
 
+- Turn 13 (completed):
+  - Added inventory_alignment_updates coercion to accept legacy wrapper objects with `updates` and fan-out into list entries with inherited reason/category.
+  - Added schema-validation retry loops for inventory alignment shape errors via centralized state patch normalization.
+  - Hardened prompts/system/output contract to require inventory_alignment_updates be an array (no wrapper object).
+  - Added regression test for inventory alignment unwrap coercion.
+  - Synced updated templates into active book workspace (`book update-templates --book criticulous_b1`).
+  - Validation: `92 passed`.
+
+- Turn 14 (completed):
+  - Added display/prose naming support for durable items (`display_name`) and normalized item names derived from ITEM_* IDs.
+  - Normalized item registry entries on load/save/ensure to populate display_name/name when missing or when name equals item_id.
+  - Updated transfer handling and on-page mention matching to prefer display_name/name for prose detection.
+  - Hardened prompts/system/output contract to instruct prose to use display_name/name and reserve item_id for JSON/patches.
+  - Added regression test ensuring ITEM_* names are humanized into display_name.
+  - Synced updated templates into active book workspace (`book update-templates --book criticulous_b1`).
+  - Validation: `93 passed`.
+
 
 ### Remaining Scope By Story
 - Story B remaining:

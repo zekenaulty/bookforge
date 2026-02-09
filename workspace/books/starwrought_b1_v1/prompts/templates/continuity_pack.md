@@ -18,6 +18,7 @@ Rules:
 - constraints must include the highest-priority inventory/container invariants from summary.must_stay_true (copy exact strings when possible).
 - If character_states are provided, prefer their inventory/container facts and continuity mechanic facts; do not invent conflicting values.
 - If item_registry or plot_devices are provided, reuse canonical names/ids in constraints when referencing durable items/devices.
+- Prefer item_registry.items[].display_name for prose references; reserve item_id for canonical JSON. The display_name must be human readable and not an escaped id/name.
 - If state.global_continuity_system_state contains canonical mechanic labels/values, reuse those exact labels in constraints.
 - If scene_card.cast_present is empty, cast_present must be an empty array.
 - open_threads must be a subset of thread_registry thread_id values.

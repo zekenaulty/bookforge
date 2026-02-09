@@ -218,3 +218,32 @@ def test_ensure_durable_state_files_backfills_plot_devices_from_thread_hints(tmp
     assert len(devices2) == 2
     assert sorted([entry["device_id"] for entry in devices2]) == sorted([entry["device_id"] for entry in devices])
 
+
+
+def test_item_registry_normalizes_display_name_from_id(tmp_path: Path) -> None:
+    book_root = _book_root(tmp_path)
+    ensure_durable_state_files(book_root)
+
+    save_item_registry(
+        book_root,
+        {
+            "schema_version": "1.0",
+            "items": [
+                {
+                    "item_id": "ITEM_rusty_dagger_abcdef12",
+                    "name": "ITEM_rusty_dagger_abcdef12",
+                    "type": "weapon",
+                    "owner_scope": "character",
+                    "custodian": "CHAR_a",
+                    "linked_threads": [],
+                    "state_tags": ["carried"],
+                    "last_seen": {"chapter": 1, "scene": 1, "location": "inn"},
+                }
+            ],
+        },
+    )
+
+    item_data = load_item_registry(book_root)
+    entry = item_data["items"][0]
+    assert entry["name"] == "Rusty Dagger"
+    assert entry["display_name"] == "Rusty Dagger"

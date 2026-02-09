@@ -79,10 +79,47 @@ def _slugify(value: str) -> str:
     return text or "item"
 
 
+def _humanize_item_id(item_id: str) -> str:
+    token = str(item_id).strip()
+    if token.upper().startswith("ITEM_"):
+        token = token[5:]
+    # Drop trailing hash-like suffixes
+    token = re.sub(r"_[0-9a-f]{8}$", "", token)
+    token = re.sub(r"[_-]+", " ", token).strip()
+    if not token:
+        return "Item"
+    parts = []
+    for part in token.split():
+        if part.isupper() or part.isdigit():
+            parts.append(part)
+        else:
+            parts.append(part.capitalize())
+    return " ".join(parts)
+
+
 def _derived_item_id(character_id: str, item_name: str) -> str:
     slug = _slugify(item_name)
     digest = hashlib.sha1(f"{character_id}|{item_name}".encode("utf-8")).hexdigest()[:8]
     return f"ITEM_{slug}_{digest}"
+
+
+def _normalize_item_entry_names(entry: Dict[str, Any]) -> Dict[str, Any]:
+    if not isinstance(entry, dict):
+        return entry
+    item_id = str(entry.get("item_id") or "").strip()
+    name = str(entry.get("name") or "").strip()
+    display = str(entry.get("display_name") or "").strip()
+
+    if (not name or name.upper().startswith("ITEM_") or (item_id and name == item_id)) and item_id:
+        name = _humanize_item_id(item_id)
+    if not display:
+        display = name
+
+    if name:
+        entry["name"] = name
+    if display:
+        entry["display_name"] = display
+    return entry
 
 
 def _coerce_int(value: Any) -> int:
@@ -287,8 +324,8 @@ def _migrate_item_registry_from_character_states(book_root: Path) -> bool:
                 item_id = _derived_item_id(character_id, item_name)
             if not item_id:
                 continue
-            if not item_name:
-                item_name = item_id
+            if not item_name or item_name == item_id or item_name.upper().startswith("ITEM_"):
+                item_name = _humanize_item_id(item_id)
 
             status = str(entry.get("status") or "").strip().lower()
             state_tags = ["unclassified"]
@@ -301,6 +338,7 @@ def _migrate_item_registry_from_character_states(book_root: Path) -> bool:
             items_by_id[item_id] = {
                 "item_id": item_id,
                 "name": item_name,
+                "display_name": item_name,
                 "type": str(entry.get("type") or "unclassified"),
                 "owner_scope": str(entry.get("owner_scope") or "character"),
                 "custodian": character_id,
@@ -363,6 +401,10 @@ def ensure_item_registry(book_root: Path) -> Path:
         _write_json(path, _default_item_registry())
     else:
         payload = _normalize_registry(json.loads(path.read_text(encoding="utf-8")), "items")
+        payload["items"] = [
+            _normalize_item_entry_names(dict(item)) if isinstance(item, dict) else item
+            for item in payload.get("items", [])
+        ]
         validate_json(payload, "item_registry")
         _write_json(path, payload)
     return path
@@ -400,6 +442,10 @@ def ensure_durable_state_files(book_root: Path) -> None:
 def load_item_registry(book_root: Path) -> Dict[str, Any]:
     ensure_durable_state_files(book_root)
     payload = _normalize_registry(json.loads(item_registry_path(book_root).read_text(encoding="utf-8")), "items")
+    payload["items"] = [
+        _normalize_item_entry_names(dict(item)) if isinstance(item, dict) else item
+        for item in payload.get("items", [])
+    ]
     validate_json(payload, "item_registry")
     return payload
 
@@ -413,6 +459,10 @@ def load_plot_devices(book_root: Path) -> Dict[str, Any]:
 
 def save_item_registry(book_root: Path, payload: Dict[str, Any]) -> None:
     normalized = _normalize_registry(payload, "items")
+    normalized["items"] = [
+        _normalize_item_entry_names(dict(item)) if isinstance(item, dict) else item
+        for item in normalized.get("items", [])
+    ]
     validate_json(normalized, "item_registry")
     _write_json(item_registry_path(book_root), normalized)
     item_ids = []

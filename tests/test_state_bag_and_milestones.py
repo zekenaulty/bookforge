@@ -2,6 +2,7 @@ from bookforge.runner import (
     _apply_bag_updates,
     _coerce_stat_updates,
     _coerce_transfer_updates,
+    _coerce_inventory_alignment_updates,
     _coerce_character_updates,
     _heuristic_invariant_issues,
     _pov_drift_issues,
@@ -380,3 +381,21 @@ def test_coerce_transfer_updates_uses_default_reason_when_missing_category() -> 
     _coerce_transfer_updates(patch)
 
     assert patch["transfer_updates"][0]["reason"] == "transfer_alignment"
+
+
+def test_coerce_inventory_alignment_updates_unwraps_object() -> None:
+    patch = {
+        "inventory_alignment_updates": {
+            "reason_category": "location_jump_normalize",
+            "updates": [
+                {"character_id": "CHAR_ARTIE", "inventory": [{"item": "ITEM_x"}]}
+            ],
+        }
+    }
+
+    _coerce_inventory_alignment_updates(patch)
+
+    updates = patch["inventory_alignment_updates"]
+    assert isinstance(updates, list)
+    assert updates[0]["character_id"] == "CHAR_ARTIE"
+    assert updates[0]["reason_category"] == "location_jump_normalize"

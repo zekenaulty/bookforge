@@ -1220,6 +1220,46 @@ def _coerce_stat_updates(patch: Dict[str, Any]) -> None:
             _ensure_update_dict(update)
             _normalize_titles_in_update(update)
 
+def _coerce_inventory_alignment_updates(patch: Dict[str, Any]) -> None:
+    if not isinstance(patch, dict):
+        return
+    raw_updates = patch.get("inventory_alignment_updates")
+    if raw_updates is None:
+        return
+
+    # Accept legacy/object form: {reason_category, reason, updates:[...]}
+    if isinstance(raw_updates, dict):
+        parent_reason = raw_updates.get("reason")
+        parent_category = raw_updates.get("reason_category")
+        parent_expected = raw_updates.get("expected_before")
+        updates_list = raw_updates.get("updates") if isinstance(raw_updates.get("updates"), list) else []
+        normalized: List[Dict[str, Any]] = []
+        for update in updates_list:
+            if not isinstance(update, dict):
+                continue
+            fixed = dict(update)
+            if parent_reason and not fixed.get("reason"):
+                fixed["reason"] = parent_reason
+            if parent_category and not fixed.get("reason_category"):
+                fixed["reason_category"] = parent_category
+            if parent_expected and not fixed.get("expected_before"):
+                fixed["expected_before"] = parent_expected
+            normalized.append(fixed)
+        patch["inventory_alignment_updates"] = normalized
+        return
+
+    if not isinstance(raw_updates, list):
+        patch["inventory_alignment_updates"] = []
+        return
+
+    normalized: List[Dict[str, Any]] = []
+    for update in raw_updates:
+        if not isinstance(update, dict):
+            continue
+        normalized.append(dict(update))
+    patch["inventory_alignment_updates"] = normalized
+
+
 def _coerce_transfer_updates(patch: Dict[str, Any]) -> None:
     if not isinstance(patch, dict):
         return
@@ -1266,6 +1306,7 @@ def _normalize_state_patch_for_validation(
     _coerce_character_updates(normalized)
     _coerce_stat_updates(normalized)
     _coerce_transfer_updates(normalized)
+    _coerce_inventory_alignment_updates(normalized)
     _migrate_numeric_invariants(normalized)
     _fill_character_update_context(normalized, scene_card)
     _fill_character_continuity_update_context(normalized, scene_card)
@@ -2085,7 +2126,7 @@ def _apply_transfer_update(
         if isinstance(last, dict):
             to_endpoint = last
 
-    item_name = str(item_entry.get("name") or item_entry.get("item_name") or item_entry.get("item") or item_id)
+    item_name = str(item_entry.get("display_name") or item_entry.get("name") or item_entry.get("item_name") or item_entry.get("item") or item_id)
 
     source_char_id = _extract_character_id_from_endpoint(from_endpoint)
     if source_char_id:
@@ -2487,7 +2528,7 @@ def _entry_mentioned_on_page(prose: str, entry: Dict[str, Any], id_key: str) -> 
     primary_id = str(entry.get(id_key) or "").strip()
     if primary_id:
         tokens.append(primary_id)
-    for key in ("name", "item_name", "item", "label"):
+    for key in ("display_name", "name", "item_name", "item", "label"):
         value = str(entry.get(key) or "").strip()
         if value:
             tokens.append(value)

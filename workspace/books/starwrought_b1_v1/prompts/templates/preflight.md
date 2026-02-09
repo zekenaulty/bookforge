@@ -38,7 +38,9 @@ Dynamic continuity rules:
 - titles must be arrays of objects with stable `name` fields, never arrays of strings.
 - Durable-state updates are authoritative and must be explicit in patch blocks.
 - If inventory posture is changed for scene fit, include `inventory_alignment_updates` with `reason` and `reason_category`.
+- `inventory_alignment_updates` must be an array of objects; do not wrap it in an object with an `updates` key.
 - If durable item custody or metadata changes, include `item_registry_updates` and/or `transfer_updates`.
+- Every `transfer_updates` entry must include `item_id` and `reason` (non-empty string).
 - If plot-device custody or activation changes, include `plot_device_updates`.
 - Never rely on prose implication for durable state mutation.
 - All *_updates arrays must contain objects; never emit bare strings as array entries.
