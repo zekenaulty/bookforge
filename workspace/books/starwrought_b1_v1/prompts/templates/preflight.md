@@ -71,6 +71,10 @@ Durable-constraint compliance check (must run before output):
    - Visible_on_page: item must be held/worn/placed such that the writer can naturally show it early.
 
 Dynamic continuity rules:
+- Required fields for durable registry entries (when creating NEW ids or filling missing required fields):
+  - item_registry_updates: set must include name, type, owner_scope, custodian, linked_threads, state_tags, last_seen {chapter, scene, location}. Optional: display_name, aliases, linked_device_id, replacement_of.
+  - plot_device_updates: set must include name, custody_scope, custody_ref, activation_state, linked_threads, constraints, last_seen {chapter, scene, location}. Optional: display_name, aliases, linked_item_id.
+  - If you introduce a new item_id/device_id anywhere in this patch, you MUST include a corresponding registry update with the full required fields.
 - Use canonical keys:
   - character_continuity_system_updates
   - global_continuity_system_updates
@@ -172,6 +176,7 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
+
 
 
 
