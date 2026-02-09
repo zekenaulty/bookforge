@@ -498,6 +498,11 @@
   - Synced updated templates into active book workspace (`book update-templates --book criticulous_b1`).
   - Validation: `93 passed`.
 
+- Turn 15 (completed):
+  - Updated characters_generate prompt to reflect dynamic continuity families and item naming rules.
+  - Added explicit guidance to include item_name with item_id and avoid ITEM_* ids in prose-facing fields.
+  - Synced updated characters_generate template into active book workspace (`book update-templates --book criticulous_b1`).
+
 
 ### Remaining Scope By Story
 - Story B remaining:
