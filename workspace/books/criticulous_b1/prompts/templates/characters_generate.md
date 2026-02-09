@@ -34,7 +34,6 @@ Naming and durable item guidance:
 Starting scene alignment (important):
 - The initial inventory/containers/state must prepare each character for the book's first scene.
 - Use the Book + Outline characters in THIS prompt as your source of truth for the opening situation.
-- If the system prompt does not include outline context, rely on the Outline characters and Book data here.
 - If the opening situation is unclear, default to a neutral, plausible posture (hands free, items stowed).
 - Example: office/briefing -> no weapons held; battle opener -> weapon may be in hand; travel -> stowed gear.
 
@@ -64,6 +63,7 @@ Book:
 
 Outline characters:
 {{outline_characters}}
+
 Outline opening context (chapter/section/scene 1):
 {{outline_opening}}
 
