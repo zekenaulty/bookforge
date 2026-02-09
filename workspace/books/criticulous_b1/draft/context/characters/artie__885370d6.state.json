@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "character_id": "CHAR_ARTIE",
+  "name": "Arthur 'Artie' Penhaligon",
+  "inventory": [
+    {
+      "item_id": "ITEM_QUARTER",
+      "item_name": "Sticky Quarter",
+      "status": "carried",
+      "container": "hand_right"
+    },
+    {
+      "item_id": "ITEM_ID_BADGE",
+      "item_name": "Corporate ID Badge",
+      "status": "stowed",
+      "container": "pocket_left"
+    }
+  ],
+  "containers": [
+    {
+      "container": "pocket_left",
+      "owner": "CHAR_ARTIE",
+      "location": "pants",
+      "contents": [
+        "ITEM_ID_BADGE"
+      ]
+    },
+    {
+      "container": "hand_right",
+      "owner": "CHAR_ARTIE",
+      "location": "arm_right",
+      "contents": [
+        "ITEM_QUARTER"
+      ]
+    }
+  ],
+  "character_continuity_system_state": {
+    "stats": {
+      "hp": {
+        "current": 1,
+        "max": 1
+      },
+      "mp": {
+        "current": 10,
+        "max": 10
+      },
+      "defense": {
+        "current": 0,
+        "max": 0
+      },
+      "luck": {
+        "current": 999,
+        "max": 999
+      },
+      "crit_chance": {
+        "current": 100,
+        "max": 100
+      }
+    },
+    "skills": {
+      "analyze_vending_machine": 1
+    },
+    "titles": [
+      {
+        "name": "The Glitched One",
+        "source": "system_error",
+        "active": true
+      },
+      {
+        "name": "Glass Cannon",
+        "source": "stat_distribution",
+        "active": true
+      }
+    ],
+    "resources": {
+      "patience": {
+        "current": 2,
+        "max": 100
+      }
+    }
+  },
+  "stats": {
+    "hp": {
+      "current": 1,
+      "max": 1
+    },
+    "mp": {
+      "current": 10,
+      "max": 10
+    },
+    "defense": {
+      "current": 0,
+      "max": 0
+    },
+    "luck": {
+      "current": 999,
+      "max": 999
+    },
+    "crit_chance": {
+      "current": 100,
+      "max": 100
+    }
+  },
+  "skills": {
+    "analyze_vending_machine": 1
+  },
+  "invariants": [
+    "inventory: CHAR_ARTIE -> Sticky Quarter (status=carried, container=hand_right)",
+    "inventory: CHAR_ARTIE -> Corporate ID Badge (status=stowed, container=pocket_left)",
+    "container: pocket_left (owner=CHAR_ARTIE, contents=[Corporate ID Badge])",
+    "injury: CHAR_ARTIE none"
+  ],
+  "history": [],
+  "updated_at": "2026-02-09T06:18:11Z"
+}
