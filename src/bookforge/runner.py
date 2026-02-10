@@ -1297,6 +1297,78 @@ def _coerce_transfer_updates(patch: Dict[str, Any]) -> None:
     patch["transfer_updates"] = normalized
 
 
+
+def _coerce_registry_updates(
+    patch: Dict[str, Any],
+    *,
+    key: str,
+    id_key: str,
+) -> None:
+    if not isinstance(patch, dict):
+        return
+    raw_updates = patch.get(key)
+    if raw_updates is None:
+        return
+
+    if isinstance(raw_updates, list):
+        normalized: List[Dict[str, Any]] = []
+        for update in raw_updates:
+            if not isinstance(update, dict):
+                continue
+            normalized.append(dict(update))
+        patch[key] = normalized
+        return
+
+    if not isinstance(raw_updates, dict):
+        patch[key] = []
+        return
+
+    # If a single update dict already has an id, wrap it.
+    if id_key in raw_updates:
+        patch[key] = [dict(raw_updates)]
+        return
+
+    set_block = raw_updates.get("set") if isinstance(raw_updates.get("set"), dict) else {}
+    delta_block = raw_updates.get("delta") if isinstance(raw_updates.get("delta"), dict) else {}
+    remove_block = raw_updates.get("remove")
+    top_reason = raw_updates.get("reason")
+    top_category = raw_updates.get("reason_category")
+    top_expected = raw_updates.get("expected_before")
+
+    ids: set[str] = set()
+    ids.update(set_block.keys())
+    ids.update(delta_block.keys())
+    if isinstance(remove_block, dict):
+        ids.update(remove_block.keys())
+
+    if not ids:
+        patch[key] = [dict(raw_updates)]
+        return
+
+    normalized = []
+    for item_id in sorted(ids):
+        update: Dict[str, Any] = {id_key: str(item_id)}
+        if item_id in set_block and isinstance(set_block.get(item_id), dict):
+            update["set"] = set_block.get(item_id)
+        if item_id in delta_block and isinstance(delta_block.get(item_id), dict):
+            update["delta"] = delta_block.get(item_id)
+        if isinstance(remove_block, dict) and item_id in remove_block:
+            update["remove"] = remove_block.get(item_id)
+        elif isinstance(remove_block, list) and len(ids) == 1:
+            update["remove"] = remove_block
+
+        if top_reason and not update.get("reason"):
+            update["reason"] = top_reason
+        if top_category and not update.get("reason_category"):
+            update["reason_category"] = top_category
+        if top_expected and not update.get("expected_before"):
+            update["expected_before"] = top_expected
+
+        normalized.append(update)
+
+    patch[key] = normalized
+
+
 def _normalize_state_patch_for_validation(
     patch: Dict[str, Any],
     scene_card: Dict[str, Any],
@@ -1311,6 +1383,8 @@ def _normalize_state_patch_for_validation(
     _coerce_stat_updates(normalized)
     _coerce_transfer_updates(normalized)
     _coerce_inventory_alignment_updates(normalized)
+    _coerce_registry_updates(normalized, key="item_registry_updates", id_key="item_id")
+    _coerce_registry_updates(normalized, key="plot_device_updates", id_key="device_id")
     _migrate_numeric_invariants(normalized)
     _fill_character_update_context(normalized, scene_card)
     _fill_character_continuity_update_context(normalized, scene_card)
@@ -1324,7 +1398,9 @@ def _state_patch_schema_retry_message(error: ValueError, *, prose_required: bool
     )
     rules = (
         "Critical rules: every transfer_updates entry must be an object with item_id and "
-        "reason (string); all *_updates arrays must contain objects, never strings."
+        "reason (string); item_registry_updates and plot_device_updates must be ARRAYS of "
+        "objects with item_id/device_id (do not output a single object keyed by id); "
+        "all *_updates arrays must contain objects, never strings."
     )
     if prose_required:
         return base + " Return PROSE plus STATE_PATCH. Output format: PROSE: <text> then STATE_PATCH: <json>. No markdown. " + rules
