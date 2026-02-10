@@ -39,6 +39,15 @@ from bookforge.pipeline.io import _load_json, _snapshot_character_states_before_
 from bookforge.pipeline.lint import _lint_issue_entries, _lint_has_issue_code
 from bookforge.pipeline.llm_ops import _chat
 from bookforge.pipeline.prompts import _resolve_template
+from bookforge.pipeline.lint import _pov_drift_issues, _stat_mismatch_issues, _durable_scene_constraint_issues
+from bookforge.pipeline.parse import _extract_authoritative_surfaces
+from bookforge.pipeline.state_patch import _coerce_character_updates
+from bookforge.pipeline.state_patch import _coerce_inventory_alignment_updates
+from bookforge.pipeline.state_patch import _coerce_transfer_updates
+from bookforge.pipeline.state_patch import _coerce_stat_updates
+from bookforge.pipeline.lint import _heuristic_invariant_issues, _linked_durable_consistency_issues
+from bookforge.pipeline.durable import _durable_state_context
+from bookforge.pipeline.parse import _extract_prose_and_patch
 from bookforge.pipeline.log import _status, _now_iso
 from bookforge.util.schema import validate_json
 

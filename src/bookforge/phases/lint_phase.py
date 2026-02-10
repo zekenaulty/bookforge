@@ -8,7 +8,7 @@ from bookforge.llm.types import Message
 from bookforge.pipeline.config import _lint_max_tokens, _lint_mode
 from bookforge.pipeline.durable import _durable_state_context
 from bookforge.pipeline.io import _log_scope
-from bookforge.pipeline.lint import _stat_mismatch_issues, _pov_drift_issues, _heuristic_invariant_issues, _durable_scene_constraint_issues, _linked_durable_consistency_issues, _merged_character_states_for_lint, _normalize_lint_report
+from bookforge.pipeline.lint import _stat_mismatch_issues, _pov_drift_issues, _heuristic_invariant_issues, _durable_scene_constraint_issues, _linked_durable_consistency_issues, _merged_character_states_for_lint, _post_state_with_character_continuity, _normalize_lint_report
 from bookforge.pipeline.llm_ops import _chat, _json_retry_count, _lint_status_from_issues
 from bookforge.pipeline.parse import _extract_authoritative_surfaces, _extract_json
 from bookforge.pipeline.prompts import _resolve_template, _system_prompt_for_phase
@@ -47,6 +47,7 @@ def _lint_scene(
         character_states = []
     template = _resolve_template(book_root, "lint.md")
     lint_character_states = _merged_character_states_for_lint(character_states, patch)
+    lint_post_state = _post_state_with_character_continuity(post_state, lint_character_states)
     durable_post = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
     authoritative_surfaces = _extract_authoritative_surfaces(prose)
     prompt = render_template_file(
@@ -54,9 +55,9 @@ def _lint_scene(
         {
             "prose": prose,
             "pre_state": pre_state,
-            "post_state": post_state,
+            "post_state": lint_post_state,
             "pre_summary": _summary_from_state(pre_state),
-            "post_summary": _summary_from_state(post_state),
+            "post_summary": _summary_from_state(lint_post_state),
             "pre_invariants": pre_invariants,
             "post_invariants": post_invariants,
             "authoritative_surfaces": authoritative_surfaces,

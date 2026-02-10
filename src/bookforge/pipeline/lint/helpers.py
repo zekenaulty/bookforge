@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 from bookforge.pipeline.llm_ops import _lint_status_from_issues
-from bookforge.pipeline.state_apply import _ensure_character_continuity_system_state
+from bookforge.pipeline.state_apply import _ensure_character_continuity_system_state, _apply_bag_updates
 from bookforge.pipeline.state_patch import _coerce_character_updates, _coerce_stat_updates
 
 
@@ -71,6 +71,10 @@ def _merged_character_states_for_lint(
     if not isinstance(stat_updates, list):
         stat_updates = []
 
+    continuity_updates = patch.get("character_continuity_system_updates", [])
+    if not isinstance(continuity_updates, list):
+        continuity_updates = []
+
     merged = []
     for state in character_states:
         if not isinstance(state, dict):
@@ -124,8 +128,48 @@ def _merged_character_states_for_lint(
                         stats[key] = value
             merged_state["stats"] = stats
 
+        continuity = _ensure_character_continuity_system_state(merged_state)
+        for update in continuity_updates:
+            if not isinstance(update, dict):
+                continue
+            if str(update.get("character_id") or "") != char_id:
+                continue
+            _apply_bag_updates(continuity, update)
+        merged_state["character_continuity_system_state"] = continuity
         _ensure_character_continuity_system_state(merged_state)
         merged.append(merged_state)
 
     return merged
 
+
+def _post_state_with_character_continuity(
+    post_state: Dict[str, Any],
+    character_states: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    if not isinstance(post_state, dict):
+        post_state = {}
+    if not isinstance(character_states, list):
+        return dict(post_state)
+
+    continuity_map: Dict[str, Dict[str, Any]] = {}
+    for state in character_states:
+        if not isinstance(state, dict):
+            continue
+        char_id = str(state.get("character_id") or "").strip()
+        continuity = state.get("character_continuity_system_state")
+        if not char_id or not isinstance(continuity, dict):
+            continue
+        continuity_map[char_id] = continuity
+
+    if not continuity_map:
+        return dict(post_state)
+
+    merged = dict(post_state)
+    continuity_system = merged.get("continuity_system")
+    if not isinstance(continuity_system, dict):
+        continuity_system = {}
+    else:
+        continuity_system = dict(continuity_system)
+    continuity_system["characters"] = continuity_map
+    merged["continuity_system"] = continuity_system
+    return merged
