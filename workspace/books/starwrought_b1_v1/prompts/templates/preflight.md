@@ -85,6 +85,9 @@ Dynamic continuity rules:
 - Use canonical keys:
   - character_continuity_system_updates
   - global_continuity_system_updates
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
 - Update operations use set/delta/remove/reason.
 - Dynamic mechanic families are allowed (stats, skills, titles, resources, effects, statuses, classes, custom systems).
 - titles must be arrays of objects with stable `name` fields, never arrays of strings.

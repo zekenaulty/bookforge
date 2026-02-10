@@ -1,2 +1,10 @@
 - Artie was killed by a vending machine.
 - Artie is now in the Character Creation Void.
+- Artie met his System Guide, Fizz.
+- Artie discovered a glitched 'Critical Hit Rate' stat in the character creation menu.
+- Artie ignored Fizz's warnings and dumped all 50 starting points into the glitched stat.
+- The System auto-balanced Artie's stats, reducing his HP and all primary attributes to 1.
+- Artie finalized the 'Crit or Quit' build and gained the title 'Glassest of Cannons'.
+- Artie and Fizz arrived in the Whispering Woods.
+- Artie encountered a Level 1 Lesser Forest Slime.
+- Artie is trapped against a tree by the slime's lunge.

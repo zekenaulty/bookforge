@@ -85,3 +85,6 @@ For durable items, prose must use display_name; item_id is reserved for JSON/pat
 For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string).
 `inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
 Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]

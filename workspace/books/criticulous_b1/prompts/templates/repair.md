@@ -1,4 +1,4 @@
-﻿# REPAIR
+# REPAIR
 
 Fix the scene based on lint issues.
 Summaries are reference-only; do not recap them in prose unless scene_card explicitly requires recap.
@@ -10,6 +10,10 @@ Inventory contract: track ownership and container location for key items; update
 For held items, specify container=hand_left or container=hand_right.
 Continuity system ownership is mandatory, and must be tracked: any mechanic/UI numbers, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, or future mechanic families must be sourced from existing continuity system state or written into continuity system updates.
 Durable vs ephemeral mechanics:
+- If a DURABLE mechanic appears multiple times in the scene (e.g., base values then final values), the LAST occurrence is canonical.
+- You MUST capture the canonical end-of-scene values in character_continuity_system_updates.
+- When allocation/level-up happens, update all affected point pools (e.g., stat_points, skill_points, perk_points) if shown.
+- Do not treat early UI snapshots as canonical if the scene later corrects them.
 - DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
 - EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
 - UI/system readouts must be on their own line, starting with '[' and ending with ']'.
@@ -57,6 +61,9 @@ STATE_PATCH rules:
   - titles must be arrays of objects with stable name fields (example: [{"name": "Novice", "source": "starting_class", "active": true}]).
   - If a new mechanic family appears, add it under set with a stable key.
 - Include global_continuity_system_updates only if global mechanics change.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
 - All *_updates arrays must contain objects; never emit bare strings as array entries.
 - character_updates.containers must be an array of objects with at least: container, owner, contents (array).
 - Durable-state mutation blocks are mandatory when applicable:
@@ -121,6 +128,7 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
+
 
 
 

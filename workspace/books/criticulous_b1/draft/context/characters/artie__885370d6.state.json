@@ -1,17 +1,20 @@
 {
   "schema_version": "1.0",
   "character_id": "CHAR_ARTIE",
-  "inventory": [],
+  "inventory": [
+    {
+      "item": "ITEM_JUMPSUIT",
+      "container": "body",
+      "status": "equipped"
+    }
+  ],
   "containers": [
     {
-      "container": "hand_right",
+      "container": "body",
       "owner": "CHAR_ARTIE",
-      "contents": []
-    },
-    {
-      "container": "hand_left",
-      "owner": "CHAR_ARTIE",
-      "contents": []
+      "contents": [
+        "ITEM_JUMPSUIT"
+      ]
     }
   ],
   "invariants": [
@@ -24,7 +27,8 @@
     "inventory: CHAR_ARTIE -> Leather Wallet (status=held, container=hand_right)",
     "inventory: CHAR_ARTIE -> Loose Change (status=held, container=hand_left)",
     "status: wearing grey-mesh jumpsuit",
-    "location: Character Creation Void"
+    "location: Character Creation Void",
+    "status: Artie has 1 HP and 100% Crit Rate (LOCKED)"
   ],
   "history": [
     {
@@ -229,49 +233,170 @@
       ],
       "chapter": 1,
       "scene": 2
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "chapter": 1,
+      "scene": 2
+    },
+    {
+      "chapter": 1,
+      "scene": 2,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "persona_updates": [
+        "Artie is now a 'Statistical Anomaly' with a reckless disregard for standard survival strategies, driven by a desire to exploit the System's glitches."
+      ]
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "chapter": 1,
+      "scene": 2
+    },
+    {
+      "chapter": 1,
+      "scene": 3,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "persona_updates": [
+        "Artie is hyper-aware of his 1 HP status as he enters a hostile environment for the first time."
+      ]
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "chapter": 1,
+      "scene": 3
+    },
+    {
+      "chapter": 1,
+      "scene": 3,
+      "changes": [
+        "inventory_alignment_updated"
+      ],
+      "notes": "Arrival in Whispering Woods; ensuring starter gear is equipped."
+    },
+    {
+      "chapter": 1,
+      "scene": 3,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "persona_updates": [
+        "Artie is experiencing genuine terror as the mechanical reality of 1 HP sets in."
+      ]
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "chapter": 1,
+      "scene": 3
+    },
+    {
+      "chapter": 1,
+      "scene": 3,
+      "changes": [
+        "inventory_alignment_updated"
+      ]
+    },
+    {
+      "chapter": 1,
+      "scene": 4,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "persona_updates": [
+        "Artie is in a state of high-adrenaline panic, his 'office drone' instincts clashing with the lethal reality of the System.",
+        "Artie is hyper-aware of his 1 HP status as he enters a hostile environment for the first time."
+      ],
+      "notes": "Artie is alone for this scene as he faces the slime."
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "chapter": 1,
+      "scene": 4
+    },
+    {
+      "chapter": 1,
+      "scene": 4,
+      "changes": [
+        "inventory_alignment_updated"
+      ],
+      "notes": "Aligning cast and equipment for Scene 4 combat."
     }
   ],
   "name": "Arthur 'Artie' Penhaligon",
   "character_continuity_system_state": {
     "stats": {
       "hp": {
-        "current": 0,
-        "max": 10
+        "current": 1,
+        "max": 1
       },
-      "stat_points": 50
+      "crit_rate": 100,
+      "strength": 1,
+      "agility": 1,
+      "intelligence": 1,
+      "luck": 1,
+      "constitution": 1
     },
     "skills": {
       "Data Entry": 4,
       "Sarcasm": 10
     },
-    "titles": [],
+    "titles": [
+      {
+        "name": "Glassest of Cannons",
+        "active": true,
+        "source": "Stat Allocation Glitch"
+      }
+    ],
     "classes": [
       {
-        "level": 1,
-        "name": "Office Drone"
+        "name": "Statistical Anomaly",
+        "level": 1
       }
     ],
     "resources": {
-      "sanity": {
-        "current": 100,
+      "stamina": {
+        "current": 95,
         "max": 100
       }
     },
-    "reason": "Initializing stat points for the allocation scene."
+    "reason": "align pre-scene state"
   },
   "stats": {
     "hp": {
-      "current": 0,
-      "max": 10
-    }
+      "current": 1,
+      "max": 1
+    },
+    "crit_rate": 100,
+    "agility": 1,
+    "constitution": 1,
+    "intelligence": 1,
+    "luck": 1,
+    "strength": 1
   },
   "skills": {
     "Data Entry": 4,
     "Sarcasm": 10
   },
-  "updated_at": "2026-02-10T14:18:35Z",
+  "updated_at": "2026-02-10T22:17:32Z",
   "last_touched": {
     "chapter": 1,
-    "scene": 2
+    "scene": 4
   }
 }

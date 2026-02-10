@@ -38,6 +38,9 @@ Durable vs ephemeral mechanics:
 - Inventory object shape: {"item": "ITEM_or_name", "container": "hand_left|hand_right|<container>", "status": "held|carried|equipped|stowed"}.
   - Container object shape: {"container": "<name>", "owner": "CHAR_id", "contents": ["ITEM_id", "..."]}.
 - Use character_continuity_system_updates / global_continuity_system_updates to reconcile mechanics.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
 - If a new mechanic family appears in prose/UI, add it under set with a stable key.
 - All *_updates arrays must contain objects; never emit bare strings as array entries.
 - character_updates.containers must be an array of objects with at least: container, owner, contents (array).

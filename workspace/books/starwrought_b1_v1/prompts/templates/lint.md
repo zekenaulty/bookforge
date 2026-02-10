@@ -1,4 +1,4 @@
-﻿# LINT
+# LINT
 
 Check the scene for continuity, invariant violations, and duplication.
 Flag invariant contradictions against must_stay_true/key facts.
@@ -19,7 +19,19 @@ Return ONLY JSON matching the lint_report schema.
 - Deterministically enforce scene-card durable constraints (required_in_custody, required_scene_accessible, forbidden_visible, device_presence; optional required_visible_on_page).
 - Durable constraint evaluation must use POST-STATE candidate (after patch), not pre-state.
 - Report missing durable context ids with explicit retry hints instead of guessing canon.
+- Input consistency check (mandatory, before issuing continuity/durable errors):
+  - If MUST_STAY_TRUE invariants contradict the provided post-patch candidate character state, treat this as an upstream snapshot error.
+  - In that case emit a single error issue with code "pipeline_state_incoherent" including evidence of the invariant and the conflicting state field.
+  - Do NOT emit additional continuity errors for the same fields when pipeline_state_incoherent is present.
 - For each issue, include evidence when possible (line number + excerpt) as {"evidence": {"line": N, "excerpt": "..."}}.
+- Evaluate consistency over the full scope of the scene, not a single snapshot.
+  - Transitional state: a temporary mismatch later corrected or superseded within this scene.
+  - Durable violation: a mismatch that persists through the end of the scene or ends unresolved.
+  - You MUST read the entire scene and build a minimal timeline of explicit state claims/updates (UI lines, inventory changes, title/skill changes, location/time claims).
+  - If you detect an apparent inconsistency, you MUST search forward for later updates that resolve or supersede it.
+  - Only produce FAIL for durable violations. If resolved within the scene, do NOT FAIL; at most emit a warning.
+  - When the same stat appears multiple times, the last occurrence in the scene is authoritative unless an explicit rollback is stated.
+  - Any durability violation must cite both the conflicting line and the lack of later correction (or state "no later correction found").
 
 Required keys:
 - schema_version ("1.0")

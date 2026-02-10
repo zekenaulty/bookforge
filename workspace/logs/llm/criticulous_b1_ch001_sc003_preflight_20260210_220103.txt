@@ -1,0 +1,216 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "location": "Whispering Woods"
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 3,
+      "inventory": [
+        {
+          "item": "ITEM_JUMPSUIT",
+          "container": "body",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        },
+        {
+          "container": "body",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_JUMPSUIT"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is hyper-aware of his 1 HP status as he enters a hostile environment for the first time."
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "chapter": 1,
+      "scene": 3,
+      "inventory": [
+        {
+          "item": "ITEM_FIZZ_GUIDE",
+          "container": "hand_right",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_GLOW_DUST",
+          "container": "satchel",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_FIZZ_GUIDE"
+          ]
+        },
+        {
+          "container": "satchel",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_GLOW_DUST"
+          ]
+        }
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100,
+          "agility": 1,
+          "constitution": 1,
+          "intelligence": 1,
+          "luck": 1,
+          "strength": 1
+        }
+      },
+      "reason": "Enforce 1 HP build constraints for the first combat encounter."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_JUMPSUIT",
+            "container": "body",
+            "status": "equipped"
+          }
+        ],
+        "containers": [
+          {
+            "container": "body",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_JUMPSUIT"
+            ]
+          }
+        ]
+      },
+      "reason": "Arrival in Whispering Woods; ensuring starter gear is equipped.",
+      "reason_category": "location_transition"
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_FIZZ_GUIDE",
+            "container": "hand_right",
+            "status": "held"
+          },
+          {
+            "item": "ITEM_GLOW_DUST",
+            "container": "satchel",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "hand_right",
+            "owner": "CHAR_FIZZ",
+            "contents": [
+              "ITEM_FIZZ_GUIDE"
+            ]
+          },
+          {
+            "container": "satchel",
+            "owner": "CHAR_FIZZ",
+            "contents": [
+              "ITEM_GLOW_DUST"
+            ]
+          }
+        ]
+      },
+      "reason": "Aligning Fizz's posture for tutorial guidance in the new zone.",
+      "reason_category": "location_transition"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_JUMPSUIT",
+      "set": {
+        "name": "grey-mesh jumpsuit",
+        "display_name": "Standard Issue Jumpsuit",
+        "type": "apparel",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [],
+        "state_tags": [
+          "starter_gear"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "Character Creation Void"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_FIZZ_GUIDE",
+      "set": {
+        "name": "System Manual",
+        "display_name": "The Official System Guidebook",
+        "type": "tool",
+        "owner_scope": "global",
+        "custodian": "CHAR_FIZZ",
+        "linked_threads": [
+          "THREAD_SYSTEM_GLITCH"
+        ],
+        "state_tags": [
+          "quest_item"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "Character Creation Void"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_GLOW_DUST",
+      "set": {
+        "name": "Glow Dust",
+        "display_name": "Pouch of Glow Dust",
+        "type": "consumable",
+        "owner_scope": "global",
+        "custodian": "CHAR_FIZZ",
+        "linked_threads": [],
+        "state_tags": [
+          "utility"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "Character Creation Void"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+"Fifty points," Artie Penhaligon muttered, his voice echoing in the vast, sterile whiteness of the Character Creation Void. "Fifty points to define the rest of my digital afterlife. No pressure."
+
+[Available Stat Points: 50]
+
+The translucent blue screen hummed with the faint, electronic buzz of a dying refrigerator. It hovered just out of reach, flickering every time Artie tried to focus on the numbers. His previous life—the spreadsheets, the lukewarm coffee, the final, ignominious defeat at the hands of a Break-O-Matic 3000—was a fading smudge of data. Now, he was just a man in a grey-mesh jumpsuit that felt suspiciously like cheap polyester.
+
+"Actually, there’s a lot of pressure," a voice chirped. It had the clipped, manic energy of a customer service representative who had been drinking nothing but espresso and spite. "And you’re taking forever. I have three other 'accidental vending machine casualties' waiting in the queue, and two of them actually had a 401k. You’re dragging down my throughput, Arthur."
+
+Artie rotated in the weightless expanse, which was a lot harder than it looked. A small, glowing sprite with neon-pink hair and a holographic clipboard was hovering three feet away. She was wearing a tiny, sharp-shouldered suit and a pair of spectacles that looked far too large for her face.
+
+"I'm Fizz," she said, finally looking up from her screen to give him a look of profound disappointment. "Your dedicated System Guide. Think of me as the person who explains why you’re about to die again, but with better grammar."
+
+"I died because of a bag of Cool Ranch chips, Fizz. I think we can skip the lecture on dignity."
+
+"Dignity isn't a stat, unfortunately," Fizz said, tapping her clipboard. The System Manual glowed with a soft, judgmental light in her right hand. "Though in your case, it would have been a dump stat anyway. Now, look at the screen. We don't have all day. The System is currently calculating your base performance metrics based on your... let's call it a 'career' in data entry."
+
+[Character: Arthur 'Artie' Penhaligon]
+[Class: Office Drone (Lvl 1)]
+[HP: 10/10]
+[MP: 10/10]
+[Strength: 4]
+[Agility: 3]
+[Constitution: 5]
+[Intelligence: 8]
+[Luck: 1]
+
+"Luck: 1?" Artie pointed at the screen. "I got struck by a freak electrical surge in a breakroom. That’s at least a Luck zero event."
+
+"The fact that you’re even here and not just a pile of carbonized meat is a miracle of the System’s mercy," Fizz countered, her wings buzzing with irritation. "Now, distribute the points. Constitution is the standard recommendation for beginners. It helps you not explode when a slime looks at you funny. Or, since you spent thirty years staring at a monitor, maybe Intelligence? Not that it helped you with the vending machine."
+
+Artie stared at the numbers. They felt like a trap. If he played it safe, he’d just be a slightly more durable version of the guy who died for a snack. He looked past the primary stats, searching for something else. Down at the very bottom of the menu, obscured by a flickering line of dead pixels, was a stat that didn't have a label.
+
+"What's this one?" he asked, pointing to the glitching bar.
+
+Fizz squinted, her glasses sliding down her nose. "That? Oh, that’s just a legacy overflow from the combat engine. It’s supposed to be 'Critical Hit Rate,' but it’s hard-capped for your level. You shouldn't even be able to see it. It’s basically a bug. Move on."
+
+"A bug?" Artie felt a familiar spark of corporate rebellion. "You mean it’s an exploit?"
+
+"It’s a non-functional variable, Arthur. If you put points into it, you’re essentially throwing them into the trash. Like your degree in Liberal Arts."
+
+Artie looked at the fifty points. Then he looked at his ten HP. If he put all fifty into Constitution, he might have sixty HP. In a world of monsters and magic, sixty HP was still just a one-shot waiting to happen. But if he could hit... really, really hard...
+
+"You know," Artie said, his finger hovering over the glitched bar. "In my old job, whenever the software glitched, we didn't fix it. We just called it a feature and charged the client double."
+
+"Don't you dare," Fizz warned, her voice dropping an octave. "If you mess with the ratio, the System’s auto-balancer will kick in. It has to maintain parity. You increase your offensive output that much, and it’ll strip your survivability to compensate. You'll be a glass cannon without the cannon part. Just a glass... thing. A glass vase. Easy to break and useless in a fight."
+
+"I've spent my whole life being a 'beginner,'" Artie muttered. "Let's see what happens when the math breaks."
+
+He slammed his hand against the screen, dragging the slider for the glitched stat all the way to the right. 
+
+[Warning: Stat Allocation exceeds recommended thresholds for Level 1.]
+[Warning: System Parity Error. Compensating...]
+[Warning: Logic Loop detected. Critical Hit Rate cannot exceed 100% at current rank.]
+
+"Arthur, stop!" Fizz shouted, dropping her clipboard as she lunged for the screen.
+
+Artie didn't stop. He dumped all fifty points. The blue screen turned a violent, bleeding red. The numbers began to spin, blurring into a mess of illegible symbols before snapping into place with a sound like a gunshot.
+
+[Stat Allocation Confirmed.]
+[Calculating adjustments...]
+
+The grey-mesh jumpsuit tightened around him, vibrating with a strange, humming energy. He felt lighter. Too light. Like he was made of paper.
+
+[Character: Arthur 'Artie' Penhaligon]
+[Class: Statistical Anomaly (Lvl 1)]
+[HP: 1/1]
+[Strength: 1]
+[Agility: 1]
+[Constitution: 1]
+[Intelligence: 1]
+[Crit Rate: 100% (LOCKED)]
+
+"One HP?" Artie whispered, staring at the single, lonely digit. "I have one hit point?"
+
+Fizz was staring at the screen, her mouth hanging open. She slowly reached out and picked up her clipboard, her hand shaking.
+
+"You idiot," she breathed. "You absolute, unmitigated moron. You just traded your entire existence for a guaranteed crit. You have one HP. Do you know what that means? A stiff breeze could kill you. A sneeze would be a boss fight. If you stub your toe, you’re deleted!"
+
+"But I’ll never miss a crit," Artie said, trying to sound more confident than he felt. His heart—which he could now feel beating with terrifying clarity against his ribs—thudded once.
+
+[System Notification: Build 'Crit or Quit' has been finalized.]
+[Title Gained: Glassest of Cannons]
+[Description: You have 1 HP and 100% Crit Rate. You are a mathematical impossibility. The System hates you, but it’s impressed by your audacity.]
+
+"Finalized?" Artie asked. "Wait, can I re-spec?"
+
+"No," Fizz said, her voice trembling with a mix of horror and hysterical laughter. "The System just locked the build. You’re a glitch, Arthur. A walking, talking error message. And I’m the one who has to guide you through a tutorial zone where the local wildlife has more health than a god, but you... you're a paper plate in a hurricane."
+
+"Well," Artie said, looking down at his translucent, fragile-looking hands. "At least I won't have to worry about a long-term retirement plan anymore."
+
+[Initialization Complete.]
+[Deploying to Tutorial Zone: The Whispering Woods...]
+
+The white void began to pixelate, the edges of Artie's vision dissolving into green and brown. 
+
+"Good luck, Arthur," Fizz muttered, her wings fluttering as she prepared for the transition. "You're going to need it. Or better yet, try not to breathe too hard. You might lose half your health."

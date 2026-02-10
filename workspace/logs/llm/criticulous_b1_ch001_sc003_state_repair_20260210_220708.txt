@@ -1,0 +1,198 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "Artie and Fizz arrived in the Whispering Woods tutorial zone. Artie immediately encountered a Level 1 Lesser Forest Slime and realized that his 1 HP build makes even the weakest enemy lethal. The scene ended with Artie trapped against an oak tree as the slime launched a final attack."
+    ],
+    "key_events": [
+      "Artie and Fizz deployed to the Whispering Woods tutorial zone.",
+      "Artie confirmed his HP is locked at 1/1.",
+      "A Level 1 Lesser Forest Slime aggroed onto Artie.",
+      "The System warned Artie that corrosive contact deals 2-4 HP damage, which is fatal.",
+      "Artie used stamina to dodge the slime's initial lunges.",
+      "Artie was backed against an ancient oak tree, trapped by the slime's impending attack."
+    ],
+    "must_stay_true": [
+      "milestone: tutorial_arrival = DONE",
+      "location: Whispering Woods",
+      "status: Artie has 1 HP and 100% Crit Rate (LOCKED)",
+      "inventory: CHAR_ARTIE -> Standard Issue Jumpsuit (equipped, container=body)",
+      "inventory: CHAR_FIZZ -> The Official System Guidebook (held, hand_right)",
+      "inventory: CHAR_FIZZ -> Pouch of Glow Dust (stowed, container=satchel)"
+    ],
+    "chapter_so_far_add": [
+      "Artie arrived in the Whispering Woods and faced his first combat encounter against a slime."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 3,
+      "persona_updates": [
+        "Artie is experiencing genuine terror as the mechanical reality of 1 HP sets in."
+      ],
+      "invariants_add": [
+        "status: Artie has 1 HP and 100% Crit Rate (LOCKED)"
+      ],
+      "inventory": [
+        {
+          "item": "ITEM_JUMPSUIT",
+          "container": "body",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "body",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_JUMPSUIT"
+          ]
+        }
+      ],
+      "reason": "Arrival in Whispering Woods and first combat encounter."
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "chapter": 1,
+      "scene": 3,
+      "persona_updates": [
+        "Fizz is treating Artie's life-threatening encounter as a routine data collection event."
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "item": "ITEM_FIZZ_GUIDE",
+          "container": "hand_right",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_GLOW_DUST",
+          "container": "satchel",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_FIZZ_GUIDE"
+          ]
+        },
+        {
+          "container": "satchel",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_GLOW_DUST"
+          ]
+        }
+      ],
+      "reason": "Guiding Artie through the tutorial zone."
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 3,
+      "set": {
+        "resources": {
+          "stamina": {
+            "current": 95,
+            "max": 100
+          }
+        }
+      },
+      "reason": "Tracking stamina usage during the first encounter."
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Whispering Woods",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie and Fizz arrived in the Whispering Woods.",
+      "Artie encountered a Level 1 Lesser Forest Slime.",
+      "Artie is trapped against a tree by the slime's lunge."
+    ],
+    "reason": "Scene transition and combat setup."
+  },
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "item_id": "ITEM_JUMPSUIT",
+      "new_container": "body",
+      "new_status": "equipped",
+      "reason_category": "location_jump_normalize"
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "item_id": "ITEM_FIZZ_GUIDE",
+      "new_container": "hand_right",
+      "new_status": "held",
+      "reason_category": "location_jump_normalize"
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "item_id": "ITEM_GLOW_DUST",
+      "new_container": "satchel",
+      "new_status": "stowed",
+      "reason_category": "location_jump_normalize"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_JUMPSUIT",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 3,
+          "location": "Whispering Woods"
+        }
+      },
+      "reason": "Updating last seen location."
+    },
+    {
+      "item_id": "ITEM_FIZZ_GUIDE",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 3,
+          "location": "Whispering Woods"
+        }
+      },
+      "reason": "Updating last seen location."
+    },
+    {
+      "item_id": "ITEM_GLOW_DUST",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 3,
+          "location": "Whispering Woods"
+        }
+      },
+      "reason": "Updating last seen location."
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 3,
+          "location": "Whispering Woods"
+        }
+      },
+      "reason": "Updating last seen location for active glitch."
+    }
+  ]
+}

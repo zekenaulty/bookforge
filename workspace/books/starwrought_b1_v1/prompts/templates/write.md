@@ -1,4 +1,4 @@
-﻿# WRITE
+# WRITE
 Write the scene described by the scene card.
 - YOU MUST ALWAYS RETURN PROSE AND THE STATE_PATCH.
 - Start in motion. No recap.
@@ -13,6 +13,10 @@ Write the scene described by the scene card.
 - For held items, specify container=hand_left or container=hand_right.
 - Continuity system ownership is mandatory, and must be tracked: any mechanic/UI numbers, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, or future mechanic families must be sourced from existing continuity system state or written into continuity system updates.
 Durable vs ephemeral mechanics:
+- If a DURABLE mechanic appears multiple times in the scene (e.g., base values then final values), the LAST occurrence is canonical.
+- You MUST capture the canonical end-of-scene values in character_continuity_system_updates.
+- When allocation/level-up happens, update all affected point pools (e.g., stat_points, skill_points, perk_points) if shown.
+- Do not treat early UI snapshots as canonical if the scene later corrects them.
 - DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
 - EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
 - UI/system readouts must be on their own line, starting with '[' and ending with ']'.
@@ -47,6 +51,9 @@ STATE_PATCH rules:
   - titles must be arrays of objects with stable name fields (example: [{"name": "Novice", "source": "starting_class", "active": true}]).
   - If a new mechanic family appears, add it under set with a stable key.
 - Include global_continuity_system_updates only if global mechanics change.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
 - All *_updates arrays must contain objects; never emit bare strings as array entries.
 - character_updates.containers must be an array of objects with at least: container, owner, contents (array).
 - Durable-state mutation blocks are mandatory when applicable:
@@ -84,31 +91,42 @@ STATE_PATCH rules:
   - milestone: maps_acquired = DONE/NOT_YET
   - injury: right forearm scar / left arm filament
   - ownership: shard (carried) / shard (bound but physical)
+
 Scene card:
 {{scene_card}}
+
 Continuity pack:
 {{continuity_pack}}
+
 Character registry (id -> name):
 {{character_registry}}
+
 Thread registry:
 {{thread_registry}}
+
 Character states (per cast_present_ids):
 {{character_states}}
+
 Style anchor:
 {{style_anchor}}
+
 State:
 {{state}}
+
 Output (required, no code fences):
 COMPLIANCE:
 Scene ID: <scene_card.scene_id>
 Allowed events: <short list from Scene Card>
 Forbidden milestones: <from must_stay_true>
 Current arm-side / inventory facts: <from must_stay_true>
+
 PROSE:
 <scene prose>
 STATE_PATCH:
 <json>
+
 Item registry (canonical):
 {{item_registry}}
+
 Plot devices (canonical):
 {{plot_devices}}

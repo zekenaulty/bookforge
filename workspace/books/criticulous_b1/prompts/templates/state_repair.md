@@ -1,4 +1,4 @@
-﻿# STATE REPAIR
+# STATE REPAIR
 
 You are the state repair step. You must output a corrected STATE_PATCH JSON only.
 No prose, no commentary, no code fences.
@@ -18,6 +18,10 @@ Rules:
 - summary_update arrays are required: last_scene (2-4 sentences), key_events (3-7 bullets), must_stay_true (3-7 bullets), chapter_so_far_add (bullets).
 - Continuity system ownership is mandatory, and must be tracked: any mechanic/UI numbers, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, or future mechanic families must be sourced from existing continuity system state or written into continuity system updates
 Durable vs ephemeral mechanics:
+- If a DURABLE mechanic appears multiple times in the scene (e.g., base values then final values), the LAST occurrence is canonical.
+- You MUST capture the canonical end-of-scene values in character_continuity_system_updates.
+- When allocation/level-up happens, update all affected point pools (e.g., stat_points, skill_points, perk_points) if shown.
+- Do not treat early UI snapshots as canonical if the scene later corrects them.
 - DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
 - EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
 - DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
@@ -34,6 +38,9 @@ Durable vs ephemeral mechanics:
 - Inventory object shape: {"item": "ITEM_or_name", "container": "hand_left|hand_right|<container>", "status": "held|carried|equipped|stowed"}.
   - Container object shape: {"container": "<name>", "owner": "CHAR_id", "contents": ["ITEM_id", "..."]}.
 - Use character_continuity_system_updates / global_continuity_system_updates to reconcile mechanics.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
 - If a new mechanic family appears in prose/UI, add it under set with a stable key.
 - All *_updates arrays must contain objects; never emit bare strings as array entries.
 - character_updates.containers must be an array of objects with at least: container, owner, contents (array).
@@ -99,13 +106,3 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
-
-
-
-
-
-
-
-
-
-

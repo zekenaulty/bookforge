@@ -51,6 +51,9 @@ STATE_PATCH rules:
   - titles must be arrays of objects with stable name fields (example: [{"name": "Novice", "source": "starting_class", "active": true}]).
   - If a new mechanic family appears, add it under set with a stable key.
 - Include global_continuity_system_updates only if global mechanics change.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
 - All *_updates arrays must contain objects; never emit bare strings as array entries.
 - character_updates.containers must be an array of objects with at least: container, owner, contents (array).
 - Durable-state mutation blocks are mandatory when applicable:

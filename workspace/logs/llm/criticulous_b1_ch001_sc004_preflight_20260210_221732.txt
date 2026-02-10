@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Whispering Woods",
+    "reason": "Transitioning to Artie's solo combat focus; Fizz is present in the world but not the immediate scene focus."
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 4,
+      "inventory": [
+        {
+          "item": "ITEM_JUMPSUIT",
+          "container": "body",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "body",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_JUMPSUIT"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is in a state of high-adrenaline panic, his 'office drone' instincts clashing with the lethal reality of the System.",
+        "Artie is hyper-aware of his 1 HP status as he enters a hostile environment for the first time."
+      ],
+      "invariants_add": [
+        "status: Artie has 1 HP and 100% Crit Rate (LOCKED)"
+      ],
+      "notes": "Artie is alone for this scene as he faces the slime."
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100,
+          "strength": 1,
+          "agility": 1,
+          "intelligence": 1,
+          "luck": 1,
+          "constitution": 1
+        },
+        "resources": {
+          "stamina": {
+            "current": 95,
+            "max": 100
+          }
+        },
+        "classes": [
+          {
+            "name": "Statistical Anomaly",
+            "level": 1
+          }
+        ],
+        "titles": [
+          {
+            "name": "Glassest of Cannons",
+            "active": true,
+            "source": "Stat Allocation Glitch"
+          }
+        ],
+        "skills": {
+          "Data Entry": 4,
+          "Sarcasm": 10
+        }
+      },
+      "delta": {},
+      "remove": [],
+      "reason": "align pre-scene state"
+    }
+  ],
+  "global_continuity_system_updates": [],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_JUMPSUIT",
+            "container": "body",
+            "status": "equipped"
+          }
+        ],
+        "containers": [
+          {
+            "container": "body",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_JUMPSUIT"
+            ]
+          }
+        ]
+      },
+      "reason": "Aligning cast and equipment for Scene 4 combat.",
+      "reason_category": "location_transition"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_JUMPSUIT",
+      "set": {
+        "name": "Standard Issue Jumpsuit",
+        "display_name": "grey-mesh jumpsuit",
+        "type": "apparel",
+        "owner_scope": "CHAR_ARTIE",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [
+          "THREAD_CRIT_EXPLOIT"
+        ],
+        "state_tags": [
+          "starter_gear"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 3,
+          "location": "Whispering Woods"
+        }
+      },
+      "reason": "Ensuring durable item registry for starter gear."
+    }
+  ],
+  "plot_device_updates": [],
+  "transfer_updates": []
+}
