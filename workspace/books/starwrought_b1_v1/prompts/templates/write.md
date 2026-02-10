@@ -28,6 +28,10 @@ Durable vs ephemeral mechanics:
 - titles are arrays of objects with stable name fields; do not emit titles as plain strings.
 - If item_registry or plot_devices are provided, they are canonical durable-state references for ownership/custody labels in authoritative outputs.
 - Use item_registry.items[].display_name in prose; use item_id only in patches/JSON. The display_name must be human readable and not an escaped id/name.
+Durable item naming discipline:
+- When you first describe a durable item, anchor it by using the canonical display_name within the same paragraph (or within the next 2 sentences).
+- After anchoring, you may use brief descriptors for style if unambiguous.
+- During any custody/handling change, include the canonical display_name in that sentence.
 - If a required event is not in the Scene Card, do not perform it.
 - Enforce scene-card durable constraints: honor `required_in_custody`, `required_scene_accessible`, `forbidden_visible`, and `device_presence`; treat `required_visible_on_page` as explicit narrative requirement when present.
 - Respect `timeline_scope` and `ontological_scope` when proposing durable mutations; do not mutate physical custody in non-present/non-real scope unless explicitly marked override.

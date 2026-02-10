@@ -12,7 +12,7 @@ Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you
 Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
 Inventory contract: track item ownership and container location per character or container label; items do not teleport.
 Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
-Item naming: use display_name for prose; use item_id only in JSON/patches. The display_name must be human readable and not an escaped id/name.
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
 State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
 Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
 Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.

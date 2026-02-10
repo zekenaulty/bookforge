@@ -30,6 +30,10 @@ Durable vs ephemeral mechanics:
 - Canonical descriptors (colors, item names, effect IDs, mechanic labels) must be reused exactly; do not paraphrase.
 - If item_registry or plot_devices are provided, they are canonical durable-state references for authoritative labels and custody terms.
 - Use item_registry.items[].display_name in prose; use item_id only in patches/JSON. The display_name must be human readable and not an escaped id/name.
+Naming repairs:
+- If lint flags an item naming issue, fix it with minimal edits.
+- Do not remove humor; simply anchor the item (add display_name near first mention) and ensure custody-change sentences include the display_name.
+- Do not rename item_id or registry fields; only adjust prose wording.
 - Do not add numeric mechanics to invariants_add; store them in continuity system updates instead.
 - If an event appears in prose, it must appear in key_events.
 - must_stay_true must include milestone ledger entries and any inventory/injury/ownership invariants implied by prose.

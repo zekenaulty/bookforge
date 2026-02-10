@@ -10,7 +10,14 @@ Return ONLY JSON matching the lint_report schema.
 - EPHEMERAL claims do not require state ownership; only flag EPHEMERAL contradictions inside the same scene as warnings.
 - If uncertain, default to EPHEMERAL (warning at most), not DURABLE (error).
 - status="fail" only if there is at least one issue with severity="error"; warnings alone => status="pass".
-- Treat only authoritative surfaces as canonical-check targets; do not enforce canonical labels in narrative prose.
+- Item naming enforcement scope:
+  - Do not require that every mention in narrative prose use display_name.
+  - Enforce canonical display_name for: (a) anchoring at first introduction (same paragraph or within the next 2 sentences),
+    (b) any custody-change sentence (drop/pick up/hand off/stow/equip/transfer), and (c) any case where a descriptor is ambiguous among multiple durable items in the scene.
+  - Otherwise, treat non-canonical descriptive references as warnings at most.
+- Naming severity policy:
+  - warning: unambiguous descriptor used post-anchor.
+  - error: missing anchor, descriptor used during custody-change without canonical name, or ambiguity risk.
 - For authoritative surfaces, prefer exact canonical item/device labels from registries.
 - For milestone repetition/future checks, compare against PRE-INVARIANTS only (pre-scene canon).
 - For ownership/consistency checks, compare against POST-STATE (post-patch candidate).
