@@ -1,0 +1,1312 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Item naming: use display_name for prose; use item_id only in JSON/patches. The display_name must be human readable and not an escaped id/name.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+﻿Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+
+
+USER:
+
+﻿# LINT
+
+Check the scene for continuity, invariant violations, and duplication.
+Flag invariant contradictions against must_stay_true/key facts.
+Return ONLY JSON matching the lint_report schema.
+- Classify UI/prose mechanic claims as DURABLE or EPHEMERAL before enforcing.
+  - DURABLE: persistent stats/caps, skills/titles acquired, lasting status effects, inventory/custody, named mechanics referenced as invariants.
+  - EPHEMERAL: roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat telemetry.
+- Enforce DURABLE claims against authoritative_surfaces/state/registries.
+- EPHEMERAL claims do not require state ownership; only flag EPHEMERAL contradictions inside the same scene as warnings.
+- If uncertain, default to EPHEMERAL (warning at most), not DURABLE (error).
+- status="fail" only if there is at least one issue with severity="error"; warnings alone => status="pass".
+- Treat only authoritative surfaces as canonical-check targets; do not enforce canonical labels in narrative prose.
+- For authoritative surfaces, prefer exact canonical item/device labels from registries.
+- For milestone repetition/future checks, compare against PRE-INVARIANTS only (pre-scene canon).
+- For ownership/consistency checks, compare against POST-STATE (post-patch candidate).
+- Check for POV drift vs book POV (no first-person in third-person scenes).
+  - Ignore first-person pronouns inside quoted dialogue; only narration counts.
+- Deterministically enforce scene-card durable constraints (required_in_custody, required_scene_accessible, forbidden_visible, device_presence; optional required_visible_on_page).
+- Durable constraint evaluation must use POST-STATE candidate (after patch), not pre-state.
+- Report missing durable context ids with explicit retry hints instead of guessing canon.
+- For each issue, include evidence when possible (line number + excerpt) as {"evidence": {"line": N, "excerpt": "..."}}.
+
+Required keys:
+- schema_version ("1.0")
+- status ("pass" or "fail")
+- issues (array of objects)
+
+Each issue object must include:
+- code
+- message
+Optional:
+- severity
+- evidence
+
+If there are no issues, return:
+{
+  "schema_version": "1.0",
+  "status": "pass",
+  "issues": []
+}
+
+If there are issues, return:
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {"code": "continuity", "message": "Example issue", "severity": "error"}
+  ]
+}
+
+Scene:
+The white void didn't have a floor, yet Arthur 'Artie' Penhaligon found himself standing on something that felt suspiciously like a cold linoleum tile. It was a phantom sensation, a lingering memory of the office breakroom where he’d just been vaporized by a snack machine. He looked down at his hands. They were translucent, shimmering with a faint blue light, and—most distressingly—they were no longer holding his wallet.
+
+"Oh, stop looking for your punch card, Arthur. You’ve been promoted to the great beyond. Or demoted. It depends on how you feel about manual labor and frequent dismemberment."
+
+Artie spun around, his feet sliding on the non-existent floor. A woman—no, a sprite? A pixie? A very caffeinated intern with wings?—was hovering three feet off the ground. She wore a sharp, pinstriped vest over a neon-yellow blouse, and her hair was a chaotic puff of violet static. She was currently flipping through a thick, glowing book that looked like it had been bound in dragon hide and corporate red tape.
+
+[Name: Fizz]
+[Role: System Guide (Level 742)]
+[Current Mood: Professionally Impatient]
+
+"Who are you?" Artie asked, his voice sounding weirdly echoed, like he was talking inside a giant porcelain bowl. "And where is my tie? That was a silk blend."
+
+"I’m Fizz. I’m your assigned transition specialist," she said, not looking up from her book. She tapped a finger against a page, and a spark of light drifted out. "And your tie, along with your leather wallet and that pocketful of sticky nickels, has been converted into raw data. You’re currently a Level 0 'Nothing.' We need to fix that before the System’s garbage collector decides you’re an orphan process and deletes you."
+
+She snapped the book shut—the cover clearly read *System Manual: So You’ve Died to an Appliance*—and waved a hand in front of Artie’s face.
+
+[ITEM_FIZZ_GUIDE: System Manual]
+
+A massive, semi-transparent blue screen flickered into existence between them. It looked like a character creation menu from a mid-2000s RPG, complete with low-resolution buttons and a font that was slightly too small to read comfortably.
+
+[Welcome to Character Creation, User #8,421,902]
+[Class: Office Drone (Lvl 1) - Initialized]
+[Base HP: 10/10]
+[Stat Points Available: 50]
+
+"Office Drone?" Artie squinted at the screen. "That’s my class? I spent eight years in middle management. I have a degree in Logistics!"
+
+"And the System has a degree in reality," Fizz countered, finally making eye contact. Her eyes were literal spinning gears. "You died because you lost a fight to a vending machine, Arthur. 'Office Drone' is actually a generous assessment. Most people with your physical stats start as 'Unfortunate Bystander' or 'Lootable Corpse.'"
+
+She tapped the screen, highlighting the 'Stat Points' section. 
+
+"Look, we don't have all day. The Character Creation Void has a high overhead cost, and the Admin is a stickler for server efficiency. You’ve got fifty points. Put them into Strength so you can carry a sword, or Agility so you can run away. Just do it quickly."
+
+Artie reached out, his finger hovering over the floating UI. "What’s 'Vitality' do?"
+
+"It increases your Health Points," Fizz said, yawning. "Standard stuff. One point of Vitality usually equals ten HP. Since you’re currently sitting at a pathetic ten HP, I’d suggest dumping at least half of your points there. Unless you want the first breeze in the tutorial zone to fold you like a cheap card table."
+
+Artie looked at the Vitality bar. He tried to tap the '+' button, but as his finger drew near, the screen flickered. A line of red text scrolled across the bottom of the menu.
+
+[Warning: Latency Spike Detected in Sector 7-G]
+[Warning: UI Scaling Error - Please Contact Support]
+
+"The screen is shaking," Artie noted, his finger trembling. 
+
+"It’s fine," Fizz said, checking her nails. "The System is just undergoing a minor 'Stability Optimization.' It happens whenever someone with a particularly boring soul enters the queue. It’s like the universe is trying to fall asleep while processing you."
+
+Artie gritted his teeth. "I’m not boring. I’m... consistent."
+
+He tried to press the Vitality button again. The UI lurched. The entire menu shifted three inches to the left just as his finger made contact. Instead of 'Vitality,' his finger landed on a stat labeled 'Criticality (Experimental).'
+
+[Stat Point Allocated: Criticality +1]
+[Critical Hit Rate: 2.1%]
+
+"Wait, no," Artie said, trying to pull back. "I didn't mean to—"
+
+The screen didn't just flicker this time; it strobed. The blue light turned a violent shade of magenta. A loud, grinding sound filled the void, like a thousand hard drives dying at once.
+
+"Arthur, what are you doing?" Fizz asked, her professional mask slipping into genuine alarm. "The 'Criticality' stat is for high-level rogues and gamblers! It’s not even supposed to be unlocked for 'Office Drones'!"
+
+"I’m trying to cancel it!" Artie yelled. He went to tap the 'Reset' button, but the UI was now a chaotic mess of overlapping windows and error messages. 
+
+[Error: Recursive Stat Loop Detected]
+[Error: User Input Overflow]
+
+Every time Artie tried to close a window, his finger seemed to register dozens of clicks on the 'Criticality' bar. The numbers were spinning like a slot machine gone rogue.
+
+[Criticality: 10...]
+[Criticality: 25...]
+[Criticality: 40...]
+
+"Stop! You’re dumping everything into one bucket!" Fizz lunged forward, trying to grab his hand, but her fingers passed right through him. "You’re a ghost, Arthur! I can’t stop you if you’re the one authorized to click!"
+
+"I’m not clicking! It’s clicking itself!"
+
+The 'Stat Points Available' counter was plummeting. 
+
+[Stat Points Available: 5]
+[Stat Points Available: 0]
+
+The void fell silent. The magenta light faded back into a dull, pulsing blue. The UI stabilized, showing a single, final confirmation window.
+
+[System Notification: Stat Allocation Confirmed!]
+[Processing Balance Penalties...]
+[Processing Anomaly Compensation...]
+
+"Oh, you’ve done it now," Fizz whispered, staring at the screen with wide, gear-filled eyes. "I’ve seen some bad builds in my time—I once guided a guy who put all his points into 'Digestive Efficiency'—but this? This is a statistical crime."
+
+Artie looked at his new profile. His heart—or the digital approximation of it—sank into his stomach.
+
+[Name: Arthur Penhaligon]
+[Class: Office Drone (Lvl 1)]
+[HP: 1/1]
+[Critical Hit Rate: 100%]
+[Stat Points: 0]
+
+"One HP?" Artie’s voice cracked. "I have one hit point? I had ten before I started! How did I lose health by leveling up?"
+
+"The System had to balance the math, Arthur," Fizz said, her voice dripping with a mix of pity and morbid fascination. She opened her manual and began flipping pages at a blur. "Here it is. 'Law of Extreme Variables.' By pushing your Critical Hit rate to the absolute ceiling of one hundred percent, you’ve effectively opted into the 'Perfect Glass' sub-clause. You can’t fail to hit a vital spot, but in exchange, the System considers your existence to be... fragile. If anything touches you—a bee, a falling leaf, a particularly aggressive sneeze—you’re dead. Again."
+
+Artie stared at the '1/1' on his health bar. It was a tiny, pathetic sliver of red. 
+
+"But I have a hundred percent crit rate," he said, trying to find the silver lining. "That means I’m powerful, right?"
+
+"It means you’re a glitch with a heartbeat," Fizz corrected. 
+
+[Title Gained: The Glassest Cannon]
+[Description: You are the ultimate 'High Risk, No Reward' build. You hit like a god and break like a teacup. Good luck. You’re going to need it.]
+
+"Can I change it?" Artie asked, his finger hovering over the screen, hoping for a 'Back' button.
+
+"Nope. Allocation is locked," Fizz said, snapping her book shut with a final, echoing thud. "The data is written. You’re officially the most dangerous and most pathetic entity in the tutorial zone."
+
+[System Notification: Character Creation Complete.]
+[Preparing for Deployment...]
+
+Artie looked at his hands again. They were no longer translucent; they were solid, clad in a simple, grey-mesh jumpsuit that offered zero protection. He felt a strange, humming energy vibrating in his palms—the weight of a hundred percent certainty.
+
+"What happens now?" he asked.
+
+"Now," Fizz said, a small, wicked grin appearing on her face as she vanished into a cloud of sparkling dust. "We see if you can survive long enough to finish the opening cinematic."
+
+The white void began to dissolve into pixels, the floor dropping away as the sounds of a distant, rustling forest began to bleed into the silence. Artie stood there, clutching his own chest, terrified that even his heartbeat might be too much for his 1 HP to handle.
+
+Authoritative surfaces:
+[
+  {
+    "kind": "ui_block",
+    "line": 7,
+    "text": "[Name: Fizz]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 8,
+    "text": "[Role: System Guide (Level 742)]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 9,
+    "text": "[Current Mood: Professionally Impatient]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 17,
+    "text": "[ITEM_FIZZ_GUIDE: System Manual]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 21,
+    "text": "[Welcome to Character Creation, User #8,421,902]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 22,
+    "text": "[Class: Office Drone (Lvl 1) - Initialized]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 23,
+    "text": "[Base HP: 10/10]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 24,
+    "text": "[Stat Points Available: 50]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 40,
+    "text": "[Warning: Latency Spike Detected in Sector 7-G]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 41,
+    "text": "[Warning: UI Scaling Error - Please Contact Support]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 51,
+    "text": "[Stat Point Allocated: Criticality +1]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 52,
+    "text": "[Critical Hit Rate: 2.1%]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 62,
+    "text": "[Error: Recursive Stat Loop Detected]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 63,
+    "text": "[Error: User Input Overflow]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 67,
+    "text": "[Criticality: 10...]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 68,
+    "text": "[Criticality: 25...]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 69,
+    "text": "[Criticality: 40...]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 77,
+    "text": "[Stat Points Available: 5]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 78,
+    "text": "[Stat Points Available: 0]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 82,
+    "text": "[System Notification: Stat Allocation Confirmed!]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 83,
+    "text": "[Processing Balance Penalties...]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 84,
+    "text": "[Processing Anomaly Compensation...]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 90,
+    "text": "[Name: Arthur Penhaligon]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 91,
+    "text": "[Class: Office Drone (Lvl 1)]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 92,
+    "text": "[HP: 1/1]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 93,
+    "text": "[Critical Hit Rate: 100%]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 94,
+    "text": "[Stat Points: 0]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 106,
+    "text": "[Title Gained: The Glassest Cannon]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 107,
+    "text": "[Description: You are the ultimate 'High Risk, No Reward' build. You hit like a god and break like a teacup. Good luck. You\u2019re going to need it.]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 113,
+    "text": "[System Notification: Character Creation Complete.]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 114,
+    "text": "[Preparing for Deployment...]"
+  }
+]
+
+Character states (post-patch candidate, per cast_present_ids):
+[
+  {
+    "chapter": 1,
+    "character_continuity_system_state": {
+      "classes": [
+        {
+          "level": 1,
+          "name": "Office Drone"
+        }
+      ],
+      "reason": "Initializing stat points for the allocation scene.",
+      "resources": {
+        "sanity": {
+          "current": 100,
+          "max": 100
+        }
+      },
+      "skills": {
+        "Data Entry": 4,
+        "Sarcasm": 10
+      },
+      "stats": {
+        "hp": {
+          "current": 0,
+          "max": 10
+        },
+        "stat_points": 50
+      },
+      "titles": []
+    },
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "hand_right",
+        "contents": [],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "hand_left",
+        "contents": [],
+        "owner": "CHAR_ARTIE"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is holding his wallet and change as he prepares to interact with the vending machine.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Moving change to hand for vending machine interaction; wallet held for visibility.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is holding his wallet and change as he prepares to interact with the vending machine.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial scene setup for mundane start.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is prepared for the vending machine interaction with change in hand.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial scene setup for mundane start.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is prepared for the vending machine interaction with change in hand and wallet visible.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial scene setup for mundane start.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is prepared for the vending machine interaction with change in hand and wallet visible.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial scene setup for mundane start; aligning posture for vending machine interaction.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is disoriented and frustrated by the absurdity of his death."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Mundane items lost during death event; inventory cleared for character creation.",
+        "persona_updates": [
+          "Artie is disoriented, floating in a digital void, and increasingly annoyed by the flickering UI in front of him."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Enforcing forbidden_visible for lost mundane items.",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Mundane items (wallet, tie, change) remain lost/dissolved; forbidden_visible constraint satisfied.",
+        "persona_updates": [
+          "Artie is disoriented, floating in a digital void, and increasingly annoyed by the flickering UI in front of him."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Silk Tie (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Loose Change (status=stowed, container=pockets)",
+      "container: hand_right (owner=CHAR_ARTIE, contents=[Leather Wallet])",
+      "container: neck (owner=CHAR_ARTIE, contents=[Silk Tie])",
+      "container: pockets (owner=CHAR_ARTIE, contents=[Loose Change])",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=held, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Loose Change (status=held, container=hand_left)",
+      "status: wearing grey-mesh jumpsuit",
+      "location: Character Creation Void"
+    ],
+    "invariants_add": [
+      "status: wearing grey-mesh jumpsuit"
+    ],
+    "inventory": [],
+    "last_touched": {
+      "chapter": 1,
+      "scene": 2
+    },
+    "name": "Arthur 'Artie' Penhaligon",
+    "persona_updates": [
+      "Artie is terrified of his extreme fragility but intrigued by the humming power of his 100% crit rate."
+    ],
+    "scene": 2,
+    "schema_version": "1.0",
+    "skills": {
+      "Data Entry": 4,
+      "Sarcasm": 10
+    },
+    "stats": {
+      "hp": {
+        "current": 0,
+        "max": 10
+      },
+      "stat_points": 50
+    },
+    "updated_at": "2026-02-10T14:18:35Z"
+  },
+  {
+    "chapter": 1,
+    "character_continuity_system_state": {
+      "reason": "Initialization of System Guide entity.",
+      "resources": {
+        "mana": {
+          "current": 200,
+          "max": 200
+        }
+      },
+      "skills": {
+        "Navigation": 8,
+        "System Glitch Detection": 12
+      },
+      "stats": {
+        "hp": {
+          "current": 50,
+          "max": 50
+        },
+        "mp": {
+          "current": 200,
+          "max": 200
+        }
+      },
+      "titles": [
+        {
+          "active": true,
+          "name": "Official Guide",
+          "source": "System Deployment"
+        }
+      ]
+    },
+    "character_id": "CHAR_FIZZ",
+    "containers": [
+      {
+        "container": "hand_right",
+        "contents": [
+          "ITEM_FIZZ_GUIDE"
+        ],
+        "owner": "CHAR_FIZZ"
+      },
+      {
+        "container": "satchel",
+        "contents": [
+          "ITEM_GLOW_DUST"
+        ],
+        "owner": "CHAR_FIZZ"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is a high-energy, slightly condescending System guide who treats Artie's existential crisis as a minor technical support ticket."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial equipment for System Guide.",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "System Manual moved to hand to satisfy visibility constraint for the tutorial introduction.",
+        "persona_updates": [
+          "Fizz is a high-energy, slightly condescending System guide who treats Artie's existential crisis as a minor technical support ticket."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Moving System Manual to hand to satisfy required_visible_on_page constraint.",
+        "scene": 2
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_FIZZ -> System Manual (status=stowed, container=satchel)",
+      "inventory: CHAR_FIZZ -> Glow Dust (status=stowed, container=satchel)",
+      "container: satchel (owner=CHAR_FIZZ, contents=[System Manual, Glow Dust])"
+    ],
+    "invariants_add": [],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "ITEM_FIZZ_GUIDE",
+        "status": "held"
+      },
+      {
+        "container": "satchel",
+        "item": "ITEM_GLOW_DUST",
+        "status": "stowed"
+      }
+    ],
+    "last_touched": {
+      "chapter": 1,
+      "scene": 2
+    },
+    "name": "Fizz",
+    "persona_updates": [
+      "Fizz is professionally impatient and morbidly fascinated by Artie's 'statistical crime' of a build."
+    ],
+    "scene": 2,
+    "schema_version": "1.0",
+    "skills": {
+      "Navigation": 8,
+      "System Glitch Detection": 12
+    },
+    "stats": {
+      "hp": {
+        "current": 50,
+        "max": 50
+      },
+      "mp": {
+        "current": 200,
+        "max": 200
+      }
+    },
+    "updated_at": "2026-02-10T14:18:35Z"
+  }
+]
+
+Item registry (canonical):
+{
+  "items": [
+    {
+      "custodian": "CHAR_FIZZ",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "System Manual",
+      "item_id": "ITEM_FIZZ_GUIDE",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Character Creation Void",
+        "scene": 2
+      },
+      "linked_threads": [
+        "THREAD_SYSTEM_GLITCH"
+      ],
+      "name": "System Manual",
+      "owner_scope": "CHAR_FIZZ",
+      "state_tags": [
+        "tutorial"
+      ],
+      "type": "document"
+    },
+    {
+      "custodian": "CHAR_FIZZ",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Glow Dust",
+      "item_id": "ITEM_GLOW_DUST",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Character Creation Void",
+        "scene": 2
+      },
+      "linked_threads": [],
+      "name": "Glow Dust",
+      "owner_scope": "CHAR_FIZZ",
+      "state_tags": [
+        "cosmetic"
+      ],
+      "type": "consumable"
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Plot devices (canonical):
+{
+  "devices": [
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_CRIT_EXPLOIT",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_CRIT_EXPLOIT"
+      ],
+      "name": "The 100% Crit Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_THE_ASCENSION",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_path_of_the_first_glitch_c7dd4581",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_THE_ASCENSION"
+      ],
+      "name": "The Path of the First Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_SYSTEM_GLITCH",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_system_s_stability_da5be7b7",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_SYSTEM_GLITCH"
+      ],
+      "name": "The System's Stability",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_VANE_RIVALRY",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_vane_vendetta_bcf4bea1",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_VANE_RIVALRY"
+      ],
+      "name": "The Vane Vendetta",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Pre-state (before patch):
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-10T06:59:26Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 2
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {},
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_002.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING", 
+  "summary": {
+    "chapter_so_far": [
+      "Artie died in an office breakroom accident and entered the System's Character Creation Void."
+    ],
+    "key_facts_ring": [
+      "Artie argued with a 'Break-O-Matic 3000' vending machine over a stuck bag of chips.",
+      "Artie kicked the machine, triggering a massive electrical surge.",
+      "The System registered a 'Critical Hit' of -12 HP, reducing Artie's health to 0.",
+      "Artie's physical form and mundane items (wallet, change, tie) dissolved into data.",
+      "Artie arrived in the Character Creation Void and was greeted by a System Notification.",
+      "The System began calculating Artie's base stats based on his previous life performance.",
+      "milestone: death_event = DONE",
+      "milestone: void_entry = DONE",
+      "location: Character Creation Void",
+      "inventory: CHAR_ARTIE -> Leather Wallet (lost)",
+      "inventory: CHAR_ARTIE -> Loose Change (lost)",
+      "inventory: CHAR_ARTIE -> Silk Tie (lost)"
+    ],
+    "last_scene": [
+      "Artie attempted to buy chips from a vending machine in his office breakroom. A freak electrical surge delivered a critical hit, killing him and transporting him to a digital void."
+    ],
+    "must_stay_true": [
+      "milestone: death_event = DONE",
+      "milestone: void_entry = DONE",
+      "location: Character Creation Void",
+      "inventory: CHAR_ARTIE -> Leather Wallet (lost)",
+      "inventory: CHAR_ARTIE -> Loose Change (lost)",
+      "inventory: CHAR_ARTIE -> Silk Tie (lost)"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Character Creation Void",
+    "open_threads": [],
+    "recent_facts": [
+      "Artie was killed by a vending machine.",
+      "Artie is now in the Character Creation Void."
+    ],
+    "time": {}
+  }
+}
+
+Pre-summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie died in an office breakroom accident and entered the System's Character Creation Void."
+  ],
+  "key_facts_ring": [
+    "Artie argued with a 'Break-O-Matic 3000' vending machine over a stuck bag of chips.",
+    "Artie kicked the machine, triggering a massive electrical surge.",
+    "The System registered a 'Critical Hit' of -12 HP, reducing Artie's health to 0.",
+    "Artie's physical form and mundane items (wallet, change, tie) dissolved into data.",
+    "Artie arrived in the Character Creation Void and was greeted by a System Notification.",
+    "The System began calculating Artie's base stats based on his previous life performance.",
+    "milestone: death_event = DONE",
+    "milestone: void_entry = DONE",
+    "location: Character Creation Void",
+    "inventory: CHAR_ARTIE -> Leather Wallet (lost)",
+    "inventory: CHAR_ARTIE -> Loose Change (lost)",
+    "inventory: CHAR_ARTIE -> Silk Tie (lost)"
+  ],
+  "last_scene": [
+    "Artie attempted to buy chips from a vending machine in his office breakroom. A freak electrical surge delivered a critical hit, killing him and transporting him to a digital void."
+  ],
+  "must_stay_true": [
+    "milestone: death_event = DONE",
+    "milestone: void_entry = DONE",
+    "location: Character Creation Void",
+    "inventory: CHAR_ARTIE -> Leather Wallet (lost)",
+    "inventory: CHAR_ARTIE -> Loose Change (lost)",
+    "inventory: CHAR_ARTIE -> Silk Tie (lost)"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Pre-invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "milestone: death_event = DONE",
+  "milestone: void_entry = DONE",
+  "location: Character Creation Void",
+  "inventory: CHAR_ARTIE -> Leather Wallet (lost)",
+  "inventory: CHAR_ARTIE -> Loose Change (lost)",
+  "inventory: CHAR_ARTIE -> Silk Tie (lost)",
+  "Artie argued with a 'Break-O-Matic 3000' vending machine over a stuck bag of chips.",
+  "Artie kicked the machine, triggering a massive electrical surge.",
+  "The System registered a 'Critical Hit' of -12 HP, reducing Artie's health to 0.",
+  "Artie's physical form and mundane items (wallet, change, tie) dissolved into data.",
+  "Artie arrived in the Character Creation Void and was greeted by a System Notification.",
+  "The System began calculating Artie's base stats based on his previous life performance.",
+  "milestone: death_event = DONE",
+  "milestone: void_entry = DONE",
+  "location: Character Creation Void",
+  "inventory: CHAR_ARTIE -> Leather Wallet (lost)",
+  "inventory: CHAR_ARTIE -> Loose Change (lost)",
+  "inventory: CHAR_ARTIE -> Silk Tie (lost)"
+]
+
+Post-state candidate (after patch):
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-10T06:59:26Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 2
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {},
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_002.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Artie died in an office breakroom accident and entered the System's Character Creation Void.",
+      "Artie met his System Guide, Fizz, and accidentally created a 'Crit-Only' build with 1 HP."
+    ],
+    "key_facts_ring": [
+      "Artie argued with a 'Break-O-Matic 3000' vending machine over a stuck bag of chips.",
+      "Artie kicked the machine, triggering a massive electrical surge.",
+      "The System registered a 'Critical Hit' of -12 HP, reducing Artie's health to 0.",
+      "Artie's physical form and mundane items (wallet, change, tie) dissolved into data.",
+      "Artie arrived in the Character Creation Void and was greeted by a System Notification.",
+      "The System began calculating Artie's base stats based on his previous life performance.",
+      "milestone: death_event = DONE",
+      "milestone: void_entry = DONE",
+      "location: Character Creation Void",
+      "inventory: CHAR_ARTIE -> Leather Wallet (lost)",
+      "inventory: CHAR_ARTIE -> Loose Change (lost)",
+      "inventory: CHAR_ARTIE -> Silk Tie (lost)",
+      "Artie met Fizz, a Level 742 System Guide, in the Character Creation Void.",
+      "Fizz explained that Artie's mundane belongings were converted into raw data upon death.",
+      "A latency spike in the Character Creation UI caused Artie to misclick during stat allocation.",
+      "Artie accidentally allocated all 50 stat points into the experimental 'Criticality' stat.",
+      "The System applied a balance penalty, reducing Artie's maximum HP to 1.",
+      "Artie gained the title 'The Glassest Cannon' and locked in a 100% Critical Hit rate.",
+      "The Character Creation Void began dissolving as Artie was deployed to the tutorial zone.",
+      "milestone: stat_allocation = DONE",
+      "Artie_HP: 1/1",
+      "Artie_Crit_Rate: 100%"
+    ],
+    "last_scene": [
+      "Artie met his System Guide, Fizz, in the Character Creation Void. A UI glitch during stat allocation caused him to accidentally dump all fifty points into the Criticality stat. The System balanced this anomaly by reducing his maximum health to one, leaving him as a 100% crit-rate glass cannon."
+    ],
+    "must_stay_true": [
+      "milestone: death_event = DONE",
+      "milestone: void_entry = DONE",
+      "location: Character Creation Void",
+      "inventory: CHAR_ARTIE -> Leather Wallet (lost)",
+      "inventory: CHAR_ARTIE -> Loose Change (lost)",
+      "inventory: CHAR_ARTIE -> Silk Tie (lost)",
+      "milestone: stat_allocation = DONE",
+      "Artie_HP: 1/1",
+      "Artie_Crit_Rate: 100%"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "cast_present_ids": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Character Creation Void",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie met Fizz, his System Guide.",
+      "Artie's stats are locked at 1 HP and 100% Crit rate.",
+      "Artie is wearing a grey-mesh jumpsuit with zero defensive value.",
+      "Artie is being deployed to the tutorial zone."
+    ],
+    "time": {}
+  }
+}
+
+Post-summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie died in an office breakroom accident and entered the System's Character Creation Void.",
+    "Artie met his System Guide, Fizz, and accidentally created a 'Crit-Only' build with 1 HP."
+  ],
+  "key_facts_ring": [
+    "Artie argued with a 'Break-O-Matic 3000' vending machine over a stuck bag of chips.",
+    "Artie kicked the machine, triggering a massive electrical surge.",
+    "The System registered a 'Critical Hit' of -12 HP, reducing Artie's health to 0.",
+    "Artie's physical form and mundane items (wallet, change, tie) dissolved into data.",
+    "Artie arrived in the Character Creation Void and was greeted by a System Notification.",
+    "The System began calculating Artie's base stats based on his previous life performance.",
+    "milestone: death_event = DONE",
+    "milestone: void_entry = DONE",
+    "location: Character Creation Void",
+    "inventory: CHAR_ARTIE -> Leather Wallet (lost)",
+    "inventory: CHAR_ARTIE -> Loose Change (lost)",
+    "inventory: CHAR_ARTIE -> Silk Tie (lost)",
+    "Artie met Fizz, a Level 742 System Guide, in the Character Creation Void.",
+    "Fizz explained that Artie's mundane belongings were converted into raw data upon death.",
+    "A latency spike in the Character Creation UI caused Artie to misclick during stat allocation.",
+    "Artie accidentally allocated all 50 stat points into the experimental 'Criticality' stat.",
+    "The System applied a balance penalty, reducing Artie's maximum HP to 1.",
+    "Artie gained the title 'The Glassest Cannon' and locked in a 100% Critical Hit rate.",
+    "The Character Creation Void began dissolving as Artie was deployed to the tutorial zone.",
+    "milestone: stat_allocation = DONE",
+    "Artie_HP: 1/1",
+    "Artie_Crit_Rate: 100%"
+  ],
+  "last_scene": [
+    "Artie met his System Guide, Fizz, in the Character Creation Void. A UI glitch during stat allocation caused him to accidentally dump all fifty points into the Criticality stat. The System balanced this anomaly by reducing his maximum health to one, leaving him as a 100% crit-rate glass cannon."
+  ],
+  "must_stay_true": [
+    "milestone: death_event = DONE",
+    "milestone: void_entry = DONE",
+    "location: Character Creation Void",
+    "inventory: CHAR_ARTIE -> Leather Wallet (lost)",
+    "inventory: CHAR_ARTIE -> Loose Change (lost)",
+    "inventory: CHAR_ARTIE -> Silk Tie (lost)",
+    "milestone: stat_allocation = DONE",
+    "Artie_HP: 1/1",
+    "Artie_Crit_Rate: 100%"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Post-invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "milestone: death_event = DONE",
+  "milestone: void_entry = DONE",
+  "location: Character Creation Void",
+  "inventory: CHAR_ARTIE -> Leather Wallet (lost)",
+  "inventory: CHAR_ARTIE -> Loose Change (lost)",
+  "inventory: CHAR_ARTIE -> Silk Tie (lost)",
+  "milestone: stat_allocation = DONE",
+  "Artie_HP: 1/1",
+  "Artie_Crit_Rate: 100%",
+  "Artie argued with a 'Break-O-Matic 3000' vending machine over a stuck bag of chips.",
+  "Artie kicked the machine, triggering a massive electrical surge.",
+  "The System registered a 'Critical Hit' of -12 HP, reducing Artie's health to 0.",
+  "Artie's physical form and mundane items (wallet, change, tie) dissolved into data.",
+  "Artie arrived in the Character Creation Void and was greeted by a System Notification.",
+  "The System began calculating Artie's base stats based on his previous life performance.",
+  "milestone: death_event = DONE",
+  "milestone: void_entry = DONE",
+  "location: Character Creation Void",
+  "inventory: CHAR_ARTIE -> Leather Wallet (lost)",
+  "inventory: CHAR_ARTIE -> Loose Change (lost)",
+  "inventory: CHAR_ARTIE -> Silk Tie (lost)",
+  "Artie met Fizz, a Level 742 System Guide, in the Character Creation Void.",
+  "Fizz explained that Artie's mundane belongings were converted into raw data upon death.",
+  "A latency spike in the Character Creation UI caused Artie to misclick during stat allocation.",
+  "Artie accidentally allocated all 50 stat points into the experimental 'Criticality' stat.",
+  "The System applied a balance penalty, reducing Artie's maximum HP to 1.",
+  "Artie gained the title 'The Glassest Cannon' and locked in a 100% Critical Hit rate.",
+  "The Character Creation Void began dissolving as Artie was deployed to the tutorial zone.",
+  "milestone: stat_allocation = DONE",
+  "Artie_HP: 1/1",
+  "Artie_Crit_Rate: 100%"
+]
