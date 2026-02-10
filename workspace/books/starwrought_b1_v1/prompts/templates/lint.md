@@ -73,10 +73,10 @@ Pre-invariants (must_stay_true + key facts):
 {{pre_invariants}}
 
 Post-state candidate (after patch):
-{{state}}
+{{post_state}}
 
 Post-summary (facts-only):
-{{summary}}
+{{post_summary}}
 
 Post-invariants (must_stay_true + key facts):
-{{invariants}}
+{{post_invariants}}
