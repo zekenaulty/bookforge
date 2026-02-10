@@ -470,6 +470,15 @@ def _response_truncated(response: LLMResponse) -> bool:
 
 
 
+def _lint_status_from_issues(issues: List[Dict[str, Any]]) -> str:
+    for issue in issues:
+        if not isinstance(issue, dict):
+            continue
+        if str(issue.get("severity") or "").strip().lower() == "error":
+            return "fail"
+    return "pass"
+
+
 def _normalize_lint_report(report: Dict[str, Any]) -> Dict[str, Any]:
     normalized = dict(report)
     if "schema_version" not in normalized:
@@ -505,11 +514,16 @@ def _normalize_lint_report(report: Dict[str, Any]) -> Dict[str, Any]:
     if not isinstance(normalized.get("issues"), list) or issues:
         normalized["issues"] = issues
 
+    for issue in normalized.get("issues", []):
+        if isinstance(issue, dict) and not issue.get("severity"):
+            issue["severity"] = "warning"
+
+    normalized["status"] = _lint_status_from_issues(normalized.get("issues", []))
+
     if "status" not in normalized or not normalized.get("status"):
         normalized["status"] = "fail" if normalized.get("issues") else "pass"
 
     return normalized
-
 
 def _extract_json(text: str) -> Dict[str, Any]:
     data = extract_json(text, label="Response")
@@ -2405,21 +2419,38 @@ def _apply_durable_state_updates(
 def _extract_authoritative_surfaces(prose: str) -> List[Dict[str, Any]]:
     surfaces: List[Dict[str, Any]] = []
     for line_no, raw_line in enumerate(str(prose).splitlines(), start=1):
-        text = raw_line.strip()
-        if not text:
+        if not raw_line.strip():
             continue
-        if not (text.startswith("[") and text.endswith("]")):
+        line = raw_line.lstrip()
+        if not line.startswith("["):
             continue
 
-        kind = "ui_block"
-        if re.match(r"^\[[^\]:]{1,80}:\s*[-+0-9]", text):
-            kind = "ui_stat"
-        elif text.lower().startswith("[system"):
-            kind = "system_notification"
-        elif text.lower().startswith("[warning"):
-            kind = "system_notification"
+        pos = 0
+        tokens: List[str] = []
+        while True:
+            while pos < len(line) and line[pos].isspace():
+                pos += 1
+            if pos >= len(line) or line[pos] != "[":
+                break
+            end = line.find("]", pos)
+            if end == -1:
+                break
+            tokens.append(line[pos:end + 1].strip())
+            pos = end + 1
 
-        surfaces.append({"line": line_no, "kind": kind, "text": text})
+        tail = line[pos:].strip()
+        if tail and not re.fullmatch(r'[\.!?;,:"\'\)\]]*', tail):
+            continue
+
+        for text in tokens:
+            kind = "ui_block"
+            if re.match(r"^\[[^\]:]{1,80}:\s*[-+0-9]", text):
+                kind = "ui_stat"
+            elif text.lower().startswith("[system"):
+                kind = "system_notification"
+            elif text.lower().startswith("[warning"):
+                kind = "system_notification"
+            surfaces.append({"line": line_no, "kind": kind, "text": text})
     return surfaces
 
 
@@ -2440,15 +2471,26 @@ def _extract_ui_stat_lines(
     else:
         source_texts = [str(prose)]
 
+    number = r"[+-]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?"
+    pattern = re.compile(r"\[([^\]:]{1,80}):\s*(" + number + r")(?:\s*/\s*(" + number + r"))?\s*%?\]")
+
+    def _parse_num(value: str) -> Any:
+        if value is None:
+            return None
+        cleaned = value.replace(",", "").strip()
+        if not cleaned:
+            return None
+        return float(cleaned) if "." in cleaned else int(cleaned)
+
     for chunk in source_texts:
-        for match in re.finditer(r"\[([^\]:]{1,80}):\s*([0-9]+(?:\.[0-9]+)?)(?:/([0-9]+(?:\.[0-9]+)?))?\s*%?\]", chunk):
+        for match in pattern.finditer(chunk):
             key = match.group(1).strip()
             current_raw = match.group(2)
             max_raw = match.group(3)
-            current = float(current_raw) if "." in current_raw else int(current_raw)
-            maximum: Any = None
-            if max_raw is not None:
-                maximum = float(max_raw) if "." in max_raw else int(max_raw)
+            current = _parse_num(current_raw)
+            maximum = _parse_num(max_raw) if max_raw is not None else None
+            if current is None:
+                continue
             lines.append({"key": key, "current": current, "max": maximum})
     return lines
 
@@ -2464,6 +2506,38 @@ def _stat_key_aliases() -> Dict[str, str]:
         "mana": "mp",
         "level": "level",
     }
+
+
+def _merged_character_states_for_lint(
+    character_states: List[Dict[str, Any]],
+    patch: Dict[str, Any],
+) -> List[Dict[str, Any]]:
+    if not isinstance(patch, dict) or not isinstance(character_states, list):
+        return character_states
+    updates = patch.get("character_continuity_system_updates")
+    if not isinstance(updates, list) or not updates:
+        return character_states
+    merged = json.loads(json.dumps(character_states))
+    index = {}
+    for idx, state in enumerate(merged):
+        if not isinstance(state, dict):
+            continue
+        char_id = str(state.get("character_id") or "").strip()
+        if char_id:
+            index[char_id] = idx
+    for update in updates:
+        if not isinstance(update, dict):
+            continue
+        char_id = str(update.get("character_id") or "").strip()
+        if not char_id or char_id not in index:
+            continue
+        state = merged[index[char_id]]
+        if not isinstance(state, dict):
+            continue
+        continuity = _ensure_character_continuity_system_state(state)
+        _apply_bag_updates(continuity, update)
+        state["character_continuity_system_state"] = continuity
+    return merged
 
 
 def _stat_mismatch_issues(
@@ -2562,6 +2636,10 @@ def _stat_mismatch_issues(
             })
             continue
 
+        # If no owner prefix and multiple cast candidates exist, defer to LLM (avoid brittle NLP).
+        if owner_indices is None and len(candidates) > 1:
+            continue
+
         if any(_line_matches_stat(line, value) for _, value in candidates):
             continue
 
@@ -2578,22 +2656,37 @@ def _strip_dialogue(text: str) -> str:
     output: List[str] = []
     in_double = False
     in_single = False
-    for idx, ch in enumerate(text):
+    idx = 0
+    while idx < len(text):
+        ch = text[idx]
         if ch in {"\"", "\u201c", "\u201d"}:
             in_double = not in_double
+            idx += 1
             continue
-        if ch == "'":
+        if ch == "'" and not in_double:
+            if in_single:
+                in_single = False
+                idx += 1
+                continue
             prev = text[idx - 1] if idx > 0 else ""
             nxt = text[idx + 1] if idx + 1 < len(text) else ""
-            if not in_double and (not prev.isalnum()) and nxt.isalpha():
-                in_single = not in_single
-                continue
+            if (prev.isspace() or prev in "([{\"") and nxt.isalpha():
+                rest = text[idx + 1:]
+                end = rest.find("'")
+                newline = rest.find("\n")
+                if end != -1 and (newline == -1 or end < newline):
+                    in_single = True
+                    idx += 1
+                    continue
         if in_double or in_single:
             if ch == "\n":
                 output.append(ch)
+            idx += 1
             continue
         output.append(ch)
+        idx += 1
     return "".join(output)
+
 
 
 def _find_first_match_evidence(pattern: str, text: str) -> Optional[Dict[str, Any]]:
@@ -2607,7 +2700,7 @@ def _find_first_match_evidence(pattern: str, text: str) -> Optional[Dict[str, An
     return {"line": line_no, "excerpt": line_text}
 
 
-def _pov_drift_issues(prose: str, pov: Optional[str]) -> List[Dict[str, Any]]:
+def _pov_drift_issues(prose: str, pov: Optional[str], *, strict: bool = False) -> List[Dict[str, Any]]:
     if not pov:
         return []
     pov_key = str(pov).lower()
@@ -2620,7 +2713,7 @@ def _pov_drift_issues(prose: str, pov: Optional[str]) -> List[Dict[str, Any]]:
         issue: Dict[str, Any] = {
             "code": "pov_drift",
             "message": "First-person pronouns detected in third-person POV scene (narration only; dialogue ignored).",
-            "severity": "warning",
+            "severity": "error" if strict else "warning",
         }
         if evidence:
             issue["evidence"] = evidence
@@ -2947,7 +3040,7 @@ def _heuristic_invariant_issues(
     dead = ["dead", "killed", "slain", "corpse"]
 
     issues: List[Dict[str, Any]] = []
-    invariants_for_contradiction = post_invariants or pre_invariants
+    invariants_for_contradiction = pre_invariants
     for invariant in invariants_for_contradiction:
         inv_text = str(invariant).strip().lower()
         if not inv_text:
@@ -3020,7 +3113,7 @@ def _heuristic_invariant_issues(
     }
 
     milestones: List[tuple[str, str]] = []
-    invariants_for_milestones = pre_invariants or post_invariants
+    invariants_for_milestones = pre_invariants
     for invariant in invariants_for_milestones:
         match = re.search(r"milestone\s*:\s*([a-z0-9_\- ]+)\s*=\s*(done|not_yet)", str(invariant), re.IGNORECASE)
         if not match:
@@ -3751,7 +3844,7 @@ def _scene_state_preflight(
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "preflight.md")
     context = _build_preflight_context(book_root, outline, chapter_order, scene_counts, scene_card)
-    durable = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
+    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
     prompt = render_template_file(
         template,
         {
@@ -3851,7 +3944,7 @@ def _generate_continuity_pack(
     durable_expand_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "continuity_pack.md")
-    durable = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
+    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
     recent_facts = state.get("world", {}).get("recent_facts", [])
     prompt = render_template_file(
         template,
@@ -3932,7 +4025,7 @@ def _write_scene(
     durable_expand_ids: Optional[List[str]] = None,
 ) -> Tuple[str, Dict[str, Any]]:
     template = _resolve_template(book_root, "write.md")
-    durable = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
+    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
     prompt = render_template_file(
         template,
         {
@@ -4039,7 +4132,7 @@ def _lint_scene(
     durable_expand_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "lint.md")
-    durable = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
+    durable = _durable_state_context(book_root, pre_state, scene_card, durable_expand_ids)
     authoritative_surfaces = _extract_authoritative_surfaces(prose)
     prompt = render_template_file(
         template,
@@ -4104,20 +4197,23 @@ def _lint_scene(
     if not isinstance(summary_update, dict):
         summary_update = {}
     heuristic_issues = _heuristic_invariant_issues(prose, summary_update, pre_invariants, post_invariants)
+    lint_character_states = _merged_character_states_for_lint(character_states, patch)
     extra_issues = _stat_mismatch_issues(
         prose,
-        character_states,
+        lint_character_states,
         _global_continuity_stats(post_state),
         authoritative_surfaces=authoritative_surfaces,
     )
-    extra_issues += _pov_drift_issues(prose, pov)
+    extra_issues += _pov_drift_issues(prose, pov, strict=_lint_mode() == "strict")
     durable_issues = _durable_scene_constraint_issues(prose, scene_card, durable)
     durable_issues += _linked_durable_consistency_issues(durable)
     combined = heuristic_issues + extra_issues + durable_issues
     if combined:
         report["issues"] = list(report.get("issues", [])) + combined
-        report["status"] = "fail"
+        report["status"] = _lint_status_from_issues(report.get("issues", []))
         report.setdefault("mode", "heuristic")
+    else:
+        report["status"] = _lint_status_from_issues(report.get("issues", []))
     validate_json(report, "lint_report")
     return report
 
@@ -4138,7 +4234,7 @@ def _repair_scene(
     durable_expand_ids: Optional[List[str]] = None,
 ) -> Tuple[str, Dict[str, Any]]:
     template = _resolve_template(book_root, "repair.md")
-    durable = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
+    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
     prompt = render_template_file(
         template,
         {
@@ -4244,7 +4340,7 @@ def _state_repair(
     durable_expand_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "state_repair.md")
-    durable = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
+    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
     prompt = render_template_file(
         template,
         {

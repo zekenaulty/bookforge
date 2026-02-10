@@ -61,6 +61,12 @@ def test_pov_drift_detects_first_person_in_third_person() -> None:
     assert any(issue.get("code") == "pov_drift" for issue in issues)
 
 
+def test_pov_drift_strict_flags_error() -> None:
+    issues = _pov_drift_issues("I run through the gate.", "third_limited", strict=True)
+
+    assert any(issue.get("code") == "pov_drift" and issue.get("severity") == "error" for issue in issues)
+
+
 def test_stat_mismatch_uses_any_cast_member_match() -> None:
     prose = "[HP: 10/10]"
     character_states = [
@@ -78,12 +84,23 @@ def test_stat_mismatch_warns_when_no_candidate_matches() -> None:
     prose = "[Stamina: 42/100]"
     character_states = [
         {"character_id": "CHAR_a", "stats": {"stamina": {"current": 20, "max": 20}}},
-        {"character_id": "CHAR_b", "stats": {"stamina": {"current": 30, "max": 100}}},
     ]
 
     issues = _stat_mismatch_issues(prose, character_states, {})
 
     assert any(issue.get("code") == "stat_mismatch" for issue in issues)
+
+
+def test_stat_mismatch_skips_ambiguous_multi_cast_without_owner() -> None:
+    prose = "[Stamina: 42/100]"
+    character_states = [
+        {"character_id": "CHAR_a", "stats": {"stamina": {"current": 20, "max": 20}}},
+        {"character_id": "CHAR_b", "stats": {"stamina": {"current": 30, "max": 100}}},
+    ]
+
+    issues = _stat_mismatch_issues(prose, character_states, {})
+
+    assert not any(issue.get("code") in {"stat_mismatch", "stat_unowned"} for issue in issues)
 
 
 def test_stat_unowned_when_missing_in_cast_and_run() -> None:
