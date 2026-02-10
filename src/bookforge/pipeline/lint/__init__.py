@@ -1,5 +1,6 @@
 """Pipeline lint package."""
 
+from .helpers import _normalize_lint_report, _merged_character_states_for_lint
 from .tripwires import (
     _stat_mismatch_issues,
     _pov_drift_issues,
@@ -11,6 +12,8 @@ from .tripwires import (
 )
 
 __all__ = [
+    "_normalize_lint_report",
+    "_merged_character_states_for_lint",
     "_stat_mismatch_issues",
     "_pov_drift_issues",
     "_heuristic_invariant_issues",

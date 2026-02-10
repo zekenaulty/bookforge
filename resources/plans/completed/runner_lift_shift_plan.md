@@ -20,6 +20,8 @@ Extract `runner.py` into small modules with zero behavior change. Only move code
 - Phase 8: complete
 
 
+- Phase 9: complete
+- Phase 10: complete
 ## Phase 0: Safety Baseline
 - Run `pytest -q` and record pass status.
 - Note current `runner.py` public entry points (e.g., `run_loop`, CLI usage).
@@ -164,4 +166,21 @@ One phase per turn if needed; no logic changes, only moves/imports.
 
 
 
+
+
+## Phase 9: Config/Env Helpers (low risk)
+**New module:** src/bookforge/pipeline/config.py`n
+**Move as-is:**
+- _int_env`n- _write_max_tokens`n- _lint_max_tokens`n- _repair_max_tokens`n- _state_repair_max_tokens`n- _continuity_max_tokens`n- _preflight_max_tokens`n- _style_anchor_max_tokens`n- _durable_slice_max_expansions`n- _lint_mode`n
+**Runner changes:** import from pipeline.config. Keep PAUSE_EXIT_CODE in runner.
+
+**Tests:** full suite.
+
+## Phase 10: Outline Helpers (low risk)
+**New module:** src/bookforge/pipeline/outline.py`n
+**Move as-is:**
+- _chapter_scene_count`n- _outline_summary`n- _build_character_registry`n- _build_thread_registry`n- _character_name_map`n- _character_id_map`n
+**Runner changes:** import from pipeline.outline.
+
+**Tests:** full suite.
 

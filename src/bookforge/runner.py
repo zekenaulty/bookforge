@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 import ast
@@ -9,7 +8,7 @@ import json
 import re
 import shutil
 
-from bookforge.config.env import load_config, read_env_value, read_int_env
+from bookforge.config.env import load_config
 from bookforge.characters import characters_ready, generate_characters, resolve_character_state_path, ensure_character_index, create_character_state_path
 from bookforge.llm.client import LLMClient
 from bookforge.llm.errors import LLMRequestError
@@ -35,8 +34,17 @@ from bookforge.memory.durable_state import (
     snapshot_plot_devices,
 )
 from bookforge.phases.plan import plan_scene
+from bookforge.phases.preflight_phase import _scene_state_preflight
+from bookforge.phases.continuity_phase import _generate_continuity_pack
+from bookforge.phases.write_phase import _write_scene
+from bookforge.phases.repair_phase import _repair_scene
+from bookforge.phases.state_repair_phase import _state_repair
+from bookforge.phases.lint_phase import _lint_scene
 from bookforge.prompt.renderer import render_template_file
 from bookforge.pipeline.parse import _extract_json, _extract_prose_and_patch, _extract_authoritative_surfaces
+from bookforge.pipeline.config import _write_max_tokens, _lint_max_tokens, _repair_max_tokens, _state_repair_max_tokens, _continuity_max_tokens, _preflight_max_tokens, _style_anchor_max_tokens, _durable_slice_max_expansions, _lint_mode
+from bookforge.pipeline.outline import _chapter_scene_count, _outline_summary, _build_character_registry, _build_thread_registry, _character_name_map, _character_id_map
+from bookforge.pipeline.scene import _scene_cast_ids_from_outline, _load_character_states, _normalize_continuity_pack, _parse_until
 from bookforge.pipeline.state_patch import _normalize_state_patch_for_validation, _sanitize_preflight_patch, _coerce_summary_update, _coerce_character_updates, _coerce_stat_updates, _coerce_transfer_updates, _coerce_inventory_alignment_updates, _coerce_registry_updates, _fill_character_update_context, _fill_character_continuity_update_context, _migrate_numeric_invariants
 from bookforge.pipeline.state_apply import _summary_list, _summary_from_state, _apply_state_patch, _apply_character_updates, _apply_character_stat_updates, _apply_bag_updates, _ensure_character_continuity_system_state, _update_bible, _rollup_chapter_summary, _compile_chapter_markdown
 from bookforge.pipeline.durable import _durable_state_context, _apply_durable_state_updates
@@ -44,81 +52,11 @@ from bookforge.pipeline.io import _load_json, _snapshot_character_states_before_
 from bookforge.pipeline.lint import _stat_mismatch_issues, _pov_drift_issues, _heuristic_invariant_issues, _durable_scene_constraint_issues, _linked_durable_consistency_issues, _lint_issue_entries, _lint_has_issue_code
 from bookforge.pipeline.llm_ops import _chat, _response_truncated, _json_retry_count, _state_patch_schema_retry_message, _lint_status_from_issues
 from bookforge.pipeline.prompts import _resolve_template, _system_prompt_for_phase
+from bookforge.pipeline.log import _status, _now_iso
 from bookforge.util.schema import validate_json
 
-
-DEFAULT_WRITE_MAX_TOKENS = 73728
-DEFAULT_LINT_MAX_TOKENS = 147456
-DEFAULT_REPAIR_MAX_TOKENS = 147456
-DEFAULT_STATE_REPAIR_MAX_TOKENS = 147456
-DEFAULT_CONTINUITY_MAX_TOKENS = 147456
-DEFAULT_PREFLIGHT_MAX_TOKENS = 147456
-DEFAULT_STYLE_ANCHOR_MAX_TOKENS = 32768
-DEFAULT_EMPTY_RESPONSE_RETRIES = 2
-DEFAULT_REQUEST_ERROR_RETRIES = 1
-DEFAULT_REQUEST_ERROR_BACKOFF_SECONDS = 2.0
-DEFAULT_REQUEST_ERROR_MAX_SLEEP = 60.0
-DEFAULT_JSON_RETRY_COUNT = 1
-DEFAULT_DURABLE_SLICE_MAX_EXPANSIONS = 2
 PAUSE_EXIT_CODE = 75
 
-SUMMARY_CHAPTER_SO_FAR_CAP = 20
-SUMMARY_KEY_FACTS_CAP = 25
-SUMMARY_MUST_STAY_TRUE_CAP = 20
-SUMMARY_STORY_SO_FAR_CAP = 40
-
-
-def _int_env(name: str, default: int) -> int:
-    return read_int_env(name, default)
-
-
-def _write_max_tokens() -> int:
-    return _int_env("BOOKFORGE_WRITE_MAX_TOKENS", DEFAULT_WRITE_MAX_TOKENS)
-
-
-def _lint_max_tokens() -> int:
-    return _int_env("BOOKFORGE_LINT_MAX_TOKENS", DEFAULT_LINT_MAX_TOKENS)
-
-
-def _repair_max_tokens() -> int:
-    return _int_env("BOOKFORGE_REPAIR_MAX_TOKENS", DEFAULT_REPAIR_MAX_TOKENS)
-
-
-def _state_repair_max_tokens() -> int:
-    return _int_env("BOOKFORGE_STATE_REPAIR_MAX_TOKENS", DEFAULT_STATE_REPAIR_MAX_TOKENS)
-
-
-def _continuity_max_tokens() -> int:
-    return _int_env("BOOKFORGE_CONTINUITY_MAX_TOKENS", DEFAULT_CONTINUITY_MAX_TOKENS)
-
-
-def _preflight_max_tokens() -> int:
-    return _int_env("BOOKFORGE_PREFLIGHT_MAX_TOKENS", DEFAULT_PREFLIGHT_MAX_TOKENS)
-
-def _style_anchor_max_tokens() -> int:
-    return _int_env("BOOKFORGE_STYLE_ANCHOR_MAX_TOKENS", DEFAULT_STYLE_ANCHOR_MAX_TOKENS)
-
-
-def _durable_slice_max_expansions() -> int:
-    return max(0, _int_env("BOOKFORGE_DURABLE_SLICE_MAX_EXPANSIONS", DEFAULT_DURABLE_SLICE_MAX_EXPANSIONS))
-
-
-def _lint_mode() -> str:
-    raw = read_env_value("BOOKFORGE_LINT_MODE")
-    if raw is None:
-        raw = "warn"
-    raw = str(raw).strip().lower()
-    if raw in {"strict", "warn", "off"}:
-        return raw
-    return "warn"
-
-
-def _now_iso() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-
-
-def _status(message: str) -> None:
-    print(f"[bookforge] {message}", flush=True)
 
 
 def _normalize_lint_report(report: Dict[str, Any]) -> Dict[str, Any]:
@@ -166,199 +104,6 @@ def _normalize_lint_report(report: Dict[str, Any]) -> Dict[str, Any]:
         normalized["status"] = "fail" if normalized.get("issues") else "pass"
 
     return normalized
-
-def _parse_until(value: Optional[str]) -> Tuple[Optional[int], Optional[int]]:
-    if not value:
-        return None, None
-    parts = [part.strip() for part in value.split(":") if part.strip()]
-    if len(parts) == 2 and parts[0].lower() == "chapter":
-        return int(parts[1]), None
-    if len(parts) == 4 and parts[0].lower() == "chapter" and parts[2].lower() == "scene":
-        return int(parts[1]), int(parts[3])
-    raise ValueError("Invalid --until value. Expected chapter:N or chapter:N:scene:M.")
-
-
-def _chapter_scene_count(chapter: Dict[str, Any]) -> int:
-    count = 0
-    sections = chapter.get("sections", []) if isinstance(chapter.get("sections", []), list) else []
-    for section in sections:
-        if not isinstance(section, dict):
-            continue
-        scenes = section.get("scenes", []) if isinstance(section.get("scenes", []), list) else []
-        count += len([scene for scene in scenes if isinstance(scene, dict)])
-    return count
-
-
-def _outline_summary(outline: Dict[str, Any]) -> Tuple[List[int], Dict[int, int]]:
-    chapter_order: List[int] = []
-    scene_counts: Dict[int, int] = {}
-    chapters = outline.get("chapters", []) if isinstance(outline.get("chapters", []), list) else []
-    for index, chapter in enumerate(chapters, start=1):
-        if not isinstance(chapter, dict):
-            continue
-        chapter_id = chapter.get("chapter_id", index)
-        try:
-            chapter_num = int(chapter_id)
-        except (TypeError, ValueError):
-            continue
-        chapter_order.append(chapter_num)
-        scene_counts[chapter_num] = _chapter_scene_count(chapter)
-    return chapter_order, scene_counts
-
-
-def _build_character_registry(outline: Dict[str, Any]) -> List[Dict[str, str]]:
-    registry: List[Dict[str, str]] = []
-    characters = outline.get("characters", [])
-    if not isinstance(characters, list):
-        return registry
-    for item in characters:
-        if not isinstance(item, dict):
-            continue
-        character_id = str(item.get("character_id") or "").strip()
-        if not character_id:
-            continue
-        name = str(item.get("name") or "").strip()
-        registry.append({"character_id": character_id, "name": name})
-    return registry
-
-
-def _build_thread_registry(outline: Dict[str, Any]) -> List[Dict[str, str]]:
-    registry: List[Dict[str, str]] = []
-    threads = outline.get("threads", [])
-    if not isinstance(threads, list):
-        return registry
-    for item in threads:
-        if not isinstance(item, dict):
-            continue
-        thread_id = str(item.get("thread_id") or "").strip()
-        if not thread_id:
-            continue
-        label = str(item.get("label") or "").strip()
-        status = str(item.get("status") or "").strip()
-        entry = {"thread_id": thread_id}
-        if label:
-            entry["label"] = label
-        if status:
-            entry["status"] = status
-        registry.append(entry)
-    return registry
-
-
-def _character_name_map(registry: List[Dict[str, str]]) -> Dict[str, str]:
-    mapping: Dict[str, str] = {}
-    for entry in registry:
-        if not isinstance(entry, dict):
-            continue
-        char_id = str(entry.get("character_id") or "").strip()
-        name = str(entry.get("name") or "").strip()
-        if char_id:
-            mapping[char_id] = name or char_id
-    return mapping
-
-
-def _character_id_map(registry: List[Dict[str, str]]) -> Dict[str, str]:
-    mapping: Dict[str, str] = {}
-    for entry in registry:
-        if not isinstance(entry, dict):
-            continue
-        char_id = str(entry.get("character_id") or "").strip()
-        name = str(entry.get("name") or "").strip().lower()
-        if name and char_id:
-            mapping[name] = char_id
-        if char_id:
-            mapping[char_id.lower()] = char_id
-    return mapping
-
-
-def _scene_cast_ids_from_outline(outline: Dict[str, Any], chapter_num: int, scene_num: int) -> List[str]:
-    chapter = _find_chapter_outline(outline, chapter_num)
-    scenes: List[Dict[str, Any]] = []
-    sections = chapter.get("sections") if isinstance(chapter, dict) else None
-    if isinstance(sections, list):
-        for section in sections:
-            if not isinstance(section, dict):
-                continue
-            sec_scenes = section.get("scenes")
-            if isinstance(sec_scenes, list):
-                scenes.extend([item for item in sec_scenes if isinstance(item, dict)])
-    else:
-        raw = chapter.get("scenes") if isinstance(chapter, dict) else None
-        if isinstance(raw, list):
-            scenes = [item for item in raw if isinstance(item, dict)]
-    if not scenes:
-        return []
-    index = max(0, scene_num - 1)
-    if index >= len(scenes):
-        return []
-    current = scenes[index]
-    cast_ids = current.get("characters") if isinstance(current, dict) else None
-    if not isinstance(cast_ids, list):
-        return []
-    return [str(item) for item in cast_ids if str(item).strip()]
-
-
-
-def _load_character_states(book_root: Path, scene_card: Dict[str, Any]) -> List[Dict[str, Any]]:
-    cast_ids = scene_card.get("cast_present_ids", []) if isinstance(scene_card, dict) else []
-    if not isinstance(cast_ids, list):
-        cast_ids = []
-    ensure_character_index(book_root)
-    states: List[Dict[str, Any]] = []
-    for char_id in cast_ids:
-        state_path = resolve_character_state_path(book_root, str(char_id))
-        if state_path and state_path.exists():
-            try:
-                loaded = json.loads(state_path.read_text(encoding="utf-8"))
-                if isinstance(loaded, dict):
-                    _ensure_character_continuity_system_state(loaded)
-                states.append(loaded)
-                continue
-            except json.JSONDecodeError:
-                pass
-        states.append({"character_id": str(char_id), "missing": True})
-    return states
-
-def _normalize_continuity_pack(
-    pack: Dict[str, Any],
-    scene_card: Dict[str, Any],
-    thread_registry: List[Dict[str, str]],
-) -> Dict[str, Any]:
-    normalized = dict(pack)
-    allowed_cast = scene_card.get("cast_present", [])
-    if not isinstance(allowed_cast, list):
-        allowed_cast = []
-    allowed_cast = [str(item) for item in allowed_cast if str(item).strip()]
-    cast_present = normalized.get("cast_present", [])
-    if not isinstance(cast_present, list):
-        cast_present = []
-    cast_present = [str(item) for item in cast_present if str(item).strip()]
-    if allowed_cast:
-        filtered_cast = [item for item in cast_present if item in allowed_cast]
-        normalized["cast_present"] = filtered_cast or list(allowed_cast)
-    else:
-        normalized["cast_present"] = []
-
-    allowed_threads = {
-        str(item.get("thread_id")).strip()
-        for item in thread_registry
-        if isinstance(item, dict) and str(item.get("thread_id") or "").strip()
-    }
-    thread_ids = scene_card.get("thread_ids", [])
-    if not isinstance(thread_ids, list):
-        thread_ids = []
-    thread_ids = [str(item) for item in thread_ids if str(item).strip()]
-    open_threads = normalized.get("open_threads", [])
-    if not isinstance(open_threads, list):
-        open_threads = []
-    open_threads = [str(item) for item in open_threads if str(item).strip()]
-    if thread_ids:
-        open_threads = thread_ids
-    if allowed_threads:
-        open_threads = [item for item in open_threads if item in allowed_threads]
-    normalized["open_threads"] = open_threads
-
-    return normalized
-
 
 def _normalize_stat_key(value: str) -> str:
     cleaned = re.sub(r"[^a-zA-Z0-9]+", "_", str(value).strip().lower())
@@ -1030,294 +775,6 @@ def _ensure_style_anchor(
     return text
 
 
-def _scene_state_preflight(
-    workspace: Path,
-    book_root: Path,
-    system_path: Path,
-    scene_card: Dict[str, Any],
-    state: Dict[str, Any],
-    outline: Dict[str, Any],
-    chapter_order: List[int],
-    scene_counts: Dict[int, int],
-    character_registry: List[Dict[str, str]],
-    thread_registry: List[Dict[str, str]],
-    character_states: List[Dict[str, Any]],
-    client: LLMClient,
-    model: str,
-    durable_expand_ids: Optional[List[str]] = None,
-) -> Dict[str, Any]:
-    template = _resolve_template(book_root, "preflight.md")
-    context = _build_preflight_context(book_root, outline, chapter_order, scene_counts, scene_card)
-    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
-    prompt = render_template_file(
-        template,
-        {
-            "scene_card": scene_card,
-            "state": state,
-            "summary": _summary_from_state(state),
-            "character_registry": character_registry,
-            "thread_registry": thread_registry,
-            "character_states": character_states,
-            "item_registry": durable.get("item_registry", {}),
-            "plot_devices": durable.get("plot_devices", {}),
-            "immediate_previous_scene": context.get("immediate_previous_scene", {}),
-            "cast_last_appearance": context.get("cast_last_appearance", []),
-        },
-    )
-
-    messages: List[Message] = [
-        {"role": "system", "content": _system_prompt_for_phase(system_path, book_root / "outline" / "outline.json", "preflight")},
-        {"role": "user", "content": prompt},
-    ]
-
-    response = _chat(
-        workspace,
-        "scene_state_preflight",
-        client,
-        messages,
-        model=model,
-        temperature=0.2,
-        max_tokens=_preflight_max_tokens(),
-        log_extra=_log_scope(book_root, scene_card),
-    )
-
-    retries = _json_retry_count()
-    attempt = 0
-    while True:
-        try:
-            patch = _extract_json(response.text)
-            break
-        except ValueError as exc:
-            if attempt >= retries:
-                raise exc
-            retry_messages = list(messages)
-            retry_messages.append({
-                "role": "user",
-                "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
-            })
-            response = _chat(
-                workspace,
-                f"scene_state_preflight_json_retry{attempt + 1}",
-                client,
-                retry_messages,
-                model=model,
-                temperature=0.2,
-                max_tokens=_preflight_max_tokens(),
-                log_extra=_log_scope(book_root, scene_card),
-            )
-            attempt += 1
-
-    schema_attempt = 0
-    while True:
-        patch = _normalize_state_patch_for_validation(patch, scene_card, preflight=True)
-        try:
-            validate_json(patch, "state_patch")
-            return patch
-        except ValueError as exc:
-            if schema_attempt >= retries:
-                raise
-            retry_messages = list(messages)
-            retry_messages.append({
-                "role": "user",
-                "content": _state_patch_schema_retry_message(exc, prose_required=False),
-            })
-            response = _chat(
-                workspace,
-                f"scene_state_preflight_schema_retry{schema_attempt + 1}",
-                client,
-                retry_messages,
-                model=model,
-                temperature=0.2,
-                max_tokens=_preflight_max_tokens(),
-                log_extra=_log_scope(book_root, scene_card),
-            )
-            patch = _extract_json(response.text)
-            schema_attempt += 1
-
-def _generate_continuity_pack(
-    workspace: Path,
-    book_root: Path,
-    system_path: Path,
-    state: Dict[str, Any],
-    scene_card: Dict[str, Any],
-    character_registry: List[Dict[str, str]],
-    thread_registry: List[Dict[str, str]],
-    character_states: List[Dict[str, Any]],
-    client: LLMClient,
-    model: str,
-    durable_expand_ids: Optional[List[str]] = None,
-) -> Dict[str, Any]:
-    template = _resolve_template(book_root, "continuity_pack.md")
-    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
-    recent_facts = state.get("world", {}).get("recent_facts", [])
-    prompt = render_template_file(
-        template,
-        {
-            "state": state,
-            "summary": _summary_from_state(state),
-            "recent_facts": recent_facts,
-            "scene_card": scene_card,
-            "character_registry": character_registry,
-            "thread_registry": thread_registry,
-            "character_states": character_states,
-            "item_registry": durable.get("item_registry", {}),
-            "plot_devices": durable.get("plot_devices", {}),
-        },
-    )
-
-    messages: List[Message] = [
-        {"role": "system", "content": _system_prompt_for_phase(system_path, book_root / "outline" / "outline.json", "continuity_pack")},
-        {"role": "user", "content": prompt},
-    ]
-
-    response = _chat(
-        workspace,
-        "continuity_pack",
-        client,
-        messages,
-        model=model,
-        temperature=0.4,
-        max_tokens=_continuity_max_tokens(),
-        log_extra=_log_scope(book_root, scene_card),
-    )
-
-    retries = _json_retry_count()
-    attempt = 0
-    while True:
-        try:
-            data = _extract_json(response.text)
-            break
-        except ValueError as exc:
-            if attempt >= retries:
-                raise exc
-            retry_messages = list(messages)
-            retry_messages.append({
-                "role": "user",
-                "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
-            })
-            response = _chat(
-                workspace,
-                f"continuity_pack_json_retry{attempt + 1}",
-                client,
-                retry_messages,
-                model=model,
-                temperature=0.4,
-                max_tokens=_continuity_max_tokens(),
-                log_extra=_log_scope(book_root, scene_card),
-            )
-            attempt += 1
-    data = _normalize_continuity_pack(data, scene_card, thread_registry)
-    data["summary"] = _summary_from_state(state)
-    pack = ContinuityPack.from_dict(data)
-    save_continuity_pack(continuity_pack_path(book_root), pack)
-    return pack.to_dict()
-
-
-def _write_scene(
-    workspace: Path,
-    book_root: Path,
-    system_path: Path,
-    scene_card: Dict[str, Any],
-    continuity_pack: Dict[str, Any],
-    state: Dict[str, Any],
-    style_anchor: str,
-    character_registry: List[Dict[str, str]],
-    thread_registry: List[Dict[str, str]],
-    character_states: List[Dict[str, Any]],
-    client: LLMClient,
-    model: str,
-    durable_expand_ids: Optional[List[str]] = None,
-) -> Tuple[str, Dict[str, Any]]:
-    template = _resolve_template(book_root, "write.md")
-    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
-    prompt = render_template_file(
-        template,
-        {
-            "scene_card": scene_card,
-            "continuity_pack": continuity_pack,
-            "state": state,
-            "style_anchor": style_anchor,
-            "character_registry": character_registry,
-            "thread_registry": thread_registry,
-            "character_states": character_states,
-            "item_registry": durable.get("item_registry", {}),
-            "plot_devices": durable.get("plot_devices", {}),
-        },
-    )
-
-    messages: List[Message] = [
-        {"role": "system", "content": _system_prompt_for_phase(system_path, book_root / "outline" / "outline.json", "write")},
-        {"role": "user", "content": prompt},
-    ]
-
-    response = _chat(
-        workspace,
-        "write_scene",
-        client,
-        messages,
-        model=model,
-        temperature=0.7,
-        max_tokens=_write_max_tokens(),
-        log_extra=_log_scope(book_root, scene_card),
-    )
-
-    retries = _json_retry_count()
-    attempt = 0
-    while True:
-        try:
-            prose, patch = _extract_prose_and_patch(response.text)
-            break
-        except ValueError as exc:
-            if attempt >= retries:
-                extra = ""
-                if _response_truncated(response):
-                    extra = f" Model output hit MAX_TOKENS ({_write_max_tokens()}); increase BOOKFORGE_WRITE_MAX_TOKENS."
-                raise ValueError(f"{exc}{extra}") from exc
-            retry_messages = list(messages)
-            retry_messages.append({
-                "role": "user",
-                "content": "Return PROSE plus a STATE_PATCH JSON block. Output format: PROSE: <text> then STATE_PATCH: <json>. No markdown.",
-            })
-            response = _chat(
-                workspace,
-                f"write_scene_json_retry{attempt + 1}",
-                client,
-                retry_messages,
-                model=model,
-                temperature=0.7,
-                max_tokens=_write_max_tokens(),
-                log_extra=_log_scope(book_root, scene_card),
-            )
-            attempt += 1
-
-    schema_attempt = 0
-    while True:
-        patch = _normalize_state_patch_for_validation(patch, scene_card)
-        try:
-            validate_json(patch, "state_patch")
-            return prose, patch
-        except ValueError as exc:
-            if schema_attempt >= retries:
-                raise
-            retry_messages = list(messages)
-            retry_messages.append({
-                "role": "user",
-                "content": _state_patch_schema_retry_message(exc, prose_required=True),
-            })
-            response = _chat(
-                workspace,
-                f"write_scene_schema_retry{schema_attempt + 1}",
-                client,
-                retry_messages,
-                model=model,
-                temperature=0.7,
-                max_tokens=_write_max_tokens(),
-                log_extra=_log_scope(book_root, scene_card),
-            )
-            prose, patch = _extract_prose_and_patch(response.text)
-            schema_attempt += 1
-
-
 def _lint_scene(
     workspace: Path,
     book_root: Path,
@@ -1421,215 +878,6 @@ def _lint_scene(
         report["status"] = _lint_status_from_issues(report.get("issues", []))
     validate_json(report, "lint_report")
     return report
-
-
-def _repair_scene(
-    workspace: Path,
-    book_root: Path,
-    system_path: Path,
-    prose: str,
-    lint_report: Dict[str, Any],
-    state: Dict[str, Any],
-    scene_card: Dict[str, Any],
-    character_registry: List[Dict[str, str]],
-    thread_registry: List[Dict[str, str]],
-    character_states: List[Dict[str, Any]],
-    client: LLMClient,
-    model: str,
-    durable_expand_ids: Optional[List[str]] = None,
-) -> Tuple[str, Dict[str, Any]]:
-    template = _resolve_template(book_root, "repair.md")
-    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
-    prompt = render_template_file(
-        template,
-        {
-            "issues": lint_report.get("issues", []),
-            "prose": prose,
-            "state": state,
-            "scene_card": scene_card,
-            "character_registry": character_registry,
-            "thread_registry": thread_registry,
-            "character_states": character_states,
-            "item_registry": durable.get("item_registry", {}),
-            "plot_devices": durable.get("plot_devices", {}),
-        },
-    )
-
-    messages: List[Message] = [
-        {"role": "system", "content": _system_prompt_for_phase(system_path, book_root / "outline" / "outline.json", "repair")},
-        {"role": "user", "content": prompt},
-    ]
-
-    response = _chat(
-        workspace,
-        "repair_scene",
-        client,
-        messages,
-        model=model,
-        temperature=0.4,
-        max_tokens=_repair_max_tokens(),
-        log_extra=_log_scope(book_root, scene_card),
-    )
-
-    retries = _json_retry_count()
-    attempt = 0
-    while True:
-        try:
-            prose, patch = _extract_prose_and_patch(response.text)
-            break
-        except ValueError as exc:
-            if attempt >= retries:
-                extra = ""
-                if _response_truncated(response):
-                    extra = f" Model output hit MAX_TOKENS ({_repair_max_tokens()}); increase BOOKFORGE_REPAIR_MAX_TOKENS."
-                raise ValueError(f"{exc}{extra}") from exc
-            retry_messages = list(messages)
-            retry_messages.append({
-                "role": "user",
-                "content": "Return PROSE plus a STATE_PATCH JSON block. Output format: PROSE: <text> then STATE_PATCH: <json>. No markdown.",
-            })
-            response = _chat(
-                workspace,
-                f"repair_scene_json_retry{attempt + 1}",
-                client,
-                retry_messages,
-                model=model,
-                temperature=0.4,
-                max_tokens=_repair_max_tokens(),
-                log_extra=_log_scope(book_root, scene_card),
-            )
-            attempt += 1
-
-    schema_attempt = 0
-    while True:
-        patch = _normalize_state_patch_for_validation(patch, scene_card)
-        try:
-            validate_json(patch, "state_patch")
-            return prose, patch
-        except ValueError as exc:
-            if schema_attempt >= retries:
-                raise
-            retry_messages = list(messages)
-            retry_messages.append({
-                "role": "user",
-                "content": _state_patch_schema_retry_message(exc, prose_required=True),
-            })
-            response = _chat(
-                workspace,
-                f"repair_scene_schema_retry{schema_attempt + 1}",
-                client,
-                retry_messages,
-                model=model,
-                temperature=0.4,
-                max_tokens=_repair_max_tokens(),
-                log_extra=_log_scope(book_root, scene_card),
-            )
-            prose, patch = _extract_prose_and_patch(response.text)
-            schema_attempt += 1
-
-
-def _state_repair(
-    workspace: Path,
-    book_root: Path,
-    system_path: Path,
-    prose: str,
-    state: Dict[str, Any],
-    scene_card: Dict[str, Any],
-    continuity_pack: Dict[str, Any],
-    draft_patch: Dict[str, Any],
-    character_registry: List[Dict[str, str]],
-    thread_registry: List[Dict[str, str]],
-    character_states: List[Dict[str, Any]],
-    client: LLMClient,
-    model: str,
-    durable_expand_ids: Optional[List[str]] = None,
-) -> Dict[str, Any]:
-    template = _resolve_template(book_root, "state_repair.md")
-    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
-    prompt = render_template_file(
-        template,
-        {
-            "prose": prose,
-            "state": state,
-            "summary": _summary_from_state(state),
-            "scene_card": scene_card,
-            "continuity_pack": continuity_pack,
-            "draft_patch": draft_patch,
-            "character_registry": character_registry,
-            "thread_registry": thread_registry,
-            "character_states": character_states,
-            "item_registry": durable.get("item_registry", {}),
-            "plot_devices": durable.get("plot_devices", {}),
-        },
-    )
-
-    messages: List[Message] = [
-        {"role": "system", "content": _system_prompt_for_phase(system_path, book_root / "outline" / "outline.json", "state_repair")},
-        {"role": "user", "content": prompt},
-    ]
-
-    response = _chat(
-        workspace,
-        "state_repair",
-        client,
-        messages,
-        model=model,
-        temperature=0.2,
-        max_tokens=_state_repair_max_tokens(),
-        log_extra=_log_scope(book_root, scene_card),
-    )
-
-    retries = _json_retry_count()
-    attempt = 0
-    while True:
-        try:
-            patch = _extract_json(response.text)
-            break
-        except ValueError as exc:
-            if attempt >= retries:
-                raise exc
-            retry_messages = list(messages)
-            retry_messages.append({
-                "role": "user",
-                "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
-            })
-            response = _chat(
-                workspace,
-                f"state_repair_json_retry{attempt + 1}",
-                client,
-                retry_messages,
-                model=model,
-                temperature=0.2,
-                max_tokens=_state_repair_max_tokens(),
-                log_extra=_log_scope(book_root, scene_card),
-            )
-            attempt += 1
-    schema_attempt = 0
-    while True:
-        patch = _normalize_state_patch_for_validation(patch, scene_card)
-        try:
-            validate_json(patch, "state_patch")
-            return patch
-        except ValueError as exc:
-            if schema_attempt >= retries:
-                raise
-            retry_messages = list(messages)
-            retry_messages.append({
-                "role": "user",
-                "content": _state_patch_schema_retry_message(exc, prose_required=False),
-            })
-            response = _chat(
-                workspace,
-                f"state_repair_schema_retry{schema_attempt + 1}",
-                client,
-                retry_messages,
-                model=model,
-                temperature=0.2,
-                max_tokens=_state_repair_max_tokens(),
-                log_extra=_log_scope(book_root, scene_card),
-            )
-            patch = _extract_json(response.text)
-            schema_attempt += 1
 
 
 def run_loop(
@@ -2138,6 +1386,30 @@ def run_loop(
 
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
