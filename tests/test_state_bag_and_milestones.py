@@ -1,4 +1,4 @@
-from bookforge.runner import (
+﻿from bookforge.runner import (
     _apply_bag_updates,
     _coerce_stat_updates,
     _coerce_transfer_updates,
@@ -41,7 +41,7 @@ def test_milestone_duplicate_detected_for_shard_bind() -> None:
     invariants = ["milestone: shard_bind = DONE"]
     prose = "He bound and then binding the shard to his bloodline in a panic."
 
-    issues = _heuristic_invariant_issues(prose, {}, invariants)
+    issues = _heuristic_invariant_issues(prose, {}, invariants, [])
 
     assert any(issue.get("code") == "milestone_duplicate" for issue in issues)
 
@@ -50,7 +50,7 @@ def test_milestone_early_detected_for_maps_acquired() -> None:
     invariants = ["milestone: maps_acquired = NOT_YET"]
     prose = "She retrieved the maps and unfurled them on the table."
 
-    issues = _heuristic_invariant_issues(prose, {}, invariants)
+    issues = _heuristic_invariant_issues(prose, {}, invariants, [])
 
     assert any(issue.get("code") == "milestone_future" for issue in issues)
 
@@ -399,3 +399,9 @@ def test_coerce_inventory_alignment_updates_unwraps_object() -> None:
     assert isinstance(updates, list)
     assert updates[0]["character_id"] == "CHAR_ARTIE"
     assert updates[0]["reason_category"] == "location_jump_normalize"
+
+
+def test_pov_drift_ignores_first_person_dialogue() -> None:
+    prose = "He said, \"I will go now,\" and left."
+    issues = _pov_drift_issues(prose, "third_limited")
+    assert not issues

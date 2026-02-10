@@ -1,0 +1,163 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "reason": "Fatal electrocution and transition to System void.",
+      "scene": 1,
+      "set": {
+        "resources": {
+          "luck": {
+            "current": -1,
+            "max": 100,
+            "status": "integer_underflow"
+          }
+        },
+        "stats": {
+          "hp": {
+            "current": 0,
+            "max": 10
+          }
+        },
+        "statuses": [
+          {
+            "description": "Physical form terminated by electrical surge.",
+            "name": "Deceased",
+            "type": "death"
+          }
+        ]
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "pocket_left",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "inventory": [
+        {
+          "container": "pocket_left",
+          "item_id": "ITEM_ID_BADGE",
+          "status": "stowed"
+        },
+        {
+          "container": "body",
+          "item_id": "ITEM_CHEAP_SUIT",
+          "status": "equipped"
+        }
+      ],
+      "persona_updates": [
+        "Views his own death with a mix of snark and resignation.",
+        "Recognizes his life as a series of low rolls and glitches."
+      ],
+      "scene": 1
+    }
+  ],
+  "global_continuity_system_updates": [],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "item_id": "ITEM_DOLLAR_COIN",
+      "new_container": "environment",
+      "new_status": "lost",
+      "reason_category": "after_combat_cleanup"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_DOLLAR_COIN",
+      "set": {
+        "custodian": "environment",
+        "last_seen": {
+          "chapter": 1,
+          "location": "Office Breakroom",
+          "scene": 1
+        },
+        "state_tags": [
+          "lost",
+          "consumed"
+        ]
+      }
+    },
+    {
+      "item_id": "ITEM_ID_BADGE",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "location": "Office Breakroom",
+          "scene": 1
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_CHEAP_SUIT",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "location": "Office Breakroom",
+          "scene": 1
+        }
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie died in an office breakroom after being electrocuted by a vending machine.",
+      "The System intercepted Artie's soul, identifying a Luck stat underflow anomaly."
+    ],
+    "key_events": [
+      "Artie inserted a One Dollar Coin into the Snack-O-Matic 9000 to buy Zesty Ranch Zings.",
+      "The bag of chips became stuck, leading Artie to shake the machine and reach inside.",
+      "A fatal electrical surge struck Artie, dealing 10 damage and reducing his HP to 0.",
+      "Artie's consciousness transitioned to a grey digital void after his physical death.",
+      "The System identified Artie as a 'Statistical Anomaly' due to a Luck stat integer underflow.",
+      "The System offered Artie a 'Beta-Glitch' Compensation Package and initiated Character Creation."
+    ],
+    "last_scene": [
+      "Artie's attempt to retrieve a stuck bag of Zesty Ranch Zings from an office vending machine ended in a fatal electrical surge. His HP dropped to zero, and his consciousness transitioned into a grey digital void. There, the System identified him as a statistical anomaly due to a Luck stat underflow and initiated character creation."
+    ],
+    "must_stay_true": [
+      "milestone: vending_machine_death = DONE",
+      "milestone: system_void_entry = DONE",
+      "milestone: luck_stat_underflow = DONE",
+      "Artie's physical body remains in the Office Breakroom (deceased).",
+      "Artie's current HP is 0/10.",
+      "Artie is currently located in the Character Creation Void.",
+      "The One Dollar Coin is lost within the vending machine."
+    ]
+  },
+  "threads_touched": [
+    "THREAD_CRIT_EXPLOIT",
+    "THREAD_SYSTEM_GLITCH"
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_DOLLAR_COIN",
+      "reason": "Inserted into Snack-O-Matic 9000 and lost upon character death."
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Character Creation Void",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ],
+    "recent_facts": [
+      "Artie is dead in the physical world.",
+      "The System has flagged Artie for a compensation package due to a glitch in his Luck stat.",
+      "The current environment is a non-physical digital void."
+    ]
+  }
+}

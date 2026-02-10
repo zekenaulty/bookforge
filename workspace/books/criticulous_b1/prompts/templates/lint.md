@@ -12,9 +12,13 @@ Return ONLY JSON matching the lint_report schema.
 - status="fail" only if there is at least one issue with severity="error"; warnings alone => status="pass".
 - Treat only authoritative surfaces as canonical-check targets; do not enforce canonical labels in narrative prose.
 - For authoritative surfaces, prefer exact canonical item/device labels from registries.
+- For milestone repetition/future checks, compare against PRE-INVARIANTS only (pre-scene canon).
+- For ownership/consistency checks, compare against POST-STATE (post-patch candidate).
 - Check for POV drift vs book POV (no first-person in third-person scenes).
-- Deterministically enforce scene-card durable constraints (`required_in_custody`, `required_scene_accessible`, `forbidden_visible`, `device_presence`; optional `required_visible_on_page`).
+  - Ignore first-person pronouns inside quoted dialogue; only narration counts.
+- Deterministically enforce scene-card durable constraints (required_in_custody, required_scene_accessible, forbidden_visible, device_presence; optional required_visible_on_page).
 - Report missing durable context ids with explicit retry hints instead of guessing canon.
+- For each issue, include evidence when possible (line number + excerpt) as {"evidence": {"line": N, "excerpt": "..."}}.
 
 Required keys:
 - schema_version ("1.0")
@@ -26,6 +30,7 @@ Each issue object must include:
 - message
 Optional:
 - severity
+- evidence
 
 If there are no issues, return:
 {
@@ -58,11 +63,20 @@ Item registry (canonical):
 Plot devices (canonical):
 {{plot_devices}}
 
-State:
+Pre-state (before patch):
+{{pre_state}}
+
+Pre-summary (facts-only):
+{{pre_summary}}
+
+Pre-invariants (must_stay_true + key facts):
+{{pre_invariants}}
+
+Post-state candidate (after patch):
 {{state}}
 
-Summary (facts-only):
+Post-summary (facts-only):
 {{summary}}
 
-Invariants (must_stay_true + key facts):
+Post-invariants (must_stay_true + key facts):
 {{invariants}}

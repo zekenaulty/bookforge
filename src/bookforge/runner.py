@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
@@ -1232,20 +1232,24 @@ def _coerce_inventory_alignment_updates(patch: Dict[str, Any]) -> None:
         parent_reason = raw_updates.get("reason")
         parent_category = raw_updates.get("reason_category")
         parent_expected = raw_updates.get("expected_before")
-        updates_list = raw_updates.get("updates") if isinstance(raw_updates.get("updates"), list) else []
-        normalized: List[Dict[str, Any]] = []
-        for update in updates_list:
-            if not isinstance(update, dict):
-                continue
-            fixed = dict(update)
-            if parent_reason and not fixed.get("reason"):
-                fixed["reason"] = parent_reason
-            if parent_category and not fixed.get("reason_category"):
-                fixed["reason_category"] = parent_category
-            if parent_expected and not fixed.get("expected_before"):
-                fixed["expected_before"] = parent_expected
-            normalized.append(fixed)
-        patch["inventory_alignment_updates"] = normalized
+        updates_list = raw_updates.get("updates")
+        if isinstance(updates_list, list):
+            normalized: List[Dict[str, Any]] = []
+            for update in updates_list:
+                if not isinstance(update, dict):
+                    continue
+                fixed = dict(update)
+                if parent_reason and not fixed.get("reason"):
+                    fixed["reason"] = parent_reason
+                if parent_category and not fixed.get("reason_category"):
+                    fixed["reason_category"] = parent_category
+                if parent_expected and not fixed.get("expected_before"):
+                    fixed["expected_before"] = parent_expected
+                normalized.append(fixed)
+            patch["inventory_alignment_updates"] = normalized
+            return
+
+        patch["inventory_alignment_updates"] = [dict(raw_updates)]
         return
 
     if not isinstance(raw_updates, list):
@@ -2492,18 +2496,59 @@ def _stat_mismatch_issues(
             "severity": "warning",
         })
     return issues
+def _strip_dialogue(text: str) -> str:
+    if not text:
+        return ""
+    output: List[str] = []
+    in_double = False
+    in_single = False
+    for idx, ch in enumerate(text):
+        if ch in {"\"", "\u201c", "\u201d"}:
+            in_double = not in_double
+            continue
+        if ch == "'":
+            prev = text[idx - 1] if idx > 0 else ""
+            nxt = text[idx + 1] if idx + 1 < len(text) else ""
+            if not in_double and (not prev.isalnum()) and nxt.isalpha():
+                in_single = not in_single
+                continue
+        if in_double or in_single:
+            if ch == "\n":
+                output.append(ch)
+            continue
+        output.append(ch)
+    return "".join(output)
+
+
+def _find_first_match_evidence(pattern: str, text: str) -> Optional[Dict[str, Any]]:
+    match = re.search(pattern, text)
+    if not match:
+        return None
+    start = match.start()
+    line_no = text.count("\n", 0, start) + 1
+    lines = text.splitlines()
+    line_text = lines[line_no - 1].strip() if 0 <= line_no - 1 < len(lines) else ""
+    return {"line": line_no, "excerpt": line_text}
+
+
 def _pov_drift_issues(prose: str, pov: Optional[str]) -> List[Dict[str, Any]]:
     if not pov:
         return []
     pov_key = str(pov).lower()
     if not pov_key.startswith("third"):
         return []
-    if re.search(r"\b(I|I'm|I've|I'd|me|my|mine)\b", prose):
-        return [{
+    narration = _strip_dialogue(prose)
+    pattern = r"\b(I|I'm|I've|I'd|me|my|mine)\b"
+    if re.search(pattern, narration):
+        evidence = _find_first_match_evidence(pattern, narration)
+        issue: Dict[str, Any] = {
             "code": "pov_drift",
-            "message": "First-person pronouns detected in third-person POV scene.",
+            "message": "First-person pronouns detected in third-person POV scene (narration only; dialogue ignored).",
             "severity": "warning",
-        }]
+        }
+        if evidence:
+            issue["evidence"] = evidence
+        return [issue]
     return []
 
 
@@ -2802,9 +2847,10 @@ def _contains_any(text: str, terms: List[str]) -> bool:
 def _heuristic_invariant_issues(
     prose: str,
     summary_update: Dict[str, Any],
-    invariants: List[str],
+    pre_invariants: List[str],
+    post_invariants: List[str],
 ) -> List[Dict[str, Any]]:
-    if not invariants:
+    if not pre_invariants and not post_invariants:
         return []
     prose_lower = prose.lower()
     observed = prose_lower
@@ -2825,7 +2871,8 @@ def _heuristic_invariant_issues(
     dead = ["dead", "killed", "slain", "corpse"]
 
     issues: List[Dict[str, Any]] = []
-    for invariant in invariants:
+    invariants_for_contradiction = post_invariants or pre_invariants
+    for invariant in invariants_for_contradiction:
         inv_text = str(invariant).strip().lower()
         if not inv_text:
             continue
@@ -2897,7 +2944,8 @@ def _heuristic_invariant_issues(
     }
 
     milestones: List[tuple[str, str]] = []
-    for invariant in invariants:
+    invariants_for_milestones = pre_invariants or post_invariants
+    for invariant in invariants_for_milestones:
         match = re.search(r"milestone\s*:\s*([a-z0-9_\- ]+)\s*=\s*(done|not_yet)", str(invariant), re.IGNORECASE)
         if not match:
             continue
@@ -2932,7 +2980,7 @@ def _heuristic_invariant_issues(
                 "severity": "warning",
             })
 
-    invariant_text = " ".join([str(item).lower() for item in invariants])
+    invariant_text = " ".join([str(item).lower() for item in invariants_for_contradiction])
     if "right" in invariant_text and re.search(r"\bleft\s+(arm|forearm|hand)\b.{0,40}\b(scar|mark|filament|oath|sigil)\b", prose_lower):
         issues.append({
             "code": "arm_side_mismatch",
@@ -3627,7 +3675,7 @@ def _scene_state_preflight(
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "preflight.md")
     context = _build_preflight_context(book_root, outline, chapter_order, scene_counts, scene_card)
-    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
+    durable = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
     prompt = render_template_file(
         template,
         {
@@ -3727,7 +3775,7 @@ def _generate_continuity_pack(
     durable_expand_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "continuity_pack.md")
-    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
+    durable = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
     recent_facts = state.get("world", {}).get("recent_facts", [])
     prompt = render_template_file(
         template,
@@ -3808,7 +3856,7 @@ def _write_scene(
     durable_expand_ids: Optional[List[str]] = None,
 ) -> Tuple[str, Dict[str, Any]]:
     template = _resolve_template(book_root, "write.md")
-    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
+    durable = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
     prompt = render_template_file(
         template,
         {
@@ -3902,10 +3950,12 @@ def _lint_scene(
     book_root: Path,
     system_path: Path,
     prose: str,
-    state: Dict[str, Any],
+    pre_state: Dict[str, Any],
+    post_state: Dict[str, Any],
     patch: Dict[str, Any],
     scene_card: Dict[str, Any],
-    invariants: List[str],
+    pre_invariants: List[str],
+    post_invariants: List[str],
     character_states: List[Dict[str, Any]],
     pov: Optional[str],
     client: LLMClient,
@@ -3913,15 +3963,18 @@ def _lint_scene(
     durable_expand_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "lint.md")
-    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
+    durable = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
     authoritative_surfaces = _extract_authoritative_surfaces(prose)
     prompt = render_template_file(
         template,
         {
             "prose": prose,
-            "state": state,
-            "summary": _summary_from_state(state),
-            "invariants": invariants,
+            "pre_state": pre_state,
+            "state": post_state,
+            "pre_summary": _summary_from_state(pre_state),
+            "summary": _summary_from_state(post_state),
+            "pre_invariants": pre_invariants,
+            "invariants": post_invariants,
             "authoritative_surfaces": authoritative_surfaces,
             "item_registry": durable.get("item_registry", {}),
             "plot_devices": durable.get("plot_devices", {}),
@@ -3974,11 +4027,11 @@ def _lint_scene(
     summary_update = patch.get("summary_update") if isinstance(patch, dict) else {}
     if not isinstance(summary_update, dict):
         summary_update = {}
-    heuristic_issues = _heuristic_invariant_issues(prose, summary_update, invariants)
+    heuristic_issues = _heuristic_invariant_issues(prose, summary_update, pre_invariants, post_invariants)
     extra_issues = _stat_mismatch_issues(
         prose,
         character_states,
-        _global_continuity_stats(state),
+        _global_continuity_stats(post_state),
         authoritative_surfaces=authoritative_surfaces,
     )
     extra_issues += _pov_drift_issues(prose, pov)
@@ -4009,7 +4062,7 @@ def _repair_scene(
     durable_expand_ids: Optional[List[str]] = None,
 ) -> Tuple[str, Dict[str, Any]]:
     template = _resolve_template(book_root, "repair.md")
-    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
+    durable = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
     prompt = render_template_file(
         template,
         {
@@ -4115,7 +4168,7 @@ def _state_repair(
     durable_expand_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "state_repair.md")
-    durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
+    durable = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
     prompt = render_template_file(
         template,
         {
@@ -4630,12 +4683,18 @@ def run_loop(
             _pause_on_quota(book_root, state_path, state, "state_repair", exc, scene_card)
         _status("State repair complete OK")
 
+        pre_lint_state = json.loads(json.dumps(state))
+        pre_summary = _summary_from_state(pre_lint_state)
+        pre_invariants = list(base_invariants)
+        pre_invariants += pre_summary.get("must_stay_true", [])
+        pre_invariants += pre_summary.get("key_facts_ring", [])
+
         lint_state = json.loads(json.dumps(state))
         lint_state = _apply_state_patch(lint_state, patch, chapter_end=chapter_end)
-        summary = _summary_from_state(lint_state)
-        invariants = list(base_invariants)
-        invariants += summary.get("must_stay_true", [])
-        invariants += summary.get("key_facts_ring", [])
+        post_summary = _summary_from_state(lint_state)
+        post_invariants = list(base_invariants)
+        post_invariants += post_summary.get("must_stay_true", [])
+        post_invariants += post_summary.get("key_facts_ring", [])
 
         lint_mode = _lint_mode()
 
@@ -4650,10 +4709,12 @@ def run_loop(
                     book_root,
                     system_path,
                     prose,
+                    pre_lint_state,
                     lint_state,
                     patch,
                     scene_card,
-                    invariants,
+                    pre_invariants,
+                    post_invariants,
                     character_states,
                     book.get("pov"),
                     linter_client,
@@ -4726,12 +4787,18 @@ def run_loop(
                     _pause_on_quota(book_root, state_path, state, "state_repair", exc, scene_card)
                 _status("State repair complete OK")
 
+                pre_lint_state = json.loads(json.dumps(state))
+                pre_summary = _summary_from_state(pre_lint_state)
+                pre_invariants = list(base_invariants)
+                pre_invariants += pre_summary.get("must_stay_true", [])
+                pre_invariants += pre_summary.get("key_facts_ring", [])
+
                 lint_state = json.loads(json.dumps(state))
                 lint_state = _apply_state_patch(lint_state, patch, chapter_end=chapter_end)
-                summary = _summary_from_state(lint_state)
-                invariants = list(base_invariants)
-                invariants += summary.get("must_stay_true", [])
-                invariants += summary.get("key_facts_ring", [])
+                post_summary = _summary_from_state(lint_state)
+                post_invariants = list(base_invariants)
+                post_invariants += post_summary.get("must_stay_true", [])
+                post_invariants += post_summary.get("key_facts_ring", [])
 
                 _status(f"Linting scene: ch{chapter_num:03d} sc{scene_num:03d}...")
                 try:
@@ -4740,10 +4807,12 @@ def run_loop(
                         book_root,
                         system_path,
                         prose,
+                        pre_lint_state,
                         lint_state,
                         patch,
                         scene_card,
-                        invariants,
+                        pre_invariants,
+                        post_invariants,
                         character_states,
                         book.get("pov"),
                         linter_client,
@@ -4866,6 +4935,34 @@ def run_loop(
 
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

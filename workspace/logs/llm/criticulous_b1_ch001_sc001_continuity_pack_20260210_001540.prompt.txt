@@ -1,0 +1,558 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Item naming: use display_name for prose; use item_id only in JSON/patches. The display_name must be human readable and not an escaped id/name.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+﻿Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+
+
+USER:
+
+# CONTINUITY PACK
+
+Create a continuity pack JSON object with these fields:
+- scene_end_anchor: 2-4 factual sentences about how the last scene ended (no prose).
+- constraints: list of immediate continuity constraints.
+- open_threads: list of active thread ids.
+- cast_present: list of character names present next.
+- location: location id or name.
+- next_action: the implied next action.
+- summary: echo state.summary (facts-only arrays; do not paraphrase).
+
+Return ONLY JSON.
+
+Rules:
+- Use only characters listed in scene_card.cast_present. Do not introduce new names.
+- summary must match state.summary and remain facts-only; do not add prose.
+- constraints must include the highest-priority invariants from summary.must_stay_true and summary.key_facts_ring (copy exact strings when possible).
+- constraints must include the highest-priority inventory/container invariants from summary.must_stay_true (copy exact strings when possible).
+- If character_states are provided, prefer their inventory/container facts and continuity mechanic facts; do not invent conflicting values.
+- If item_registry or plot_devices are provided, reuse canonical names/ids in constraints when referencing durable items/devices.
+- Prefer item_registry.items[].display_name for prose references; reserve item_id for canonical JSON. The display_name must be human readable and not an escaped id/name.
+- If state.global_continuity_system_state contains canonical mechanic labels/values, reuse those exact labels in constraints.
+- If scene_card.cast_present is empty, cast_present must be an empty array.
+- open_threads must be a subset of thread_registry thread_id values.
+- If scene_card.thread_ids is present, prefer those thread ids.
+- Do not invent new thread ids or character names.
+
+Scene card:
+{
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE"
+  ],
+  "chapter": 1,
+  "conflict": "Artie vs. a malfunctioning vending machine.",
+  "constraints": [
+    "target_words: 2000",
+    "no-recaps",
+    "forward-motion"
+  ],
+  "continuity_system_focus": [
+    "stats",
+    "titles"
+  ],
+  "device_presence": [],
+  "end_condition": "Artie is electrocuted and the first System prompt appears in the void.",
+  "forbidden_visible": [],
+  "goal": "Establish Artie's mundane life and sudden, absurd death.",
+  "introduces": [
+    "Arthur 'Artie' Penhaligon"
+  ],
+  "introduces_ids": [
+    "CHAR_ARTIE"
+  ],
+  "ontological_scope": "real",
+  "required_callbacks": [],
+  "required_in_custody": [
+    "ITEM_DOLLAR_COIN",
+    "ITEM_ID_BADGE",
+    "ITEM_CHEAP_SUIT"
+  ],
+  "required_scene_accessible": [
+    "ITEM_DOLLAR_COIN"
+  ],
+  "required_visible_on_page": [
+    "ITEM_DOLLAR_COIN"
+  ],
+  "scene": 1,
+  "scene_id": "SC_001_001",
+  "scene_target": "Artie dies and enters the System's character creation void.",
+  "schema_version": "1.1",
+  "thread_ids": [],
+  "timeline_scope": "present",
+  "transition_type": "setup",
+  "ui_mechanics_expected": [
+    "HP",
+    "System Notification"
+  ]
+}
+
+Character registry (id -> name):
+[
+  {
+    "character_id": "CHAR_ARTIE",
+    "name": "Arthur 'Artie' Penhaligon"
+  },
+  {
+    "character_id": "CHAR_FIZZ",
+    "name": "Fizz"
+  },
+  {
+    "character_id": "CHAR_VANE",
+    "name": "Vane"
+  },
+  {
+    "character_id": "CHAR_MAYOR",
+    "name": "Mayor of Oakhaven"
+  },
+  {
+    "character_id": "CHAR_BOSS",
+    "name": "The System Administrator"
+  }
+]
+
+Thread registry:
+[
+  {
+    "label": "The 100% Crit Glitch",
+    "status": "open",
+    "thread_id": "THREAD_CRIT_EXPLOIT"
+  },
+  {
+    "label": "The Vane Vendetta",
+    "status": "open",
+    "thread_id": "THREAD_VANE_RIVALRY"
+  },
+  {
+    "label": "The System's Stability",
+    "status": "open",
+    "thread_id": "THREAD_SYSTEM_GLITCH"
+  },
+  {
+    "label": "The Path of the First Glitch",
+    "status": "open",
+    "thread_id": "THREAD_THE_ASCENSION"
+  }
+]
+
+Character states (per cast_present_ids):
+[
+  {
+    "character_continuity_system_state": {
+      "resources": {
+        "luck": {
+          "current": 1,
+          "max": 100
+        }
+      },
+      "skills": {
+        "passive_aggressive_emailing": 2,
+        "spreadsheet_management": 4
+      },
+      "stats": {
+        "hp": {
+          "current": 10,
+          "max": 10
+        }
+      },
+      "titles": [
+        {
+          "active": true,
+          "name": "Unsuspecting Victim",
+          "source": "environmental_hazard"
+        }
+      ]
+    },
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "pocket_left",
+        "contents": [
+          "ITEM_ID_BADGE"
+        ],
+        "location": "pants_left",
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "pocket_right",
+        "contents": [],
+        "location": "pants_right",
+        "owner": "CHAR_ARTIE"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie starts the scene in the office breakroom, holding a dollar coin and wearing his cheap suit.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initialize pre-death stats and titles for the opening scene.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial scene setup and constraint enforcement for required items.",
+        "scene": 1
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> dollar_coin (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> plastic_id_badge (status=stowed, container=pocket_left)",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[plastic_id_badge])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[])"
+    ],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item_id": "ITEM_DOLLAR_COIN",
+        "status": "carried"
+      },
+      {
+        "container": "pocket_left",
+        "item_id": "ITEM_ID_BADGE",
+        "status": "stowed"
+      },
+      {
+        "container": "body",
+        "item_id": "ITEM_CHEAP_SUIT",
+        "status": "equipped"
+      }
+    ],
+    "last_touched": {
+      "chapter": 1,
+      "scene": 1
+    },
+    "name": "Arthur 'Artie' Penhaligon",
+    "schema_version": "1.0",
+    "skills": {
+      "passive_aggressive_emailing": 2,
+      "spreadsheet_management": 4
+    },
+    "stats": {
+      "hp": {
+        "current": 10,
+        "max": 10
+      }
+    },
+    "updated_at": "2026-02-10T00:15:24Z"
+  }
+]
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-10T00:09:51Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 1
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {},
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_001.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "PLANNED",
+  "summary": {
+    "chapter_so_far": [],
+    "key_facts_ring": [],
+    "last_scene": [],
+    "must_stay_true": [],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Office Breakroom",
+    "open_threads": [],
+    "recent_facts": [],
+    "time": {}
+  }
+}
+
+Summary (facts-only):
+{
+  "chapter_so_far": [],
+  "key_facts_ring": [],
+  "last_scene": [],
+  "must_stay_true": [],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Recent facts:
+[]
+Item registry (canonical):
+{
+  "items": [
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Polyester Suit",
+      "item_id": "ITEM_CHEAP_SUIT",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Office Breakroom",
+        "scene": 1
+      },
+      "linked_threads": [],
+      "name": "Polyester Suit",
+      "owner_scope": "character",
+      "state_tags": [
+        "unclassified",
+        "equipped"
+      ],
+      "type": "unclassified"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "One Dollar Coin",
+      "item_id": "ITEM_DOLLAR_COIN",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Office Breakroom",
+        "scene": 1
+      },
+      "linked_threads": [],
+      "name": "One Dollar Coin",
+      "owner_scope": "character",
+      "state_tags": [
+        "unclassified",
+        "carried"
+      ],
+      "type": "unclassified"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Plastic ID Badge",
+      "item_id": "ITEM_ID_BADGE",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Office Breakroom",
+        "scene": 1
+      },
+      "linked_threads": [],
+      "name": "Plastic ID Badge",
+      "owner_scope": "character",
+      "state_tags": [
+        "unclassified",
+        "stowed"
+      ],
+      "type": "unclassified"
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Plot devices (canonical):
+{
+  "devices": [
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_CRIT_EXPLOIT",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_CRIT_EXPLOIT"
+      ],
+      "name": "The 100% Crit Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_THE_ASCENSION",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_path_of_the_first_glitch_c7dd4581",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_THE_ASCENSION"
+      ],
+      "name": "The Path of the First Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_SYSTEM_GLITCH",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_system_s_stability_da5be7b7",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_SYSTEM_GLITCH"
+      ],
+      "name": "The System's Stability",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_VANE_RIVALRY",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_vane_vendetta_bcf4bea1",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_VANE_RIVALRY"
+      ],
+      "name": "The Vane Vendetta",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    }
+  ],
+  "schema_version": "1.0"
+}

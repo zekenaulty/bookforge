@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "character_id": "CHAR_ARTIE",
+  "inventory": [
+    {
+      "item_id": "ITEM_DOLLAR_COIN",
+      "container": "hand_right",
+      "status": "carried"
+    },
+    {
+      "item_id": "ITEM_ID_BADGE",
+      "container": "pocket_left",
+      "status": "stowed"
+    },
+    {
+      "item_id": "ITEM_CHEAP_SUIT",
+      "container": "body",
+      "status": "equipped"
+    }
+  ],
+  "containers": [
+    {
+      "container": "pocket_left",
+      "owner": "CHAR_ARTIE",
+      "contents": [
+        "ITEM_ID_BADGE"
+      ],
+      "location": "pants_left"
+    },
+    {
+      "container": "pocket_right",
+      "owner": "CHAR_ARTIE",
+      "contents": [],
+      "location": "pants_right"
+    }
+  ],
+  "invariants": [
+    "inventory: CHAR_ARTIE -> dollar_coin (status=carried, container=hand_right)",
+    "inventory: CHAR_ARTIE -> plastic_id_badge (status=stowed, container=pocket_left)",
+    "container: pocket_left (owner=CHAR_ARTIE, contents=[plastic_id_badge])",
+    "container: pocket_right (owner=CHAR_ARTIE, contents=[])"
+  ],
+  "history": [
+    {
+      "chapter": 1,
+      "scene": 1,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "notes": "Artie starts the scene in the office breakroom, holding a dollar coin and wearing his cheap suit."
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "notes": "Initialize pre-death stats and titles for the opening scene.",
+      "chapter": 1,
+      "scene": 1
+    },
+    {
+      "chapter": 1,
+      "scene": 1,
+      "changes": [
+        "inventory_alignment_updated"
+      ],
+      "notes": "Initial scene setup and constraint enforcement for required items."
+    }
+  ],
+  "name": "Arthur 'Artie' Penhaligon",
+  "character_continuity_system_state": {
+    "stats": {
+      "hp": {
+        "current": 10,
+        "max": 10
+      }
+    },
+    "skills": {
+      "spreadsheet_management": 4,
+      "passive_aggressive_emailing": 2
+    },
+    "titles": [
+      {
+        "name": "Unsuspecting Victim",
+        "active": true,
+        "source": "environmental_hazard"
+      }
+    ],
+    "resources": {
+      "luck": {
+        "current": 1,
+        "max": 100
+      }
+    }
+  },
+  "stats": {
+    "hp": {
+      "current": 10,
+      "max": 10
+    },
+    "mp": {
+      "current": 5,
+      "max": 5
+    },
+    "strength": 5,
+    "dexterity": 5,
+    "intelligence": 10,
+    "wisdom": 8,
+    "constitution": 5,
+    "charisma": 7
+  },
+  "skills": {
+    "spreadsheet_management": 4,
+    "passive_aggressive_emailing": 2
+  },
+  "updated_at": "2026-02-10T00:15:24Z",
+  "last_touched": {
+    "chapter": 1,
+    "scene": 1
+  }
+}

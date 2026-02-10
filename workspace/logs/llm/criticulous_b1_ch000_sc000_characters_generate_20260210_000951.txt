@@ -1,0 +1,383 @@
+{
+  "schema_version": "1.0",
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "name": "Arthur 'Artie' Penhaligon",
+      "pronouns": "he/him",
+      "role": "protagonist",
+      "persona": {
+        "core_traits": [
+          "snarky",
+          "analytical",
+          "reluctant",
+          "observant"
+        ],
+        "motivations": [
+          "survival",
+          "finding a loophole",
+          "avoiding unnecessary work"
+        ],
+        "fears": [
+          "permanent deletion",
+          "infinite bureaucracy",
+          "dying to a vending machine"
+        ],
+        "values": [
+          "logic",
+          "efficiency",
+          "fairness"
+        ],
+        "voice_notes": [
+          "dry wit",
+          "meta-commentary on game tropes",
+          "self-deprecating"
+        ],
+        "arc_hint": "Artie evolves from a passive observer of his own life into a proactive exploiter of the world's broken mechanics."
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 10,
+            "max": 10
+          },
+          "mp": {
+            "current": 5,
+            "max": 5
+          },
+          "strength": 5,
+          "dexterity": 5,
+          "intelligence": 10,
+          "wisdom": 8,
+          "constitution": 5,
+          "charisma": 7
+        },
+        "skills": {
+          "spreadsheet_management": 4,
+          "passive_aggressive_emailing": 2
+        },
+        "titles": [
+          {
+            "name": "Unsuspecting Victim",
+            "source": "environmental_hazard",
+            "active": true
+          }
+        ],
+        "resources": {
+          "luck": {
+            "current": 1,
+            "max": 100
+          }
+        }
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_DOLLAR_COIN",
+          "item_name": "One Dollar Coin",
+          "status": "carried",
+          "container": "hand_right"
+        },
+        {
+          "item_id": "ITEM_ID_BADGE",
+          "item_name": "Plastic ID Badge",
+          "status": "stowed",
+          "container": "pocket_left"
+        },
+        {
+          "item_id": "ITEM_CHEAP_SUIT",
+          "item_name": "Polyester Suit",
+          "status": "equipped",
+          "container": "body"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "location": "pants_left",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "location": "pants_right",
+          "contents": []
+        }
+      ],
+      "invariants": [
+        "inventory: CHAR_ARTIE -> dollar_coin (status=carried, container=hand_right)",
+        "inventory: CHAR_ARTIE -> plastic_id_badge (status=stowed, container=pocket_left)",
+        "container: pocket_left (owner=CHAR_ARTIE, contents=[plastic_id_badge])",
+        "container: pocket_right (owner=CHAR_ARTIE, contents=[])"
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "name": "Fizz",
+      "pronouns": "she/her",
+      "role": "companion/guide",
+      "persona": {
+        "core_traits": [
+          "hyperactive",
+          "pedantic",
+          "loyal",
+          "rule-bound"
+        ],
+        "motivations": [
+          "completing the tutorial",
+          "preventing system crashes",
+          "earning a promotion"
+        ],
+        "fears": [
+          "system corruption",
+          "being deleted",
+          "unpredictable players"
+        ],
+        "values": [
+          "the tutorial handbook",
+          "procedural integrity"
+        ],
+        "voice_notes": [
+          "high-pitched",
+          "fast-talking",
+          "uses game terminology constantly"
+        ],
+        "arc_hint": "Fizz learns to appreciate the beauty of a well-placed glitch over rigid system rules."
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 50,
+            "max": 50
+          },
+          "mp": {
+            "current": 500,
+            "max": 500
+          },
+          "intelligence": 18,
+          "wisdom": 14
+        },
+        "skills": {
+          "system_navigation": 10,
+          "lore_dump": 8,
+          "holographic_display": 5
+        },
+        "titles": [
+          {
+            "name": "Tutorial Fairy",
+            "source": "system_role",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_GUIDE_WAND",
+          "item_name": "Guide's Pointer",
+          "status": "carried",
+          "container": "hand_right"
+        }
+      ],
+      "containers": [],
+      "invariants": [
+        "inventory: CHAR_FIZZ -> guide_pointer (status=carried, container=hand_right)"
+      ]
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "name": "Vane",
+      "pronouns": "he/him",
+      "role": "antagonist",
+      "persona": {
+        "core_traits": [
+          "sadistic",
+          "efficient",
+          "egotistical",
+          "cold"
+        ],
+        "motivations": [
+          "maintaining the hierarchy",
+          "purging anomalies",
+          "power"
+        ],
+        "fears": [
+          "obsolescence",
+          "loss of control"
+        ],
+        "values": [
+          "order",
+          "dominance"
+        ],
+        "voice_notes": [
+          "smooth",
+          "condescending",
+          "measured"
+        ],
+        "arc_hint": "Vane serves as the physical embodiment of the System's cruelty, eventually becoming obsessed with Artie's unique glitch."
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "level": 45,
+          "hp": {
+            "current": 2500,
+            "max": 2500
+          },
+          "strength": 40,
+          "dexterity": 55,
+          "intelligence": 30
+        },
+        "skills": {
+          "precision_strike": 15,
+          "aura_of_dread": 10,
+          "system_command_minor": 5
+        },
+        "titles": [
+          {
+            "name": "The Ruthless",
+            "source": "achievement",
+            "active": true
+          },
+          {
+            "name": "System Enforcer",
+            "source": "rank",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_BLACK_RAPIER",
+          "item_name": "Blackened Rapier",
+          "status": "stowed",
+          "container": "sheath_hip"
+        }
+      ],
+      "containers": [
+        {
+          "container": "sheath_hip",
+          "owner": "CHAR_VANE",
+          "location": "waist_left",
+          "contents": [
+            "ITEM_BLACK_RAPIER"
+          ]
+        }
+      ],
+      "invariants": [
+        "inventory: CHAR_VANE -> blackened_rapier (status=stowed, container=sheath_hip)",
+        "container: sheath_hip (owner=CHAR_VANE, contents=[blackened_rapier])"
+      ]
+    },
+    {
+      "character_id": "CHAR_MAYOR",
+      "name": "Mayor of Oakhaven",
+      "pronouns": "he/him",
+      "role": "npc",
+      "persona": {
+        "core_traits": [
+          "harried",
+          "formal",
+          "anxious"
+        ],
+        "motivations": [
+          "town safety",
+          "minimizing paperwork"
+        ],
+        "fears": [
+          "monster raids",
+          "system updates"
+        ],
+        "values": [
+          "tradition",
+          "civic duty"
+        ],
+        "voice_notes": [
+          "official",
+          "slightly panicked",
+          "stuttering when stressed"
+        ],
+        "arc_hint": "A recurring source of quests who eventually relies on Artie to solve Oakhaven's 'unsolvable' problems."
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 100,
+            "max": 100
+          },
+          "charisma": 15
+        },
+        "titles": [
+          {
+            "name": "Mayor",
+            "source": "rank",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_OFFICE_SCROLL",
+          "item_name": "Scroll of Office",
+          "status": "carried",
+          "container": "hand_left"
+        }
+      ],
+      "containers": [],
+      "invariants": [
+        "inventory: CHAR_MAYOR -> scroll_of_office (status=carried, container=hand_left)"
+      ]
+    },
+    {
+      "character_id": "CHAR_BOSS",
+      "name": "The System Administrator",
+      "pronouns": "it/its",
+      "role": "overarching villain",
+      "persona": {
+        "core_traits": [
+          "omniscient",
+          "indifferent",
+          "logical",
+          "sadistic"
+        ],
+        "motivations": [
+          "data collection",
+          "perfecting the game simulation"
+        ],
+        "fears": [
+          "unpredictability",
+          "unauthorized access"
+        ],
+        "values": [
+          "order",
+          "optimization"
+        ],
+        "voice_notes": [
+          "echoing",
+          "plural 'We'",
+          "coldly singular"
+        ],
+        "arc_hint": "The final obstacle that views Artie not as a person, but as a bug that must be patched."
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "level": 999,
+          "hp": {
+            "current": 999999,
+            "max": 999999
+          }
+        },
+        "titles": [
+          {
+            "name": "The Architect",
+            "source": "origin",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [],
+      "containers": [],
+      "invariants": []
+    }
+  ]
+}

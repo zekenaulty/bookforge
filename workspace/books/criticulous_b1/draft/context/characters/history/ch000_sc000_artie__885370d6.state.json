@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "character_id": "CHAR_ARTIE",
+  "name": "Arthur 'Artie' Penhaligon",
+  "inventory": [
+    {
+      "item_id": "ITEM_DOLLAR_COIN",
+      "item_name": "One Dollar Coin",
+      "status": "carried",
+      "container": "hand_right"
+    },
+    {
+      "item_id": "ITEM_ID_BADGE",
+      "item_name": "Plastic ID Badge",
+      "status": "stowed",
+      "container": "pocket_left"
+    },
+    {
+      "item_id": "ITEM_CHEAP_SUIT",
+      "item_name": "Polyester Suit",
+      "status": "equipped",
+      "container": "body"
+    }
+  ],
+  "containers": [
+    {
+      "container": "pocket_left",
+      "owner": "CHAR_ARTIE",
+      "location": "pants_left",
+      "contents": [
+        "ITEM_ID_BADGE"
+      ]
+    },
+    {
+      "container": "pocket_right",
+      "owner": "CHAR_ARTIE",
+      "location": "pants_right",
+      "contents": []
+    }
+  ],
+  "character_continuity_system_state": {
+    "stats": {
+      "hp": {
+        "current": 10,
+        "max": 10
+      },
+      "mp": {
+        "current": 5,
+        "max": 5
+      },
+      "strength": 5,
+      "dexterity": 5,
+      "intelligence": 10,
+      "wisdom": 8,
+      "constitution": 5,
+      "charisma": 7
+    },
+    "skills": {
+      "spreadsheet_management": 4,
+      "passive_aggressive_emailing": 2
+    },
+    "titles": [
+      {
+        "name": "Unsuspecting Victim",
+        "source": "environmental_hazard",
+        "active": true
+      }
+    ],
+    "resources": {
+      "luck": {
+        "current": 1,
+        "max": 100
+      }
+    }
+  },
+  "stats": {
+    "hp": {
+      "current": 10,
+      "max": 10
+    },
+    "mp": {
+      "current": 5,
+      "max": 5
+    },
+    "strength": 5,
+    "dexterity": 5,
+    "intelligence": 10,
+    "wisdom": 8,
+    "constitution": 5,
+    "charisma": 7
+  },
+  "skills": {
+    "spreadsheet_management": 4,
+    "passive_aggressive_emailing": 2
+  },
+  "invariants": [
+    "inventory: CHAR_ARTIE -> dollar_coin (status=carried, container=hand_right)",
+    "inventory: CHAR_ARTIE -> plastic_id_badge (status=stowed, container=pocket_left)",
+    "container: pocket_left (owner=CHAR_ARTIE, contents=[plastic_id_badge])",
+    "container: pocket_right (owner=CHAR_ARTIE, contents=[])"
+  ],
+  "history": [],
+  "updated_at": "2026-02-10T00:09:51Z"
+}
