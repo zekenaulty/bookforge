@@ -1,5 +1,5 @@
-﻿from bookforge.runner import (
-    _apply_bag_updates,
+from bookforge.pipeline.state_apply import _apply_bag_updates
+from bookforge.runner import (
     _coerce_stat_updates,
     _coerce_transfer_updates,
     _coerce_inventory_alignment_updates,
@@ -422,3 +422,4 @@ def test_pov_drift_ignores_first_person_dialogue() -> None:
     prose = "He said, \"I will go now,\" and left."
     issues = _pov_drift_issues(prose, "third_limited")
     assert not issues
+
