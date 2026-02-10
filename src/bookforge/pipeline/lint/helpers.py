@@ -58,15 +58,18 @@ def _merged_character_states_for_lint(
     character_states: List[Dict[str, Any]],
     patch: Dict[str, Any],
 ) -> List[Dict[str, Any]]:
-    updates = patch.get("character_updates", []) if isinstance(patch, dict) else []
+    if not isinstance(patch, dict):
+        patch = {}
+    _coerce_character_updates(patch)
+    _coerce_stat_updates(patch)
+
+    updates = patch.get("character_updates", [])
     if not isinstance(updates, list):
         updates = []
-    _coerce_character_updates(updates)
 
-    stat_updates = patch.get("character_stat_updates", []) if isinstance(patch, dict) else []
+    stat_updates = patch.get("character_stat_updates", [])
     if not isinstance(stat_updates, list):
         stat_updates = []
-    _coerce_stat_updates(stat_updates)
 
     merged = []
     for state in character_states:
@@ -125,3 +128,4 @@ def _merged_character_states_for_lint(
         merged.append(merged_state)
 
     return merged
+

@@ -70,6 +70,8 @@ def _stat_mismatch_issues(
     def _owner_from_key(key: str) -> Optional[Dict[str, Any]]:
         key_lower = key.lower().strip()
         for state in character_states:
+            if not isinstance(state, dict):
+                continue
             name = str(state.get("name") or "").strip()
             if name and key_lower.startswith(name.lower() + " "):
                 return state
@@ -498,3 +500,5 @@ def _linked_durable_consistency_issues(durable: Dict[str, Any]) -> List[Dict[str
             })
 
     return issues
+
+

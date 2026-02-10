@@ -35,6 +35,16 @@ def _lint_scene(
     model: str,
     durable_expand_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
+    if not isinstance(pre_state, dict):
+        pre_state = {}
+    if not isinstance(post_state, dict):
+        post_state = {}
+    if not isinstance(patch, dict):
+        patch = {}
+    if not isinstance(scene_card, dict):
+        scene_card = {}
+    if not isinstance(character_states, list):
+        character_states = []
     template = _resolve_template(book_root, "lint.md")
     lint_character_states = _merged_character_states_for_lint(character_states, patch)
     durable_post = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
@@ -121,6 +131,7 @@ def _lint_scene(
         report["status"] = _lint_status_from_issues(report.get("issues", []))
     validate_json(report, "lint_report")
     return report
+
 
 
 

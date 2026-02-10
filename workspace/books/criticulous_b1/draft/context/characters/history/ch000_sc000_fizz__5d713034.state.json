@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "character_id": "CHAR_FIZZ",
+  "name": "Fizz",
+  "inventory": [
+    {
+      "item_id": "ITEM_FIZZ_GUIDE",
+      "item_name": "System Manual",
+      "status": "stowed",
+      "container": "satchel"
+    },
+    {
+      "item_id": "ITEM_GLOW_DUST",
+      "item_name": "Glow Dust",
+      "status": "stowed",
+      "container": "satchel"
+    }
+  ],
+  "containers": [
+    {
+      "container": "satchel",
+      "owner": "CHAR_FIZZ",
+      "location": "waist",
+      "contents": [
+        "System Manual",
+        "Glow Dust"
+      ]
+    }
+  ],
+  "character_continuity_system_state": {
+    "stats": {
+      "hp": {
+        "current": 50,
+        "max": 50
+      },
+      "mp": {
+        "current": 200,
+        "max": 200
+      }
+    },
+    "skills": {
+      "Navigation": 8,
+      "System Glitch Detection": 12
+    },
+    "titles": [
+      {
+        "name": "Official Guide",
+        "source": "System Deployment",
+        "active": true
+      }
+    ],
+    "resources": {
+      "mana": {
+        "current": 200,
+        "max": 200
+      }
+    }
+  },
+  "stats": {
+    "hp": {
+      "current": 50,
+      "max": 50
+    },
+    "mp": {
+      "current": 200,
+      "max": 200
+    }
+  },
+  "skills": {
+    "Navigation": 8,
+    "System Glitch Detection": 12
+  },
+  "invariants": [
+    "inventory: CHAR_FIZZ -> System Manual (status=stowed, container=satchel)",
+    "inventory: CHAR_FIZZ -> Glow Dust (status=stowed, container=satchel)",
+    "container: satchel (owner=CHAR_FIZZ, contents=[System Manual, Glow Dust])"
+  ],
+  "history": [],
+  "updated_at": "2026-02-10T06:59:26Z"
+}

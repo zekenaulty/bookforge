@@ -1,0 +1,165 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "reason": "Artie's HP was reduced to 0 by a critical hit from a vending machine.",
+      "scene": 1,
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 0,
+            "max": 10
+          }
+        }
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "hand_left",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "neck",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "pockets",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "invariants_add": [
+        "status: wearing grey-mesh jumpsuit",
+        "location: Character Creation Void"
+      ],
+      "inventory": [],
+      "persona_updates": [
+        "Artie is disoriented and frustrated by the absurdity of his death."
+      ],
+      "scene": 1
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "item_id": "ITEM_WALLET",
+      "new_container": "none",
+      "new_status": "lost",
+      "reason_category": "location_jump_normalize"
+    },
+    {
+      "character_id": "CHAR_ARTIE",
+      "item_id": "ITEM_CHANGE",
+      "new_container": "none",
+      "new_status": "lost",
+      "reason_category": "location_jump_normalize"
+    },
+    {
+      "character_id": "CHAR_ARTIE",
+      "item_id": "ITEM_TIE",
+      "new_container": "none",
+      "new_status": "lost",
+      "reason_category": "location_jump_normalize"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_WALLET",
+      "set": {
+        "custodian": "none",
+        "last_seen": {
+          "chapter": 1,
+          "location": "Office Breakroom",
+          "scene": 1
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_CHANGE",
+      "set": {
+        "custodian": "none",
+        "last_seen": {
+          "chapter": 1,
+          "location": "Office Breakroom",
+          "scene": 1
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_TIE",
+      "set": {
+        "custodian": "none",
+        "last_seen": {
+          "chapter": 1,
+          "location": "Office Breakroom",
+          "scene": 1
+        }
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie died in an office breakroom accident and entered the System's Character Creation Void."
+    ],
+    "key_events": [
+      "Artie argued with a 'Break-O-Matic 3000' vending machine over a stuck bag of chips.",
+      "Artie kicked the machine, triggering a massive electrical surge.",
+      "The System registered a 'Critical Hit' of -12 HP, reducing Artie's health to 0.",
+      "Artie's physical form and mundane items (wallet, change, tie) dissolved into data.",
+      "Artie arrived in the Character Creation Void and was greeted by a System Notification.",
+      "The System began calculating Artie's base stats based on his previous life performance."
+    ],
+    "last_scene": [
+      "Artie attempted to buy chips from a vending machine in his office breakroom. A freak electrical surge delivered a critical hit, killing him and transporting him to a digital void."
+    ],
+    "must_stay_true": [
+      "milestone: death_event = DONE",
+      "milestone: void_entry = DONE",
+      "location: Character Creation Void",
+      "inventory: CHAR_ARTIE -> Leather Wallet (lost)",
+      "inventory: CHAR_ARTIE -> Loose Change (lost)",
+      "inventory: CHAR_ARTIE -> Silk Tie (lost)"
+    ]
+  },
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_WALLET",
+      "reason": "Item dissolved during transition to the void.",
+      "source_character_id": "CHAR_ARTIE"
+    },
+    {
+      "item_id": "ITEM_CHANGE",
+      "reason": "Item dissolved during transition to the void.",
+      "source_character_id": "CHAR_ARTIE"
+    },
+    {
+      "item_id": "ITEM_TIE",
+      "reason": "Item dissolved during transition to the void.",
+      "source_character_id": "CHAR_ARTIE"
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Character Creation Void",
+    "recent_facts": [
+      "Artie was killed by a vending machine.",
+      "Artie is now in the Character Creation Void."
+    ]
+  }
+}

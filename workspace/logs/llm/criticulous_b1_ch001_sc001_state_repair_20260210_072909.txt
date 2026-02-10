@@ -1,0 +1,191 @@
+{
+  "schema_version": "1.0",
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 1,
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100,
+          "strength": 1,
+          "agility": 1,
+          "intelligence": 1,
+          "stamina": 1,
+          "charisma": 1
+        },
+        "classes": [
+          {
+            "name": "Glass Cannon",
+            "level": 1
+          }
+        ],
+        "titles": [
+          {
+            "name": "Statistical Anomaly",
+            "active": true,
+            "source": "system_glitch"
+          }
+        ],
+        "skills": {
+          "Data Entry": 4,
+          "Sarcasm": 10
+        },
+        "resources": {
+          "sanity": {
+            "current": 100,
+            "max": 100
+          }
+        }
+      },
+      "reason": "Character creation finalized with glitch/interference following mundane death."
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 1,
+      "inventory": [
+        {
+          "item": "ITEM_WALLET",
+          "container": "pockets",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_CHANGE",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_TIE",
+          "container": "neck",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pockets",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_CHANGE"
+          ]
+        },
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_TIE"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is now a 'Statistical Anomaly' with 1 HP and 100% Crit Rate.",
+        "He has transitioned from an office worker to a 'Glass Cannon' in a new world."
+      ],
+      "invariants_add": [
+        "stat_invariant: CHAR_ARTIE -> 1 HP, 100% Crit Rate",
+        "milestone: artie_death = DONE",
+        "milestone: enter_void = DONE"
+      ]
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "item_id": "ITEM_WALLET",
+      "new_container": "pockets",
+      "new_status": "stowed",
+      "reason": "Artie stowed his wallet to shake the machine."
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_WALLET",
+      "reason": "Artie placed his wallet in his pocket to free his hand for shaking the machine."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_WALLET",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "The System Integration Void"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_CHANGE",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "The System Integration Void"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_TIE",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "The System Integration Void"
+        }
+      }
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie's attempt to retrieve a stuck bag of chips from a vending machine resulted in a lethal electrical surge and a critical hit from a spatial rift.",
+      "He died and entered a character creation void where the System analyzed his mundane life metrics.",
+      "Due to external interference, his stats were glitched into a high-risk build before he was integrated into a new world."
+    ],
+    "key_events": [
+      "Artie kicked and rocked the Snack-O-Matic 3000 to free a bag of 'Vinegar Vengeance' chips.",
+      "An electrical surge dealt 2 HP damage, followed by a 10 HP critical hit from a rift.",
+      "Artie died (HP 0/10) and met the System UI in a null-space void.",
+      "The System initialized Artie's stats, but external interference forced a point dump into Critical Hit Rate.",
+      "Artie acquired the 'Glass Cannon' class and the 'Statistical Anomaly' title.",
+      "Artie's final stats were locked at 1 HP and 100% Crit Rate.",
+      "Artie was teleported out of the void and into a new environment."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: enter_void = DONE",
+      "milestone: character_creation_glitch = DONE",
+      "inventory: CHAR_ARTIE -> Leather Wallet (stowed, container=pockets)",
+      "inventory: CHAR_ARTIE -> Loose Change (held, container=hand_left)",
+      "inventory: CHAR_ARTIE -> Silk Tie (equipped, container=neck)",
+      "stat_invariant: CHAR_ARTIE -> 1 HP, 100% Crit Rate"
+    ],
+    "chapter_so_far_add": [
+      "Artie has transitioned from the mundane world to the System after a lethal vending machine encounter."
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "The System Integration Void",
+    "recent_facts": [
+      "Artie died due to an electrical surge from a vending machine.",
+      "Artie entered a character creation void.",
+      "Artie's stats were forcibly reallocated due to system interference.",
+      "Artie is now a 'Glass Cannon' build with 1 HP and 100% Crit."
+    ]
+  }
+}

@@ -1,0 +1,243 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "delta": {},
+      "scene": 2,
+      "set": {
+        "classes": [
+          {
+            "level": 1,
+            "name": "Office Drone"
+          }
+        ],
+        "reason": "Stat allocation during character creation triggered a glitch.",
+        "resources": {
+          "sanity": {
+            "current": 100,
+            "max": 100
+          }
+        },
+        "skills": {
+          "Data Entry": 4,
+          "Sarcasm": 10
+        },
+        "stats": {
+          "agility": 1,
+          "crit_rate": 100,
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "intelligence": 1,
+          "luck": 1,
+          "stamina": 0,
+          "strength": 1
+        },
+        "titles": [
+          {
+            "active": true,
+            "name": "The Glass Anomaly",
+            "source": "System Glitch"
+          }
+        ]
+      }
+    },
+    {
+      "chapter": 1,
+      "character_id": "CHAR_FIZZ",
+      "delta": {},
+      "scene": 2,
+      "set": {
+        "reason": "Initialization of System Guide entity.",
+        "resources": {
+          "mana": {
+            "current": 200,
+            "max": 200
+          }
+        },
+        "skills": {
+          "Navigation": 8,
+          "System Glitch Detection": 12
+        },
+        "stats": {
+          "hp": {
+            "current": 50,
+            "max": 50
+          },
+          "mp": {
+            "current": 200,
+            "max": 200
+          }
+        },
+        "titles": [
+          {
+            "active": true,
+            "name": "Official Guide",
+            "source": "System Deployment"
+          }
+        ]
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "hand_left",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "neck",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "pockets",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "invariants_add": [
+        "status: 1 HP build",
+        "status: 100% Crit Rate",
+        "title: The Glass Anomaly"
+      ],
+      "inventory": [],
+      "persona_updates": [
+        "Artie is now a 'Glass Anomaly' with 1 HP and 100% Crit Rate.",
+        "He remains sarcastic despite his extreme physical fragility."
+      ],
+      "scene": 2
+    },
+    {
+      "chapter": 1,
+      "character_id": "CHAR_FIZZ",
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_FIZZ_GUIDE"
+          ],
+          "owner": "CHAR_FIZZ"
+        },
+        {
+          "container": "satchel",
+          "contents": [
+            "ITEM_GLOW_DUST"
+          ],
+          "owner": "CHAR_FIZZ"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_FIZZ_GUIDE",
+          "status": "held"
+        },
+        {
+          "container": "satchel",
+          "item": "ITEM_GLOW_DUST",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": [
+        "Fizz is horrified by Artie's glitched build and views him as a professional liability."
+      ],
+      "scene": 2
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_FIZZ",
+      "item_id": "ITEM_FIZZ_GUIDE",
+      "new_container": "hand_right",
+      "new_status": "held"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_FIZZ_GUIDE",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "location": "Character Creation Void",
+          "scene": 2
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_GLOW_DUST",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "location": "Character Creation Void",
+          "scene": 2
+        }
+      }
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "set": {
+        "activation_state": "active",
+        "last_seen": {
+          "chapter": 1,
+          "location": "Character Creation Void",
+          "scene": 2
+        }
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie glitched his character creation, resulting in a high-risk 'Crit or Quit' build with 1 HP and 100% Crit Rate."
+    ],
+    "key_events": [
+      "Artie met Fizz, his hummingbird-sized System Guide.",
+      "Artie accessed a locked sub-menu for advanced multipliers against Fizz's advice.",
+      "A system overflow drained Artie's base stats to minimums to compensate for a maxed Crit Rate.",
+      "Artie's HP was reduced to 1/1.",
+      "Artie gained the title 'The Glass Anomaly'.",
+      "The Character Creation Void began to dissolve as the tutorial zone loaded."
+    ],
+    "last_scene": [
+      "Artie met his System Guide, Fizz, in the Character Creation Void. Despite her warnings, he triggered a system glitch by accessing a hidden menu, resulting in a build with 1 HP and a 100% Critical Hit rate. The scene ended as the void began to dissolve into the tutorial zone."
+    ],
+    "must_stay_true": [
+      "milestone: death_event = DONE",
+      "milestone: void_entry = DONE",
+      "milestone: stat_allocation = DONE",
+      "status: Artie has 1 HP and 100% Crit Rate",
+      "title: The Glass Anomaly",
+      "inventory: CHAR_FIZZ -> The Official System Guidebook (v4.2) (held, hand_right)"
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Character Creation Void",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie triggered a system overflow during stat allocation.",
+      "Artie is now 'The Glass Anomaly' with 1 HP.",
+      "The tutorial zone is rendering."
+    ]
+  }
+}

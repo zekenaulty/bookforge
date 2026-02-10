@@ -22,17 +22,6 @@ from bookforge.memory.continuity import (
     save_style_anchor,
     style_anchor_path,
 )
-from bookforge.memory.durable_state import (
-    ensure_durable_state_files,
-    load_durable_commits,
-    load_item_registry,
-    load_plot_devices,
-    save_durable_commits,
-    save_item_registry,
-    save_plot_devices,
-    snapshot_item_registry,
-    snapshot_plot_devices,
-)
 from bookforge.phases.plan import plan_scene
 from bookforge.phases.preflight_phase import _scene_state_preflight
 from bookforge.phases.continuity_phase import _generate_continuity_pack
@@ -41,316 +30,19 @@ from bookforge.phases.repair_phase import _repair_scene
 from bookforge.phases.state_repair_phase import _state_repair
 from bookforge.phases.lint_phase import _lint_scene
 from bookforge.prompt.renderer import render_template_file
-from bookforge.pipeline.parse import _extract_json, _extract_prose_and_patch, _extract_authoritative_surfaces
-from bookforge.pipeline.config import _write_max_tokens, _lint_max_tokens, _repair_max_tokens, _state_repair_max_tokens, _continuity_max_tokens, _preflight_max_tokens, _style_anchor_max_tokens, _durable_slice_max_expansions, _lint_mode
-from bookforge.pipeline.outline import _chapter_scene_count, _outline_summary, _build_character_registry, _build_thread_registry, _character_name_map, _character_id_map
-from bookforge.pipeline.scene import _scene_cast_ids_from_outline, _load_character_states, _normalize_continuity_pack, _parse_until
-from bookforge.pipeline.state_patch import _normalize_state_patch_for_validation, _sanitize_preflight_patch, _coerce_summary_update, _coerce_character_updates, _coerce_stat_updates, _coerce_transfer_updates, _coerce_inventory_alignment_updates, _coerce_registry_updates, _fill_character_update_context, _fill_character_continuity_update_context, _migrate_numeric_invariants
-from bookforge.pipeline.state_apply import _summary_list, _summary_from_state, _apply_state_patch, _apply_character_updates, _apply_character_stat_updates, _apply_bag_updates, _ensure_character_continuity_system_state, _update_bible, _rollup_chapter_summary, _compile_chapter_markdown
-from bookforge.pipeline.durable import _durable_state_context, _apply_durable_state_updates
+from bookforge.pipeline.config import _style_anchor_max_tokens, _durable_slice_max_expansions, _lint_mode
+from bookforge.pipeline.outline import _outline_summary, _build_character_registry, _build_thread_registry, _character_name_map, _character_id_map
+from bookforge.pipeline.scene import _scene_cast_ids_from_outline, _load_character_states, _parse_until
+from bookforge.pipeline.state_apply import _summary_from_state, _apply_state_patch, _apply_character_updates, _apply_character_stat_updates, _update_bible, _rollup_chapter_summary, _compile_chapter_markdown
+from bookforge.pipeline.durable import _apply_durable_state_updates
 from bookforge.pipeline.io import _load_json, _snapshot_character_states_before_preflight, _log_scope, _write_scene_files
-from bookforge.pipeline.lint import _stat_mismatch_issues, _pov_drift_issues, _heuristic_invariant_issues, _durable_scene_constraint_issues, _linked_durable_consistency_issues, _lint_issue_entries, _lint_has_issue_code
-from bookforge.pipeline.llm_ops import _chat, _response_truncated, _json_retry_count, _state_patch_schema_retry_message, _lint_status_from_issues
-from bookforge.pipeline.prompts import _resolve_template, _system_prompt_for_phase
+from bookforge.pipeline.lint import _lint_issue_entries, _lint_has_issue_code
+from bookforge.pipeline.llm_ops import _chat
+from bookforge.pipeline.prompts import _resolve_template
 from bookforge.pipeline.log import _status, _now_iso
 from bookforge.util.schema import validate_json
 
 PAUSE_EXIT_CODE = 75
-
-
-
-def _normalize_lint_report(report: Dict[str, Any]) -> Dict[str, Any]:
-    normalized = dict(report)
-    if "schema_version" not in normalized:
-        normalized["schema_version"] = "1.0"
-
-    status = normalized.get("status")
-    if not status:
-        passed = normalized.get("pass")
-        if isinstance(passed, bool):
-            normalized["status"] = "pass" if passed else "fail"
-
-    issues: List[Dict[str, Any]] = []
-    raw_issues = normalized.get("issues")
-    if isinstance(raw_issues, list):
-        for item in raw_issues:
-            if isinstance(item, dict) and item.get("message"):
-                issues.append(item)
-            elif item is not None:
-                issues.append({"code": "issue", "message": str(item)})
-
-    violations = normalized.get("violations")
-    if isinstance(violations, list):
-        for item in violations:
-            if item is not None:
-                issues.append({"code": "violation", "message": str(item), "severity": "error"})
-
-    warnings = normalized.get("warnings")
-    if isinstance(warnings, list):
-        for item in warnings:
-            if item is not None:
-                issues.append({"code": "warning", "message": str(item), "severity": "warning"})
-
-    if not isinstance(normalized.get("issues"), list) or issues:
-        normalized["issues"] = issues
-
-    for issue in normalized.get("issues", []):
-        if isinstance(issue, dict) and not issue.get("severity"):
-            issue["severity"] = "warning"
-
-    normalized["status"] = _lint_status_from_issues(normalized.get("issues", []))
-
-    if "status" not in normalized or not normalized.get("status"):
-        normalized["status"] = "fail" if normalized.get("issues") else "pass"
-
-    return normalized
-
-def _normalize_stat_key(value: str) -> str:
-    cleaned = re.sub(r"[^a-zA-Z0-9]+", "_", str(value).strip().lower())
-    return cleaned.strip("_")
-
-
-def _parse_stat_value(raw: str) -> Any:
-    if raw is None:
-        return None
-    text = str(raw).strip()
-    locked = "locked" in text.lower()
-    text = re.sub(r"\(.*?\)", "", text).strip()
-    if "/" in text:
-        parts = [part.strip() for part in text.split("/", 1)]
-        if len(parts) == 2 and parts[0].replace(".", "", 1).isdigit() and parts[1].replace(".", "", 1).isdigit():
-            current = float(parts[0]) if "." in parts[0] else int(parts[0])
-            maximum = float(parts[1]) if "." in parts[1] else int(parts[1])
-            result = {"current": current, "max": maximum}
-            if locked:
-                result["locked"] = True
-            return result
-    numeric = text.replace("%", "").strip()
-    if numeric.replace(".", "", 1).isdigit():
-        value = float(numeric) if "." in numeric else int(numeric)
-        if text.endswith("%"):
-            value = f"{value}%"
-        if locked:
-            return {"value": value, "locked": True}
-        return value
-    return text
-
-
-def _upsert_continuity_update(updates: list, character_id: str) -> dict:
-    for update in updates:
-        if isinstance(update, dict) and str(update.get("character_id") or "") == character_id:
-            return update
-    new_item = {"character_id": character_id, "set": {}, "delta": {}}
-    updates.append(new_item)
-    return new_item
-
-
-def _upsert_global_continuity_update(updates: list) -> dict:
-    for update in updates:
-        if isinstance(update, dict):
-            return update
-    new_item = {"set": {}, "delta": {}}
-    updates.append(new_item)
-    return new_item
-
-
-def _merge_continuity_update_block(target: Dict[str, Any], key: str, payload: Any) -> None:
-    if payload is None:
-        return
-    if isinstance(payload, dict):
-        target.setdefault(key, {})
-        existing = target.get(key)
-        if not isinstance(existing, dict):
-            target[key] = dict(payload)
-            return
-        for sub_key, sub_value in payload.items():
-            existing[sub_key] = sub_value
-        target[key] = existing
-        return
-    target[key] = payload
-
-
-def _coerce_legacy_family_update_into_continuity(target: Dict[str, Any], legacy_update: Dict[str, Any], family_key: str) -> None:
-    target.setdefault("set", {})
-    target.setdefault("delta", {})
-
-    direct = legacy_update.get(family_key)
-    if isinstance(direct, (dict, list, str, int, float)):
-        _merge_continuity_update_block(target["set"], family_key, direct)
-
-    set_block = legacy_update.get("set")
-    if isinstance(set_block, dict):
-        _merge_continuity_update_block(target["set"], family_key, set_block)
-
-    delta_block = legacy_update.get("delta")
-    if isinstance(delta_block, dict):
-        _merge_continuity_update_block(target["delta"], family_key, delta_block)
-
-    reason = legacy_update.get("reason")
-    if isinstance(reason, str) and reason.strip() and not target.get("reason"):
-        target["reason"] = reason.strip()
-
-
-def _append_continuity_list_item(target_set: Dict[str, Any], key: str, value: str) -> None:
-    if key == "titles":
-        existing = target_set.get("titles")
-        normalized_existing = _normalize_titles_value(existing)
-        title = _normalize_title_entry(value)
-        if title:
-            normalized_existing.append(title)
-        target_set["titles"] = _normalize_titles_value(normalized_existing)
-        return
-    existing = target_set.get(key)
-    if isinstance(existing, list):
-        if value not in existing:
-            existing.append(value)
-            target_set[key] = existing
-        return
-    target_set[key] = [value]
-
-def _stat_key_aliases() -> Dict[str, str]:
-    return {
-        "critical_hit_rate": "crit_rate",
-        "crit_rate": "crit_rate",
-        "critical_rate": "crit_rate",
-        "hp": "hp",
-        "stamina": "stamina",
-        "mp": "mp",
-        "mana": "mp",
-        "level": "level",
-    }
-
-
-def _merged_character_states_for_lint(
-    character_states: List[Dict[str, Any]],
-    patch: Dict[str, Any],
-) -> List[Dict[str, Any]]:
-    if not isinstance(patch, dict) or not isinstance(character_states, list):
-        return character_states
-    updates = patch.get("character_continuity_system_updates")
-    character_updates = patch.get("character_updates")
-    if not isinstance(updates, list) and not isinstance(character_updates, list):
-        return character_states
-
-    merged = json.loads(json.dumps(character_states))
-    index = {}
-    for idx, state in enumerate(merged):
-        if not isinstance(state, dict):
-            continue
-        char_id = str(state.get("character_id") or "").strip()
-        if char_id:
-            index[char_id] = idx
-
-    if isinstance(updates, list):
-        for update in updates:
-            if not isinstance(update, dict):
-                continue
-            char_id = str(update.get("character_id") or "").strip()
-            if not char_id or char_id not in index:
-                continue
-            state = merged[index[char_id]]
-            if not isinstance(state, dict):
-                continue
-            continuity = _ensure_character_continuity_system_state(state)
-            _apply_bag_updates(continuity, update)
-            state["character_continuity_system_state"] = continuity
-
-    if isinstance(character_updates, list):
-        for update in character_updates:
-            if not isinstance(update, dict):
-                continue
-            char_id = str(update.get("character_id") or "").strip()
-            if not char_id or char_id not in index:
-                continue
-            state = merged[index[char_id]]
-            if not isinstance(state, dict):
-                continue
-            inventory = update.get("inventory")
-            if isinstance(inventory, list):
-                state["inventory"] = inventory
-            containers = update.get("containers")
-            if isinstance(containers, list):
-                state["containers"] = containers
-            invariants_add = update.get("invariants_add")
-            if isinstance(invariants_add, list):
-                existing = state.get("invariants", [])
-                if not isinstance(existing, list):
-                    existing = []
-                combined = existing + [str(item) for item in invariants_add if str(item).strip()]
-                deduped = []
-                seen = set()
-                for item in combined:
-                    key = str(item).strip().lower()
-                    if not key or key in seen:
-                        continue
-                    seen.add(key)
-                    deduped.append(item)
-                state["invariants"] = deduped
-
-    return merged
-
-
-def _scene_card_ids(scene_card: Dict[str, Any], key: str) -> List[str]:
-    values = scene_card.get(key)
-    if not isinstance(values, list):
-        return []
-    return [str(value).strip() for value in values if str(value).strip()]
-
-
-def _entry_aliases(entry: Dict[str, Any]) -> List[str]:
-    aliases = entry.get("aliases")
-    if not isinstance(aliases, list):
-        return []
-    return [str(value).strip() for value in aliases if str(value).strip()]
-
-
-def _entry_mentioned_on_page(prose: str, entry: Dict[str, Any], id_key: str) -> bool:
-    if not isinstance(entry, dict):
-        return False
-    tokens: List[str] = []
-    primary_id = str(entry.get(id_key) or "").strip()
-    if primary_id:
-        tokens.append(primary_id)
-    for key in ("display_name", "name", "item_name", "item", "label"):
-        value = str(entry.get(key) or "").strip()
-        if value:
-            tokens.append(value)
-    tokens.extend(_entry_aliases(entry))
-
-    text = prose.lower()
-    for token in tokens:
-        normalized = token.strip().lower()
-        if not normalized:
-            continue
-        if " " in normalized:
-            if normalized in text:
-                return True
-        else:
-            if re.search(r"\b" + re.escape(normalized) + r"\b", text):
-                return True
-    return False
-
-
-def _global_continuity_stats(state: Dict[str, Any]) -> Dict[str, Any]:
-    continuity = state.get("global_continuity_system_state")
-    if isinstance(continuity, dict):
-        stats = continuity.get("stats")
-        if isinstance(stats, dict):
-            return stats
-    legacy = state.get("run_stats")
-    return legacy if isinstance(legacy, dict) else {}
-def _contains_any(text: str, terms: List[str]) -> bool:
-    for term in terms:
-        if not term:
-            continue
-        if " " in term:
-            if term in text:
-                return True
-        else:
-            if re.search(r"\b" + re.escape(term) + r"\b", text):
-                return True
-    return False
-
 
 def _cursor_beyond_target(
     chapter: int,
@@ -371,7 +63,6 @@ def _cursor_beyond_target(
         return False
     return scene > target_scene
 
-
 def _advance_cursor(
     chapter_order: List[int],
     scene_counts: Dict[int, int],
@@ -386,7 +77,6 @@ def _advance_cursor(
         if index + 1 < len(chapter_order):
             return chapter_order[index + 1], 1, False
     return chapter + 1, 1, True
-
 
 def _existing_scene_card(state: Dict[str, Any], book_root: Path) -> Optional[Path]:
     plan_data = state.get("plan", {}) if isinstance(state.get("plan"), dict) else {}
@@ -410,126 +100,17 @@ def _existing_scene_card(state: Dict[str, Any], book_root: Path) -> Optional[Pat
         return None
     return path
 
-
-
 def _author_fragment_path(workspace: Path, author_ref: str) -> Path:
     parts = [part for part in author_ref.split("/") if part]
     if len(parts) != 2:
         raise ValueError("author_ref must look like <author_slug>/vN")
     return workspace / "authors" / parts[0] / parts[1] / "system_fragment.md"
 
-
 def _maybe_int(value: Any) -> Optional[int]:
     try:
         return int(value)
     except (TypeError, ValueError):
         return None
-
-
-def _previous_scene_ref(
-    chapter_order: List[int],
-    scene_counts: Dict[int, int],
-    chapter: int,
-    scene: int,
-) -> Optional[Tuple[int, int]]:
-    if scene > 1:
-        return chapter, scene - 1
-    if chapter in chapter_order:
-        idx = chapter_order.index(chapter)
-        if idx > 0:
-            prev_chapter = chapter_order[idx - 1]
-            prev_count = int(scene_counts.get(prev_chapter, 0) or 0)
-            if prev_count > 0:
-                return prev_chapter, prev_count
-    return None
-
-
-def _scene_prose_path(book_root: Path, chapter: int, scene: int) -> Path:
-    return book_root / "draft" / "chapters" / f"ch_{chapter:03d}" / f"scene_{scene:03d}.md"
-
-
-def _read_scene_prose(book_root: Path, chapter: int, scene: int) -> str:
-    path = _scene_prose_path(book_root, chapter, scene)
-    if not path.exists():
-        return ""
-    return path.read_text(encoding="utf-8")
-
-
-def _last_appearance_for_character(
-    book_root: Path,
-    outline: Dict[str, Any],
-    chapter_order: List[int],
-    scene_counts: Dict[int, int],
-    chapter: int,
-    scene: int,
-    character_id: str,
-) -> Optional[Dict[str, Any]]:
-    pointer = _previous_scene_ref(chapter_order, scene_counts, chapter, scene)
-    while pointer is not None:
-        ref_ch, ref_sc = pointer
-        cast_ids = _scene_cast_ids_from_outline(outline, ref_ch, ref_sc)
-        if character_id in cast_ids:
-            prose = _read_scene_prose(book_root, ref_ch, ref_sc)
-            if prose.strip():
-                return {
-                    "character_id": character_id,
-                    "chapter": ref_ch,
-                    "scene": ref_sc,
-                    "prose": prose,
-                }
-        pointer = _previous_scene_ref(chapter_order, scene_counts, ref_ch, ref_sc)
-    return None
-
-
-def _build_preflight_context(
-    book_root: Path,
-    outline: Dict[str, Any],
-    chapter_order: List[int],
-    scene_counts: Dict[int, int],
-    scene_card: Dict[str, Any],
-) -> Dict[str, Any]:
-    chapter = _maybe_int(scene_card.get("chapter")) or 0
-    scene = _maybe_int(scene_card.get("scene")) or 0
-    cast_ids = scene_card.get("cast_present_ids", [])
-    if not isinstance(cast_ids, list):
-        cast_ids = []
-    cast_ids = [str(item) for item in cast_ids if str(item).strip()]
-
-    immediate_previous: Dict[str, Any] = {"available": False}
-    immediate_cast_ids: List[str] = []
-    previous = _previous_scene_ref(chapter_order, scene_counts, chapter, scene)
-    if previous is not None:
-        prev_ch, prev_sc = previous
-        prose = _read_scene_prose(book_root, prev_ch, prev_sc)
-        immediate_previous = {
-            "available": bool(prose.strip()),
-            "chapter": prev_ch,
-            "scene": prev_sc,
-            "prose": prose,
-        }
-        immediate_cast_ids = _scene_cast_ids_from_outline(outline, prev_ch, prev_sc)
-
-    cast_last_appearance: List[Dict[str, Any]] = []
-    for char_id in cast_ids:
-        if char_id in immediate_cast_ids:
-            continue
-        item = _last_appearance_for_character(
-            book_root,
-            outline,
-            chapter_order,
-            scene_counts,
-            chapter,
-            scene,
-            char_id,
-        )
-        if item:
-            cast_last_appearance.append(item)
-
-    return {
-        "immediate_previous_scene": immediate_previous,
-        "cast_last_appearance": cast_last_appearance,
-    }
-
 
 def _durable_slice_retry_ids(report: Dict[str, Any]) -> List[str]:
     ids: List[str] = []
@@ -542,7 +123,6 @@ def _durable_slice_retry_ids(report: Dict[str, Any]) -> List[str]:
         if token and token not in ids:
             ids.append(token)
     return ids
-
 
 def _write_reason_pause_marker(
     book_root: Path,
@@ -574,7 +154,6 @@ def _write_reason_pause_marker(
     pause_path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
     return pause_path
 
-
 def _pause_on_reason(
     book_root: Path,
     state_path: Path,
@@ -594,7 +173,6 @@ def _pause_on_reason(
     _write_reason_pause_marker(book_root, phase, reason_code, message, scene_card, details)
     _status(f"Run paused ({reason_code}) in phase '{phase}': {message}")
     raise SystemExit(PAUSE_EXIT_CODE)
-
 
 def _write_pause_marker(
     book_root: Path,
@@ -632,7 +210,6 @@ def _write_pause_marker(
     pause_path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
     return pause_path
 
-
 def _pause_on_quota(
     book_root: Path,
     state_path: Path,
@@ -652,7 +229,6 @@ def _pause_on_quota(
     _write_pause_marker(book_root, phase, error, scene_card)
     _status(f"Run paused due to quota in phase '{phase}': {error}")
     raise SystemExit(PAUSE_EXIT_CODE)
-
 
 def _apply_durable_updates_or_pause(
     book_root: Path,
@@ -695,14 +271,11 @@ def _apply_durable_updates_or_pause(
         )
     return False
 
-
-
 def _fallback_style_anchor(author_fragment: str) -> str:
     cleaned = re.sub(r"^You are [^.]+\.\s*", "", author_fragment, flags=re.IGNORECASE).strip()
     if cleaned:
         return cleaned
     return "Write in tight third-person limited with concrete sensory detail and forward motion."
-
 
 def _ensure_style_anchor(
     workspace: Path,
@@ -773,112 +346,6 @@ def _ensure_style_anchor(
         raise ValueError("Style anchor generation returned empty output.")
     save_style_anchor(anchor_path, text)
     return text
-
-
-def _lint_scene(
-    workspace: Path,
-    book_root: Path,
-    system_path: Path,
-    prose: str,
-    pre_state: Dict[str, Any],
-    post_state: Dict[str, Any],
-    patch: Dict[str, Any],
-    scene_card: Dict[str, Any],
-    pre_invariants: List[str],
-    post_invariants: List[str],
-    character_states: List[Dict[str, Any]],
-    pov: Optional[str],
-    client: LLMClient,
-    model: str,
-    durable_expand_ids: Optional[List[str]] = None,
-) -> Dict[str, Any]:
-    template = _resolve_template(book_root, "lint.md")
-    lint_character_states = _merged_character_states_for_lint(character_states, patch)
-    durable_post = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
-    authoritative_surfaces = _extract_authoritative_surfaces(prose)
-    prompt = render_template_file(
-        template,
-        {
-            "prose": prose,
-            "pre_state": pre_state,
-            "post_state": post_state,
-            "pre_summary": _summary_from_state(pre_state),
-            "post_summary": _summary_from_state(post_state),
-            "pre_invariants": pre_invariants,
-            "post_invariants": post_invariants,
-            "authoritative_surfaces": authoritative_surfaces,
-            "item_registry": durable_post.get("item_registry", {}),
-            "plot_devices": durable_post.get("plot_devices", {}),
-            "character_states": lint_character_states,
-        },
-    )
-
-    messages: List[Message] = [
-        {"role": "system", "content": _system_prompt_for_phase(system_path, book_root / "outline" / "outline.json", "lint")},
-        {"role": "user", "content": prompt},
-    ]
-
-    response = _chat(
-        workspace,
-        "lint_scene",
-        client,
-        messages,
-        model=model,
-        temperature=0.0,
-        max_tokens=_lint_max_tokens(),
-        log_extra=_log_scope(book_root, scene_card),
-    )
-
-    retries = _json_retry_count()
-    attempt = 0
-    while True:
-        try:
-            report = _extract_json(response.text)
-            break
-        except ValueError as exc:
-            if attempt >= retries:
-                raise exc
-            retry_messages = list(messages)
-            retry_messages.append({
-                "role": "user",
-                "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
-            })
-            response = _chat(
-                workspace,
-                f"lint_scene_json_retry{attempt + 1}",
-                client,
-                retry_messages,
-                model=model,
-                temperature=0.0,
-                max_tokens=_lint_max_tokens(),
-                log_extra=_log_scope(book_root, scene_card),
-            )
-            attempt += 1
-    report = _normalize_lint_report(report)
-    summary_update = patch.get("summary_update") if isinstance(patch, dict) else {}
-    if not isinstance(summary_update, dict):
-        summary_update = {}
-    heuristic_issues = _heuristic_invariant_issues(prose, summary_update, pre_invariants, post_invariants)
-    lint_character_states = _merged_character_states_for_lint(character_states, patch)
-    extra_issues = _stat_mismatch_issues(
-        prose,
-        lint_character_states,
-        _global_continuity_stats(post_state),
-        authoritative_surfaces=authoritative_surfaces,
-    )
-    extra_issues += _pov_drift_issues(prose, pov, strict=_lint_mode() == "strict")
-    durable_issues = _durable_scene_constraint_issues(prose, scene_card, durable_post)
-    durable_issues += _linked_durable_consistency_issues(durable_post)
-    combined = heuristic_issues + extra_issues + durable_issues
-    if combined:
-        report["issues"] = list(report.get("issues", [])) + combined
-        report["status"] = _lint_status_from_issues(report.get("issues", []))
-        report.setdefault("mode", "heuristic")
-    else:
-        report["status"] = _lint_status_from_issues(report.get("issues", []))
-    validate_json(report, "lint_report")
-    return report
-
 
 def run_loop(
     workspace: Path,
@@ -1383,9 +850,9 @@ def run_loop(
         if steps_remaining is not None:
             steps_remaining -= 1
 
-
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
+
 
 
 

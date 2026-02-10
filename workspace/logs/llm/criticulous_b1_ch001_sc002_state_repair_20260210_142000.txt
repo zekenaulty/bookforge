@@ -1,0 +1,216 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "delta": {},
+      "scene": 2,
+      "set": {
+        "classes": [
+          {
+            "level": 1,
+            "name": "Office Drone"
+          }
+        ],
+        "reason": "Artie locked in his character creation stats, resulting in a 1 HP / 100% Crit build due to a UI glitch.",
+        "stats": {
+          "crit_rate": 100,
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "stat_points": 0
+        },
+        "titles": [
+          {
+            "active": true,
+            "name": "The Glassest Cannon",
+            "source": "Stat Allocation"
+          }
+        ]
+      }
+    },
+    {
+      "chapter": 1,
+      "character_id": "CHAR_FIZZ",
+      "delta": {},
+      "scene": 2,
+      "set": {
+        "reason": "Maintaining Fizz's guide stats during the tutorial introduction.",
+        "stats": {
+          "hp": {
+            "current": 50,
+            "max": 50
+          },
+          "mp": {
+            "current": 200,
+            "max": 200
+          }
+        }
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "hand_left",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "invariants_add": [
+        "status: wearing grey-mesh jumpsuit"
+      ],
+      "inventory": [],
+      "persona_updates": [
+        "Artie is terrified of his extreme fragility but intrigued by the humming power of his 100% crit rate."
+      ],
+      "scene": 2
+    },
+    {
+      "chapter": 1,
+      "character_id": "CHAR_FIZZ",
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_FIZZ_GUIDE"
+          ],
+          "owner": "CHAR_FIZZ"
+        },
+        {
+          "container": "satchel",
+          "contents": [
+            "ITEM_GLOW_DUST"
+          ],
+          "owner": "CHAR_FIZZ"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_FIZZ_GUIDE",
+          "status": "held"
+        },
+        {
+          "container": "satchel",
+          "item": "ITEM_GLOW_DUST",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": [
+        "Fizz is professionally impatient and morbidly fascinated by Artie's 'statistical crime' of a build."
+      ],
+      "scene": 2
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": []
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item_id": "ITEM_FIZZ_GUIDE",
+          "status": "held"
+        },
+        {
+          "container": "satchel",
+          "item_id": "ITEM_GLOW_DUST",
+          "status": "stowed"
+        }
+      ]
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_FIZZ_GUIDE",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "location": "Character Creation Void",
+          "scene": 2
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_GLOW_DUST",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "location": "Character Creation Void",
+          "scene": 2
+        }
+      }
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "set": {
+        "activation_state": "active",
+        "last_seen": {
+          "chapter": 1,
+          "location": "Character Creation Void",
+          "scene": 2
+        }
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie met his System Guide, Fizz, and accidentally created a 'Crit-Only' build with 1 HP."
+    ],
+    "key_events": [
+      "Artie met Fizz, a Level 742 System Guide, in the Character Creation Void.",
+      "Fizz explained that Artie's mundane belongings were converted into raw data upon death.",
+      "A latency spike in the Character Creation UI caused Artie to misclick during stat allocation.",
+      "Artie accidentally allocated all 50 stat points into the experimental 'Criticality' stat.",
+      "The System applied a balance penalty, reducing Artie's maximum HP to 1.",
+      "Artie gained the title 'The Glassest Cannon' and locked in a 100% Critical Hit rate.",
+      "The Character Creation Void began dissolving as Artie was deployed to the tutorial zone."
+    ],
+    "last_scene": [
+      "Artie met his System Guide, Fizz, in the Character Creation Void. A UI glitch during stat allocation caused him to accidentally dump all fifty points into the Criticality stat. The System balanced this anomaly by reducing his maximum health to one, leaving him as a 100% crit-rate glass cannon."
+    ],
+    "must_stay_true": [
+      "milestone: death_event = DONE",
+      "milestone: void_entry = DONE",
+      "milestone: stat_allocation = DONE",
+      "inventory: CHAR_ARTIE -> Leather Wallet (lost)",
+      "inventory: CHAR_ARTIE -> Silk Tie (lost)",
+      "inventory: CHAR_ARTIE -> Loose Change (lost)",
+      "Artie_HP: 1/1",
+      "Artie_Crit_Rate: 100%"
+    ]
+  },
+  "world_updates": {
+    "cast_present_ids": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Character Creation Void",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie met Fizz, his System Guide.",
+      "Artie's stats are locked at 1 HP and 100% Crit rate.",
+      "Artie is wearing a grey-mesh jumpsuit with zero defensive value.",
+      "Artie is being deployed to the tutorial zone."
+    ]
+  }
+}

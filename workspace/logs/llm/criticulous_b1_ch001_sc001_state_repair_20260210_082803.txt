@@ -1,0 +1,159 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "delta": {
+        "resources": {
+          "sanity": {
+            "current": -5
+          }
+        },
+        "stats": {
+          "hp": {
+            "current": -10
+          }
+        }
+      },
+      "scene": 1,
+      "set": {
+        "reason": "Electrocution by malfunctioning vending machine."
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "neck",
+          "contents": [
+            "ITEM_TIE"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "hand_right",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "hand_left",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "invariants_add": [
+        "status: CHAR_ARTIE -> Deceased (Mundane)"
+      ],
+      "inventory": [
+        {
+          "container": "neck",
+          "item_id": "ITEM_TIE",
+          "status": "equipped"
+        }
+      ],
+      "persona_updates": [
+        "Artie's final mundane thought was a realization of his hatred for ranch-flavored chips."
+      ],
+      "scene": 1
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "item_id": "ITEM_WALLET",
+      "new_container": "Office Breakroom floor",
+      "new_status": "dropped",
+      "reason": "Muscular spasm during electrocution.",
+      "reason_category": "after_combat_cleanup"
+    },
+    {
+      "character_id": "CHAR_ARTIE",
+      "item_id": "ITEM_CHANGE",
+      "new_container": "Office Breakroom floor",
+      "new_status": "dropped",
+      "reason": "Dropped during struggle with machine.",
+      "reason_category": "after_combat_cleanup"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_TIE",
+      "set": {
+        "state_tags": [
+          "mundane",
+          "scorched"
+        ]
+      }
+    },
+    {
+      "item_id": "ITEM_WALLET",
+      "set": {
+        "custodian": "Office Breakroom floor"
+      }
+    },
+    {
+      "item_id": "ITEM_CHANGE",
+      "set": {
+        "custodian": "Office Breakroom floor"
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie died in a mundane office accident involving a vending machine and a power surge."
+    ],
+    "key_events": [
+      "Artie interacts with the vending machine using Loose Change.",
+      "The vending machine malfunctions, snagging the snack bag.",
+      "Artie attempts to physically manipulate the machine, triggering a power surge.",
+      "A critical electrical strike hits Artie, dropping him to 0 HP.",
+      "Artie loses consciousness as the world 'crashes' around him.",
+      "The office breakroom environment dissolves into static and a dark void."
+    ],
+    "last_scene": [
+      "Artie attempted to buy a snack from a malfunctioning vending machine in his office breakroom.",
+      "After the machine snagged his chips, a freak power surge electrocuted him, reducing his HP to zero.",
+      "His consciousness faded as the mundane world dissolved into a digital void."
+    ],
+    "must_stay_true": [
+      "milestone: vending_death = DONE",
+      "milestone: system_transition_triggered = DONE",
+      "inventory: CHAR_ARTIE -> Leather Wallet (dropped, location=Office Breakroom floor)",
+      "inventory: CHAR_ARTIE -> Loose Change (dropped, location=Office Breakroom floor)",
+      "inventory: CHAR_ARTIE -> Silk Tie (equipped, scorched)",
+      "status: CHAR_ARTIE -> Deceased (Mundane)"
+    ]
+  },
+  "transfer_updates": [
+    {
+      "destination": "Office Breakroom floor",
+      "item_id": "ITEM_WALLET",
+      "reason": "Dropped during fatal electrocution.",
+      "reason_category": "handoff_transfer",
+      "source": "hand_right"
+    },
+    {
+      "destination": "Office Breakroom floor",
+      "item_id": "ITEM_CHANGE",
+      "reason": "Dropped during fatal electrocution.",
+      "reason_category": "handoff_transfer",
+      "source": "hand_left"
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Office Breakroom",
+    "open_threads": [],
+    "recent_facts": [
+      "Artie attempted to buy Zesty Ranch Zings from a malfunctioning vending machine.",
+      "A freak power surge occurred during Artie's attempt to shake the machine.",
+      "Artie was electrocuted by the vending machine, dropping his HP to 0."
+    ]
+  }
+}

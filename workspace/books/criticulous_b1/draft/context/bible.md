@@ -1,0 +1,2 @@
+- Artie was killed by a vending machine.
+- Artie is now in the Character Creation Void.

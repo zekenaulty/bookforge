@@ -359,6 +359,15 @@ def _apply_run_stat_updates(state: Dict[str, Any], patch: Dict[str, Any]) -> Non
 
 
 def _summary_from_state(state: Dict[str, Any]) -> Dict[str, List[str]]:
+    if not isinstance(state, dict):
+        return {
+            "last_scene": [],
+            "chapter_so_far": [],
+            "story_so_far": [],
+            "key_facts_ring": [],
+            "must_stay_true": [],
+            "pending_story_rollups": [],
+        }
     summary = state.get("summary", {})
     if not isinstance(summary, dict):
         summary = {}
@@ -657,3 +666,4 @@ def _compile_chapter_markdown(book_root: Path, outline: Dict[str, Any], chapter_
     chapter_file = book_root / "draft" / "chapters" / f"ch_{chapter_num:03d}.md"
     chapter_file.write_text(compiled, encoding="utf-8")
     return chapter_file
+
