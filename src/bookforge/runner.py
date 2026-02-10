@@ -2515,8 +2515,10 @@ def _merged_character_states_for_lint(
     if not isinstance(patch, dict) or not isinstance(character_states, list):
         return character_states
     updates = patch.get("character_continuity_system_updates")
-    if not isinstance(updates, list) or not updates:
+    character_updates = patch.get("character_updates")
+    if not isinstance(updates, list) and not isinstance(character_updates, list):
         return character_states
+
     merged = json.loads(json.dumps(character_states))
     index = {}
     for idx, state in enumerate(merged):
@@ -2525,18 +2527,53 @@ def _merged_character_states_for_lint(
         char_id = str(state.get("character_id") or "").strip()
         if char_id:
             index[char_id] = idx
-    for update in updates:
-        if not isinstance(update, dict):
-            continue
-        char_id = str(update.get("character_id") or "").strip()
-        if not char_id or char_id not in index:
-            continue
-        state = merged[index[char_id]]
-        if not isinstance(state, dict):
-            continue
-        continuity = _ensure_character_continuity_system_state(state)
-        _apply_bag_updates(continuity, update)
-        state["character_continuity_system_state"] = continuity
+
+    if isinstance(updates, list):
+        for update in updates:
+            if not isinstance(update, dict):
+                continue
+            char_id = str(update.get("character_id") or "").strip()
+            if not char_id or char_id not in index:
+                continue
+            state = merged[index[char_id]]
+            if not isinstance(state, dict):
+                continue
+            continuity = _ensure_character_continuity_system_state(state)
+            _apply_bag_updates(continuity, update)
+            state["character_continuity_system_state"] = continuity
+
+    if isinstance(character_updates, list):
+        for update in character_updates:
+            if not isinstance(update, dict):
+                continue
+            char_id = str(update.get("character_id") or "").strip()
+            if not char_id or char_id not in index:
+                continue
+            state = merged[index[char_id]]
+            if not isinstance(state, dict):
+                continue
+            inventory = update.get("inventory")
+            if isinstance(inventory, list):
+                state["inventory"] = inventory
+            containers = update.get("containers")
+            if isinstance(containers, list):
+                state["containers"] = containers
+            invariants_add = update.get("invariants_add")
+            if isinstance(invariants_add, list):
+                existing = state.get("invariants", [])
+                if not isinstance(existing, list):
+                    existing = []
+                combined = existing + [str(item) for item in invariants_add if str(item).strip()]
+                deduped = []
+                seen = set()
+                for item in combined:
+                    key = str(item).strip().lower()
+                    if not key or key in seen:
+                        continue
+                    seen.add(key)
+                    deduped.append(item)
+                state["invariants"] = deduped
+
     return merged
 
 
@@ -4132,7 +4169,8 @@ def _lint_scene(
     durable_expand_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     template = _resolve_template(book_root, "lint.md")
-    durable = _durable_state_context(book_root, pre_state, scene_card, durable_expand_ids)
+    lint_character_states = _merged_character_states_for_lint(character_states, patch)
+    durable_post = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
     authoritative_surfaces = _extract_authoritative_surfaces(prose)
     prompt = render_template_file(
         template,
@@ -4145,9 +4183,9 @@ def _lint_scene(
             "pre_invariants": pre_invariants,
             "post_invariants": post_invariants,
             "authoritative_surfaces": authoritative_surfaces,
-            "item_registry": durable.get("item_registry", {}),
-            "plot_devices": durable.get("plot_devices", {}),
-            "character_states": character_states,
+            "item_registry": durable_post.get("item_registry", {}),
+            "plot_devices": durable_post.get("plot_devices", {}),
+            "character_states": lint_character_states,
         },
     )
 
@@ -4205,8 +4243,8 @@ def _lint_scene(
         authoritative_surfaces=authoritative_surfaces,
     )
     extra_issues += _pov_drift_issues(prose, pov, strict=_lint_mode() == "strict")
-    durable_issues = _durable_scene_constraint_issues(prose, scene_card, durable)
-    durable_issues += _linked_durable_consistency_issues(durable)
+    durable_issues = _durable_scene_constraint_issues(prose, scene_card, durable_post)
+    durable_issues += _linked_durable_consistency_issues(durable_post)
     combined = heuristic_issues + extra_issues + durable_issues
     if combined:
         report["issues"] = list(report.get("issues", [])) + combined
@@ -5035,14 +5073,16 @@ def run_loop(
         _status("State updated OK")
 
         updates = patch.get("character_updates") if isinstance(patch, dict) else None
-        if isinstance(updates, list) and updates:
+        continuity_updates = patch.get("character_continuity_system_updates") if isinstance(patch, dict) else None
+        has_char_updates = isinstance(updates, list) and len(updates) > 0
+        has_continuity_updates = isinstance(continuity_updates, list) and len(continuity_updates) > 0
+        if has_char_updates or has_continuity_updates:
             _status("Updating character states...")
-            _apply_character_updates(book_root, patch, chapter_num, scene_num)
-            _apply_character_stat_updates(book_root, patch)
+            if has_char_updates:
+                _apply_character_updates(book_root, patch, chapter_num, scene_num)
+            if has_continuity_updates:
+                _apply_character_stat_updates(book_root, patch)
             _status("Character states updated OK")
-        else:
-            _apply_character_updates(book_root, patch, chapter_num, scene_num)
-            _apply_character_stat_updates(book_root, patch)
 
         if _apply_durable_updates_or_pause(
             book_root=book_root,

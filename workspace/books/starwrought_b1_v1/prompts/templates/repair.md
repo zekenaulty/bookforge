@@ -12,6 +12,10 @@ Continuity system ownership is mandatory, and must be tracked: any mechanic/UI n
 Durable vs ephemeral mechanics:
 - DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
 - EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- UI/system readouts must be on their own line, starting with '[' and ending with ']'.
+- Do NOT embed bracketed UI in narrative sentences.
+- Allowed suffix after a UI block is punctuation or '(locked)' only.
+
 - DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
 - EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
 Canonical descriptors (colors, item names, effect IDs, mechanic labels) must be reused exactly; do not paraphrase.

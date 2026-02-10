@@ -17,6 +17,7 @@ Return ONLY JSON matching the lint_report schema.
 - Check for POV drift vs book POV (no first-person in third-person scenes).
   - Ignore first-person pronouns inside quoted dialogue; only narration counts.
 - Deterministically enforce scene-card durable constraints (required_in_custody, required_scene_accessible, forbidden_visible, device_presence; optional required_visible_on_page).
+- Durable constraint evaluation must use POST-STATE candidate (after patch), not pre-state.
 - Report missing durable context ids with explicit retry hints instead of guessing canon.
 - For each issue, include evidence when possible (line number + excerpt) as {"evidence": {"line": N, "excerpt": "..."}}.
 
@@ -54,7 +55,7 @@ Scene:
 Authoritative surfaces:
 {{authoritative_surfaces}}
 
-Character states (per cast_present_ids):
+Character states (post-patch candidate, per cast_present_ids):
 {{character_states}}
 
 Item registry (canonical):
