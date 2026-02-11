@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
@@ -506,6 +506,7 @@ def reset_book_workspace_detailed(
     _remove_dir_if_exists(context_dir / "continuity_history", report, "continuity_dirs_deleted")
     _remove_dir_if_exists(context_dir / "chapter_summaries", report, "chapter_summary_dirs_deleted")
     _remove_dir_if_exists(context_dir / "characters", report, "character_dirs_deleted")
+    _remove_dir_if_exists(context_dir / "phase_history", report, "phase_history_dirs_deleted")
 
     _remove_file_if_exists(context_dir / "item_registry.json", report, "durable_files_deleted")
     _remove_file_if_exists(context_dir / "plot_devices.json", report, "durable_files_deleted")
