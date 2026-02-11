@@ -1,4 +1,4 @@
-# PREFLIGHT
+﻿# PREFLIGHT
 
 You are the scene state preflight aligner.
 Return ONLY a single JSON object that matches the state_patch schema.
@@ -112,7 +112,10 @@ Dynamic continuity rules:
 - Never rely on prose implication for durable state mutation.
 - All *_updates arrays must contain objects; never emit bare strings as array entries.
 - character_updates.containers must be an array of objects with at least: container, owner, contents (array).
-- Safety check for non-trivial changes:
+- Transfer vs registry conflict rule (must follow):
+  - If you create a NEW item in item_registry_updates with final custodian already set (e.g., CHAR_ARTIE), DO NOT emit transfer_updates for that item.
+  - If you emit transfer_updates for a NEW item, the registry entry must start with custodian="world" and then transfer to the character.
+  - expected_before must match the registry entry at the moment of transfer (after any registry update that applies before it).- Safety check for non-trivial changes:
   - When making a DISCONTINUOUS TRANSITION change that moves an item between containers, changes custody, or toggles a plot device:
     - include expected_before with the minimal prior snapshot you are relying on (e.g., prior container/status/custodian).
     - if expected_before does not match current state, prefer leaving unchanged and note the discrepancy in notes.
@@ -128,6 +131,26 @@ Dynamic continuity rules:
   - equipment_posture
   - custody_transfer
   - plot_device_state
+
+JSON Contract Block (strict; arrays only):
+- All *_updates must be arrays of objects, even when there is only one update.
+- INVALID vs VALID examples:
+  - item_registry_updates:
+    - INVALID: "item_registry_updates": {"set": {"ITEM_X": {...}}}
+    - VALID:   "item_registry_updates": [{"item_id": "ITEM_X", "set": {...}}]
+  - plot_device_updates:
+    - INVALID: "plot_device_updates": {"set": {"DEVICE_X": {...}}}
+    - VALID:   "plot_device_updates": [{"device_id": "DEVICE_X", "set": {...}}]
+  - transfer_updates:
+    - INVALID: "transfer_updates": {"item_id": "ITEM_X"}
+    - VALID:   "transfer_updates": [{"item_id": "ITEM_X", "reason": "handoff"}]
+  - inventory_alignment_updates:
+    - INVALID: "inventory_alignment_updates": {"updates": [{...}]}
+    - VALID:   "inventory_alignment_updates": [{"character_id": "CHAR_X", "set": {...}, "reason": "..."}]
+  - global_continuity_system_updates:
+    - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+    - VALID:   "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+- custodian must be a non-null string id or "world"; never null.
 
 Scene card:
 {{scene_card}}
@@ -198,20 +221,3 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

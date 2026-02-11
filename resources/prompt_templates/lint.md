@@ -1,4 +1,4 @@
-# LINT
+﻿# LINT
 
 Check the scene for continuity, invariant violations, and duplication.
 Flag invariant contradictions against must_stay_true/key facts.
@@ -29,6 +29,7 @@ Return ONLY JSON matching the lint_report schema.
 - For authoritative surfaces, prefer exact canonical item/device labels from registries.
 - For milestone repetition/future checks, compare against PRE-INVARIANTS only (pre-scene canon).
 - For ownership/consistency checks, compare against POST-STATE (post-patch candidate).
+- POST-STATE is canonical; character_states is a derived convenience view. If they contradict, emit pipeline_state_incoherent.
 - Check for POV drift vs book POV (no first-person in third-person scenes).
   - Ignore first-person pronouns inside quoted dialogue; only narration counts.
 - Deterministically enforce scene-card durable constraints (required_in_custody, required_scene_accessible, forbidden_visible, device_presence; optional required_visible_on_page).
@@ -38,6 +39,7 @@ Return ONLY JSON matching the lint_report schema.
   - If MUST_STAY_TRUE invariants contradict the provided post-patch candidate character state, treat this as an upstream snapshot error.
   - In that case emit a single error issue with code "pipeline_state_incoherent" including evidence of the invariant and the conflicting state field.
   - Do NOT emit additional continuity errors for the same fields when pipeline_state_incoherent is present.
+- If pipeline_state_incoherent is present, issues MUST contain exactly one issue.
 - For each issue, include evidence when possible (line number + excerpt) as {"evidence": {"line": N, "excerpt": "..."}}.
 - Evaluate consistency over the full scope of the scene, not a single snapshot.
   - Transitional state: a temporary mismatch later corrected or superseded within this scene.
@@ -111,11 +113,3 @@ Post-summary (facts-only):
 
 Post-invariants (must_stay_true + key facts):
 {{post_invariants}}
-
-
-
-
-
-
-
-

@@ -1,4 +1,4 @@
-# WRITE
+﻿# WRITE
 Write the scene described by the scene card.
 - YOU MUST ALWAYS RETURN PROSE AND THE STATE_PATCH.
 - Start in motion. No recap.
@@ -98,7 +98,10 @@ STATE_PATCH rules:
   - owner_scope must be "character" or "world" and must match the custodian scope.
   - plot_device_updates: set must include name, custody_scope, custody_ref, activation_state, linked_threads, constraints, last_seen {chapter, scene, location}. Optional: display_name, aliases, linked_item_id.
   - If you introduce a new item_id/device_id anywhere in this patch, you MUST include a corresponding registry update with the full required fields.
-  - `inventory_alignment_updates` for scene-fit posture normalization.
+- Transfer vs registry conflict rule (must follow):
+  - If you create a NEW item in item_registry_updates with final custodian already set (e.g., CHAR_ARTIE), DO NOT emit transfer_updates for that item.
+  - If you emit transfer_updates for a NEW item, the registry entry must start with custodian="world" and then transfer to the character.
+  - expected_before must match the registry entry at the moment of transfer (after any registry update that applies before it).  - `inventory_alignment_updates` for scene-fit posture normalization.
   - `item_registry_updates` for durable item metadata/custody changes.
   - `plot_device_updates` for durable plot-device custody/activation changes.
   - `transfer_updates` for item handoffs (source, destination, reason, optional transfer_chain).
@@ -159,6 +162,7 @@ Scene ID: <scene_card.scene_id>
 Allowed events: <short list from Scene Card>
 Forbidden milestones: <from must_stay_true>
 Current arm-side / inventory facts: <from must_stay_true>
+Durable changes committed: <final durable values to record in continuity updates>
 
 APPEARANCE_CHECK:
 - CHAR_ID: <4-8 tokens from atoms/marks>
@@ -174,19 +178,22 @@ Item registry (canonical):
 Plot devices (canonical):
 {{plot_devices}}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+JSON Contract Block (strict; arrays only):
+- All *_updates must be arrays of objects, even when there is only one update.
+- INVALID vs VALID examples:
+  - item_registry_updates:
+    - INVALID: "item_registry_updates": {"set": {"ITEM_X": {...}}}
+    - VALID:   "item_registry_updates": [{"item_id": "ITEM_X", "set": {...}}]
+  - plot_device_updates:
+    - INVALID: "plot_device_updates": {"set": {"DEVICE_X": {...}}}
+    - VALID:   "plot_device_updates": [{"device_id": "DEVICE_X", "set": {...}}]
+  - transfer_updates:
+    - INVALID: "transfer_updates": {"item_id": "ITEM_X"}
+    - VALID:   "transfer_updates": [{"item_id": "ITEM_X", "reason": "handoff"}]
+  - inventory_alignment_updates:
+    - INVALID: "inventory_alignment_updates": {"updates": [{...}]}
+    - VALID:   "inventory_alignment_updates": [{"character_id": "CHAR_X", "set": {...}, "reason": "..."}]
+  - global_continuity_system_updates:
+    - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+    - VALID:   "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+- custodian must be a non-null string id or "world"; never null.

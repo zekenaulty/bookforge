@@ -38,12 +38,12 @@ S5. Lint: temporal scope, pipeline‑incoherent guard, evidence requirements
 S6. Phase Drift Prevention: update checklist + prompt auditing steps
 
 Status Tracker
-- S1: pending — define shared JSON contract block and examples
-- S2: pending — add preflight conflict avoidance rules (registry vs transfer)
-- S3: pending — require durable change ledger and end‑state canonicalization
-- S4: pending — enforce repair alignment with “last occurrence wins” and schema rules
-- S5: pending — add pipeline_state_incoherent guard and evidence‑cited errors
-- S6: pending — add prompt drift checklist and local override verification
+- S1: completed (JSON contract block added to global + criticulous_b1 overrides) — define shared JSON contract block and examples
+- S2: completed (preflight conflict + scope override rule added) — add preflight conflict avoidance rules (registry vs transfer)
+- S3: completed (write durable change ledger + conflict rule + contract block) — require durable change ledger and end‑state canonicalization
+- S4: completed (repair/state_repair updated with conflict rule + contract block) — enforce repair alignment with “last occurrence wins” and schema rules
+- S5: completed (lint guardrail + canonical target clarification) — add pipeline_state_incoherent guard and evidence‑cited errors
+- S6: pending (override template sync + drift checklist) — add prompt drift checklist and local override verification
 
 Plan Detail
 
@@ -105,3 +105,9 @@ Notes (Integration Discipline)
 - Keep logic in phase‑specific modules; do not expand runner.py after lift‑and‑shift.
 - Any new JSON shape requires immediate prompt update across all phases that can emit it.
 
+
+Edge Cases Observed (capture; do not halt work)
+- Transfer vs registry conflict: creating a new item with final custodian AND emitting transfer_updates causes expected_before mismatch. Prompt now forces either registry-only or world->transfer flow.
+- Existing item custodian change: if an item already exists and custody changes, use transfer_updates (not registry-only) to avoid silent ownership drift.
+- Non-real but story-real transitions (e.g., System Void): preflight must explicitly set scope_override on physical updates when story continuity requires it.
+- New item + transfer: registry custodian must be "world" prior to transfer; otherwise omit transfer_updates.
