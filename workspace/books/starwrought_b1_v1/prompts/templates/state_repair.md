@@ -94,7 +94,9 @@ Naming repairs:
 - If durable mutation is implied but ambiguous, keep canonical state unchanged and emit an explicit repair note in reason fields.
 - Honor scene-card durable constraints (`required_in_custody`, `required_scene_accessible`, `forbidden_visible`, `device_presence`; optional `required_visible_on_page`).
 - Respect `timeline_scope` and `ontological_scope`; avoid physical custody changes in non-present/non-real scope unless explicit override is present.
-
+- Scope override rule (non-present / non-real scenes):
+  - If timeline_scope != "present" OR ontological_scope != "real", do NOT emit inventory_alignment_updates, transfer_updates, or physical custody changes.
+  - If you must mutate physical custody in a non-present/non-real scene, set scope_override=true (or allow_non_present_mutation=true) on that update and set reason_category="timeline_override".
 Inputs
 - prose: final scene text
 - state: pre-scene state
@@ -134,6 +136,7 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
+
 
 
 

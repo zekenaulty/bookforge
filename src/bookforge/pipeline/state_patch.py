@@ -355,13 +355,62 @@ def _migrate_numeric_invariants(patch: Dict[str, Any]) -> None:
         update["invariants_add"] = remaining
 
 
+PHYSICAL_ITEM_MUTATION_KEYS = {
+    "custodian",
+    "container_ref",
+    "carrier_ref",
+    "location_ref",
+    "owner_scope",
+}
+PHYSICAL_DEVICE_MUTATION_KEYS = {
+    "custody_scope",
+    "custody_ref",
+    "container_ref",
+    "carrier_ref",
+    "location_ref",
+}
+
+
+def _scene_scopes(scene_card: Dict[str, Any] | None) -> tuple[str, str]:
+    if not isinstance(scene_card, dict):
+        return "present", "real"
+    timeline_scope = str(scene_card.get("timeline_scope") or "present").strip().lower() or "present"
+    ontological_scope = str(scene_card.get("ontological_scope") or "real").strip().lower() or "real"
+    return timeline_scope, ontological_scope
+
+
+def _scope_override_enabled(update: Dict[str, Any]) -> bool:
+    if not isinstance(update, dict):
+        return False
+    for key in ("timeline_override", "scope_override", "allow_scope_override", "allow_non_present_mutation"):
+        value = update.get(key)
+        if isinstance(value, bool) and value:
+            return True
+        if isinstance(value, str) and value.strip().lower() in {"1", "true", "yes", "on"}:
+            return True
+    return False
+
+
+def _block_touches_physical_keys(update: Dict[str, Any], keys: set[str]) -> bool:
+    if not isinstance(update, dict):
+        return False
+    for block_name in ("set", "delta"):
+        block = update.get(block_name)
+        if isinstance(block, dict) and any(key in block for key in keys):
+            return True
+    remove_block = update.get("remove")
+    if isinstance(remove_block, list) and any(str(item) in keys for item in remove_block):
+        return True
+    return False
+
+
 def _normalize_state_patch_for_validation(
     patch: Dict[str, Any],
     scene_card: Dict[str, Any],
     *,
     preflight: bool = False,
 ) -> Dict[str, Any]:
-    normalized = _sanitize_preflight_patch(patch) if preflight else patch
+    normalized = _sanitize_preflight_patch(patch, scene_card) if preflight else patch
     if "schema_version" not in normalized:
         normalized["schema_version"] = "1.0"
     _coerce_summary_update(normalized)
@@ -377,7 +426,10 @@ def _normalize_state_patch_for_validation(
     return normalized
 
 
-def _sanitize_preflight_patch(patch: Dict[str, Any]) -> Dict[str, Any]:
+def _sanitize_preflight_patch(
+    patch: Dict[str, Any],
+    scene_card: Dict[str, Any] | None = None,
+) -> Dict[str, Any]:
     allowed_keys = {
         "schema_version",
         "world_updates",
@@ -401,7 +453,56 @@ def _sanitize_preflight_patch(patch: Dict[str, Any]) -> Dict[str, Any]:
         if key in allowed_keys:
             sanitized[key] = value
     sanitized.setdefault("schema_version", "1.0")
+
+    timeline_scope, ontological_scope = _scene_scopes(scene_card)
+    if timeline_scope != "present" or ontological_scope != "real":
+        inventory_updates = []
+        for update in sanitized.get("inventory_alignment_updates", []) or []:
+            if isinstance(update, dict) and _scope_override_enabled(update):
+                inventory_updates.append(update)
+        if inventory_updates:
+            sanitized["inventory_alignment_updates"] = inventory_updates
+        else:
+            sanitized.pop("inventory_alignment_updates", None)
+
+        transfer_updates = []
+        for update in sanitized.get("transfer_updates", []) or []:
+            if isinstance(update, dict) and _scope_override_enabled(update):
+                transfer_updates.append(update)
+        if transfer_updates:
+            sanitized["transfer_updates"] = transfer_updates
+        else:
+            sanitized.pop("transfer_updates", None)
+
+        item_updates = []
+        for update in sanitized.get("item_registry_updates", []) or []:
+            if not isinstance(update, dict):
+                continue
+            physical = _block_touches_physical_keys(update, PHYSICAL_ITEM_MUTATION_KEYS)
+            if physical and not _scope_override_enabled(update):
+                continue
+            item_updates.append(update)
+        if item_updates:
+            sanitized["item_registry_updates"] = item_updates
+        else:
+            sanitized.pop("item_registry_updates", None)
+
+        device_updates = []
+        for update in sanitized.get("plot_device_updates", []) or []:
+            if not isinstance(update, dict):
+                continue
+            physical = _block_touches_physical_keys(update, PHYSICAL_DEVICE_MUTATION_KEYS)
+            if physical and not _scope_override_enabled(update):
+                continue
+            device_updates.append(update)
+        if device_updates:
+            sanitized["plot_device_updates"] = device_updates
+        else:
+            sanitized.pop("plot_device_updates", None)
+
     return sanitized
+
+
 
 
 

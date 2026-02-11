@@ -42,7 +42,9 @@ Durable item naming discipline:
 - If a required event is not in the Scene Card, do not perform it.
 - Enforce scene-card durable constraints: honor `required_in_custody`, `required_scene_accessible`, `forbidden_visible`, and `device_presence`; treat `required_visible_on_page` as explicit narrative requirement when present.
 - Respect `timeline_scope` and `ontological_scope` when proposing durable mutations; do not mutate physical custody in non-present/non-real scope unless explicitly marked override.
-- summary_update arrays are mandatory; do not omit or leave empty unless explicitly stated.
+- Scope override rule (non-present / non-real scenes):
+  - If timeline_scope != "present" OR ontological_scope != "real", do NOT emit inventory_alignment_updates, transfer_updates, or physical custody changes.
+  - If you must mutate physical custody in a non-present/non-real scene, set scope_override=true (or allow_non_present_mutation=true) on that update and set reason_category="timeline_override".- summary_update arrays are mandatory; do not omit or leave empty unless explicitly stated.
 - STATE_PATCH must record all major events and outcomes from the prose; if an event happens, add it to key_events and update must_stay_true as needed.
 - must_stay_true must include a milestone ledger entry for every milestone referenced in the Scene Card or already present in state.
 - If state lacks a key invariant needed for this scene, seed it in must_stay_true using standard phrasing.
@@ -171,6 +173,7 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
+
 
 
 

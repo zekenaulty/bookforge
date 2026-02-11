@@ -68,6 +68,7 @@ def _scene_state_preflight(
 
     patch = _normalize_state_patch_for_validation(patch, scene_card)
     validate_json(patch, "state_patch")
-    patch = _sanitize_preflight_patch(patch)
+    patch = _sanitize_preflight_patch(patch, scene_card)
 
     return patch
+
