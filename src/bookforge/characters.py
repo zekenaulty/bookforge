@@ -19,6 +19,7 @@ from bookforge.util.json_extract import extract_json
 from bookforge.util.schema import validate_json
 
 DEFAULT_JSON_RETRY_COUNT = 1
+DEFAULT_APPEARANCE_MAX_TOKENS = 4096
 
 
 def _now_iso() -> str:
@@ -32,6 +33,9 @@ def _int_env(name: str, default: int) -> int:
 
 def _json_retry_count() -> int:
     return max(0, _int_env("BOOKFORGE_JSON_RETRY_COUNT", DEFAULT_JSON_RETRY_COUNT))
+
+def _appearance_max_tokens() -> int:
+    return max(512, _int_env("BOOKFORGE_APPEARANCE_MAX_TOKENS", DEFAULT_APPEARANCE_MAX_TOKENS))
 
 
 def _extract_json(text: str) -> Dict[str, Any]:
@@ -296,6 +300,7 @@ def _ensure_character_appearance_current(
         return False
 
     state["appearance_current"] = derived
+    state["appearance_projection_pending"] = True
     history = state.get("appearance_history")
     if not isinstance(history, list):
         state["appearance_history"] = []
@@ -304,6 +309,136 @@ def _ensure_character_appearance_current(
         state["updated_at"] = _now_iso()
         state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
     return True
+
+def _render_appearance_projection_prompt(
+    book_root: Path,
+    character: Dict[str, Any],
+    appearance_base: Dict[str, Any],
+    appearance_current: Dict[str, Any],
+) -> str:
+    template = _resolve_template(book_root, "appearance_projection.md")
+    return render_template_file(
+        template,
+        {
+            "character": character,
+            "appearance_base": appearance_base,
+            "appearance_current": appearance_current,
+        },
+    )
+
+
+def _refresh_character_appearance_projection(
+    book_root: Path,
+    character_id: str,
+    *,
+    client: Optional[LLMClient] = None,
+    model: Optional[str] = None,
+    force: bool = False,
+) -> bool:
+    state_path = resolve_character_state_path(book_root, character_id)
+    if state_path is None or not state_path.exists():
+        return False
+    try:
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return False
+    if not isinstance(state, dict):
+        return False
+
+    _ensure_character_appearance_current(book_root, state, character_id, state_path)
+    appearance_current = state.get("appearance_current")
+    if not isinstance(appearance_current, dict):
+        return False
+
+    has_summary = isinstance(appearance_current.get("summary"), str) and appearance_current.get("summary", "").strip()
+    pending = bool(state.get("appearance_projection_pending"))
+    if not force and not pending and has_summary:
+        return False
+
+    canon = _load_character_canon(book_root, character_id) or {}
+    appearance_base = canon.get("appearance_base") if isinstance(canon.get("appearance_base"), dict) else {}
+
+    character = {
+        "character_id": character_id,
+        "name": state.get("name") or canon.get("name") or "",
+    }
+
+    prompt = _render_appearance_projection_prompt(book_root, character, appearance_base, appearance_current)
+
+    if client is None:
+        config = load_config()
+        client = get_llm_client(config, phase="characters")
+        if model is None:
+            model = resolve_model("characters", config)
+    elif model is None:
+        model = "default"
+
+    system_path = book_root / "prompts" / "system_v1.md"
+    system_prompt = system_path.read_text(encoding="utf-8") if system_path.exists() else ""
+    messages: List[Message] = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": prompt},
+    ]
+
+    request = {"model": model, "temperature": 0.3, "max_tokens": _appearance_max_tokens()}
+    workspace = _workspace_root_from_book_root(book_root)
+    key_slot = getattr(client, "key_slot", None)
+    log_extra: Dict[str, Any] = {"book_id": book_root.name, "character_id": character_id}
+    if key_slot:
+        log_extra["key_slot"] = key_slot
+
+    try:
+        response = client.chat(messages, model=model, temperature=0.3, max_tokens=_appearance_max_tokens())
+    except LLMRequestError as exc:
+        if should_log_llm():
+            log_llm_error(workspace, "appearance_projection_error", exc, request=request, messages=messages, extra=log_extra)
+        raise
+
+    if should_log_llm():
+        log_llm_response(workspace, "appearance_projection", response, request=request, messages=messages, extra=log_extra)
+
+    data = _extract_json(response.text)
+    summary = data.get("summary") if isinstance(data, dict) else None
+    if not isinstance(summary, str) or not summary.strip():
+        raise ValueError("Appearance projection response missing required summary.")
+
+    appearance_current["summary"] = summary.strip()
+    appearance_art = data.get("appearance_art") if isinstance(data, dict) else None
+    if isinstance(appearance_art, dict):
+        appearance_current["appearance_art"] = appearance_art
+
+    state["appearance_current"] = appearance_current
+    state["appearance_projection_pending"] = False
+    state["updated_at"] = _now_iso()
+    state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
+    return True
+
+
+def refresh_appearance_projections(
+    book_root: Path,
+    character_ids: List[str],
+    *,
+    force: bool = False,
+    client: Optional[LLMClient] = None,
+    model: Optional[str] = None,
+) -> List[str]:
+    if not character_ids:
+        return []
+    config = load_config() if client is None else None
+    if client is None:
+        client = get_llm_client(config, phase="characters")
+    if model is None:
+        model = resolve_model("characters", config)
+    refreshed: List[str] = []
+    seen = set()
+    for char_id in character_ids:
+        cid = str(char_id).strip()
+        if not cid or cid in seen:
+            continue
+        seen.add(cid)
+        if _refresh_character_appearance_projection(book_root, cid, client=client, model=model, force=force):
+            refreshed.append(cid)
+    return refreshed
 
 def _unique_state_path(characters_dir: Path, character_id: str) -> Path:
     base_path = characters_dir / _character_state_filename(character_id)
@@ -732,6 +867,15 @@ def characters_ready(book_root: Path) -> bool:
         if not (book_root / rel_path).exists():
             return False
     return True
+
+
+
+
+
+
+
+
+
 
 
 

@@ -158,7 +158,7 @@ Status: completed
 
 ### Story F: Projection Refresh
 - After acceptance, regenerate summary/art from atoms/marks via characters model.
-Status: pending
+Status: completed
 
 ### Story G: Scene Card Durable Appearance Changes (Optional)
 - Add optional durable_appearance_changes for explicit intent.
@@ -174,7 +174,7 @@ Status: pending
 - [x] Story C: Authoritative Appearance Surface
 - [x] Story D: Lint Enforcement (Authoritative)
 - [x] Story E: Appearance Updates Apply + History
-- [ ] Story F: Projection Refresh
+- [x] Story F: Projection Refresh
 - [ ] Story G: Scene Card Durable Appearance Changes
 - [ ] Story H: Attire Boundary Enforcement
 
@@ -194,5 +194,8 @@ Status: pending
 - Ensure no silent drift: appearance_current must remain stable unless explicitly updated.
 - Preflight must guarantee initial appearance data on fresh runs.
 - Keep code organized by phase and file boundaries; do not grow `runner.py` further after the lift-and-shift refactor. New DCAS logic must live in the appropriate phase/module.
+
+
+
 
 

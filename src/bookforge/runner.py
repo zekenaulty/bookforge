@@ -9,7 +9,7 @@ import re
 import shutil
 
 from bookforge.config.env import load_config
-from bookforge.characters import characters_ready, generate_characters, resolve_character_state_path, ensure_character_index, create_character_state_path
+from bookforge.characters import characters_ready, generate_characters, resolve_character_state_path, ensure_character_index, create_character_state_path, refresh_appearance_projections
 from bookforge.llm.client import LLMClient
 from bookforge.llm.errors import LLMRequestError
 from bookforge.llm.factory import get_llm_client, resolve_model
@@ -505,6 +505,13 @@ def run_loop(
         snapshots = _snapshot_character_states_before_preflight(book_root, scene_card)
         if snapshots:
             _status(f"Character state snapshots written: {len(snapshots)}")
+        if cast_ids:
+            try:
+                refreshed = refresh_appearance_projections(book_root, cast_ids)
+                if refreshed:
+                    _status(f"Appearance projections refreshed: {len(refreshed)}")
+            except LLMRequestError as exc:
+                _pause_on_quota(book_root, state_path, state, "appearance_projection", exc, scene_card)
 
         _status(f"Preflight state alignment: ch{chapter_num:03d} sc{scene_num:03d}...")
         try:
@@ -798,6 +805,23 @@ def run_loop(
             if has_continuity_updates:
                 _apply_character_stat_updates(book_root, patch)
             _status("Character states updated OK")
+        if has_char_updates:
+            appearance_ids: List[str] = []
+            for update in updates:
+                if not isinstance(update, dict):
+                    continue
+                if update.get("appearance_updates") is None:
+                    continue
+                char_id = str(update.get("character_id") or "").strip()
+                if char_id:
+                    appearance_ids.append(char_id)
+            if appearance_ids:
+                try:
+                    refreshed = refresh_appearance_projections(book_root, appearance_ids, force=True)
+                    if refreshed:
+                        _status(f"Appearance projections refreshed: {len(refreshed)}")
+                except LLMRequestError as exc:
+                    _pause_on_quota(book_root, state_path, state, "appearance_projection", exc, scene_card)
 
         if _apply_durable_updates_or_pause(
             book_root=book_root,
@@ -861,6 +885,13 @@ def run_loop(
 
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
+
+
+
+
+
+
+
 
 
 
