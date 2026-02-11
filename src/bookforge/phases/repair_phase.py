@@ -7,6 +7,7 @@ from bookforge.llm.client import LLMClient
 from bookforge.llm.types import Message
 from bookforge.pipeline.config import _repair_max_tokens
 from bookforge.pipeline.durable import _durable_state_context
+from bookforge.pipeline.appearance import _with_derived_attire
 from bookforge.pipeline.io import _log_scope
 from bookforge.pipeline.llm_ops import _chat, _response_truncated, _json_retry_count, _state_patch_schema_retry_message
 from bookforge.pipeline.parse import _extract_prose_and_patch, _extract_appearance_check
@@ -33,6 +34,7 @@ def _repair_scene(
 ) -> Tuple[str, Dict[str, Any]]:
     template = _resolve_template(book_root, "repair.md")
     durable = _durable_state_context(book_root, state, scene_card, durable_expand_ids)
+    derived_character_states = _with_derived_attire(character_states, durable.get("item_registry", {}))
     prompt = render_template_file(
         template,
         {
@@ -42,7 +44,7 @@ def _repair_scene(
             "scene_card": scene_card,
             "character_registry": character_registry,
             "thread_registry": thread_registry,
-            "character_states": character_states,
+            "character_states": derived_character_states,
             "item_registry": durable.get("item_registry", {}),
             "plot_devices": durable.get("plot_devices", {}),
         },
@@ -125,4 +127,6 @@ def _repair_scene(
             if appearance_check:
                 patch["_appearance_check"] = appearance_check
             schema_attempt += 1
+
+
 

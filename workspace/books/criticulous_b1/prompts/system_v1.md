@@ -16,7 +16,7 @@ Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you
 Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
 Inventory contract: track item ownership and container location per character or container label; items do not teleport.
 Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
-Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware).
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
 State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
 Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
 Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
@@ -88,4 +88,6 @@ Use canonical continuity keys: character_continuity_system_updates and global_co
 - global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
   - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
   - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+
 

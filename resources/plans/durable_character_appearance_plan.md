@@ -166,7 +166,7 @@ Status: completed
 
 ### Story H: Attire Boundary Enforcement
 - Derived attire default; signature outfit via explicit milestone/change.
-Status: pending
+Status: completed
 
 ## Status Tracker
 - [x] Story A: Canon + Runtime Schema
@@ -176,7 +176,7 @@ Status: pending
 - [x] Story E: Appearance Updates Apply + History
 - [x] Story F: Projection Refresh
 - [x] Story G: Scene Card Durable Appearance Changes
-- [ ] Story H: Attire Boundary Enforcement
+- [x] Story H: Attire Boundary Enforcement
 
 ## Definition of Done
 - appearance_base exists for all canon characters in series.
@@ -194,6 +194,8 @@ Status: pending
 - Ensure no silent drift: appearance_current must remain stable unless explicitly updated.
 - Preflight must guarantee initial appearance data on fresh runs.
 - Keep code organized by phase and file boundaries; do not grow `runner.py` further after the lift-and-shift refactor. New DCAS logic must live in the appropriate phase/module.
+
+
 
 
 
