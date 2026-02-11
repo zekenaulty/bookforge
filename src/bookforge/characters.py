@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -230,6 +230,80 @@ def _normalize_titles_in_continuity_state(continuity_state: Dict[str, Any]) -> N
     if "titles" in continuity_state:
         continuity_state["titles"] = _normalize_titles_value(continuity_state.get("titles"))
 
+
+
+def _workspace_root_from_book_root(book_root: Path) -> Path:
+    return book_root.parent.parent
+
+
+def _series_root_for_book_root(book_root: Path) -> Path:
+    book_path = book_root / "book.json"
+    book: Dict[str, Any] = {}
+    if book_path.exists():
+        try:
+            book = _read_json(book_path)
+        except json.JSONDecodeError:
+            book = {}
+    workspace = _workspace_root_from_book_root(book_root)
+    return _series_root(workspace, book)
+
+
+def _load_character_canon(book_root: Path, character_id: str) -> Optional[Dict[str, Any]]:
+    series_root = _series_root_for_book_root(book_root)
+    slug = _character_slug(character_id)
+    canon_path = series_root / "canon" / "characters" / slug / "character.json"
+    if not canon_path.exists():
+        return None
+    try:
+        data = _read_json(canon_path)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(data, dict):
+        return None
+    return data
+
+
+def _appearance_current_from_base(base: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    if not isinstance(base, dict):
+        return None
+    current: Dict[str, Any] = {}
+    for key in ("version", "summary", "atoms", "marks", "alias_map", "appearance_art", "attire"):
+        value = base.get(key)
+        if isinstance(value, (dict, list, str, int, float, bool)):
+            current[key] = value
+    if not any(key in current for key in ("atoms", "marks", "summary")):
+        return None
+    return current
+
+
+def _ensure_character_appearance_current(
+    book_root: Path,
+    state: Dict[str, Any],
+    character_id: str,
+    state_path: Optional[Path] = None,
+) -> bool:
+    current = state.get("appearance_current")
+    if isinstance(current, dict) and any(key in current for key in ("atoms", "marks", "summary")):
+        return False
+
+    base = state.get("appearance_base") if isinstance(state.get("appearance_base"), dict) else None
+    if base is None:
+        canon = _load_character_canon(book_root, character_id)
+        base = canon.get("appearance_base") if isinstance(canon, dict) else None
+
+    derived = _appearance_current_from_base(base)
+    if not isinstance(derived, dict):
+        return False
+
+    state["appearance_current"] = derived
+    history = state.get("appearance_history")
+    if not isinstance(history, list):
+        state["appearance_history"] = []
+
+    if state_path is not None:
+        state["updated_at"] = _now_iso()
+        state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
+    return True
 
 def _unique_state_path(characters_dir: Path, character_id: str) -> Path:
     base_path = characters_dir / _character_state_filename(character_id)
@@ -545,6 +619,10 @@ def generate_characters(
         char_dir = series_root / "canon" / "characters" / slug
         char_dir.mkdir(parents=True, exist_ok=True)
 
+        appearance_base = char.get("appearance_base")
+        if not isinstance(appearance_base, dict):
+            appearance_base = {}
+
         canonical = {
             "schema_version": "1.0",
             "character_id": char_id,
@@ -552,6 +630,7 @@ def generate_characters(
             "pronouns": char.get("pronouns", ""),
             "role": char.get("role", ""),
             "persona": char.get("persona", {}),
+            "appearance_base": appearance_base,
             "voice_notes": char.get("voice_notes", []),
         }
         canon_path = char_dir / "character.json"
@@ -593,12 +672,18 @@ def generate_characters(
         stats_mirror = continuity_state.get("stats") if isinstance(continuity_state.get("stats"), dict) else {}
         skills_mirror = continuity_state.get("skills") if isinstance(continuity_state.get("skills"), dict) else {}
 
+        appearance_current = char.get("appearance_current")
+        if not isinstance(appearance_current, dict):
+            appearance_current = _appearance_current_from_base(appearance_base) or {}
+
         state = {
             "schema_version": "1.0",
             "character_id": char_id,
             "name": char.get("name", ""),
             "inventory": char.get("inventory", []),
             "containers": char.get("containers", []),
+            "appearance_current": appearance_current,
+            "appearance_history": [],
             "character_continuity_system_state": continuity_state,
             "stats": stats_mirror,
             "skills": skills_mirror,
@@ -647,6 +732,10 @@ def characters_ready(book_root: Path) -> bool:
         if not (book_root / rel_path).exists():
             return False
     return True
+
+
+
+
 
 
 

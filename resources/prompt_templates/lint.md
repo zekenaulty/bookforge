@@ -18,6 +18,13 @@ Return ONLY JSON matching the lint_report schema.
 - Naming severity policy:
   - warning: unambiguous descriptor used post-anchor.
   - error: missing anchor, descriptor used during custody-change without canonical name, or ambiguity risk.
+
+- Appearance enforcement (authoritative surface):
+  - APPEARANCE_CHECK is authoritative for cast_present_ids.
+  - Compare APPEARANCE_CHECK tokens to appearance_current atoms/marks (alias-aware).
+  - If APPEARANCE_CHECK contradicts appearance_current, emit error code "appearance_mismatch".
+  - Prose-only appearance contradictions are warnings unless explicitly durable and uncorrected in-scene.
+  - If APPEARANCE_CHECK is missing for a cast member, emit warning code "appearance_check_missing".
 - For authoritative surfaces, prefer exact canonical item/device labels from registries.
 - For milestone repetition/future checks, compare against PRE-INVARIANTS only (pre-scene canon).
 - For ownership/consistency checks, compare against POST-STATE (post-patch candidate).
@@ -74,6 +81,9 @@ Scene:
 Authoritative surfaces:
 {{authoritative_surfaces}}
 
+Appearance check (authoritative):
+{{appearance_check}}
+
 Character states (post-patch candidate, per cast_present_ids):
 {{character_states}}
 
@@ -100,3 +110,9 @@ Post-summary (facts-only):
 
 Post-invariants (must_stay_true + key facts):
 {{post_invariants}}
+
+
+
+
+
+

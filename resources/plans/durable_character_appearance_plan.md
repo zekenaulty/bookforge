@@ -135,26 +135,26 @@ Update templates to include:
 ### Story A: Canon + Runtime Schema
 - Add appearance_base to canon character schema + data.
 - Add appearance_current/history to runtime character state schema.
-Status: pending
+Status: completed
 
 ### Story B: Initialization + Preflight Seeding
 - Ensure appearance_current seeded from appearance_base on fresh run.
 - Add preflight guard for missing appearance_current.
-Status: pending
+Status: completed
 
 ### Story C: Authoritative Appearance Surface
 - Add APPEARANCE_CHECK to COMPLIANCE output in write/repair prompts.
 - Inject appearance_current atoms/marks into context.
-Status: pending
+Status: completed
 
 ### Story D: Lint Enforcement (Authoritative)
 - Hard fail if APPEARANCE_CHECK conflicts with appearance_current.
 - Prose checks warning-first (alias-aware, timeline aware).
-Status: pending
+Status: completed
 
 ### Story E: Appearance Updates Apply + History
 - Apply appearance_updates and append history snapshots.
-Status: pending
+Status: completed
 
 ### Story F: Projection Refresh
 - After acceptance, regenerate summary/art from atoms/marks via characters model.
@@ -169,11 +169,11 @@ Status: pending
 Status: pending
 
 ## Status Tracker
-- [ ] Story A: Canon + Runtime Schema
-- [ ] Story B: Initialization + Preflight Seeding
-- [ ] Story C: Authoritative Appearance Surface
-- [ ] Story D: Lint Enforcement (Authoritative)
-- [ ] Story E: Appearance Updates Apply + History
+- [x] Story A: Canon + Runtime Schema
+- [x] Story B: Initialization + Preflight Seeding
+- [x] Story C: Authoritative Appearance Surface
+- [x] Story D: Lint Enforcement (Authoritative)
+- [x] Story E: Appearance Updates Apply + History
 - [ ] Story F: Projection Refresh
 - [ ] Story G: Scene Card Durable Appearance Changes
 - [ ] Story H: Attire Boundary Enforcement
@@ -194,3 +194,5 @@ Status: pending
 - Ensure no silent drift: appearance_current must remain stable unless explicitly updated.
 - Preflight must guarantee initial appearance data on fresh runs.
 - Keep code organized by phase and file boundaries; do not grow `runner.py` further after the lift-and-shift refactor. New DCAS logic must live in the appropriate phase/module.
+
+

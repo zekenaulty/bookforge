@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 import json
 
-from bookforge.characters import ensure_character_index, resolve_character_state_path
+from bookforge.characters import ensure_character_index, resolve_character_state_path, _ensure_character_appearance_current
 from bookforge.pipeline.state_apply import _ensure_character_continuity_system_state, _find_chapter_outline
 
 
@@ -48,6 +48,7 @@ def _load_character_states(book_root: Path, scene_card: Dict[str, Any]) -> List[
                 loaded = json.loads(state_path.read_text(encoding="utf-8"))
                 if isinstance(loaded, dict):
                     _ensure_character_continuity_system_state(loaded)
+                    _ensure_character_appearance_current(book_root, loaded, str(char_id), state_path)
                 states.append(loaded)
                 continue
             except json.JSONDecodeError:
@@ -107,3 +108,6 @@ def _parse_until(value: Optional[str]) -> Tuple[Optional[int], Optional[int]]:
     if len(parts) == 4 and parts[0].lower() == "chapter" and parts[2].lower() == "scene":
         return int(parts[1]), int(parts[3])
     raise ValueError("Invalid --until value. Expected chapter:N or chapter:N:scene:M.")
+
+
+

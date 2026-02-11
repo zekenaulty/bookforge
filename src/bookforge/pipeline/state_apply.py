@@ -512,7 +512,59 @@ def _apply_character_updates(book_root: Path, patch: Dict[str, Any], chapter_num
                 deduped.append(item)
             state["invariants"] = deduped
 
+        appearance_updates = update.get("appearance_updates")
+        appearance_changed = False
+        if isinstance(appearance_updates, dict):
+            current_appearance = state.get("appearance_current")
+            if not isinstance(current_appearance, dict):
+                current_appearance = {}
+            set_block = appearance_updates.get("set") if isinstance(appearance_updates, dict) else None
+            if isinstance(set_block, dict):
+                atoms = set_block.get("atoms")
+                if isinstance(atoms, dict):
+                    existing_atoms = current_appearance.get("atoms")
+                    if not isinstance(existing_atoms, dict):
+                        existing_atoms = {}
+                    existing_atoms.update(atoms)
+                    current_appearance["atoms"] = existing_atoms
+                    appearance_changed = True
+                marks = set_block.get("marks")
+                if isinstance(marks, list):
+                    current_appearance["marks"] = marks
+                    appearance_changed = True
+                marks_add = set_block.get("marks_add")
+                if isinstance(marks_add, list):
+                    existing_marks = current_appearance.get("marks")
+                    if not isinstance(existing_marks, list):
+                        existing_marks = []
+                    for mark in marks_add:
+                        if mark not in existing_marks:
+                            existing_marks.append(mark)
+                    current_appearance["marks"] = existing_marks
+                    appearance_changed = True
+                alias_map = set_block.get("alias_map")
+                if isinstance(alias_map, dict):
+                    current_appearance["alias_map"] = alias_map
+                    appearance_changed = True
+            if appearance_changed:
+                state["appearance_current"] = current_appearance
+                appearance_history = state.get("appearance_history")
+                if not isinstance(appearance_history, list):
+                    appearance_history = []
+                reason = appearance_updates.get("reason")
+                appearance_entry = {
+                    "chapter": chapter,
+                    "scene": scene,
+                    "changes": ["appearance_updated"],
+                }
+                if isinstance(reason, str) and reason.strip():
+                    appearance_entry["reason"] = reason.strip()
+                appearance_history.append(appearance_entry)
+                state["appearance_history"] = appearance_history
+
         history_entry: Dict[str, Any] = {"chapter": chapter, "scene": scene, "changes": []}
+        if appearance_changed:
+            history_entry["changes"].append("appearance_updated")
         persona_updates = update.get("persona_updates")
         if isinstance(persona_updates, list):
             history_entry["persona_updates"] = [str(item) for item in persona_updates if str(item).strip()]
@@ -666,4 +718,7 @@ def _compile_chapter_markdown(book_root: Path, outline: Dict[str, Any], chapter_
     chapter_file = book_root / "draft" / "chapters" / f"ch_{chapter_num:03d}.md"
     chapter_file.write_text(compiled, encoding="utf-8")
     return chapter_file
+
+
+
 

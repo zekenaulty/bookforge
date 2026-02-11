@@ -32,3 +32,29 @@ def test_merged_character_states_applies_continuity_updates() -> None:
     assert stats.get("stat_points") == 0
     assert any(title.get("name") == "Novice" for title in continuity.get("titles", []))
     assert state.get("stats", {}).get("hp_max") == 1
+
+def test_merged_character_states_applies_appearance_updates() -> None:
+    character_states = [
+        {
+            "character_id": "CHAR_A",
+            "appearance_current": {"atoms": {"hair_color": "brown"}, "marks": []},
+        }
+    ]
+    patch = {
+        "character_updates": [
+            {
+                "character_id": "CHAR_A",
+                "appearance_updates": {
+                    "set": {
+                        "atoms": {"hair_color": "blonde"},
+                        "marks_add": [{"name": "scar", "location": "brow"}],
+                    }
+                },
+            }
+        ]
+    }
+    merged = _merged_character_states_for_lint(character_states, patch)
+    assert len(merged) == 1
+    appearance = merged[0].get("appearance_current", {})
+    assert appearance.get("atoms", {}).get("hair_color") == "blonde"
+    assert {"name": "scar", "location": "brow"} in appearance.get("marks", [])

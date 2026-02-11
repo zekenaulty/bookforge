@@ -9,7 +9,7 @@ from bookforge.pipeline.config import _repair_max_tokens
 from bookforge.pipeline.durable import _durable_state_context
 from bookforge.pipeline.io import _log_scope
 from bookforge.pipeline.llm_ops import _chat, _response_truncated, _json_retry_count, _state_patch_schema_retry_message
-from bookforge.pipeline.parse import _extract_prose_and_patch
+from bookforge.pipeline.parse import _extract_prose_and_patch, _extract_appearance_check
 from bookforge.pipeline.prompts import _resolve_template, _system_prompt_for_phase
 from bookforge.pipeline.state_patch import _normalize_state_patch_for_validation
 from bookforge.prompt.renderer import render_template_file
@@ -69,6 +69,9 @@ def _repair_scene(
     while True:
         try:
             prose, patch = _extract_prose_and_patch(response.text)
+            appearance_check = _extract_appearance_check(response.text)
+            if appearance_check:
+                patch["_appearance_check"] = appearance_check
             break
         except ValueError as exc:
             if attempt >= retries:
@@ -118,4 +121,8 @@ def _repair_scene(
                 log_extra=_log_scope(book_root, scene_card),
             )
             prose, patch = _extract_prose_and_patch(response.text)
+            appearance_check = _extract_appearance_check(response.text)
+            if appearance_check:
+                patch["_appearance_check"] = appearance_check
             schema_attempt += 1
+

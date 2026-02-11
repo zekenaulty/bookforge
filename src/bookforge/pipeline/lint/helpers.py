@@ -103,6 +103,35 @@ def _merged_character_states_for_lint(
                     merged_state["invariants_add"] = value
                 elif key == "titles" and isinstance(value, list):
                     merged_state["titles"] = value
+                elif key == "appearance_updates" and isinstance(value, dict):
+                    current_appearance = merged_state.get("appearance_current")
+                    if not isinstance(current_appearance, dict):
+                        current_appearance = {}
+                    set_block = value.get("set") if isinstance(value, dict) else None
+                    if isinstance(set_block, dict):
+                        atoms = set_block.get("atoms")
+                        if isinstance(atoms, dict):
+                            existing_atoms = current_appearance.get("atoms")
+                            if not isinstance(existing_atoms, dict):
+                                existing_atoms = {}
+                            existing_atoms.update(atoms)
+                            current_appearance["atoms"] = existing_atoms
+                        marks = set_block.get("marks")
+                        if isinstance(marks, list):
+                            current_appearance["marks"] = marks
+                        marks_add = set_block.get("marks_add")
+                        if isinstance(marks_add, list):
+                            existing_marks = current_appearance.get("marks")
+                            if not isinstance(existing_marks, list):
+                                existing_marks = []
+                            for mark in marks_add:
+                                if mark not in existing_marks:
+                                    existing_marks.append(mark)
+                            current_appearance["marks"] = existing_marks
+                        alias_map = set_block.get("alias_map")
+                        if isinstance(alias_map, dict):
+                            current_appearance["alias_map"] = alias_map
+                    merged_state["appearance_current"] = current_appearance
                 else:
                     merged_state[key] = value
 
@@ -173,3 +202,4 @@ def _post_state_with_character_continuity(
     continuity_system["characters"] = continuity_map
     merged["continuity_system"] = continuity_system
     return merged
+

@@ -46,6 +46,7 @@ def _lint_scene(
     if not isinstance(character_states, list):
         character_states = []
     template = _resolve_template(book_root, "lint.md")
+    appearance_check = patch.get("_appearance_check", {})
     lint_character_states = _merged_character_states_for_lint(character_states, patch)
     lint_post_state = _post_state_with_character_continuity(post_state, lint_character_states)
     durable_post = _durable_state_context(book_root, post_state, scene_card, durable_expand_ids)
@@ -61,6 +62,7 @@ def _lint_scene(
             "pre_invariants": pre_invariants,
             "post_invariants": post_invariants,
             "authoritative_surfaces": authoritative_surfaces,
+            "appearance_check": appearance_check,
             "item_registry": durable_post.get("item_registry", {}),
             "plot_devices": durable_post.get("plot_devices", {}),
             "character_states": lint_character_states,

@@ -25,6 +25,48 @@ def _strip_compliance_block(text: str) -> str:
     return ""
 
 
+
+
+def _extract_compliance_block(text: str) -> str:
+    if not re.match(r"^COMPLIANCE\s*:", text.strip(), flags=re.IGNORECASE):
+        return ""
+    match = re.search(r"\bPROSE\s*:\s*", text, re.IGNORECASE)
+    if match:
+        return text[:match.start()].strip()
+    parts = re.split(r"\n\s*\n", text, maxsplit=1)
+    if parts:
+        return parts[0].strip()
+    return ""
+
+
+def _extract_appearance_check(text: str) -> Dict[str, List[str]]:
+    block = _extract_compliance_block(text)
+    if not block:
+        return {}
+    lines = [line.strip() for line in block.splitlines() if line.strip()]
+    check_start = None
+    for idx, line in enumerate(lines):
+        if line.lower().startswith("appearance_check"):
+            check_start = idx + 1
+            break
+    if check_start is None:
+        return {}
+    result: Dict[str, List[str]] = {}
+    for line in lines[check_start:]:
+        if not line.startswith("-"):
+            break
+        entry = line.lstrip("- ").strip()
+        if ":" not in entry:
+            continue
+        char_id, raw = entry.split(":", 1)
+        char_id = char_id.strip()
+        raw = raw.strip()
+        if not char_id:
+            continue
+        tokens = [tok.strip() for tok in re.split(r"[,;]\s*|\s+", raw) if tok.strip()]
+        result[char_id] = tokens
+    return result
+
 def _extract_prose_and_patch(text: str) -> Tuple[str, Dict[str, Any]]:
     match = None
     for candidate in re.finditer(r"STATE\s*_(?:OKPATCH|PATCH)\s*:\s*", text, re.IGNORECASE):
@@ -202,3 +244,5 @@ def _find_first_match_evidence(pattern: str, text: str) -> Optional[Dict[str, An
     lines = text.splitlines()
     line_text = lines[line_no - 1].strip() if 0 <= line_no - 1 < len(lines) else ""
     return {"line": line_no, "excerpt": line_text}
+
+
