@@ -9,6 +9,7 @@ DEFAULT_STATE_REPAIR_MAX_TOKENS = 147456
 DEFAULT_CONTINUITY_MAX_TOKENS = 147456
 DEFAULT_PREFLIGHT_MAX_TOKENS = 147456
 DEFAULT_STYLE_ANCHOR_MAX_TOKENS = 32768
+DEFAULT_APPEARANCE_MAX_TOKENS = 8192
 DEFAULT_DURABLE_SLICE_MAX_EXPANSIONS = 2
 
 
@@ -44,6 +45,9 @@ def _style_anchor_max_tokens() -> int:
     return _int_env("BOOKFORGE_STYLE_ANCHOR_MAX_TOKENS", DEFAULT_STYLE_ANCHOR_MAX_TOKENS)
 
 
+def _appearance_max_tokens() -> int:
+    return max(512, _int_env("BOOKFORGE_APPEARANCE_MAX_TOKENS", DEFAULT_APPEARANCE_MAX_TOKENS))
+
 def _durable_slice_max_expansions() -> int:
     return max(0, _int_env("BOOKFORGE_DURABLE_SLICE_MAX_EXPANSIONS", DEFAULT_DURABLE_SLICE_MAX_EXPANSIONS))
 
@@ -56,3 +60,8 @@ def _lint_mode() -> str:
     if raw in {"strict", "warn", "off"}:
         return raw
     return "warn"
+
+
+
+
+

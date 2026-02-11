@@ -28,6 +28,13 @@ Durable vs ephemeral mechanics:
 - titles are arrays of objects with stable name fields; do not emit titles as plain strings.
 - If item_registry or plot_devices are provided, they are canonical durable-state references for ownership/custody labels in authoritative outputs.
 - Use item_registry.items[].display_name in prose; use item_id only in patches/JSON. The display_name must be human readable and not an escaped id/name.
+Appearance contract:
+- Attire boundary: wearables are inventory-owned. Do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+- appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change.
+- Durable appearance changes must be declared in scene_card.durable_appearance_changes (or an explicit appearance milestone) and recorded via appearance_updates.
+- If a durable appearance change occurs in this scene, record it in character_updates.appearance_updates with a reason.
+- APPEARANCE_CHECK is required in COMPLIANCE for each cast_present_id (4-8 tokens from atoms/marks).
+
 Durable item naming discipline:
 - When you first describe a durable item, anchor it by using the canonical display_name within the same paragraph (or within the next 2 sentences).
 - After anchoring, you may use brief descriptors for style if unambiguous.
@@ -81,6 +88,10 @@ STATE_PATCH rules:
 - For off-screen normalization and non-trivial durable mutations, include `reason_category` with stable values like `time_skip_normalize`, `location_jump_normalize`, `after_combat_cleanup`, `stowed_at_inn`, `handoff_transfer`, `knowledge_reveal`.
 - If you mutate durable state, do not leave the same mutation only in prose.
 - Include character_updates entries for cast_present_ids that change state (inventory, containers, persona shifts).
+- appearance_updates: when a durable appearance change happens, include appearance_updates on the relevant character_updates entry.
+  - appearance_updates.set may include atoms and marks only (canonical truth).
+  - appearance_updates.reason is required (brief, factual).
+  - Do NOT set summary or art text in appearance_updates (derived after acceptance)
   - Each entry must include character_id, chapter, scene, inventory (full current list), containers (full current list), invariants_add (array), persona_updates (array).
   - character_updates.inventory MUST be an array of objects, never string item ids.
   - Inventory object shape: {"item": "ITEM_or_name", "container": "hand_left|hand_right|<container>", "status": "held|carried|equipped|stowed"}.
@@ -124,6 +135,9 @@ Allowed events: <short list from Scene Card>
 Forbidden milestones: <from must_stay_true>
 Current arm-side / inventory facts: <from must_stay_true>
 
+APPEARANCE_CHECK:
+- CHAR_ID: <4-8 tokens from atoms/marks>
+
 PROSE:
 <scene prose>
 STATE_PATCH:
@@ -134,3 +148,9 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
+
+
+
+
+
+

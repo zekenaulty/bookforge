@@ -8,6 +8,7 @@ import re
 import hashlib
 
 from bookforge.config.env import load_config, read_int_env
+from bookforge.pipeline.config import _appearance_max_tokens
 from bookforge.llm.client import LLMClient
 from bookforge.llm.errors import LLMRequestError
 from bookforge.llm.factory import get_llm_client, resolve_model
@@ -19,7 +20,6 @@ from bookforge.util.json_extract import extract_json
 from bookforge.util.schema import validate_json
 
 DEFAULT_JSON_RETRY_COUNT = 1
-DEFAULT_APPEARANCE_MAX_TOKENS = 4096
 
 
 def _now_iso() -> str:
@@ -34,9 +34,6 @@ def _int_env(name: str, default: int) -> int:
 def _json_retry_count() -> int:
     return max(0, _int_env("BOOKFORGE_JSON_RETRY_COUNT", DEFAULT_JSON_RETRY_COUNT))
 
-
-def _appearance_max_tokens() -> int:
-    return max(512, _int_env("BOOKFORGE_APPEARANCE_MAX_TOKENS", DEFAULT_APPEARANCE_MAX_TOKENS))
 
 
 def _extract_json(text: str) -> Dict[str, Any]:
@@ -868,6 +865,8 @@ def characters_ready(book_root: Path) -> bool:
         if not (book_root / rel_path).exists():
             return False
     return True
+
+
 
 
 

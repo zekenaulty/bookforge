@@ -1,4 +1,4 @@
-﻿# CHARACTERS GENERATE
+# CHARACTERS GENERATE
 
 You are refining outline character stubs into canon character entries and initial per-book character state.
 Return ONLY a single JSON object. No markdown, no code fences, no commentary.
@@ -17,6 +17,7 @@ Each character object must include:
 - inventory (array)
 - containers (array)
 - invariants (array of strings)
+- appearance_base (object)
 
 Recommended mechanic seed key (dynamic):
 - character_continuity_system_state (object)
@@ -27,10 +28,19 @@ Recommended mechanic seed key (dynamic):
   - Use dynamic continuity families as needed: stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, system_tracking_metadata, extended_system_data.
   - For LitRPG-like systems, prefer structured stats/skills/titles in character_continuity_system_state.
 
+Appearance guidance (durable, canonical):
+- appearance_base is the canon self-image for this character.
+- Include: summary, atoms, marks, alias_map.
+- Atoms are normalized traits (species, sex_presentation, age_band, height_band, build, hair_color, hair_style, eye_color, skin_tone).
+- marks are durable identifiers (scars, tattoos, prosthetics). No temporary grime or wounds.
+- alias_map lists acceptable synonyms for lint tolerance (e.g., hair_color: ["dark brown"]).
+- appearance_current will be derived from appearance_base for the book unless explicitly overridden later.
+
 Naming and durable item guidance:
 - For items, use a human-readable item_name; do not use ITEM_* ids in prose strings.
 - Reserve ITEM_* ids for canonical JSON only; do not use them in prose strings.
 - If you emit an item_id here, include item_name as a human label.
+
 Starting scene alignment (important):
 - The initial inventory/containers/state must prepare each character for the book's first scene.
 - Use the Book + Outline characters in THIS prompt as your source of truth for the opening situation.
@@ -87,6 +97,27 @@ Output JSON:
         "voice_notes": [],
         "arc_hint": ""
       },
+      "appearance_base": {
+        "summary": "",
+        "atoms": {
+          "species": "human",
+          "sex_presentation": "",
+          "age_band": "",
+          "height_band": "",
+          "build": "",
+          "hair_color": "",
+          "hair_style": "",
+          "eye_color": "",
+          "skin_tone": ""
+        },
+        "marks": [
+          {"name": "", "location": "", "durability": "durable"}
+        ],
+        "alias_map": {
+          "hair_color": [""],
+          "eye_color": [""]
+        }
+      },
       "character_continuity_system_state": {
         "stats": {"hp": {"current": 10, "max": 10}},
         "skills": {"sword": 1},
@@ -106,5 +137,3 @@ Output JSON:
     }
   ]
 }
-
-

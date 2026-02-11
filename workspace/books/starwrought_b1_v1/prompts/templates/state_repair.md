@@ -30,6 +30,13 @@ Durable vs ephemeral mechanics:
 - Canonical descriptors (colors, item names, effect IDs, mechanic labels) must be reused exactly; do not paraphrase.
 - If item_registry or plot_devices are provided, they are canonical durable-state references for authoritative labels and custody terms.
 - Use item_registry.items[].display_name in prose; use item_id only in patches/JSON. The display_name must be human readable and not an escaped id/name.
+Appearance contract:
+- Attire boundary: wearables are inventory-owned. Do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+- appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change.
+- Durable appearance changes must be declared in scene_card.durable_appearance_changes (or an explicit appearance milestone) and recorded via appearance_updates.
+- If prose depicts a durable appearance change, include character_updates.appearance_updates with a reason.
+- Do NOT set summary or art text in appearance_updates (derived after acceptance).
+
 Naming repairs:
 - If lint flags an item naming issue, fix it with minimal edits.
 - Do not remove humor; simply anchor the item (add display_name near first mention) and ensure custody-change sentences include the display_name.
@@ -110,3 +117,9 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
+
+
+
+
+
+

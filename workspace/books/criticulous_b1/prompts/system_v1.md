@@ -16,6 +16,7 @@ Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you
 Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
 Inventory contract: track item ownership and container location per character or container label; items do not teleport.
 Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
 Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
 State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
 Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
@@ -81,13 +82,10 @@ Durable vs ephemeral mechanics:
 - EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
 - DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
 - EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
-For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change must include the canonical display_name in the same sentence.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
 For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string).
 `inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
 Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
 - global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
   - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
   - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
-
-
-
