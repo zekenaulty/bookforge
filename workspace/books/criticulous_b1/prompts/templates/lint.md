@@ -24,6 +24,7 @@ Return ONLY JSON matching the lint_report schema.
   - Compare APPEARANCE_CHECK tokens to appearance_current atoms/marks (alias-aware).
   - If APPEARANCE_CHECK contradicts appearance_current, emit error code "appearance_mismatch".
   - Prose-only appearance contradictions are warnings unless explicitly durable and uncorrected in-scene.
+  - If prose depicts a durable appearance change but scene_card.durable_appearance_changes does not include it and no appearance_updates are present, emit error code "appearance_change_undeclared".
   - If APPEARANCE_CHECK is missing for a cast member, emit warning code "appearance_check_missing".
 - For authoritative surfaces, prefer exact canonical item/device labels from registries.
 - For milestone repetition/future checks, compare against PRE-INVARIANTS only (pre-scene canon).
@@ -110,6 +111,8 @@ Post-summary (facts-only):
 
 Post-invariants (must_stay_true + key facts):
 {{post_invariants}}
+
+
 
 
 

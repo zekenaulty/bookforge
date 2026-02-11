@@ -34,6 +34,7 @@ def _int_env(name: str, default: int) -> int:
 def _json_retry_count() -> int:
     return max(0, _int_env("BOOKFORGE_JSON_RETRY_COUNT", DEFAULT_JSON_RETRY_COUNT))
 
+
 def _appearance_max_tokens() -> int:
     return max(512, _int_env("BOOKFORGE_APPEARANCE_MAX_TOKENS", DEFAULT_APPEARANCE_MAX_TOKENS))
 
@@ -867,6 +868,9 @@ def characters_ready(book_root: Path) -> bool:
         if not (book_root / rel_path).exists():
             return False
     return True
+
+
+
 
 
 

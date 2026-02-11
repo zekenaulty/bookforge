@@ -30,6 +30,7 @@ Durable vs ephemeral mechanics:
 - Use item_registry.items[].display_name in prose; use item_id only in patches/JSON. The display_name must be human readable and not an escaped id/name.
 Appearance contract:
 - appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change.
+- Durable appearance changes must be declared in scene_card.durable_appearance_changes (or an explicit appearance milestone) and recorded via appearance_updates.
 - If a durable appearance change occurs in this scene, record it in character_updates.appearance_updates with a reason.
 - APPEARANCE_CHECK is required in COMPLIANCE for each cast_present_id (4-8 tokens from atoms/marks).
 
@@ -146,4 +147,6 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
+
+
 
