@@ -1,4 +1,4 @@
-# BookForge Implementation Plan v2
+﻿# BookForge Implementation Plan v2
 
 Objective
 - Build a Python CLI that generates a full book from a single prompt using file-based memory, multi-provider LLMs, and a deterministic prompt system designed for token caching.
@@ -481,55 +481,55 @@ Risks / Rollback
 - Rollback: disable a phase, restore previous prompt version, or revert workspace artifacts via Git.
 
 Worklog Protocol
-- Create step notes under resources/plans/steps_YYYYMMDD_HHMM_<slug>.md.
+- Create step notes under resources/plans/archived/original/steps_YYYYMMDD_HHMM_<slug>.md.
 - Each note includes Goal, Context, Commands, Files, Tests, Issues, Decision, Completion, Next Actions.
 
 Refinement Notes
-- Story 1.R accepted: resources/plans/steps_20260118_0012_story1r_scope_help.md
-- Story 2.R accepted: resources/plans/steps_20260118_0016_story2r_llm_provider.md
-- Story 3.R accepted: resources/plans/steps_20260118_0035_story3r_schema_governance.md
-- Story 4.R accepted: resources/plans/steps_20260118_0036_story4r_prompt_system.md
-- Story 5.R accepted: resources/plans/steps_20260118_0041_story5r_budgeter_continuity.md
-- Story 6.R accepted: resources/plans/steps_20260118_0050_story6r_author_library.md
-- Story 7.R accepted: resources/plans/steps_20260118_0053_story7r_workspace_schema.md
-- Story 8.R accepted: resources/plans/steps_20260118_0055_story8r_outline_scene_schema.md
-- Story 9.R accepted: resources/plans/steps_20260118_0100_story9r_writing_loop.md
-- Story 10.R accepted: resources/plans/steps_20260118_0106_story10r_dup_prevention.md
-- Story 11.R accepted: resources/plans/steps_20260118_0107_story11r_lint_similarity.md
-- Story 12.R accepted: resources/plans/steps_20260118_0108_story12r_canon_retrieval.md
-- Story 13.R accepted: resources/plans/steps_20260118_0109_story13r_compile_export.md
-- Story 14.R accepted: resources/plans/steps_20260118_0111_story14r_cli_rerun.md
-- Story 15.R accepted: resources/plans/steps_20260118_0113_story15r_observability.md
-- Story 16.R accepted: resources/plans/steps_20260118_0115_story16r_tests_docs.md
+- Story 1.R accepted: resources/plans/archived/original/steps_20260118_0012_story1r_scope_help.md
+- Story 2.R accepted: resources/plans/archived/original/steps_20260118_0016_story2r_llm_provider.md
+- Story 3.R accepted: resources/plans/archived/original/steps_20260118_0035_story3r_schema_governance.md
+- Story 4.R accepted: resources/plans/archived/original/steps_20260118_0036_story4r_prompt_system.md
+- Story 5.R accepted: resources/plans/archived/original/steps_20260118_0041_story5r_budgeter_continuity.md
+- Story 6.R accepted: resources/plans/archived/original/steps_20260118_0050_story6r_author_library.md
+- Story 7.R accepted: resources/plans/archived/original/steps_20260118_0053_story7r_workspace_schema.md
+- Story 8.R accepted: resources/plans/archived/original/steps_20260118_0055_story8r_outline_scene_schema.md
+- Story 9.R accepted: resources/plans/archived/original/steps_20260118_0100_story9r_writing_loop.md
+- Story 10.R accepted: resources/plans/archived/original/steps_20260118_0106_story10r_dup_prevention.md
+- Story 11.R accepted: resources/plans/archived/original/steps_20260118_0107_story11r_lint_similarity.md
+- Story 12.R accepted: resources/plans/archived/original/steps_20260118_0108_story12r_canon_retrieval.md
+- Story 13.R accepted: resources/plans/archived/original/steps_20260118_0109_story13r_compile_export.md
+- Story 14.R accepted: resources/plans/archived/original/steps_20260118_0111_story14r_cli_rerun.md
+- Story 15.R accepted: resources/plans/archived/original/steps_20260118_0113_story15r_observability.md
+- Story 16.R accepted: resources/plans/archived/original/steps_20260118_0115_story16r_tests_docs.md
 
 Implementation Notes
-- Lint mode + normalization: resources/plans/steps_20260118_1920_lint_mode_normalization.md
-- Phase API key overrides: resources/plans/steps_20260118_1845_phase_api_keys.md
-- Story 9 implementation: resources/plans/steps_20260118_1805_story9_write_loop_impl.md
-- Outline character hooks + scene/section variance: resources/plans/steps_20260118_1210_outline_characters_beats.md
-- Outline prompt file support: resources/plans/steps_20260118_1330_outline_prompt_file.md
-- Outline sections + scene terminology: resources/plans/steps_20260118_1245_outline_sections_scenes.md
-- Series canon scaffolding: resources/plans/steps_20260118_1130_series_canon_seed.md
-- Request timeout increase: resources/plans/steps_20260118_1115_request_timeout.md
-- Outline max tokens default: resources/plans/steps_20260118_1056_outline_max_tokens.md
-- Outline JSON repair fallback: resources/plans/steps_20260118_1410_outline_json_repair.md
-- Outline enum softening: resources/plans/steps_20260118_1510_outline_enum_soften.md
-- Outline enum warnings: resources/plans/steps_20260118_1530_outline_enum_warning.md
-- Outline JSON extra-data repair: resources/plans/steps_20260118_1600_outline_json_extra_data_repair.md
-- Outline intensity softening: resources/plans/steps_20260118_1650_outline_intensity_soften.md
-- Pretty LLM text logs: resources/plans/steps_20260118_1605_llm_pretty_logs.md
-- Prompt logging: resources/plans/steps_20260118_1715_prompt_logging.md
-- Story 8 implementation: resources/plans/steps_20260118_1035_story8_outline_plan_impl.md
-- Story 7 implementation: resources/plans/steps_20260118_0940_story7_workspace_init.md
-- Story 1 implementation: resources/plans/steps_20260118_0121_story1_scaffold.md
-- Story 2 implementation: resources/plans/steps_20260118_0130_story2_llm_provider_impl.md
-- Story 3 implementation: resources/plans/steps_20260118_0147_story3_schema_impl.md
-- Story 4 implementation: resources/plans/steps_20260118_0151_story4_prompt_impl.md
-- Story 5 implementation: resources/plans/steps_20260118_0216_story5_budgeter_continuity_impl.md
-- Story 6 implementation: resources/plans/steps_20260118_0222_story6_author_impl.md
-- Gemini quota handling: resources/plans/steps_20260118_0211_gemini_throttle_quota.md
-- Env path fix: resources/plans/steps_20260118_0229_env_path_fix.md
-- Author logging and token caps: resources/plans/steps_20260118_0918_story6_author_logging.md
+- Lint mode + normalization: resources/plans/archived/original/steps_20260118_1920_lint_mode_normalization.md
+- Phase API key overrides: resources/plans/archived/original/steps_20260118_1845_phase_api_keys.md
+- Story 9 implementation: resources/plans/archived/original/steps_20260118_1805_story9_write_loop_impl.md
+- Outline character hooks + scene/section variance: resources/plans/archived/original/steps_20260118_1210_outline_characters_beats.md
+- Outline prompt file support: resources/plans/archived/original/steps_20260118_1330_outline_prompt_file.md
+- Outline sections + scene terminology: resources/plans/archived/original/steps_20260118_1245_outline_sections_scenes.md
+- Series canon scaffolding: resources/plans/archived/original/steps_20260118_1130_series_canon_seed.md
+- Request timeout increase: resources/plans/archived/original/steps_20260118_1115_request_timeout.md
+- Outline max tokens default: resources/plans/archived/original/steps_20260118_1056_outline_max_tokens.md
+- Outline JSON repair fallback: resources/plans/archived/original/steps_20260118_1410_outline_json_repair.md
+- Outline enum softening: resources/plans/archived/original/steps_20260118_1510_outline_enum_soften.md
+- Outline enum warnings: resources/plans/archived/original/steps_20260118_1530_outline_enum_warning.md
+- Outline JSON extra-data repair: resources/plans/archived/original/steps_20260118_1600_outline_json_extra_data_repair.md
+- Outline intensity softening: resources/plans/archived/original/steps_20260118_1650_outline_intensity_soften.md
+- Pretty LLM text logs: resources/plans/archived/original/steps_20260118_1605_llm_pretty_logs.md
+- Prompt logging: resources/plans/archived/original/steps_20260118_1715_prompt_logging.md
+- Story 8 implementation: resources/plans/archived/original/steps_20260118_1035_story8_outline_plan_impl.md
+- Story 7 implementation: resources/plans/archived/original/steps_20260118_0940_story7_workspace_init.md
+- Story 1 implementation: resources/plans/archived/original/steps_20260118_0121_story1_scaffold.md
+- Story 2 implementation: resources/plans/archived/original/steps_20260118_0130_story2_llm_provider_impl.md
+- Story 3 implementation: resources/plans/archived/original/steps_20260118_0147_story3_schema_impl.md
+- Story 4 implementation: resources/plans/archived/original/steps_20260118_0151_story4_prompt_impl.md
+- Story 5 implementation: resources/plans/archived/original/steps_20260118_0216_story5_budgeter_continuity_impl.md
+- Story 6 implementation: resources/plans/archived/original/steps_20260118_0222_story6_author_impl.md
+- Gemini quota handling: resources/plans/archived/original/steps_20260118_0211_gemini_throttle_quota.md
+- Env path fix: resources/plans/archived/original/steps_20260118_0229_env_path_fix.md
+- Author logging and token caps: resources/plans/archived/original/steps_20260118_0918_story6_author_logging.md
 
 
 Checklist
@@ -565,3 +565,5 @@ Checklist
 - [ ] Story 15: Logging and metrics
 - [x] Story 16.R: Tests and documentation refinement
 - [ ] Story 16: Tests and documentation
+
+
