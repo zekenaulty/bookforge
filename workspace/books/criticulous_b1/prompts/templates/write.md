@@ -66,6 +66,19 @@ STATE_PATCH rules:
   - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
   - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
 - All *_updates arrays must contain objects; never emit bare strings as array entries.
+- JSON shape guardrails (strict, do not deviate):
+  - character_updates MUST be an array of objects.
+    - INVALID: "character_updates": {"character_id": "CHAR_X"}
+    - VALID: "character_updates": [{"character_id": "CHAR_X"}]
+  - character_continuity_system_updates MUST be an array of objects with character_id.
+    - INVALID: "character_continuity_system_updates": {"set": {...}}
+    - VALID: "character_continuity_system_updates": [{"character_id": "CHAR_X", "set": {...}}]
+  - summary_update fields must be arrays of strings.
+    - INVALID: "summary_update": {"last_scene": "text"}
+    - VALID: "summary_update": {"last_scene": ["text"], "key_events": ["..."], "must_stay_true": ["..."], "chapter_so_far_add": ["..."]}
+  - appearance_updates MUST be an object under character_updates.
+    - INVALID: "appearance_updates": [{"set": {...}}] OR "appearance_updates": {"marks_add": [...]}
+    - VALID: "appearance_updates": {"set": {"marks_add": [{"name": "Singed Hair", "location": "head", "durability": "durable"}]}, "reason": "..."}
 - character_updates.containers must be an array of objects with at least: container, owner, contents (array).
 - Durable-state mutation blocks are mandatory when applicable:
 - Required fields for durable registry entries (when creating NEW ids or filling missing required fields):
@@ -77,6 +90,10 @@ STATE_PATCH rules:
     - VALID: plot_device_updates = [{"device_id": "DEVICE_X", "set": {...}}]
 
   - item_registry_updates: set must include name, type, owner_scope, custodian, linked_threads, state_tags, last_seen {chapter, scene, location}. Optional: display_name, aliases, linked_device_id, replacement_of.
+  - custodian must be a non-null string id/scope (character id or "world"). Never use null.
+    - INVALID: "custodian": null
+    - VALID: "custodian": "CHAR_ARTIE" or "world"
+  - owner_scope must be "character" or "world" and must match the custodian scope.
   - plot_device_updates: set must include name, custody_scope, custody_ref, activation_state, linked_threads, constraints, last_seen {chapter, scene, location}. Optional: display_name, aliases, linked_item_id.
   - If you introduce a new item_id/device_id anywhere in this patch, you MUST include a corresponding registry update with the full required fields.
   - `inventory_alignment_updates` for scene-fit posture normalization.
@@ -89,7 +106,13 @@ STATE_PATCH rules:
 - If you mutate durable state, do not leave the same mutation only in prose.
 - Include character_updates entries for cast_present_ids that change state (inventory, containers, persona shifts).
 - appearance_updates: when a durable appearance change happens, include appearance_updates on the relevant character_updates entry.
+  - appearance_updates MUST be an object, not an array.
+    - INVALID: "appearance_updates": [{"set": {...}, "reason": "..."}]
+    - VALID: "appearance_updates": {"set": {"marks_add": [{"name": "Singed Hair", "location": "head", "durability": "durable"}]}, "reason": "..."}
   - appearance_updates.set may include atoms and marks only (canonical truth).
+    - Do NOT put marks_add at the top level; it belongs under set.
+    - Use set.marks_add / set.marks_remove for marks changes.
+    - Use set.atoms for atom changes.
   - appearance_updates.reason is required (brief, factual).
   - Do NOT set summary or art text in appearance_updates (derived after acceptance)
   - Each entry must include character_id, chapter, scene, inventory (full current list), containers (full current list), invariants_add (array), persona_updates (array).
@@ -148,6 +171,16 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
+
+
+
+
+
+
+
+
+
+
 
 
 
