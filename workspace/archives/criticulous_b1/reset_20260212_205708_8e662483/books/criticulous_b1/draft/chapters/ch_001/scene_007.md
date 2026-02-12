@@ -1,0 +1,61 @@
+The siren didn't just wail; it shrieked with the digital agony of a thousand dying hard drives. Every time the red light pulsed against the white stone walls of Oakhaven’s main thoroughfare, Artie’s vision flickered, his retinas burning with the afterimage of a system that was currently having a collective nervous breakdown. 
+
+[SYSTEM ALERT: STATISTICAL ANOMALY DETECTED]
+[CRITICAL ERROR: DATA INTEGRITY COMPROMISED]
+[LOCATION: OAKHAVEN - SECTOR 01]
+
+"Can we turn that off? Seriously, I think I’m getting a migraine, and with my health pool, a migraine might actually be fatal!" Artie shouted, his voice cracking over the rhythmic thumping of the alarm. 
+
+He gripped the Participation Trophy tighter in his right hand. The gold-plated monstrosity, shaped like a hand patting a smaller, sadder hand, felt like it was vibrating. It wasn't just a reward; it was a lightning rod. The "Center of Attention" buff was working overtime, and Artie could feel the weight of a thousand curious eyes pressing into his back like physical needles.
+
+"Turn it off?" A new voice, smooth as churned butter and twice as oily, cut through the noise. "My boy, you don't turn off a divine revelation. You index it. You study it. You tax it."
+
+The crowd of panicked travelers and gawking merchants parted like the Red Sea, or at least like a bunch of people who didn't want to get stepped on by the line of stiff-backed guards marching into the square. At their head walked a man who seemed to have been designed by someone with a very specific interest in the 'Portly Bureaucrat' aesthetic. 
+
+[Mayor of Oakhaven - Lvl 15]
+[HP: 80/80]
+
+The Mayor of Oakhaven was short, his ruddy face glistening with a thin sheen of sweat that suggested he’d run here the moment the scanners started screaming. He wore a heavy Oakhaven Sash of Office draped across his torso, the silk so thick it looked like it could stop a crossbow bolt, and a pair of gold-rimmed spectacles perched precariously on the bridge of his nose. 
+
+Artie froze. His heart hammered against his ribs—a dangerous activity for a man with a single hit point.
+
+[Aggro Meter: CRITICAL]
+[Warning: High-Level NPC is 'Predatorily Curious'. Physical contact may result in accidental deletion.]
+
+"I... I was just passing through," Artie said, trying to tuck the Participation Trophy behind his back. It didn't work. The trophy’s glow only intensified, casting a sickly yellow light over his lanky frame and messy brown hair. "I have a permit. Well, the guards let me in. That counts as a permit, right?"
+
+The Mayor stopped three paces away, his watery brown eyes narrowing as they scanned Artie from head to toe. He didn't look at Artie’s face; he looked at the space just above Artie’s head, where the System tags were currently flickering like a neon sign in a rainstorm.
+
+"Arthur Penhaligon," the Mayor read aloud, his voice dropping into a register of pure, unadulterated greed. "Level 2. Human. And a title that makes my internal ledger sing like a choir of angels."
+
+[Title Detected: Statistical Anomaly]
+[Crit Rate: 100.00% (locked)]
+[HP: 1/1 (locked)]
+
+"It's a typo," Artie blurted out. "The character creator froze. I was trying to click 'Balanced Build' and I think I hit the 'Everything is Terrible' button by mistake. I’m actually very fragile. If you sneeze too hard in my general direction, I’ll probably explode into loot."
+
+The Mayor chuckled, a wet, rattling sound that did nothing to settle Artie’s nerves. He adjusted his gold-rimmed spectacles, leaning in close enough that Artie could smell the expensive pipe tobacco and desperation clinging to his robes. 
+
+"Fragility is a matter of perspective, Arthur. In the Whispering Woods, you are a snack. But here? In the City of Chance?" The Mayor gestured to the surrounding spires, where the architecture itself seemed to be built on the logic of a casino floor. "Here, you are a miracle. Do you have any idea what the House of Odds would pay for a guaranteed result? A one-hundred-percent certainty in a world built on the roll of a die?"
+
+Artie took a half-step back, his heel catching on a cobblestone. 
+
+[Stamina: 38/100]
+[Warning: Minor stumble detected. Potential for 1 DMG on impact.]
+
+He flailed his left hand, steadying himself against the air as if he could grab onto the UI itself. "I’m not a gambler. I’m a... I’m a consultant. An office drone. I just want to find a quest that involves sitting in a very padded chair."
+
+"You are a Market Disruptor," the Mayor corrected, his smile widening to reveal teeth that had clearly been polished by high-level dental magic. "Oakhaven is the heart of the System’s economy because we manage risk. But you? You don't have risk. You have a result. You are the only stable currency in a world of floating point variables."
+
+The alarm finally cut out, replaced by a silence that was somehow much louder. The guards shifted, their hands resting on the pommels of their swords, and the crowd began to press closer. Artie realized then that the 'Statistical Anomaly' title wasn't just a bug report; it was a bounty. It was a beacon. 
+
+Every merchant wanting a perfect craft, every gambler wanting a perfect roll, and every tyrant wanting a perfect strike was going to see him as the ultimate tool. 
+
+"I think," Artie whispered, his hazel eyes wide as he looked at the hungry expressions surrounding him, "that I’ve made a very big mistake."
+
+"Mistake?" The Mayor reached out, his hand hovering inches from Artie’s shoulder. "My dear boy, you’ve just become the most valuable property in Oakhaven. Now, shall we discuss your... 'indexing' fee? Or should I let the guards explain the local laws regarding unregistered glitches?"
+
+[New Objective: Escape the 'Index']
+[Current Threat Level: Bureaucratic Extinction]
+
+Artie looked at the Participation Trophy in his right hand, then at the Mayor's gold-rimmed spectacles, and finally at the exit gates he had just entered through. The gates were closed. The city was a trap, and he was the cheese.

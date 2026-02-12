@@ -3,7 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 import json
+import os
 import shutil
+import hashlib
+from datetime import datetime, timezone
 
 from bookforge.prompt.system import write_system_prompt
 from bookforge.memory.durable_state import ensure_durable_state_files
@@ -400,11 +403,186 @@ def _clear_workspace_logs(workspace: Path, book_id: str, logs_scope: str, report
     report["files_deleted"] = int(report.get("files_deleted", 0)) + deleted
 
 
+
+def _path_size(path: Path) -> int:
+    try:
+        if path.is_file():
+            return path.stat().st_size
+        if path.is_dir():
+            total = 0
+            for root, _, files in os.walk(path):
+                for name in files:
+                    try:
+                        total += (Path(root) / name).stat().st_size
+                    except OSError:
+                        continue
+            return total
+    except OSError:
+        return 0
+    return 0
+
+
+def _collect_reset_archive_targets(
+    workspace: Path,
+    book_root: Path,
+    book_id: str,
+    keep_logs: bool,
+    logs_scope: str,
+    include_logs: bool,
+) -> List[Path]:
+    targets: List[Path] = []
+
+    def _add_if_exists(candidate: Path) -> None:
+        if candidate.exists():
+            targets.append(candidate)
+
+    # Files rewritten during reset.
+    _add_if_exists(book_root / 'state.json')
+
+    # Directories removed during reset.
+    _add_if_exists(book_root / 'draft' / 'chapters')
+    _add_if_exists(book_root / 'exports')
+    _add_if_exists(book_root / 'logs')
+
+    context_dir = book_root / 'draft' / 'context'
+    _add_if_exists(context_dir / 'bible.md')
+    _add_if_exists(context_dir / 'last_excerpt.md')
+    _add_if_exists(context_dir / 'continuity_pack.json')
+    _add_if_exists(context_dir / 'run_paused.json')
+
+    _add_if_exists(context_dir / 'continuity_history')
+    _add_if_exists(context_dir / 'chapter_summaries')
+    _add_if_exists(context_dir / 'characters')
+    _add_if_exists(context_dir / 'phase_history')
+
+    _add_if_exists(context_dir / 'item_registry.json')
+    _add_if_exists(context_dir / 'plot_devices.json')
+    _add_if_exists(context_dir / 'durable_commits.json')
+
+    _add_if_exists(context_dir / 'items')
+    _add_if_exists(context_dir / 'plot_devices')
+
+    if include_logs and not keep_logs:
+        logs_root = workspace / 'logs' / 'llm'
+        if logs_root.exists() and logs_root.is_dir():
+            if logs_scope == 'all':
+                for candidate in logs_root.iterdir():
+                    if candidate.is_file():
+                        targets.append(candidate)
+            else:
+                pattern = f"{book_id}_*"
+                for candidate in logs_root.glob(pattern):
+                    if candidate.is_file():
+                        targets.append(candidate)
+
+    # Deduplicate and ensure we don't include child paths when parent is already included.
+    unique_targets = []
+    seen = set()
+    for target in sorted(targets, key=lambda p: len(str(p))):
+        resolved = str(target.resolve())
+        if resolved in seen:
+            continue
+        skip = False
+        for parent in unique_targets:
+            if target.resolve().is_relative_to(parent.resolve()):
+                skip = True
+                break
+        if skip:
+            continue
+        unique_targets.append(target)
+        seen.add(resolved)
+
+    return unique_targets
+
+
+def _validate_archive(archive_root: Path, workspace: Path, targets: List[Path]) -> None:
+    if not archive_root.exists():
+        raise RuntimeError('Archive root was not created.')
+    manifest_path = archive_root / 'archive_manifest.json'
+    if not manifest_path.exists():
+        raise RuntimeError('Archive manifest missing; aborting reset.')
+    for target in targets:
+        rel = target.relative_to(workspace)
+        dest = archive_root / rel
+        if not dest.exists():
+            raise RuntimeError(f"Archive missing expected path: {dest}")
+
+
+def _archive_reset_targets(
+    workspace: Path,
+    book_id: str,
+    targets: List[Path],
+    archive_mode: str,
+    include_logs: bool,
+    logs_scope: str,
+) -> Path:
+    timestamp = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
+    rel_paths = sorted({str(target.relative_to(workspace)).replace('\\', '/') for target in targets})
+    hash_seed = "\n".join(rel_paths).encode('utf-8') if rel_paths else b'empty'
+    short_hash = hashlib.sha1(hash_seed).hexdigest()[:8]
+
+    archive_root = workspace / 'archives' / book_id / f"reset_{timestamp}_{short_hash}"
+    if archive_root.exists():
+        suffix = 1
+        while (workspace / 'archives' / book_id / f"reset_{timestamp}_{short_hash}_{suffix}").exists():
+            suffix += 1
+        archive_root = workspace / 'archives' / book_id / f"reset_{timestamp}_{short_hash}_{suffix}"
+
+    archive_root.mkdir(parents=True, exist_ok=True)
+
+    archive_mode = str(archive_mode).strip().lower()
+    if archive_mode not in {'copy', 'move'}:
+        raise ValueError("archive_mode must be 'copy' or 'move'.")
+
+    sizes = {}
+    total_size = 0
+    for target in targets:
+        rel = str(target.relative_to(workspace)).replace('\\', '/')
+        size = _path_size(target)
+        sizes[rel] = size
+        total_size += size
+
+    for target in targets:
+        rel = target.relative_to(workspace)
+        dest = archive_root / rel
+        if target.is_dir():
+            if archive_mode == 'copy':
+                shutil.copytree(target, dest)
+            else:
+                shutil.move(str(target), str(dest))
+        elif target.is_file():
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            if archive_mode == 'copy':
+                shutil.copy2(target, dest)
+            else:
+                shutil.move(str(target), str(dest))
+
+    manifest = {
+        'timestamp': timestamp,
+        'book_id': book_id,
+        'archive_mode': archive_mode,
+        'include_logs': include_logs,
+        'logs_scope': logs_scope,
+        'purge_paths': rel_paths,
+        'sizes': sizes,
+        'total_size': total_size,
+    }
+
+    manifest_path = archive_root / 'archive_manifest.json'
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=True, indent=2), encoding='utf-8')
+
+    _validate_archive(archive_root, workspace, targets)
+    return archive_root
+
+
 def reset_book_workspace_detailed(
     workspace: Path,
     book_id: str,
     keep_logs: bool = False,
     logs_scope: str = "book",
+    archive: bool = False,
+    archive_mode: str = "copy",
+    archive_logs: bool = False,
 ) -> Tuple[Path, Dict[str, Any]]:
     book_root = workspace / "books" / book_id
     if not book_root.exists():
@@ -425,6 +603,30 @@ def reset_book_workspace_detailed(
         "all_log_files_deleted": 0,
         "durable_reinitialized": 0,
     }
+
+    archive_root: Optional[Path] = None
+    if archive:
+        targets = _collect_reset_archive_targets(
+            workspace=workspace,
+            book_root=book_root,
+            book_id=book_id,
+            keep_logs=keep_logs,
+            logs_scope=logs_scope,
+            include_logs=archive_logs,
+        )
+        archive_root = _archive_reset_targets(
+            workspace=workspace,
+            book_id=book_id,
+            targets=targets,
+            archive_mode=archive_mode,
+            include_logs=archive_logs,
+            logs_scope=logs_scope,
+        )
+        report["archive_path"] = str(archive_root)
+        report["archive_mode"] = archive_mode
+        report["archive_logs"] = bool(archive_logs)
+        report["archive_targets"] = len(targets)
+
 
     book_path = book_root / "book.json"
     state_path = book_root / "state.json"

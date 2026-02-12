@@ -107,11 +107,16 @@ def _book_reset(args: argparse.Namespace) -> int:
             book_id=args.book,
             keep_logs=bool(args.keep_logs),
             logs_scope=str(args.logs_scope),
+            archive=bool(getattr(args, 'archive', False)),
+            archive_mode=str(getattr(args, 'archive_mode', 'copy')),
+            archive_logs=bool(getattr(args, 'archive_logs', False)),
         )
     except Exception as exc:
         sys.stderr.write(f"Reset failed: {exc}\n")
         return 1
     sys.stdout.write(f"Book reset at {book_root}\n")
+    if report.get("archive_path"):
+        sys.stdout.write(f"Archive created at {report.get('archive_path')}\n")
     sys.stdout.write(
         "Reset summary: "
         f"files_deleted={report.get('files_deleted', 0)} "
@@ -252,6 +257,22 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["book", "all"],
         default="book",
         help="When logs are cleared, remove only this book's logs or all logs.",
+    )
+    book_reset.add_argument(
+        "--archive",
+        action="store_true",
+        help="Archive reset targets before deletion (workspace/archives).",
+    )
+    book_reset.add_argument(
+        "--archive-mode",
+        choices=["copy", "move"],
+        default="copy",
+        help="Archive mode when --archive is set (copy|move).",
+    )
+    book_reset.add_argument(
+        "--archive-logs",
+        action="store_true",
+        help="Include logs/llm + logs/runs in the archive when --archive is set.",
     )
     book_reset.set_defaults(func=_book_reset)
 
