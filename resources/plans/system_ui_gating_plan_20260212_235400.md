@@ -60,7 +60,6 @@ Invalid (contradiction):
 - `resources/prompt_templates/repair.md` (same gate; remove UI blocks if disallowed)
 - `resources/prompt_templates/state_repair.md` (same gate; do not preserve UI when disallowed)
 - `resources/prompt_templates/lint.md` (UI gate check, issue when UI appears with `ui_allowed=false`)
-- Optional: `resources/prompt_templates/style_anchor.md` split into pre-System/system-active anchors
 
 ### Schemas
 - `schemas/scene_card.schema.json`
@@ -87,7 +86,6 @@ Invalid (contradiction):
 ### Book Overrides / Artifacts
 - `book update-templates` to propagate template changes
 - Regenerate `system_v1.md` after base rules change
-- Optional: create two style anchors and select based on `ui_allowed`
 
 ### Docs
 - Update help docs if new planner fields or behavior needs to be user-visible (optional)
@@ -196,17 +194,6 @@ Validation:
 - Ensure author v1 remains unchanged.
 - Criticulous uses v2 when approved.
 
-### Story 6: Style Anchor Split (Optional)
-Summary:
-Provide separate style anchors for pre-System and system-active scenes to reduce UI bleed.
-
-Files:
-- `workspace/books/<book>/prompts/style_anchor_pre_system.md`
-- `workspace/books/<book>/prompts/style_anchor_system.md`
-- `src/bookforge/runner.py` (select anchor based on `ui_allowed`)
-
-Notes:
-- This is optional but helps tone alignment without relying on author persona.
 
 ## Edge Cases / Risk Review
 - Mid-scene activation: allow `ui_allowed=true`, but restrict `ui_mechanics_expected` to what is introduced in the scene.
@@ -270,7 +257,6 @@ Notes:
 - Story 3 (Writer/Repair/State Repair alignment): Not started
 - Story 4 (Lint guard): Not started
 - Story 5 (Eldrik v2 author fragment): Not started
-- Story 6 (Optional style anchor split): Not started
 
 ## Notes
 - UI gating must be in Base Rules to override author fragments.
