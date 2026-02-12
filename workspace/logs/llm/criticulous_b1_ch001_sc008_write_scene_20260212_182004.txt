@@ -1,0 +1,210 @@
+COMPLIANCE:
+Scene ID: SC_001_008
+Allowed events: Confrontation with Vane, Duel Request UI, Artie dodging Vane's attacks, Artie escaping into the backstreets.
+Forbidden milestones: Any mention of leaving Oakhaven (gates are closed), any mention of reaching the capital or the crypts.
+Current arm-side / inventory facts: CHAR_ARTIE -> Participation Trophy (held, container=hand_right); CHAR_VANE -> Viper's Kiss dagger (equipped, container=sheath_belt).
+Durable changes committed: milestone: vane_confrontation_started = DONE; milestone: vane_confrontation_resolved = DONE; Vane's obsession with Artie established as a recent fact.
+
+APPEARANCE_CHECK:
+- CHAR_ARTIE: lanky, messy brown hair, hazel eyes, pale skin.
+- CHAR_VANE: athletic, slicked-back black hair, cold blue eyes, jagged scar.
+
+PROSE:
+
+The shadow that fell across the cobblestones was too sharp, too deliberate to be cast by a simple building. I froze, my fingers cramping around the cold, gilded base of the Participation Trophy. The gold-plated plastic felt heavy in my right hand, a constant, cursed reminder that the System had a very sick sense of humor.
+
+"The Mayor is a man of commerce, but he has no eye for potential," a voice drawled. It was smooth, like expensive whiskey poured over jagged glass.
+
+I turned slowly. Standing ten paces away was a man who looked like he’d been designed by a committee dedicated to the concept of 'Threatening.' He was tall and athletic, his black hair slicked back with military precision. A jagged scar ran through his left eye, which remained a piercing, cold blue despite the disfigurement. He wore dark, articulated leather armor that whispered of high level-requirements and even higher price tags.
+
+[Vane - Lvl 42] [Class: Shadow Stalker] [HP: 450/450]
+
+"Vane, I presume?" I said, trying to keep my voice from cracking. "Look, if you’re here for the trophy, it’s soulbound. Trust me, I’ve tried to drop it. I’ve tried to bury it. I’ve tried to trade it for a ham sandwich. It’s not going anywhere."
+
+Vane didn't laugh. He didn't even blink. He just watched me with the predatory stillness of a hawk watching a field mouse. "I don't care about your trinket, Anomaly. I care about the math. A level 2 with a hundred-percent crit rate? That’s not a player. That’s a mistake."
+
+He reached for his belt. In one fluid motion, he drew a slender, wickedly curved blade. The steel was dark, etched with serpentine patterns that seemed to pulse with a faint, toxic green light. 
+
+"The Viper's Kiss dagger," I muttered, the name appearing in a flickering tooltip as he held the weapon in his right hand.
+
+"They call me the Apex Predator in this district," Vane said, his voice dropping an octave. "And an Apex Predator doesn't allow glitches to roam his territory. But I’m a fair man. Let’s see if that luck of yours holds up under pressure."
+
+A chime rang in my ears, loud and intrusive.
+
+[Duel Request: Vane (Lvl 42) has challenged you to a 'Friendly' Spar!]
+[Terms: First to 10% HP or First Blood.]
+[Penalty for Refusal: 10% XP Loss and 'Coward' Status for 24 hours.]
+[Accept? Y/N]
+
+"Friendly?" I choked out, taking a step back. "I have exactly one hit point, Vane. In your world, 'First Blood' is a minor inconvenience. In mine, it’s a funeral."
+
+"Then don't get hit," Vane replied.
+
+He didn't wait for me to click 'Yes.' He moved. 
+
+He didn't run; he blurred. The Shadow Stalker class wasn't just a name. He became a streak of obsidian against the gray stone of Oakhaven. I didn't have time to think, only to react. My Agility was still a pathetic base stat, but my panic was at an all-time high. 
+
+I swung the Participation Trophy out of sheer reflex.
+
+[Critical Hit! (Object Collision)]
+[Damage: 0 (Safe Zone Protection Active)]
+[Effect: Aggro Spike!]
+
+The trophy didn't hurt him, but the 'Center of Attention' curse flared to life. A pulse of obnoxious, bright red light erupted from the gold plating, momentarily blinding Vane. He hissed, his Viper's Kiss dagger whistling through the air exactly where my throat had been a microsecond before.
+
+[Stamina: 32/38]
+
+I scrambled backward, my boots slipping on the uneven stones. "I'm not fighting you! I'm leaving! This is a Safe Zone!"
+
+"Nowhere is safe for a glitch," Vane snarled, recovering his vision. He twisted his body, the Viper's Kiss dagger spinning in his grip as he prepared for a second lunge. "The System wants you deleted, Anomaly. I’m just the one holding the eraser."
+
+He came at me again, faster this time. He used a skill—[Shadow Step]—and suddenly he was behind me. I felt the cold air of the blade’s passage against the back of my neck. If he so much as grazed my collar, I was done. Game over. Delete character.
+
+[HP: 1/1] (locked)
+
+"Missed again!" I yelled, though it was more of a whimpering shriek. 
+
+I didn't look back. I dove toward a narrow gap between a weaver’s shop and a closed tavern. It was a filthy, lightless alleyway that smelled of damp wool and old cabbage. 
+
+"You can't run forever!" Vane’s voice echoed behind me, filled with a mounting, dark obsession. "I’ll find the break in your pattern! I’ll see the roll that fails!"
+
+I didn't answer. I shoved the Participation Trophy into my chest to keep it from glowing and ran. I was lanky, I was weak, and I was one sneeze away from death, but I knew how to hide. I’d spent ten years hiding in an office cubicle; hiding in a medieval backstreet was just a change of scenery.
+
+I turned a corner, then another, vaulting over a stack of empty crates. The Aggro Meter on my HUD was still pulsing a violent, angry red, but the distance between me and the 'Apex Predator' was growing.
+
+[Aggro Meter: High (Decreasing)]
+
+I slid behind a heavy oak barrel and held my breath. My heart was hammering against my ribs so hard I thought it might count as self-inflicted bludgeoning damage. I stayed there for a long time, watching the entrance to the alley. 
+
+Vane didn't follow. Not yet. But I could feel it—the weight of his gaze, the way the System seemed to lean toward him. I wasn't just a player anymore. I was a target. And in Oakhaven, the hunt had just begun.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": ["CHAR_ARTIE", "CHAR_VANE"],
+    "location": "Oakhaven - Backstreets (Sector 01)",
+    "recent_facts": [
+      "Vane attempted to force a duel with Artie using a System Duel Request.",
+      "Artie used the Participation Trophy's aggro-flare to distract Vane and escape.",
+      "Artie successfully avoided taking damage despite Vane's high-level attacks.",
+      "Vane has developed an obsession with 'deleting' Artie as a statistical glitch."
+    ],
+    "open_threads": ["THREAD_VANE_RIVALRY", "THREAD_CRIT_EXPLOIT"]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_participation_trophy",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        }
+      ],
+      "persona_updates": [
+        "Artie is now a fugitive within Oakhaven, evading both the Mayor and high-level players like Vane."
+      ]
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "inventory": [
+        {
+          "item": "ITEM_vane_dagger",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "sheath_belt",
+          "owner": "CHAR_VANE",
+          "contents": []
+        }
+      ],
+      "persona_updates": [
+        "Vane is obsessed with testing the limits of Artie's glitch and intends to 'delete' him."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "delta": {
+        "resources": {
+          "stamina": -6
+        }
+      },
+      "reason": "Stamina depletion from dodging Vane's Shadow Step and sprinting into the backstreets."
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "set": {
+        "titles": [
+          {
+            "name": "The Apex Predator",
+            "source": "achievement",
+            "active": true
+          }
+        ]
+      },
+      "reason": "Title confirmation during confrontation."
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "combat_state": "evasion",
+        "aggro_meter": "high"
+      },
+      "reason": "Transition from duel request to active flight and evasion."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Vane confronted Artie in Sector 01, attempting to force a duel to 'delete' the glitch.",
+      "Artie used the Participation Trophy to distract Vane and escaped into the Oakhaven backstreets without taking damage."
+    ],
+    "key_events": [
+      "Vane challenged Artie to a duel, which Artie refused by fleeing.",
+      "Artie triggered the Participation Trophy's aggro-flare to blind Vane.",
+      "Artie navigated the Oakhaven backstreets to lose Vane's pursuit.",
+      "Vane declared his intent to hunt Artie down and fix the System's 'mistake'."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: build_finalized = DONE",
+      "milestone: oakhaven_entry = DONE",
+      "milestone: mayor_intercepted = DONE",
+      "milestone: vane_confrontation_started = DONE",
+      "milestone: vane_confrontation_resolved = DONE",
+      "Artie's HP is 1 and he is locked into the Crit-Only build.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (held, container=hand_right)",
+      "inventory: CHAR_VANE -> Viper's Kiss dagger (held, container=hand_right)",
+      "The city gates of Oakhaven are closed, trapping Artie inside."
+    ],
+    "chapter_so_far_add": [
+      "Artie survived a high-stakes encounter with Vane, a level 42 Shadow Stalker, by exploiting his cursed trophy's aggro effects."
+    ]
+  },
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_vane_dagger",
+      "reason": "Vane unsheathed the dagger to initiate the duel.",
+      "source_container": "sheath_belt",
+      "destination_container": "hand_right"
+    }
+  ]
+}

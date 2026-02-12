@@ -3,13 +3,27 @@
   "status": "fail",
   "issues": [
     {
-      "code": "pipeline_state_incoherent",
-      "message": "The character state for CHAR_ARTIE contains invariants that contradict the authoritative must_stay_true list. Specifically, the state claims the 'crumpled dollar bill' is carried/held in hand_right, while the authoritative invariants mark it as lost in the world. Additionally, the character's 'inventory' field is empty, contradicting its own internal 'invariants' list.",
+      "code": "milestone_repetition",
+      "message": "The scene depicts milestones 'crit_glitch_reveal' and 'build_finalized' occurring, but these are already marked as DONE in the pre-scene invariants and documented in the 'last_scene' summary.",
       "severity": "error",
       "evidence": {
-        "line": null,
-        "excerpt": "Invariant in state: 'inventory: CHAR_ARTIE -> crumpled dollar bill (status=carried, container=hand_right)' vs Authoritative must_stay_true: 'inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)'"
+        "line": 38,
+        "excerpt": "[Build Finalized: The 'Crit-iculous' Specialization]"
       }
+    },
+    {
+      "code": "duplication",
+      "message": "The scene content repeats the narrative arc (stat glitching and build finalization) already established in the 'last_scene' summary and 'key_facts_ring'.",
+      "severity": "error",
+      "evidence": {
+        "line": 1,
+        "excerpt": "The white void didn't have a floor, yet Artie\u2019s feet felt like they were resting on high-grade linoleum."
+      }
+    },
+    {
+      "code": "appearance_check_missing",
+      "message": "Authoritative appearance checks are missing for present characters: CHAR_ARTIE, CHAR_FIZZ.",
+      "severity": "warning"
     },
     {
       "code": "stat_unowned",

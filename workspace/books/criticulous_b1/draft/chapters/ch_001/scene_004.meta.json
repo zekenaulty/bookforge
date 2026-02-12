@@ -1,0 +1,259 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_004",
+  "chapter": 1,
+  "scene": 4,
+  "scene_target": "Artie survives his first encounter and levels up.",
+  "goal": "Demonstrate the extreme variance and destructive potential of the 'Crit-Only' build.",
+  "conflict": "Artie's physical incompetence and low accuracy versus the slime's slow, lethal approach.",
+  "required_callbacks": [
+    "Artie is cornered in a dead-end crevice by a Level 1 Slime."
+  ],
+  "constraints": [
+    "target_words: 2000",
+    "must depict exactly 5 misses or 0-damage non-crits before the final hit",
+    "must depict the 'Super-Mega-Ultra-Crit' vaporizing the slime and the environment behind it",
+    "no-recaps",
+    "Fizz must provide unhelpful commentary from the 'Noob's Guide'"
+  ],
+  "end_condition": "The slime is defeated and Artie receives a Level Up notification.",
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "THREAD_CRIT_EXPLOIT"
+  ],
+  "required_in_custody": [],
+  "required_scene_accessible": [],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "none",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "levels",
+    "combat_log"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Damage",
+    "Level Up",
+    "Combat Log",
+    "Crit Multiplier"
+  ],
+  "prose_path": "draft/chapters/ch_001/scene_004.md",
+  "state_patch": {
+    "character_continuity_system_updates": [
+      {
+        "chapter": 1,
+        "character_id": "CHAR_ARTIE",
+        "scene": 4,
+        "set": {
+          "stats": {
+            "crit_multiplier": 10,
+            "crit_rate": 100,
+            "hp": {
+              "current": 1,
+              "max": 1
+            },
+            "level": 2,
+            "skill_points": 1,
+            "stat_points": 5
+          },
+          "reason": "Level up after defeating the slime with a glitched multiplier.",
+          "reason_category": "progression"
+        },
+        "delta": {}
+      }
+    ],
+    "character_updates": [
+      {
+        "chapter": 1,
+        "character_id": "CHAR_ARTIE",
+        "containers": [
+          {
+            "container": "pocket_right",
+            "contents": [],
+            "owner": "CHAR_ARTIE"
+          },
+          {
+            "container": "pocket_left",
+            "contents": [],
+            "owner": "CHAR_ARTIE"
+          }
+        ],
+        "invariants_add": [
+          "milestone: slime_defeated = DONE",
+          "milestone: first_level_up = DONE"
+        ],
+        "inventory": [],
+        "persona_updates": [
+          "Artie has survived his first combat encounter and is beginning to grasp the destructive scale of his glitched build."
+        ],
+        "scene": 4
+      }
+    ],
+    "global_continuity_system_updates": [
+      {
+        "reason": "Combat ended; environmental damage recorded.",
+        "set": {
+          "combat_state": "inactive",
+          "tutorial_zone_integrity": "compromised"
+        }
+      }
+    ],
+    "inventory_alignment_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "reason": "Post-combat inventory check; Artie remains empty-handed after the explosion.",
+        "reason_category": "after_combat_cleanup",
+        "set": {
+          "containers": [
+            {
+              "container": "pocket_right",
+              "contents": [],
+              "owner": "CHAR_ARTIE"
+            },
+            {
+              "container": "pocket_left",
+              "contents": [],
+              "owner": "CHAR_ARTIE"
+            }
+          ],
+          "inventory": []
+        }
+      }
+    ],
+    "schema_version": "1.0",
+    "summary_update": {
+      "chapter_so_far_add": [
+        "Artie survives his first combat by accidentally vaporizing a chunk of the world map with a glitched critical hit."
+      ],
+      "key_events": [
+        "Artie misses or deals 0 damage five times against a Level 1 Lesser Puddle Slime.",
+        "Artie triggers a 'Super-Mega-Ultra-Crit' dealing 99,999,999 True Damage.",
+        "A large section of the Whispering Woods tutorial zone is vaporized and 'optimized' by the attack.",
+        "Artie gains 5,000 XP due to a glitched x100 multiplier.",
+        "Artie levels up to Level 2 and gains 5 stat points and 1 skill point.",
+        "Fizz provides unhelpful commentary from 'The Noob's Guide to Not Dying'."
+      ],
+      "last_scene": [
+        "Artie was cornered by a Level 1 Slime in a dead-end crevice.",
+        "After five failed attempts to deal damage, Artie triggered a massive 'Super-Mega-Ultra-Crit' that vaporized the slime and a hundred-yard arc of the forest.",
+        "Artie reached Level 2 and realized the sheer scale of his build's instability."
+      ],
+      "must_stay_true": [
+        "REMOVE: Artie is cornered in a dead-end crevice by a Level 1 Slime.",
+        "milestone: slime_defeated = DONE",
+        "milestone: first_level_up = DONE",
+        "Artie's HP is 1 and he is locked into the Crit-Only build.",
+        "Artie is Level 2 with 5 unallocated stat points and 1 skill point.",
+        "A hundred-yard trench of vaporized forest exists in the Whispering Woods."
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "CHAR_ARTIE"
+      ],
+      "location": "Whispering Woods (Optimized)",
+      "open_threads": [
+        "THREAD_CRIT_EXPLOIT"
+      ],
+      "recent_facts": [
+        "Artie defeated a Lesser Puddle Slime with a Super-Mega-Ultra-Crit.",
+        "The combat caused massive environmental damage, vaporizing a large section of the Whispering Woods.",
+        "Artie leveled up to Level 2."
+      ]
+    }
+  },
+  "scene_summary": [
+    "Artie was cornered by a Level 1 Slime in a dead-end crevice.",
+    "After five failed attempts to deal damage, Artie triggered a massive 'Super-Mega-Ultra-Crit' that vaporized the slime and a hundred-yard arc of the forest.",
+    "Artie reached Level 2 and realized the sheer scale of his build's instability."
+  ],
+  "key_events": [
+    "Artie misses or deals 0 damage five times against a Level 1 Lesser Puddle Slime.",
+    "Artie triggers a 'Super-Mega-Ultra-Crit' dealing 99,999,999 True Damage.",
+    "A large section of the Whispering Woods tutorial zone is vaporized and 'optimized' by the attack.",
+    "Artie gains 5,000 XP due to a glitched x100 multiplier.",
+    "Artie levels up to Level 2 and gains 5 stat points and 1 skill point.",
+    "Fizz provides unhelpful commentary from 'The Noob's Guide to Not Dying'."
+  ],
+  "must_stay_true": [
+    "REMOVE: Artie is cornered in a dead-end crevice by a Level 1 Slime.",
+    "milestone: slime_defeated = DONE",
+    "milestone: first_level_up = DONE",
+    "Artie's HP is 1 and he is locked into the Crit-Only build.",
+    "Artie is Level 2 with 5 unallocated stat points and 1 skill point.",
+    "A hundred-yard trench of vaporized forest exists in the Whispering Woods."
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "appearance_check_missing",
+        "message": "Authoritative APPEARANCE_CHECK is missing for cast member CHAR_ARTIE.",
+        "severity": "warning"
+      },
+      {
+        "code": "item_naming",
+        "message": "Unambiguous descriptor 'manual' used post-anchor for 'The Noob's Guide to Not Dying'.",
+        "severity": "warning",
+        "evidence": {
+          "line": 17,
+          "excerpt": "\"Checking the manual, Artie,\" Fizz said..."
+        }
+      },
+      {
+        "code": "item_naming",
+        "message": "Unambiguous descriptor 'Guide' used post-anchor for 'The Noob's Guide to Not Dying'.",
+        "severity": "warning",
+        "evidence": {
+          "line": 27,
+          "excerpt": "\"The Guide says your Accuracy stat is currently 'Optimistic,'\""
+        }
+      },
+      {
+        "code": "item_naming",
+        "message": "Unambiguous descriptor 'book' used post-anchor for 'The Noob's Guide to Not Dying'.",
+        "severity": "warning",
+        "evidence": {
+          "line": 42,
+          "excerpt": "...Fizz said, flipping a page in her book."
+        }
+      },
+      {
+        "code": "stat_mismatch",
+        "message": "UI shows HP but character state has {'current': 1, 'max': 1}.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Experience Gained but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Stat Points Gained but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Skill Points Gained but no matching stat exists in state.",
+        "severity": "warning"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 1,
+  "updated_at": "2026-02-12T11:36:12Z"
+}

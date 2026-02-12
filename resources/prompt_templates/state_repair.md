@@ -109,8 +109,9 @@ Naming repairs:
 - Honor scene-card durable constraints (`required_in_custody`, `required_scene_accessible`, `forbidden_visible`, `device_presence`; optional `required_visible_on_page`).
 - Respect `timeline_scope` and `ontological_scope`; avoid physical custody changes in non-present/non-real scope unless explicit override is present.
 - Scope override rule (non-present / non-real scenes):
-  - If timeline_scope != "present" OR ontological_scope != "real", do NOT emit inventory_alignment_updates, transfer_updates, or physical custody changes.
-  - If you must mutate physical custody in a non-present/non-real scene, set scope_override=true (or allow_non_present_mutation=true) on that update and set reason_category="timeline_override".
+  - If timeline_scope != "present" OR ontological_scope != "real", do NOT emit durable mutation blocks UNLESS they are required for this scene transition (based on scene_card + current state).
+  - Durable mutation blocks include: inventory_alignment_updates, transfer_updates, item_registry_updates, plot_device_updates, and any other durable-state mutation you emit.
+  - If they are required for the story (e.g., items must persist into the next real scene, required_in_custody/required_scene_accessible lists them, or transition_type implies continuity of physical possessions), you MUST set scope_override=true (or allow_non_present_mutation=true) on EACH affected update object and set reason_category="timeline_override".
 Inputs
 - prose: final scene text
 - state: pre-scene state
@@ -170,6 +171,7 @@ JSON Contract Block (strict; arrays only):
     - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
     - VALID:   "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
 - custodian must be a non-null string id or "world"; never null.
+
 
 
 

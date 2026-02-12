@@ -1,0 +1,224 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "Artie and Fizz arrived in the Whispering Woods tutorial zone, where Artie immediately realized the lethal reality of his 1 HP build.",
+      "A Level 1 Lesser Puddle Slime cornered Artie in a dead-end rocky crevice, leaving him defenseless against a lethal lunge."
+    ],
+    "key_events": [
+      "Artie and Fizz spawned into the Whispering Woods tutorial zone.",
+      "Artie confirmed his HP is locked at 1/1 with a 100% Critical Hit rate.",
+      "A Level 1 Lesser Puddle Slime appeared and targeted Artie as a lethal threat.",
+      "Artie tripped while fleeing, receiving a System warning for physical trauma.",
+      "Artie was cornered in a dead-end rocky crevice by the slime.",
+      "Fizz explained she cannot interfere in combat due to Class C Guide restrictions."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "milestone: build_finalized = DONE",
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+      "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+      "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+      "REMOVE: Artie's HP is 1 and he is locked into the Crit-Only build.",
+      "Artie's HP is 1/1 and he is locked into the 'Glitched: Crit-Only' build.",
+      "Artie is cornered in a dead-end rocky crevice by a Level 1 Lesser Puddle Slime.",
+      "Fizz is restricted from interfering in active combat by System terms of service.",
+      "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)",
+      "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)"
+    ],
+    "chapter_so_far_add": [
+      "Artie spawned into the Whispering Woods and realized the lethal reality of his 1 HP build.",
+      "A Level 1 Lesser Puddle Slime cornered Artie, demonstrating that even tutorial mobs are deadly to him."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "persona_updates": [
+        "Artie is experiencing extreme existential dread as he realizes the fragility of his 1 HP build."
+      ],
+      "inventory": [],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        }
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "persona_updates": [],
+      "inventory": [
+        {
+          "item_id": "ITEM_fizz_wand",
+          "container": "belt",
+          "status": "stowed"
+        },
+        {
+          "item_id": "ITEM_guidebook",
+          "container": "satchel",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "belt",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_fizz_wand"
+          ]
+        },
+        {
+          "container": "satchel",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_guidebook"
+          ]
+        }
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100,
+          "level": 1
+        },
+        "statuses": [
+          {
+            "name": "Glitched: Crit-Only",
+            "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+            "durable": true
+          }
+        ]
+      }
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "tutorial_zone": "Whispering Woods",
+        "current_mob": "Lesser Puddle Slime"
+      }
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Whispering Woods",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie and Fizz spawned into the Whispering Woods.",
+      "Artie was cornered by a Level 1 Lesser Puddle Slime in a dead-end crevice."
+    ]
+  },
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "reason": "Arrival in tutorial zone; no starter gear yet.",
+      "reason_category": "location_jump_normalize",
+      "set": {
+        "inventory": [],
+        "containers": [
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": []
+          },
+          {
+            "container": "pocket_left",
+            "owner": "CHAR_ARTIE",
+            "contents": []
+          }
+        ]
+      }
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "reason": "Arrival in tutorial zone; gear remains stowed.",
+      "reason_category": "location_jump_normalize",
+      "set": {
+        "inventory": [
+          {
+            "item_id": "ITEM_fizz_wand",
+            "container": "belt",
+            "status": "stowed"
+          },
+          {
+            "item_id": "ITEM_guidebook",
+            "container": "satchel",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "belt",
+            "owner": "CHAR_FIZZ",
+            "contents": [
+              "ITEM_fizz_wand"
+            ]
+          },
+          {
+            "container": "satchel",
+            "owner": "CHAR_FIZZ",
+            "contents": [
+              "ITEM_guidebook"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_fizz_wand",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 3,
+          "location": "Whispering Woods"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_guidebook",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 3,
+          "location": "Whispering Woods"
+        }
+      }
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 3,
+          "location": "Whispering Woods"
+        }
+      }
+    }
+  ],
+  "transfer_updates": []
+}

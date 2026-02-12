@@ -1,0 +1,328 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_006",
+  "chapter": 1,
+  "scene": 6,
+  "scene_target": "Artie survives the gate inspection at Oakhaven and enters the hub.",
+  "goal": "Introduce the town's RNG-obsessed culture and trigger the 'Statistical Anomaly' flag.",
+  "conflict": "The guards' gate scanner cannot process Artie's 100% Crit Rate and 1 HP, causing a system-wide alert.",
+  "required_callbacks": [
+    "milestone: participation_trophy_acquired",
+    "milestone: crit_glitch_reveal"
+  ],
+  "constraints": [
+    "target_words: 2000",
+    "no-recaps",
+    "forward-motion"
+  ],
+  "end_condition": "Artie is allowed entry into Oakhaven while the 'Statistical Anomaly' alarm sounds throughout the district.",
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [],
+  "required_in_custody": [
+    "ITEM_participation_trophy"
+  ],
+  "required_scene_accessible": [
+    "ITEM_participation_trophy"
+  ],
+  "device_presence": [
+    "DEVICE_gate_scanner"
+  ],
+  "transition_type": "travel_arrival",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "titles",
+    "resources"
+  ],
+  "ui_mechanics_expected": [
+    "Crit Rate",
+    "HP",
+    "System Alert",
+    "Aggro Meter"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "prose_path": "draft/chapters/ch_001/scene_006.md",
+  "state_patch": {
+    "character_continuity_system_updates": [
+      {
+        "chapter": 1,
+        "character_id": "CHAR_ARTIE",
+        "scene": 6,
+        "set": {
+          "resources": {
+            "stamina": 42
+          },
+          "stats": {
+            "hp": {
+              "current": 1,
+              "max": 1
+            },
+            "level": 2,
+            "skill_points": 1,
+            "stat_points": 5,
+            "xp": 5250
+          },
+          "reason": "Entered Oakhaven; stamina depletion from running and stress. Gained exploration XP.",
+          "reason_category": "progression"
+        },
+        "delta": {}
+      }
+    ],
+    "character_updates": [
+      {
+        "chapter": 1,
+        "character_id": "CHAR_ARTIE",
+        "persona_updates": [
+          "Artie is now recognized by the System (and the public) as a 'Statistical Anomaly'."
+        ],
+        "scene": 6,
+        "invariants_add": []
+      },
+      {
+        "chapter": 1,
+        "character_id": "CHAR_FIZZ",
+        "persona_updates": [
+          "Fizz is oscillating between professional guide duties and morbid curiosity regarding how the gate scanners will handle Artie's glitched stats."
+        ],
+        "scene": 6,
+        "invariants_add": []
+      }
+    ],
+    "global_continuity_system_updates": [
+      {
+        "reason": "Statistical Anomaly detected by Oakhaven Gate Scanner; cursed trophy effect amplified.",
+        "set": {
+          "aggro_meter": "critical",
+          "system_alert_active": true
+        }
+      }
+    ],
+    "inventory_alignment_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "reason": "Entered Oakhaven; maintaining custody of the cursed trophy.",
+        "reason_category": "after_combat_cleanup",
+        "set": {
+          "containers": [
+            {
+              "container": "pocket_right",
+              "contents": [],
+              "owner": "CHAR_ARTIE"
+            },
+            {
+              "container": "pocket_left",
+              "contents": [],
+              "owner": "CHAR_ARTIE"
+            }
+          ],
+          "inventory": [
+            {
+              "container": "hand_right",
+              "item": "ITEM_participation_trophy",
+              "status": "held"
+            }
+          ]
+        }
+      },
+      {
+        "character_id": "CHAR_FIZZ",
+        "reason": "Entered Oakhaven; guidebook held for navigation.",
+        "reason_category": "location_jump_normalize",
+        "set": {
+          "containers": [
+            {
+              "container": "satchel",
+              "contents": [],
+              "owner": "CHAR_FIZZ"
+            },
+            {
+              "container": "belt",
+              "contents": [
+                "ITEM_fizz_wand"
+              ],
+              "owner": "CHAR_FIZZ"
+            }
+          ],
+          "inventory": [
+            {
+              "container": "hand_right",
+              "item": "ITEM_guidebook",
+              "status": "held"
+            },
+            {
+              "container": "belt",
+              "item": "ITEM_fizz_wand",
+              "status": "stowed"
+            }
+          ]
+        }
+      }
+    ],
+    "item_registry_updates": [
+      {
+        "item_id": "ITEM_participation_trophy",
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "location": "Oakhaven - The City of Chance",
+            "scene": 6
+          }
+        }
+      },
+      {
+        "item_id": "ITEM_guidebook",
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "location": "Oakhaven - The City of Chance",
+            "scene": 6
+          }
+        }
+      },
+      {
+        "item_id": "ITEM_fizz_wand",
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "location": "Oakhaven - The City of Chance",
+            "scene": 6
+          }
+        }
+      }
+    ],
+    "plot_device_updates": [
+      {
+        "device_id": "DEVICE_gate_scanner",
+        "set": {
+          "activation_state": "active",
+          "last_seen": {
+            "chapter": 1,
+            "location": "Oakhaven Gates",
+            "scene": 6
+          }
+        }
+      }
+    ],
+    "schema_version": "1.0",
+    "summary_update": {
+      "chapter_so_far_add": [
+        "Artie entered Oakhaven, triggering a massive system-wide alert due to his glitched stats."
+      ],
+      "key_events": [
+        "Artie approached Oakhaven while holding the cursed Participation Trophy.",
+        "The Gate Scanner (DEVICE_gate_scanner) failed to process Artie's 1 HP and 100% Crit Rate.",
+        "A 'Statistical Anomaly' System Alert was triggered, sounding throughout the district.",
+        "Guards Harlen and Silas witnessed Artie's glitched build and allowed him through the gate.",
+        "Artie discovered the Oakhaven location and gained 250 XP."
+      ],
+      "last_scene": [
+        "Artie and Fizz reached the Oakhaven gates, where Artie's glitched stats caused the Gate Scanner to malfunction and trigger a city-wide alarm.",
+        "Despite the alert, the guards allowed them entry to prevent a System crash, leaving Artie in the middle of a city that now knows he is an anomaly."
+      ],
+      "must_stay_true": [
+        "REMOVE: Artie has 5 unallocated stat points and 1 skill point.",
+        "REMOVE: The Participation Trophy increases monster aggro by 400%.",
+        "milestone: artie_death = DONE",
+        "milestone: build_finalized = DONE",
+        "milestone: participation_trophy_acquired = DONE",
+        "milestone: oakhaven_entry = DONE",
+        "inventory: CHAR_ARTIE -> Participation Trophy (held, container=hand_right)",
+        "Artie's HP is 1 and he is locked into the Crit-Only build.",
+        "The city-wide 'Statistical Anomaly' alarm is currently active in Oakhaven.",
+        "Artie is Level 2 with 5 unallocated stat points and 1 skill point.",
+        "The Aggro Meter is currently at Critical due to the cursed trophy and system alert."
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "CHAR_ARTIE",
+        "CHAR_FIZZ"
+      ],
+      "location": "Oakhaven - The City of Chance",
+      "open_threads": [
+        "THREAD_CRIT_EXPLOIT",
+        "THREAD_SYSTEM_GLITCH"
+      ]
+    }
+  },
+  "scene_summary": [
+    "Artie and Fizz reached the Oakhaven gates, where Artie's glitched stats caused the Gate Scanner to malfunction and trigger a city-wide alarm.",
+    "Despite the alert, the guards allowed them entry to prevent a System crash, leaving Artie in the middle of a city that now knows he is an anomaly."
+  ],
+  "key_events": [
+    "Artie approached Oakhaven while holding the cursed Participation Trophy.",
+    "The Gate Scanner (DEVICE_gate_scanner) failed to process Artie's 1 HP and 100% Crit Rate.",
+    "A 'Statistical Anomaly' System Alert was triggered, sounding throughout the district.",
+    "Guards Harlen and Silas witnessed Artie's glitched build and allowed him through the gate.",
+    "Artie discovered the Oakhaven location and gained 250 XP."
+  ],
+  "must_stay_true": [
+    "REMOVE: Artie has 5 unallocated stat points and 1 skill point.",
+    "REMOVE: The Participation Trophy increases monster aggro by 400%.",
+    "milestone: artie_death = DONE",
+    "milestone: build_finalized = DONE",
+    "milestone: participation_trophy_acquired = DONE",
+    "milestone: oakhaven_entry = DONE",
+    "inventory: CHAR_ARTIE -> Participation Trophy (held, container=hand_right)",
+    "Artie's HP is 1 and he is locked into the Crit-Only build.",
+    "The city-wide 'Statistical Anomaly' alarm is currently active in Oakhaven.",
+    "Artie is Level 2 with 5 unallocated stat points and 1 skill point.",
+    "The Aggro Meter is currently at Critical due to the cursed trophy and system alert."
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "appearance_check_missing",
+        "message": "Authoritative appearance check is missing for cast member: Arthur 'Artie' Penhaligon (CHAR_ARTIE).",
+        "severity": "warning"
+      },
+      {
+        "code": "appearance_check_missing",
+        "message": "Authoritative appearance check is missing for cast member: Fizz (CHAR_FIZZ).",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Stamina but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows XP Gained but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Current Level but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Stat Points Available but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Skill Points Available but no matching stat exists in state.",
+        "severity": "warning"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 1,
+  "updated_at": "2026-02-12T18:02:18Z"
+}

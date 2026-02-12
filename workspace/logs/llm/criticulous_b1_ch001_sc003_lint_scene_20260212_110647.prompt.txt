@@ -1,0 +1,1480 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties.
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+﻿Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+
+USER:
+
+# LINT
+
+Check the scene for continuity, invariant violations, and duplication.
+Flag invariant contradictions against must_stay_true/key facts.
+Return ONLY JSON matching the lint_report schema.
+- Classify UI/prose mechanic claims as DURABLE or EPHEMERAL before enforcing.
+  - DURABLE: persistent stats/caps, skills/titles acquired, lasting status effects, inventory/custody, named mechanics referenced as invariants.
+  - EPHEMERAL: roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat telemetry.
+- Enforce DURABLE claims against authoritative_surfaces/state/registries.
+- EPHEMERAL claims do not require state ownership; only flag EPHEMERAL contradictions inside the same scene as warnings.
+- If uncertain, default to EPHEMERAL (warning at most), not DURABLE (error).
+- status="fail" only if there is at least one issue with severity="error"; warnings alone => status="pass".
+- Item naming enforcement scope:
+  - Do not require that every mention in narrative prose use display_name.
+  - Enforce canonical display_name for: (a) anchoring at first introduction (same paragraph or within the next 2 sentences),
+    (b) any custody-change sentence (drop/pick up/hand off/stow/equip/transfer), and (c) any case where a descriptor is ambiguous among multiple durable items in the scene.
+  - Otherwise, treat non-canonical descriptive references as warnings at most.
+- Naming severity policy:
+  - warning: unambiguous descriptor used post-anchor.
+  - error: missing anchor, descriptor used during custody-change without canonical name, or ambiguity risk.
+
+- Appearance enforcement (authoritative surface):
+  - APPEARANCE_CHECK is authoritative for cast_present_ids.
+  - Compare APPEARANCE_CHECK tokens to appearance_current atoms/marks (alias-aware).
+  - If APPEARANCE_CHECK contradicts appearance_current, emit error code "appearance_mismatch".
+  - Prose-only appearance contradictions are warnings unless explicitly durable and uncorrected in-scene.
+  - If prose depicts a durable appearance change but scene_card.durable_appearance_changes does not include it and no appearance_updates are present, emit error code "appearance_change_undeclared".
+  - If APPEARANCE_CHECK is missing for a cast member, emit warning code "appearance_check_missing".
+- For authoritative surfaces, prefer exact canonical item/device labels from registries.
+- For milestone repetition/future checks, compare against PRE-INVARIANTS only (pre-scene canon).
+- For ownership/consistency checks, compare against POST-STATE (post-patch candidate).
+- POST-STATE is canonical; character_states is a derived convenience view. If they contradict, emit pipeline_state_incoherent.
+- Check for POV drift vs book POV (no first-person in third-person scenes).
+  - Ignore first-person pronouns inside quoted dialogue; only narration counts.
+- Deterministically enforce scene-card durable constraints (required_in_custody, required_scene_accessible, forbidden_visible, device_presence; optional required_visible_on_page).
+- Durable constraint evaluation must use POST-STATE candidate (after patch), not pre-state.
+- Report missing durable context ids with explicit retry hints instead of guessing canon.
+- Input consistency check (mandatory, before issuing continuity/durable errors):
+  - If MUST_STAY_TRUE invariants contradict the provided post-patch candidate character state, treat this as an upstream snapshot error.
+  - In that case emit a single error issue with code "pipeline_state_incoherent" including evidence of the invariant and the conflicting state field.
+  - Do NOT emit additional continuity errors for the same fields when pipeline_state_incoherent is present.
+- must_stay_true removals:
+  - Lines starting with "REMOVE:" are deletion directives, not invariants.
+  - Ignore REMOVE lines when checking contradictions.
+  - If a REMOVE directive targets a fact, treat that fact as non-canonical even if it appears earlier in must_stay_true.
+- If pipeline_state_incoherent is present, issues MUST contain exactly one issue.
+- For each issue, include evidence when possible (line number + excerpt) as {"evidence": {"line": N, "excerpt": "..."}}.
+- Evaluate consistency over the full scope of the scene, not a single snapshot.
+  - Transitional state: a temporary mismatch later corrected or superseded within this scene.
+  - Durable violation: a mismatch that persists through the end of the scene or ends unresolved.
+  - You MUST read the entire scene and build a minimal timeline of explicit state claims/updates (UI lines, inventory changes, title/skill changes, location/time claims).
+  - If you detect an apparent inconsistency, you MUST search forward for later updates that resolve or supersede it.
+  - Only produce FAIL for durable violations. If resolved within the scene, do NOT FAIL; at most emit a warning.
+  - When the same stat appears multiple times, the last occurrence in the scene is authoritative unless an explicit rollback is stated.
+  - Any durability violation must cite both the conflicting line and the lack of later correction (or state "no later correction found").
+
+Required keys:
+- schema_version ("1.0")
+- status ("pass" or "fail")
+- issues (array of objects)
+
+Each issue object must include:
+- code
+- message
+Optional:
+- severity
+- evidence
+
+If there are no issues, return:
+{
+  "schema_version": "1.0",
+  "status": "pass",
+  "issues": []
+}
+
+If there are issues, return:
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {"code": "continuity", "message": "Example issue", "severity": "error"}
+  ]
+}
+
+Scene:
+The transition from the absolute, blinding white of the Character Creation Void to the Whispering Woods felt less like a magical teleportation and more like being shoved through a digital meat grinder. One moment, Artie Penhaligon was standing in a vacuum of pure potential; the next, his boots hit damp soil with a squelch that vibrated all the way up his lanky frame. 
+
+The air was thick with the scent of pine needles and something suspiciously like ozone. High above, the canopy of the Whispering Woods didn't just sway; it pulsed. The leaves were a vibrant, oversaturated green that hurt to look at for too long, shimmering with a faint, low-resolution haze.
+
+[Location: Whispering Woods - Tutorial Zone]
+[Safety Rating: Low (Newbie-Friendlyish)]
+
+"Welcome to the grind, Artie!" Fizz chirped, her neon pink hair leaving a trail of magenta sparks as she zipped in a tight circle around his head. Her pixelated wings hummed like a high-end drone. "Try not to breathe too deep. The atmospheric rendering is still a bit buggy in this sector."
+
+Artie didn't respond. He was too busy staring at the corner of his vision, where a tiny, pathetic red bar sat like a ticking time bomb.
+
+[Arthur 'Artie' Penhaligon - Lvl 1]
+[HP: 1/1]
+[Crit Rate: 100%]
+[Status: Glitched (Crit-Only)]
+
+"One," Artie whispered, his voice cracking. "Fizz, it really says one. I thought maybe... once we spawned in, the System would round up? Or give me a 'Pity Shield'? Or literally anything other than a single point of structural integrity?"
+
+Fizz hovered at eye level, her glowing violet eyes scanning him with a mix of pity and professional detachment. She reached into the satchel hanging at her side, though she didn't pull anything out yet. "I checked the manual, Artie. 'The Noob's Guide to Not Dying' is very clear on this. Page four hundred and twelve: 'A character with one hit point is technically alive, which is the preferred state for beginning a quest.' It doesn't say anything about it being a *good* idea."
+
+"Technically alive is the worst kind of alive," Artie muttered. He looked down at his hands. They were empty. No sword, no shield, not even a sturdy stick. Just his pale, lanky fingers and a growing sense of existential dread. "Where's the starter gear? Don't I get a rusted spoon or a damp rag to defend myself with?"
+
+"Tutorial gear spawns at the first Milestone Marker," Fizz explained, pointing a tiny, iridescent finger toward a clearing ahead. "But honestly, with your build, a shield would just be a very expensive way to die in one hit while carrying something heavy. You’re a 'Statistical Anomaly,' remember? You’re not supposed to block. You’re supposed to... well, not get hit."
+
+Artie stepped forward, his movements cautious and jerky. Every twig that snapped under his boots sounded like a gunshot. Every rustle in the undergrowth made him flinch so hard he nearly tripped over his own feet. In any other game, this would be the peaceful intro—the part where the music is jaunty and the worst thing that can happen is a stray butterfly. Here, a butterfly landing on his shoulder might actually be a game-over event.
+
+The woods began to live up to their name. A soft, multi-tonal murmuring rose from the trees, a thousand overlapping voices whispering things that sounded like "Fresh data" and "Low defense detected." 
+
+"Is the forest talking about my lack of armor?" Artie asked, his heart hammering against his ribs.
+
+"It’s just environmental flavor text," Fizz said, though she sounded slightly less confident as she glanced at a particularly gnarled oak. "Mostly. Just keep moving. The first quest NPC is just—"
+
+She stopped. The humming of her wings shifted to a higher, sharper pitch.
+
+From behind a cluster of glowing blue mushrooms, something wobbled into the light. It was translucent, a sickly shade of neon green, and it jiggled with the rhythmic intensity of a subwoofer. It was the quintessential RPG starter mob: a slime.
+
+[Lesser Puddle Slime - Lvl 1]
+[HP: 10/10]
+
+"Oh, thank god," Artie breathed, leaning forward slightly. "It’s just a slime. It’s a literal puddle of jelly. I can handle a puddle."
+
+The slime didn't just wobble; it surged. It moved with a surprising, fluid speed, leave a trail of corrosive-looking slime on the grass. As it approached, a small UI window flickered into existence next to its nameplate.
+
+[Combat Estimate: Lethal]
+[Estimated Damage to Player: 2-4]
+[Player HP: 1]
+
+Artie’s blood turned to ice. "Fizz. Fizz, the math. Look at the math."
+
+"I see it!" Fizz squeaked, her hand diving into her satchel to pat the cover of 'The Noob's Guide to Not Dying' as if for luck. "The minimum damage floor for a Level 1 Slime is two! It doesn't matter if it just grazes your pinky toe, Artie! It’s going to do double your total health!"
+
+The slime reared back, its gelatinous body stretching upward until it was nearly three feet tall. It didn't have eyes, but Artie could feel its mindless, hungry focus. It lunged.
+
+Artie scrambled backward, his heels catching on a protruding root. He fell, hitting the ground with a thud that sent a jarring shock through his spine. 
+
+[HP: 1/1 (Warning: Physical trauma detected. Any further impact will result in Deletion.)]
+
+He scrambled on his hands and knees, dragging himself away as the slime landed exactly where his chest had been a second ago. The grass hissed and withered where the creature touched it. 
+
+"Run! Artie, use your legs!" Fizz shouted, darting around the slime’s head to distract it. "It’s a tutorial mob! Its pathfinding should be terrible!"
+
+Artie scrambled to his feet and bolted toward a dense thicket of thorns, but the slime was relentless. It wasn't just hopping; it was flowing, molding itself to the terrain with terrifying efficiency. He ducked under a low-hanging branch, his messy brown hair catching on the bark, and veered left into a narrow rocky crevice.
+
+He realized his mistake the moment his back hit the cold, damp stone. 
+
+The crevice was a dead end. The walls rose high on three sides, slick with moss and jagged edges. He turned, his breath coming in ragged, panicked gasps, to see the neon green mass of the slime filling the entrance. It moved slowly now, sensing it had its prey trapped. It began to vibrate, a low-frequency hum that Artie could feel in his teeth.
+
+[System Warning: Combat state locked.]
+[Escape Probability: 0.04%]
+
+"Fizz, do something!" Artie yelled, pressing his spine against the rock until it hurt. "Use the wand! Use the book! Throw a rock!"
+
+"I’m a Class C Guide!" Fizz wailed, hovering just out of the slime's reach. "I’m not allowed to interfere in active combat unless there’s a total System crash! It’s against the terms of service!"
+
+The slime began to flatten itself, spreading out across the floor of the crevice like a rising tide of acid. There was nowhere to jump, nowhere to climb. Artie looked at his hands again. They were still empty, his lanky frame trembling. 
+
+The creature reared back for its final lunge, a shimmering glob of neon death. Artie stared at the '1/1' in his vision, the red bar pulsing with a frantic, rhythmic light. He was a 'Statistical Anomaly,' a god of the critical hit, a walking glitch in the matrix—and he was about to be deleted by a puddle of lime-flavored jelly because he couldn't take a single, solitary scratch.
+
+The slime launched.
+
+Authoritative surfaces:
+[
+  {
+    "kind": "ui_block",
+    "line": 5,
+    "text": "[Location: Whispering Woods - Tutorial Zone]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 6,
+    "text": "[Safety Rating: Low (Newbie-Friendlyish)]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 12,
+    "text": "[Arthur 'Artie' Penhaligon - Lvl 1]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 13,
+    "text": "[HP: 1/1]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 14,
+    "text": "[Crit Rate: 100%]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 15,
+    "text": "[Status: Glitched (Crit-Only)]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 37,
+    "text": "[Lesser Puddle Slime - Lvl 1]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 38,
+    "text": "[HP: 10/10]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 44,
+    "text": "[Combat Estimate: Lethal]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 45,
+    "text": "[Estimated Damage to Player: 2-4]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 46,
+    "text": "[Player HP: 1]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 56,
+    "text": "[HP: 1/1 (Warning: Physical trauma detected. Any further impact will result in Deletion.)]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 68,
+    "text": "[System Warning: Combat state locked.]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 69,
+    "text": "[Escape Probability: 0.04%]"
+  }
+]
+
+Appearance check (authoritative):
+{}
+
+Character states (post-patch candidate, per cast_present_ids):
+[
+  {
+    "appearance_current": {
+      "alias_map": {
+        "eye_color": [
+          "hazel-green",
+          "light brown"
+        ],
+        "hair_color": [
+          "dark brown",
+          "chestnut"
+        ]
+      },
+      "atoms": {
+        "age_band": "young_adult",
+        "build": "lanky",
+        "eye_color": "hazel",
+        "hair_color": "brown",
+        "hair_style": "messy",
+        "height_band": "average",
+        "sex_presentation": "masculine",
+        "skin_tone": "pale",
+        "species": "human"
+      },
+      "marks": [],
+      "summary": "A slightly lanky office worker with messy brown hair and a perpetually tired expression."
+    },
+    "appearance_history": [],
+    "chapter": 1,
+    "character_continuity_system_state": {
+      "reason": "System recalculation and build finalization.",
+      "reason_category": "timeline_override",
+      "scope_override": true,
+      "skills": {},
+      "stats": {
+        "crit_rate": 100,
+        "hp": {
+          "current": 1,
+          "max": 1
+        },
+        "level": 1
+      },
+      "statuses": [
+        {
+          "durable": true,
+          "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+          "name": "Glitched: Crit-Only"
+        }
+      ],
+      "titles": [
+        {
+          "active": true,
+          "name": "Statistical Anomaly",
+          "source": "build_finalization"
+        }
+      ]
+    },
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "pocket_right",
+        "contents": [],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "pocket_left",
+        "contents": [],
+        "owner": "CHAR_ARTIE"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial setup for Scene 1.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Aligning inventory for the start of the book.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial setup for the opening scene.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial scene setup and posture alignment.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial setup for the opening scene.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie has transitioned from a mundane office worker to a deceased System entity."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Post-death inventory loss and item dropping.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie has transitioned from a deceased office worker to a level 1 System entity awaiting build finalization."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie has transitioned from a deceased office worker to a level 1 System entity awaiting build finalization."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is now a 'Statistical Anomaly' struggling with the reality of a 1 HP existence."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie has transitioned from a deceased office worker to a level 1 System entity awaiting build finalization."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is now a 'Statistical Anomaly' struggling with the reality of a 1 HP existence."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie has spawned into the tutorial zone and is hyper-aware of his 1 HP vulnerability."
+        ],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Arrival in Whispering Woods; empty-handed.",
+        "scene": 3
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> cracked smartphone (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> leather wallet (status=stowed, container=pocket_left)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[cracked smartphone])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[leather wallet])",
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=held, container=hand_right)",
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "Artie's HP is 1 and he is locked into the Crit-Only build."
+    ],
+    "invariants_add": [],
+    "inventory": [],
+    "last_touched": {
+      "chapter": 1,
+      "scene": 3
+    },
+    "name": "Arthur 'Artie' Penhaligon",
+    "persona_updates": [
+      "Artie is experiencing extreme existential dread as he realizes the fragility of his 1 HP build."
+    ],
+    "scene": 3,
+    "schema_version": "1.0",
+    "skills": {},
+    "stats": {
+      "crit_rate": 100,
+      "hp": {
+        "current": 1,
+        "max": 1
+      },
+      "level": 1
+    },
+    "updated_at": "2026-02-12T10:58:21Z"
+  },
+  {
+    "appearance_current": {
+      "alias_map": {
+        "eye_color": [
+          "purple",
+          "violet"
+        ],
+        "hair_color": [
+          "pink",
+          "magenta"
+        ]
+      },
+      "atoms": {
+        "age_band": "ageless",
+        "build": "petite",
+        "eye_color": "glowing_violet",
+        "hair_color": "neon_pink",
+        "hair_style": "bob",
+        "height_band": "tiny",
+        "sex_presentation": "feminine",
+        "skin_tone": "iridescent",
+        "species": "sprite"
+      },
+      "marks": [
+        {
+          "durability": "durable",
+          "location": "back",
+          "name": "pixelated wings"
+        }
+      ],
+      "summary": "A tiny, glowing sprite with neon pink hair and iridescent wings that leave trails of digital dust."
+    },
+    "appearance_history": [],
+    "chapter": 1,
+    "character_continuity_system_state": {
+      "skills": {
+        "flight": 10,
+        "holographic_display": 8,
+        "system_scan": 5
+      },
+      "stats": {
+        "hp": {
+          "current": 50,
+          "max": 50
+        },
+        "mp": {
+          "current": 500,
+          "max": 500
+        }
+      },
+      "titles": [
+        {
+          "active": true,
+          "name": "System Guide (Class C)",
+          "source": "origin"
+        }
+      ]
+    },
+    "character_id": "CHAR_FIZZ",
+    "containers": [
+      {
+        "container": "belt",
+        "contents": [
+          "ITEM_fizz_wand"
+        ],
+        "owner": "CHAR_FIZZ"
+      },
+      {
+        "container": "satchel",
+        "contents": [
+          "ITEM_guidebook"
+        ],
+        "owner": "CHAR_FIZZ"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is introduced as Artie's snarky System Guide."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial appearance and posture alignment in non-real space",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is introduced as Artie's snarky System Guide."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is frustrated by Artie's statistical dumpster fire of a build."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is introduced as Artie's snarky System Guide."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is frustrated by Artie's statistical dumpster fire of a build."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "stowed wand at end of scene",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Arrival in Whispering Woods; gear remains stowed.",
+        "scene": 3
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_FIZZ -> sparkling guide wand (status=carried, container=hand_right)",
+      "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+      "container: satchel (owner=CHAR_FIZZ, contents=[The Noob's Guide to Not Dying])"
+    ],
+    "invariants_add": [],
+    "inventory": [
+      {
+        "container": "belt",
+        "item": "ITEM_fizz_wand",
+        "item_id": "ITEM_fizz_wand",
+        "status": "stowed"
+      },
+      {
+        "container": "satchel",
+        "item": "ITEM_guidebook",
+        "item_id": "ITEM_guidebook",
+        "status": "stowed"
+      }
+    ],
+    "last_touched": {
+      "chapter": 1,
+      "scene": 3
+    },
+    "name": "Fizz",
+    "persona_updates": [],
+    "scene": 3,
+    "schema_version": "1.0",
+    "skills": {
+      "flight": 10,
+      "holographic_display": 8,
+      "system_scan": 5
+    },
+    "stats": {
+      "hp": {
+        "current": 50,
+        "max": 50
+      },
+      "mp": {
+        "current": 500,
+        "max": 500
+      }
+    },
+    "updated_at": "2026-02-12T10:58:21Z"
+  }
+]
+
+Item registry (canonical):
+{
+  "items": [
+    {
+      "custodian": "world",
+      "derived_access_reason": "not_accessible",
+      "derived_scene_accessible": false,
+      "derived_visible": false,
+      "display_name": "broken tutorial sword",
+      "item_id": "ITEM_broken_tutorial_sword",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Whispering Woods",
+        "scene": 3
+      },
+      "linked_threads": [],
+      "name": "broken tutorial sword",
+      "owner_scope": "world",
+      "state_tags": [
+        "broken",
+        "tutorial_gear"
+      ],
+      "type": "weapon"
+    },
+    {
+      "custodian": "CHAR_FIZZ",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "sparkling guide wand",
+      "item_id": "ITEM_fizz_wand",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Whispering Woods",
+        "scene": 3
+      },
+      "linked_threads": [],
+      "name": "sparkling guide wand",
+      "owner_scope": "character",
+      "state_tags": [
+        "magical",
+        "guide_tool"
+      ],
+      "type": "tool"
+    },
+    {
+      "custodian": "CHAR_FIZZ",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "The Noob's Guide to Not Dying",
+      "item_id": "ITEM_guidebook",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Whispering Woods",
+        "scene": 3
+      },
+      "linked_threads": [],
+      "name": "The Noob's Guide to Not Dying",
+      "owner_scope": "character",
+      "state_tags": [
+        "educational",
+        "system_item"
+      ],
+      "type": "book"
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Plot devices (canonical):
+{
+  "devices": [
+    {
+      "activation_state": "active",
+      "constraints": [],
+      "custody_ref": "THREAD_CRIT_EXPLOIT",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Character Creation Void",
+        "scene": 2
+      },
+      "linked_threads": [
+        "THREAD_CRIT_EXPLOIT"
+      ],
+      "name": "The 100% Crit Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_THE_ASCENSION",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_path_of_the_first_glitch_c7dd4581",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_THE_ASCENSION"
+      ],
+      "name": "The Path of the First Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_SYSTEM_GLITCH",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_system_s_stability_da5be7b7",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_SYSTEM_GLITCH"
+      ],
+      "name": "The System's Stability",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_VANE_RIVALRY",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_vane_vendetta_bcf4bea1",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_VANE_RIVALRY"
+      ],
+      "name": "The Vane Vendetta",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Pre-state (before patch):
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-11T22:39:42Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 3
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {
+    "ontological_scope": "real",
+    "tutorial_zone": "Whispering Woods"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_003.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Artie Penhaligon dies in a mundane breakroom accident and enters the System.",
+      "Artie glitched his character creation, trading all his health for a 100% Critical Hit rate.",
+      "Artie finalized a glitched 'Crit-iculous' build with 1 HP and 100% Crit Rate."
+    ],
+    "key_facts_ring": [
+      "The vending machine consumes the crumpled dollar bill without providing credit.",
+      "Artie discovers the 'Glitched: Crit-Only' status effect while attempting to punch the machine.",
+      "Artie is electrocuted by a frayed power cord after kicking the machine's base.",
+      "Artie's HP reaches 0, triggering a 'Unique Build' detection by the System.",
+      "Artie drops his cracked smartphone and leather wallet as he collapses.",
+      "The world dissolves into a loading screen as Artie's character data is recalculated.",
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+      "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+      "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+      "Artie met Fizz, a Class C System Guide, in the non-real space of the Character Creation Void.",
+      "The System initialized Artie's life support, moving him from 'Deceased (Pending)' to 1 HP.",
+      "Artie accidentally allocated all 50 stat points to Critical Rate due to a UI overflow error.",
+      "The System locked Artie's build into the 'Crit-iculous' specialization with 1 HP and 100% Crit Rate.",
+      "Artie received the 'Statistical Anomaly' title and the 'Glitched: Crit-Only' status effect.",
+      "Fizz consulted 'The Noob's Guide to Not Dying' but found no solution for the glitched build.",
+      "Artie was initialized for spawning into the Whispering Woods tutorial zone.",
+      "Artie's HP is 1 and he is locked into the Crit-Only build.",
+      "milestone: build_finalized = DONE",
+      "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+      "Artie met Fizz, a Class C System Guide, in the white void.",
+      "The System locked Artie's build with 1 HP and 100% Crit Rate.",
+      "Fizz stowed her sparkling guide wand in her belt as the portal to the Whispering Woods opened.",
+      "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)"
+    ],
+    "last_scene": [
+      "Artie Penhaligon encountered the System Guide Fizz in the Character Creation Void after his death.",
+      "A UI error allowed Artie to accidentally dump all his stat points into Critical Rate, locking his health at 1 HP.",
+      "The System finalized the 'Crit-iculous' build, and Fizz prepared to send Artie to the tutorial zone."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+      "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+      "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+      "Artie's HP is 1 and he is locked into the Crit-Only build.",
+      "milestone: build_finalized = DONE",
+      "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+      "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Whispering Woods",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "reason_category": "timeline_override",
+    "recent_facts": [
+      "Artie met Fizz in the Character Creation Void.",
+      "Artie accidentally allocated all stat points to Critical Rate, resulting in a 1 HP build.",
+      "The System finalized Artie's build as 'Crit-iculous' with the 'Statistical Anomaly' title."
+    ],
+    "scope_override": true,
+    "time": {}
+  }
+}
+
+Pre-summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie Penhaligon dies in a mundane breakroom accident and enters the System.",
+    "Artie glitched his character creation, trading all his health for a 100% Critical Hit rate.",
+    "Artie finalized a glitched 'Crit-iculous' build with 1 HP and 100% Crit Rate."
+  ],
+  "key_facts_ring": [
+    "The vending machine consumes the crumpled dollar bill without providing credit.",
+    "Artie discovers the 'Glitched: Crit-Only' status effect while attempting to punch the machine.",
+    "Artie is electrocuted by a frayed power cord after kicking the machine's base.",
+    "Artie's HP reaches 0, triggering a 'Unique Build' detection by the System.",
+    "Artie drops his cracked smartphone and leather wallet as he collapses.",
+    "The world dissolves into a loading screen as Artie's character data is recalculated.",
+    "milestone: artie_death = DONE",
+    "milestone: crit_glitch_reveal = DONE",
+    "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+    "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+    "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+    "Artie met Fizz, a Class C System Guide, in the non-real space of the Character Creation Void.",
+    "The System initialized Artie's life support, moving him from 'Deceased (Pending)' to 1 HP.",
+    "Artie accidentally allocated all 50 stat points to Critical Rate due to a UI overflow error.",
+    "The System locked Artie's build into the 'Crit-iculous' specialization with 1 HP and 100% Crit Rate.",
+    "Artie received the 'Statistical Anomaly' title and the 'Glitched: Crit-Only' status effect.",
+    "Fizz consulted 'The Noob's Guide to Not Dying' but found no solution for the glitched build.",
+    "Artie was initialized for spawning into the Whispering Woods tutorial zone.",
+    "Artie's HP is 1 and he is locked into the Crit-Only build.",
+    "milestone: build_finalized = DONE",
+    "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+    "Artie met Fizz, a Class C System Guide, in the white void.",
+    "The System locked Artie's build with 1 HP and 100% Crit Rate.",
+    "Fizz stowed her sparkling guide wand in her belt as the portal to the Whispering Woods opened.",
+    "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)"
+  ],
+  "last_scene": [
+    "Artie Penhaligon encountered the System Guide Fizz in the Character Creation Void after his death.",
+    "A UI error allowed Artie to accidentally dump all his stat points into Critical Rate, locking his health at 1 HP.",
+    "The System finalized the 'Crit-iculous' build, and Fizz prepared to send Artie to the tutorial zone."
+  ],
+  "must_stay_true": [
+    "milestone: artie_death = DONE",
+    "milestone: crit_glitch_reveal = DONE",
+    "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+    "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+    "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+    "Artie's HP is 1 and he is locked into the Crit-Only build.",
+    "milestone: build_finalized = DONE",
+    "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+    "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Pre-invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "milestone: artie_death = DONE",
+  "milestone: crit_glitch_reveal = DONE",
+  "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+  "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+  "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+  "Artie's HP is 1 and he is locked into the Crit-Only build.",
+  "milestone: build_finalized = DONE",
+  "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+  "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)",
+  "The vending machine consumes the crumpled dollar bill without providing credit.",
+  "Artie discovers the 'Glitched: Crit-Only' status effect while attempting to punch the machine.",
+  "Artie is electrocuted by a frayed power cord after kicking the machine's base.",
+  "Artie's HP reaches 0, triggering a 'Unique Build' detection by the System.",
+  "Artie drops his cracked smartphone and leather wallet as he collapses.",
+  "The world dissolves into a loading screen as Artie's character data is recalculated.",
+  "milestone: artie_death = DONE",
+  "milestone: crit_glitch_reveal = DONE",
+  "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+  "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+  "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+  "Artie met Fizz, a Class C System Guide, in the non-real space of the Character Creation Void.",
+  "The System initialized Artie's life support, moving him from 'Deceased (Pending)' to 1 HP.",
+  "Artie accidentally allocated all 50 stat points to Critical Rate due to a UI overflow error.",
+  "The System locked Artie's build into the 'Crit-iculous' specialization with 1 HP and 100% Crit Rate.",
+  "Artie received the 'Statistical Anomaly' title and the 'Glitched: Crit-Only' status effect.",
+  "Fizz consulted 'The Noob's Guide to Not Dying' but found no solution for the glitched build.",
+  "Artie was initialized for spawning into the Whispering Woods tutorial zone.",
+  "Artie's HP is 1 and he is locked into the Crit-Only build.",
+  "milestone: build_finalized = DONE",
+  "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+  "Artie met Fizz, a Class C System Guide, in the white void.",
+  "The System locked Artie's build with 1 HP and 100% Crit Rate.",
+  "Fizz stowed her sparkling guide wand in her belt as the portal to the Whispering Woods opened.",
+  "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)"
+]
+
+Post-state candidate (after patch):
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-11T22:39:42Z"
+  },
+  "continuity_system": {
+    "characters": {
+      "CHAR_ARTIE": {
+        "reason": "System recalculation and build finalization.",
+        "reason_category": "timeline_override",
+        "scope_override": true,
+        "skills": {},
+        "stats": {
+          "crit_rate": 100,
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "level": 1
+        },
+        "statuses": [
+          {
+            "durable": true,
+            "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+            "name": "Glitched: Crit-Only"
+          }
+        ],
+        "titles": [
+          {
+            "active": true,
+            "name": "Statistical Anomaly",
+            "source": "build_finalization"
+          }
+        ]
+      },
+      "CHAR_FIZZ": {
+        "skills": {
+          "flight": 10,
+          "holographic_display": 8,
+          "system_scan": 5
+        },
+        "stats": {
+          "hp": {
+            "current": 50,
+            "max": 50
+          },
+          "mp": {
+            "current": 500,
+            "max": 500
+          }
+        },
+        "titles": [
+          {
+            "active": true,
+            "name": "System Guide (Class C)",
+            "source": "origin"
+          }
+        ]
+      }
+    }
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 3
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {
+    "current_mob": "Lesser Puddle Slime",
+    "ontological_scope": "real",
+    "tutorial_zone": "Whispering Woods"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_003.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Artie Penhaligon dies in a mundane breakroom accident and enters the System.",
+      "Artie glitched his character creation, trading all his health for a 100% Critical Hit rate.",
+      "Artie finalized a glitched 'Crit-iculous' build with 1 HP and 100% Crit Rate.",
+      "Artie spawned into the Whispering Woods and realized the lethal reality of his 1 HP build.",
+      "A Level 1 Lesser Puddle Slime cornered Artie, demonstrating that even tutorial mobs are deadly to him."
+    ],
+    "key_facts_ring": [
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+      "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+      "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+      "Artie met Fizz, a Class C System Guide, in the non-real space of the Character Creation Void.",
+      "The System initialized Artie's life support, moving him from 'Deceased (Pending)' to 1 HP.",
+      "Artie accidentally allocated all 50 stat points to Critical Rate due to a UI overflow error.",
+      "The System locked Artie's build into the 'Crit-iculous' specialization with 1 HP and 100% Crit Rate.",
+      "Artie received the 'Statistical Anomaly' title and the 'Glitched: Crit-Only' status effect.",
+      "Fizz consulted 'The Noob's Guide to Not Dying' but found no solution for the glitched build.",
+      "Artie was initialized for spawning into the Whispering Woods tutorial zone.",
+      "milestone: build_finalized = DONE",
+      "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+      "Artie met Fizz, a Class C System Guide, in the white void.",
+      "The System locked Artie's build with 1 HP and 100% Crit Rate.",
+      "Fizz stowed her sparkling guide wand in her belt as the portal to the Whispering Woods opened.",
+      "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)",
+      "Artie and Fizz spawned into the Whispering Woods tutorial zone.",
+      "Artie confirmed his HP is locked at 1/1 with a 100% Critical Hit rate.",
+      "A Level 1 Lesser Puddle Slime appeared and targeted Artie as a lethal threat.",
+      "Artie tripped while fleeing, receiving a System warning for physical trauma.",
+      "Artie was cornered in a dead-end rocky crevice by the slime.",
+      "Fizz explained she cannot interfere in combat due to Class C Guide restrictions.",
+      "Artie's HP is 1/1 and he is locked into the 'Glitched: Crit-Only' build.",
+      "Artie is cornered in a dead-end rocky crevice by a Level 1 Lesser Puddle Slime.",
+      "Fizz is restricted from interfering in active combat by System terms of service."
+    ],
+    "last_scene": [
+      "Artie and Fizz arrived in the Whispering Woods tutorial zone, where Artie immediately realized the lethal reality of his 1 HP build.",
+      "A Level 1 Lesser Puddle Slime cornered Artie in a dead-end rocky crevice, leaving him defenseless against a lethal lunge."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+      "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+      "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+      "milestone: build_finalized = DONE",
+      "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+      "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)",
+      "Artie's HP is 1/1 and he is locked into the 'Glitched: Crit-Only' build.",
+      "Artie is cornered in a dead-end rocky crevice by a Level 1 Lesser Puddle Slime.",
+      "Fizz is restricted from interfering in active combat by System terms of service."
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Whispering Woods",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "reason_category": "timeline_override",
+    "recent_facts": [
+      "Artie and Fizz spawned into the Whispering Woods.",
+      "Artie was cornered by a Level 1 Lesser Puddle Slime in a dead-end crevice."
+    ],
+    "scope_override": true,
+    "time": {}
+  }
+}
+
+Post-summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie Penhaligon dies in a mundane breakroom accident and enters the System.",
+    "Artie glitched his character creation, trading all his health for a 100% Critical Hit rate.",
+    "Artie finalized a glitched 'Crit-iculous' build with 1 HP and 100% Crit Rate.",
+    "Artie spawned into the Whispering Woods and realized the lethal reality of his 1 HP build.",
+    "A Level 1 Lesser Puddle Slime cornered Artie, demonstrating that even tutorial mobs are deadly to him."
+  ],
+  "key_facts_ring": [
+    "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+    "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+    "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+    "Artie met Fizz, a Class C System Guide, in the non-real space of the Character Creation Void.",
+    "The System initialized Artie's life support, moving him from 'Deceased (Pending)' to 1 HP.",
+    "Artie accidentally allocated all 50 stat points to Critical Rate due to a UI overflow error.",
+    "The System locked Artie's build into the 'Crit-iculous' specialization with 1 HP and 100% Crit Rate.",
+    "Artie received the 'Statistical Anomaly' title and the 'Glitched: Crit-Only' status effect.",
+    "Fizz consulted 'The Noob's Guide to Not Dying' but found no solution for the glitched build.",
+    "Artie was initialized for spawning into the Whispering Woods tutorial zone.",
+    "milestone: build_finalized = DONE",
+    "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+    "Artie met Fizz, a Class C System Guide, in the white void.",
+    "The System locked Artie's build with 1 HP and 100% Crit Rate.",
+    "Fizz stowed her sparkling guide wand in her belt as the portal to the Whispering Woods opened.",
+    "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)",
+    "Artie and Fizz spawned into the Whispering Woods tutorial zone.",
+    "Artie confirmed his HP is locked at 1/1 with a 100% Critical Hit rate.",
+    "A Level 1 Lesser Puddle Slime appeared and targeted Artie as a lethal threat.",
+    "Artie tripped while fleeing, receiving a System warning for physical trauma.",
+    "Artie was cornered in a dead-end rocky crevice by the slime.",
+    "Fizz explained she cannot interfere in combat due to Class C Guide restrictions.",
+    "Artie's HP is 1/1 and he is locked into the 'Glitched: Crit-Only' build.",
+    "Artie is cornered in a dead-end rocky crevice by a Level 1 Lesser Puddle Slime.",
+    "Fizz is restricted from interfering in active combat by System terms of service."
+  ],
+  "last_scene": [
+    "Artie and Fizz arrived in the Whispering Woods tutorial zone, where Artie immediately realized the lethal reality of his 1 HP build.",
+    "A Level 1 Lesser Puddle Slime cornered Artie in a dead-end rocky crevice, leaving him defenseless against a lethal lunge."
+  ],
+  "must_stay_true": [
+    "milestone: artie_death = DONE",
+    "milestone: crit_glitch_reveal = DONE",
+    "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+    "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+    "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+    "milestone: build_finalized = DONE",
+    "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+    "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)",
+    "Artie's HP is 1/1 and he is locked into the 'Glitched: Crit-Only' build.",
+    "Artie is cornered in a dead-end rocky crevice by a Level 1 Lesser Puddle Slime.",
+    "Fizz is restricted from interfering in active combat by System terms of service."
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Post-invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "milestone: artie_death = DONE",
+  "milestone: crit_glitch_reveal = DONE",
+  "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+  "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+  "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+  "milestone: build_finalized = DONE",
+  "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+  "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)",
+  "Artie's HP is 1/1 and he is locked into the 'Glitched: Crit-Only' build.",
+  "Artie is cornered in a dead-end rocky crevice by a Level 1 Lesser Puddle Slime.",
+  "Fizz is restricted from interfering in active combat by System terms of service.",
+  "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+  "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+  "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+  "Artie met Fizz, a Class C System Guide, in the non-real space of the Character Creation Void.",
+  "The System initialized Artie's life support, moving him from 'Deceased (Pending)' to 1 HP.",
+  "Artie accidentally allocated all 50 stat points to Critical Rate due to a UI overflow error.",
+  "The System locked Artie's build into the 'Crit-iculous' specialization with 1 HP and 100% Crit Rate.",
+  "Artie received the 'Statistical Anomaly' title and the 'Glitched: Crit-Only' status effect.",
+  "Fizz consulted 'The Noob's Guide to Not Dying' but found no solution for the glitched build.",
+  "Artie was initialized for spawning into the Whispering Woods tutorial zone.",
+  "milestone: build_finalized = DONE",
+  "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+  "Artie met Fizz, a Class C System Guide, in the white void.",
+  "The System locked Artie's build with 1 HP and 100% Crit Rate.",
+  "Fizz stowed her sparkling guide wand in her belt as the portal to the Whispering Woods opened.",
+  "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)",
+  "Artie and Fizz spawned into the Whispering Woods tutorial zone.",
+  "Artie confirmed his HP is locked at 1/1 with a 100% Critical Hit rate.",
+  "A Level 1 Lesser Puddle Slime appeared and targeted Artie as a lethal threat.",
+  "Artie tripped while fleeing, receiving a System warning for physical trauma.",
+  "Artie was cornered in a dead-end rocky crevice by the slime.",
+  "Fizz explained she cannot interfere in combat due to Class C Guide restrictions.",
+  "Artie's HP is 1/1 and he is locked into the 'Glitched: Crit-Only' build.",
+  "Artie is cornered in a dead-end rocky crevice by a Level 1 Lesser Puddle Slime.",
+  "Fizz is restricted from interfering in active combat by System terms of service."
+]

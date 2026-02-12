@@ -1,0 +1,101 @@
+The stone road leading to Oakhaven was less of a path and more of a suggestion, winding through jagged hills that seemed designed to twist ankles. Artie Penhaligon didn't have the luxury of a twisted ankle; with a single hit point to his name, a moderately sharp pebble was a legitimate boss fight. He gripped the Participation Trophy in his right hand, the gold-plated plastic feeling heavier with every step. It pulsed with a faint, rhythmic light that Artie was reasonably certain was the "Center of Attention" enchantment screaming for every predator within a three-mile radius to come and eat him.
+
+"Can you stop that?" Artie hissed, glancing over his shoulder. The Whispering Woods were a dark smudge on the horizon, but the memory of the howling wolves was still fresh. "The trophy. It’s glowing again."
+
+Fizz hovered at eye level, her iridescent wings humming like a caffeinated dragonfly. She was busy flipping through the pages of a heavy, leather-bound book. 
+
+"Technically, it's not 'glowing,' Artie. It’s 'broadcasting,'" Fizz corrected without looking up. She adjusted her grip on The Noob's Guide to Not Dying, the book's edges shimmering with digital artifacts. "And no, I can't stop it. It’s soulbound. You earned it for 'Optimization,' remember? Which is System-speak for 'you broke the world and we’re going to make it everyone’s problem.'"
+
+"I didn't mean to vaporize the forest," Artie muttered. 
+
+"And yet, there’s a new canyon where the slimes used to live. Look on the bright side! We’re at the gates. If we get inside, the city guards handle the aggro."
+
+Oakhaven loomed ahead, a fortress of white stone and brass gears built into the side of a mountain. The gates were massive, reinforced with iron bands and glowing blue runes. A pair of guards in polished plate armor stood at the entrance, but they weren't exactly standing at attention. They were huddled over a floating holographic display, tossing digital dice.
+
+"Come on, Big Six!" one guard shouted. "I need a Crit-Rate of at least forty to cover my tab at the Rusty Tankard!"
+
+The other guard snorted. "Forty? In this economy? You'll get a twenty-two and like it, Harlen."
+
+Artie slowed his pace, his heart hammering against his ribs—a sensation that felt dangerously like it might deal 1 point of internal vibration damage. 
+
+[Aggro Meter: High (Cursed)]
+
+"Stay calm," Fizz whispered, snapping her guidebook shut and letting it float near her hand. "Just act like a normal, non-glitched person who doesn't have the health of a wet paper towel."
+
+As they reached the threshold, the guard named Harlen looked up, his eyes scanning Artie’s lanky frame and messy brown hair. He didn't look impressed until his gaze landed on the Participation Trophy.
+
+"That’s a loud-looking piece of junk you got there, kid," Harlen said, stepping forward. He held a device that looked like a cross between a radar gun and a literal eye on a stick. "Entry protocol. Hold still for the scanner."
+
+[Plot Device: Gate Scanner - Initializing...]
+
+Artie froze. "Is this... mandatory?"
+
+"Unless you want to go back to the woods and play tag with the Dire Wolves," the guard replied. He pointed the Gate Scanner at Artie’s chest.
+
+A beam of thin, red light swept over Artie from head to toe. For a second, nothing happened. Then, the scanner began to vibrate. The red light turned a violent, strobe-like purple.
+
+[Scanning...]
+[Error: Value 'HP' out of expected range (Minimum: 15, Found: 1)]
+[Error: Value 'Crit_Rate' exceeds local variable cap (Found: 100%)]
+[Recalculating...]
+
+"Uh, Harlen?" the second guard said, his dice-game forgotten. "The scanner's smoking."
+
+"I see that, Silas! Just give it a—"
+
+A high-pitched, screeching wail erupted from the scanner, followed immediately by a booming voice that seemed to echo from the very stones of the gateway.
+
+[System Alert: Statistical Anomaly Detected!]
+[Warning: Logic Breach in Sector 4!]
+[Subject: Arthur 'Artie' Penhaligon - Status: Impossible]
+
+"Impossible?" Artie squeaked. 
+
+The Gate Scanner didn't just smoke; it began to emit a series of rapid-fire beeps that synchronized with the pulsing light of the Participation Trophy. Above Artie’s head, his title flickered into existence for everyone to see.
+
+[Title: Statistical Anomaly (Equipped)]
+
+"A hundred percent?" Harlen whispered, his jaw dropping as he read the secondary display on his wrist. "Silas, look at this. He doesn't have a range. He just... always crits. And look at the HP! One? How are you even standing up? Are you a ghost?"
+
+"I'm very much alive," Artie said, though he felt like he might faint, which would definitely count as 1 damage. "Can I just go in? The wolves are really close."
+
+Behind them, a low howl echoed from the tree line. The "Center of Attention" effect was clearly still pulling in every hungry thing in the province.
+
+"Wait, wait," Silas said, stepping closer with a look of pure, religious awe. "If he’s got a hundred percent rate... he’s a walking jackpot. Do you know what the betting pools in the capital would do for a guy like this?"
+
+[System Alert: High-Threat Anomaly Detected]
+[Aggro Meter: Critical]
+
+The alarms within the city began to chime—a deep, resonant sound that signaled a breach. A red light started spinning atop the gatehouse, casting long, rhythmic shadows across the road.
+
+"Look, the scanner’s flagged him as a 'Logic Breach,'" Harlen said, looking nervous. "If we don't let him in, the System might try to 'optimize' the gate to fix the error. Last time that happened, the North Gate turned into a giant block of cheese for three days."
+
+"Let him in!" Silas shouted. "Better a glitch in the city than a crash at the door!"
+
+Harlen slammed a heavy brass lever. The inner portcullis began to grind upward, the gears groaning under the strain of the sudden System-wide alert.
+
+"Go! Move!" Harlen yelled, waving Artie through. "And for the love of the RNG, don't trip on the rug!"
+
+Artie bolted. He ran through the dark tunnel of the gatehouse, his sneakers slapping against the cobblestones. Fizz zipped along beside him, her wings leaving trails of violet sparks in the dim light. 
+
+"See?" Fizz shouted over the roar of the alarms. "Entry achieved! Total success!"
+
+"They’re literally sounding the 'The World is Broken' alarm because of me, Fizz!" Artie yelled back.
+
+They burst out of the tunnel and into the Oakhaven District. The town was a sprawling mess of tiered streets, hanging lanterns, and shops with names like 'The Lucky Roll' and 'The Modifier’s Lab.' People were stopping in the streets, looking up at the red alarm lights spinning on the towers.
+
+Artie skidded to a halt near a fountain shaped like a giant twenty-sided die. He was breathing hard, his lungs burning. 
+
+[Stamina: 42/100]
+
+He looked down at his hands. He was still holding the Participation Trophy. He was still at 1 HP. But the gates were shut behind him, and for the first time since he’d died in that breakroom, he wasn't being chased by something with teeth.
+
+"Welcome to Oakhaven," Fizz said, landing on the edge of the fountain and opening her guidebook again. "Try not to breathe too hard. The air quality here is a bit... crunchy."
+
+[Location Discovered: Oakhaven - The City of Chance]
+[XP Gained: 250]
+[Current Level: 2]
+[Stat Points Available: 5]
+[Skill Points Available: 1]
+
+The alarm continued to blare, a constant reminder that Artie Penhaligon was the loudest glitch in the machine.

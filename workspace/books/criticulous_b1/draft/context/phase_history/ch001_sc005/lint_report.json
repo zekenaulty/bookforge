@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {
+      "code": "pipeline_state_incoherent",
+      "message": "The MUST_STAY_TRUE invariant for Fizz's guidebook contradicts the character's inventory state in the post-patch candidate. The invariant claims the item is stowed in the satchel, but the state correctly reflects it being held in hand per the scene's prose.",
+      "severity": "error",
+      "evidence": {
+        "invariant": "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+        "conflicting_state": "CHAR_FIZZ.inventory[0].status = 'held', CHAR_FIZZ.inventory[0].container = 'hand_right'"
+      }
+    },
+    {
+      "code": "stat_unowned",
+      "message": "UI shows Stat Points Available but no matching stat exists in state.",
+      "severity": "warning"
+    },
+    {
+      "code": "stat_unowned",
+      "message": "UI shows Skill Points Available but no matching stat exists in state.",
+      "severity": "warning"
+    },
+    {
+      "code": "stat_unowned",
+      "message": "UI shows Current HP but no matching stat exists in state.",
+      "severity": "warning"
+    },
+    {
+      "code": "stat_unowned",
+      "message": "UI shows Stamina but no matching stat exists in state.",
+      "severity": "warning"
+    },
+    {
+      "code": "durable_slice_missing",
+      "message": "Required plot device 'ITEM_participation_trophy' is not present in the durable registry slice.",
+      "severity": "error"
+    }
+  ],
+  "mode": "heuristic"
+}

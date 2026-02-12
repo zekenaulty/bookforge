@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_VANE"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 8,
+      "inventory": [
+        {
+          "item": "ITEM_participation_trophy",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "pocket_left",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "persona_updates": [
+        "Artie is cornered by Vane, a high-level player, and must navigate a forced duel with 1 HP."
+      ],
+      "invariants_add": [
+        "milestone: vane_confrontation_started"
+      ],
+      "notes": "Artie remains in Sector 01, now facing Vane after the Mayor's departure."
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "chapter": 1,
+      "scene": 8,
+      "inventory": [
+        {
+          "item": "ITEM_vane_dagger",
+          "container": "sheath_belt",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "sheath_belt",
+          "contents": [
+            "ITEM_vane_dagger"
+          ],
+          "location": "waist",
+          "owner": "CHAR_VANE"
+        }
+      ],
+      "persona_updates": [
+        "Vane is a high-level player who views Artie as a curiosity or a target for 'mentorship' (bullying)."
+      ],
+      "invariants_add": [
+        "Vane is actively seeking to duel Artie."
+      ],
+      "notes": "Vane enters the scene to confront the 'Statistical Anomaly'."
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_VANE",
+      "set": {
+        "titles": [
+          {
+            "name": "The Apex Predator",
+            "active": true,
+            "source": "achievement"
+          }
+        ]
+      },
+      "reason": "Ensure Vane's signature title is active for the confrontation."
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "combat_state": "duel_pending"
+      },
+      "reason": "Vane is initiating a duel request."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_participation_trophy",
+            "container": "hand_right",
+            "status": "held"
+          }
+        ]
+      },
+      "reason": "Maintaining custody of the cursed trophy.",
+      "reason_category": "constraint_enforcement"
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_vane_dagger",
+            "container": "sheath_belt",
+            "status": "equipped"
+          }
+        ]
+      },
+      "reason": "Vane arrives with his weapon equipped.",
+      "reason_category": "location_transition"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_participation_trophy",
+      "set": {
+        "name": "Participation Trophy",
+        "display_name": "Participation Trophy",
+        "type": "cursed_item",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [
+          "THREAD_SYSTEM_GLITCH"
+        ],
+        "state_tags": [
+          "soulbound",
+          "cursed",
+          "aggro_beacon"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 7,
+          "location": "Oakhaven - Sector 01"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_vane_dagger",
+      "set": {
+        "name": "Viper's Kiss dagger",
+        "display_name": "Viper's Kiss dagger",
+        "type": "weapon",
+        "owner_scope": "character",
+        "custodian": "CHAR_VANE",
+        "linked_threads": [
+          "THREAD_VANE_RIVALRY"
+        ],
+        "state_tags": [
+          "equipped"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 8,
+          "location": "Oakhaven - Sector 01"
+        }
+      }
+    }
+  ],
+  "plot_device_updates": [],
+  "transfer_updates": []
+}

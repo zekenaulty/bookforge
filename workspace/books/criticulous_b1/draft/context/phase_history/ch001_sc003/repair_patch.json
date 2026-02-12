@@ -1,0 +1,221 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Whispering Woods",
+    "recent_facts": [
+      "Artie spawned into the Whispering Woods tutorial zone with 1 HP.",
+      "Artie encountered a Level 1 Lesser Puddle Slime that deals lethal damage.",
+      "Artie is cornered in a rocky crevice with no escape."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        }
+      ],
+      "persona_updates": [
+        "Artie is experiencing extreme existential dread due to his 1 HP vulnerability."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 3
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "inventory": [
+        {
+          "item": "ITEM_fizz_wand",
+          "container": "belt",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_guidebook",
+          "container": "satchel",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "belt",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_fizz_wand"
+          ]
+        },
+        {
+          "container": "satchel",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_guidebook"
+          ]
+        }
+      ],
+      "persona_updates": [],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 3
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100,
+          "level": 1,
+          "escape_probability": 0.04
+        },
+        "statuses": [
+          {
+            "name": "Glitched: Crit-Only",
+            "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+            "durable": true
+          }
+        ]
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 3
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "combat_state": "locked"
+      }
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "reason": "Arrival in tutorial zone; previous mundane items lost during death/transition.",
+      "reason_category": "location_jump_normalize",
+      "set": {
+        "inventory": [],
+        "containers": [
+          {
+            "container": "pocket_right",
+            "contents": [],
+            "owner": "CHAR_ARTIE"
+          },
+          {
+            "container": "pocket_left",
+            "contents": [],
+            "owner": "CHAR_ARTIE"
+          }
+        ]
+      }
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "reason": "Standard gear posture for tutorial guidance.",
+      "reason_category": "time_skip_normalize",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_fizz_wand",
+            "container": "belt",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_guidebook",
+            "container": "satchel",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "belt",
+            "owner": "CHAR_FIZZ",
+            "contents": [
+              "ITEM_fizz_wand"
+            ]
+          },
+          {
+            "container": "satchel",
+            "owner": "CHAR_FIZZ",
+            "contents": [
+              "ITEM_guidebook"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie Penhaligon arrived in the Whispering Woods tutorial zone with his glitched 1 HP build.",
+      "He was immediately targeted by a Level 1 Slime and realized that even the weakest enemies are lethal to him.",
+      "Artie was cornered in a dead-end crevice as the slime launched a final attack."
+    ],
+    "key_events": [
+      "Artie spawns into the Whispering Woods and confirms his 1 HP status.",
+      "Fizz explains that Artie's build requires him to avoid all damage entirely.",
+      "A Level 1 Lesser Puddle Slime attacks, demonstrating a damage floor higher than Artie's max HP.",
+      "Artie flees into a rocky crevice, which turns out to be a dead end.",
+      "The System locks the combat state as the slime prepares to finish Artie off."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "milestone: build_finalized = DONE",
+      "Artie's HP is 1 and he is locked into the Crit-Only build.",
+      "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)",
+      "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+      "REMOVE: inventory: CHAR_ARTIE -> crumpled dollar bill (status=carried, container=hand_right)",
+      "REMOVE: inventory: CHAR_ARTIE -> cracked smartphone (status=stowed, container=pocket_right)",
+      "REMOVE: inventory: CHAR_ARTIE -> leather wallet (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> (empty)"
+    ],
+    "chapter_so_far_add": [
+      "Artie enters the Whispering Woods and faces his first lethal encounter with a simple slime."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "lanky",
+      "build",
+      "messy",
+      "brown",
+      "hair",
+      "hazel",
+      "eyes",
+      "pale",
+      "skin."
+    ],
+    "CHAR_FIZZ": [
+      "tiny",
+      "sprite",
+      "neon",
+      "pink",
+      "hair",
+      "glowing",
+      "violet",
+      "eyes",
+      "pixelated",
+      "wings."
+    ]
+  }
+}

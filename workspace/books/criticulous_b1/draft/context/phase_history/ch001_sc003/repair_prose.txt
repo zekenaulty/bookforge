@@ -1,0 +1,80 @@
+The transition from the absolute, blinding white of the Character Creation Void to the Whispering Woods felt less like a magical teleportation and more like being shoved through a digital meat grinder. One moment, Artie Penhaligon was standing in a vacuum of pure potential; the next, his boots hit damp soil with a squelch that vibrated all the way up his lanky frame. 
+
+The air was thick with the scent of pine needles and something suspiciously like ozone. High above, the canopy of the Whispering Woods didn't just sway; it pulsed. The leaves were a vibrant, oversaturated green that hurt to look at for too long, shimmering with a faint, low-resolution haze.
+
+[Location: Whispering Woods - Tutorial Zone]
+[Safety Rating: Low (Newbie-Friendlyish)]
+
+"Welcome to the grind, Artie!" Fizz chirped, her neon pink hair leaving a trail of magenta sparks as she zipped in a tight circle around his head. Her pixelated wings hummed like a high-end drone. "Try not to breathe too deep. The atmospheric rendering is still a bit buggy in this sector."
+
+Artie didn't respond. He was too busy staring at the corner of his vision, where a tiny, pathetic red bar sat like a ticking time bomb.
+
+[Arthur 'Artie' Penhaligon - Lvl 1]
+[HP: 1/1]
+[Crit Rate: 100%]
+[Status: Glitched (Crit-Only)]
+
+"One," Artie whispered, his voice cracking. "Fizz, it really says one. I thought maybe... once we spawned in, the System would round up? Or give me a 'Pity Shield'? Or literally anything other than a single point of structural integrity?"
+
+Fizz hovered at eye level, her glowing violet eyes scanning him with a mix of pity and professional detachment. She reached toward the satchel hanging at her side, though she didn't pull anything out yet. "I checked the manual, Artie. 'The Noob's Guide to Not Dying' is very clear on this. Page four hundred and twelve: 'A character with one hit point is technically alive, which is the preferred state for beginning a quest.' It doesn't say anything about it being a *good* idea."
+
+"Technically alive is the worst kind of alive," Artie muttered. He looked down at his hands. They were empty. No sword, no shield, not even a sturdy stick. Just his pale, lanky fingers and a growing sense of existential dread. "Where's the starter gear? Don't I get a rusted spoon or a damp rag to defend myself with?"
+
+"Tutorial gear spawns at the first Milestone Marker," Fizz explained, pointing a tiny, iridescent finger toward a clearing ahead. "But honestly, with your build, a shield would just be a very expensive way to die in one hit while carrying something heavy. You’re a 'Statistical Anomaly,' remember? You’re not supposed to block. You’re supposed to... well, not get hit."
+
+Artie stepped forward, his movements cautious and jerky. Every twig that snapped under his boots sounded like a gunshot. Every rustle in the undergrowth made him flinch so hard he nearly tripped over his own feet. In any other game, this would be the peaceful intro—the part where the music is jaunty and the worst thing that can happen is a stray butterfly. Here, a butterfly landing on his shoulder might actually be a game-over event.
+
+The woods began to live up to their name. A soft, multi-tonal murmuring rose from the trees, a thousand overlapping voices whispering things that sounded like "Fresh data" and "Low defense detected." 
+
+"Is the forest talking about my lack of armor?" Artie asked, his heart hammering against his ribs.
+
+"It’s just environmental flavor text," Fizz said, though she sounded slightly less confident as she glanced at a particularly gnarled oak. "Mostly. Just keep moving. The first quest NPC is just—"
+
+She stopped. The humming of her wings shifted to a higher, sharper pitch.
+
+From behind a cluster of glowing blue mushrooms, something wobbled into the light. It was translucent, a sickly shade of neon green, and it jiggled with the rhythmic intensity of a subwoofer. It was the quintessential RPG starter mob: a slime.
+
+[Lesser Puddle Slime - Lvl 1]
+[HP: 10/10]
+
+"Oh, thank god," Artie breathed, leaning forward slightly. "It’s just a slime. It’s a literal puddle of jelly. I can handle a puddle."
+
+The slime didn't just wobble; it surged. It moved with a surprising, fluid speed, leaving a trail of corrosive-looking slime on the grass. As it approached, a small UI window flickered into existence next to its nameplate.
+
+[Combat Estimate: Lethal]
+[Estimated Damage to Player: 2-4]
+[Player HP: 1]
+
+Artie’s blood turned to ice. "Fizz. Fizz, the math. Look at the math."
+
+"I see it!" Fizz squeaked, her hand diving into her satchel to pat the cover of The Noob's Guide to Not Dying as if for luck. "The minimum damage floor for a Level 1 Slime is two! It doesn't matter if it just grazes your pinky toe, Artie! It’s going to do double your total health!"
+
+The slime reared back, its gelatinous body stretching upward until it was nearly three feet tall. It didn't have eyes, but Artie could feel its mindless, hungry focus. It lunged.
+
+Artie scrambled backward, his heels catching on a protruding root. He fell, hitting the ground with a thud that sent a jarring shock through his spine. 
+
+[HP: 1/1]
+[Warning: Physical trauma detected. Any further impact will result in Deletion.]
+
+He scrambled on his hands and knees, dragging himself away as the slime landed exactly where his chest had been a second ago. The grass hissed and withered where the creature touched it. 
+
+"Run! Artie, use your legs!" Fizz shouted, darting around the slime’s head to distract it. "It’s a tutorial mob! Its pathfinding should be terrible!"
+
+Artie scrambled to his feet and bolted toward a dense thicket of thorns, but the slime was relentless. It wasn't just hopping; it was flowing, molding itself to the terrain with terrifying efficiency. He ducked under a low-hanging branch, his messy brown hair catching on the bark, and veered left into a narrow rocky crevice.
+
+He realized his mistake the moment his back hit the cold, damp stone. 
+
+The crevice was a dead end. The walls rose high on three sides, slick with moss and jagged edges. He turned, his breath coming in ragged, panicked gasps, to see the neon green mass of the slime filling the entrance. It moved slowly now, sensing it had its prey trapped. It began to vibrate, a low-frequency hum that Artie could feel in his teeth.
+
+[System Warning: Combat state locked.]
+[Escape Probability: 0.04%]
+
+"Fizz, do something!" Artie yelled, pressing his spine against the rock until it hurt. "Use the wand! Use the book! Throw a rock!"
+
+"I’m a Class C Guide!" Fizz wailed, hovering just out of the slime's reach. "I’m not allowed to interfere in active combat unless there’s a total System crash! It’s against the terms of service!"
+
+The slime began to flatten itself, spreading out across the floor of the crevice like a rising tide of acid. There was nowhere to jump, nowhere to climb. Artie looked at his hands again. They were still empty, his lanky frame trembling. 
+
+The creature reared back for its final lunge, a shimmering glob of neon death. Artie stared at the '1/1' in his vision, the red bar pulsing with a frantic, rhythmic light. He was a 'Statistical Anomaly,' a god of the critical hit, a walking glitch in the matrix—and he was about to be deleted by a puddle of lime-flavored jelly because he couldn't take a single, solitary scratch.
+
+The slime launched.

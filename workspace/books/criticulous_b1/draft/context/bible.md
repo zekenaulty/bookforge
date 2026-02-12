@@ -1,2 +1,13 @@
 - Artie was killed by a malfunctioning vending machine.
 - The System has flagged Artie as a 'Unique Build' due to a 100% Crit Rate glitch.
+- Artie spawned into the Whispering Woods tutorial zone with 1 HP.
+- Artie encountered a Level 1 Lesser Puddle Slime that deals lethal damage.
+- Artie is cornered in a rocky crevice with no escape.
+- Artie defeated a Lesser Puddle Slime with a Super-Mega-Ultra-Crit.
+- The combat caused massive environmental damage, vaporizing a large section of the Whispering Woods.
+- Artie leveled up to Level 2.
+- Artie received the cursed Participation Trophy as a reward for 'Optimization'.
+- The trophy's 'Center of Attention' effect increased monster aggro radius by 400%.
+- Artie's attempt to allocate stat points to Agility was blocked by combat interruption.
+- A mob of Dire Wolves and Needle-Wasps ambushed Artie in the trench.
+- Artie used the Participation Trophy to land a critical hit on a Needle-Wasp while fleeing.

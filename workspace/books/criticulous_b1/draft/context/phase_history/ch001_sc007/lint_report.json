@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {
+      "code": "pipeline_state_incoherent",
+      "message": "The post-patch candidate state for CHAR_ARTIE is incoherent. The character's internal 'invariants' list claims the 'crumpled dollar bill' is 'carried' in 'hand_right', the 'cracked smartphone' is 'stowed' in 'pocket_right', and the 'leather wallet' is 'stowed' in 'pocket_left'. However, the authoritative MUST_STAY_TRUE block (and the pre-state) explicitly marks these items as 'lost' or 'dropped' in the 'world'. Furthermore, the character's 'inventory' array and the scene prose correctly show 'hand_right' is occupied by the 'Participation Trophy', contradicting the 'carried' status for the dollar bill in the character's invariant list.",
+      "severity": "error"
+    },
+    {
+      "code": "stat_unowned",
+      "message": "UI shows Stamina but no matching stat exists in state.",
+      "severity": "warning"
+    }
+  ],
+  "mode": "heuristic"
+}

@@ -1,22 +1,63 @@
 {
   "schema_version": "1.0",
   "character_id": "CHAR_MAYOR",
-  "name": "Mayor of Oakhaven",
   "inventory": [
     {
-      "item_id": "ITEM_mayor_sash",
-      "item_name": "Oakhaven Sash of Office",
-      "status": "equipped",
-      "container": "torso"
+      "container": "torso",
+      "item": "ITEM_mayor_sash",
+      "status": "equipped"
     },
     {
-      "item_id": "ITEM_mayor_spectacles",
-      "item_name": "gold-rimmed spectacles",
-      "status": "equipped",
-      "container": "face"
+      "container": "face",
+      "item": "ITEM_mayor_spectacles",
+      "status": "equipped"
     }
   ],
   "containers": [],
+  "invariants": [
+    "inventory: CHAR_MAYOR -> Oakhaven Sash of Office (status=equipped, container=torso)",
+    "inventory: CHAR_MAYOR -> gold-rimmed spectacles (status=equipped, container=face)"
+  ],
+  "history": [
+    {
+      "chapter": 1,
+      "scene": 7,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "persona_updates": [
+        "The Mayor is intercepting Artie to investigate the 'Statistical Anomaly' alert."
+      ],
+      "notes": "Intercepting the anomaly."
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "chapter": 1,
+      "scene": 7
+    },
+    {
+      "chapter": 1,
+      "scene": 7,
+      "changes": [
+        "inventory_alignment_updated"
+      ],
+      "notes": "Aligning posture for interception by the Mayor."
+    },
+    {
+      "chapter": 1,
+      "scene": 7,
+      "changes": [
+        "inventory_updated"
+      ],
+      "persona_updates": [
+        "The Mayor views Artie as a 'Market Disruptor' and a valuable piece of property to be indexed."
+      ]
+    }
+  ],
+  "name": "Mayor of Oakhaven",
   "appearance_current": {
     "summary": "A portly, middle-aged man with a balding head and spectacles that constantly slide down his nose.",
     "atoms": {
@@ -57,11 +98,12 @@
     },
     "titles": [
       {
+        "active": true,
         "name": "Mayor of Oakhaven",
-        "source": "position",
-        "active": true
+        "source": "position"
       }
-    ]
+    ],
+    "reason": "Ensure Mayor's title is active."
   },
   "stats": {
     "hp": {
@@ -75,10 +117,9 @@
     "diplomacy": 10,
     "accounting": 15
   },
-  "invariants": [
-    "inventory: CHAR_MAYOR -> Oakhaven Sash of Office (status=equipped, container=torso)",
-    "inventory: CHAR_MAYOR -> gold-rimmed spectacles (status=equipped, container=face)"
-  ],
-  "history": [],
-  "updated_at": "2026-02-11T22:39:42Z"
+  "updated_at": "2026-02-12T18:13:20Z",
+  "last_touched": {
+    "chapter": 1,
+    "scene": 7
+  }
 }

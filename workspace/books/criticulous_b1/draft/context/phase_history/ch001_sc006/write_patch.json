@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Oakhaven - The City of Chance",
+    "recent_facts": [
+      "Artie and Fizz successfully entered Oakhaven through the main gate.",
+      "The Gate Scanner triggered a system-wide 'Statistical Anomaly' alert due to Artie's 1 HP and 100% Crit Rate.",
+      "The guards Harlen and Silas allowed Artie entry to avoid a potential 'optimization' crash of the gate hardware.",
+      "Oakhaven is a city obsessed with RNG and crit-culture."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_participation_trophy",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        }
+      ],
+      "persona_updates": [
+        "Artie is now recognized by the System (and the public) as a 'Statistical Anomaly'."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 6
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "inventory": [
+        {
+          "item": "ITEM_guidebook",
+          "container": "hand_right",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_fizz_wand",
+          "container": "belt",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "satchel",
+          "owner": "CHAR_FIZZ",
+          "contents": []
+        },
+        {
+          "container": "belt",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_fizz_wand"
+          ]
+        }
+      ],
+      "persona_updates": [],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 6
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "delta": {
+        "resources": {
+          "stamina": -58
+        }
+      },
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "level": 2,
+          "stat_points": 5,
+          "skill_points": 1
+        },
+        "reason": "Entered Oakhaven; stamina depletion from running and stress."
+      },
+      "chapter": 1,
+      "scene": 6
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "aggro_meter": "critical",
+        "system_alert_active": true
+      },
+      "reason": "Statistical Anomaly detected by Oakhaven Gate Scanner."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie and Fizz reached the Oakhaven gates, where Artie's glitched stats caused the Gate Scanner to malfunction and trigger a city-wide alarm.",
+      "Despite the alert, the guards allowed them entry to prevent a System crash, leaving Artie in the middle of a city that now knows he is an anomaly."
+    ],
+    "key_events": [
+      "Artie approached Oakhaven while holding the cursed Participation Trophy.",
+      "The Gate Scanner (DEVICE_gate_scanner) failed to process Artie's 1 HP and 100% Crit Rate.",
+      "A 'Statistical Anomaly' System Alert was triggered, sounding throughout the district.",
+      "Guards Harlen and Silas witnessed Artie's glitched build and allowed him through the gate.",
+      "Artie discovered the Oakhaven location and gained 250 XP."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: build_finalized = DONE",
+      "milestone: participation_trophy_acquired = DONE",
+      "milestone: oakhaven_entry = DONE",
+      "inventory: CHAR_ARTIE -> Participation Trophy (held, container=hand_right)",
+      "Artie's HP is 1 and he is locked into the Crit-Only build.",
+      "The city-wide 'Statistical Anomaly' alarm is currently active in Oakhaven.",
+      "Artie is Level 2 with 5 unallocated stat points and 1 skill point."
+    ],
+    "chapter_so_far_add": [
+      "Artie entered Oakhaven, triggering a massive system-wide alert due to his glitched stats."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "lanky",
+      "build",
+      "messy",
+      "brown",
+      "hair",
+      "hazel",
+      "eyes",
+      "pale",
+      "skin."
+    ],
+    "CHAR_FIZZ": [
+      "tiny",
+      "sprite",
+      "neon_pink",
+      "hair",
+      "glowing_violet",
+      "eyes",
+      "iridescent",
+      "wings."
+    ]
+  }
+}

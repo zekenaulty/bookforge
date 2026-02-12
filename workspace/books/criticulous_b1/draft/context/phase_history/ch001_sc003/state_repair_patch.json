@@ -1,0 +1,238 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "Artie Penhaligon arrived in the Whispering Woods tutorial zone with his glitched 1 HP build.",
+      "He was immediately targeted by a Level 1 Slime and realized that even the weakest enemies are lethal to him.",
+      "Artie was cornered in a dead-end crevice as the slime launched a final attack."
+    ],
+    "key_events": [
+      "Artie spawns into the Whispering Woods and confirms his 1 HP status.",
+      "Fizz explains that Artie's build requires him to avoid all damage entirely.",
+      "A Level 1 Lesser Puddle Slime attacks, demonstrating a damage floor higher than Artie's max HP.",
+      "Artie flees into a rocky crevice, which turns out to be a dead end.",
+      "The System locks the combat state as the slime prepares to finish Artie off."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "milestone: build_finalized = DONE",
+      "REMOVE: inventory: CHAR_ARTIE -> crumpled dollar bill (status=carried, container=hand_right)",
+      "REMOVE: inventory: CHAR_ARTIE -> cracked smartphone (status=stowed, container=pocket_right)",
+      "REMOVE: inventory: CHAR_ARTIE -> leather wallet (status=stowed, container=pocket_left)",
+      "Artie's HP is 1 and he is locked into the Crit-Only build.",
+      "Artie is cornered in a dead-end crevice by a Level 1 Slime."
+    ],
+    "chapter_so_far_add": [
+      "Artie enters the Whispering Woods and faces his first lethal encounter with a simple slime."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "persona_updates": [
+        "Artie is experiencing extreme existential dread due to his 1 HP vulnerability."
+      ],
+      "invariants_add": [],
+      "inventory": [],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "pocket_left",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "chapter": 1,
+      "scene": 3
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "persona_updates": [],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "item": "ITEM_fizz_wand",
+          "container": "belt",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_guidebook",
+          "container": "satchel",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "belt",
+          "contents": [
+            "ITEM_fizz_wand"
+          ],
+          "owner": "CHAR_FIZZ"
+        },
+        {
+          "container": "satchel",
+          "contents": [
+            "ITEM_guidebook"
+          ],
+          "owner": "CHAR_FIZZ"
+        }
+      ],
+      "chapter": 1,
+      "scene": 3
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "crit_rate": 100,
+          "escape_probability": 0.04,
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "level": 1
+        },
+        "statuses": [
+          {
+            "durable": true,
+            "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+            "name": "Glitched: Crit-Only"
+          }
+        ],
+        "titles": [
+          {
+            "active": true,
+            "name": "Statistical Anomaly",
+            "source": "build_finalization"
+          }
+        ],
+        "reason": "Arrival in tutorial zone and combat initiation."
+      },
+      "chapter": 1,
+      "scene": 3,
+      "delta": {}
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "combat_state": "locked"
+      },
+      "reason": "Combat initiated with Lesser Puddle Slime."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "reason": "Arrival in tutorial zone; previous mundane items lost during death/transition.",
+      "reason_category": "location_jump_normalize",
+      "set": {
+        "inventory": [],
+        "containers": [
+          {
+            "container": "pocket_right",
+            "contents": [],
+            "owner": "CHAR_ARTIE"
+          },
+          {
+            "container": "pocket_left",
+            "contents": [],
+            "owner": "CHAR_ARTIE"
+          }
+        ]
+      }
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "reason": "Standard gear posture for tutorial guidance.",
+      "reason_category": "time_skip_normalize",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_fizz_wand",
+            "container": "belt",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_guidebook",
+            "container": "satchel",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "belt",
+            "contents": [
+              "ITEM_fizz_wand"
+            ],
+            "owner": "CHAR_FIZZ"
+          },
+          {
+            "container": "satchel",
+            "contents": [
+              "ITEM_guidebook"
+            ],
+            "owner": "CHAR_FIZZ"
+          }
+        ]
+      }
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_fizz_wand",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 3,
+          "location": "Whispering Woods"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_guidebook",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 3,
+          "location": "Whispering Woods"
+        }
+      }
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 3,
+          "location": "Whispering Woods"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Whispering Woods",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie spawned into the Whispering Woods tutorial zone with 1 HP.",
+      "Artie encountered a Level 1 Lesser Puddle Slime that deals lethal damage.",
+      "Artie is cornered in a rocky crevice with no escape."
+    ]
+  }
+}

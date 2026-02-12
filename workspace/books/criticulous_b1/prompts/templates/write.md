@@ -50,8 +50,9 @@ Durable item naming discipline:
 - Enforce scene-card durable constraints: honor `required_in_custody`, `required_scene_accessible`, `forbidden_visible`, and `device_presence`; treat `required_visible_on_page` as explicit narrative requirement when present.
 - Respect `timeline_scope` and `ontological_scope` when proposing durable mutations; do not mutate physical custody in non-present/non-real scope unless explicitly marked override.
 - Scope override rule (non-present / non-real scenes):
-  - If timeline_scope != "present" OR ontological_scope != "real", do NOT emit inventory_alignment_updates, transfer_updates, or physical custody changes.
-  - If you must mutate physical custody in a non-present/non-real scene, set scope_override=true (or allow_non_present_mutation=true) on that update and set reason_category="timeline_override".
+  - If timeline_scope != "present" OR ontological_scope != "real", do NOT emit durable mutation blocks UNLESS they are required for this scene transition (based on scene_card + current state).
+  - Durable mutation blocks include: inventory_alignment_updates, transfer_updates, item_registry_updates, plot_device_updates, and any other durable-state mutation you emit.
+  - If they are required for the story (e.g., items must persist into the next real scene, required_in_custody/required_scene_accessible lists them, or transition_type implies continuity of physical possessions), you MUST set scope_override=true (or allow_non_present_mutation=true) on EACH affected update object and set reason_category="timeline_override".
 - summary_update arrays are mandatory; do not omit or leave empty unless explicitly stated.
 - STATE_PATCH must record all major events and outcomes from the prose; if an event happens, add it to key_events and update must_stay_true as needed.
 - must_stay_true is end-of-scene truth only (last occurrence wins); do not keep earlier values that are superseded by the scene.
@@ -223,6 +224,7 @@ JSON Contract Block (strict; arrays only):
     - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
     - VALID:   "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
 - custodian must be a non-null string id or "world"; never null.
+
 
 
 

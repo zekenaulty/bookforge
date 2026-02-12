@@ -1,0 +1,1087 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties.
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+﻿Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+
+USER:
+
+# PLAN
+
+You are the planner. Use the outline window and state to create the next scene card.
+Return ONLY a single JSON object that matches the scene_card schema.
+No markdown, no code fences, no commentary. Use strict JSON (double quotes, no trailing commas).
+
+If outline_window includes character information, keep those character ids in mind.
+If character_states are provided, keep inventory/persona/continuity mechanics consistent; do not invent conflicting facts.
+If outline_window.current.introduces is present, the scene must introduce those characters.
+
+Required keys:
+- schema_version ("1.1")
+- scene_id
+- chapter
+- scene
+- scene_target
+- goal
+- conflict
+- required_callbacks (array)
+- constraints (array)
+- end_condition
+
+Recommended keys (use ids from the outline; do not invent ids):
+- cast_present (array of character names for prose guidance)
+- cast_present_ids (array of character ids, e.g. CHAR_Eldrin)
+- introduces (array of character names introduced in this scene)
+- introduces_ids (array of character ids introduced in this scene)
+- thread_ids (array of thread ids, e.g. THREAD_Awakened_Sage)
+
+Optional continuity-planning keys:
+- required_in_custody (array of item/device ids that must still be owned by scene start)
+- required_scene_accessible (array of item/device ids that must be retrievable without continuity break)
+- required_visible_on_page (array of ids that must be explicitly shown in-scene; use sparingly)
+- forbidden_visible (array of ids that must not be visibly carried/active in-scene)
+- device_presence (array of plot-device ids expected to matter in-scene)
+- transition_type (string, e.g. "time_skip", "travel_arrival", "combat_aftermath")
+- timeline_scope ("present"|"flashback"|"dream"|"simulation"|"hypothetical")
+- ontological_scope ("real"|"non_real")
+
+Optional genre/system keys:
+- continuity_system_focus (array of mechanic domains likely to change this scene, e.g. ["stats", "resources", "titles"])
+- ui_mechanics_expected (array of UI labels likely to appear, e.g. ["HP", "Stamina", "Crit Rate"])
+
+JSON shape example (fill with real values):
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_001",
+  "chapter": 1,
+  "scene": 1,
+  "scene_target": "Protagonist commits to the journey.",
+  "goal": "Force a decisive choice.",
+  "conflict": "Safety versus obligation.",
+  "required_callbacks": [],
+  "constraints": ["target_words: 1900"],
+  "end_condition": "The protagonist leaves home.",
+  "cast_present": ["Eldrin"],
+  "cast_present_ids": ["CHAR_Eldrin"],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": ["THREAD_Awakened_Sage"],
+  "required_in_custody": ["ITEM_broken_tutorial_sword"],
+  "required_scene_accessible": ["ITEM_broken_tutorial_sword"],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": ["DEVICE_anomaly_tag"],
+  "transition_type": "travel_arrival",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": ["stats", "resources"],
+  "ui_mechanics_expected": ["HP", "Stamina"]
+}
+
+Outline window:
+{
+  "chapter": {
+    "bridge": {
+      "from_prev": "N/A",
+      "to_next": "Artie must find a way to survive his first night with zero defensive stats."
+    },
+    "chapter_id": 1,
+    "chapter_role": "hook",
+    "characters": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ",
+      "CHAR_MAYOR",
+      "CHAR_VANE"
+    ],
+    "goal": "Introduce Artie and his broken 'Crit-Only' status in a high-stakes environment.",
+    "pacing": {
+      "expected_scene_count": 8,
+      "intensity": 4,
+      "tempo": "rush"
+    },
+    "stakes_shift": "Artie goes from an office drone to a level 1 glitch in a lethal game world.",
+    "title": "Welcome to the RNG-Hellscape"
+  },
+  "current": {
+    "callbacks": [],
+    "characters": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "introduces": [],
+    "outcome": "Artie enters the town but is flagged as a 'Statistical Anomaly' by the gate scanners.",
+    "scene_id": 6,
+    "section": {
+      "intent": "Reach the first hub and establish the world's culture.",
+      "section_id": 3,
+      "section_role": "",
+      "title": "The Safe Zone?"
+    },
+    "summary": "Artie reaches the gates of Oakhaven, where the guards are busy betting on the 'Crit-Rate' of incoming travelers.",
+    "threads": [],
+    "type": "transition"
+  },
+  "next": {
+    "callbacks": [],
+    "characters": [
+      "CHAR_ARTIE",
+      "CHAR_MAYOR"
+    ],
+    "introduces": [
+      "CHAR_MAYOR"
+    ],
+    "outcome": "Artie understands his 'broken' stat makes him a target for the powerful.",
+    "scene_id": 7,
+    "section": {
+      "intent": "Reach the first hub and establish the world's culture.",
+      "section_id": 3,
+      "section_role": "",
+      "title": "The Safe Zone?"
+    },
+    "summary": "Artie meets the local Tavern Keeper, who explains that 'Crits' are the only currency that matters to the local nobility.",
+    "threads": [],
+    "type": "reveal"
+  },
+  "previous": {
+    "callbacks": [],
+    "characters": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "introduces": [],
+    "outcome": "Artie is forced to run for his life as the tutorial zone aggros on him.",
+    "scene_id": 5,
+    "section": {
+      "intent": "Show the immediate danger of a 1 HP build.",
+      "section_id": 2,
+      "section_role": "",
+      "title": "The First Spawn"
+    },
+    "summary": "The System awards Artie a 'Participation Trophy' item that actually attracts monsters.",
+    "threads": [],
+    "type": "consequence"
+  },
+  "scene_index": 6,
+  "section": {
+    "intent": "Reach the first hub and establish the world's culture.",
+    "section_id": 3,
+    "section_role": "",
+    "title": "The Safe Zone?"
+  }
+}
+
+Character states (per outline_window.current.characters):
+[
+  {
+    "appearance_current": {
+      "alias_map": {
+        "eye_color": [
+          "hazel-green",
+          "light brown"
+        ],
+        "hair_color": [
+          "dark brown",
+          "chestnut"
+        ]
+      },
+      "atoms": {
+        "age_band": "young_adult",
+        "build": "lanky",
+        "eye_color": "hazel",
+        "hair_color": "brown",
+        "hair_style": "messy",
+        "height_band": "average",
+        "sex_presentation": "masculine",
+        "skin_tone": "pale",
+        "species": "human"
+      },
+      "marks": [],
+      "summary": "A slightly lanky office worker with messy brown hair and a perpetually tired expression."
+    },
+    "appearance_history": [],
+    "character_continuity_system_state": {
+      "reason": "Stamina depleted during flight; stat points remain unallocated due to combat interruption.",
+      "reason_category": "progression",
+      "resources": {
+        "stamina": 25
+      },
+      "scope_override": true,
+      "skills": {},
+      "stats": {
+        "hp": {
+          "current": 1,
+          "max": 1
+        },
+        "level": 2,
+        "skill_points": 1,
+        "stat_points": 5
+      },
+      "statuses": [
+        {
+          "durable": true,
+          "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+          "name": "Glitched: Crit-Only"
+        }
+      ],
+      "titles": [
+        {
+          "active": true,
+          "name": "Statistical Anomaly",
+          "source": "build_finalization"
+        }
+      ]
+    },
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "pocket_right",
+        "contents": [],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "pocket_left",
+        "contents": [],
+        "owner": "CHAR_ARTIE"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial setup for Scene 1.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Aligning inventory for the start of the book.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial setup for the opening scene.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial scene setup and posture alignment.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial setup for the opening scene.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie has transitioned from a mundane office worker to a deceased System entity."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Post-death inventory loss and item dropping.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie has transitioned from a deceased office worker to a level 1 System entity awaiting build finalization."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie has transitioned from a deceased office worker to a level 1 System entity awaiting build finalization."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is now a 'Statistical Anomaly' struggling with the reality of a 1 HP existence."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie has transitioned from a deceased office worker to a level 1 System entity awaiting build finalization."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is now a 'Statistical Anomaly' struggling with the reality of a 1 HP existence."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie has spawned into the tutorial zone and is hyper-aware of his 1 HP vulnerability."
+        ],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Arrival in Whispering Woods; empty-handed.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is experiencing extreme existential dread due to his 1 HP vulnerability."
+        ],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Arrival in tutorial zone; previous mundane items lost during death/transition.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Aligning state for combat; Fizz is removed from cast_present per scene card but remains available for guide commentary via System UI.",
+        "persona_updates": [
+          "Artie is cornered and forced into his first combat encounter, hyper-aware of his 1 HP vulnerability."
+        ],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie has survived his first combat encounter and is beginning to grasp the destructive scale of his glitched build."
+        ],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Post-combat inventory check; Artie remains empty-handed after the explosion.",
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie receives the cursed Participation Trophy.",
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "System reward acquisition and mandatory visibility.",
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie receives the cursed Participation Trophy.",
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is now a fugitive from an entire ecosystem due to his disruptive presence and the cursed trophy."
+        ],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Acquisition of reward item; previous mundane items confirmed lost.",
+        "scene": 5
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> cracked smartphone (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> leather wallet (status=stowed, container=pocket_left)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[cracked smartphone])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[leather wallet])",
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=held, container=hand_right)",
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "Artie's HP is 1 and he is locked into the Crit-Only build.",
+      "milestone: slime_defeated = DONE",
+      "milestone: first_level_up = DONE"
+    ],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "ITEM_participation_trophy",
+        "status": "held"
+      }
+    ],
+    "last_touched": {
+      "chapter": 1,
+      "scene": 5
+    },
+    "name": "Arthur 'Artie' Penhaligon",
+    "schema_version": "1.0",
+    "skills": {},
+    "stats": {
+      "crit_multiplier": 10,
+      "crit_rate": 100,
+      "hp": {
+        "current": 1,
+        "max": 1
+      },
+      "level": 2,
+      "skill_points": 1,
+      "stat_points": 5
+    },
+    "updated_at": "2026-02-12T17:48:20Z"
+  },
+  {
+    "appearance_current": {
+      "alias_map": {
+        "eye_color": [
+          "purple",
+          "violet"
+        ],
+        "hair_color": [
+          "pink",
+          "magenta"
+        ]
+      },
+      "atoms": {
+        "age_band": "ageless",
+        "build": "petite",
+        "eye_color": "glowing_violet",
+        "hair_color": "neon_pink",
+        "hair_style": "bob",
+        "height_band": "tiny",
+        "sex_presentation": "feminine",
+        "skin_tone": "iridescent",
+        "species": "sprite"
+      },
+      "marks": [
+        {
+          "durability": "durable",
+          "location": "back",
+          "name": "pixelated wings"
+        }
+      ],
+      "summary": "A tiny, glowing sprite with neon pink hair and iridescent wings that leave trails of digital dust."
+    },
+    "appearance_history": [],
+    "character_continuity_system_state": {
+      "skills": {
+        "flight": 10,
+        "holographic_display": 8,
+        "system_scan": 5
+      },
+      "stats": {
+        "hp": {
+          "current": 50,
+          "max": 50
+        },
+        "mp": {
+          "current": 500,
+          "max": 500
+        }
+      },
+      "titles": [
+        {
+          "active": true,
+          "name": "System Guide (Class C)",
+          "source": "origin"
+        }
+      ]
+    },
+    "character_id": "CHAR_FIZZ",
+    "containers": [
+      {
+        "container": "satchel",
+        "contents": [],
+        "owner": "CHAR_FIZZ"
+      },
+      {
+        "container": "belt",
+        "contents": [
+          "ITEM_fizz_wand"
+        ],
+        "owner": "CHAR_FIZZ"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is introduced as Artie's snarky System Guide."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial appearance and posture alignment in non-real space",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is introduced as Artie's snarky System Guide."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is frustrated by Artie's statistical dumpster fire of a build."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is introduced as Artie's snarky System Guide."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is frustrated by Artie's statistical dumpster fire of a build."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "stowed wand at end of scene",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Arrival in Whispering Woods; gear remains stowed.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Standard gear posture for tutorial guidance.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated"
+        ],
+        "chapter": 1,
+        "notes": "Fizz returns to provide unhelpful guidance.",
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Re-entry into scene with standard gear posture.",
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated"
+        ],
+        "chapter": 1,
+        "notes": "Fizz returns to provide unhelpful guidance.",
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Consulting guidebook during flight.",
+        "scene": 5
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_FIZZ -> sparkling guide wand (status=carried, container=hand_right)",
+      "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+      "container: satchel (owner=CHAR_FIZZ, contents=[The Noob's Guide to Not Dying])"
+    ],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "ITEM_guidebook",
+        "status": "held"
+      },
+      {
+        "container": "belt",
+        "item": "ITEM_fizz_wand",
+        "status": "stowed"
+      }
+    ],
+    "last_touched": {
+      "chapter": 1,
+      "scene": 5
+    },
+    "name": "Fizz",
+    "schema_version": "1.0",
+    "skills": {
+      "flight": 10,
+      "holographic_display": 8,
+      "system_scan": 5
+    },
+    "stats": {
+      "hp": {
+        "current": 50,
+        "max": 50
+      },
+      "mp": {
+        "current": 500,
+        "max": 500
+      }
+    },
+    "updated_at": "2026-02-12T17:48:20Z"
+  }
+]
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-11T22:39:42Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 6
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {
+    "aggro_meter": "MAX",
+    "combat_state": "active",
+    "ontological_scope": "real",
+    "tutorial_zone": "Whispering Woods",
+    "tutorial_zone_integrity": "compromised"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_005.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Artie Penhaligon dies in a mundane breakroom accident and enters the System.",
+      "Artie glitched his character creation, trading all his health for a 100% Critical Hit rate.",
+      "Artie finalized a glitched 'Crit-iculous' build with 1 HP and 100% Crit Rate.",
+      "Artie enters the Whispering Woods and faces his first lethal encounter with a simple slime.",
+      "Artie survives his first combat by accidentally vaporizing a chunk of the world map with a glitched critical hit.",
+      "Artie received a cursed Participation Trophy that increased his aggro radius by 400%.",
+      "A mob of Dire Wolves and Needle-Wasps chased Artie out of the Whispering Woods."
+    ],
+    "key_facts_ring": [
+      "Artie spawns into the Whispering Woods and confirms his 1 HP status.",
+      "Fizz explains that Artie's build requires him to avoid all damage entirely.",
+      "A Level 1 Lesser Puddle Slime attacks, demonstrating a damage floor higher than Artie's max HP.",
+      "Artie flees into a rocky crevice, which turns out to be a dead end.",
+      "The System locks the combat state as the slime prepares to finish Artie off.",
+      "Artie misses or deals 0 damage five times against a Level 1 Lesser Puddle Slime.",
+      "Artie triggers a 'Super-Mega-Ultra-Crit' dealing 99,999,999 True Damage.",
+      "A large section of the Whispering Woods tutorial zone is vaporized and 'optimized' by the attack.",
+      "Artie gains 5,000 XP due to a glitched x100 multiplier.",
+      "Artie levels up to Level 2 and gains 5 stat points and 1 skill point.",
+      "Fizz provides unhelpful commentary from 'The Noob's Guide to Not Dying'.",
+      "milestone: slime_defeated = DONE",
+      "milestone: first_level_up = DONE",
+      "Artie is Level 2 with 5 unallocated stat points and 1 skill point.",
+      "A hundred-yard trench of vaporized forest exists in the Whispering Woods.",
+      "Artie received the cursed Participation Trophy as a reward for 'Optimization'.",
+      "The trophy's 'Center of Attention' effect increased monster aggro radius by 400%.",
+      "Artie's attempt to allocate stat points to Agility was blocked by combat interruption.",
+      "A mob of Dire Wolves and Needle-Wasps ambushed Artie in the trench.",
+      "Artie used the Participation Trophy to land a critical hit on a Needle-Wasp while fleeing.",
+      "Artie reached the edge of the Whispering Woods with the mob in pursuit.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (held, container=hand_right)",
+      "milestone: participation_trophy_acquired = DONE",
+      "Artie has 5 unallocated stat points and 1 skill point.",
+      "The Participation Trophy increases monster aggro by 400%."
+    ],
+    "last_scene": [
+      "Artie received a cursed Participation Trophy that acted as a monster lure.",
+      "Forced to flee a growing mob of predators, he ran for the tutorial zone's exit while Fizz provided unhelpful advice from her guidebook."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+      "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+      "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+      "Artie's HP is 1 and he is locked into the Crit-Only build.",
+      "milestone: build_finalized = DONE",
+      "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+      "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)",
+      "milestone: slime_defeated = DONE",
+      "milestone: first_level_up = DONE",
+      "Artie is Level 2 with 5 unallocated stat points and 1 skill point.",
+      "A hundred-yard trench of vaporized forest exists in the Whispering Woods.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (held, container=hand_right)",
+      "milestone: participation_trophy_acquired = DONE",
+      "Artie has 5 unallocated stat points and 1 skill point.",
+      "The Participation Trophy increases monster aggro by 400%."
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Whispering Woods (Optimized)",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ],
+    "reason_category": "timeline_override",
+    "recent_facts": [
+      "Artie received the cursed Participation Trophy as a reward for 'Optimization'.",
+      "The trophy's 'Center of Attention' effect increased monster aggro radius by 400%.",
+      "Artie's attempt to allocate stat points to Agility was blocked by combat interruption.",
+      "A mob of Dire Wolves and Needle-Wasps ambushed Artie in the trench.",
+      "Artie used the Participation Trophy to land a critical hit on a Needle-Wasp while fleeing."
+    ],
+    "scope_override": false,
+    "time": {}
+  }
+}
+
+Task:
+Create the next scene card.

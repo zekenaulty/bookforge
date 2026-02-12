@@ -60,7 +60,11 @@ If state lacks a key invariant needed for this scene, seed it in must_stay_true 
   - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
   - Remove conflicting old invariants rather than preserving them.
 Enforce scene-card durable constraints: `required_in_custody`, `required_scene_accessible`, `forbidden_visible`, `device_presence`; treat `required_visible_on_page` as explicit narrative requirement when present.
-Respect `timeline_scope` and `ontological_scope`; avoid physical durable custody changes in non-present/non-real scope unless explicit override is present.
+Respect `timeline_scope` and `ontological_scope`.
+- Scope override rule (non-present / non-real scenes):
+  - If timeline_scope != "present" OR ontological_scope != "real", do NOT emit durable mutation blocks UNLESS they are required for this scene transition (based on scene_card + current state).
+  - Durable mutation blocks include: inventory_alignment_updates, transfer_updates, item_registry_updates, plot_device_updates, and any other durable-state mutation you emit.
+  - If they are required for the story (e.g., items must persist into the next real scene, required_in_custody/required_scene_accessible lists them, or transition_type implies continuity of physical possessions), you MUST set scope_override=true (or allow_non_present_mutation=true) on EACH affected update object and set reason_category="timeline_override".
 Return corrected prose plus a corrected state_patch JSON block.
 
 Output format (required, no code fences, no commentary):
@@ -238,6 +242,7 @@ JSON Contract Block (strict; arrays only):
     - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
     - VALID:   "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
 - custodian must be a non-null string id or "world"; never null.
+
 
 
 

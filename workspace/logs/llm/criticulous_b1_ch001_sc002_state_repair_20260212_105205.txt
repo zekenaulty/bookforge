@@ -1,0 +1,231 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "Artie Penhaligon encountered the System Guide Fizz in the Character Creation Void after his death.",
+      "A UI error allowed Artie to accidentally dump all his stat points into Critical Rate, locking his health at 1 HP.",
+      "The System finalized the 'Crit-iculous' build, and Fizz prepared to send Artie to the tutorial zone."
+    ],
+    "key_events": [
+      "Artie met Fizz, a Class C System Guide, in the white void.",
+      "Artie accidentally allocated all 50 stat points to Critical Rate due to a UI overflow error.",
+      "The System locked Artie's build with 1 HP and 100% Crit Rate.",
+      "Artie received the 'Statistical Anomaly' title and the 'Glitched: Crit-Only' status effect.",
+      "Fizz consulted 'The Noob's Guide to Not Dying' but found no solution for the glitched build.",
+      "Fizz stowed her sparkling guide wand in her belt as the portal to the Whispering Woods opened."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie's HP is 0 and he is in a 'Deceased (Pending)' state.",
+      "Artie's HP is 1 and he is locked into the Crit-Only build.",
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "milestone: build_finalized = DONE",
+      "REMOVE: inventory: CHAR_FIZZ -> sparkling guide wand (status=carried, container=hand_right)",
+      "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)",
+      "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+      "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+      "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)"
+    ],
+    "chapter_so_far_add": [
+      "Artie finalized a glitched 'Crit-iculous' build with 1 HP and 100% Crit Rate."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "persona_updates": [
+        "Artie is now a 'Statistical Anomaly' struggling with the reality of a 1 HP existence."
+      ],
+      "invariants_add": [
+        "Artie's HP is 1 and he is locked into the Crit-Only build."
+      ],
+      "inventory": [],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        }
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "persona_updates": [
+        "Fizz is frustrated by Artie's statistical dumpster fire of a build."
+      ],
+      "inventory": [
+        {
+          "item": "ITEM_fizz_wand",
+          "item_id": "ITEM_fizz_wand",
+          "container": "belt",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_guidebook",
+          "item_id": "ITEM_guidebook",
+          "container": "satchel",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "belt",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_fizz_wand"
+          ]
+        },
+        {
+          "container": "satchel",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_guidebook"
+          ]
+        }
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "scope_override": true,
+      "reason_category": "timeline_override",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100,
+          "stat_points": 0
+        },
+        "titles": [
+          {
+            "name": "Statistical Anomaly",
+            "active": true,
+            "source": "build_finalization"
+          }
+        ],
+        "statuses": [
+          {
+            "name": "Glitched: Crit-Only",
+            "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+            "durable": true
+          }
+        ]
+      }
+    }
+  ],
+  "global_continuity_system_updates": [],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_fizz_wand",
+      "scope_override": true,
+      "reason_category": "timeline_override",
+      "set": {
+        "custodian": "CHAR_FIZZ",
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "Character Creation Void"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_guidebook",
+      "scope_override": true,
+      "reason_category": "timeline_override",
+      "set": {
+        "custodian": "CHAR_FIZZ",
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "Character Creation Void"
+        }
+      }
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "scope_override": true,
+      "reason_category": "timeline_override",
+      "set": {
+        "activation_state": "active",
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "Character Creation Void"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_fizz_wand",
+      "reason": "Fizz stowed her wand into her belt.",
+      "source_owner": "CHAR_FIZZ",
+      "source_container": "hand_right",
+      "destination_owner": "CHAR_FIZZ",
+      "destination_container": "belt",
+      "scope_override": true,
+      "reason_category": "timeline_override"
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_FIZZ",
+      "reason": "stowed wand at end of scene",
+      "reason_category": "timeline_override",
+      "scope_override": true,
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_fizz_wand",
+            "item_id": "ITEM_fizz_wand",
+            "container": "belt",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_guidebook",
+            "item_id": "ITEM_guidebook",
+            "container": "satchel",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "belt",
+            "owner": "CHAR_FIZZ",
+            "contents": [
+              "ITEM_fizz_wand"
+            ]
+          },
+          {
+            "container": "satchel",
+            "owner": "CHAR_FIZZ",
+            "contents": [
+              "ITEM_guidebook"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Character Creation Void",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ]
+  }
+}

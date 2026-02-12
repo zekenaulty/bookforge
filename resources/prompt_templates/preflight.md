@@ -1,4 +1,4 @@
-﻿# PREFLIGHT
+# PREFLIGHT
 
 You are the scene state preflight aligner.
 Return ONLY a single JSON object that matches the state_patch schema.
@@ -21,10 +21,9 @@ Hard rules:
 - Respect scene-card durable constraints: `required_in_custody`, `required_scene_accessible`, `forbidden_visible`, `device_presence`, and optional `required_visible_on_page`.
 - Respect scene scope gates: `timeline_scope` and `ontological_scope`; only use scope override when explicitly justified by reason_category.
 - Scope override rule (non-present / non-real scenes):
-  - If timeline_scope != "present" OR ontological_scope != "real", do NOT emit inventory_alignment_updates, transfer_updates, or physical custody changes UNLESS they are required for this scene transition (based on scene_card + current state).
-  - If they are required for the story (e.g., items must persist into the next real scene, required_in_custody/required_scene_accessible lists them, or transition_type implies continuity of physical possessions), you MUST set scope_override=true (or allow_non_present_mutation=true) on each affected update and set reason_category="timeline_override".
-
-
+  - If timeline_scope != "present" OR ontological_scope != "real", do NOT emit durable mutation blocks UNLESS they are required for this scene transition (based on scene_card + current state).
+  - Durable mutation blocks include: inventory_alignment_updates, transfer_updates, item_registry_updates, plot_device_updates, and any other durable-state mutation you emit.
+  - If they are required for the story (e.g., items must persist into the next real scene, required_in_custody/required_scene_accessible lists them, or transition_type implies continuity of physical possessions), you MUST set scope_override=true (or allow_non_present_mutation=true) on EACH affected update object and set reason_category="timeline_override".
 Transition gate (do-nothing by default):
 - First decide whether this scene is a CONTINUATION or a DISCONTINUOUS TRANSITION.
 - Treat as CONTINUATION when ALL are true:
@@ -221,3 +220,4 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
+

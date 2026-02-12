@@ -7,9 +7,10 @@
     ],
     "location": "Character Creation Void",
     "recent_facts": [
-      "Artie met Fizz in the Character Creation Void.",
-      "Artie accidentally allocated all stat points to Critical Rate, resulting in a 1 HP build.",
-      "The System finalized Artie's build as 'Crit-iculous' with the 'Statistical Anomaly' title."
+      "Artie accidentally allocated all 50 stat points to Critical Rate.",
+      "The System locked Artie into a 1 HP, 100% Crit build.",
+      "Artie earned the title 'Statistical Anomaly'.",
+      "Fizz stowed her wand as the portal to the Whispering Woods opened."
     ],
     "open_threads": [
       "THREAD_CRIT_EXPLOIT"
@@ -17,37 +18,28 @@
   },
   "summary_update": {
     "last_scene": [
-      "Artie Penhaligon encountered the System Guide Fizz in a white void after his death.",
-      "During character creation, Artie accidentally glitched his stats, locking himself into a 100% Critical Rate and 1 HP build.",
-      "The System finalized his 'Crit-iculous' specialization and prepared him for transport to the tutorial zone."
+      "Artie met his System Guide, Fizz, in the character creation void.",
+      "A UI error allowed Artie to accidentally dump all his stat points into Critical Rate, locking his health at 1 HP.",
+      "The System finalized the 'Crit-iculous' build, and Fizz prepared to send Artie to the tutorial zone."
     ],
     "key_events": [
-      "Artie met Fizz, a Class C System Guide, in the non-real space of the Character Creation Void.",
-      "Artie's clumsy interaction with the UI resulted in an overflow error, locking his Critical Rate at 100%.",
-      "The System assigned Artie the 'Statistical Anomaly' title and the 'Glitched: Crit-Only' status.",
-      "Fizz consulted 'The Noob's Guide to Not Dying' but found no solution for the glitched build.",
-      "Artie was initialized for spawning into the Whispering Woods tutorial zone."
+      "Artie met Fizz, a Class C System Guide.",
+      "Artie accidentally allocated all 50 stat points to Critical Rate due to a UI overflow.",
+      "The System locked Artie's build with 1 HP and 100% Crit Rate.",
+      "Artie received the 'Statistical Anomaly' title and 'Glitched: Crit-Only' status.",
+      "Fizz stowed her sparkling guide wand in her belt as the portal opened."
     ],
     "must_stay_true": [
-      "REMOVE: Artie's HP is 0 and he is in a 'Deceased (Pending)' state.",
-      "REMOVE: inventory: CHAR_ARTIE -> crumpled dollar bill (status=carried, container=hand_right)",
-      "REMOVE: inventory: CHAR_ARTIE -> cracked smartphone (status=stowed, container=pocket_right)",
-      "REMOVE: inventory: CHAR_ARTIE -> leather wallet (status=stowed, container=pocket_left)",
-      "REMOVE: container: pocket_right (owner=CHAR_ARTIE, contents=[cracked smartphone])",
-      "REMOVE: container: pocket_left (owner=CHAR_ARTIE, contents=[leather wallet])",
-      "REMOVE: inventory: CHAR_ARTIE -> crumpled dollar bill (status=held, container=hand_right)",
-      "Artie's HP is 1 and he is locked into the Crit-Only build.",
+      "REMOVE: inventory: CHAR_FIZZ -> sparkling guide wand (status=carried, container=hand_right)",
+      "inventory: CHAR_FIZZ -> sparkling guide wand (status=stowed, container=belt)",
+      "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
       "milestone: artie_death = DONE",
       "milestone: crit_glitch_reveal = DONE",
       "milestone: build_finalized = DONE",
-      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
-      "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
-      "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
-      "inventory: CHAR_FIZZ -> sparkling guide wand (status=carried, container=hand_right)",
-      "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)"
+      "Artie's HP is 1 and he is locked into the Crit-Only build."
     ],
     "chapter_so_far_add": [
-      "Artie glitched his character creation, trading all his health for a 100% Critical Hit rate."
+      "Artie finalized a glitched 'Crit-iculous' build with 1 HP and 100% Crit Rate."
     ]
   },
   "character_updates": [
@@ -57,11 +49,6 @@
       "scene": 2,
       "inventory": [],
       "containers": [
-        {
-          "container": "hand_right",
-          "owner": "CHAR_ARTIE",
-          "contents": []
-        },
         {
           "container": "pocket_right",
           "owner": "CHAR_ARTIE",
@@ -85,8 +72,8 @@
       "inventory": [
         {
           "item": "ITEM_fizz_wand",
-          "container": "hand_right",
-          "status": "carried"
+          "container": "belt",
+          "status": "stowed"
         },
         {
           "item": "ITEM_guidebook",
@@ -103,7 +90,7 @@
           ]
         },
         {
-          "container": "hand_right",
+          "container": "belt",
           "owner": "CHAR_FIZZ",
           "contents": [
             "ITEM_fizz_wand"
@@ -141,12 +128,59 @@
             "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
             "durable": true
           }
-        ],
-        "reason": "System build finalization and stat lock."
+        ]
       },
       "delta": {},
       "chapter": 1,
       "scene": 2
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_FIZZ",
+      "reason": "stowed wand at end of scene",
+      "reason_category": "after_combat_cleanup",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_fizz_wand",
+            "container": "belt",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_guidebook",
+            "container": "satchel",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "satchel",
+            "owner": "CHAR_FIZZ",
+            "contents": [
+              "ITEM_guidebook"
+            ]
+          },
+          {
+            "container": "belt",
+            "owner": "CHAR_FIZZ",
+            "contents": [
+              "ITEM_fizz_wand"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_fizz_wand",
+      "reason": "Fizz stowed her wand into her belt.",
+      "source_container": "hand_right",
+      "destination_container": "belt",
+      "source_owner": "CHAR_FIZZ",
+      "destination_owner": "CHAR_FIZZ",
+      "from": {}
     }
   ],
   "item_registry_updates": [
@@ -157,7 +191,8 @@
           "chapter": 1,
           "scene": 2,
           "location": "Character Creation Void"
-        }
+        },
+        "custodian": "CHAR_FIZZ"
       }
     },
     {
@@ -167,39 +202,12 @@
           "chapter": 1,
           "scene": 2,
           "location": "Character Creation Void"
-        }
+        },
+        "custodian": "CHAR_FIZZ"
       }
     }
   ],
-  "plot_device_updates": [
-    {
-      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
-      "set": {
-        "activation_state": "active",
-        "last_seen": {
-          "chapter": 1,
-          "scene": 2,
-          "location": "Character Creation Void"
-        }
-      }
-    }
-  ],
-  "inventory_alignment_updates": [
-    {
-      "character_id": "CHAR_ARTIE",
-      "set": {
-        "inventory": [],
-        "containers": [
-          {
-            "container": "hand_right",
-            "owner": "CHAR_ARTIE",
-            "contents": []
-          }
-        ]
-      },
-      "reason": "Normalization of inventory after death and void entry."
-    }
-  ],
+  "global_continuity_system_updates": [],
   "_appearance_check": {
     "CHAR_ARTIE": [
       "lanky",
@@ -209,19 +217,22 @@
       "hazel",
       "eyes",
       "pale",
-      "skin."
+      "skin",
+      "young",
+      "adult."
     ],
     "CHAR_FIZZ": [
       "tiny",
-      "sprite",
-      "neon",
-      "pink",
-      "hair",
       "glowing",
       "violet",
       "eyes",
+      "neon",
+      "pink",
+      "hair",
+      "bob",
       "iridescent",
-      "wings."
+      "wings",
+      "petite."
     ]
   }
 }

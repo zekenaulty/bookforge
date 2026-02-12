@@ -1,0 +1,247 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_007",
+  "chapter": 1,
+  "scene": 7,
+  "scene_target": "Artie is intercepted by the Mayor of Oakhaven while the 'Statistical Anomaly' alarm continues to blare.",
+  "goal": "Establish that Artie's 100% Crit Rate is a world-breaking rarity that makes him a political and economic target.",
+  "conflict": "The Mayor wants to 'index' and exploit Artie's glitch, while Artie struggles to hide his 1 HP vulnerability.",
+  "required_callbacks": [
+    "milestone: oakhaven_entry",
+    "milestone: participation_trophy_acquired"
+  ],
+  "constraints": [
+    "target_words: 2000",
+    "no-recaps",
+    "forward-motion"
+  ],
+  "end_condition": "Artie realizes his 'Statistical Anomaly' title is a beacon for every power-hungry entity in the city.",
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon",
+    "Mayor of Oakhaven"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_MAYOR"
+  ],
+  "introduces": [
+    "Mayor of Oakhaven"
+  ],
+  "introduces_ids": [
+    "CHAR_MAYOR"
+  ],
+  "thread_ids": [],
+  "required_in_custody": [
+    "ITEM_participation_trophy"
+  ],
+  "required_scene_accessible": [
+    "ITEM_participation_trophy"
+  ],
+  "required_visible_on_page": [
+    "ITEM_participation_trophy"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "travel_arrival",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "titles",
+    "resources"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Crit Rate",
+    "Aggro Meter",
+    "System Alert"
+  ],
+  "prose_path": "draft/chapters/ch_001/scene_007.md",
+  "state_patch": {
+    "character_continuity_system_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "set": {
+          "reason": "Tracking stamina depletion and current glitched status during the encounter with the Mayor.",
+          "reason_category": "progression",
+          "resources": {
+            "stamina": 38
+          },
+          "stats": {
+            "hp": {
+              "current": 1,
+              "max": 1
+            }
+          }
+        },
+        "delta": {},
+        "chapter": 1,
+        "scene": 7
+      }
+    ],
+    "character_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "invariants_add": [
+          "milestone: mayor_intercepted = DONE"
+        ],
+        "inventory": [
+          {
+            "container": "hand_right",
+            "item": "ITEM_participation_trophy",
+            "status": "held"
+          }
+        ],
+        "persona_updates": [
+          "Artie realizes his glitched status makes him a target for economic and political exploitation."
+        ],
+        "chapter": 1,
+        "scene": 7
+      },
+      {
+        "character_id": "CHAR_MAYOR",
+        "inventory": [
+          {
+            "container": "torso",
+            "item": "ITEM_mayor_sash",
+            "status": "equipped"
+          },
+          {
+            "container": "face",
+            "item": "ITEM_mayor_spectacles",
+            "status": "equipped"
+          }
+        ],
+        "persona_updates": [
+          "The Mayor views Artie as a 'Market Disruptor' and a valuable piece of property to be indexed."
+        ],
+        "invariants_add": [],
+        "chapter": 1,
+        "scene": 7
+      }
+    ],
+    "global_continuity_system_updates": [
+      {
+        "reason": "The city-wide alarm has cut out, but the local threat level remains critical and the gates are sealed.",
+        "set": {
+          "aggro_meter": "critical",
+          "oakhaven_gates_status": "closed",
+          "system_alert_active": false
+        }
+      }
+    ],
+    "item_registry_updates": [
+      {
+        "item_id": "ITEM_participation_trophy",
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "location": "Oakhaven - Sector 01",
+            "scene": 7
+          }
+        }
+      },
+      {
+        "item_id": "ITEM_mayor_sash",
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "location": "Oakhaven - Sector 01",
+            "scene": 7
+          }
+        }
+      },
+      {
+        "item_id": "ITEM_mayor_spectacles",
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "location": "Oakhaven - Sector 01",
+            "scene": 7
+          }
+        }
+      }
+    ],
+    "schema_version": "1.0",
+    "summary_update": {
+      "chapter_so_far_add": [
+        "Artie was intercepted by the Mayor of Oakhaven, who intends to exploit his glitched stats for economic gain."
+      ],
+      "key_events": [
+        "The city-wide 'Statistical Anomaly' alarm blares as Artie enters the thoroughfare before cutting out.",
+        "The Mayor of Oakhaven intercepts Artie, recognizing his glitched title and stats.",
+        "The Mayor reveals that Artie's 100% Crit Rate makes him a valuable economic asset for the 'House of Odds'.",
+        "Artie realizes he is being viewed as property rather than a person and that the city is a trap.",
+        "The Mayor threatens to 'index' Artie, and the city gates are closed to prevent his escape."
+      ],
+      "last_scene": [
+        "Artie entered Oakhaven and was immediately intercepted by the Mayor, who recognized his 'Statistical Anomaly' title.",
+        "The Mayor explained that Artie's 100% Crit Rate makes him an invaluable economic asset, effectively declaring him property of the city."
+      ],
+      "must_stay_true": [
+        "REMOVE: inventory: CHAR_ARTIE -> crumpled dollar bill (status=carried, container=hand_right)",
+        "REMOVE: inventory: CHAR_ARTIE -> cracked smartphone (status=stowed, container=pocket_right)",
+        "REMOVE: inventory: CHAR_ARTIE -> leather wallet (status=stowed, container=pocket_left)",
+        "REMOVE: container: pocket_right (owner=CHAR_ARTIE, contents=[cracked smartphone])",
+        "REMOVE: container: pocket_left (owner=CHAR_ARTIE, contents=[leather wallet])",
+        "Artie's HP is 1 and he is locked into the Crit-Only build.",
+        "milestone: mayor_intercepted = DONE",
+        "inventory: CHAR_ARTIE -> Participation Trophy (held, container=hand_right)",
+        "The city gates of Oakhaven are closed, trapping Artie inside."
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "CHAR_ARTIE",
+        "CHAR_MAYOR"
+      ],
+      "location": "Oakhaven - Sector 01",
+      "open_threads": [
+        "THREAD_CRIT_EXPLOIT",
+        "THREAD_SYSTEM_GLITCH"
+      ]
+    }
+  },
+  "scene_summary": [
+    "Artie entered Oakhaven and was immediately intercepted by the Mayor, who recognized his 'Statistical Anomaly' title.",
+    "The Mayor explained that Artie's 100% Crit Rate makes him an invaluable economic asset, effectively declaring him property of the city."
+  ],
+  "key_events": [
+    "The city-wide 'Statistical Anomaly' alarm blares as Artie enters the thoroughfare before cutting out.",
+    "The Mayor of Oakhaven intercepts Artie, recognizing his glitched title and stats.",
+    "The Mayor reveals that Artie's 100% Crit Rate makes him a valuable economic asset for the 'House of Odds'.",
+    "Artie realizes he is being viewed as property rather than a person and that the city is a trap.",
+    "The Mayor threatens to 'index' Artie, and the city gates are closed to prevent his escape."
+  ],
+  "must_stay_true": [
+    "REMOVE: inventory: CHAR_ARTIE -> crumpled dollar bill (status=carried, container=hand_right)",
+    "REMOVE: inventory: CHAR_ARTIE -> cracked smartphone (status=stowed, container=pocket_right)",
+    "REMOVE: inventory: CHAR_ARTIE -> leather wallet (status=stowed, container=pocket_left)",
+    "REMOVE: container: pocket_right (owner=CHAR_ARTIE, contents=[cracked smartphone])",
+    "REMOVE: container: pocket_left (owner=CHAR_ARTIE, contents=[leather wallet])",
+    "Artie's HP is 1 and he is locked into the Crit-Only build.",
+    "milestone: mayor_intercepted = DONE",
+    "inventory: CHAR_ARTIE -> Participation Trophy (held, container=hand_right)",
+    "The city gates of Oakhaven are closed, trapping Artie inside."
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "fail",
+    "issues": [
+      {
+        "code": "pipeline_state_incoherent",
+        "message": "The post-patch candidate state for CHAR_ARTIE is incoherent. The character's internal 'invariants' list claims the 'crumpled dollar bill' is 'carried' in 'hand_right', the 'cracked smartphone' is 'stowed' in 'pocket_right', and the 'leather wallet' is 'stowed' in 'pocket_left'. However, the authoritative MUST_STAY_TRUE block (and the pre-state) explicitly marks these items as 'lost' or 'dropped' in the 'world'. Furthermore, the character's 'inventory' array and the scene prose correctly show 'hand_right' is occupied by the 'Participation Trophy', contradicting the 'carried' status for the dollar bill in the character's invariant list.",
+        "severity": "error"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Stamina but no matching stat exists in state.",
+        "severity": "warning"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 2,
+  "updated_at": "2026-02-12T18:13:20Z"
+}

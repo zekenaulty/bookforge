@@ -1,25 +1,58 @@
 {
   "schema_version": "1.0",
   "character_id": "CHAR_VANE",
-  "name": "Vane",
   "inventory": [
     {
-      "item_id": "ITEM_vane_dagger",
-      "item_name": "Viper's Kiss dagger",
-      "status": "equipped",
-      "container": "sheath_belt"
+      "item": "ITEM_vane_dagger",
+      "container": "sheath_belt",
+      "status": "equipped"
     }
   ],
   "containers": [
     {
       "container": "sheath_belt",
-      "owner": "CHAR_VANE",
-      "location": "waist",
       "contents": [
-        "Viper's Kiss dagger"
-      ]
+        "ITEM_vane_dagger"
+      ],
+      "location": "waist",
+      "owner": "CHAR_VANE"
     }
   ],
+  "invariants": [
+    "inventory: CHAR_VANE -> Viper's Kiss dagger (status=equipped, container=sheath_belt)",
+    "container: sheath_belt (owner=CHAR_VANE, contents=[Viper's Kiss dagger])",
+    "Vane is actively seeking to duel Artie."
+  ],
+  "history": [
+    {
+      "chapter": 1,
+      "scene": 8,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "persona_updates": [
+        "Vane is a high-level player who views Artie as a curiosity or a target for 'mentorship' (bullying)."
+      ],
+      "notes": "Vane enters the scene to confront the 'Statistical Anomaly'."
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "chapter": 1,
+      "scene": 8
+    },
+    {
+      "chapter": 1,
+      "scene": 8,
+      "changes": [
+        "inventory_alignment_updated"
+      ],
+      "notes": "Vane arrives with his weapon equipped."
+    }
+  ],
+  "name": "Vane",
   "appearance_current": {
     "summary": "An athletic man with sharp features, slicked-back black hair, and a cold, predatory gaze.",
     "atoms": {
@@ -70,10 +103,11 @@
     "titles": [
       {
         "name": "The Apex Predator",
-        "source": "achievement",
-        "active": true
+        "active": true,
+        "source": "achievement"
       }
-    ]
+    ],
+    "reason": "Ensure Vane's signature title is active for the confrontation."
   },
   "stats": {
     "hp": {
@@ -89,10 +123,9 @@
     "precision_strike": 20,
     "intimidate": 12
   },
-  "invariants": [
-    "inventory: CHAR_VANE -> Viper's Kiss dagger (status=equipped, container=sheath_belt)",
-    "container: sheath_belt (owner=CHAR_VANE, contents=[Viper's Kiss dagger])"
-  ],
-  "history": [],
-  "updated_at": "2026-02-11T22:39:42Z"
+  "updated_at": "2026-02-12T18:19:06Z",
+  "last_touched": {
+    "chapter": 1,
+    "scene": 8
+  }
 }

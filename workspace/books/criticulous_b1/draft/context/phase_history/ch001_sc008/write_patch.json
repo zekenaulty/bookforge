@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_VANE"
+    ],
+    "location": "Oakhaven - Backstreets (Sector 01)",
+    "recent_facts": [
+      "Vane attempted to force a duel with Artie using a System Duel Request.",
+      "Artie used the Participation Trophy's aggro-flare to distract Vane and escape.",
+      "Artie successfully avoided taking damage despite Vane's high-level attacks.",
+      "Vane has developed an obsession with 'deleting' Artie as a statistical glitch."
+    ],
+    "open_threads": [
+      "THREAD_VANE_RIVALRY",
+      "THREAD_CRIT_EXPLOIT"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_participation_trophy",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        }
+      ],
+      "persona_updates": [
+        "Artie is now a fugitive within Oakhaven, evading both the Mayor and high-level players like Vane."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 8
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "inventory": [
+        {
+          "item": "ITEM_vane_dagger",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "sheath_belt",
+          "owner": "CHAR_VANE",
+          "contents": []
+        }
+      ],
+      "persona_updates": [
+        "Vane is obsessed with testing the limits of Artie's glitch and intends to 'delete' him."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 8
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "delta": {
+        "resources": {
+          "stamina": -6
+        }
+      },
+      "set": {
+        "reason": "Stamina depletion from dodging Vane's Shadow Step and sprinting into the backstreets."
+      },
+      "chapter": 1,
+      "scene": 8
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "set": {
+        "titles": [
+          {
+            "name": "The Apex Predator",
+            "source": "achievement",
+            "active": true
+          }
+        ],
+        "reason": "Title confirmation during confrontation."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 8
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "combat_state": "evasion",
+        "aggro_meter": "high"
+      },
+      "reason": "Transition from duel request to active flight and evasion."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Vane confronted Artie in Sector 01, attempting to force a duel to 'delete' the glitch.",
+      "Artie used the Participation Trophy to distract Vane and escaped into the Oakhaven backstreets without taking damage."
+    ],
+    "key_events": [
+      "Vane challenged Artie to a duel, which Artie refused by fleeing.",
+      "Artie triggered the Participation Trophy's aggro-flare to blind Vane.",
+      "Artie navigated the Oakhaven backstreets to lose Vane's pursuit.",
+      "Vane declared his intent to hunt Artie down and fix the System's 'mistake'."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: build_finalized = DONE",
+      "milestone: oakhaven_entry = DONE",
+      "milestone: mayor_intercepted = DONE",
+      "milestone: vane_confrontation_started = DONE",
+      "milestone: vane_confrontation_resolved = DONE",
+      "Artie's HP is 1 and he is locked into the Crit-Only build.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (held, container=hand_right)",
+      "inventory: CHAR_VANE -> Viper's Kiss dagger (held, container=hand_right)",
+      "The city gates of Oakhaven are closed, trapping Artie inside."
+    ],
+    "chapter_so_far_add": [
+      "Artie survived a high-stakes encounter with Vane, a level 42 Shadow Stalker, by exploiting his cursed trophy's aggro effects."
+    ]
+  },
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_vane_dagger",
+      "reason": "Vane unsheathed the dagger to initiate the duel.",
+      "source_container": "sheath_belt",
+      "destination_container": "hand_right",
+      "from": {}
+    }
+  ],
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "lanky",
+      "messy",
+      "brown",
+      "hair",
+      "hazel",
+      "eyes",
+      "pale",
+      "skin."
+    ],
+    "CHAR_VANE": [
+      "athletic",
+      "slicked-back",
+      "black",
+      "hair",
+      "cold",
+      "blue",
+      "eyes",
+      "jagged",
+      "scar."
+    ]
+  }
+}
