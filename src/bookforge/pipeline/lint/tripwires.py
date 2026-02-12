@@ -312,8 +312,16 @@ def _durable_scene_constraint_issues(
     item_map = _items_map()
     device_map = _devices_map()
 
+    def _is_item_token(value: str) -> bool:
+        return str(value).strip().upper().startswith("ITEM_")
+
+    def _is_device_token(value: str) -> bool:
+        return str(value).strip().upper().startswith("DEVICE_")
+
     def _resolve_item(token: str) -> Optional[Dict[str, Any]]:
         token = str(token).strip()
+        if _is_device_token(token):
+            return None
         if token in item_map:
             return item_map[token]
         for entry in item_map.values():
@@ -329,6 +337,8 @@ def _durable_scene_constraint_issues(
 
     def _resolve_device(token: str) -> Optional[Dict[str, Any]]:
         token = str(token).strip()
+        if _is_item_token(token):
+            return None
         if token in device_map:
             return device_map[token]
         for entry in device_map.values():
@@ -414,6 +424,15 @@ def _durable_scene_constraint_issues(
     device_presence = constraints.get("device_presence")
     if isinstance(device_presence, list):
         for token in device_presence:
+            if _is_item_token(token):
+                entry = _resolve_item(token)
+                if not entry:
+                    issues.append({
+                        "code": "durable_slice_missing",
+                        "message": f"Required item '{token}' is not present in the durable registry slice.",
+                        "severity": "error",
+                    })
+                continue
             entry = _resolve_device(token)
             if not entry:
                 issues.append({

@@ -104,6 +104,7 @@ Dynamic continuity rules:
 - titles must be arrays of objects with stable `name` fields, never arrays of strings.
 - Durable-state updates are authoritative and must be explicit in patch blocks.
 - If inventory posture is changed for scene fit, include `inventory_alignment_updates` with `reason` and `reason_category`.
+- If you emit inventory_alignment_updates, the reason MUST state the final posture (item + container + status) so downstream phases can reconcile must_stay_true. Do not omit posture intent.
 - `inventory_alignment_updates` must be an array of objects; do not wrap it in an object with an `updates` key.
 - If durable item custody or metadata changes, include `item_registry_updates` and/or `transfer_updates`.
 - Every `transfer_updates` entry must include `item_id` and `reason` (non-empty string).

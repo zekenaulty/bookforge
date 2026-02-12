@@ -14,6 +14,12 @@ Milestone uniqueness: if a milestone is marked DONE in must_stay_true, do not de
   - REMOVE lines also apply to key_facts_ring (purge stale facts from continuity).
 Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
 Inventory contract: track ownership and container location for key items; update must_stay_true when items move or change hands.
+- Inventory posture reconciliation:
+  - If inventory/containers change (held/stowed/container), must_stay_true must be updated to the final posture.
+  - Add REMOVE lines for prior inventory/container invariants before the new final entries.
+  - Use canonical invariant formats:
+    - inventory: CHAR_X -> <item display_name> (status=held|carried|equipped|stowed, container=hand_left|hand_right|<container>)
+    - container: <container> (owner=CHAR_X, contents=[<item display_name>, ...])
 For held items, specify container=hand_left or container=hand_right.
 Continuity system ownership is mandatory, and must be tracked: any mechanic/UI numbers, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, or future mechanic families must be sourced from existing continuity system state or written into continuity system updates.
 Durable vs ephemeral mechanics:

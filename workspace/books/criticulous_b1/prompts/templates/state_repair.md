@@ -52,6 +52,12 @@ Naming repairs:
 - Do not add numeric mechanics to invariants_add; store them in continuity system updates instead.
 - If an event appears in prose, it must appear in key_events.
 - must_stay_true must include milestone ledger entries and any inventory/injury/ownership invariants implied by prose.
+- Inventory posture reconciliation:
+  - If inventory/containers change (held/stowed/container), must_stay_true must be updated to the final posture.
+  - Add REMOVE lines for prior inventory/container invariants before the new final entries.
+  - Use canonical invariant formats:
+    - inventory: CHAR_X -> <item display_name> (status=held|carried|equipped|stowed, container=hand_left|hand_right|<container>)
+    - container: <container> (owner=CHAR_X, contents=[<item display_name>, ...])
 - character_updates entries must use arrays: persona_updates (array), invariants_add (array).
 - character_updates.inventory must be an array of objects, never item-id strings.
 - Inventory object shape: {"item": "ITEM_or_name", "container": "hand_left|hand_right|<container>", "status": "held|carried|equipped|stowed"}.

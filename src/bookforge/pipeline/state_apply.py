@@ -450,7 +450,8 @@ def _merge_summary_update(state: Dict[str, Any], summary_update: Dict[str, Any],
 
     if must_stay_true:
         merged_invariants = summary.get("must_stay_true", []) + must_stay_true
-        summary["must_stay_true"] = _dedupe_preserve(merged_invariants)[-SUMMARY_MUST_STAY_TRUE_CAP:]
+        summary["must_stay_true"] = _dedupe_preserve(merged_invariants)[-SUMMARY_MUST_STAY_TRUE_CAP:]
+
     state["summary"] = summary
 
 
@@ -493,6 +494,12 @@ def _apply_character_updates(book_root: Path, patch: Dict[str, Any], chapter_num
     updates = patch.get("character_updates") if isinstance(patch, dict) else None
     if not isinstance(updates, list):
         return
+    summary_removals: List[str] = []
+    if isinstance(patch, dict):
+        summary_update = patch.get("summary_update")
+        if isinstance(summary_update, dict):
+            must_stay_true = _summary_list(summary_update.get("must_stay_true"))
+            summary_removals, _ = _split_invariant_removals(must_stay_true)
     characters_dir = book_root / "draft" / "context" / "characters"
     characters_dir.mkdir(parents=True, exist_ok=True)
     ensure_character_index(book_root)
@@ -520,6 +527,12 @@ def _apply_character_updates(book_root: Path, patch: Dict[str, Any], chapter_num
                     state.update(loaded)
             except json.JSONDecodeError:
                 pass
+
+        if summary_removals:
+            existing_invariants = state.get("invariants", [])
+            if not isinstance(existing_invariants, list):
+                existing_invariants = []
+            state["invariants"] = _apply_invariant_removals(existing_invariants, summary_removals)
 
         chapter = int(update.get("chapter", chapter_num) or chapter_num)
         scene = int(update.get("scene", scene_num) or scene_num)

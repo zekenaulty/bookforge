@@ -281,6 +281,21 @@ def test_durable_scene_constraint_detects_slice_missing() -> None:
     assert any(issue.get("code") == "durable_slice_missing" for issue in issues)
 
 
+def test_durable_scene_constraint_device_presence_accepts_item_token() -> None:
+    prose = "Artie clutches the Participation Trophy."
+    scene_card = {"device_presence": ["ITEM_participation_trophy"]}
+    durable = {
+        "item_registry": {
+            "items": [
+                {"item_id": "ITEM_participation_trophy", "name": "Participation Trophy"}
+            ]
+        },
+        "plot_devices": {"devices": []},
+    }
+    issues = _durable_scene_constraint_issues(prose, scene_card, durable)
+    assert not any(issue.get("code") == "durable_slice_missing" for issue in issues)
+
+
 def test_linked_durable_consistency_detects_tombstone_activation_conflict() -> None:
     durable = {
         "item_registry": {

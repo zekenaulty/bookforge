@@ -133,9 +133,9 @@ Stabilize the lint pipeline by eliminating verified mechanical incoherence and t
 - Prompts updated in global + book overrides, with JSON shape guidance and REMOVE rules.
 
 ## Status Tracker
-- Story 1: Not started
-- Story 2: Not started
-- Story 3: Not started
+- Story 1: Done (code + tests passed via .venv)
+- Story 2: In progress (prompt updates applied in global + criticulous_b1 templates)
+- Story 3: Done (code + tests passed via .venv)
 
 ## Notes / Constraints
 - Keep JSON schema intact (no new schema changes).
@@ -254,3 +254,8 @@ Stabilize the lint pipeline by eliminating verified mechanical incoherence and t
 2) Story 2 (prompt rules) - ensures future patches generate correct must_stay_true lines.
 3) Story 3 (lint resolver) - removes false durable_slice_missing errors.
 
+## Progress / Findings Log
+- 2026-02-12: Ran pytest via `.venv\Scripts\python -m pytest` for new/updated tests; all passed.
+- 2026-02-12: Added inventory posture reconciliation rules to preflight/write/repair/state_repair prompts (global + criticulous_b1), including REMOVE guidance and canonical invariant formats.
+- 2026-02-12: Implemented REMOVE handling for character invariants in `src/bookforge/pipeline/state_apply.py` (applies summary_remove lines before invariants_add). Added `tests/test_character_invariants_remove.py`. Initial test run failed due to missing pytest; resolved by using the .venv interpreter (tests now pass).
+- 2026-02-12: Updated lint durable constraint resolver to treat ITEM_ tokens as item_registry (device_presence now accepts ITEM_). Added test in `tests/test_state_bag_and_milestones.py`. Initial test run failed due to missing pytest; resolved by using the .venv interpreter (tests now pass).
