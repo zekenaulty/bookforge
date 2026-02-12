@@ -8,6 +8,7 @@ from .tripwires import (
     _durable_scene_constraint_issues,
     _linked_durable_consistency_issues,
     _ui_gate_issues,
+    _internal_id_issues,
     _lint_issue_entries,
     _lint_has_issue_code,
 )
@@ -22,6 +23,7 @@ __all__ = [
     "_durable_scene_constraint_issues",
     "_linked_durable_consistency_issues",
     "_ui_gate_issues",
+    "_internal_id_issues",
     "_lint_issue_entries",
     "_lint_has_issue_code",
 ]

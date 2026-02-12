@@ -32,7 +32,7 @@ Durable vs ephemeral mechanics:
 - UI gate: only include bracketed UI blocks when scene_card.ui_allowed=true. If false, remove or rephrase UI blocks into narrative prose.
 - UI/system readouts must be on their own line, starting with '[' and ending with ']'.
 - Do NOT embed bracketed UI in narrative sentences.
-- Allowed suffix after a UI block is punctuation or '(locked)' only.
+- Allowed suffix after a UI block is punctuation or a short parenthetical annotation (e.g., (locked), (Warning: ...)).
 
 - DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
 - EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.

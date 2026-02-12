@@ -22,7 +22,7 @@ Continuity system scope: this includes stats, skills, titles, classes, ranks, re
 Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties.
 JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
 Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
-Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it unless explicitly removing a stale fact with REMOVE and restating the current truth.
 Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
 Never recap at scene openings.
 Do not repeat previous prose.

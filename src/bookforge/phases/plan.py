@@ -266,45 +266,68 @@ def _build_outline_window(chapter: Dict[str, Any], scene_number: int) -> Dict[st
 
 
 def _recent_lint_warnings(book_root: Path, chapter: int, scene: int) -> List[Dict[str, Any]]:
-    if chapter <= 0 or scene <= 1:
+    def _warnings_for_scene(ch: int, sc: int) -> List[Dict[str, Any]]:
+        data = _load_phase_history(book_root, ch, sc)
+        phases = data.get("phases") if isinstance(data, dict) else None
+        if not isinstance(phases, dict):
+            return []
+        lint_phase = phases.get("lint") if isinstance(phases.get("lint"), dict) else None
+        if not isinstance(lint_phase, dict):
+            return []
+        artifacts = lint_phase.get("artifacts")
+        if not isinstance(artifacts, dict):
+            return []
+        report_rel = artifacts.get("report")
+        if not isinstance(report_rel, str) or not report_rel.strip():
+            return []
+        report_path = book_root / report_rel
+        if not report_path.exists():
+            return []
+        try:
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            return []
+        issues = report.get("issues") if isinstance(report, dict) else None
+        if not isinstance(issues, list):
+            return []
+        warnings: List[Dict[str, Any]] = []
+        for issue in issues:
+            if not isinstance(issue, dict):
+                continue
+            if str(issue.get("code") or "").strip() != "ui_gate_unknown":
+                continue
+            warnings.append({
+                "code": "ui_gate_unknown",
+                "message": str(issue.get("message") or "").strip(),
+                "severity": str(issue.get("severity") or "warning").strip(),
+            })
+        return warnings
+
+    if chapter <= 0 or scene <= 0:
         return []
-    prev_chapter = chapter
-    prev_scene = scene - 1
-    data = _load_phase_history(book_root, prev_chapter, prev_scene)
-    phases = data.get("phases") if isinstance(data, dict) else None
-    if not isinstance(phases, dict):
+
+    if scene > 1:
+        return _warnings_for_scene(chapter, scene - 1)
+
+    if chapter <= 1:
         return []
-    lint_phase = phases.get("lint") if isinstance(phases.get("lint"), dict) else None
-    if not isinstance(lint_phase, dict):
-        return []
-    artifacts = lint_phase.get("artifacts")
-    if not isinstance(artifacts, dict):
-        return []
-    report_rel = artifacts.get("report")
-    if not isinstance(report_rel, str) or not report_rel.strip():
-        return []
-    report_path = book_root / report_rel
-    if not report_path.exists():
+
+    outline_path = book_root / "outline" / "outline.json"
+    if not outline_path.exists():
         return []
     try:
-        report = json.loads(report_path.read_text(encoding="utf-8"))
+        outline = json.loads(outline_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return []
-    issues = report.get("issues") if isinstance(report, dict) else None
-    if not isinstance(issues, list):
+    try:
+        prev_chapter = _find_chapter(outline, chapter - 1)
+    except ValueError:
         return []
-    warnings: List[Dict[str, Any]] = []
-    for issue in issues:
-        if not isinstance(issue, dict):
-            continue
-        if str(issue.get("code") or "").strip() != "ui_gate_unknown":
-            continue
-        warnings.append({
-            "code": "ui_gate_unknown",
-            "message": str(issue.get("message") or "").strip(),
-            "severity": str(issue.get("severity") or "warning").strip(),
-        })
-    return warnings
+    scenes = _flatten_scenes(prev_chapter)
+    if not scenes:
+        return []
+    prev_scene = len(scenes)
+    return _warnings_for_scene(chapter - 1, prev_scene)
 def _scene_id(chapter: int, scene: int) -> str:
     return f"SC_{chapter:03d}_{scene:03d}"
 

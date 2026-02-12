@@ -29,6 +29,7 @@ def _lint_has_issue_code(report: Dict[str, Any], code: str) -> bool:
 def _ui_gate_issues(
     scene_card: Dict[str, Any],
     authoritative_surfaces: Optional[List[Dict[str, Any]]],
+    prose: Optional[str] = None,
     *,
     strict: bool = False,
 ) -> List[Dict[str, Any]]:
@@ -39,14 +40,50 @@ def _ui_gate_issues(
     ui_mechanics = scene_card.get("ui_mechanics_expected")
     if not isinstance(ui_mechanics, list):
         ui_mechanics = []
+
     has_ui = bool(authoritative_surfaces)
+    inline_evidence = None
+
+    def _is_ui_token(token: str) -> bool:
+        inner = token.strip()[1:-1].strip() if token.startswith("[") and token.endswith("]") else token.strip()
+        if not inner:
+            return False
+        if re.search(r"\d", inner):
+            return True
+        lower = inner.lower()
+        keywords = (
+            "system", "warning", "error", "alert", "notification", "objective", "quest", "level",
+            "title", "status", "reward", "item", "inventory", "location", "map", "combat",
+            "critical", "damage", "attack", "skill", "class", "rank", "stamina", "hp", "mp",
+            "xp", "experience", "aggro", "cooldown", "effect", "resource"
+        )
+        if any(lower.startswith(key) for key in keywords):
+            return True
+        if ":" in inner:
+            key = inner.split(":", 1)[0].strip().lower()
+            if key in keywords:
+                return True
+        return False
+
+    if not has_ui and prose:
+        for line_no, raw_line in enumerate(str(prose).splitlines(), start=1):
+            line = str(raw_line)
+            for match in re.finditer(r"\[[^\[\]]+\]", line):
+                token = match.group(0)
+                if _is_ui_token(token):
+                    inline_evidence = {"line": line_no, "excerpt": line.strip()}
+                    break
+            if inline_evidence:
+                break
 
     if ui_allowed is None:
         if ui_mechanics:
             return issues
-        if has_ui:
-            surface = authoritative_surfaces[0]
-            evidence = {"line": surface.get("line"), "excerpt": surface.get("text")}
+        if has_ui or inline_evidence:
+            evidence = inline_evidence
+            if has_ui:
+                surface = authoritative_surfaces[0]
+                evidence = {"line": surface.get("line"), "excerpt": surface.get("text")}
             issues.append({
                 "code": "ui_gate_unknown",
                 "message": "UI blocks appear but scene_card.ui_allowed is missing; set ui_allowed explicitly in the scene card.",
@@ -58,18 +95,42 @@ def _ui_gate_issues(
     if not isinstance(ui_allowed, bool):
         ui_allowed = bool(ui_mechanics)
 
-    if ui_allowed is False and has_ui:
-        surface = authoritative_surfaces[0]
-        evidence = {"line": surface.get("line"), "excerpt": surface.get("text")}
-        severity = "error" if strict else "warning"
-        issues.append({
-            "code": "ui_gate_violation",
-            "message": "UI blocks appear but scene_card.ui_allowed=false. Remove UI or set ui_allowed=true when System/UI is active.",
-            "severity": severity,
-            "evidence": evidence,
-        })
+    if ui_allowed is False:
+        if has_ui:
+            surface = authoritative_surfaces[0]
+            evidence = {"line": surface.get("line"), "excerpt": surface.get("text")}
+            severity = "error" if strict else "warning"
+            issues.append({
+                "code": "ui_gate_violation",
+                "message": "UI blocks appear but scene_card.ui_allowed=false. Remove UI or set ui_allowed=true when System/UI is active.",
+                "severity": severity,
+                "evidence": evidence,
+            })
+        elif inline_evidence:
+            issues.append({
+                "code": "ui_gate_violation",
+                "message": "Inline UI-shaped token appears but scene_card.ui_allowed=false. Avoid bracketed UI in narrative prose or set ui_allowed=true when System/UI is active.",
+                "severity": "warning",
+                "evidence": inline_evidence,
+            })
 
     return issues
+
+
+def _internal_id_issues(prose: str, *, strict: bool = False) -> List[Dict[str, Any]]:
+    if not prose:
+        return []
+    pattern = r"\b(?:CHAR_[A-Z0-9_]+|ITEM_[A-Z0-9_]+|THREAD_[A-Z0-9_]+|DEVICE_[A-Z0-9_]+|hand_left|hand_right)\b"
+    evidence = _find_first_match_evidence(pattern, prose)
+    if not evidence:
+        return []
+    severity = "error" if strict else "warning"
+    return [{
+        "code": "prose_internal_id",
+        "message": "Prose includes internal id or container code; use human-readable phrasing instead.",
+        "severity": severity,
+        "evidence": evidence,
+    }]
 def _stat_mismatch_issues(
     prose: str,
     character_states: List[Dict[str, Any]],
