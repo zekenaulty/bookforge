@@ -6,7 +6,15 @@ No prose, no commentary, no code fences.
 Goal:
 - Ensure state_patch fully and accurately captures the scene's events and outcomes.
 - Fill missing summary_update data and fix invalid formats from draft_patch.
-- Preserve state invariants; do not contradict must_stay_true.
+- Preserve pre-scene invariants unless this scene changes them; when it does, update must_stay_true to the final end-of-scene value.
+- must_stay_true reconciliation (mandatory):
+  - If this scene changes a durable fact (stats/HP/status/title/custody), you MUST update must_stay_true to reflect the final end-of-scene value.
+  - Remove or replace any prior must_stay_true entries that conflict with new durable values.
+  - Do NOT carry forward conflicting legacy invariants once the scene updates them.
+- must_stay_true removal (mandatory when a durable fact is superseded):
+  - Add "REMOVE: <exact prior invariant text>" in summary_update.must_stay_true.
+  - Place REMOVE lines before the new final invariant.
+  - REMOVE lines also apply to key_facts_ring (purge stale facts from continuity).
 - Ensure mechanic/UI ownership in continuity system updates.
 
 Rules:
@@ -64,7 +72,7 @@ Naming repairs:
   - summary_update fields must be arrays of strings.
     - INVALID: "summary_update": {"last_scene": "text"}
     - VALID: "summary_update": {"last_scene": ["text"], "key_events": ["..."], "must_stay_true": ["..."], "chapter_so_far_add": ["..."]}
-  - appearance_updates MUST be an object under character_updates.
+- appearance_updates MUST be an object under character_updates.
     - INVALID: "appearance_updates": [{"set": {...}}] OR "appearance_updates": {"marks_add": [...]}
     - VALID: "appearance_updates": {"set": {"marks_add": [{"name": "Singed Hair", "location": "head", "durability": "durable"}]}, "reason": "..."}
 - character_updates.containers must be an array of objects with at least: container, owner, contents (array).
@@ -162,3 +170,10 @@ JSON Contract Block (strict; arrays only):
     - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
     - VALID:   "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
 - custodian must be a non-null string id or "world"; never null.
+
+
+
+
+
+
+

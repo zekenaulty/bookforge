@@ -43,6 +43,25 @@ def test_apply_state_patch_summary_merge() -> None:
     assert "Shard remains physical." in summary["must_stay_true"]
 
 
+
+def test_apply_state_patch_summary_remove() -> None:
+    state = _base_state()
+    state["summary"]["must_stay_true"] = ["Artie HP is 0/0 (deceased)."]
+    state["summary"]["key_facts_ring"] = ["Artie HP is 0/0 (deceased)."]
+    patch = {
+        "summary_update": {
+            "must_stay_true": [
+                "REMOVE: Artie HP is 0/0 (deceased).",
+                "Artie HP is locked at 1/1.",
+            ]
+        }
+    }
+    updated = _apply_state_patch(state, patch, chapter_end=False)
+    summary = updated["summary"]
+    assert "Artie HP is 0/0 (deceased)." not in summary["must_stay_true"]
+    assert "Artie HP is 0/0 (deceased)." not in summary["key_facts_ring"]
+    assert "Artie HP is locked at 1/1." in summary["must_stay_true"]
+
 def test_apply_state_patch_story_so_far_on_chapter_end() -> None:
     state = _base_state()
     patch = {"summary_update": {"story_so_far_add": ["Chapter 1 ends with escape."]}}
@@ -80,3 +99,6 @@ def test_rollup_chapter_summary(tmp_path: Path) -> None:
     assert payload["chapter"] == 1
     assert "Shard secured." in payload["key_events"]
     assert "Shard remains physical." in payload["must_stay_true"]
+
+
+

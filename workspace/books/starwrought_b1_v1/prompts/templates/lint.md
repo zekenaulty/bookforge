@@ -1,4 +1,4 @@
-﻿# LINT
+# LINT
 
 Check the scene for continuity, invariant violations, and duplication.
 Flag invariant contradictions against must_stay_true/key facts.
@@ -39,6 +39,10 @@ Return ONLY JSON matching the lint_report schema.
   - If MUST_STAY_TRUE invariants contradict the provided post-patch candidate character state, treat this as an upstream snapshot error.
   - In that case emit a single error issue with code "pipeline_state_incoherent" including evidence of the invariant and the conflicting state field.
   - Do NOT emit additional continuity errors for the same fields when pipeline_state_incoherent is present.
+- must_stay_true removals:
+  - Lines starting with "REMOVE:" are deletion directives, not invariants.
+  - Ignore REMOVE lines when checking contradictions.
+  - If a REMOVE directive targets a fact, treat that fact as non-canonical even if it appears earlier in must_stay_true.
 - If pipeline_state_incoherent is present, issues MUST contain exactly one issue.
 - For each issue, include evidence when possible (line number + excerpt) as {"evidence": {"line": N, "excerpt": "..."}}.
 - Evaluate consistency over the full scope of the scene, not a single snapshot.
@@ -113,3 +117,5 @@ Post-summary (facts-only):
 
 Post-invariants (must_stay_true + key facts):
 {{post_invariants}}
+
+

@@ -1,10 +1,17 @@
-﻿# REPAIR
+# REPAIR
 
 Fix the scene based on lint issues.
 Summaries are reference-only; do not recap them in prose unless scene_card explicitly requires recap.
 Timeline Lock: only depict events explicitly listed in the current Scene Card. Do not depict, imply, or resolve later-scene milestones (acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
-State primacy: state invariants and summary facts are binding; do not contradict them.
+State primacy: pre-scene invariants and summary facts are binding unless the Scene Card depicts a change. If this scene changes a durable fact, update must_stay_true to the final end-of-scene value and remove the old entry.
 Milestone uniqueness: if a milestone is marked DONE in must_stay_true, do not depict it again. If marked NOT_YET, do not depict it now.
+- must_stay_true reconciliation (mandatory):
+  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
+  - Remove conflicting old invariants rather than preserving them.
+- must_stay_true removal (mandatory when a durable fact is superseded):
+  - Add "REMOVE: <exact prior invariant text>" in summary_update.must_stay_true.
+  - Place REMOVE lines before the new final invariant.
+  - REMOVE lines also apply to key_facts_ring (purge stale facts from continuity).
 Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
 Inventory contract: track ownership and container location for key items; update must_stay_true when items move or change hands.
 For held items, specify container=hand_left or container=hand_right.
@@ -38,8 +45,20 @@ Naming repairs:
 - Do not rename item_id or registry fields; only adjust prose wording.
 summary_update arrays are mandatory; do not omit or leave empty unless explicitly stated.
 STATE_PATCH must record all major events and outcomes from the prose; if an event happens, add it to key_events and update must_stay_true as needed.
+- must_stay_true reconciliation (mandatory):
+
+  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
+  - Remove conflicting old invariants rather than preserving them.
 must_stay_true must include a milestone ledger entry for every milestone referenced in the Scene Card or already present in state.
+- must_stay_true reconciliation (mandatory):
+
+  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
+  - Remove conflicting old invariants rather than preserving them.
 If state lacks a key invariant needed for this scene, seed it in must_stay_true using standard phrasing.
+- must_stay_true reconciliation (mandatory):
+
+  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
+  - Remove conflicting old invariants rather than preserving them.
 Enforce scene-card durable constraints: `required_in_custody`, `required_scene_accessible`, `forbidden_visible`, `device_presence`; treat `required_visible_on_page` as explicit narrative requirement when present.
 Respect `timeline_scope` and `ontological_scope`; avoid physical durable custody changes in non-present/non-real scope unless explicit override is present.
 Return corrected prose plus a corrected state_patch JSON block.
@@ -49,7 +68,15 @@ COMPLIANCE:
 Scene ID: <scene_card.scene_id>
 Allowed events: <short list from Scene Card>
 Forbidden milestones: <from must_stay_true>
+- must_stay_true reconciliation (mandatory):
+
+  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
+  - Remove conflicting old invariants rather than preserving them.
 Current arm-side / inventory facts: <from must_stay_true>
+- must_stay_true reconciliation (mandatory):
+
+  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
+  - Remove conflicting old invariants rather than preserving them.
 
 APPEARANCE_CHECK:
 - CHAR_ID: <4-8 tokens from atoms/marks>
@@ -67,6 +94,10 @@ STATE_PATCH rules:
 - Use scene_card.thread_ids for open_threads (thread ids).
 - Do not invent new character or thread ids.
 - Include summary_update arrays: last_scene (array of 2-4 sentence strings), key_events (array of 3-7 bullet strings), must_stay_true (array of 3-7 bullet strings), chapter_so_far_add (array of bullet strings).
+- must_stay_true reconciliation (mandatory):
+
+  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
+  - Remove conflicting old invariants rather than preserving them.
 - Include story_so_far_add only at chapter end (or when scene_card explicitly requests).
 - Use threads_touched only if you can reference thread ids from scene_card.thread_ids.
 - Include character_continuity_system_updates for cast_present_ids when mechanics change.
@@ -89,6 +120,10 @@ STATE_PATCH rules:
   - summary_update fields must be arrays of strings.
     - INVALID: "summary_update": {"last_scene": "text"}
     - VALID: "summary_update": {"last_scene": ["text"], "key_events": ["..."], "must_stay_true": ["..."], "chapter_so_far_add": ["..."]}
+- must_stay_true reconciliation (mandatory):
+
+  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
+  - Remove conflicting old invariants rather than preserving them.
   - appearance_updates MUST be an object under character_updates.
     - INVALID: "appearance_updates": [{"set": {...}}] OR "appearance_updates": {"marks_add": [...]}
     - VALID: "appearance_updates": {"set": {"marks_add": [{"name": "Singed Hair", "location": "head", "durability": "durable"}]}, "reason": "..."}
@@ -118,6 +153,9 @@ STATE_PATCH rules:
   - `transfer_updates` for item handoffs (source, destination, reason, optional transfer_chain).
   - Every `transfer_updates` entry must include `item_id` and `reason` (non-empty string).
   - `inventory_alignment_updates` must be an array of objects; never an object with an `updates` field.
+  - inventory_alignment_updates[*].set MUST be an object (not a list).
+    - INVALID: "set": []
+    - VALID:   "set": {"inventory": [...], "containers": [...]}
 - For off-screen normalization and non-trivial durable mutations, include `reason_category` with stable values like `time_skip_normalize`, `location_jump_normalize`, `after_combat_cleanup`, `stowed_at_inn`, `handoff_transfer`, `knowledge_reveal`.
 - If you mutate durable state, do not leave the same mutation only in prose.
 - Include character_updates entries for cast_present_ids that change state (inventory, containers, persona shifts).
@@ -137,7 +175,15 @@ STATE_PATCH rules:
   - Container object shape: {"container": "<name>", "owner": "CHAR_id", "contents": ["ITEM_id", "..."]}.
   - If you have a single persona update, still wrap it in an array of strings.
 - must_stay_true must include a milestone ledger and invariants using standard phrasing, e.g.:
+- must_stay_true reconciliation (mandatory):
+
+  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
+  - Remove conflicting old invariants rather than preserving them.
   - Avoid numeric mechanics in must_stay_true; store them in continuity system updates instead.
+- must_stay_true reconciliation (mandatory):
+
+  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
+  - Remove conflicting old invariants rather than preserving them.
   - inventory: CHAR_example -> shard (carried, container=satchel)
   - inventory: CHAR_example -> longsword (carried, container=hand_right)
   - container: satchel (owner=CHAR_example, contents=[shard, maps])
@@ -192,3 +238,8 @@ JSON Contract Block (strict; arrays only):
     - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
     - VALID:   "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
 - custodian must be a non-null string id or "world"; never null.
+
+
+
+
+

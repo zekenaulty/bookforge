@@ -118,6 +118,38 @@ def _dedupe_preserve(items: List[str]) -> List[str]:
     return result
 
 
+def _normalize_invariant_text(value: str) -> str:
+    return str(value).strip().lower()
+
+
+def _split_invariant_removals(items: List[str]) -> tuple[list[str], list[str]]:
+    removals: List[str] = []
+    additions: List[str] = []
+    for item in items:
+        text = str(item).strip()
+        if text.lower().startswith("remove:"):
+            target = text.split(":", 1)[-1].strip()
+            if target:
+                removals.append(target)
+            continue
+        if text:
+            additions.append(text)
+    return removals, additions
+
+
+def _apply_invariant_removals(items: List[str], removals: List[str]) -> List[str]:
+    if not removals:
+        return items
+    remove_set = {_normalize_invariant_text(entry) for entry in removals if str(entry).strip()}
+    if not remove_set:
+        return items
+    filtered: List[str] = []
+    for item in items:
+        if _normalize_invariant_text(item) in remove_set:
+            continue
+        filtered.append(item)
+    return filtered
+
 def _append_continuity_list_item(target_set: Dict[str, Any], key: str, value: str) -> None:
     if key == "titles":
         existing = target_set.get("titles")
@@ -407,15 +439,18 @@ def _merge_summary_update(state: Dict[str, Any], summary_update: Dict[str, Any],
             summary["pending_story_rollups"] = pending
 
     key_events = _summary_list(summary_update.get("key_events"))
-    must_stay_true = _summary_list(summary_update.get("must_stay_true"))
+    raw_must_stay_true = _summary_list(summary_update.get("must_stay_true"))
+    removals, must_stay_true = _split_invariant_removals(raw_must_stay_true)
+    if removals:
+        summary["must_stay_true"] = _apply_invariant_removals(summary.get("must_stay_true", []), removals)
+        summary["key_facts_ring"] = _apply_invariant_removals(summary.get("key_facts_ring", []), removals)
     if key_events or must_stay_true:
         ring = summary.get("key_facts_ring", []) + key_events + must_stay_true
         summary["key_facts_ring"] = _dedupe_preserve(ring)[-SUMMARY_KEY_FACTS_CAP:]
 
     if must_stay_true:
         merged_invariants = summary.get("must_stay_true", []) + must_stay_true
-        summary["must_stay_true"] = _dedupe_preserve(merged_invariants)[-SUMMARY_MUST_STAY_TRUE_CAP:]
-
+        summary["must_stay_true"] = _dedupe_preserve(merged_invariants)[-SUMMARY_MUST_STAY_TRUE_CAP:]
     state["summary"] = summary
 
 
@@ -718,6 +753,11 @@ def _compile_chapter_markdown(book_root: Path, outline: Dict[str, Any], chapter_
     chapter_file = book_root / "draft" / "chapters" / f"ch_{chapter_num:03d}.md"
     chapter_file.write_text(compiled, encoding="utf-8")
     return chapter_file
+
+
+
+
+
 
 
 

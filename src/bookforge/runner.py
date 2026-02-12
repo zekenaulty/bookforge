@@ -36,6 +36,7 @@ from bookforge.pipeline.state_apply import _summary_from_state, _apply_state_pat
 from bookforge.pipeline.durable import _apply_durable_state_updates
 from bookforge.pipeline.io import _load_json, _snapshot_character_states_before_preflight, _log_scope, _write_scene_files
 from bookforge.pipeline.phase_history import _load_phase_history, _record_phase_success, _write_phase_artifact
+from bookforge.pipeline.run_logging import _current_run_id, _write_latest_run_pointer, _run_log_path, _append_run_log
 from bookforge.pipeline.lint import _lint_issue_entries, _lint_has_issue_code
 from bookforge.pipeline.llm_ops import _chat
 from bookforge.pipeline.prompts import _resolve_template
@@ -48,7 +49,7 @@ from bookforge.pipeline.state_patch import _coerce_stat_updates
 from bookforge.pipeline.lint import _heuristic_invariant_issues, _linked_durable_consistency_issues
 from bookforge.pipeline.durable import _durable_state_context
 from bookforge.pipeline.parse import _extract_prose_and_patch
-from bookforge.pipeline.log import _status, _now_iso
+from bookforge.pipeline.log import _status, _now_iso, set_run_log_path
 from bookforge.util.schema import validate_json
 
 PAUSE_EXIT_CODE = 75
@@ -416,6 +417,13 @@ def run_loop(
         raise FileNotFoundError(f"Missing outline.json: {outline_path}")
     if not system_path.exists():
         raise FileNotFoundError(f"Missing system_v1.md: {system_path}")
+
+    run_id = _current_run_id()
+    _write_latest_run_pointer(book_root, run_id)
+    set_run_log_path(_run_log_path(book_root, run_id))
+    _append_run_log(book_root, run_id, f"run_id: {run_id}")
+    _append_run_log(book_root, run_id, f"book_id: {book_id}")
+    _append_run_log(book_root, run_id, f"started_at: {_now_iso()}")
 
     book = _load_json(book_path)
     outline = _load_json(outline_path)
@@ -991,6 +999,8 @@ def run_loop(
 
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
+
+
 
 
 
