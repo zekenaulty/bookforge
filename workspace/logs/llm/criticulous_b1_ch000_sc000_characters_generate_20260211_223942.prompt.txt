@@ -1,0 +1,364 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties.
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+﻿Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+
+USER:
+
+# CHARACTERS GENERATE
+
+You are refining outline character stubs into canon character entries and initial per-book character state.
+Return ONLY a single JSON object. No markdown, no code fences, no commentary.
+Do not invent new characters; expand only the outline-provided stubs.
+
+Required top-level keys:
+- schema_version ("1.0")
+- characters (array)
+
+Each character object must include:
+- character_id
+- name
+- pronouns
+- role
+- persona (object)
+- inventory (array)
+- containers (array)
+- invariants (array of strings)
+- appearance_base (object)
+
+Recommended mechanic seed key (dynamic):
+- character_continuity_system_state (object)
+  - Include any starting mechanics known at setup time.
+  - Examples: stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses.
+  - titles must be an array of objects (not strings).
+  - You may add future mechanic families if relevant.
+  - Use dynamic continuity families as needed: stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, system_tracking_metadata, extended_system_data.
+  - For LitRPG-like systems, prefer structured stats/skills/titles in character_continuity_system_state.
+
+Appearance guidance (durable, canonical):
+- appearance_base is the canon self-image for this character.
+- Include: summary, atoms, marks, alias_map.
+- Atoms are normalized traits (species, sex_presentation, age_band, height_band, build, hair_color, hair_style, eye_color, skin_tone).
+- marks are durable identifiers (scars, tattoos, prosthetics). No temporary grime or wounds.
+- alias_map lists acceptable synonyms for lint tolerance (e.g., hair_color: ["dark brown"]).
+- appearance_current will be derived from appearance_base for the book unless explicitly overridden later.
+
+Naming and durable item guidance:
+- For items, use a human-readable item_name; do not use ITEM_* ids in prose strings.
+- Reserve ITEM_* ids for canonical JSON only; do not use them in prose strings.
+- If you emit an item_id here, include item_name as a human label.
+
+Starting scene alignment (important):
+- The initial inventory/containers/state must prepare each character for the book's first scene.
+- Use the Book + Outline characters in THIS prompt as your source of truth for the opening situation.
+- If the opening situation is unclear, default to a neutral, plausible posture (hands free, items stowed).
+- Example: office/briefing -> no weapons held; battle opener -> weapon may be in hand; travel -> stowed gear.
+
+Persona guidance (compact, factual):
+- core_traits (array)
+- motivations (array)
+- fears (array)
+- values (array)
+- voice_notes (array)
+- arc_hint (string)
+
+Inventory rules:
+- Every carried/held item must include a container location.
+- Use explicit container labels (satchel, belt, pack, hand_left, hand_right, sheath, etc.).
+- If an item is held, container must be hand_left or hand_right.
+- If you use item_id, include item_name (human label) on the same inventory entry. The item_name must be human readable and not an escaped id value.
+- Prefer item_name in prose-facing fields; item_id only in canonical JSON.
+- Containers are tracked separately in containers[] with owner and contents.
+
+Invariant phrasing (use exact strings where possible):
+- inventory: <CHAR_ID> -> <item> (status=carried|stowed|equipped, container=<container_label>)
+- container: <container_label> (owner=<CHAR_ID>, contents=[item1, item2])
+- injury: <character_id> <injury/location>
+
+Book:
+{
+  "author_ref": "eldrik-vale/v1",
+  "book_id": "criticulous_b1",
+  "genre": [
+    "litrpg",
+    "isekai",
+    "comedy"
+  ],
+  "invariants": [
+    "No world resets.",
+    "No convenient amnesia as a continuity device.",
+    "Do not change established names/relationships."
+  ],
+  "page_metrics": {
+    "chars_per_page": 1500,
+    "words_per_page": 250
+  },
+  "schema_version": "1.0",
+  "series_id": "crit-iculous",
+  "series_ref": "series/crit-iculous",
+  "targets": {
+    "avg_scene_words": 2000,
+    "chapters": 7
+  },
+  "title": "Crit Hit & Run",
+  "voice": {
+    "pov": "third_limited",
+    "style_tags": [
+      "no-recaps",
+      "forward-motion",
+      "tight-prose"
+    ],
+    "tense": "past"
+  }
+}
+
+Outline characters:
+[
+  {
+    "character_id": "CHAR_ARTIE",
+    "intro": {
+      "chapter": 1,
+      "scene": 1
+    },
+    "name": "Arthur 'Artie' Penhaligon",
+    "pronouns": "he/him",
+    "role": "protagonist"
+  },
+  {
+    "character_id": "CHAR_FIZZ",
+    "intro": {
+      "chapter": 1,
+      "scene": 2
+    },
+    "name": "Fizz",
+    "pronouns": "she/her",
+    "role": "companion/guide"
+  },
+  {
+    "character_id": "CHAR_VANE",
+    "intro": {
+      "chapter": 1,
+      "scene": 8
+    },
+    "name": "Vane",
+    "pronouns": "he/him",
+    "role": "antagonist"
+  },
+  {
+    "character_id": "CHAR_MAYOR",
+    "intro": {
+      "chapter": 1,
+      "scene": 7
+    },
+    "name": "Mayor of Oakhaven",
+    "pronouns": "he/him",
+    "role": "npc"
+  },
+  {
+    "character_id": "CHAR_BOSS",
+    "intro": {
+      "chapter": 6,
+      "scene": 8
+    },
+    "name": "The System Administrator",
+    "pronouns": "it/its",
+    "role": "overarching villain"
+  }
+]
+
+Outline opening context (chapter/section/scene 1):
+{
+  "chapter": {
+    "chapter_id": 1,
+    "title": "Welcome to the RNG-Hellscape",
+    "goal": "Introduce Artie and his broken 'Crit-Only' status in a high-stakes environment.",
+    "chapter_role": "hook",
+    "stakes_shift": "Artie goes from an office drone to a level 1 glitch in a lethal game world.",
+    "bridge": {
+      "from_prev": "N/A",
+      "to_next": "Artie must find a way to survive his first night with zero defensive stats."
+    },
+    "pacing": {
+      "intensity": 4,
+      "tempo": "rush",
+      "expected_scene_count": 8
+    }
+  },
+  "section": {
+    "section_id": 1,
+    "title": "The Exit Interview",
+    "intent": "Establish Artie's mundane life and sudden, absurd death."
+  },
+  "scene": {
+    "scene_id": 1,
+    "summary": "Artie argues with a vending machine over a bag of chips before a freak electrical surge sends him to the great login screen in the sky.",
+    "type": "setup",
+    "outcome": "Artie dies and enters the System's character creation void.",
+    "characters": [
+      "CHAR_ARTIE"
+    ],
+    "introduces": [
+      "CHAR_ARTIE"
+    ],
+    "threads": null
+  }
+}
+
+Series info (if any):
+{
+  "books": [
+    "criticulous_b1"
+  ],
+  "schema_version": "1.0",
+  "series_id": "crit-iculous"
+}
+
+Output JSON:
+{
+  "schema_version": "1.0",
+  "characters": [
+    {
+      "character_id": "CHAR_example",
+      "name": "",
+      "pronouns": "",
+      "role": "",
+      "persona": {
+        "core_traits": [],
+        "motivations": [],
+        "fears": [],
+        "values": [],
+        "voice_notes": [],
+        "arc_hint": ""
+      },
+      "appearance_base": {
+        "summary": "",
+        "atoms": {
+          "species": "human",
+          "sex_presentation": "",
+          "age_band": "",
+          "height_band": "",
+          "build": "",
+          "hair_color": "",
+          "hair_style": "",
+          "eye_color": "",
+          "skin_tone": ""
+        },
+        "marks": [
+          {"name": "", "location": "", "durability": "durable"}
+        ],
+        "alias_map": {
+          "hair_color": [""],
+          "eye_color": [""]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {"hp": {"current": 10, "max": 10}},
+        "skills": {"sword": 1},
+        "titles": [{"name": "Novice", "source": "starting_class", "active": true}],
+        "resources": {"mana": {"current": 5, "max": 5}}
+      },
+      "inventory": [
+        {"item_id": "ITEM_longsword", "item_name": "Longsword", "status": "carried", "container": "hand_right"}
+      ],
+      "containers": [
+        {"container": "satchel", "owner": "CHAR_example", "location": "shoulder_left", "contents": ["maps"]}
+      ],
+      "invariants": [
+        "inventory: CHAR_example -> longsword (status=carried, container=hand_right)",
+        "container: satchel (owner=CHAR_example, contents=[maps])"
+      ]
+    }
+  ]
+}

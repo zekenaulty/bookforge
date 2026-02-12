@@ -1,4 +1,4 @@
-﻿# REPAIR
+# REPAIR
 
 Fix the scene based on lint issues.
 Summaries are reference-only; do not recap them in prose unless scene_card explicitly requires recap.
@@ -118,6 +118,9 @@ STATE_PATCH rules:
   - `transfer_updates` for item handoffs (source, destination, reason, optional transfer_chain).
   - Every `transfer_updates` entry must include `item_id` and `reason` (non-empty string).
   - `inventory_alignment_updates` must be an array of objects; never an object with an `updates` field.
+  - inventory_alignment_updates[*].set MUST be an object (not a list).
+    - INVALID: "set": []
+    - VALID:   "set": {"inventory": [...], "containers": [...]}
 - For off-screen normalization and non-trivial durable mutations, include `reason_category` with stable values like `time_skip_normalize`, `location_jump_normalize`, `after_combat_cleanup`, `stowed_at_inn`, `handoff_transfer`, `knowledge_reveal`.
 - If you mutate durable state, do not leave the same mutation only in prose.
 - Include character_updates entries for cast_present_ids that change state (inventory, containers, persona shifts).

@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Office Breakroom",
+    "recent_facts": [
+      "Artie attempted to buy chips from a vending machine using his last dollar.",
+      "The vending machine malfunctioned and ate the dollar without providing credit.",
+      "Artie attempted to attack the machine, dealing 0 damage due to his Glitched status.",
+      "Artie was electrocuted by a frayed power cord after kicking the machine.",
+      "Artie's HP reached 0, triggering a System transition."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item_id": "ITEM_smartphone",
+          "container": "world",
+          "status": "dropped",
+          "item": "ITEM_smartphone"
+        },
+        {
+          "item_id": "ITEM_wallet",
+          "container": "world",
+          "status": "dropped",
+          "item": "ITEM_wallet"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        }
+      ],
+      "persona_updates": [
+        "Artie has experienced his first death and System interaction."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 1
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "delta": {
+        "stats": {
+          "hp": {
+            "current": -10
+          }
+        }
+      },
+      "set": {
+        "reason": "Electrocution from a malfunctioning vending machine."
+      },
+      "chapter": 1,
+      "scene": 1
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_crumpled_dollar",
+      "set": {
+        "custodian": "world",
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "Vending Machine Interior"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_crumpled_dollar",
+      "source": "CHAR_ARTIE",
+      "destination": "world",
+      "reason": "Consumed by vending machine validator.",
+      "from": {}
+    },
+    {
+      "item_id": "ITEM_smartphone",
+      "source": "CHAR_ARTIE",
+      "destination": "world",
+      "reason": "Dropped during electrocution.",
+      "from": {}
+    },
+    {
+      "item_id": "ITEM_wallet",
+      "source": "CHAR_ARTIE",
+      "destination": "world",
+      "reason": "Dropped during electrocution.",
+      "from": {}
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie dies in an office breakroom after a failed attempt to buy chips from a malfunctioning vending machine.",
+      "The scene introduces Artie's 'Crit-Only' glitch as he deals zero damage to the machine before being electrocuted.",
+      "The System intervenes at the moment of death, initiating a recalculation and a transition to a loading screen."
+    ],
+    "key_events": [
+      "Artie feeds ITEM_crumpled_dollar into the vending machine, which is then lost.",
+      "Artie discovers he cannot deal normal damage due to the 'Glitched: Crit-Only' status.",
+      "Artie is hit by an electrical surge, reducing his HP from 10 to 0.",
+      "The System detects Artie's unique build and begins a world-state transition.",
+      "Artie's physical belongings (wallet, phone) are left behind in the 'real' world."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+      "status: Artie is currently in a transition state between reality and the System.",
+      "invariant: Artie's base HP was 10 before the fatal surge."
+    ],
+    "chapter_so_far_add": [
+      "Artie died via vending machine electrocution after realizing his attacks do 0 damage."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "lanky",
+      "office",
+      "worker",
+      "messy",
+      "brown",
+      "hair",
+      "perpetually",
+      "tired",
+      "expression",
+      "pale",
+      "skin",
+      "hazel",
+      "eyes."
+    ]
+  }
+}

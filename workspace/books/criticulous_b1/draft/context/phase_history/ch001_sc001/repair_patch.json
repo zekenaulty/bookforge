@@ -1,0 +1,183 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Office Breakroom",
+    "recent_facts": [
+      "Artie was killed by a malfunctioning vending machine.",
+      "The System has flagged Artie as a 'Unique Build' due to a 100% Crit Rate glitch."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        }
+      ],
+      "persona_updates": [
+        "Artie has transitioned from a mundane office worker to a deceased System entity."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 1
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 0,
+            "max": 10
+          },
+          "damage": 0
+        },
+        "statuses": [
+          {
+            "name": "Deceased (Pending)",
+            "effect": "Entity is awaiting recalculation or deletion.",
+            "durable": true
+          },
+          {
+            "name": "Glitched: Crit-Only",
+            "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+            "durable": true
+          }
+        ],
+        "reason": "Electrocution and System initialization."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 1
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_crumpled_dollar",
+      "set": {
+        "custodian": "world",
+        "state_tags": [
+          "consumed",
+          "lost"
+        ]
+      }
+    },
+    {
+      "item_id": "ITEM_smartphone",
+      "set": {
+        "custodian": "world",
+        "state_tags": [
+          "dropped"
+        ]
+      }
+    },
+    {
+      "item_id": "ITEM_wallet",
+      "set": {
+        "custodian": "world",
+        "state_tags": [
+          "dropped"
+        ]
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_crumpled_dollar",
+      "reason": "inserted into vending machine and consumed without credit",
+      "from": {}
+    },
+    {
+      "item_id": "ITEM_smartphone",
+      "reason": "dropped on the breakroom floor during electrocution",
+      "from": {}
+    },
+    {
+      "item_id": "ITEM_wallet",
+      "reason": "dropped on the breakroom floor during electrocution",
+      "from": {}
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [],
+        "containers": [
+          {
+            "container": "hand_right",
+            "owner": "CHAR_ARTIE",
+            "contents": []
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": []
+          },
+          {
+            "container": "pocket_left",
+            "owner": "CHAR_ARTIE",
+            "contents": []
+          }
+        ]
+      },
+      "reason": "Post-death inventory loss and item dropping."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie Penhaligon, an exhausted office worker, attempted to buy chips from a vending machine using his last dollar.",
+      "After the machine stole his money and ignored his attacks, Artie kicked it, triggering a fatal electrical surge.",
+      "As Artie died, the System initialized, revealing a 'Crit-Only' glitch and beginning a recalculation of his data."
+    ],
+    "key_events": [
+      "Artie fails a Charisma check against a vending machine.",
+      "Artie discovers the 'Glitched: Crit-Only' status effect while trying to punch the machine.",
+      "Artie is electrocuted by a frayed power cord after kicking the machine.",
+      "Artie's HP reaches 0, triggering a System 'Unique Build' detection.",
+      "The world dissolves into a loading screen as Artie's character data is recalculated."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+      "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+      "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+      "status: Artie is currently in a 'Deceased (Pending)' state within the System."
+    ],
+    "chapter_so_far_add": [
+      "Artie Penhaligon dies in a mundane breakroom accident and enters the System."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "lanky",
+      "build",
+      "messy",
+      "brown",
+      "hair",
+      "hazel",
+      "eyes",
+      "pale",
+      "skin."
+    ]
+  }
+}

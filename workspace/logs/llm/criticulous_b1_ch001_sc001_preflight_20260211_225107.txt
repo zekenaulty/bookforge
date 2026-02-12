@@ -1,0 +1,205 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "location": "Office Breakroom",
+    "cast_present": [
+      "CHAR_ARTIE"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 1,
+      "inventory": [
+        {
+          "item_id": "ITEM_crumpled_dollar",
+          "container": "hand_right",
+          "status": "held"
+        },
+        {
+          "item_id": "ITEM_smartphone",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item_id": "ITEM_wallet",
+          "container": "pocket_left",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_crumpled_dollar"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_smartphone"
+          ]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_wallet"
+          ]
+        }
+      ],
+      "invariants_add": [
+        "inventory: CHAR_ARTIE -> crumpled dollar bill (status=held, container=hand_right)",
+        "inventory: CHAR_ARTIE -> cracked smartphone (status=stowed, container=pocket_right)",
+        "inventory: CHAR_ARTIE -> leather wallet (status=stowed, container=pocket_left)"
+      ],
+      "notes": "Initial setup for the opening scene."
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 10,
+            "max": 10
+          },
+          "str": 8,
+          "agi": 10,
+          "int": 12,
+          "luk": 1
+        },
+        "statuses": [
+          {
+            "name": "Glitched: Crit-Only",
+            "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+            "durable": true
+          }
+        ],
+        "titles": [
+          {
+            "name": "Disgruntled Employee",
+            "source": "background",
+            "active": true
+          }
+        ]
+      },
+      "reason": "Initial stat and status alignment for the start of the book."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item_id": "ITEM_crumpled_dollar",
+            "container": "hand_right",
+            "status": "held"
+          },
+          {
+            "item_id": "ITEM_smartphone",
+            "container": "pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item_id": "ITEM_wallet",
+            "container": "pocket_left",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "hand_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_crumpled_dollar"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_smartphone"
+            ]
+          },
+          {
+            "container": "pocket_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_wallet"
+            ]
+          }
+        ]
+      },
+      "reason": "Initial scene setup and posture alignment.",
+      "reason_category": "location_transition"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_crumpled_dollar",
+      "set": {
+        "name": "crumpled dollar bill",
+        "display_name": "crumpled dollar bill",
+        "type": "currency",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [],
+        "state_tags": [
+          "mundane"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "Office Breakroom"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_smartphone",
+      "set": {
+        "name": "cracked smartphone",
+        "display_name": "cracked smartphone",
+        "type": "electronics",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [],
+        "state_tags": [
+          "mundane"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "Office Breakroom"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_wallet",
+      "set": {
+        "name": "leather wallet",
+        "display_name": "leather wallet",
+        "type": "container",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [],
+        "state_tags": [
+          "mundane"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "Office Breakroom"
+        }
+      }
+    }
+  ],
+  "plot_device_updates": [],
+  "transfer_updates": [],
+  "global_continuity_system_updates": []
+}

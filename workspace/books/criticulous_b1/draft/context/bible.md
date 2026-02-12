@@ -1,0 +1,2 @@
+- Artie was killed by a malfunctioning vending machine.
+- The System has flagged Artie as a 'Unique Build' due to a 100% Crit Rate glitch.

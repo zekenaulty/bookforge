@@ -15,7 +15,6 @@ from bookforge.llm.errors import LLMRequestError
 from bookforge.llm.factory import get_llm_client, resolve_model
 from bookforge.llm.types import LLMResponse, Message
 from bookforge.memory.continuity import (
-    ContinuityPack,
     continuity_pack_path,
     load_style_anchor,
     save_continuity_pack,
@@ -609,7 +608,7 @@ def run_loop(
         if resume and phase_history:
             resume_artifacts = _phase_artifacts_for_resume(phase_history, "continuity_pack", ["pack"], book_root)
             if resume_artifacts:
-                continuity_pack = ContinuityPack.from_dict(_load_json(resume_artifacts["pack"]))
+                continuity_pack = _load_json(resume_artifacts["pack"])
         if continuity_pack is None:
             try:
                 continuity_pack = _generate_continuity_pack(
@@ -627,7 +626,7 @@ def run_loop(
                 )
             except LLMRequestError as exc:
                 _pause_on_quota(book_root, state_path, state, "continuity_pack", exc, scene_card)
-            artifact_path = _write_phase_artifact(book_root, chapter_num, scene_num, "continuity_pack", continuity_pack.to_dict(), as_json=True)
+            artifact_path = _write_phase_artifact(book_root, chapter_num, scene_num, "continuity_pack", continuity_pack, as_json=True)
             _record_phase_success(book_root, chapter_num, scene_num, "continuity_pack", {"pack": _artifact_relpath(book_root, artifact_path)})
         else:
             _status("Using continuity pack from phase history")
@@ -992,6 +991,7 @@ def run_loop(
 
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
+
 
 
 

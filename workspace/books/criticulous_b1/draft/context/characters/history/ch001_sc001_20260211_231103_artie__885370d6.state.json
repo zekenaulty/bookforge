@@ -1,0 +1,175 @@
+{
+  "schema_version": "1.0",
+  "character_id": "CHAR_ARTIE",
+  "inventory": [
+    {
+      "item_id": "ITEM_crumpled_dollar",
+      "container": "hand_right",
+      "status": "held"
+    },
+    {
+      "item_id": "ITEM_smartphone",
+      "container": "pocket_right",
+      "status": "stowed"
+    },
+    {
+      "item_id": "ITEM_wallet",
+      "container": "pocket_left",
+      "status": "stowed"
+    }
+  ],
+  "containers": [
+    {
+      "container": "hand_right",
+      "owner": "CHAR_ARTIE",
+      "contents": [
+        "ITEM_crumpled_dollar"
+      ]
+    },
+    {
+      "container": "pocket_right",
+      "owner": "CHAR_ARTIE",
+      "contents": [
+        "ITEM_smartphone"
+      ]
+    },
+    {
+      "container": "pocket_left",
+      "owner": "CHAR_ARTIE",
+      "contents": [
+        "ITEM_wallet"
+      ]
+    }
+  ],
+  "invariants": [
+    "inventory: CHAR_ARTIE -> crumpled dollar bill (status=carried, container=hand_right)",
+    "inventory: CHAR_ARTIE -> cracked smartphone (status=stowed, container=pocket_right)",
+    "inventory: CHAR_ARTIE -> leather wallet (status=stowed, container=pocket_left)",
+    "container: pocket_right (owner=CHAR_ARTIE, contents=[cracked smartphone])",
+    "container: pocket_left (owner=CHAR_ARTIE, contents=[leather wallet])",
+    "inventory: CHAR_ARTIE -> crumpled dollar bill (status=held, container=hand_right)"
+  ],
+  "history": [
+    {
+      "chapter": 1,
+      "scene": 1,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "persona_updates": [],
+      "notes": "Initial setup for Scene 1."
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "chapter": 1,
+      "scene": 1
+    },
+    {
+      "chapter": 1,
+      "scene": 1,
+      "changes": [
+        "inventory_alignment_updated"
+      ],
+      "notes": "Aligning inventory for the start of the book."
+    },
+    {
+      "chapter": 1,
+      "scene": 1,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "persona_updates": [],
+      "notes": "Initial setup for the opening scene."
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "chapter": 1,
+      "scene": 1
+    },
+    {
+      "chapter": 1,
+      "scene": 1,
+      "changes": [
+        "inventory_alignment_updated"
+      ],
+      "notes": "Initial scene setup and posture alignment."
+    }
+  ],
+  "name": "Arthur 'Artie' Penhaligon",
+  "appearance_current": {
+    "summary": "A slightly lanky office worker with messy brown hair and a perpetually tired expression.",
+    "atoms": {
+      "species": "human",
+      "sex_presentation": "masculine",
+      "age_band": "young_adult",
+      "height_band": "average",
+      "build": "lanky",
+      "hair_color": "brown",
+      "hair_style": "messy",
+      "eye_color": "hazel",
+      "skin_tone": "pale"
+    },
+    "marks": [],
+    "alias_map": {
+      "hair_color": [
+        "dark brown",
+        "chestnut"
+      ],
+      "eye_color": [
+        "hazel-green",
+        "light brown"
+      ]
+    }
+  },
+  "appearance_history": [],
+  "character_continuity_system_state": {
+    "stats": {
+      "hp": {
+        "current": 10,
+        "max": 10
+      },
+      "str": 8,
+      "agi": 10,
+      "int": 12,
+      "luk": 1
+    },
+    "skills": {},
+    "titles": [
+      {
+        "name": "Disgruntled Employee",
+        "source": "background",
+        "active": true
+      }
+    ],
+    "statuses": [
+      {
+        "name": "Glitched: Crit-Only",
+        "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+        "durable": true
+      }
+    ],
+    "reason": "Initial stat and status alignment for the start of the book."
+  },
+  "stats": {
+    "hp": {
+      "current": 10,
+      "max": 10
+    },
+    "str": 8,
+    "agi": 10,
+    "int": 12,
+    "luk": 1
+  },
+  "skills": {},
+  "updated_at": "2026-02-11T22:51:07Z",
+  "last_touched": {
+    "chapter": 1,
+    "scene": 1
+  }
+}

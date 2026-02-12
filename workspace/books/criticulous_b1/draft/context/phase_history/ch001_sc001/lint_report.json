@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {
+      "code": "pipeline_state_incoherent",
+      "message": "The derived character_states invariants contradict the canonical must_stay_true invariants regarding item custody for CHAR_ARTIE. The canonical state correctly reflects items being lost or dropped during the scene, while the derived view retains stale 'held' and 'stowed' invariants.",
+      "severity": "error",
+      "evidence": {
+        "excerpt": "must_stay_true: 'inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)' vs character_states[0].invariants: 'inventory: CHAR_ARTIE -> crumpled dollar bill (status=held, container=hand_right)'"
+      }
+    },
+    {
+      "code": "stat_mismatch",
+      "message": "UI shows HP but character state has {'current': 0, 'max': 10}.",
+      "severity": "warning"
+    },
+    {
+      "code": "stat_unowned",
+      "message": "UI shows Damage but no matching stat exists in state.",
+      "severity": "warning"
+    },
+    {
+      "code": "stat_unowned",
+      "message": "UI shows Damage but no matching stat exists in state.",
+      "severity": "warning"
+    },
+    {
+      "code": "stat_unowned",
+      "message": "UI shows Damage but no matching stat exists in state.",
+      "severity": "warning"
+    },
+    {
+      "code": "stat_unowned",
+      "message": "UI shows Damage but no matching stat exists in state.",
+      "severity": "warning"
+    }
+  ],
+  "mode": "heuristic"
+}

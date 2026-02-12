@@ -1,0 +1,218 @@
+COMPLIANCE:
+Scene ID: SC_001_002
+Allowed events: Fizz introduction, Artie navigating character creation, glitched point allocation, finalization of the 1 HP/100% Crit build.
+Forbidden milestones: Any travel to Oakhaven, any combat with slimes, any acquisition of the Cloak of the Cowardly Lion.
+Current arm-side / inventory facts: Artie has no items; Fizz holds sparkling guide wand in right hand.
+Durable changes committed: Artie HP set to 1/1, Status "Glitched: Crit-Only" confirmed, Title "Statistical Anomaly" added.
+
+APPEARANCE_CHECK:
+- CHAR_ARTIE: lanky young adult, messy brown hair, hazel eyes, pale skin.
+- CHAR_FIZZ: tiny iridescent sprite, neon pink bob, glowing violet eyes, pixelated wings.
+
+PROSE:
+The white void didn't have a floor, yet Artie’s feet felt like they were resting on high-grade linoleum. It was the most comfortable he’d been since the electrical surge from the Snack-Master 4000 had turned his nervous system into a highway for angry electrons.
+
+"Name?"
+
+The voice was high-pitched, vibrating with the synthetic hum of a corrupted audio file. Artie blinked, squinting against the sterile radiance. A tiny figure hovered a few feet away, wings fluttering so fast they were a blur of magenta pixels. She was barely the size of a soda can, with neon pink hair and eyes that glowed like ultraviolet LEDs.
+
+"Artie," he croaked, his throat feeling like he’d swallowed a handful of dry glitter. "Arthur Penhaligon. Am I... is this the part with the tunnel and the light?"
+
+"You’re in the part with the paperwork and the lack of a dental plan," the sprite snapped. She waved a sparkling guide wand, and a translucent blue window snapped into existence between them. "I’m Fizz. I’m your System Guide. Usually, I handle the 'Heroic Rebirth' package, but your data is... well, it’s a dumpster fire, Artie."
+
+[System Notification: Unique Build Detected]
+[Status: Deceased (Pending) -> Initializing Life Support...]
+
+"A dumpster fire?" Artie stepped forward, his lanky frame feeling strangely weightless. "I died over a bag of Jalapeño Hoops. I think I’ve suffered enough."
+
+"You died because you tried to melee a vending machine with a frayed power cord," Fizz corrected, pointing her sparkling guide wand at the screen. "The System flagged your 'Last Stand' as an act of extreme statistical improbability. Specifically, that kick you landed? It was a one-in-a-billion critical hit. The math broke, and now I’m stuck trying to fit your soul into a character sheet that’s currently screaming in binary."
+
+[Character Creation: Arthur Penhaligon]
+[Available Stat Points: 50]
+[Warning: Data Corruption in 'Luck' and 'Critical Rate' nodes.]
+
+"Just give me some health," Artie said, reaching out toward the floating UI. "I don't want to die again. Especially not to office equipment."
+
+"Careful with that!" Fizz yelped, but it was too late.
+
+Artie’s finger brushed the screen. In the weightless environment, his clumsy poke didn't just tap a button; it dragged a slider. The 'Critical Rate' bar surged toward the right, turning a deep, threatening crimson. The 'HP' bar, conversely, shriveled until it was nothing more than a microscopic sliver of red.
+
+[Stat Allocation Error: Overflow Detected!]
+[Critical Rate: 100% (LOCKED)]
+[Health Points: 1 (LOCKED)]
+
+"What did you do?" Fizz’s neon hair flared to a bright, angry orange. She frantically waved her sparkling guide wand, trying to reset the screen, but the UI just hissed and spat out a shower of golden sparks. "You just dumped every single point into a glitched stat! You have fifty points in Crit and one—literally one—hit point!"
+
+"Change it back!" Artie panicked, stabbing at the 'Reset' button. It grayed out instantly.
+
+"I can't! The System just finalized the build because it thinks you’re a 'Specialized Prototype'!" Fizz grabbed a thick, leather-bound volume from her satchel, The Noob's Guide to Not Dying, and began leafing through it so fast the pages smoked. "It says here... oh, this is bad. It says 'In the event of a 100% Crit-Rate lock, the user is classified as a Glass Cannon.' But you aren't a cannon, Artie. You're a glass thimble."
+
+[Build Finalized: The 'Crit-iculous' Specialization]
+[Title Earned: Statistical Anomaly]
+[Status Applied: Glitched: Crit-Only]
+
+"One HP?" Artie stared at the tiny bar. "That's not a build. That's a death sentence. A stiff breeze could kill me. A sneeze could kill me!"
+
+"On the bright side," Fizz said, her voice dripping with enough sarcasm to corrode the UI, "you’ll never have to worry about a long, drawn-out battle. You’ll either win in one hit, or you’ll be a very lanky smear on the floor. Now hold still. The portal is opening, and I have a quota to meet."
+
+"Wait, I'm not ready!"
+
+[Initializing Spawn: Tutorial Zone - Whispering Woods]
+[Health: 1/1]
+[Crit Rate: 100%]
+
+"Good luck, Anomaly," Fizz muttered, tucking her sparkling guide wand into her belt as the white void began to tear open, revealing a world of vibrant, terrifying green. "You're definitely going to need it. Or at least a very sturdy bubble-wrap suit."
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Character Creation Void",
+    "recent_facts": [
+      "Artie accidentally allocated all his starter points into Critical Rate during a UI glitch.",
+      "Fizz is introduced as Artie's System Guide.",
+      "Artie is locked into a 1 HP, 100% Crit-Only build."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        }
+      ],
+      "persona_updates": [
+        "Artie is terrified of his new glass-cannon status and frustrated by the System's rigidity."
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "inventory": [
+        {
+          "item_id": "ITEM_fizz_wand",
+          "container": "hand_right",
+          "status": "held"
+        },
+        {
+          "item_id": "ITEM_guidebook",
+          "container": "satchel",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "satchel",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_guidebook"
+          ]
+        },
+        {
+          "container": "hand_right",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_fizz_wand"
+          ]
+        }
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100,
+          "stat_points": 0
+        },
+        "titles": [
+          {
+            "name": "Statistical Anomaly",
+            "source": "system_glitch",
+            "active": true
+          }
+        ],
+        "statuses": [
+          {
+            "name": "Glitched: Crit-Only",
+            "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+            "durable": true
+          }
+        ]
+      },
+      "reason": "Finalization of the glitched character build."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie met his System Guide, Fizz, in the Character Creation Void.",
+      "Due to a UI glitch and Artie's clumsiness, he accidentally allocated all his stat points into Critical Rate.",
+      "The System locked Artie into a build with 1 HP and 100% Critical Rate before spawning him into the world."
+    ],
+    "key_events": [
+      "Fizz is introduced as a snarky, pixelated sprite guide.",
+      "Artie attempts to allocate points but triggers a Critical Rate overflow.",
+      "The System finalizes Artie's build as the 'Crit-iculous' Specialization.",
+      "Artie gains the title 'Statistical Anomaly'.",
+      "Artie is set to 1/1 HP and 100% Crit Rate.",
+      "Artie and Fizz prepare to spawn into the Whispering Woods tutorial zone."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "milestone: build_finalized = DONE",
+      "inventory: CHAR_FIZZ -> sparkling guide wand (status=held, container=hand_right)",
+      "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+      "Artie's HP is locked at 1/1.",
+      "Artie's Crit Rate is locked at 100%."
+    ],
+    "chapter_so_far_add": [
+      "Artie has been reincarnated with a broken, high-risk build after a vending machine accident."
+    ]
+  },
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_FIZZ",
+      "set": {
+        "inventory": [
+          {
+            "item_id": "ITEM_fizz_wand",
+            "container": "hand_right",
+            "status": "held"
+          },
+          {
+            "item_id": "ITEM_guidebook",
+            "container": "satchel",
+            "status": "stowed"
+          }
+        ]
+      },
+      "reason": "Ensuring guide items are correctly positioned for the transition."
+    }
+  ]
+}

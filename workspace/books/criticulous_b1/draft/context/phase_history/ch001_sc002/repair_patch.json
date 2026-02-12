@@ -1,0 +1,187 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Character Creation Void",
+    "recent_facts": [
+      "Artie accidentally allocated all 50 stat points into Critical Rate.",
+      "The System locked Artie into a 1 HP build with 100% Critical Hit rate.",
+      "Fizz is assigned as Artie's guide and is visibly frustrated by his glitched status."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": []
+        }
+      ],
+      "persona_updates": [
+        "Artie is now a 'Statistical Anomaly' with a fatalistic outlook on his 1 HP survival prospects."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 2
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "inventory": [
+        {
+          "item_id": "ITEM_fizz_wand",
+          "container": "hand_right",
+          "status": "held",
+          "item": "ITEM_fizz_wand"
+        },
+        {
+          "item_id": "ITEM_guidebook",
+          "container": "satchel",
+          "status": "stowed",
+          "item": "ITEM_guidebook"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_fizz_wand"
+          ]
+        },
+        {
+          "container": "satchel",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_guidebook"
+          ]
+        }
+      ],
+      "persona_updates": [],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100,
+          "stat_points": 0
+        },
+        "titles": [
+          {
+            "name": "Statistical Anomaly",
+            "source": "system_glitch",
+            "active": true
+          }
+        ],
+        "statuses": [
+          {
+            "name": "Glitched: Crit-Only",
+            "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+            "durable": true
+          }
+        ],
+        "reason": "Finalization of the glitched character build."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_FIZZ",
+      "set": {
+        "inventory": [
+          {
+            "item_id": "ITEM_fizz_wand",
+            "container": "hand_right",
+            "status": "held"
+          },
+          {
+            "item_id": "ITEM_guidebook",
+            "container": "satchel",
+            "status": "stowed"
+          }
+        ]
+      },
+      "reason": "Normalization of guide equipment posture."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie met his System Guide, Fizz, in a white void following his death.",
+      "A UI glitch caused Artie to dump all his stat points into Critical Rate, leaving him with only 1 HP.",
+      "The System finalized the 'Crit-iculous' build, and Fizz prepared to send Artie to the tutorial zone."
+    ],
+    "key_events": [
+      "Artie interacts with the System UI for the first time.",
+      "Artie accidentally triggers a stat overflow glitch.",
+      "Artie's HP is permanently locked at 1.",
+      "Artie's Critical Rate is permanently locked at 100%.",
+      "Artie earns the 'Statistical Anomaly' title.",
+      "Fizz consults 'The Noob's Guide to Not Dying' regarding the glitch."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+      "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+      "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+      "Artie's HP is 1 and he is locked into the Crit-Only build."
+    ],
+    "chapter_so_far_add": [
+      "Artie finalized a glitched build in the character creation void with the help of Fizz."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "lanky",
+      "messy",
+      "brown",
+      "hair",
+      "hazel",
+      "eyes",
+      "pale",
+      "skin."
+    ],
+    "CHAR_FIZZ": [
+      "tiny",
+      "sprite",
+      "neon",
+      "pink",
+      "hair",
+      "glowing",
+      "violet",
+      "eyes",
+      "pixelated",
+      "wings."
+    ]
+  }
+}

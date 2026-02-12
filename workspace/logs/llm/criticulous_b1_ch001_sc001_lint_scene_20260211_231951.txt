@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {
+      "code": "pipeline_state_incoherent",
+      "message": "The post-patch candidate state for CHAR_ARTIE contradicts the MUST_STAY_TRUE invariants. The invariants state that the 'crumpled dollar bill' (ITEM_crumpled_dollar) is lost and the 'cracked smartphone' (ITEM_smartphone) and 'leather wallet' (ITEM_wallet) are dropped (container=world), but the character's inventory array still lists these items as 'held' or 'stowed' in his possession.",
+      "severity": "error",
+      "evidence": {
+        "line": 65,
+        "excerpt": "My cracked smartphone flew out of my pocket, clattering across the linoleum. ... Invariant: inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world) vs State: ITEM_smartphone (status=stowed, container=pocket_right)"
+      }
+    }
+  ]
+}

@@ -1,0 +1,184 @@
+{
+  "schema_version": "1.0",
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 2,
+      "inventory": [],
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "pocket_right",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "pocket_left",
+          "contents": [],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "persona_updates": [
+        "Artie has transitioned from a deceased office worker to a level 1 System entity awaiting build finalization."
+      ],
+      "invariants_add": [
+        "Artie's HP is 1 and he is locked into the Crit-Only build."
+      ],
+      "scope_override": true,
+      "reason_category": "timeline_override"
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "chapter": 1,
+      "scene": 2,
+      "inventory": [
+        {
+          "item_id": "ITEM_fizz_wand",
+          "container": "hand_right",
+          "status": "held",
+          "item": "ITEM_fizz_wand"
+        },
+        {
+          "item_id": "ITEM_guidebook",
+          "container": "satchel",
+          "status": "stowed",
+          "item": "ITEM_guidebook"
+        }
+      ],
+      "containers": [
+        {
+          "container": "satchel",
+          "contents": [
+            "ITEM_guidebook"
+          ],
+          "location": "shoulder_left",
+          "owner": "CHAR_FIZZ"
+        },
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_fizz_wand"
+          ],
+          "owner": "CHAR_FIZZ"
+        }
+      ],
+      "persona_updates": [
+        "Fizz is introduced as Artie's snarky System Guide."
+      ],
+      "scope_override": true,
+      "reason_category": "timeline_override",
+      "invariants_add": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          }
+        },
+        "statuses": [
+          {
+            "durable": true,
+            "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+            "name": "Glitched: Crit-Only"
+          }
+        ],
+        "reason": "System recalculation and build finalization.",
+        "scope_override": true,
+        "reason_category": "timeline_override"
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_FIZZ",
+      "set": {
+        "inventory": [
+          {
+            "item_id": "ITEM_fizz_wand",
+            "container": "hand_right",
+            "status": "held"
+          },
+          {
+            "item_id": "ITEM_guidebook",
+            "container": "satchel",
+            "status": "stowed"
+          }
+        ]
+      },
+      "scope_override": true,
+      "reason": "Initial appearance and posture alignment in non-real space",
+      "reason_category": "timeline_override"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_fizz_wand",
+      "set": {
+        "name": "sparkling guide wand",
+        "display_name": "sparkling guide wand",
+        "type": "tool",
+        "owner_scope": "character",
+        "custodian": "CHAR_FIZZ",
+        "linked_threads": [
+          "THREAD_SYSTEM_GLITCH"
+        ],
+        "state_tags": [
+          "magical",
+          "system_interface"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "Character Creation Void"
+        }
+      },
+      "scope_override": true,
+      "reason_category": "timeline_override"
+    },
+    {
+      "item_id": "ITEM_guidebook",
+      "set": {
+        "name": "The Noob's Guide to Not Dying",
+        "display_name": "The Noob's Guide to Not Dying",
+        "type": "book",
+        "owner_scope": "character",
+        "custodian": "CHAR_FIZZ",
+        "linked_threads": [
+          "THREAD_SYSTEM_GLITCH"
+        ],
+        "state_tags": [
+          "educational"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "Character Creation Void"
+        }
+      },
+      "scope_override": true,
+      "reason_category": "timeline_override"
+    }
+  ],
+  "world_updates": {
+    "location": "Character Creation Void",
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "scope_override": true,
+    "reason_category": "timeline_override"
+  }
+}

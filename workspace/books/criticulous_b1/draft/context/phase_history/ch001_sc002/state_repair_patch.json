@@ -1,0 +1,248 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "specialization": "Crit-iculous",
+        "stats": {
+          "crit_rate": 100,
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "stat_points": 0
+        },
+        "statuses": [
+          {
+            "durable": true,
+            "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+            "name": "Glitched: Crit-Only"
+          }
+        ],
+        "titles": [
+          {
+            "active": true,
+            "name": "Statistical Anomaly",
+            "source": "system_glitch"
+          }
+        ],
+        "reason": "Finalization of the glitched character build.",
+        "reason_category": "timeline_override",
+        "scope_override": true
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "invariants_add": [
+        "Artie's HP is 1/1 and cannot be increased through normal means.",
+        "Artie's Critical Rate is 100% and locked.",
+        "Artie possesses the title 'Statistical Anomaly'.",
+        "Artie is under the 'Glitched: Crit-Only' status effect."
+      ],
+      "persona_updates": [
+        "Artie has transitioned from a deceased office worker to a level 1 'Statistical Anomaly' with a fatalistic outlook on his 1 HP survival prospects."
+      ],
+      "chapter": 1,
+      "scene": 2
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [],
+          "owner": "CHAR_FIZZ"
+        },
+        {
+          "container": "belt",
+          "contents": [
+            "ITEM_fizz_wand"
+          ],
+          "owner": "CHAR_FIZZ"
+        },
+        {
+          "container": "satchel",
+          "contents": [
+            "ITEM_guidebook"
+          ],
+          "owner": "CHAR_FIZZ"
+        }
+      ],
+      "inventory": [
+        {
+          "container": "belt",
+          "item": "sparkling guide wand",
+          "item_id": "ITEM_fizz_wand",
+          "status": "stowed"
+        },
+        {
+          "container": "satchel",
+          "item": "The Noob's Guide to Not Dying",
+          "item_id": "ITEM_guidebook",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": [],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "global_continuity_system_updates": [],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_FIZZ",
+      "reason": "Normalization of guide equipment posture at scene end.",
+      "reason_category": "timeline_override",
+      "scope_override": true,
+      "set": {
+        "containers": [
+          {
+            "container": "hand_right",
+            "contents": [],
+            "owner": "CHAR_FIZZ"
+          },
+          {
+            "container": "belt",
+            "contents": [
+              "ITEM_fizz_wand"
+            ],
+            "owner": "CHAR_FIZZ"
+          },
+          {
+            "container": "satchel",
+            "contents": [
+              "ITEM_guidebook"
+            ],
+            "owner": "CHAR_FIZZ"
+          }
+        ],
+        "inventory": [
+          {
+            "container": "belt",
+            "item_id": "ITEM_fizz_wand",
+            "status": "stowed"
+          },
+          {
+            "container": "satchel",
+            "item_id": "ITEM_guidebook",
+            "status": "stowed"
+          }
+        ]
+      }
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_fizz_wand",
+      "set": {
+        "custodian": "CHAR_FIZZ",
+        "last_seen": {
+          "chapter": 1,
+          "location": "Character Creation Void",
+          "scene": 2
+        },
+        "linked_threads": [
+          "THREAD_SYSTEM_GLITCH"
+        ],
+        "name": "sparkling guide wand",
+        "owner_scope": "character",
+        "state_tags": [
+          "magical",
+          "system_interface"
+        ],
+        "type": "tool"
+      }
+    },
+    {
+      "item_id": "ITEM_guidebook",
+      "set": {
+        "custodian": "CHAR_FIZZ",
+        "last_seen": {
+          "chapter": 1,
+          "location": "Character Creation Void",
+          "scene": 2
+        },
+        "linked_threads": [
+          "THREAD_SYSTEM_GLITCH"
+        ],
+        "name": "The Noob's Guide to Not Dying",
+        "owner_scope": "character",
+        "state_tags": [
+          "educational"
+        ],
+        "type": "book"
+      }
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "set": {
+        "activation_state": "active",
+        "custody_ref": "THREAD_CRIT_EXPLOIT",
+        "custody_scope": "thread",
+        "last_seen": {
+          "chapter": 1,
+          "location": "Character Creation Void",
+          "scene": 2
+        },
+        "linked_threads": [
+          "THREAD_CRIT_EXPLOIT"
+        ],
+        "name": "The 100% Crit Glitch"
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie finalized a glitched build in the character creation void with the help of Fizz."
+    ],
+    "key_events": [
+      "Artie encounters Fizz, a Class C System Guide, in the white void.",
+      "The System detects a unique build based on Artie's 'one-in-a-billion' fatal kick to the vending machine.",
+      "Artie accidentally drags the stat slider, allocating all 50 points to Critical Rate.",
+      "The System locks Artie's HP at 1 and his Critical Rate at 100%.",
+      "Artie earns the title 'Statistical Anomaly' and the 'Crit-iculous' specialization.",
+      "Fizz consults 'The Noob's Guide to Not Dying' to diagnose the glitched build.",
+      "Artie is teleported to the Whispering Woods tutorial zone."
+    ],
+    "last_scene": [
+      "Artie met his System Guide, Fizz, in the Character Creation Void following his death.",
+      "A clumsy interaction with the UI caused him to dump all 50 stat points into Critical Rate, leaving him with only 1 HP.",
+      "The System finalized the 'Crit-iculous' build, locking him into a high-risk existence as a Statistical Anomaly before sending him to the tutorial zone."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "Artie's HP is 1/1 and cannot be increased through normal means.",
+      "Artie's Critical Rate is 100% and locked.",
+      "Artie possesses the title 'Statistical Anomaly'.",
+      "Artie is under the 'Glitched: Crit-Only' status effect.",
+      "Artie's previous belongings (phone, wallet, dollar) remain lost or dropped in the world."
+    ]
+  },
+  "transfer_updates": [],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Character Creation Void",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie allocated all 50 stat points to Critical Rate.",
+      "Artie is locked at 1 HP.",
+      "Fizz is Artie's assigned System Guide.",
+      "Artie has been sent to the Whispering Woods tutorial zone."
+    ]
+  }
+}

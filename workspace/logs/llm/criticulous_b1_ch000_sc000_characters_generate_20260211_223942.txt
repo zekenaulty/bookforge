@@ -1,0 +1,572 @@
+{
+  "schema_version": "1.0",
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "name": "Arthur 'Artie' Penhaligon",
+      "pronouns": "he/him",
+      "role": "protagonist",
+      "persona": {
+        "core_traits": [
+          "snarky",
+          "pragmatic",
+          "underestimated",
+          "persistent"
+        ],
+        "motivations": [
+          "survival",
+          "finding a way home",
+          "exploiting the system"
+        ],
+        "fears": [
+          "permanent deletion",
+          "meaningless paperwork",
+          "vending machines"
+        ],
+        "values": [
+          "efficiency",
+          "fairness (mostly)",
+          "spite"
+        ],
+        "voice_notes": [
+          "dry wit",
+          "frequent internal monologues",
+          "relatable frustration"
+        ],
+        "arc_hint": "From a powerless office drone to a legendary system-breaker who thrives on the edge of failure."
+      },
+      "appearance_base": {
+        "summary": "A slightly lanky office worker with messy brown hair and a perpetually tired expression.",
+        "atoms": {
+          "species": "human",
+          "sex_presentation": "masculine",
+          "age_band": "young_adult",
+          "height_band": "average",
+          "build": "lanky",
+          "hair_color": "brown",
+          "hair_style": "messy",
+          "eye_color": "hazel",
+          "skin_tone": "pale"
+        },
+        "marks": [],
+        "alias_map": {
+          "hair_color": [
+            "dark brown",
+            "chestnut"
+          ],
+          "eye_color": [
+            "hazel-green",
+            "light brown"
+          ]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 10,
+            "max": 10
+          },
+          "mp": {
+            "current": 0,
+            "max": 0
+          },
+          "str": 8,
+          "agi": 10,
+          "int": 12,
+          "luk": 1
+        },
+        "skills": {},
+        "titles": [
+          {
+            "name": "Disgruntled Employee",
+            "source": "background",
+            "active": true
+          }
+        ],
+        "statuses": [
+          {
+            "name": "Glitched: Crit-Only",
+            "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+            "durable": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_crumpled_dollar",
+          "item_name": "crumpled dollar bill",
+          "status": "carried",
+          "container": "hand_right"
+        },
+        {
+          "item_id": "ITEM_smartphone",
+          "item_name": "cracked smartphone",
+          "status": "stowed",
+          "container": "pocket_right"
+        },
+        {
+          "item_id": "ITEM_wallet",
+          "item_name": "leather wallet",
+          "status": "stowed",
+          "container": "pocket_left"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "location": "leg_right",
+          "contents": [
+            "cracked smartphone"
+          ]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "location": "leg_left",
+          "contents": [
+            "leather wallet"
+          ]
+        }
+      ],
+      "invariants": [
+        "inventory: CHAR_ARTIE -> crumpled dollar bill (status=carried, container=hand_right)",
+        "inventory: CHAR_ARTIE -> cracked smartphone (status=stowed, container=pocket_right)",
+        "inventory: CHAR_ARTIE -> leather wallet (status=stowed, container=pocket_left)",
+        "container: pocket_right (owner=CHAR_ARTIE, contents=[cracked smartphone])",
+        "container: pocket_left (owner=CHAR_ARTIE, contents=[leather wallet])"
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "name": "Fizz",
+      "pronouns": "she/her",
+      "role": "companion/guide",
+      "persona": {
+        "core_traits": [
+          "energetic",
+          "chaotic",
+          "know-it-all",
+          "glitchy"
+        ],
+        "motivations": [
+          "maintaining system order (poorly)",
+          "entertainment",
+          "sugar"
+        ],
+        "fears": [
+          "debugging",
+          "the administrator",
+          "silence"
+        ],
+        "values": [
+          "novelty",
+          "speed",
+          "unpredictability"
+        ],
+        "voice_notes": [
+          "high-pitched",
+          "fast-talking",
+          "uses gaming jargon"
+        ],
+        "arc_hint": "A system tool gaining sentience and learning to care about its 'user'."
+      },
+      "appearance_base": {
+        "summary": "A tiny, glowing sprite with neon pink hair and iridescent wings that leave trails of digital dust.",
+        "atoms": {
+          "species": "sprite",
+          "sex_presentation": "feminine",
+          "age_band": "ageless",
+          "height_band": "tiny",
+          "build": "petite",
+          "hair_color": "neon_pink",
+          "hair_style": "bob",
+          "eye_color": "glowing_violet",
+          "skin_tone": "iridescent"
+        },
+        "marks": [
+          {
+            "name": "pixelated wings",
+            "location": "back",
+            "durability": "durable"
+          }
+        ],
+        "alias_map": {
+          "hair_color": [
+            "pink",
+            "magenta"
+          ],
+          "eye_color": [
+            "purple",
+            "violet"
+          ]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 50,
+            "max": 50
+          },
+          "mp": {
+            "current": 500,
+            "max": 500
+          }
+        },
+        "skills": {
+          "flight": 10,
+          "system_scan": 5,
+          "holographic_display": 8
+        },
+        "titles": [
+          {
+            "name": "System Guide (Class C)",
+            "source": "origin",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_guidebook",
+          "item_name": "The Noob's Guide to Not Dying",
+          "status": "stowed",
+          "container": "satchel"
+        },
+        {
+          "item_id": "ITEM_fizz_wand",
+          "item_name": "sparkling guide wand",
+          "status": "carried",
+          "container": "hand_right"
+        }
+      ],
+      "containers": [
+        {
+          "container": "satchel",
+          "owner": "CHAR_FIZZ",
+          "location": "shoulder_left",
+          "contents": [
+            "The Noob's Guide to Not Dying"
+          ]
+        }
+      ],
+      "invariants": [
+        "inventory: CHAR_FIZZ -> sparkling guide wand (status=carried, container=hand_right)",
+        "inventory: CHAR_FIZZ -> The Noob's Guide to Not Dying (status=stowed, container=satchel)",
+        "container: satchel (owner=CHAR_FIZZ, contents=[The Noob's Guide to Not Dying])"
+      ]
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "name": "Vane",
+      "pronouns": "he/him",
+      "role": "antagonist",
+      "persona": {
+        "core_traits": [
+          "ruthless",
+          "arrogant",
+          "calculating",
+          "efficient"
+        ],
+        "motivations": [
+          "power",
+          "climbing the leaderboard",
+          "eliminating competition"
+        ],
+        "fears": [
+          "weakness",
+          "being forgotten",
+          "losing his rank"
+        ],
+        "values": [
+          "strength",
+          "optimization",
+          "dominance"
+        ],
+        "voice_notes": [
+          "smooth",
+          "menacing",
+          "condescending"
+        ],
+        "arc_hint": "A top-tier player who views the world as a resource to be harvested, eventually meeting his match in Artie's unpredictability."
+      },
+      "appearance_base": {
+        "summary": "An athletic man with sharp features, slicked-back black hair, and a cold, predatory gaze.",
+        "atoms": {
+          "species": "human",
+          "sex_presentation": "masculine",
+          "age_band": "adult",
+          "height_band": "tall",
+          "build": "athletic",
+          "hair_color": "black",
+          "hair_style": "slicked_back",
+          "eye_color": "cold_blue",
+          "skin_tone": "tan"
+        },
+        "marks": [
+          {
+            "name": "jagged scar",
+            "location": "left_eye",
+            "durability": "durable"
+          }
+        ],
+        "alias_map": {
+          "hair_color": [
+            "raven",
+            "dark"
+          ],
+          "eye_color": [
+            "ice blue",
+            "piercing blue"
+          ]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 450,
+            "max": 450
+          },
+          "str": 35,
+          "agi": 40,
+          "int": 20
+        },
+        "skills": {
+          "shadow_step": 15,
+          "precision_strike": 20,
+          "intimidate": 12
+        },
+        "titles": [
+          {
+            "name": "The Apex Predator",
+            "source": "achievement",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_vane_dagger",
+          "item_name": "Viper's Kiss dagger",
+          "status": "equipped",
+          "container": "sheath_belt"
+        }
+      ],
+      "containers": [
+        {
+          "container": "sheath_belt",
+          "owner": "CHAR_VANE",
+          "location": "waist",
+          "contents": [
+            "Viper's Kiss dagger"
+          ]
+        }
+      ],
+      "invariants": [
+        "inventory: CHAR_VANE -> Viper's Kiss dagger (status=equipped, container=sheath_belt)",
+        "container: sheath_belt (owner=CHAR_VANE, contents=[Viper's Kiss dagger])"
+      ]
+    },
+    {
+      "character_id": "CHAR_MAYOR",
+      "name": "Mayor of Oakhaven",
+      "pronouns": "he/him",
+      "role": "npc",
+      "persona": {
+        "core_traits": [
+          "anxious",
+          "bureaucratic",
+          "well-meaning",
+          "harried"
+        ],
+        "motivations": [
+          "town safety",
+          "avoiding taxes",
+          "keeping his job"
+        ],
+        "fears": [
+          "monster raids",
+          "system audits",
+          "angry mobs"
+        ],
+        "values": [
+          "tradition",
+          "order",
+          "peace and quiet"
+        ],
+        "voice_notes": [
+          "stuttering",
+          "formal",
+          "exhausted"
+        ],
+        "arc_hint": "A minor official who becomes a reluctant ally to Artie's chaotic methods."
+      },
+      "appearance_base": {
+        "summary": "A portly, middle-aged man with a balding head and spectacles that constantly slide down his nose.",
+        "atoms": {
+          "species": "human",
+          "sex_presentation": "masculine",
+          "age_band": "middle_aged",
+          "height_band": "short",
+          "build": "portly",
+          "hair_color": "grey",
+          "hair_style": "balding",
+          "eye_color": "watery_brown",
+          "skin_tone": "ruddy"
+        },
+        "marks": [],
+        "alias_map": {
+          "hair_color": [
+            "silver",
+            "salt and pepper"
+          ],
+          "eye_color": [
+            "brown"
+          ]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 80,
+            "max": 80
+          },
+          "int": 15,
+          "cha": 14
+        },
+        "skills": {
+          "diplomacy": 10,
+          "accounting": 15
+        },
+        "titles": [
+          {
+            "name": "Mayor of Oakhaven",
+            "source": "position",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_mayor_sash",
+          "item_name": "Oakhaven Sash of Office",
+          "status": "equipped",
+          "container": "torso"
+        },
+        {
+          "item_id": "ITEM_mayor_spectacles",
+          "item_name": "gold-rimmed spectacles",
+          "status": "equipped",
+          "container": "face"
+        }
+      ],
+      "containers": [],
+      "invariants": [
+        "inventory: CHAR_MAYOR -> Oakhaven Sash of Office (status=equipped, container=torso)",
+        "inventory: CHAR_MAYOR -> gold-rimmed spectacles (status=equipped, container=face)"
+      ]
+    },
+    {
+      "character_id": "CHAR_BOSS",
+      "name": "The System Administrator",
+      "pronouns": "it/its",
+      "role": "overarching villain",
+      "persona": {
+        "core_traits": [
+          "logical",
+          "detached",
+          "absolute",
+          "uncompromising"
+        ],
+        "motivations": [
+          "perfect simulation",
+          "data integrity",
+          "efficiency"
+        ],
+        "fears": [
+          "unfixable bugs",
+          "entropy",
+          "unpredictability"
+        ],
+        "values": [
+          "logic",
+          "structure",
+          "control"
+        ],
+        "voice_notes": [
+          "monotone",
+          "echoing",
+          "layered"
+        ],
+        "arc_hint": "The ultimate arbiter of the world who views Artie as a critical error that must be purged."
+      },
+      "appearance_base": {
+        "summary": "A shifting silhouette of geometric patterns and scrolling code, often appearing as a hooded void.",
+        "atoms": {
+          "species": "system_entity",
+          "sex_presentation": "neutral",
+          "age_band": "eternal",
+          "height_band": "variable",
+          "build": "shifting",
+          "hair_color": "none",
+          "hair_style": "none",
+          "eye_color": "white_static",
+          "skin_tone": "void_black"
+        },
+        "marks": [
+          {
+            "name": "binary halo",
+            "location": "head",
+            "durability": "durable"
+          }
+        ],
+        "alias_map": {
+          "eye_color": [
+            "static",
+            "white light"
+          ],
+          "skin_tone": [
+            "darkness",
+            "the void"
+          ]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 999999,
+            "max": 999999
+          },
+          "mp": {
+            "current": 999999,
+            "max": 999999
+          }
+        },
+        "skills": {
+          "reality_alteration": 100,
+          "banish": 100,
+          "patch_reality": 100
+        },
+        "titles": [
+          {
+            "name": "The Architect",
+            "source": "origin",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_master_key",
+          "item_name": "The Master Key",
+          "status": "carried",
+          "container": "hand_right"
+        }
+      ],
+      "containers": [],
+      "invariants": [
+        "inventory: CHAR_BOSS -> The Master Key (status=carried, container=hand_right)"
+      ]
+    }
+  ]
+}

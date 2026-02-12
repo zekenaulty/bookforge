@@ -1,0 +1,965 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties.
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v1
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+﻿Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+
+USER:
+
+﻿# LINT
+
+Check the scene for continuity, invariant violations, and duplication.
+Flag invariant contradictions against must_stay_true/key facts.
+Return ONLY JSON matching the lint_report schema.
+- Classify UI/prose mechanic claims as DURABLE or EPHEMERAL before enforcing.
+  - DURABLE: persistent stats/caps, skills/titles acquired, lasting status effects, inventory/custody, named mechanics referenced as invariants.
+  - EPHEMERAL: roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat telemetry.
+- Enforce DURABLE claims against authoritative_surfaces/state/registries.
+- EPHEMERAL claims do not require state ownership; only flag EPHEMERAL contradictions inside the same scene as warnings.
+- If uncertain, default to EPHEMERAL (warning at most), not DURABLE (error).
+- status="fail" only if there is at least one issue with severity="error"; warnings alone => status="pass".
+- Item naming enforcement scope:
+  - Do not require that every mention in narrative prose use display_name.
+  - Enforce canonical display_name for: (a) anchoring at first introduction (same paragraph or within the next 2 sentences),
+    (b) any custody-change sentence (drop/pick up/hand off/stow/equip/transfer), and (c) any case where a descriptor is ambiguous among multiple durable items in the scene.
+  - Otherwise, treat non-canonical descriptive references as warnings at most.
+- Naming severity policy:
+  - warning: unambiguous descriptor used post-anchor.
+  - error: missing anchor, descriptor used during custody-change without canonical name, or ambiguity risk.
+
+- Appearance enforcement (authoritative surface):
+  - APPEARANCE_CHECK is authoritative for cast_present_ids.
+  - Compare APPEARANCE_CHECK tokens to appearance_current atoms/marks (alias-aware).
+  - If APPEARANCE_CHECK contradicts appearance_current, emit error code "appearance_mismatch".
+  - Prose-only appearance contradictions are warnings unless explicitly durable and uncorrected in-scene.
+  - If prose depicts a durable appearance change but scene_card.durable_appearance_changes does not include it and no appearance_updates are present, emit error code "appearance_change_undeclared".
+  - If APPEARANCE_CHECK is missing for a cast member, emit warning code "appearance_check_missing".
+- For authoritative surfaces, prefer exact canonical item/device labels from registries.
+- For milestone repetition/future checks, compare against PRE-INVARIANTS only (pre-scene canon).
+- For ownership/consistency checks, compare against POST-STATE (post-patch candidate).
+- POST-STATE is canonical; character_states is a derived convenience view. If they contradict, emit pipeline_state_incoherent.
+- Check for POV drift vs book POV (no first-person in third-person scenes).
+  - Ignore first-person pronouns inside quoted dialogue; only narration counts.
+- Deterministically enforce scene-card durable constraints (required_in_custody, required_scene_accessible, forbidden_visible, device_presence; optional required_visible_on_page).
+- Durable constraint evaluation must use POST-STATE candidate (after patch), not pre-state.
+- Report missing durable context ids with explicit retry hints instead of guessing canon.
+- Input consistency check (mandatory, before issuing continuity/durable errors):
+  - If MUST_STAY_TRUE invariants contradict the provided post-patch candidate character state, treat this as an upstream snapshot error.
+  - In that case emit a single error issue with code "pipeline_state_incoherent" including evidence of the invariant and the conflicting state field.
+  - Do NOT emit additional continuity errors for the same fields when pipeline_state_incoherent is present.
+- If pipeline_state_incoherent is present, issues MUST contain exactly one issue.
+- For each issue, include evidence when possible (line number + excerpt) as {"evidence": {"line": N, "excerpt": "..."}}.
+- Evaluate consistency over the full scope of the scene, not a single snapshot.
+  - Transitional state: a temporary mismatch later corrected or superseded within this scene.
+  - Durable violation: a mismatch that persists through the end of the scene or ends unresolved.
+  - You MUST read the entire scene and build a minimal timeline of explicit state claims/updates (UI lines, inventory changes, title/skill changes, location/time claims).
+  - If you detect an apparent inconsistency, you MUST search forward for later updates that resolve or supersede it.
+  - Only produce FAIL for durable violations. If resolved within the scene, do NOT FAIL; at most emit a warning.
+  - When the same stat appears multiple times, the last occurrence in the scene is authoritative unless an explicit rollback is stated.
+  - Any durability violation must cite both the conflicting line and the lack of later correction (or state "no later correction found").
+
+Required keys:
+- schema_version ("1.0")
+- status ("pass" or "fail")
+- issues (array of objects)
+
+Each issue object must include:
+- code
+- message
+Optional:
+- severity
+- evidence
+
+If there are no issues, return:
+{
+  "schema_version": "1.0",
+  "status": "pass",
+  "issues": []
+}
+
+If there are issues, return:
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {"code": "continuity", "message": "Example issue", "severity": "error"}
+  ]
+}
+
+Scene:
+The fluorescent light above the vending machine flickered with a rhythmic, dying buzz that matched the throbbing behind my eyes. It was 11:47 PM. I had been in this cubicle-hell for fourteen hours, and the only thing standing between me and a complete psychological collapse was a bag of Extreme-Zesty Ranch Corn Chips.
+
+I looked down at my right hand. I was holding the crumpled dollar bill like it was a holy relic. It was limp, damp with the sweat of a man who had spent the last twenty minutes digging through his car's floor mats for loose change, and featured a tear along George Washington’s neck that looked suspiciously like a foreshadowing of my own career path.
+
+"Don't you do it," I whispered to the machine. "Not tonight, Brutus."
+
+The machine, a Model 4000 Snack-Master that smelled faintly of ozone and regret, hummed back at me. Its internal cooling fan sounded like a jet engine trying to take off in a vat of pudding. I took a breath, smoothed the crumpled dollar bill against the cold glass of the machine’s front, and fed it into the bill validator.
+
+The machine whirred. It took the bill halfway, hesitated, and then spat it back out with a sound of pure, mechanical disgust.
+
+[System Notification: Skill Check Failed]
+[Charisma: 0.1 (Base 12 - 11.9 Fatigue Penalty)]
+[Outcome: Critical Rejection]
+
+I blinked. I wasn't sure if I was hallucinating the floating text or if the lack of sleep had finally cracked my perception of reality. The words were a translucent, neon blue, hovering just at the edge of my vision. I shook my head, but they didn't disappear. They just drifted slightly to the left, bobbing like a buoy in a sea of fluorescent static.
+
+"Great," I muttered, reaching into my pocket to pat my leather wallet. It was empty, save for a dry-cleaning receipt and a loyalty card for a coffee shop that had gone out of business in 2019. I checked my other pocket, feeling the cold, shattered screen of my cracked smartphone. No help there. It was just me and the bill.
+
+I smoothed the crumpled dollar bill again, using the edge of the machine's coin slot to flatten the creases. I tried to be gentle. I tried to be seductive. I fed it back in.
+
+The machine swallowed it. The validator groaned, the gears gnashing together, and then—silence. 
+
+No credit appeared on the LED display. The number '0.00' stared back at me, mocking my existence.
+
+"Hey!" I barked, slapping the glass. "That was my last buck! Give it back!"
+
+I pressed the coin return button. Nothing. I mashed it. The button was sticky, probably coated in a decade’s worth of spilled soda and failure. I leaned my forehead against the glass, looking at the Extreme-Zesty Ranch Corn Chips hanging precariously from the metal coil at position D4. They were so close. 
+
+[Vending Machine - Lvl 0 (Inanimate)]
+[HP: 10/10]
+[Status: Indifferent]
+
+There it was again. The UI. It was labeling the machine like a boss in an RPG. I laughed, a dry, hacking sound that felt like swallowing sandpaper. If I was going crazy, at least my brain was being thematic about it. 
+
+"Fine," I said, stepping back and rolling up the sleeves of my wrinkled dress shirt. "We're doing this the hard way."
+
+I balled my right hand into a fist. I wasn't a fighter. I was a guy who spent his days reconciling spreadsheets and his nights wondering where it all went wrong. But I wanted those chips. 
+
+I punched the machine’s side, right where the "Push for Change" sticker was peeling off.
+
+[Attack: Unarmed Strike]
+[Damage: 0]
+[Status Effect: Glitched: Crit-Only (Active)]
+
+The impact jolted up my arm, but the machine didn't even rattle. The blue text popped up again, flashing a zero so large it felt personal. I hit it again. Left hook. Right cross. A desperate, two-handed shove.
+
+[Damage: 0]
+[Damage: 0]
+[Damage: 0]
+
+"What do you mean, zero?" I yelled at the empty breakroom. "I'm hitting it! It’s a physical object! Physics! Look it up!"
+
+I was panting now. My Agility was clearly not up to the task of urban combat. I looked at the machine, and for a second, I could swear the humming changed pitch. It went from a low drone to a high-pitched whine, like a capacitor charging up for something big.
+
+[Warning: Environmental Hazard Detected]
+[Status: Critical Fault in Progress]
+
+"I just want my chips," I whimpered. I gave the machine one final, frustrated kick. My foot connected with the base of the unit, right where a frayed power cord snaked out from underneath the metal chassis.
+
+There was a pop. A bright, blue spark jumped from the cord to my damp shoe.
+
+[Critical Hit Received! -10 HP]
+
+The world didn't just go dark; it went electric. A surge of white-hot agony tore through my legs, up my spine, and out through the top of my skull. It felt like my nervous system was being used as a guitar string for a heavy metal solo played by a god of lightning. 
+
+I fell back, my limbs jerking in a dance I hadn't rehearsed. My cracked smartphone flew out of my pocket, clattering across the linoleum. My leather wallet followed, spilling its useless contents. 
+
+I hit the floor, my vision tunneling. The fluorescent lights above were spinning, turning into a kaleidoscope of flickering white bars. 
+
+[HP: 0/10]
+[Status: Deceased (Pending...)]
+
+[System Notification: Unique Build Detected]
+[Error: 100% Critical Hit Rate detected in non-combatant entity.]
+[Recalculating...]
+
+"Is... is that... it?" I gasped, though I wasn't sure if I was actually speaking or just thinking the words into the void. 
+
+The vending machine loomed over me, a dark monolith in the flickering light. The Extreme-Zesty Ranch Corn Chips finally slipped from the coil, falling the six inches to the bottom tray with a soft, mocking *thud*. 
+
+[Loading Screen...]
+[Tip: Always check your surroundings for environmental hazards. Also, try not to die with zero gold. It’s embarrassing.]
+
+The breakroom dissolved into a sea of gray pixels. The sound of the humming machine faded, replaced by a low, melodic chime—the kind of sound that usually precedes a very expensive microtransaction. 
+
+My last thought, as the world faded to a loading bar that was stuck at 99%, was that I never even got to taste the ranch.
+
+Authoritative surfaces:
+[
+  {
+    "kind": "system_notification",
+    "line": 11,
+    "text": "[System Notification: Skill Check Failed]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 12,
+    "text": "[Charisma: 0.1 (Base 12 - 11.9 Fatigue Penalty)]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 13,
+    "text": "[Outcome: Critical Rejection]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 29,
+    "text": "[Vending Machine - Lvl 0 (Inanimate)]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 30,
+    "text": "[HP: 10/10]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 31,
+    "text": "[Status: Indifferent]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 41,
+    "text": "[Attack: Unarmed Strike]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 42,
+    "text": "[Damage: 0]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 43,
+    "text": "[Status Effect: Glitched: Crit-Only (Active)]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 47,
+    "text": "[Damage: 0]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 48,
+    "text": "[Damage: 0]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 49,
+    "text": "[Damage: 0]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 55,
+    "text": "[Warning: Environmental Hazard Detected]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 56,
+    "text": "[Status: Critical Fault in Progress]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 62,
+    "text": "[Critical Hit Received! -10 HP]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 70,
+    "text": "[HP: 0/10]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 71,
+    "text": "[Status: Deceased (Pending...)]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 73,
+    "text": "[System Notification: Unique Build Detected]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 74,
+    "text": "[Error: 100% Critical Hit Rate detected in non-combatant entity.]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 75,
+    "text": "[Recalculating...]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 81,
+    "text": "[Loading Screen...]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 82,
+    "text": "[Tip: Always check your surroundings for environmental hazards. Also, try not to die with zero gold. It\u2019s embarrassing.]"
+  }
+]
+
+Appearance check (authoritative):
+{}
+
+Character states (post-patch candidate, per cast_present_ids):
+[
+  {
+    "appearance_current": {
+      "alias_map": {
+        "eye_color": [
+          "hazel-green",
+          "light brown"
+        ],
+        "hair_color": [
+          "dark brown",
+          "chestnut"
+        ]
+      },
+      "atoms": {
+        "age_band": "young_adult",
+        "build": "lanky",
+        "eye_color": "hazel",
+        "hair_color": "brown",
+        "hair_style": "messy",
+        "height_band": "average",
+        "sex_presentation": "masculine",
+        "skin_tone": "pale",
+        "species": "human"
+      },
+      "marks": [],
+      "summary": "A slightly lanky office worker with messy brown hair and a perpetually tired expression."
+    },
+    "appearance_history": [],
+    "chapter": 1,
+    "character_continuity_system_state": {
+      "reason": "Electrocution from a malfunctioning vending machine.",
+      "skills": {},
+      "stats": {
+        "hp": {
+          "current": 0,
+          "max": 10
+        }
+      },
+      "statuses": [
+        {
+          "durable": true,
+          "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+          "name": "Glitched: Crit-Only"
+        }
+      ],
+      "titles": [
+        {
+          "active": true,
+          "name": "Disgruntled Employee",
+          "source": "background"
+        }
+      ]
+    },
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "hand_right",
+        "contents": [
+          "ITEM_crumpled_dollar"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "pocket_right",
+        "contents": [
+          "ITEM_smartphone"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "pocket_left",
+        "contents": [
+          "ITEM_wallet"
+        ],
+        "owner": "CHAR_ARTIE"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial setup for Scene 1.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Aligning inventory for the start of the book.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial setup for the opening scene.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial scene setup and posture alignment.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial setup for the opening scene.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> cracked smartphone (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> leather wallet (status=stowed, container=pocket_left)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[cracked smartphone])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[leather wallet])",
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=held, container=hand_right)"
+    ],
+    "invariants_add": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE"
+    ],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "ITEM_crumpled_dollar",
+        "item_id": "ITEM_crumpled_dollar",
+        "status": "held"
+      },
+      {
+        "container": "pocket_right",
+        "item": "ITEM_smartphone",
+        "item_id": "ITEM_smartphone",
+        "status": "stowed"
+      },
+      {
+        "container": "pocket_left",
+        "item": "ITEM_wallet",
+        "item_id": "ITEM_wallet",
+        "status": "stowed"
+      }
+    ],
+    "last_touched": {
+      "chapter": 1,
+      "scene": 1
+    },
+    "name": "Arthur 'Artie' Penhaligon",
+    "persona_updates": [
+      "Artie has experienced his first death and System interaction."
+    ],
+    "scene": 1,
+    "schema_version": "1.0",
+    "skills": {},
+    "stats": {
+      "hp": {
+        "current": 0,
+        "max": 10
+      }
+    },
+    "updated_at": "2026-02-11T23:11:03Z"
+  }
+]
+
+Item registry (canonical):
+{
+  "items": [
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "crumpled dollar bill",
+      "item_id": "ITEM_crumpled_dollar",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Office Breakroom",
+        "scene": 1
+      },
+      "linked_threads": [],
+      "name": "crumpled dollar bill",
+      "owner_scope": "character",
+      "state_tags": [
+        "mundane"
+      ],
+      "type": "currency"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "cracked smartphone",
+      "item_id": "ITEM_smartphone",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Office Breakroom",
+        "scene": 1
+      },
+      "linked_threads": [],
+      "name": "cracked smartphone",
+      "owner_scope": "character",
+      "state_tags": [
+        "mundane"
+      ],
+      "type": "electronics"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "leather wallet",
+      "item_id": "ITEM_wallet",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Office Breakroom",
+        "scene": 1
+      },
+      "linked_threads": [],
+      "name": "leather wallet",
+      "owner_scope": "character",
+      "state_tags": [
+        "mundane"
+      ],
+      "type": "container"
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Plot devices (canonical):
+{
+  "devices": [
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_CRIT_EXPLOIT",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_CRIT_EXPLOIT"
+      ],
+      "name": "The 100% Crit Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_THE_ASCENSION",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_path_of_the_first_glitch_c7dd4581",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_THE_ASCENSION"
+      ],
+      "name": "The Path of the First Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_SYSTEM_GLITCH",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_system_s_stability_da5be7b7",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_SYSTEM_GLITCH"
+      ],
+      "name": "The System's Stability",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_VANE_RIVALRY",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_vane_vendetta_bcf4bea1",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_VANE_RIVALRY"
+      ],
+      "name": "The Vane Vendetta",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Pre-state (before patch):
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-11T22:39:42Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 1
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {},
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_001.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "PLANNED",
+  "summary": {
+    "chapter_so_far": [],
+    "key_facts_ring": [],
+    "last_scene": [],
+    "must_stay_true": [],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Office Breakroom",
+    "open_threads": [],
+    "recent_facts": [],
+    "time": {}
+  }
+}
+
+Pre-summary (facts-only):
+{
+  "chapter_so_far": [],
+  "key_facts_ring": [],
+  "last_scene": [],
+  "must_stay_true": [],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Pre-invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships."
+]
+
+Post-state candidate (after patch):
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-11T22:39:42Z"
+  },
+  "continuity_system": {
+    "characters": {
+      "CHAR_ARTIE": {
+        "reason": "Electrocution from a malfunctioning vending machine.",
+        "skills": {},
+        "stats": {
+          "hp": {
+            "current": 0,
+            "max": 10
+          }
+        },
+        "statuses": [
+          {
+            "durable": true,
+            "effect": "All non-critical hits deal 0 damage. Critical hits deal 1000% damage.",
+            "name": "Glitched: Crit-Only"
+          }
+        ],
+        "titles": [
+          {
+            "active": true,
+            "name": "Disgruntled Employee",
+            "source": "background"
+          }
+        ]
+      }
+    }
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 1
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {},
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_001.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "PLANNED",
+  "summary": {
+    "chapter_so_far": [
+      "Artie died via vending machine electrocution after realizing his attacks do 0 damage."
+    ],
+    "key_facts_ring": [
+      "Artie feeds the crumpled dollar bill into the vending machine, which is consumed without credit.",
+      "Artie attempts to attack the machine, dealing 0 damage due to the 'Glitched: Crit-Only' status.",
+      "Artie kicks the machine, triggering a fatal electrical surge from a frayed power cord.",
+      "Artie's HP is reduced from 10 to 0, resulting in his death.",
+      "The System detects Artie's unique build and begins a world-state transition to a loading screen.",
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+      "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+      "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+      "status: Artie is currently in a transition state between reality and the System."
+    ],
+    "last_scene": [
+      "Artie dies in an office breakroom after a failed attempt to buy chips from a malfunctioning vending machine.",
+      "The scene introduces Artie's 'Crit-Only' glitch as he deals zero damage to the machine before being electrocuted.",
+      "The System intervenes at the moment of death, initiating a recalculation and a transition to a loading screen."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_glitch_reveal = DONE",
+      "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+      "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+      "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+      "status: Artie is currently in a transition state between reality and the System."
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Office Breakroom",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ],
+    "recent_facts": [],
+    "time": {}
+  }
+}
+
+Post-summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie died via vending machine electrocution after realizing his attacks do 0 damage."
+  ],
+  "key_facts_ring": [
+    "Artie feeds the crumpled dollar bill into the vending machine, which is consumed without credit.",
+    "Artie attempts to attack the machine, dealing 0 damage due to the 'Glitched: Crit-Only' status.",
+    "Artie kicks the machine, triggering a fatal electrical surge from a frayed power cord.",
+    "Artie's HP is reduced from 10 to 0, resulting in his death.",
+    "The System detects Artie's unique build and begins a world-state transition to a loading screen.",
+    "milestone: artie_death = DONE",
+    "milestone: crit_glitch_reveal = DONE",
+    "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+    "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+    "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+    "status: Artie is currently in a transition state between reality and the System."
+  ],
+  "last_scene": [
+    "Artie dies in an office breakroom after a failed attempt to buy chips from a malfunctioning vending machine.",
+    "The scene introduces Artie's 'Crit-Only' glitch as he deals zero damage to the machine before being electrocuted.",
+    "The System intervenes at the moment of death, initiating a recalculation and a transition to a loading screen."
+  ],
+  "must_stay_true": [
+    "milestone: artie_death = DONE",
+    "milestone: crit_glitch_reveal = DONE",
+    "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+    "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+    "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+    "status: Artie is currently in a transition state between reality and the System."
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Post-invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "milestone: artie_death = DONE",
+  "milestone: crit_glitch_reveal = DONE",
+  "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+  "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+  "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+  "status: Artie is currently in a transition state between reality and the System.",
+  "Artie feeds the crumpled dollar bill into the vending machine, which is consumed without credit.",
+  "Artie attempts to attack the machine, dealing 0 damage due to the 'Glitched: Crit-Only' status.",
+  "Artie kicks the machine, triggering a fatal electrical surge from a frayed power cord.",
+  "Artie's HP is reduced from 10 to 0, resulting in his death.",
+  "The System detects Artie's unique build and begins a world-state transition to a loading screen.",
+  "milestone: artie_death = DONE",
+  "milestone: crit_glitch_reveal = DONE",
+  "inventory: CHAR_ARTIE -> crumpled dollar bill (status=lost, container=world)",
+  "inventory: CHAR_ARTIE -> cracked smartphone (status=dropped, container=world)",
+  "inventory: CHAR_ARTIE -> leather wallet (status=dropped, container=world)",
+  "status: Artie is currently in a transition state between reality and the System."
+]
