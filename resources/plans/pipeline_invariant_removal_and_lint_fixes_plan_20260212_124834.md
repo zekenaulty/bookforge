@@ -39,7 +39,7 @@ Stabilize the lint pipeline by eliminating verified mechanical incoherence and t
 
 ## Plan Overview
 
-### Story 1 — Code: Apply REMOVE logic to character_state.invariants
+### Story 1 - Code: Apply REMOVE logic to character_state.invariants
 **Goal**: when a patch includes REMOVE: lines in summary_update.must_stay_true, those removals also purge character_state.invariants (and any derived invariants used in lint convenience views).
 
 **Tasks**
@@ -59,9 +59,9 @@ Stabilize the lint pipeline by eliminating verified mechanical incoherence and t
 **Risks / Edge Cases**
 - Over-removal if normalization is too aggressive. Mitigate by matching exact text + minimal normalization (as summary removal does now).
 - Character invariants may contain duplicate/near-duplicate inventory lines (e.g., carried vs held for same item). Removal must drop all matching stale forms that appear in REMOVE lines.
-- Ensure invariants cleanup does not remove non-inventory invariants (milestones, injuries) unless explicitly REMOVE?d.
+- Ensure invariants cleanup does not remove non-inventory invariants (milestones, injuries) unless explicitly REMOVEd.
 
-### Story 2 — Prompt: must_stay_true updates for inventory posture changes
+### Story 2 - Prompt: must_stay_true updates for inventory posture changes
 **Goal**: enforce a prompt rule that any inventory posture change reflected in character_updates or inventory_alignment_updates must be mirrored in must_stay_true and must remove old invariants with REMOVE: lines. Apply this across preflight + write + repair + state_repair so the rule is consistent in every phase that can introduce inventory posture changes.
 
 **Tasks**
@@ -83,7 +83,7 @@ Stabilize the lint pipeline by eliminating verified mechanical incoherence and t
 - Overgrowth of must_stay_true if REMOVE is not applied consistently; mitigate by explicit REMOVE ordering rule (REMOVE before new invariant).
 - Mis-specified inventory line formats; mitigate by including the exact canonical invariant formats in the prompt.
 
-### Story 3 — Lint: ITEM_ ids should resolve only to item_registry
+### Story 3 - Lint: ITEM_ ids should resolve only to item_registry
 **Goal**: durable constraint resolver must not treat ITEM_ as plot_device identifiers.
 
 **Tasks**
@@ -141,3 +141,116 @@ Stabilize the lint pipeline by eliminating verified mechanical incoherence and t
 - Keep JSON schema intact (no new schema changes).
 - Apply prompt changes consistently across global and book-level templates.
 - Favor deterministic removal and explicit invariants over heuristic linting.
+
+## Detailed Scope and Touchpoints (Refined)
+
+### Story 1 - Code: Apply REMOVE logic to character_state.invariants
+**Primary touchpoints**
+- `src/bookforge/pipeline/state_apply.py`
+  - Where `summary_update` is merged into state and where REMOVE logic currently applies to summary/key_facts.
+  - Add removal pass for `character_state.invariants` using the same REMOVE parsing/normalization as summary removal.
+- `src/bookforge/characters.py`
+  - If character invariants are merged or normalized here, ensure removals are applied before invariants_add is appended.
+- Tests:
+  - `tests/test_state_summary.py` or a new `tests/test_character_invariants.py` for removal behavior.
+
+**Expected code changes**
+- Reuse or expose the existing REMOVE parsing helpers (normalize/remove) to the character invariants merge step.
+- Apply removals before adding new invariants so stale inventory lines do not persist.
+- Ensure removals operate on exact matches (same canonical string), consistent with the summary removal logic.
+
+**Edge cases to handle**
+- Duplicate inventory lines with different verbs (carried vs held) for the same item:
+  - Only remove items explicitly listed in REMOVE lines (exact match or exact normalized match).
+- Non-inventory invariants (milestones, injuries):
+  - Must not be touched unless explicitly REMOVEd.
+
+**Validation**
+- Unit test: start with a character invariants list that includes stale inventory lines. Apply a patch with REMOVE lines. Verify invariants no longer include the removed entries.
+- Regression: run lint on an existing scene with pipeline_state_incoherent (e.g., ch001_sc007) and verify it disappears after apply.
+
+---
+
+### Story 2 - Prompt: must_stay_true updates for inventory posture changes
+**Primary touchpoints**
+- Global prompt templates:
+  - `resources/prompt_templates/preflight.md`
+  - `resources/prompt_templates/write.md`
+  - `resources/prompt_templates/repair.md`
+  - `resources/prompt_templates/state_repair.md`
+- Book overrides:
+  - `workspace/books/criticulous_b1/prompts/templates/preflight.md`
+  - `workspace/books/criticulous_b1/prompts/templates/write.md`
+  - `workspace/books/criticulous_b1/prompts/templates/repair.md`
+  - `workspace/books/criticulous_b1/prompts/templates/state_repair.md`
+
+**Expected prompt changes (first draft)**
+
+**Preflight** (no summary_update; must signal posture change intent):
+- Add an explicit reminder that any posture change must be surfaced for later reconciliation:
+  - "If you change inventory posture (held/stowed/container), add a concise `notes` entry or `reason` in inventory_alignment_updates describing the final posture to be reconciled in must_stay_true downstream."
+
+**Write** (must_stay_true updates required):
+- Add a rule: "If the scene changes inventory posture, must_stay_true must be updated to the final posture and REMOVE must be used for obsolete lines."
+- Include canonical invariant examples for inventory + container lines.
+
+**Repair / State Repair** (strict reconciliation):
+- Add a rule: "For any change in inventory posture (held/stowed/container), update must_stay_true to the final posture and add REMOVE for prior posture invariants."
+- Explicitly require container invariants when containers are part of the change.
+
+**Inventory invariant example block (insert into repair/state_repair/write)**
+```
+- Inventory invariant formats (use exactly):
+  - inventory: CHAR_X -> <item display name> (status=held|carried|equipped|stowed, container=hand_left|hand_right|<container>)
+  - container: <container> (owner=CHAR_X, contents=[<item display name>, ...])
+- When posture changes, REMOVE the old inventory/container lines and add the new final ones.
+```
+
+**Edge cases to handle in prompts**
+- Items that are in inventory arrays but no longer should be referenced in must_stay_true (stale items):
+  - Always use REMOVE for the prior must_stay_true lines.
+- Multiple posture changes within a scene:
+  - Final posture only must remain in must_stay_true; earlier entries must be removed.
+
+**Validation**
+- Compare state_repair_patch outputs for ch001_sc005 and ensure must_stay_true matches the new posture of Fizz's guidebook (held vs stowed).
+- Run lint on a scene that previously flagged inventory posture mismatch and confirm error disappears.
+
+---
+
+### Story 3 - Lint: ITEM_ ids should resolve only to item_registry
+**Primary touchpoints**
+- `src/bookforge/pipeline/lint/helpers.py`
+  - Durable constraint resolver for required_in_custody / required_visible_on_page / device_presence, etc.
+- Tests:
+  - New unit test in `tests/test_lint_durable_resolver.py` or extend existing lint tests.
+
+**Expected code changes**
+- Token classification logic:
+  - If token starts with `ITEM_`, resolve only via item_registry and skip plot_device registry.
+  - If token starts with `DEVICE_`, resolve only via plot_devices and skip item_registry.
+  - If token is unprefixed, allow alias lookup across registries (display_name, aliases).
+
+**Edge cases to handle**
+- Unprefixed tokens that match both item and device aliases:
+  - Prefer item_registry for inventory constraints, plot_devices for device_presence, or flag ambiguity.
+- Tokens with mixed casing or punctuation:
+  - Normalize before matching.
+
+**Validation**
+- Unit test: `required_visible_on_page = ["ITEM_participation_trophy"]` must be resolved via item_registry only.
+- Regression: re-run lint on ch001_sc005 to ensure `durable_slice_missing` does not misclassify ITEM_ tokens as plot devices.
+
+---
+
+## Cross-Phase Touchpoint Summary
+- Preflight establishes initial posture and must signal posture changes (notes/reason), so downstream phases reconcile must_stay_true.
+- Write/Repair/State Repair must update must_stay_true to reflect final posture and explicitly REMOVE old entries.
+- Code applies REMOVE logic to character_state.invariants so lint convenience views do not contradict canonical must_stay_true.
+- Lint resolver must treat ITEM_ vs DEVICE_ correctly to avoid false missing slice errors.
+
+## Execution Order (recommended)
+1) Story 1 (code invariants removal) - removes the most damaging incoherence.
+2) Story 2 (prompt rules) - ensures future patches generate correct must_stay_true lines.
+3) Story 3 (lint resolver) - removes false durable_slice_missing errors.
+
