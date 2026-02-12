@@ -24,6 +24,52 @@ def _lint_has_issue_code(report: Dict[str, Any], code: str) -> bool:
     return bool(_lint_issue_entries(report, code))
 
 
+
+
+def _ui_gate_issues(
+    scene_card: Dict[str, Any],
+    authoritative_surfaces: Optional[List[Dict[str, Any]]],
+    *,
+    strict: bool = False,
+) -> List[Dict[str, Any]]:
+    issues: List[Dict[str, Any]] = []
+    if not isinstance(scene_card, dict):
+        return issues
+    ui_allowed = scene_card.get("ui_allowed")
+    ui_mechanics = scene_card.get("ui_mechanics_expected")
+    if not isinstance(ui_mechanics, list):
+        ui_mechanics = []
+    has_ui = bool(authoritative_surfaces)
+
+    if ui_allowed is None:
+        if ui_mechanics:
+            return issues
+        if has_ui:
+            surface = authoritative_surfaces[0]
+            evidence = {"line": surface.get("line"), "excerpt": surface.get("text")}
+            issues.append({
+                "code": "ui_gate_unknown",
+                "message": "UI blocks appear but scene_card.ui_allowed is missing; set ui_allowed explicitly in the scene card.",
+                "severity": "warning",
+                "evidence": evidence,
+            })
+        return issues
+
+    if not isinstance(ui_allowed, bool):
+        ui_allowed = bool(ui_mechanics)
+
+    if ui_allowed is False and has_ui:
+        surface = authoritative_surfaces[0]
+        evidence = {"line": surface.get("line"), "excerpt": surface.get("text")}
+        severity = "error" if strict else "warning"
+        issues.append({
+            "code": "ui_gate_violation",
+            "message": "UI blocks appear but scene_card.ui_allowed=false. Remove UI or set ui_allowed=true when System/UI is active.",
+            "severity": severity,
+            "evidence": evidence,
+        })
+
+    return issues
 def _stat_mismatch_issues(
     prose: str,
     character_states: List[Dict[str, Any]],

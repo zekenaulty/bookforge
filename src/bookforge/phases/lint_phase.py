@@ -8,7 +8,7 @@ from bookforge.llm.types import Message
 from bookforge.pipeline.config import _lint_max_tokens, _lint_mode
 from bookforge.pipeline.durable import _durable_state_context
 from bookforge.pipeline.io import _log_scope
-from bookforge.pipeline.lint import _stat_mismatch_issues, _pov_drift_issues, _heuristic_invariant_issues, _durable_scene_constraint_issues, _linked_durable_consistency_issues, _merged_character_states_for_lint, _post_state_with_character_continuity, _normalize_lint_report
+from bookforge.pipeline.lint import _stat_mismatch_issues, _pov_drift_issues, _heuristic_invariant_issues, _durable_scene_constraint_issues, _linked_durable_consistency_issues, _merged_character_states_for_lint, _post_state_with_character_continuity, _normalize_lint_report, _ui_gate_issues
 from bookforge.pipeline.llm_ops import _chat, _json_retry_count, _lint_status_from_issues
 from bookforge.pipeline.parse import _extract_authoritative_surfaces, _extract_json
 from bookforge.pipeline.prompts import _resolve_template, _system_prompt_for_phase
@@ -62,6 +62,7 @@ def _lint_scene(
             "pre_invariants": pre_invariants,
             "post_invariants": post_invariants,
             "authoritative_surfaces": authoritative_surfaces,
+            "scene_card": scene_card,
             "appearance_check": appearance_check,
             "item_registry": durable_post.get("item_registry", {}),
             "plot_devices": durable_post.get("plot_devices", {}),
@@ -125,7 +126,8 @@ def _lint_scene(
     extra_issues = _pov_drift_issues(prose, pov, strict=_lint_mode() == "strict")
     durable_issues = _durable_scene_constraint_issues(prose, scene_card, durable_post)
     durable_issues += _linked_durable_consistency_issues(durable_post)
-    combined = heuristic_issues + extra_issues + durable_issues
+    ui_gate_issues = _ui_gate_issues(scene_card, authoritative_surfaces, strict=_lint_mode() == "strict")
+    combined = heuristic_issues + extra_issues + durable_issues + ui_gate_issues
     if combined:
         report["issues"] = list(report.get("issues", [])) + combined
         report["status"] = _lint_status_from_issues(report.get("issues", []))

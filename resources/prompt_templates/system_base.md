@@ -17,6 +17,7 @@ Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches
 Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
 State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
 Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+UI gate: UI/system blocks (lines starting with '[' and ending with ']') are permitted only when scene_card.ui_allowed=true. If ui_allowed=false, do not include UI blocks even if an author persona says "always include".
 Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
 Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties.
 JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.

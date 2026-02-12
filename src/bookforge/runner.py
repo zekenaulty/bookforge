@@ -158,6 +158,34 @@ def _maybe_int(value: Any) -> Optional[int]:
     except (TypeError, ValueError):
         return None
 
+
+
+def _normalize_scene_card_ui_gate(scene_card: Dict[str, Any]) -> None:
+    if not isinstance(scene_card, dict):
+        return
+    ui_mechanics = scene_card.get("ui_mechanics_expected")
+    if isinstance(ui_mechanics, list):
+        ui_mechanics = [str(item) for item in ui_mechanics if str(item).strip()]
+    else:
+        ui_mechanics = []
+
+    ui_allowed = scene_card.get("ui_allowed")
+    if isinstance(ui_allowed, str):
+        lowered = ui_allowed.strip().lower()
+        if lowered in {"true", "yes", "1", "on"}:
+            ui_allowed = True
+        elif lowered in {"false", "no", "0", "off"}:
+            ui_allowed = False
+        else:
+            ui_allowed = None
+    if not isinstance(ui_allowed, bool):
+        ui_allowed = bool(ui_mechanics)
+
+    if ui_allowed is False:
+        ui_mechanics = []
+
+    scene_card["ui_allowed"] = ui_allowed
+    scene_card["ui_mechanics_expected"] = ui_mechanics
 def _durable_slice_retry_ids(report: Dict[str, Any]) -> List[str]:
     ids: List[str] = []
     for issue in _lint_issue_entries(report, "durable_slice_missing"):
@@ -515,6 +543,7 @@ def run_loop(
         else:
             _status(f"Using existing scene card: ch{chapter:03d} sc{scene:03d}")
         scene_card = _load_json(scene_card_path)
+        _normalize_scene_card_ui_gate(scene_card)
         validate_json(scene_card, "scene_card")
         chapter_num = int(scene_card.get("chapter", chapter))
         scene_num = int(scene_card.get("scene", scene))

@@ -252,11 +252,11 @@ Validation:
   - lint emits `ui_gate_unknown` warning
 
 ## Status Tracker
-- Story 1 (System Base Rules UI Gate): Not started
-- Story 2 (Planner UI Gate + Schema): Not started
-- Story 3 (Writer/Repair/State Repair alignment): Not started
-- Story 4 (Lint guard): Not started
-- Story 5 (Eldrik v2 author fragment): Not started
+- Story 1 (System Base Rules UI Gate): Implemented (pending validation)
+- Story 2 (Planner UI Gate + Schema): Implemented (pending validation)
+- Story 3 (Writer/Repair/State Repair alignment): Implemented (pending validation)
+- Story 4 (Lint guard): Implemented (pending validation)
+- Story 5 (Eldrik v2 author fragment): Implemented (pending validation)
 
 ## Notes
 - UI gating must be in Base Rules to override author fragments.

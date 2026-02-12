@@ -14,6 +14,7 @@ from bookforge.llm.factory import get_llm_client, resolve_model
 from bookforge.llm.logging import log_llm_error, log_llm_response, should_log_llm
 from bookforge.llm.types import LLMResponse, Message
 from bookforge.llm.errors import LLMRequestError
+from bookforge.pipeline.phase_history import _load_phase_history
 from bookforge.prompt.renderer import render_template_file
 from bookforge.util.paths import repo_root
 from bookforge.util.json_extract import extract_json
@@ -262,6 +263,48 @@ def _build_outline_window(chapter: Dict[str, Any], scene_number: int) -> Dict[st
     }
 
 
+
+
+def _recent_lint_warnings(book_root: Path, chapter: int, scene: int) -> List[Dict[str, Any]]:
+    if chapter <= 0 or scene <= 1:
+        return []
+    prev_chapter = chapter
+    prev_scene = scene - 1
+    data = _load_phase_history(book_root, prev_chapter, prev_scene)
+    phases = data.get("phases") if isinstance(data, dict) else None
+    if not isinstance(phases, dict):
+        return []
+    lint_phase = phases.get("lint") if isinstance(phases.get("lint"), dict) else None
+    if not isinstance(lint_phase, dict):
+        return []
+    artifacts = lint_phase.get("artifacts")
+    if not isinstance(artifacts, dict):
+        return []
+    report_rel = artifacts.get("report")
+    if not isinstance(report_rel, str) or not report_rel.strip():
+        return []
+    report_path = book_root / report_rel
+    if not report_path.exists():
+        return []
+    try:
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return []
+    issues = report.get("issues") if isinstance(report, dict) else None
+    if not isinstance(issues, list):
+        return []
+    warnings: List[Dict[str, Any]] = []
+    for issue in issues:
+        if not isinstance(issue, dict):
+            continue
+        if str(issue.get("code") or "").strip() != "ui_gate_unknown":
+            continue
+        warnings.append({
+            "code": "ui_gate_unknown",
+            "message": str(issue.get("message") or "").strip(),
+            "severity": str(issue.get("severity") or "warning").strip(),
+        })
+    return warnings
 def _scene_id(chapter: int, scene: int) -> str:
     return f"SC_{chapter:03d}_{scene:03d}"
 
@@ -330,6 +373,30 @@ def _normalize_scene_card(
     if timeline_scope not in {"present", "flashback", "dream", "simulation", "hypothetical"}:
         timeline_scope = "present"
     card["timeline_scope"] = timeline_scope
+
+    ui_mechanics = card.get("ui_mechanics_expected")
+    if isinstance(ui_mechanics, list):
+        ui_mechanics = [str(item) for item in ui_mechanics if str(item).strip()]
+    else:
+        ui_mechanics = []
+
+    ui_allowed = card.get("ui_allowed")
+    if isinstance(ui_allowed, str):
+        lowered = ui_allowed.strip().lower()
+        if lowered in {"true", "yes", "1", "on"}:
+            ui_allowed = True
+        elif lowered in {"false", "no", "0", "off"}:
+            ui_allowed = False
+        else:
+            ui_allowed = None
+    if not isinstance(ui_allowed, bool):
+        ui_allowed = bool(ui_mechanics)
+
+    if ui_allowed is False:
+        ui_mechanics = []
+
+    card["ui_allowed"] = ui_allowed
+    card["ui_mechanics_expected"] = ui_mechanics
 
     ontological_scope = str(card.get("ontological_scope") or "real").strip().lower() or "real"
     if ontological_scope not in {"real", "non_real"}:
@@ -407,12 +474,14 @@ def plan_scene(
     callbacks = [str(item) for item in callbacks if str(item).strip()]
 
     plan_template = _resolve_plan_template(book_root)
+    recent_warnings = _recent_lint_warnings(book_root, chapter_num, scene_num)
     prompt = render_template_file(
         plan_template,
         {
             "outline_window": outline_window,
             "state": state,
             "character_states": character_states,
+            "recent_lint_warnings": recent_warnings,
         },
     )
 

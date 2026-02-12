@@ -8,6 +8,9 @@ Return ONLY JSON matching the lint_report schema.
   - EPHEMERAL: roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat telemetry.
 - Enforce DURABLE claims against authoritative_surfaces/state/registries.
 - EPHEMERAL claims do not require state ownership; only flag EPHEMERAL contradictions inside the same scene as warnings.
+- UI gate:
+  - If scene_card.ui_allowed=false and any authoritative UI blocks appear, emit issue code 'ui_gate_violation' (severity depends on lint mode).
+  - If ui_allowed is missing and UI blocks appear, emit 'ui_gate_unknown' (warning) requesting explicit ui_allowed; do not fail solely for missing flag.
 - If uncertain, default to EPHEMERAL (warning at most), not DURABLE (error).
 - status="fail" only if there is at least one issue with severity="error"; warnings alone => status="pass".
 - Item naming enforcement scope:
@@ -84,6 +87,9 @@ If there are issues, return:
 
 Scene:
 {{prose}}
+
+Scene card:
+{{scene_card}}
 
 Authoritative surfaces:
 {{authoritative_surfaces}}

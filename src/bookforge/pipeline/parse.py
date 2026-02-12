@@ -141,8 +141,13 @@ def _extract_authoritative_surfaces(prose: str) -> List[Dict[str, Any]]:
             pos = end + 1
 
         tail = line[pos:].strip()
-        if tail and not re.fullmatch(r'[\.!?;,:"\'\)\]]*', tail):
-            continue
+        if tail:
+            if re.fullmatch(r'[\.!?;,:"\'\)\]]*', tail):
+                pass
+            elif re.fullmatch(r'[\.!?;,:"\'\)\]]*\([^\)]*\)[\.!?;,:"\'\)\]]*', tail):
+                pass
+            else:
+                continue
 
         for text in tokens:
             kind = "ui_block"
