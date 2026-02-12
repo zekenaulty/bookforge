@@ -1,20 +1,20 @@
 # bookforge run
 
 Purpose
-- Run the plan/write/lint/repair loop for a book.
+- Run the scene generation loop (plan -> preflight -> write -> repair -> state_repair -> lint -> commit).
 
 Usage
-- bookforge run --book <id> [--steps <n>] [--until <chapter:scene>] [--resume]
+- bookforge run --book <id> [--steps <n>] [--until chapter:N | chapter:N:scene:M] [--resume]
 
 Scope
-- Requires book scope (explicit --book or current book).
+- Requires explicit --book (current-book selection is not implemented).
 
 Required parameters
 - --book: Book id slug.
 
 Optional parameters
 - --steps: Number of loop iterations to run.
-- --until: Stop condition, e.g. chapter:3 or chapter:3:scene:2.
+- --until: Stop condition. Formats: chapter:N or chapter:N:scene:M.
 - --resume: Resume a prior run.
 - --workspace: Override workspace root (global option).
 
@@ -22,12 +22,17 @@ Optional parameters
 Defaults
 - If neither --steps nor --until is provided, the run loop executes 1 scene step.
 
+Resume notes
+- --resume reuses phase history and scene artifacts in draft/context/phase_history to continue without re-running completed phases.
+
 Outputs
 - draft/chapters/ch_###/scene_###.md (scene prose)
 - draft/chapters/ch_###.md (compiled chapter when a chapter completes)
 - draft/chapters/ch_###/scene_###.meta.json (scene card + state patch + lint report)
 - draft/context/continuity_pack.json
 - draft/context/bible.md and draft/context/last_excerpt.md
+- draft/context/phase_history/ch###_sc###/* (per-phase prompts, patches, and lint reports)
+- workspace/books/<book>/logs/runs/run_<timestamp>.log
 - workspace/logs/llm (when BOOKFORGE_LOG_LLM=1; includes quota error logs)
 
 

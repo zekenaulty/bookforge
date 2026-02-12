@@ -1,5 +1,8 @@
 # bookforge book set-current
 
+Status
+- Not implemented yet (CLI returns "Not implemented yet.").
+
 Purpose
 - Set the current book for subsequent commands.
 

@@ -1,5 +1,8 @@
 # bookforge book clear-current
 
+Status
+- Not implemented yet (CLI returns "Not implemented yet.").
+
 Purpose
 - Clear the current book selection.
 

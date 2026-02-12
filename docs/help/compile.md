@@ -1,5 +1,8 @@
 # bookforge compile
 
+Status
+- Not implemented yet (CLI returns "Not implemented yet.").
+
 Purpose
 - Compile scene files into a single manuscript.
 
@@ -7,7 +10,7 @@ Usage
 - bookforge compile --book <id> [--output <path>]
 
 Scope
-- Requires book scope (explicit --book or current book).
+- Requires explicit --book (current-book selection is not implemented).
 
 Required parameters
 - --book: Book id slug.

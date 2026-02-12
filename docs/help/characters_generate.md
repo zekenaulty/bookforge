@@ -8,7 +8,7 @@ Usage
 - bookforge characters generate --book <id> [--count <n>]
 
 Scope
-- Requires book scope (explicit --book or current book).
+- Requires explicit --book (current-book selection is not implemented).
 - Reads outline/characters.json (or outline.json characters array) and series canon if present.
 - Does not invent new characters; it expands only the outline-provided stubs.
 - If not run manually, it is executed implicitly before writing starts.

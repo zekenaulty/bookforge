@@ -7,7 +7,7 @@ Usage
 - bookforge outline generate --book <id> [--new-version] [--prompt-file <path>]
 
 Scope
-- Requires book scope (explicit --book or current book).
+- Requires explicit --book (current-book selection is not implemented).
 
 Required parameters
 - --book: Book id slug.
@@ -31,8 +31,8 @@ Debugging
 - When logging is enabled, the request prompt is written to workspace/logs/llm/outline_generate_<timestamp>.prompt.txt (system + user).
 - To always log raw responses, set BOOKFORGE_LOG_LLM=1 before running.
   Example (PowerShell): $env:BOOKFORGE_LOG_LLM="1"
-- If the output is truncated (MAX_TOKENS), raise BOOKFORGE_OUTLINE_MAX_TOKENS (default: 36864).
-  Example (PowerShell): $env:BOOKFORGE_OUTLINE_MAX_TOKENS="36864"
+- If the output is truncated (MAX_TOKENS), raise BOOKFORGE_OUTLINE_MAX_TOKENS (default: 98304).
+  Example (PowerShell): $env:BOOKFORGE_OUTLINE_MAX_TOKENS="98304"
 
 - If requests time out, raise BOOKFORGE_REQUEST_TIMEOUT_SECONDS (default: 600).
   Example (PowerShell): $env:BOOKFORGE_REQUEST_TIMEOUT_SECONDS="600"

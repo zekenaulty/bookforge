@@ -1,5 +1,8 @@
 # bookforge export synopsis
 
+Status
+- Not implemented yet (CLI returns "Not implemented yet.").
+
 Purpose
 - Generate a synopsis from outline and bible.
 
@@ -7,7 +10,7 @@ Usage
 - bookforge export synopsis --book <id> [--output <path>]
 
 Scope
-- Requires book scope (explicit --book or current book).
+- Requires explicit --book (current-book selection is not implemented).
 
 Required parameters
 - --book: Book id slug.

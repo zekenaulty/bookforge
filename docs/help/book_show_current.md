@@ -1,5 +1,8 @@
 # bookforge book show-current
 
+Status
+- Not implemented yet (CLI returns "Not implemented yet.").
+
 Purpose
 - Show the current book selection.
 
