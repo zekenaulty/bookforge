@@ -430,17 +430,16 @@ Acceptance:
 - No material regression attributable to composition migration.
 
 ## Status Tracker
-- Story 0 (Governance Contract Lock): `pending`
-- Story 1: `pending`
-- Story 2: `pending`
-- Story 3: `pending`
-- Story 4: `pending`
-- Story 5: `pending`
+- Story 0 (Governance Contract Lock): `completed`
+- Story 1: `completed`
+- Story 2: `completed`
+- Story 3: `completed`
+- Story 4: `completed`
+- Story 5: `pending` (behavioral baseline suite not yet executed)
 
 ## Immediate Next Actions
-1. Log Story 0 naming approval and finalize remaining governance contract items (manifest schema, allowlist policy, encoding/newline policy).
-2. Create schema/allowlist artifact stubs in `resources/prompt_composition/`.
-3. Freeze dedupe-eligible spans from forensic package before composer coding.
-4. Define and log the 8-scene behavioral baseline suite and seeds.
-5. Add lightweight CI log-enforcement checks for control logs.
+1. Execute Story 5 baseline suite (8 scenes x 3 seeds) and record threshold comparison metrics in `validation_log.md`.
+2. Run Stage C behavioral review and capture approval/rejections in `review_log.md` + `decision_log.md`.
+3. Wire `scripts/validate_prompt_composition_controls.py` into CI with changed-file inputs from git diff.
+4. If Story 5 passes, move Go/No-Go gate status to release-ready and capture final sign-off evidence.
 

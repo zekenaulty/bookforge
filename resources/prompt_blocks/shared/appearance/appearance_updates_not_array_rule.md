@@ -1,0 +1,4 @@
+  - appearance_updates MUST be an object, not an array.
+    - INVALID: "appearance_updates": [{"set": {...}, "reason": "..."}]
+    - VALID: "appearance_updates": {"set": {"marks_add": [{"name": "Singed Hair", "location": "head", "durability": "durable"}]}, "reason": "..."}
+

@@ -1,0 +1,5 @@
+- must_stay_true removal (mandatory when a durable fact is superseded):
+  - Add "REMOVE: <exact prior invariant text>" in summary_update.must_stay_true.
+  - Place REMOVE lines before the new final invariant.
+  - REMOVE lines also apply to key_facts_ring (purge stale facts from continuity).
+

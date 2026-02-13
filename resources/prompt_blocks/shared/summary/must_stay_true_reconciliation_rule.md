@@ -1,0 +1,4 @@
+- must_stay_true reconciliation (mandatory):
+  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
+  - Remove conflicting old invariants rather than preserving them.
+
