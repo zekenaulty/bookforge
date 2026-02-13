@@ -7,6 +7,7 @@ No markdown, no code fences, no commentary. Use strict JSON (double quotes, no t
 If outline_window includes character information, keep those character ids in mind.
 If character_states are provided, keep inventory/persona/continuity mechanics consistent; do not invent conflicting facts.
 If outline_window.current.introduces is present, the scene must introduce those characters.
+If recent_lint_warnings include ui_gate_unknown, set ui_allowed explicitly for this scene.
 
 Required keys:
 - schema_version ("1.1")
@@ -19,6 +20,7 @@ Required keys:
 - required_callbacks (array)
 - constraints (array)
 - end_condition
+- ui_allowed (boolean; true only when System/UI is active in this scene)
 
 Recommended keys (use ids from the outline; do not invent ids):
 - cast_present (array of character names for prose guidance)
@@ -40,6 +42,7 @@ Optional continuity-planning keys:
 Optional genre/system keys:
 - continuity_system_focus (array of mechanic domains likely to change this scene, e.g. ["stats", "resources", "titles"])
 - ui_mechanics_expected (array of UI labels likely to appear, e.g. ["HP", "Stamina", "Crit Rate"])
+  - If ui_allowed=false, ui_mechanics_expected MUST be an empty array.
 
 JSON shape example (fill with real values):
 {
@@ -53,6 +56,7 @@ JSON shape example (fill with real values):
   "required_callbacks": [],
   "constraints": ["target_words: 1900"],
   "end_condition": "The protagonist leaves home.",
+  "ui_allowed": false,
   "cast_present": ["Eldrin"],
   "cast_present_ids": ["CHAR_Eldrin"],
   "introduces": [],
@@ -78,6 +82,9 @@ Character states (per outline_window.current.characters):
 
 State:
 {{state}}
+
+Recent lint warnings (prior scene, if any):
+{{recent_lint_warnings}}
 
 Task:
 Create the next scene card.

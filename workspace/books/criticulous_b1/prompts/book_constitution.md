@@ -1,6 +1,6 @@
 Title: Crit Hit & Run
 Book ID: criticulous_b1
-Author Ref: eldrik-vale/v1
+Author Ref: eldrik-vale/v2
 Genre: litrpg, isekai, comedy
 Series ID: crit-iculous
 Series Ref: series/crit-iculous

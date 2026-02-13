@@ -26,6 +26,8 @@ Rules:
 - summary_update arrays are required: last_scene (2-4 sentences), key_events (3-7 bullets), must_stay_true (3-7 bullets), chapter_so_far_add (bullets).
 - Continuity system ownership is mandatory, and must be tracked: any mechanic/UI numbers, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, or future mechanic families must be sourced from existing continuity system state or written into continuity system updates
 Durable vs ephemeral mechanics:
+- UI gate: only include bracketed UI blocks when scene_card.ui_allowed=true. If false, remove or rephrase UI blocks into narrative prose.
+
 - If a DURABLE mechanic appears multiple times in the scene (e.g., base values then final values), the LAST occurrence is canonical.
 - You MUST capture the canonical end-of-scene values in character_continuity_system_updates.
 - When allocation/level-up happens, update all affected point pools (e.g., stat_points, skill_points, perk_points) if shown.

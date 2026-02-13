@@ -32,9 +32,10 @@ Durable vs ephemeral mechanics:
 - Do not treat early UI snapshots as canonical if the scene later corrects them.
 - DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
 - EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- UI gate: only include bracketed UI blocks when scene_card.ui_allowed=true. If false, do not include UI blocks; rephrase into narrative prose.
 - UI/system readouts must be on their own line, starting with '[' and ending with ']'.
 - Do NOT embed bracketed UI in narrative sentences.
-- Allowed suffix after a UI block is punctuation or '(locked)' only.
+- Allowed suffix after a UI block is punctuation or a short parenthetical annotation (e.g., (locked), (Warning: ...)).
 
 - DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
 - EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
