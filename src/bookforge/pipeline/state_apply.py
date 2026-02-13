@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 import json
+import re
 
 from bookforge.characters import ensure_character_index, resolve_character_state_path, create_character_state_path
 
@@ -149,6 +150,173 @@ def _apply_invariant_removals(items: List[str], removals: List[str]) -> List[str
             continue
         filtered.append(item)
     return filtered
+
+
+_INVENTORY_INVARIANT_RE = re.compile(
+    r"^inventory:\s*(?P<subject>.+?)\s*->\s*(?P<item>.+?)(?:\s*\((?P<meta>.*)\))?\s*$",
+    flags=re.IGNORECASE,
+)
+_KNOWN_INVENTORY_STATUSES = {
+    "held",
+    "carried",
+    "equipped",
+    "stowed",
+    "dropped",
+    "lost",
+}
+
+
+def _parse_inventory_invariant(line: Any) -> Optional[Dict[str, str]]:
+    text = str(line or "").strip()
+    if not text:
+        return None
+    match = _INVENTORY_INVARIANT_RE.match(text)
+    if not match:
+        return None
+    subject = (match.group("subject") or "").strip()
+    item = (match.group("item") or "").strip()
+    if not subject or not item:
+        return None
+    meta_text = (match.group("meta") or "").strip()
+    status = ""
+    container = ""
+    if meta_text:
+        for part in meta_text.split(","):
+            token = str(part).strip()
+            if not token:
+                continue
+            if "=" in token:
+                key, value = token.split("=", 1)
+                key_norm = str(key).strip().lower()
+                value_norm = str(value).strip().lower()
+                if key_norm == "status":
+                    status = value_norm
+                elif key_norm == "container":
+                    container = value_norm
+            else:
+                bare = token.lower()
+                if not status and bare in _KNOWN_INVENTORY_STATUSES:
+                    status = bare
+    return {
+        "line": text,
+        "subject": subject,
+        "subject_norm": subject.lower(),
+        "item": item,
+        "item_norm": item.lower(),
+        "status": status,
+        "container": container,
+    }
+
+
+def _canonical_inventory_invariants(summary_lines: List[str]) -> Dict[tuple[str, str], Dict[str, str]]:
+    canonical: Dict[tuple[str, str], Dict[str, str]] = {}
+    for entry in summary_lines:
+        parsed = _parse_inventory_invariant(entry)
+        if not parsed:
+            continue
+        key = (parsed.get("subject_norm", ""), parsed.get("item_norm", ""))
+        if not key[0] or not key[1]:
+            continue
+        canonical[key] = parsed
+    return canonical
+
+
+def _inventory_matches_posture(
+    inventory: Any,
+    containers: Any,
+    status: str,
+    container: str,
+) -> bool:
+    if isinstance(inventory, list):
+        for entry in inventory:
+            if not isinstance(entry, dict):
+                continue
+            item_status = str(entry.get("status") or "").strip().lower()
+            item_container = str(entry.get("container") or "").strip().lower()
+            if status and item_status != status:
+                continue
+            if container and item_container != container:
+                continue
+            if status or container:
+                return True
+    if container and isinstance(containers, list):
+        for slot in containers:
+            if not isinstance(slot, dict):
+                continue
+            slot_name = str(slot.get("container") or "").strip().lower()
+            if slot_name != container:
+                continue
+            contents = slot.get("contents")
+            if isinstance(contents, list) and contents:
+                return True
+    return False
+
+
+def _reconcile_inventory_invariants(
+    invariants: List[str],
+    canonical_map: Dict[tuple[str, str], Dict[str, str]],
+    inventory: Any,
+    containers: Any,
+) -> List[str]:
+    if not isinstance(invariants, list) or not invariants:
+        return invariants if isinstance(invariants, list) else []
+    if not canonical_map:
+        return invariants
+    existing = [str(item).strip() for item in invariants if str(item).strip()]
+    existing_norm = {_normalize_invariant_text(item) for item in existing}
+    parsed_existing = []
+    for line in existing:
+        parsed = _parse_inventory_invariant(line)
+        if parsed:
+            parsed_existing.append(parsed)
+
+    remove_norm: set[str] = set()
+    additions: List[str] = []
+
+    for canonical in canonical_map.values():
+        canonical_status = canonical.get("status", "")
+        canonical_container = canonical.get("container", "")
+        if not _inventory_matches_posture(inventory, containers, canonical_status, canonical_container):
+            continue
+        # Guardrail: only reconcile when an existing invariant already agrees with the
+        # structured posture for the same subject+item token.
+        has_corroborated_existing = False
+        for parsed in parsed_existing:
+            if parsed.get("subject_norm") != canonical.get("subject_norm"):
+                continue
+            if parsed.get("item_norm") != canonical.get("item_norm"):
+                continue
+            if parsed.get("status", "") != canonical_status:
+                continue
+            if parsed.get("container", "") != canonical_container:
+                continue
+            has_corroborated_existing = True
+            break
+        if not has_corroborated_existing:
+            continue
+
+        for parsed in parsed_existing:
+            if parsed.get("subject_norm") != canonical.get("subject_norm"):
+                continue
+            if parsed.get("item_norm") != canonical.get("item_norm"):
+                continue
+            if parsed.get("status", "") == canonical_status and parsed.get("container", "") == canonical_container:
+                continue
+            line_text = parsed.get("line", "")
+            if line_text:
+                remove_norm.add(_normalize_invariant_text(line_text))
+
+        canonical_line = canonical.get("line", "")
+        canonical_norm = _normalize_invariant_text(canonical_line)
+        if canonical_line and canonical_norm and canonical_norm not in existing_norm:
+            additions.append(canonical_line)
+            existing_norm.add(canonical_norm)
+
+    if not remove_norm and not additions:
+        return existing
+    filtered = [line for line in existing if _normalize_invariant_text(line) not in remove_norm]
+    filtered.extend(additions)
+    return _dedupe_preserve(filtered)
 
 def _append_continuity_list_item(target_set: Dict[str, Any], key: str, value: str) -> None:
     if key == "titles":
@@ -495,11 +663,13 @@ def _apply_character_updates(book_root: Path, patch: Dict[str, Any], chapter_num
     if not isinstance(updates, list):
         return
     summary_removals: List[str] = []
+    summary_inventory_canonical: Dict[tuple[str, str], Dict[str, str]] = {}
     if isinstance(patch, dict):
         summary_update = patch.get("summary_update")
         if isinstance(summary_update, dict):
             must_stay_true = _summary_list(summary_update.get("must_stay_true"))
-            summary_removals, _ = _split_invariant_removals(must_stay_true)
+            summary_removals, summary_additions = _split_invariant_removals(must_stay_true)
+            summary_inventory_canonical = _canonical_inventory_invariants(summary_additions)
     characters_dir = book_root / "draft" / "context" / "characters"
     characters_dir.mkdir(parents=True, exist_ok=True)
     ensure_character_index(book_root)
@@ -559,6 +729,27 @@ def _apply_character_updates(book_root: Path, patch: Dict[str, Any], chapter_num
                 seen.add(key)
                 deduped.append(item)
             state["invariants"] = deduped
+
+        if summary_inventory_canonical:
+            subject_tokens = {char_id.lower()}
+            state_name = str(state.get("name") or "").strip().lower()
+            if state_name:
+                subject_tokens.add(state_name)
+            canonical_for_character = {
+                key: value
+                for key, value in summary_inventory_canonical.items()
+                if key[0] in subject_tokens
+            }
+            if canonical_for_character:
+                existing_invariants = state.get("invariants", [])
+                if not isinstance(existing_invariants, list):
+                    existing_invariants = []
+                state["invariants"] = _reconcile_inventory_invariants(
+                    existing_invariants,
+                    canonical_for_character,
+                    state.get("inventory"),
+                    state.get("containers"),
+                )
 
         appearance_updates = update.get("appearance_updates")
         appearance_changed = False
@@ -766,12 +957,4 @@ def _compile_chapter_markdown(book_root: Path, outline: Dict[str, Any], chapter_
     chapter_file = book_root / "draft" / "chapters" / f"ch_{chapter_num:03d}.md"
     chapter_file.write_text(compiled, encoding="utf-8")
     return chapter_file
-
-
-
-
-
-
-
-
 

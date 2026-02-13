@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 from bookforge.pipeline.llm_ops import _lint_status_from_issues
-from bookforge.pipeline.state_apply import _ensure_character_continuity_system_state, _apply_bag_updates
+from bookforge.pipeline.state_apply import _ensure_character_continuity_system_state, _apply_bag_updates, _summary_list, _split_invariant_removals, _apply_invariant_removals, _canonical_inventory_invariants, _reconcile_inventory_invariants
 from bookforge.pipeline.state_patch import _coerce_character_updates, _coerce_stat_updates
 
 
@@ -75,6 +75,14 @@ def _merged_character_states_for_lint(
     if not isinstance(continuity_updates, list):
         continuity_updates = []
 
+    summary_removals: List[str] = []
+    summary_inventory_canonical: Dict[tuple[str, str], Dict[str, str]] = {}
+    summary_update = patch.get("summary_update")
+    if isinstance(summary_update, dict):
+        must_stay_true = _summary_list(summary_update.get("must_stay_true"))
+        summary_removals, summary_additions = _split_invariant_removals(must_stay_true)
+        summary_inventory_canonical = _canonical_inventory_invariants(summary_additions)
+
     merged = []
     for state in character_states:
         if not isinstance(state, dict):
@@ -101,6 +109,19 @@ def _merged_character_states_for_lint(
                     merged_state["persona_updates"] = value
                 elif key == "invariants_add" and isinstance(value, list):
                     merged_state["invariants_add"] = value
+                    existing_invariants = merged_state.get("invariants", [])
+                    if not isinstance(existing_invariants, list):
+                        existing_invariants = []
+                    combined_invariants = existing_invariants + [str(item) for item in value if str(item).strip()]
+                    deduped_invariants: List[str] = []
+                    seen_invariants = set()
+                    for invariant in combined_invariants:
+                        norm = str(invariant).strip().lower()
+                        if not norm or norm in seen_invariants:
+                            continue
+                        seen_invariants.add(norm)
+                        deduped_invariants.append(invariant)
+                    merged_state["invariants"] = deduped_invariants
                 elif key == "titles" and isinstance(value, list):
                     merged_state["titles"] = value
                 elif key == "appearance_updates" and isinstance(value, dict):
@@ -166,6 +187,30 @@ def _merged_character_states_for_lint(
             _apply_bag_updates(continuity, update)
         merged_state["character_continuity_system_state"] = continuity
         _ensure_character_continuity_system_state(merged_state)
+
+        existing_invariants = merged_state.get("invariants", [])
+        if isinstance(existing_invariants, list):
+            if summary_removals:
+                existing_invariants = _apply_invariant_removals(existing_invariants, summary_removals)
+            if summary_inventory_canonical:
+                subject_tokens = {char_id.lower()}
+                state_name = str(merged_state.get("name") or "").strip().lower()
+                if state_name:
+                    subject_tokens.add(state_name)
+                canonical_for_character = {
+                    key: value
+                    for key, value in summary_inventory_canonical.items()
+                    if key[0] in subject_tokens
+                }
+                if canonical_for_character:
+                    existing_invariants = _reconcile_inventory_invariants(
+                        existing_invariants,
+                        canonical_for_character,
+                        merged_state.get("inventory"),
+                        merged_state.get("containers"),
+                    )
+            merged_state["invariants"] = existing_invariants
+
         merged.append(merged_state)
 
     return merged
