@@ -1,0 +1,219 @@
+COMPLIANCE:
+Scene ID: SC_001_005
+Allowed events: Awarding of Participation Trophy, activation of Monster Beacon status, mass monster aggro, Artie fleeing toward Oakhaven.
+Forbidden milestones: Any mention of Vane (not present), entering Oakhaven (end condition is sprinting toward it), spending stat points (not in scene card).
+Current arm-side / inventory facts: 
+- inventory: CHAR_ARTIE -> Corporate ID Badge (equipped, container=neck)
+- inventory: CHAR_ARTIE -> Cracked Smartphone (stowed, container=pocket_right)
+- inventory: CHAR_ARTIE -> Participation Trophy (held, container=hand_left)
+Durable changes committed: Participation Trophy remains held in hand_left. Monster Beacon status is active. Artie is in a state of 'Extreme Aggro'.
+
+APPEARANCE_CHECK:
+- CHAR_ARTIE: late-20s, slight build, hazel eyes, mousy brown hair, unruly short, pale skin.
+- CHAR_FIZZ: ancient, ethereal build, white eyes, neon blue hair, translucent blue skin.
+
+PROSE:
+The smoke from the vaporized ancient tree was still stinging my lungs when the golden light manifested in front of my face. It didn't gently descend; it popped into existence with the obnoxious chime of a microwave finishing a bag of popcorn.
+
+"Congratulations," Fizz said, her neon-blue form flickering with a static-heavy sigh. "You’ve successfully broken the tutorial's physics engine. I hope you’re proud of yourself. The System had to pull from the 'Emergency Compensation' pool for this one."
+
+I reached out and grabbed the object floating in the air. It felt like cheap, gold-plated plastic.
+
+[Item Received: Participation Trophy (Cursed)]
+[Type: Cursed Accessory]
+[Rarity: Rare (Glitch-Tier)]
+[Description: Awarded to those who achieve a victory so statistically improbable that the System assumes you’re cheating but can’t prove it. It’s ugly, it’s heavy, and it smells like ozone and desperation.]
+[Passive Effect: Monster Beacon – Your presence is now broadcast on all frequencies. Monsters within 1km are aware of your location and find your face personally insulting.]
+[Note: This item is Soulbound. You can’t drop it. You can’t sell it. You can only regret it.]
+
+"Wait, 'personally insulting'?" I looked down at the trophy in my left hand. It featured a small, golden figure of a man tripping over a rock while holding a calculator. "Fizz, what does 'Monster Beacon' actually do in numerical terms?"
+
+"In numerical terms?" Fizz zipped around my head, her pixelated trail leaving a streak of blue light in the smoky air. "It means your Aggro Meter is about to become a vertical line. Look up, Artie. Quickly."
+
+I looked. Above my 1/1 HP bar, a new UI element had appeared. It was a jagged red eye that was currently pulsing with an angry, rhythmic light.
+
+[Aggro Meter: 94% (Rising...)]
+
+A low, guttural growl echoed from the shadows of the remaining trees. Then another. And a third that sounded like a blender full of gravel. The "lush forest" suddenly felt a lot less like a tutorial zone and a lot more like a buffet where I was the only thing on the menu.
+
+"The slime," I whispered, my heart hammering against my ribs. "The explosion. Did it attract them?"
+
+"The explosion was the dinner bell," Fizz said, her voice rising an octave. "The trophy is the GPS coordinates. Artie, you have exactly one hit point. If a squirrel sneezes on you, we both go back to the void, and I get demoted to 'Loading Screen Tip' status. Run!"
+
+[System Warning: Local Aggro Threshold Exceeded!]
+[Status Inflicted: Marked for Death]
+[Description: Every monster in the 'Lush Forest' sub-zone is now sprinting toward your coordinates. Good luck, Anomaly.]
+
+I didn't wait for a second warning. I turned and bolted. My dress shirt, already rumpled and stained with office coffee and slime residue, billowed behind me. My Corporate ID Badge bounced painfully against my collarbone with every step.
+
+[Stamina: 92/100]
+
+The forest, which had seemed peaceful ten minutes ago, was now a cacophony of snapping branches and predatory shrieks. To my left, a pair of glowing red eyes burst through a thicket of ferns. I didn't stay to see what they belonged to. I just focused on the distant, shimmering outline of stone walls on the horizon—Oakhaven.
+
+"Is there a sprint button?" I wheezed, my lungs burning. "Because I really need a sprint button!"
+
+"You're already using it! It's called 'Adrenaline and Terror'!" Fizz shouted, hovering effortlessly beside my ear. "Left! Go left! There’s a pack of Razor-Toothed Rabbits closing in from the right!"
+
+I veered left, my boots skidding on a patch of moss. I nearly lost my balance, which would have been a death sentence.
+
+[Stamina: 75/100]
+
+[HP: 1/1]
+
+The absurdity of it hit me even as I dodged a low-hanging branch. I was a Level 2 "Statistical Anomaly" with the power to vaporize gods, but I was currently being hunted by bunnies because I was holding a piece of plastic that made me smell like a target.
+
+"Can I put the trophy in my pocket?" I yelled over the sound of something large and heavy crashing through the underbrush behind us.
+
+"It’s a beacon, Artie! It doesn't matter if you put it in a lead box or up your—" Fizz cut herself off as a projectile—a glob of hardened sap—whistled past my head, missing by an inch. "Just run! The gates are only two kilometers away!"
+
+"Only two kilometers?" I looked at my rapidly depleting stamina bar. "I’m an analyst! I haven't run two kilometers since the elevator in the office broke in 2019!"
+
+[Stamina: 60/100]
+
+Behind me, the forest was alive with the sound of a hundred monsters converging on a single point. The Aggro Meter hit 100% and turned a dark, bruised purple. 
+
+[New Quest: Run for Your Life!]
+[Objective: Reach the Oakhaven Gate Scanners.]
+[Reward: Not dying.]
+[Failure: Deletion.]
+
+"I hate this game," I panted, my vision starting to tunnel. "I really, really hate this game."
+
+"Save your breath for the sprinting!" Fizz urged.
+
+I gripped the Participation Trophy tighter, its golden surface mocking me in the dappled sunlight. I could see the gates now—massive, iron-bound structures guarded by men in shining armor. They looked safe. They looked solid. They also looked a very, very long way away.
+
+I pushed my legs harder, the wind whipping past my ears as the first of the pursuers—a lean, grey wolf with far too many teeth—broke cover behind me. 
+
+"Don't look back!" Fizz screamed.
+
+I didn't. I just ran.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": ["CHAR_ARTIE", "CHAR_FIZZ"],
+    "location": "Tutorial Zone (Lush Forest - Transit to Oakhaven)",
+    "recent_facts": [
+      "Artie received the Participation Trophy (Cursed) as compensation for his overkill.",
+      "The Participation Trophy activated the Monster Beacon status, attracting all nearby monsters.",
+      "An 'Extreme Aggro' event was triggered, forcing Artie into a desperate flight.",
+      "Artie is currently sprinting toward the Oakhaven gates with a horde in pursuit."
+    ],
+    "open_threads": ["THREAD_CRIT_EXPLOIT", "THREAD_SYSTEM_GLITCH"]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": ["ITEM_ID_BADGE"]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": ["ITEM_SMARTPHONE"]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": ["ITEM_PARTICIPATION_TROPHY"]
+        }
+      ],
+      "persona_updates": [
+        "Artie is experiencing a rapid shift from post-combat triumph to pure survival instinct.",
+        "Artie's frustration with the System's 'rewards' is mounting."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "stamina": {
+            "current": 60,
+            "max": 100
+          }
+        },
+        "statuses": [
+          {
+            "name": "Monster Beacon",
+            "source": "ITEM_PARTICIPATION_TROPHY",
+            "effect": "Massively increases aggro radius; monsters within 1km are aware of your location."
+          },
+          {
+            "name": "Marked for Death",
+            "source": "system_event",
+            "effect": "Maximum aggro from all local entities."
+          }
+        ]
+      },
+      "reason": "Acquisition and activation of the Participation Trophy."
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "active_mechanics": [
+          "HP",
+          "Crit Rate",
+          "Point Buy",
+          "System Notification",
+          "Damage Number",
+          "Level Up",
+          "Aggro Meter",
+          "Stamina"
+        ]
+      },
+      "reason": "Introduction of Stamina and Aggro Meter mechanics in active play."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie received the cursed Participation Trophy as a reward for his excessive damage output, which immediately applied the 'Monster Beacon' status.",
+      "The resulting aggro spike forced Artie into a desperate sprint toward the gates of Oakhaven to escape a forest full of enraged monsters."
+    ],
+    "key_events": [
+      "Artie acquires the Participation Trophy (Cursed) in his left hand.",
+      "The 'Monster Beacon' effect activates, broadcastings Artie's location to all monsters within 1km.",
+      "The Aggro Meter spikes to 100%, triggering a 'Marked for Death' status.",
+      "Artie begins a high-stakes sprint toward Oakhaven, depleting his stamina to 60.",
+      "The 'Run for Your Life!' quest is initiated by the System."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left, tags=[cursed, soulbound, beacon])",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "status: Artie -> Monster Beacon (ACTIVE)",
+      "status: Artie -> Marked for Death (ACTIVE)",
+      "milestone: participation_trophy_acquired = DONE",
+      "milestone: monster_beacon_activated = DONE",
+      "Artie is currently in a state of 'Extreme Aggro' while fleeing toward Oakhaven."
+    ],
+    "chapter_so_far_add": [
+      "Artie's first 'reward' from the System is a cursed trophy that makes him the most hated man in the forest."
+    ]
+  }
+}

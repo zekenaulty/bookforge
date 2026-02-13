@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "Arthur 'Artie' Penhaligon reached his breaking point in the office breakroom while struggling with a malfunctioning vending machine.",
+      "His attempt to manually retrieve a bag of Zesty Ranch Glitch-O's resulted in a fatal electrical surge.",
+      "Artie died on the floor as the mundane world dissolved into pixels."
+    ],
+    "key_events": [
+      "Artie attempted 'Percussive Maintenance' on the Snack-Master 4000 to dislodge a stuck bag of chips.",
+      "Artie placed his Leather Wallet on the machine's ledge before reaching into the delivery chute.",
+      "A massive electrical surge from a loose wire electrocuted Artie while his arm was inside the machine.",
+      "Artie's HP dropped to 0, resulting in his death in the mundane world.",
+      "The Leather Wallet fell to the floor as Artie's body collapsed.",
+      "The mundane world began to pixelate and dissolve from Artie's perspective as he lost consciousness."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: vending_machine_struggle = DONE",
+      "REMOVE: inventory: CHAR_ARTIE -> Leather Wallet (status=carried, container=hand_right)",
+      "inventory: world -> Leather Wallet (status=dropped, container=Office Breakroom Floor)",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "character_status: CHAR_ARTIE -> deceased (mundane world)",
+      "location: Office Breakroom (transitioning to Void)"
+    ],
+    "chapter_so_far_add": [
+      "Artie Penhaligon died in a freak vending machine accident in the office breakroom."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "scene": 1,
+      "chapter": 1,
+      "inventory": [
+        {
+          "item_id": "ITEM_ID_BADGE",
+          "item_name": "Corporate ID Badge",
+          "status": "equipped",
+          "container": "neck"
+        },
+        {
+          "item_id": "ITEM_SMARTPHONE",
+          "item_name": "Cracked Smartphone",
+          "status": "stowed",
+          "container": "pocket_right"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie's final moment in the mundane world was defined by a petty but relatable frustration with corporate life and malfunctioning technology."
+      ],
+      "invariants_add": [
+        "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+        "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)"
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "scene": 1,
+      "chapter": 1,
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 0,
+            "max": 10
+          }
+        },
+        "resources": {
+          "patience": {
+            "current": 0,
+            "max": 100
+          }
+        }
+      },
+      "reason": "Fatal electrocution by vending machine."
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "world_type": "void"
+      },
+      "reason": "Transition from mundane world to the System void upon death."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "reason": "Artie dropped his wallet upon death; other items remain on his person.",
+      "reason_category": "after_combat_cleanup",
+      "set": {
+        "inventory": [
+          {
+            "item_id": "ITEM_ID_BADGE",
+            "status": "equipped",
+            "container": "neck"
+          },
+          {
+            "item_id": "ITEM_SMARTPHONE",
+            "status": "stowed",
+            "container": "pocket_right"
+          }
+        ],
+        "containers": [
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_WALLET",
+      "source": "CHAR_ARTIE",
+      "destination": "world",
+      "reason": "Dropped on the breakroom floor during fatal electrocution."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_WALLET",
+      "set": {
+        "custodian": "world",
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "Office Breakroom Floor"
+        }
+      },
+      "reason": "Item is no longer in character custody."
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Office Breakroom",
+    "recent_facts": [
+      "Artie Penhaligon is deceased in the mundane world.",
+      "The mundane reality has dissolved into a pixelated void for the protagonist."
+    ]
+  }
+}

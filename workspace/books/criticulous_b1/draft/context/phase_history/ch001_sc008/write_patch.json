@@ -1,0 +1,226 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_VANE"
+    ],
+    "location": "Oakhaven - Town Square",
+    "recent_facts": [
+      "Artie encountered Vane in the Oakhaven Town Square.",
+      "Vane attempted to 'test' Artie's 1 HP build with his Obsidian Greatsword.",
+      "Artie successfully dodged Vane's attack through a combination of luck and a tactical trip.",
+      "Artie used 'Percussive Maintenance' to block Vane's pursuit with a pile of crates.",
+      "Artie escaped the confrontation, establishing a primary rivalry with Vane."
+    ],
+    "open_threads": [
+      "THREAD_VANE_RIVALRY",
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_PARTICIPATION_TROPHY"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie has realized that his build is a magnet for high-level bullies and that his luck is as broken as his stats."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 8
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "inventory": [
+        {
+          "item": "ITEM_OBSIDIAN_BLADE",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "CHAR_VANE",
+          "contents": [
+            "ITEM_OBSIDIAN_BLADE"
+          ]
+        },
+        {
+          "container": "back_sheath",
+          "owner": "CHAR_VANE",
+          "contents": []
+        }
+      ],
+      "persona_updates": [
+        "Vane is now obsessed with the 'Anomaly' and views Artie as a personal insult to his ranking."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 8
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "delta": {
+        "resources": {
+          "aggro_meter": 1
+        }
+      },
+      "set": {
+        "reason": "Escaping a high-level confrontation increased local notoriety and aggro."
+      },
+      "chapter": 1,
+      "scene": 8
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "set": {
+        "level": 45,
+        "titles": [
+          {
+            "name": "Top 100 Slayer",
+            "source": "leaderboard",
+            "active": true
+          }
+        ],
+        "stats": {
+          "hp": {
+            "current": 500,
+            "max": 500
+          }
+        },
+        "reason": "Establishing Vane's canonical combat stats and title."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 8
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "delta": {
+        "reality_stability": -2
+      },
+      "reason": "A Level 2 dodging a Level 45 caused a minor calculation error in the world's physics engine."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie exited the Mayor's office only to be intercepted by Vane, a Level 45 Slayer intrigued by his 'Anomaly' status.",
+      "After a tense exchange and a near-lethal swing from Vane's Obsidian Greatsword, Artie used a comedic dodge and a crate-collapse to escape into the city's backstreets."
+    ],
+    "key_events": [
+      "Artie entered the Oakhaven Town Square with a 95% Aggro Meter.",
+      "Vane introduced himself and his Obsidian Greatsword, challenging Artie's 1 HP status.",
+      "Artie successfully dodged a high-level attack from Vane through a 'Luck' proc.",
+      "Artie used the 'Percussive Maintenance' skill to create an obstacle and facilitate his escape.",
+      "Vane was left in the Town Square, publicly humiliated and intrigued by the glitch.",
+      "milestone: vane_rivalry_established = DONE",
+      "milestone: town_square_confrontation = DONE"
+    ],
+    "must_stay_true": [
+      "REMOVE: location: Oakhaven - Mayor's Office",
+      "location: Oakhaven - Town Square",
+      "Artie is Level 2 with 1/1 HP and 100% Crit Rate.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (held, container=hand_left)",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (held, container=hand_right)",
+      "milestone: vane_rivalry_established = DONE",
+      "milestone: town_square_confrontation = DONE",
+      "Artie is under the 'Marked for Death' and 'Monster Beacon' statuses (Active).",
+      "Vane is Level 45 with the 'Top 100 Slayer' title."
+    ],
+    "chapter_so_far_add": [
+      "Artie has made a powerful enemy in Vane, the Top 100 Slayer, after surviving a 'test' in the Oakhaven Town Square."
+    ]
+  },
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "container": "hand_left",
+            "status": "held"
+          }
+        ]
+      },
+      "reason": "Posture normalization after escape."
+    }
+  ],
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "late-20s",
+      "slight",
+      "build",
+      "hazel",
+      "eyes",
+      "mousy",
+      "brown",
+      "hair."
+    ],
+    "CHAR_VANE": [
+      "mid-30s",
+      "athletic",
+      "build",
+      "steely",
+      "grey",
+      "eyes",
+      "jet",
+      "black",
+      "hair."
+    ]
+  }
+}

@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Tutorial Zone (Lush Forest - Transit to Oakhaven)",
+    "recent_facts": [
+      "Artie received the Participation Trophy (Cursed) as compensation for his overkill.",
+      "The Participation Trophy activated the Monster Beacon status, attracting all nearby monsters.",
+      "An 'Extreme Aggro' event was triggered, forcing Artie into a desperate flight.",
+      "Artie is currently sprinting toward the Oakhaven gates with a horde in pursuit."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_PARTICIPATION_TROPHY"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is experiencing a rapid shift from post-combat triumph to pure survival instinct.",
+        "Artie's frustration with the System's 'rewards' is mounting."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 5
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "stamina": {
+            "current": 60,
+            "max": 100
+          }
+        },
+        "statuses": [
+          {
+            "name": "Monster Beacon",
+            "source": "ITEM_PARTICIPATION_TROPHY",
+            "effect": "Massively increases aggro radius; monsters within 1km are aware of your location."
+          },
+          {
+            "name": "Marked for Death",
+            "source": "system_event",
+            "effect": "Maximum aggro from all local entities."
+          }
+        ],
+        "reason": "Acquisition and activation of the Participation Trophy."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 5
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "active_mechanics": [
+          "HP",
+          "Crit Rate",
+          "Point Buy",
+          "System Notification",
+          "Damage Number",
+          "Level Up",
+          "Aggro Meter",
+          "Stamina"
+        ]
+      },
+      "reason": "Introduction of Stamina and Aggro Meter mechanics in active play."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie received the cursed Participation Trophy as a reward for his excessive damage output, which immediately applied the 'Monster Beacon' status.",
+      "The resulting aggro spike forced Artie into a desperate sprint toward the gates of Oakhaven to escape a forest full of enraged monsters."
+    ],
+    "key_events": [
+      "Artie acquires the Participation Trophy (Cursed) in his left hand.",
+      "The 'Monster Beacon' effect activates, broadcastings Artie's location to all monsters within 1km.",
+      "The Aggro Meter spikes to 100%, triggering a 'Marked for Death' status.",
+      "Artie begins a high-stakes sprint toward Oakhaven, depleting his stamina to 60.",
+      "The 'Run for Your Life!' quest is initiated by the System."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left, tags=[cursed, soulbound, beacon])",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "status: Artie -> Monster Beacon (ACTIVE)",
+      "status: Artie -> Marked for Death (ACTIVE)",
+      "milestone: participation_trophy_acquired = DONE",
+      "milestone: monster_beacon_activated = DONE",
+      "Artie is currently in a state of 'Extreme Aggro' while fleeing toward Oakhaven."
+    ],
+    "chapter_so_far_add": [
+      "Artie's first 'reward' from the System is a cursed trophy that makes him the most hated man in the forest."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "late-20s",
+      "slight",
+      "build",
+      "hazel",
+      "eyes",
+      "mousy",
+      "brown",
+      "hair",
+      "unruly",
+      "short",
+      "pale",
+      "skin."
+    ],
+    "CHAR_FIZZ": [
+      "ancient",
+      "ethereal",
+      "build",
+      "white",
+      "eyes",
+      "neon",
+      "blue",
+      "hair",
+      "translucent",
+      "blue",
+      "skin."
+    ]
+  }
+}

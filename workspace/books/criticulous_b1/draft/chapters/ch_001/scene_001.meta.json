@@ -1,0 +1,280 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_001",
+  "chapter": 1,
+  "scene": 1,
+  "scene_target": "Establish Artie's character and his transition from the mundane world to the System.",
+  "goal": "Artie attempts to retrieve a stuck bag of chips from a faulty vending machine.",
+  "conflict": "Artie's frustration with corporate life peaks during a physical struggle with a vending machine, leading to a fatal accident.",
+  "required_callbacks": [],
+  "constraints": [
+    "target_words: 2000",
+    "no-recaps",
+    "forward-motion",
+    "depict the vending machine scar on CHAR_ARTIE's right knuckle"
+  ],
+  "end_condition": "Artie is electrocuted by the vending machine and the mundane world fades to black.",
+  "ui_allowed": false,
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE"
+  ],
+  "introduces": [
+    "Arthur 'Artie' Penhaligon"
+  ],
+  "introduces_ids": [
+    "CHAR_ARTIE"
+  ],
+  "thread_ids": [],
+  "required_in_custody": [
+    "ITEM_WALLET",
+    "ITEM_ID_BADGE",
+    "ITEM_SMARTPHONE"
+  ],
+  "required_scene_accessible": [
+    "ITEM_WALLET",
+    "ITEM_ID_BADGE",
+    "ITEM_SMARTPHONE"
+  ],
+  "required_visible_on_page": [
+    "ITEM_WALLET"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "setup",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [],
+  "ui_mechanics_expected": [],
+  "prose_path": "draft/chapters/ch_001/scene_001.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "summary_update": {
+      "last_scene": [
+        "Arthur 'Artie' Penhaligon's frustration with a stuck bag of chips led to a fatal confrontation with a vending machine in his office breakroom.",
+        "After attempting percussive maintenance and reaching into the machine's chute, he was struck by a massive electrical surge.",
+        "Artie died as his vision pixelated and the mundane world dissolved into darkness."
+      ],
+      "key_events": [
+        "Artie fails to retrieve a bag of Zesty Ranch Glitch-O's from the Snack-Master 4000.",
+        "Artie performs 'Percussive Maintenance' on the machine to no avail.",
+        "Artie places his Leather Wallet on the machine's ledge to free his hands.",
+        "Artie reaches into the delivery chute and touches a loose internal wire.",
+        "A massive electrical surge fatally electrocutes Artie.",
+        "Artie's Leather Wallet falls to the floor as he collapses.",
+        "The mundane world pixelates and dissolves into blackness as Artie dies."
+      ],
+      "must_stay_true": [
+        "REMOVE: inventory: CHAR_ARTIE -> Leather Wallet (status=carried, container=hand_right)",
+        "REMOVE: inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+        "REMOVE: container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+        "inventory: world -> Leather Wallet (status=dropped, container=floor)",
+        "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+        "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+        "milestone: artie_electrocuted = DONE",
+        "injury: vending machine scar on right knuckle",
+        "state: world_dissolving = TRUE"
+      ],
+      "chapter_so_far_add": [
+        "Artie's mundane life as a Junior Analyst ended with a fatal electrocution in the office breakroom."
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "CHAR_ARTIE"
+      ],
+      "location": "Office Breakroom",
+      "open_threads": [],
+      "recent_facts": [
+        "Artie died from electrocution while fighting a vending machine."
+      ]
+    },
+    "character_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "chapter": 1,
+        "scene": 1,
+        "persona_updates": [
+          "Artie's final mundane thought was a regret about untasted chips."
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          }
+        ]
+      }
+    ],
+    "character_continuity_system_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "chapter": 1,
+        "scene": 1,
+        "set": {
+          "stats": {
+            "hp": {
+              "current": 0,
+              "max": 10
+            }
+          },
+          "resources": {
+            "patience": {
+              "current": 0,
+              "max": 100
+            }
+          },
+          "reason": "Fatal electrocution by vending machine."
+        },
+        "delta": {}
+      }
+    ],
+    "global_continuity_system_updates": [
+      {
+        "set": {
+          "world_type": "mundane",
+          "reality_stability": 0
+        },
+        "reason": "Artie's death triggers the dissolution of the mundane world."
+      }
+    ],
+    "item_registry_updates": [
+      {
+        "item_id": "ITEM_WALLET",
+        "set": {
+          "name": "Leather Wallet",
+          "type": "accessory",
+          "owner_scope": "world",
+          "custodian": "world",
+          "linked_threads": [],
+          "state_tags": [
+            "mundane",
+            "essential"
+          ],
+          "last_seen": {
+            "chapter": 1,
+            "scene": 1,
+            "location": "Office Breakroom floor"
+          }
+        },
+        "reason": "Dropped during electrocution."
+      }
+    ],
+    "transfer_updates": [
+      {
+        "item_id": "ITEM_WALLET",
+        "source": "CHAR_ARTIE",
+        "destination": "world",
+        "reason": "Dropped on floor during fatal electrocution.",
+        "from": {}
+      }
+    ],
+    "inventory_alignment_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "reason": "Post-death inventory state.",
+        "reason_category": "after_combat_cleanup",
+        "set": {
+          "inventory": [
+            {
+              "item": "ITEM_ID_BADGE",
+              "container": "neck",
+              "status": "equipped"
+            },
+            {
+              "item": "ITEM_SMARTPHONE",
+              "container": "pocket_right",
+              "status": "stowed"
+            }
+          ],
+          "containers": [
+            {
+              "container": "pocket_right",
+              "owner": "CHAR_ARTIE",
+              "contents": [
+                "ITEM_SMARTPHONE"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "_appearance_check": {
+      "CHAR_ARTIE": [
+        "late-20s",
+        "slight",
+        "build",
+        "hazel",
+        "eyes",
+        "mousy",
+        "brown",
+        "hair",
+        "vending",
+        "machine",
+        "scar",
+        "on",
+        "right",
+        "knuckle"
+      ]
+    }
+  },
+  "scene_summary": [
+    "Arthur 'Artie' Penhaligon's frustration with a stuck bag of chips led to a fatal confrontation with a vending machine in his office breakroom.",
+    "After attempting percussive maintenance and reaching into the machine's chute, he was struck by a massive electrical surge.",
+    "Artie died as his vision pixelated and the mundane world dissolved into darkness."
+  ],
+  "key_events": [
+    "Artie fails to retrieve a bag of Zesty Ranch Glitch-O's from the Snack-Master 4000.",
+    "Artie performs 'Percussive Maintenance' on the machine to no avail.",
+    "Artie places his Leather Wallet on the machine's ledge to free his hands.",
+    "Artie reaches into the delivery chute and touches a loose internal wire.",
+    "A massive electrical surge fatally electrocutes Artie.",
+    "Artie's Leather Wallet falls to the floor as he collapses.",
+    "The mundane world pixelates and dissolves into blackness as Artie dies."
+  ],
+  "must_stay_true": [
+    "REMOVE: inventory: CHAR_ARTIE -> Leather Wallet (status=carried, container=hand_right)",
+    "REMOVE: inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+    "REMOVE: container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+    "inventory: world -> Leather Wallet (status=dropped, container=floor)",
+    "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+    "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+    "milestone: artie_electrocuted = DONE",
+    "injury: vending machine scar on right knuckle",
+    "state: world_dissolving = TRUE"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "fail",
+    "issues": [
+      {
+        "code": "pipeline_state_incoherent",
+        "message": "The post-patch character state invariants for CHAR_ARTIE contradict the authoritative must_stay_true block regarding ITEM_WALLET custody (carried vs dropped).",
+        "severity": "error",
+        "evidence": {
+          "excerpt": "must_stay_true: 'inventory: world -> Leather Wallet (status=dropped, container=floor)' vs character_states.invariants: 'inventory: CHAR_ARTIE -> Leather Wallet (status=carried, container=hand_right)'"
+        }
+      }
+    ]
+  },
+  "write_attempts": 2,
+  "updated_at": "2026-02-13T08:05:54Z"
+}

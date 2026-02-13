@@ -1,0 +1,92 @@
+The Lesser Puddle Slime didn’t have a face, but Artie could feel its judgment. It wobbled with a rhythmic, wet thrum, its translucent green body pulsing as it prepared to turn Artie’s one and only Hit Point into a memory. 
+
+Artie’s back hit the thicket of thorns. The sharp pricks through his rumpled dress shirt were a reminder that the environment was just as lethal as the monster. He had ninety-five stamina and a dream of not dying in a tutorial.
+
+The slime lunged.
+
+Artie threw himself to the right, his dress shoes skidding on the damp grass. He felt the rush of cold, gelatinous air as the slime sailed past his shoulder, slamming into the thorns with a squelch.
+
+[Stamina: 90/100]
+
+"My turn," Artie wheezed, clenching his fist. The vending machine scar on his right knuckle throbbed. He swung a desperate haymaker at the puddle as it tried to untangle itself from the briars.
+
+His fist passed through empty air. The slime had flattened itself like a pancake, the blow whistling harmlessly over its jiggly surface.
+
+[Attack Missed!]
+
+"Okay, warm-up. That was a warm-up," Artie muttered. He stepped back, trying to find his footing. The slime reformed, spinning like a top. It launched again, a low-altitude strike aimed at his ankles. Artie hopped over it, the effort sending a jolt of fatigue through his legs.
+
+[Stamina: 85/100]
+
+He pivoted and kicked. Or tried to. His foot connected with nothing but a stray leaf. The slime had rolled to the side with the grace of a professional gymnast made of Jell-O.
+
+[Attack Missed!]
+
+"Are you kidding me? It’s a puddle! How does a puddle have better evasion than a Junior Analyst?"
+
+The slime didn't answer. It just bubbled. Artie lunged forward, trying a double-handed overhead smash. He put his whole weight into it, his Corporate ID Badge swinging wildly against his chest. The slime simply shifted its mass, creating a hole in the center of its body. Artie’s hands passed through the gap, and he nearly face-planted into the dirt.
+
+[Attack Missed!]
+
+[Stamina: 75/100]
+
+"Three. That’s three," Artie gasped. He was starting to sweat. The humidity of the Lush Forest was doing no favors for his cotton shirt. The slime was circling him now, its green core glowing with a faint, predatory light. It hissed—a sound like a leaky radiator—and sprayed a glob of acidic bile.
+
+Artie dove, rolling across the roots of a massive oak tree. The bile hit the wood behind him, hissing as it ate through the bark.
+
+[Stamina: 70/100]
+
+He came up swinging. A quick jab, the kind he’d seen in movies. The slime bobbed.
+
+[Attack Missed!]
+
+"Four!" Artie screamed. "I am literally a statistical impossibility! I have a hundred percent crit rate! I just need to touch you!"
+
+The slime seemed to pause, its entire body vibrating. It looked like it was laughing. It began to bounce in place, a mocking, rubbery taunt. Artie felt a vein throb in his temple. He rushed in, swinging a wild, uncoordinated roundhouse punch. The slime ducked. It didn't even move far; it just lowered its profile by an inch, and Artie’s fist sailed over it yet again.
+
+[Attack Missed!]
+
+[Stamina: 60/100]
+
+Artie stopped. His chest heaved. He looked at his hand—the one with the vending machine scar. He looked at the slime, which was now preparing for what looked like a final, high-velocity leap. 
+
+"Fine," Artie whispered. "You want to play the RNG game? Let’s talk about the margin of error."
+
+The slime launched. It was a perfect strike, aimed directly at Artie’s heart. In mid-air, it expanded, its body forming a wide net of corrosive slime designed to ensure there was no escape.
+
+Artie didn't move. He waited until the green translucence filled his vision, until he could smell the ozone and rot. Then, he didn't punch. He didn't kick. He simply stepped forward and met the slime with a firm, rigid palm strike, right into the center of its glowing core.
+
+The world didn't just make a sound; it ceased to have a medium for sound.
+
+[CRITICAL HIT!]
+[Calculating Damage...]
+[Error: Value Exceeds Local Variable Limits]
+[Statistical Anomaly Bonus Applied: 'The Glitch']
+[Damage Dealt: 9,999,999,999 (Overkill!)]
+
+A pillar of pure, white light erupted from Artie’s palm. The Lesser Puddle Slime didn't splatter; it ceased to exist at a molecular level. The force of the blow didn't stop there. The shockwave tore through the air, a localized vacuum that shrieked as it expanded. 
+
+Behind the space where the slime had been, a massive, ancient tree—a trunk at least four feet thick—simply evaporated. There was no falling timber, no cracking wood. One moment it was a stalwart of the forest, and the next, there was a perfectly circular hole in the canopy and a scorched patch of earth where the roots used to be.
+
+Silence returned to the forest, save for the sound of Artie’s heavy breathing and the faint clinking of his Corporate ID Badge.
+
+Artie stared at his hand. It wasn't even singed.
+
+[System Notification: Enemy Defeated!]
+[Lesser Puddle Slime (Lvl 1) has been deleted from the database.]
+[Experience Gained: 500 (Tutorial Bonus Applied)]
+
+[LEVEL UP!]
+[Arthur 'Artie' Penhaligon: Level 1 -> Level 2]
+[All Resources Restored.]
+
+[Stat Points Gained: 5]
+[Skill Points Gained: 1]
+
+"Holy... crap," Artie breathed. He reached into his pocket and felt the cool, glass surface of his Cracked Smartphone. It was still there. He was still here.
+
+[Warning: Reality Stability decreased to 44%. Please refrain from divide-by-zero combat maneuvers.]
+
+Artie ignored the warning. He watched as his HP bar remained at a steady, terrifying 1/1, but his stamina bar surged back to full. He felt a strange, tingling warmth in his limbs—the sensation of growth, or perhaps just the lingering radiation of a billion-damage punch.
+
+"I think," Artie said to the empty forest, "I'm going to like being an anomaly."

@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 4,
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "notes": "Artie is cornered by the slime; preparing for the 'Statistical Anomaly' combat sequence.",
+      "persona_updates": [],
+      "invariants_add": []
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "active_mechanics": [
+          "HP",
+          "Crit Rate",
+          "Point Buy",
+          "System Notification",
+          "Damage Number",
+          "Level Up"
+        ]
+      },
+      "reason": "Aligning active mechanics for combat and level up sequence.",
+      "reason_category": "continuity_fix"
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          }
+        ]
+      },
+      "reason": "Confirming inventory posture for combat: ID badge equipped, phone stowed.",
+      "reason_category": "equipment_posture"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_ID_BADGE",
+      "set": {
+        "name": "Corporate ID Badge",
+        "display_name": "Corporate ID Badge",
+        "type": "accessory",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [],
+        "state_tags": [
+          "equipped"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 3,
+          "location": "Tutorial Zone (Lush Forest)"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_SMARTPHONE",
+      "set": {
+        "name": "Cracked Smartphone",
+        "display_name": "Cracked Smartphone",
+        "type": "tool",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [],
+        "state_tags": [
+          "stowed"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 3,
+          "location": "Tutorial Zone (Lush Forest)"
+        }
+      }
+    }
+  ],
+  "character_continuity_system_updates": []
+}

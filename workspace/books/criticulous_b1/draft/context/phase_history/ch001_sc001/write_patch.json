@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Office Breakroom",
+    "recent_facts": [
+      "Artie died attempting to retrieve a bag of chips from a vending machine.",
+      "The mundane world has faded to black for Artie."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item_id": "ITEM_ID_BADGE",
+          "item_name": "Corporate ID Badge",
+          "container": "neck",
+          "status": "equipped",
+          "item": "ITEM_ID_BADGE"
+        },
+        {
+          "item_id": "ITEM_SMARTPHONE",
+          "item_name": "Cracked Smartphone",
+          "container": "pocket_right",
+          "status": "stowed",
+          "item": "ITEM_SMARTPHONE"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie's final moment was defined by a petty but relatable frustration with the mundane world."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 1
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 0,
+            "max": 10
+          }
+        },
+        "resources": {
+          "patience": {
+            "current": 0,
+            "max": 100
+          }
+        },
+        "reason": "Electrocution by vending machine."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 1
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item_id": "ITEM_ID_BADGE",
+            "status": "equipped",
+            "container": "neck"
+          },
+          {
+            "item_id": "ITEM_SMARTPHONE",
+            "status": "stowed",
+            "container": "pocket_right"
+          }
+        ]
+      },
+      "reason": "Artie dropped his wallet and died, leaving his equipped/stowed items on his corpse.",
+      "reason_category": "after_combat_cleanup"
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_WALLET",
+      "reason": "Dropped on the breakroom floor during electrocution.",
+      "source": "CHAR_ARTIE",
+      "destination": "world",
+      "from": {}
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie reached his breaking point with a stuck bag of chips in the office breakroom.",
+      "His attempt at percussive maintenance and manual retrieval led to a fatal electrical surge.",
+      "Artie died on the breakroom floor as the world faded to black."
+    ],
+    "key_events": [
+      "Artie failed to purchase Zesty Ranch Glitch-O's.",
+      "Artie engaged in a physical struggle with a Snack-Master 4000 vending machine.",
+      "Artie suffered a fatal electrical surge while reaching into the machine.",
+      "Artie's Leather Wallet was dropped on the floor.",
+      "Artie's HP reached 0, resulting in his death in the mundane world."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: vending_machine_struggle = DONE",
+      "REMOVE: inventory: CHAR_ARTIE -> Leather Wallet (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+      "location: Office Breakroom (transitioning to Void)"
+    ],
+    "chapter_so_far_add": [
+      "Artie's mundane life ended abruptly due to a vending machine malfunction."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "late-20s",
+      "slight",
+      "build",
+      "hazel",
+      "eyes",
+      "mousy",
+      "brown",
+      "unruly",
+      "hair",
+      "pale",
+      "skin."
+    ]
+  }
+}

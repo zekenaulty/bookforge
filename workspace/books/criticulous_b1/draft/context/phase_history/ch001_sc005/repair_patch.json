@@ -1,0 +1,204 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Tutorial Zone (Lush Forest)",
+    "recent_facts": [
+      "Artie received the Participation Trophy as a cursed reward for his overkill victory.",
+      "The Participation Trophy activated the Monster Beacon effect, attracting all local monsters.",
+      "Artie is being hunted by a mob of tutorial monsters while sprinting toward Oakhaven.",
+      "Artie's stamina has depleted to 60/100 during the flight."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_PARTICIPATION_TROPHY"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is discovering that his high-damage build comes with extreme social and physical aggro."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 5
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "stamina": {
+            "current": 60,
+            "max": 100
+          },
+          "hp": {
+            "current": 1,
+            "max": 1
+          }
+        },
+        "statuses": [
+          {
+            "name": "Monster Beacon",
+            "source": "ITEM_PARTICIPATION_TROPHY",
+            "effect": "Massively increases aggro radius; monsters within 1km are aware of your location."
+          },
+          {
+            "name": "Marked for Death",
+            "source": "system_event",
+            "effect": "Maximum aggro from all local entities."
+          }
+        ],
+        "reason": "Artie's stamina depleted during the sprint while the Participation Trophy activated the Monster Beacon and Marked for Death statuses.",
+        "reason_category": "after_combat_cleanup"
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 5
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_PARTICIPATION_TROPHY",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 5,
+          "location": "Tutorial Zone (Lush Forest)"
+        },
+        "custodian": "CHAR_ARTIE"
+      }
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "container": "hand_left",
+            "status": "held"
+          }
+        ]
+      },
+      "reason": "Artie is holding the Participation Trophy while fleeing toward Oakhaven.",
+      "reason_category": "after_combat_cleanup"
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie received the cursed Participation Trophy after vaporizing the tutorial slime, which immediately broadcast his location to every monster in the forest.",
+      "Forced into a desperate sprint toward Oakhaven, Artie struggled with his 1 HP vulnerability as a horde of aggroed creatures closed in."
+    ],
+    "key_events": [
+      "Artie acquired the Participation Trophy (Cursed) in his left hand.",
+      "The System applied the 'Monster Beacon' and 'Marked for Death' statuses to Artie.",
+      "Artie's Aggro Meter reached 100%, triggering a zone-wide hunt.",
+      "Artie began a high-stakes sprint toward the gates of Oakhaven.",
+      "Artie's stamina dropped to 60/100 during the chase.",
+      "The System initiated the 'Run for Your Life!' quest."
+    ],
+    "must_stay_true": [
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+      "milestone: lesser_puddle_slime_defeated = DONE",
+      "milestone: tutorial_level_up_reached = DONE",
+      "Artie is Level 2 with 1/1 HP and 100% Crit Rate.",
+      "Artie is currently under the 'Marked for Death' and 'Monster Beacon' statuses."
+    ],
+    "chapter_so_far_add": [
+      "Artie's overkill victory resulted in a cursed trophy that makes him a permanent target for monsters."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "slight",
+      "build",
+      "hazel",
+      "eyes",
+      "mousy",
+      "brown",
+      "hair",
+      "unruly",
+      "short",
+      "hair",
+      "pale",
+      "skin",
+      "vending",
+      "machine",
+      "scar."
+    ],
+    "CHAR_FIZZ": [
+      "diminutive",
+      "ethereal",
+      "species",
+      "neon",
+      "blue",
+      "hair",
+      "white",
+      "eyes",
+      "translucent",
+      "blue",
+      "skin",
+      "pixelated",
+      "trail."
+    ]
+  }
+}

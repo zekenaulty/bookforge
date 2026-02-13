@@ -1,0 +1,21 @@
+- Artie died from electrocution while fighting a vending machine.
+- Artie arrived in the Lush Forest tutorial zone.
+- Artie encountered a Level 1 Lesser Puddle Slime.
+- Artie realized that 1 HP means any hit is fatal.
+- Artie engaged a Lesser Puddle Slime in combat.
+- Artie missed five consecutive attacks due to poor coordination.
+- Artie landed a 'Super-Mega-Ultra-Crit' that dealt 9,999,999,999 damage.
+- The slime and a large tree were vaporized by the attack.
+- Artie leveled up to Level 2 and restored all resources.
+- Artie received the Participation Trophy as a cursed reward for his overkill victory.
+- The Participation Trophy activated the Monster Beacon effect, attracting all local monsters.
+- Artie is being hunted by a mob of tutorial monsters while sprinting toward Oakhaven.
+- Artie's stamina has depleted to 60/100 during the flight.
+- Artie narrowly escaped a monster horde by entering Oakhaven just as the gates slammed shut.
+- The Oakhaven gate guards verified Artie's 'Statistical Anomaly' status via an automated scanner.
+- Artie's 100% Crit Rate and 1 HP build have been flagged as a 'Paradoxical Threat' by city defenses.
+- The Participation Trophy continues to act as a Monster Beacon even inside the city.
+- Artie met the Mayor of Oakhaven and discussed his 'Paradoxical Anomaly' status.
+- The Mayor identified Artie as a 'Market Disruptor' due to his 100% Crit Rate.
+- The Mayor offered Artie protection and the 'Cloak of the Bureaucrat' in exchange for a monopoly on his crits.
+- Artie's Aggro Meter reached 92% due to the Participation Trophy's beacon effect.

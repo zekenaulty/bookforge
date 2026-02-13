@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "location": "Tutorial Zone (Lush Forest)",
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 3,
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        }
+      ],
+      "notes": "Artie arrives in the tutorial zone physically vulnerable and confused by his surroundings.",
+      "persona_updates": [],
+      "invariants_add": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100
+        },
+        "reason": "Confirming glass cannon stats for the first combat encounter."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 3
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "world_type": "tutorial_zone"
+      },
+      "reason": "Transition from Character Creation Void to the physical game world."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "neck",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_ID_BADGE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          }
+        ]
+      },
+      "reason": "Artie arrives in the tutorial zone with his ID badge equipped and phone stowed.",
+      "reason_category": "location_transition"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_ID_BADGE",
+      "set": {
+        "name": "Corporate ID Badge",
+        "type": "accessory",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [],
+        "state_tags": [
+          "mundane"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "Character Creation Void"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_SMARTPHONE",
+      "set": {
+        "name": "Cracked Smartphone",
+        "type": "tool",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [],
+        "state_tags": [
+          "mundane",
+          "damaged"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "Character Creation Void"
+        }
+      }
+    }
+  ]
+}

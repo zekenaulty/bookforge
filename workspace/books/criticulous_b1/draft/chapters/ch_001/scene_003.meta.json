@@ -1,0 +1,302 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_003",
+  "chapter": 1,
+  "scene": 3,
+  "scene_target": "Artie arrives in the tutorial zone and faces his first threat, realizing the lethality of his 1 HP build.",
+  "goal": "Establish the mechanical reality of the 'Glass Cannon' build through environmental tension and a mob encounter.",
+  "conflict": "Artie's confusion and extreme physical vulnerability versus a predatory Level 1 Slime.",
+  "required_callbacks": [
+    "milestone: crit_build_finalized",
+    "milestone: artie_electrocuted"
+  ],
+  "constraints": [
+    "target_words: 2000",
+    "no-recaps",
+    "forward-motion"
+  ],
+  "end_condition": "Artie is cornered by the slime and realizes that a single point of damage will end his journey.",
+  "ui_allowed": true,
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [],
+  "required_in_custody": [
+    "ITEM_ID_BADGE",
+    "ITEM_SMARTPHONE"
+  ],
+  "required_scene_accessible": [
+    "ITEM_ID_BADGE",
+    "ITEM_SMARTPHONE"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "travel_arrival",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources",
+    "titles"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Crit Rate",
+    "System Notification",
+    "Level"
+  ],
+  "prose_path": "draft/chapters/ch_001/scene_003.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "summary_update": {
+      "last_scene": [
+        "Artie arrived in the Lush Forest tutorial zone and was immediately confronted by the reality of his 1 HP build.",
+        "A Lesser Puddle Slime attacked, forcing Artie to realize that he must dodge every single attack to survive."
+      ],
+      "key_events": [
+        "Artie spawns in the Lush Forest with his Corporate ID Badge and Cracked Smartphone.",
+        "The System initiates the 'Survive the Spawn' quest.",
+        "Artie confirms his stats: Level 1, 1/1 HP, and 100% Crit Rate.",
+        "A Lesser Puddle Slime (Lvl 1) aggros on Artie.",
+        "Artie successfully dodges the slime's first leap, consuming 5 stamina.",
+        "Artie is cornered against a thicket of thorns as the slime prepares a second lunge."
+      ],
+      "must_stay_true": [
+        "milestone: artie_electrocuted = DONE",
+        "milestone: crit_build_finalized = DONE",
+        "milestone: survive_the_spawn_initiated = DONE",
+        "inventory: world -> Leather Wallet (status=dropped, container=floor)",
+        "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+        "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+        "injury: vending machine scar on right knuckle",
+        "state: tutorial_active = TRUE"
+      ],
+      "chapter_so_far_add": [
+        "Artie has entered the game world and faced his first lethal threat, establishing the high stakes of his glitchy build."
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "CHAR_ARTIE",
+        "CHAR_FIZZ"
+      ],
+      "location": "Tutorial Zone (Lush Forest)",
+      "open_threads": [],
+      "recent_facts": [
+        "Artie arrived in the Lush Forest tutorial zone.",
+        "Artie encountered a Level 1 Lesser Puddle Slime.",
+        "Artie realized that 1 HP means any hit is fatal."
+      ]
+    },
+    "character_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "persona_updates": [
+          "Artie is beginning to understand that his 'Statistical Anomaly' title is a literal warning of his fragility."
+        ],
+        "invariants_add": [
+          "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+          "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)"
+        ],
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "neck",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_ID_BADGE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          }
+        ],
+        "chapter": 1,
+        "scene": 3
+      }
+    ],
+    "character_continuity_system_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "set": {
+          "stats": {
+            "hp": {
+              "current": 1,
+              "max": 1
+            },
+            "crit_rate": 100,
+            "stamina": {
+              "current": 95,
+              "max": 100
+            },
+            "level": 1
+          },
+          "titles": [
+            {
+              "active": true,
+              "name": "Statistical Anomaly",
+              "source": "system_glitch"
+            }
+          ],
+          "reason": "Establishing base level and tracking stamina consumption after first dodge."
+        },
+        "delta": {},
+        "chapter": 1,
+        "scene": 3
+      }
+    ],
+    "global_continuity_system_updates": [
+      {
+        "set": {
+          "reality_stability": 45,
+          "world_type": "tutorial_zone"
+        },
+        "reason": "Confirmed arrival in the Lush Forest tutorial instance."
+      }
+    ],
+    "inventory_alignment_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "set": {
+          "inventory": [
+            {
+              "item": "ITEM_ID_BADGE",
+              "container": "neck",
+              "status": "equipped"
+            },
+            {
+              "item": "ITEM_SMARTPHONE",
+              "container": "pocket_right",
+              "status": "stowed"
+            }
+          ],
+          "containers": [
+            {
+              "container": "neck",
+              "owner": "CHAR_ARTIE",
+              "contents": [
+                "ITEM_ID_BADGE"
+              ]
+            },
+            {
+              "container": "pocket_right",
+              "owner": "CHAR_ARTIE",
+              "contents": [
+                "ITEM_SMARTPHONE"
+              ]
+            }
+          ]
+        },
+        "reason": "Normalization of inventory posture upon arrival in the tutorial zone.",
+        "reason_category": "location_jump_normalize"
+      }
+    ],
+    "item_registry_updates": [
+      {
+        "item_id": "ITEM_ID_BADGE",
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "scene": 3,
+            "location": "Tutorial Zone (Lush Forest)"
+          }
+        }
+      },
+      {
+        "item_id": "ITEM_SMARTPHONE",
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "scene": 3,
+            "location": "Tutorial Zone (Lush Forest)"
+          }
+        }
+      }
+    ],
+    "plot_device_updates": [
+      {
+        "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "scene": 3,
+            "location": "Tutorial Zone (Lush Forest)"
+          }
+        }
+      }
+    ]
+  },
+  "scene_summary": [
+    "Artie arrived in the Lush Forest tutorial zone and was immediately confronted by the reality of his 1 HP build.",
+    "A Lesser Puddle Slime attacked, forcing Artie to realize that he must dodge every single attack to survive."
+  ],
+  "key_events": [
+    "Artie spawns in the Lush Forest with his Corporate ID Badge and Cracked Smartphone.",
+    "The System initiates the 'Survive the Spawn' quest.",
+    "Artie confirms his stats: Level 1, 1/1 HP, and 100% Crit Rate.",
+    "A Lesser Puddle Slime (Lvl 1) aggros on Artie.",
+    "Artie successfully dodges the slime's first leap, consuming 5 stamina.",
+    "Artie is cornered against a thicket of thorns as the slime prepares a second lunge."
+  ],
+  "must_stay_true": [
+    "milestone: artie_electrocuted = DONE",
+    "milestone: crit_build_finalized = DONE",
+    "milestone: survive_the_spawn_initiated = DONE",
+    "inventory: world -> Leather Wallet (status=dropped, container=floor)",
+    "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+    "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+    "injury: vending machine scar on right knuckle",
+    "state: tutorial_active = TRUE"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "fail",
+    "issues": [
+      {
+        "code": "pov_drift",
+        "message": "First-person pronoun 'me' used in third-person narration.",
+        "severity": "error",
+        "evidence": {
+          "line": 74,
+          "excerpt": "If it touched me, the '1/1' in his peripheral vision would go to zero."
+        }
+      },
+      {
+        "code": "appearance_check_missing",
+        "message": "Appearance check missing for CHAR_ARTIE.",
+        "severity": "warning"
+      },
+      {
+        "code": "appearance_check_missing",
+        "message": "Appearance check missing for CHAR_FIZZ.",
+        "severity": "warning"
+      }
+    ]
+  },
+  "write_attempts": 2,
+  "updated_at": "2026-02-13T08:50:36Z"
+}

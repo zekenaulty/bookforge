@@ -1,0 +1,1205 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+UI gate: UI/system blocks (lines starting with '[' and ending with ']') are permitted only when scene_card.ui_allowed=true. If ui_allowed=false, do not include UI blocks even if an author persona says "always include".
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties.
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it unless explicitly removing a stale fact with REMOVE and restating the current truth.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v2
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements **when the System is active or the scene is set in a game world**. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+﻿Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+
+USER:
+
+# CONTINUITY PACK
+
+Create a continuity pack JSON object with these fields:
+- scene_end_anchor: 2-4 factual sentences about how the last scene ended (no prose).
+- constraints: list of immediate continuity constraints.
+- open_threads: list of active thread ids.
+- cast_present: list of character names present next.
+- location: location id or name.
+- next_action: the implied next action.
+- summary: echo state.summary (facts-only arrays; do not paraphrase).
+
+Return ONLY JSON.
+
+Rules:
+- Use only characters listed in scene_card.cast_present. Do not introduce new names.
+- summary must match state.summary and remain facts-only; do not add prose.
+- constraints must include the highest-priority invariants from summary.must_stay_true and summary.key_facts_ring (copy exact strings when possible).
+- constraints must include the highest-priority inventory/container invariants from summary.must_stay_true (copy exact strings when possible).
+- If character_states are provided, prefer their inventory/container facts and continuity mechanic facts; do not invent conflicting values.
+- If item_registry or plot_devices are provided, reuse canonical names/ids in constraints when referencing durable items/devices.
+- Prefer item_registry.items[].display_name for prose references; reserve item_id for canonical JSON. The display_name must be human readable and not an escaped id/name.
+- If state.global_continuity_system_state contains canonical mechanic labels/values, reuse those exact labels in constraints.
+- If scene_card.cast_present is empty, cast_present must be an empty array.
+- open_threads must be a subset of thread_registry thread_id values.
+- If scene_card.thread_ids is present, prefer those thread ids.
+- Do not invent new thread ids or character names.
+
+Scene card:
+{
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon",
+    "Mayor of Oakhaven"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_MAYOR"
+  ],
+  "chapter": 1,
+  "conflict": "The Mayor's desire to exploit Artie's 'Anomaly' status versus Artie's need for safety and a way to remove his 'Monster Beacon' status.",
+  "constraints": [
+    "target_words: 2000",
+    "no-recaps",
+    "forward-motion"
+  ],
+  "continuity_system_focus": [
+    "stats",
+    "titles",
+    "resources"
+  ],
+  "device_presence": [],
+  "end_condition": "Artie realizes that being a 'Statistical Anomaly' makes him a walking jackpot for the nobility, and the Mayor offers him a 'deal' for protection.",
+  "forbidden_visible": [],
+  "goal": "Introduce the Mayor and establish the 'Crit-Only' economy of the world.",
+  "introduces": [
+    "Mayor of Oakhaven"
+  ],
+  "introduces_ids": [
+    "CHAR_MAYOR"
+  ],
+  "ontological_scope": "real",
+  "required_callbacks": [
+    "milestone: oakhaven_entered",
+    "milestone: run_for_your_life_completed"
+  ],
+  "required_in_custody": [
+    "ITEM_PARTICIPATION_TROPHY",
+    "ITEM_ID_BADGE",
+    "ITEM_SMARTPHONE"
+  ],
+  "required_scene_accessible": [
+    "ITEM_PARTICIPATION_TROPHY"
+  ],
+  "required_visible_on_page": [
+    "ITEM_PARTICIPATION_TROPHY",
+    "ITEM_MAYOR_SEAL"
+  ],
+  "scene": 7,
+  "scene_id": "SC_001_007",
+  "scene_target": "Artie learns that his 100% Crit Rate makes him a valuable and dangerous political asset in Oakhaven.",
+  "schema_version": "1.1",
+  "thread_ids": [],
+  "timeline_scope": "present",
+  "transition_type": "travel_arrival",
+  "ui_allowed": true,
+  "ui_mechanics_expected": [
+    "Crit Rate",
+    "HP",
+    "Anomaly Status",
+    "Aggro Meter"
+  ]
+}
+
+Character registry (id -> name):
+[
+  {
+    "character_id": "CHAR_ARTIE",
+    "name": "Arthur 'Artie' Penhaligon"
+  },
+  {
+    "character_id": "CHAR_FIZZ",
+    "name": "Fizz"
+  },
+  {
+    "character_id": "CHAR_VANE",
+    "name": "Vane"
+  },
+  {
+    "character_id": "CHAR_MAYOR",
+    "name": "Mayor of Oakhaven"
+  },
+  {
+    "character_id": "CHAR_BOSS",
+    "name": "The System Administrator"
+  }
+]
+
+Thread registry:
+[
+  {
+    "label": "The 100% Crit Glitch",
+    "status": "open",
+    "thread_id": "THREAD_CRIT_EXPLOIT"
+  },
+  {
+    "label": "The Vane Vendetta",
+    "status": "open",
+    "thread_id": "THREAD_VANE_RIVALRY"
+  },
+  {
+    "label": "The System's Stability",
+    "status": "open",
+    "thread_id": "THREAD_SYSTEM_GLITCH"
+  },
+  {
+    "label": "The Path of the First Glitch",
+    "status": "open",
+    "thread_id": "THREAD_THE_ASCENSION"
+  }
+]
+
+Character states (per cast_present_ids):
+[
+  {
+    "appearance_current": {
+      "alias_map": {
+        "eye_color": [
+          "hazel",
+          "greenish-brown"
+        ],
+        "hair_color": [
+          "brown",
+          "mousy"
+        ]
+      },
+      "atoms": {
+        "age_band": "late-20s",
+        "build": "slight",
+        "eye_color": "hazel",
+        "hair_color": "mousy brown",
+        "hair_style": "unruly short",
+        "height_band": "average",
+        "sex_presentation": "masculine",
+        "skin_tone": "pale",
+        "species": "human"
+      },
+      "marks": [
+        {
+          "durability": "durable",
+          "location": "right knuckle",
+          "name": "vending machine scar"
+        }
+      ],
+      "summary": "An average-looking office worker in a rumpled dress shirt, looking perpetually tired until the adrenaline kicks in."
+    },
+    "appearance_history": [],
+    "character_continuity_system_state": {
+      "add": {
+        "titles": [
+          {
+            "active": false,
+            "name": "Gate-Crasher",
+            "source": "quest_reward"
+          }
+        ]
+      },
+      "reason": "Rest during walk to Mayor's office",
+      "reason_category": "location_transition",
+      "resources": {
+        "currency_silver": 10,
+        "skill_points": 1,
+        "stat_points": 5,
+        "xp": 50
+      },
+      "scope_override": true,
+      "skills": {
+        "data_entry": 4,
+        "percussive_maintenance": 2
+      },
+      "stats": {
+        "hp": {
+          "current": 1,
+          "max": 1
+        },
+        "stamina": {
+          "current": 9
+        }
+      },
+      "statuses": [
+        {
+          "effect": "Massively increases aggro radius; monsters within 1km are aware of your location.",
+          "name": "Monster Beacon",
+          "source": "ITEM_PARTICIPATION_TROPHY"
+        },
+        {
+          "effect": "Maximum aggro from all local entities.",
+          "name": "Marked for Death",
+          "source": "system_event"
+        }
+      ],
+      "titles": [
+        {
+          "active": true,
+          "name": "Statistical Anomaly",
+          "source": "system_glitch"
+        }
+      ]
+    },
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "neck",
+        "contents": [
+          "ITEM_ID_BADGE"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "pocket_right",
+        "contents": [
+          "ITEM_SMARTPHONE"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "hand_left",
+        "contents": [
+          "ITEM_PARTICIPATION_TROPHY"
+        ],
+        "owner": "CHAR_ARTIE"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is in the breakroom, wallet in hand, ready to fight the vending machine.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial scene setup: Artie is holding his wallet to pay for chips.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie's final mundane thought was a regret about untasted chips."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Post-death inventory state.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie enters the void with his mundane items intact.",
+        "persona_updates": [],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie retains his Corporate ID Badge (neck, equipped) and Cracked Smartphone (pocket_right, stowed) upon entering the void.",
+        "scene": 2
+      },
+      {
+        "changes": [],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is now aware he is in a game-like system but lacks the gaming literacy to realize how dangerous a 1 HP build is."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Normalization of inventory posture upon entering the void.",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie arrives in the tutorial zone physically vulnerable and confused by his surroundings.",
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie arrives in the tutorial zone with his ID badge equipped and phone stowed.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is beginning to understand that his 'Statistical Anomaly' title is a literal warning of his fragility."
+        ],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Normalization of inventory posture upon arrival in the tutorial zone.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is cornered by the slime; preparing for the 'Statistical Anomaly' combat sequence.",
+        "persona_updates": [],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Confirming inventory posture for combat: ID badge equipped, phone stowed.",
+        "scene": 4
+      },
+      {
+        "changes": [],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is beginning to embrace the absurdity of his 'Statistical Anomaly' status and the reality-warping power of his build."
+        ],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Post-combat posture normalization.",
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie has just been awarded the Participation Trophy following the slime's vaporization.",
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is holding the newly spawned Participation Trophy in his left hand while his ID badge remains equipped and phone stowed.",
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is discovering that his high-damage build comes with extreme social and physical aggro."
+        ],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is holding the Participation Trophy while fleeing toward Oakhaven.",
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie arrives at the gates of Oakhaven, exhausted and clutching the cursed trophy.",
+        "persona_updates": [],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie reaches the gates clutching the Participation Trophy in his left hand, with his ID badge visible and phone stowed.",
+        "scene": 6
+      },
+      {
+        "changes": [],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is developing a deep resentment for the 'gambling' culture of the game world's inhabitants."
+        ],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Arrival at Oakhaven and posture normalization.",
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie arrives at the Mayor's office, still clutching the cursed trophy.",
+        "persona_updates": [],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Arrival at Mayor's office with trophy held.",
+        "scene": 7
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)"
+    ],
+    "inventory": [
+      {
+        "container": "neck",
+        "item": "ITEM_ID_BADGE",
+        "status": "equipped"
+      },
+      {
+        "container": "pocket_right",
+        "item": "ITEM_SMARTPHONE",
+        "status": "stowed"
+      },
+      {
+        "container": "hand_left",
+        "item": "ITEM_PARTICIPATION_TROPHY",
+        "status": "held"
+      }
+    ],
+    "last_touched": {
+      "chapter": 1,
+      "scene": 7
+    },
+    "name": "Arthur 'Artie' Penhaligon",
+    "schema_version": "1.0",
+    "skills": {
+      "data_entry": 4,
+      "percussive_maintenance": 2
+    },
+    "stats": {
+      "hp": {
+        "current": 1,
+        "max": 1
+      },
+      "stamina": {
+        "current": 9
+      }
+    },
+    "updated_at": "2026-02-13T09:41:00Z"
+  },
+  {
+    "appearance_current": {
+      "alias_map": {
+        "eye_color": [
+          "blue"
+        ],
+        "hair_color": [
+          "gray",
+          "silver"
+        ]
+      },
+      "atoms": {
+        "age_band": "late-50s",
+        "build": "portly",
+        "eye_color": "watery blue",
+        "hair_color": "grey",
+        "hair_style": "balding fringe",
+        "height_band": "short",
+        "sex_presentation": "masculine",
+        "skin_tone": "ruddy",
+        "species": "human"
+      },
+      "marks": [],
+      "summary": "A portly man in slightly moth-eaten velvet robes and a chain of office that's too heavy for him."
+    },
+    "appearance_history": [],
+    "character_continuity_system_state": {
+      "skills": {
+        "negotiation": 5,
+        "tax_evasion": 7
+      },
+      "stats": {
+        "hp": {
+          "current": 50,
+          "max": 50
+        }
+      },
+      "titles": [
+        {
+          "active": true,
+          "name": "Mayor",
+          "source": "appointment"
+        }
+      ]
+    },
+    "character_id": "CHAR_MAYOR",
+    "containers": [
+      {
+        "container": "neck",
+        "contents": [
+          "ITEM_MAYOR_SEAL"
+        ],
+        "owner": "CHAR_MAYOR"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "The Mayor is introduced in his office, wearing his seal of office.",
+        "persona_updates": [],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Mayor wearing his seal of office.",
+        "scene": 7
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_MAYOR -> Seal of Oakhaven (status=equipped, container=neck)"
+    ],
+    "inventory": [
+      {
+        "container": "neck",
+        "item": "ITEM_MAYOR_SEAL",
+        "status": "equipped"
+      }
+    ],
+    "last_touched": {
+      "chapter": 1,
+      "scene": 7
+    },
+    "name": "Mayor of Oakhaven",
+    "schema_version": "1.0",
+    "skills": {
+      "negotiation": 5,
+      "tax_evasion": 7
+    },
+    "stats": {
+      "hp": {
+        "current": 50,
+        "max": 50
+      }
+    },
+    "updated_at": "2026-02-13T09:41:00Z"
+  }
+]
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-13T07:51:22Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 7
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {
+    "active_mechanics": [
+      "HP",
+      "Crit Rate",
+      "Point Buy",
+      "System Notification",
+      "Damage Number",
+      "Level Up",
+      "Aggro Meter"
+    ],
+    "reality_stability": 44,
+    "world_type": "settlement_interior"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_007.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Artie's mundane life as a Junior Analyst ended with a fatal electrocution in the office breakroom.",
+      "Artie met his guide Fizz and accidentally created a broken 1 HP / 100% Crit build.",
+      "Artie has entered the game world and faced his first lethal threat, establishing the high stakes of his glitchy build.",
+      "Artie survived his first combat encounter by accidentally triggering a reality-warping critical hit.",
+      "The power of the 'Statistical Anomaly' build is confirmed to be world-shakingly powerful but difficult to control.",
+      "Artie's overkill victory resulted in a cursed trophy that makes him a permanent target for monsters.",
+      "Artie has successfully navigated the first major environmental threat and reached the safety of Oakhaven, though his glitchy nature is now public knowledge."
+    ],
+    "key_facts_ring": [
+      "Artie reached Level 2 and restored his resources, gaining 5 stat points and 1 skill point.",
+      "The System issued a reality stability warning as the value decreased to 44%.",
+      "Artie is Level 2 with 1/1 HP and 100% Crit Rate.",
+      "milestones: lesser_puddle_slime_defeated and tutorial_level_up_reached are DONE.",
+      "Artie acquired the Participation Trophy (Cursed) in his left hand.",
+      "The System applied the 'Monster Beacon' and 'Marked for Death' statuses to Artie.",
+      "Artie's Aggro Meter reached 100%, triggering a zone-wide hunt.",
+      "Artie began a high-stakes sprint toward the gates of Oakhaven.",
+      "The System initiated the 'Run for Your Life!' quest.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+      "milestone: lesser_puddle_slime_defeated = DONE",
+      "milestone: tutorial_level_up_reached = DONE",
+      "Artie reached the Oakhaven gates with critical stamina depletion while pursued by a monster horde.",
+      "Guards Ted and Bill delayed entry to gamble on Artie's survival odds against the approaching monsters.",
+      "The Oakhaven Automated Defense scanner verified Artie's 1 HP and 100% Crit Rate, flagging him as a Paradoxical Anomaly.",
+      "Artie completed the 'Run for Your Life!' quest upon entering the city seconds before the gate dropped.",
+      "The city gate dropped like a guillotine, killing the lead wolf of the pursuing horde.",
+      "Artie received 50 XP, 10 Silver, and the 'Gate-Crasher' title (Inactive) as quest rewards.",
+      "milestone: run_for_your_life_completed = DONE",
+      "milestone: oakhaven_entered = DONE",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "Artie possesses the 'Gate-Crasher' title (Inactive).",
+      "Artie is under the 'Marked for Death' and 'Monster Beacon' statuses (Active).",
+      "location: Oakhaven Gatehouse Interior"
+    ],
+    "last_scene": [
+      "Artie reached the gates of Oakhaven while pursued by a monster horde, only to be delayed by guards betting on his survival.",
+      "After being scanned and flagged as a Paradoxical Anomaly, Artie was admitted into the city seconds before the horde reached him, completing his first major quest."
+    ],
+    "must_stay_true": [
+      "inventory: world -> Leather Wallet (status=dropped, container=floor)",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "milestone: artie_electrocuted = DONE",
+      "injury: vending machine scar on right knuckle",
+      "milestone: crit_build_finalized = DONE",
+      "milestone: survive_the_spawn_initiated = DONE",
+      "Artie is Level 2 with 1/1 HP and 100% Crit Rate.",
+      "milestones: lesser_puddle_slime_defeated and tutorial_level_up_reached are DONE.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+      "milestone: lesser_puddle_slime_defeated = DONE",
+      "milestone: tutorial_level_up_reached = DONE",
+      "milestone: run_for_your_life_completed = DONE",
+      "milestone: oakhaven_entered = DONE",
+      "Artie possesses the 'Gate-Crasher' title (Inactive).",
+      "Artie is under the 'Marked for Death' and 'Monster Beacon' statuses (Active).",
+      "location: Oakhaven Gatehouse Interior"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_MAYOR"
+    ],
+    "location": "Oakhaven - Mayor's Office",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ],
+    "recent_facts": [
+      "Artie narrowly escaped a monster horde by entering Oakhaven just as the gates slammed shut.",
+      "The Oakhaven gate guards verified Artie's 'Statistical Anomaly' status via an automated scanner.",
+      "Artie's 100% Crit Rate and 1 HP build have been flagged as a 'Paradoxical Threat' by city defenses.",
+      "The Participation Trophy continues to act as a Monster Beacon even inside the city."
+    ],
+    "time": {}
+  }
+}
+
+Summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie's mundane life as a Junior Analyst ended with a fatal electrocution in the office breakroom.",
+    "Artie met his guide Fizz and accidentally created a broken 1 HP / 100% Crit build.",
+    "Artie has entered the game world and faced his first lethal threat, establishing the high stakes of his glitchy build.",
+    "Artie survived his first combat encounter by accidentally triggering a reality-warping critical hit.",
+    "The power of the 'Statistical Anomaly' build is confirmed to be world-shakingly powerful but difficult to control.",
+    "Artie's overkill victory resulted in a cursed trophy that makes him a permanent target for monsters.",
+    "Artie has successfully navigated the first major environmental threat and reached the safety of Oakhaven, though his glitchy nature is now public knowledge."
+  ],
+  "key_facts_ring": [
+    "Artie reached Level 2 and restored his resources, gaining 5 stat points and 1 skill point.",
+    "The System issued a reality stability warning as the value decreased to 44%.",
+    "Artie is Level 2 with 1/1 HP and 100% Crit Rate.",
+    "milestones: lesser_puddle_slime_defeated and tutorial_level_up_reached are DONE.",
+    "Artie acquired the Participation Trophy (Cursed) in his left hand.",
+    "The System applied the 'Monster Beacon' and 'Marked for Death' statuses to Artie.",
+    "Artie's Aggro Meter reached 100%, triggering a zone-wide hunt.",
+    "Artie began a high-stakes sprint toward the gates of Oakhaven.",
+    "The System initiated the 'Run for Your Life!' quest.",
+    "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+    "milestone: lesser_puddle_slime_defeated = DONE",
+    "milestone: tutorial_level_up_reached = DONE",
+    "Artie reached the Oakhaven gates with critical stamina depletion while pursued by a monster horde.",
+    "Guards Ted and Bill delayed entry to gamble on Artie's survival odds against the approaching monsters.",
+    "The Oakhaven Automated Defense scanner verified Artie's 1 HP and 100% Crit Rate, flagging him as a Paradoxical Anomaly.",
+    "Artie completed the 'Run for Your Life!' quest upon entering the city seconds before the gate dropped.",
+    "The city gate dropped like a guillotine, killing the lead wolf of the pursuing horde.",
+    "Artie received 50 XP, 10 Silver, and the 'Gate-Crasher' title (Inactive) as quest rewards.",
+    "milestone: run_for_your_life_completed = DONE",
+    "milestone: oakhaven_entered = DONE",
+    "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+    "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+    "Artie possesses the 'Gate-Crasher' title (Inactive).",
+    "Artie is under the 'Marked for Death' and 'Monster Beacon' statuses (Active).",
+    "location: Oakhaven Gatehouse Interior"
+  ],
+  "last_scene": [
+    "Artie reached the gates of Oakhaven while pursued by a monster horde, only to be delayed by guards betting on his survival.",
+    "After being scanned and flagged as a Paradoxical Anomaly, Artie was admitted into the city seconds before the horde reached him, completing his first major quest."
+  ],
+  "must_stay_true": [
+    "inventory: world -> Leather Wallet (status=dropped, container=floor)",
+    "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+    "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+    "milestone: artie_electrocuted = DONE",
+    "injury: vending machine scar on right knuckle",
+    "milestone: crit_build_finalized = DONE",
+    "milestone: survive_the_spawn_initiated = DONE",
+    "Artie is Level 2 with 1/1 HP and 100% Crit Rate.",
+    "milestones: lesser_puddle_slime_defeated and tutorial_level_up_reached are DONE.",
+    "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+    "milestone: lesser_puddle_slime_defeated = DONE",
+    "milestone: tutorial_level_up_reached = DONE",
+    "milestone: run_for_your_life_completed = DONE",
+    "milestone: oakhaven_entered = DONE",
+    "Artie possesses the 'Gate-Crasher' title (Inactive).",
+    "Artie is under the 'Marked for Death' and 'Monster Beacon' statuses (Active).",
+    "location: Oakhaven Gatehouse Interior"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Recent facts:
+[
+  "Artie reached Level 2 and restored his resources, gaining 5 stat points and 1 skill point.",
+  "The System issued a reality stability warning as the value decreased to 44%.",
+  "Artie is Level 2 with 1/1 HP and 100% Crit Rate.",
+  "milestones: lesser_puddle_slime_defeated and tutorial_level_up_reached are DONE.",
+  "Artie acquired the Participation Trophy (Cursed) in his left hand.",
+  "The System applied the 'Monster Beacon' and 'Marked for Death' statuses to Artie.",
+  "Artie's Aggro Meter reached 100%, triggering a zone-wide hunt.",
+  "Artie began a high-stakes sprint toward the gates of Oakhaven.",
+  "The System initiated the 'Run for Your Life!' quest.",
+  "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+  "milestone: lesser_puddle_slime_defeated = DONE",
+  "milestone: tutorial_level_up_reached = DONE",
+  "Artie reached the Oakhaven gates with critical stamina depletion while pursued by a monster horde.",
+  "Guards Ted and Bill delayed entry to gamble on Artie's survival odds against the approaching monsters.",
+  "The Oakhaven Automated Defense scanner verified Artie's 1 HP and 100% Crit Rate, flagging him as a Paradoxical Anomaly.",
+  "Artie completed the 'Run for Your Life!' quest upon entering the city seconds before the gate dropped.",
+  "The city gate dropped like a guillotine, killing the lead wolf of the pursuing horde.",
+  "Artie received 50 XP, 10 Silver, and the 'Gate-Crasher' title (Inactive) as quest rewards.",
+  "milestone: run_for_your_life_completed = DONE",
+  "milestone: oakhaven_entered = DONE",
+  "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+  "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+  "Artie possesses the 'Gate-Crasher' title (Inactive).",
+  "Artie is under the 'Marked for Death' and 'Monster Beacon' statuses (Active).",
+  "location: Oakhaven Gatehouse Interior"
+]
+Item registry (canonical):
+{
+  "items": [
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Corporate ID Badge",
+      "item_id": "ITEM_ID_BADGE",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Oakhaven - Mayor's Office",
+        "scene": 7
+      },
+      "linked_threads": [],
+      "name": "Corporate ID Badge",
+      "owner_scope": "character",
+      "state_tags": [
+        "mundane"
+      ],
+      "type": "accessory"
+    },
+    {
+      "custodian": "CHAR_MAYOR",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Seal of Oakhaven",
+      "item_id": "ITEM_MAYOR_SEAL",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Oakhaven - Mayor's Office",
+        "scene": 7
+      },
+      "linked_threads": [],
+      "name": "Seal of Oakhaven",
+      "owner_scope": "character",
+      "state_tags": [
+        "official"
+      ],
+      "type": "accessory"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Participation Trophy",
+      "item_id": "ITEM_PARTICIPATION_TROPHY",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Oakhaven - Mayor's Office",
+        "scene": 7
+      },
+      "linked_threads": [
+        "THREAD_SYSTEM_GLITCH"
+      ],
+      "name": "Participation Trophy",
+      "owner_scope": "character",
+      "state_tags": [
+        "cursed",
+        "monster_beacon"
+      ],
+      "type": "cursed_item"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Cracked Smartphone",
+      "item_id": "ITEM_SMARTPHONE",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Oakhaven - Mayor's Office",
+        "scene": 7
+      },
+      "linked_threads": [],
+      "name": "Cracked Smartphone",
+      "owner_scope": "character",
+      "state_tags": [
+        "mundane",
+        "damaged"
+      ],
+      "type": "device"
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Plot devices (canonical):
+{
+  "devices": [
+    {
+      "activation_state": "active",
+      "constraints": [],
+      "custody_ref": "THREAD_CRIT_EXPLOIT",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Oakhaven - Gatehouse Interior",
+        "scene": 6
+      },
+      "linked_threads": [
+        "THREAD_CRIT_EXPLOIT"
+      ],
+      "name": "The 100% Crit Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_THE_ASCENSION",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_path_of_the_first_glitch_c7dd4581",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_THE_ASCENSION"
+      ],
+      "name": "The Path of the First Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_SYSTEM_GLITCH",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_system_s_stability_da5be7b7",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Oakhaven - Gatehouse Interior",
+        "scene": 6
+      },
+      "linked_threads": [
+        "THREAD_SYSTEM_GLITCH"
+      ],
+      "name": "The System's Stability",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_VANE_RIVALRY",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_vane_vendetta_bcf4bea1",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_VANE_RIVALRY"
+      ],
+      "name": "The Vane Vendetta",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    }
+  ],
+  "schema_version": "1.0"
+}

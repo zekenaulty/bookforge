@@ -1,0 +1,81 @@
+The soles of Artie’s loafers—entirely unsuited for a cross-country sprint through a magical forest—slapped against the packed dirt of the trade road with a wet, desperate rhythm. Behind him, the forest wasn't just rustling; it was screaming. A cacophony of chittering mandibles, wet sloshing, and the heavy thud of paws signaled the arrival of the tutorial zone’s entire ecosystem, all of them united by a singular, burning desire to murder a Junior Analyst.
+
+"Faster, Artie! The Aggro Meter is pulsing red! That means it’s extra-angry!" Fizz zipped around his head, her neon blue hair trailing pixels like a dying GPU. 
+
+[Aggro Meter: 110% (OVERFLOW)]
+[Status: Monster Beacon - Active]
+[Status: Marked for Death - Active]
+
+"I'm... trying!" Artie wheezed. His lungs felt like they had been scrubbed with steel wool. In his left hand, he gripped the cold, heavy base of the Participation Trophy. The gold-plated plastic statuette of a generic hero seemed to pulse with a sickly, rhythmic light, acting as a literal flare for every predator within a kilometer. "Why... can't I... drop it?"
+
+"It’s soulbound, Artie! It’s part of your 'Reward' for being so statistically improbable!"
+
+[Stamina: 5/100] (Warning: Exhaustion Imminent)
+
+The massive stone walls of Oakhaven finally loomed out of the twilight, a grey bastion of safety. Two guards stood atop the battlements flanking the heavy iron-shod gates. They weren't reaching for bows. They weren't sounding a horn. One was holding a slate, and the other was shaking a pair of dice.
+
+"Fifty gold says he hits the dirt before the fifty-meter mark!" the guard on the left shouted, leaning over the merlon.
+
+"You're on! Look at that form! He’s got the stride of a man who’s never seen a gym in his life!" the second guard yelled back.
+
+Artie reached the shadow of the gate, his legs turning to jelly. He collapsed against the wood, the Participation Trophy clattering against the iron bands.
+
+"Open... the gate!" Artie screamed, his voice cracking. 
+
+The guard on the left, a burly man with a mustache that looked like a dead squirrel, peered down. "Hold your horses, traveler. Or, well, hold your monsters. We’ve got a procedure for high-aggro arrivals. Standard 'Anomaly' protocol."
+
+[System Notification: Oakhaven Automated Defenses - Scanning...]
+
+A beam of harsh, white light shot down from a crystal mounted above the gate, sweeping over Artie. He squinted, shielding his hazel eyes with his right hand, the vending machine scar on his knuckle white against his pale skin.
+
+"Scanning? I’m about to be eaten by a swarm of Level 5 Dire-Squirrels and you’re scanning me?" Artie yelled.
+
+"Quiet! You're messing with the calibration!" the guard snapped. 
+
+[Scan Result: Arthur 'Artie' Penhaligon]
+[Level: 2]
+[HP: 1/1]
+[Crit Rate: 100%]
+[Warning: Statistical Anomaly Detected]
+[Threat Level: Paradoxical]
+
+The guards went silent. The one with the dice dropped them. They clattered onto the stone walk above. "A hundred percent?" the guard whispered. "Hey, Bill, the scanner’s broken. It says he’s got a hundred percent crit rate."
+
+"Check the HP, Ted," Bill replied, his voice trembling. "It says one. Not one hundred. One."
+
+"I have one hit point!" Artie roared, pointing at the forest line where the first wave of monsters—a pack of snarling, bioluminescent wolves—burst into the clearing. "If a ladybug lands on me too hard, I explode! Open the door!"
+
+"But the betting pool!" Ted protested. "If we let a Paradoxical Anomaly in without a proper handicap, the House of RNG will have our heads! What are the odds on a one-HP wonder surviving a gate-slam?"
+
+Fizz hovered in front of the guards' faces, her white eyes glowing with irritation. "Listen, you glorified RNG-addicts! If you don't open this gate, the System is going to log a 'Failure to Protect' event, and your insurance premiums are going to skyrocket! Do you want to explain that to the Mayor?"
+
+The mention of insurance premiums seemed to do what the threat of Artie’s death couldn't. 
+
+"Fine, fine! Engaging the winch!" 
+
+The gate groaned, the heavy chains rattling as the wood began to lift. It was agonizingly slow. Artie watched the wolves. They were twenty meters away. Ten. 
+
+[Stamina: 1/100]
+
+He lunged through the narrowing gap under the rising gate, dragging the Participation Trophy with him. The moment his heels cleared the threshold, the guards slammed the lever back. 
+
+The gate didn't just close; it dropped like a guillotine.
+
+*CRUNCH.*
+
+The lead wolf’s snout was caught in the impact, followed by the dull thud of a dozen bodies slamming into the exterior of the gate. Artie scrambled back on his elbows, breathing in the smell of dust and old stone. 
+
+[Quest Complete: Run for Your Life!]
+[Reward: 50 XP, 10 Silver, 'Gate-Crasher' Title (Inactive)]
+
+Artie lay flat on his back, staring up at the vaulted ceiling of the gatehouse. His rumpled dress shirt was soaked with sweat, and his mousy brown hair was a bird's nest of twigs and leaves.
+
+"We're in," he whispered.
+
+"We're in!" Fizz cheered, doing a loop-de-loop. "And look! You only almost died three times! That's a new personal record!"
+
+Ted, the guard, walked down the stairs, looking at Artie with a mix of awe and deep suspicion. He held his slate out. "Sign here, 'Anomaly.' And keep that trophy covered. You're bleeding aggro all over my clean floor."
+
+Artie looked at the Participation Trophy in his left hand. It was still glowing. 
+
+"I hate this game," Artie said, reaching into his neck to adjust his Corporate ID Badge. "I really, really hate this game."

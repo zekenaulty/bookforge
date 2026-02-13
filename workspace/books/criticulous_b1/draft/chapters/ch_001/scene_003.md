@@ -1,0 +1,90 @@
+The transition from the server-room-scented void to the Tutorial Zone felt less like a magical teleportation and more like being shoved through a high-definition meat grinder. One moment, Artie was arguing with a flickering blue sprite about his questionable life choices; the next, the floor vanished, replaced by the aggressive scent of pine needles and damp earth.
+
+He hit the ground with a grunt that sounded remarkably like a spreadsheet being deleted. The impact wasn't hard—the grass was unnaturally lush, like it had been rendered with a high-end shader—but it was enough to make the blue plastic of his Corporate ID Badge slap against his collarbone. Artie lay there for a second, staring up at a sky so blue it looked like a default desktop wallpaper.
+
+"Welcome to the great outdoors, Artie!" Fizz’s voice chirped from somewhere above his left ear. "Try not to breathe too much. The oxygen here is surprisingly addictive."
+
+Artie rolled onto his side, his hand brushing against the rough bark of a nearby tree. The vending machine scar on his right knuckle throbbed—a jagged reminder of the Snack-Master 4000 and the electrical surge that had sent him here. He reached into his pocket, feeling the jagged, spiderwebbed glass of his Cracked Smartphone. It was dead weight now, a relic of a world where 'critical hit' usually referred to a server crash, not his own mortality.
+
+He pushed himself up to a sitting position, and that’s when the world provided its first official greeting.
+
+[System Notification: Welcome to the Tutorial Zone (Lush Forest)!]
+[Quest Initiated: Survive the Spawn]
+[Objective: Reach the Oakhaven Gates (0/1)]
+
+"Survive," Artie muttered, the word tasting like copper. "That’s a bit ominous for a tutorial, isn't it?"
+
+"Only if you're bad at games," Fizz said, hovering into his line of sight. She looked even more pixelated against the vibrant green of the forest, her neon blue hair flickering like a dying fluorescent bulb. "And considering you just dumped every single point into a stat that requires you to actually hit things before they hit you... well, 'ominous' is a polite way of putting it."
+
+Artie ignored her and did what any self-respecting Junior Analyst would do: he checked the data.
+
+[Character: Arthur 'Artie' Penhaligon]
+[Title: Statistical Anomaly]
+[Level: 1]
+[HP: 1/1]
+[Crit Rate: 100%]
+
+The '1/1' was pulsing. Not a friendly, 'hey look at me' pulse, but a rhythmic, warning-red throb that made his stomach do a slow roll. One. One single point of health. In his previous life, he’d survived a flu that felt like more than one point of damage. He’d survived a three-hour meeting with the Regional Director without a coffee break. But here, in this hyper-saturated forest, he was a single papercut away from deletion.
+
+"Fizz," Artie said, his voice rising an octave. "Why is my health bar the size of a postage stamp?"
+
+"Because you wanted to be a 'specialist,' remember?" She did a mid-air somersault, leaving a pixelated trail in her wake. "You’re the ultimate glass cannon, Artie! Except, you know, without the cannon part yet. Right now, you’re more like a glass... marble. Very shiny, very fragile, and likely to be stepped on."
+
+A rustling sound came from the bushes to his right. It wasn't the gentle sound of the wind. It was rhythmic. Wet.
+
+Schlorp. Schlorp. Schlorp.
+
+Artie froze. His heart hammered against his ribs, each beat feeling like it might be the thing that finally shattered his 1 HP limit. Slowly, he turned his head.
+
+Emerging from the undergrowth was a creature that looked like a giant, lime-flavored Jell-O mold that had developed a grudge against the world. It was translucent, wobbling with every movement, and its surface was flecked with bits of undigested leaves and what looked suspiciously like a very small, very dead squirrel.
+
+[Lesser Puddle Slime - Lvl 1]
+[HP: 15/15]
+
+The slime didn't have eyes, but Artie could feel its intent. It was hungry, and he was the only thing on the menu that wasn't made of wood.
+
+"Oh, look!" Fizz whispered, her voice dripping with mock-excitement. "Your first encounter! Usually, players use this to practice their basic attacks. You, however, might want to practice your 'running away while screaming' technique."
+
+The slime contracted, its gelatinous body pulling inward like a rubber band being stretched to its limit. 
+
+"Is it... is it supposed to do that?" Artie asked, scrambling backward. His heels dug into the soft loam, and he felt the Corporate ID Badge catch on a twig. He ripped it free, the lanyard snapping taut around his neck.
+
+"That’s the 'Leap' animation, Artie," Fizz said, checking her nonexistent fingernails. "In about two seconds, it’s going to launch itself at your face. Given its velocity and your current lack of armor, I’d say the impact will deal approximately... oh, one point of damage."
+
+"One point?" Artie yelped. "But that's all I have!"
+
+"Exactly! It’s very efficient. No wasted numbers. The System loves efficiency."
+
+The slime launched.
+
+It was a slow-motion nightmare. The green mass soared through the air, a wobbling orb of predatory citrus. Artie threw himself to the left, his shoulder hitting the dirt and sending a jolt of alarm through his entire body. 
+
+[Stamina: 95/100]
+
+He scrambled up, his breath coming in ragged gasps. The slime hit the spot where he’d been standing a split second before with a wet thwack, leaving a shimmering trail of corrosive mucus on the grass. The grass hissed and turned brown instantly.
+
+"Missed!" Artie shouted, the adrenaline finally kicking in. "You see that, Fizz? Junior Analyst reflexes! I used to dodge 'Reply All' chains for a living!"
+
+"Great job," Fizz deadpanned. "Now do it again. It’s turning around."
+
+She was right. The slime was reorienting itself, its body rippling as it prepared for another jump. Artie looked around wildly for a weapon—a rock, a sturdy branch, a heavy stapler—but there was nothing but soft earth and tall, mockery-filled trees.
+
+He backed away, but his heel caught on a protruding root. He stumbled, his arms flailing for balance. He felt the weight of his Cracked Smartphone in his pocket, shifting as he fell toward a dense thicket of thorns. 
+
+He stopped just short of the briars, cornered. The slime was five feet away, and this time, it wasn't just contracting; it was vibrating. A low, wet hum filled the air.
+
+"Fizz, help me out here," Artie hissed, his eyes locked on the wobbling green death. "There has to be a tutorial tip for this. 'How to not die to a puddle of juice'?"
+
+"Tip number one," Fizz said, appearing right in front of his nose. "Don't get hit."
+
+"That’s not a tip, that’s a tautology!"
+
+"Tip number two: You have a 100% Crit Rate, Artie. If you hit it, you hit it hard. But you actually have to, you know, hit it."
+
+Artie looked at his hands. They were shaking. His right knuckle, with its vending machine scar, was white-knuckled as he balled his hand into a fist. He was a Junior Analyst. He was a 'Statistical Anomaly.' And right now, he was a man about to be killed by a dessert topping.
+
+The slime lunged again. This time, there was no room to roll. Artie could see the flecks of dirt inside its body, the sheer weight of the thing coming right for his chest. If it touched me, the '1/1' in his peripheral vision would go to zero. The game would end before it even began.
+
+He realized then, with a clarity that only comes when you're facing a lethal blob of jelly, that this world didn't care about his resume. It didn't care about his potential. It only cared about the math. And the math said he was one mistake away from non-existence.
+
+"Oh, crap," Artie whispered as the green shadow eclipsed the sun.

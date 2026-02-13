@@ -1,0 +1,200 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "location": "Oakhaven - Town Square",
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_VANE"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 8,
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_PARTICIPATION_TROPHY"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is feeling the pressure of the Aggro Meter as he faces Vane."
+      ],
+      "invariants_add": [
+        "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)"
+      ],
+      "notes": "Artie is clutching the trophy as he leaves the Mayor's office and encounters Vane."
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "chapter": 1,
+      "scene": 8,
+      "inventory": [
+        {
+          "item": "ITEM_OBSIDIAN_BLADE",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "CHAR_VANE",
+          "contents": [
+            "ITEM_OBSIDIAN_BLADE"
+          ]
+        },
+        {
+          "container": "back_sheath",
+          "owner": "CHAR_VANE",
+          "contents": []
+        }
+      ],
+      "persona_updates": [
+        "Vane is eager to test the 'Anomaly' and prove his superiority."
+      ],
+      "invariants_add": [
+        "inventory: CHAR_VANE -> Obsidian Greatsword (status=held, container=hand_right)"
+      ],
+      "notes": "Vane is waiting for Artie, sword drawn to intimidate."
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_VANE",
+      "set": {
+        "level": 45
+      },
+      "reason": "Establish Vane's level for the UI requirement."
+    },
+    {
+      "character_id": "CHAR_ARTIE",
+      "delta": {
+        "resources": {
+          "aggro_meter": 3
+        }
+      },
+      "reason": "Aggro continues to rise as Artie enters the public square."
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "world_type": "settlement_exterior"
+      },
+      "reason": "Transition to exterior for the confrontation."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "container": "hand_left",
+            "status": "held"
+          }
+        ],
+        "containers": [
+          {
+            "container": "neck",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_ID_BADGE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          },
+          {
+            "container": "hand_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_PARTICIPATION_TROPHY"
+            ]
+          }
+        ]
+      },
+      "reason": "Artie is holding the trophy as he exits the Mayor's office.",
+      "reason_category": "location_transition"
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_OBSIDIAN_BLADE",
+            "container": "hand_right",
+            "status": "held"
+          }
+        ],
+        "containers": [
+          {
+            "container": "hand_right",
+            "owner": "CHAR_VANE",
+            "contents": [
+              "ITEM_OBSIDIAN_BLADE"
+            ]
+          },
+          {
+            "container": "back_sheath",
+            "owner": "CHAR_VANE",
+            "contents": []
+          }
+        ]
+      },
+      "reason": "Vane is brandishing his sword to intimidate Artie.",
+      "reason_category": "equipment_posture"
+    }
+  ]
+}

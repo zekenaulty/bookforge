@@ -1,0 +1,310 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_VANE"
+    ],
+    "location": "Oakhaven - Residential Backstreet",
+    "recent_facts": [
+      "Artie encountered Vane in the Town Square and survived a lethal strike by accidentally dodging.",
+      "Artie used the Percussive Maintenance skill to collapse crates and block Vane's pursuit.",
+      "Vane is now actively hunting Artie, intrigued by his 'Anomaly' status.",
+      "Artie's Aggro Meter reached 96% during the confrontation before beginning to cool down."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH",
+      "THREAD_VANE_RIVALRY"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "Artie encountered the high-level player Vane in Oakhaven's Town Square, narrowly surviving a lethal blow through a clumsy but successful dodge.",
+      "After a brief exchange, Artie fled the square and used his Percussive Maintenance skill to create an obstacle, successfully losing Vane in the backstreets.",
+      "The encounter solidified Vane as a persistent rival and confirmed that Artie's 1 HP build makes him a target for high-level players."
+    ],
+    "key_events": [
+      "Artie exited the Mayor's office and was immediately confronted by Vane in the Town Square.",
+      "Vane's stats were revealed: Level 45 with the 'Top 100 Slayer' title.",
+      "Artie successfully dodged Vane's horizontal strike by tripping over a cobblestone.",
+      "Artie triggered a Critical Hit with Percussive Maintenance to collapse a stack of crates, blocking the alleyway.",
+      "Artie escaped to a residential backstreet, where his Aggro Meter began to decrease from its peak of 96%.",
+      "Vane was left behind in the alley, frustrated and intrigued by Artie's survival."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie's Aggro Meter is at 92% and rising due to the Participation Trophy.",
+      "REMOVE: location: Oakhaven - Mayor's Office",
+      "Artie's Aggro Meter is at 94% and cooling down after escaping Vane.",
+      "location: Oakhaven - Residential Backstreet",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=held, container=hand_right)",
+      "milestone: vane_encounter_survived = DONE",
+      "milestone: percussive_maintenance_triggered = DONE",
+      "Artie is Level 2 with 1/1 HP and 100% Crit Rate.",
+      "milestone: mayor_met = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Artie's escape from Vane has established him as a fugitive within the city's social hierarchy."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 8,
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_PARTICIPATION_TROPHY"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is now fully aware that his 'Statistical Anomaly' status is a magnet for high-level aggression.",
+        "Artie has discovered that his mundane skills, like Percussive Maintenance, can have reality-warping effects in this world."
+      ],
+      "invariants_add": []
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "chapter": 1,
+      "scene": 8,
+      "inventory": [
+        {
+          "item": "ITEM_OBSIDIAN_BLADE",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "CHAR_VANE",
+          "contents": [
+            "ITEM_OBSIDIAN_BLADE"
+          ]
+        },
+        {
+          "container": "back_sheath",
+          "owner": "CHAR_VANE",
+          "contents": []
+        }
+      ],
+      "persona_updates": [
+        "Vane is obsessed with the 'efficiency' of the game and views Artie's existence as a personal insult to his hard work.",
+        "Vane's initial clinical detachment has shifted into a focused, competitive irritation."
+      ],
+      "invariants_add": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "resources": {
+          "aggro_meter": 94
+        },
+        "reason": "Escaping the confrontation allowed the aggro meter to begin cooling down from its peak of 96%."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 8
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "set": {
+        "level": 45,
+        "stats": {
+          "hp": {
+            "current": 500,
+            "max": 500
+          },
+          "agi": 70,
+          "str": 85
+        },
+        "titles": [
+          {
+            "name": "Top 100 Slayer",
+            "source": "leaderboard",
+            "active": true
+          }
+        ],
+        "reason": "Establishing Vane's canonical combat stats and title during his first encounter with Artie."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 8
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "reality_stability": 44
+      },
+      "reason": "The interaction between a Level 2 anomaly and a Top 100 player is straining the local reality physics."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_OBSIDIAN_BLADE",
+      "set": {
+        "name": "Obsidian Greatsword",
+        "display_name": "Obsidian Greatsword",
+        "type": "weapon",
+        "owner_scope": "character",
+        "custodian": "CHAR_VANE",
+        "linked_threads": [
+          "THREAD_VANE_RIVALRY"
+        ],
+        "state_tags": [
+          "legendary",
+          "equipped"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 8,
+          "location": "Oakhaven - Town Square"
+        }
+      }
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "container": "hand_left",
+            "status": "held"
+          }
+        ],
+        "containers": [
+          {
+            "container": "neck",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_ID_BADGE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          },
+          {
+            "container": "hand_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_PARTICIPATION_TROPHY"
+            ]
+          }
+        ]
+      },
+      "reason": "Normalization of inventory posture after the escape from Vane.",
+      "reason_category": "after_combat_cleanup"
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_OBSIDIAN_BLADE",
+            "container": "hand_right",
+            "status": "held"
+          }
+        ],
+        "containers": [
+          {
+            "container": "hand_right",
+            "owner": "CHAR_VANE",
+            "contents": [
+              "ITEM_OBSIDIAN_BLADE"
+            ]
+          }
+        ]
+      },
+      "reason": "Vane remains in a combat-ready posture after losing Artie in the alley.",
+      "reason_category": "after_combat_cleanup"
+    }
+  ],
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "late-20s",
+      "slight",
+      "build",
+      "hazel",
+      "eyes",
+      "mousy",
+      "brown",
+      "hair",
+      "unruly",
+      "short",
+      "hair",
+      "pale",
+      "skin."
+    ],
+    "CHAR_VANE": [
+      "mid-30s",
+      "athletic",
+      "build",
+      "steely",
+      "grey",
+      "eyes",
+      "jet",
+      "black",
+      "hair",
+      "slicked",
+      "back",
+      "hair",
+      "tan",
+      "skin."
+    ]
+  }
+}

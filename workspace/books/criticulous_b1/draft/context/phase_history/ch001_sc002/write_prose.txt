@@ -1,0 +1,62 @@
+The void didn't smell like ozone or the afterlife. It smelled like a server room that hadn't been dusted since the late nineties. Arthur 'Artie' Penhaligon stood in the center of a black expanse that felt less like infinite space and more like a loading screen with the lights turned off.
+
+"Oh, look. Another one. And this one's still wearing his lanyard. How professional."
+
+Artie spun around, his hand instinctively reaching for the Corporate ID Badge hanging from his neck. A small, glowing blue sprite flickered into existence, trailing a wake of pixelated dust that looked like a GPU having a seizure. 
+
+"Where am I?" Artie asked, his voice cracking. "I was just... the vending machine. The chips. There was a spark."
+
+"The Snack-Master 4000 claimed another soul," the sprite said, her voice dripping with a boredom that spanned eons. "I'm Fizz. I’m your System Guide, though 'Guide' is a strong word for someone who mostly watches people like you make terrible life choices. You’re dead, Arthur. Welcome to the Character Creation Void. Try not to track mud on the nothingness."
+
+[System Notification: Welcome, User 9,421,084!]
+[Current Status: Deceased (Pending Resurrection)]
+[Available Stat Points: 10]
+
+A translucent blue screen shimmered into existence between them. It was filled with numbers, bars, and a list of attributes that made Artie’s head swim. He felt the weight of his Cracked Smartphone in his pocket, a useless brick of glass in this digital purgatory.
+
+"Character creation?" Artie squinted at the screen. "Is this a game? I’m a Junior Analyst. I don't do games. I do spreadsheets."
+
+"Then think of this as a very high-stakes spreadsheet where 'Error 404' means your soul gets deleted," Fizz said, hovering closer. "You have ten points. Put them into Strength if you want to hit things, Agility if you want to run away like a coward, or Vitality if you want to survive more than a stiff breeze. Hurry up. I have a three-o'clock with a guy who died choking on a grape."
+
+Artie looked at the list. He saw 'Critical Hit Rate' at the bottom, currently sitting at a measly 1%. 
+
+"Critical," Artie muttered. "That sounds important. In my performance reviews, 'critical thinking' was always the top metric. If I want to be efficient, I should maximize the critical stuff, right?"
+
+"I wouldn't—" Fizz started, her glowing eyes widening.
+
+Artie tapped the plus sign next to Critical Hit Rate. He didn't just tap it; his finger, still twitchy from the electrocution, spasmed. The '10' in his point pool vanished instantly.
+
+[Warning: Stat Allocation Finalized!]
+[System Error: Statistical Anomaly Detected!]
+[Recalculating Build...]
+
+"What did you do?" Fizz shrieked, her pixelated trail turning a violent shade of red. "You just dumped the entire starter pool into a sub-stat! You didn't even touch Vitality!"
+
+Artie blinked as the screen turned a blinding gold.
+
+[Build Confirmed: The Glass Cannon]
+[HP: 1/1]
+[Critical Hit Rate: 100%]
+[Title Earned: Statistical Anomaly]
+
+"One?" Artie stared at the HP bar. It was so thin it was practically invisible. "Why is my health one? I had ten points!"
+
+"You had ten points to spend on *everything*, you absolute walnut!" Fizz hovered inches from his nose, her translucent blue face contorted in a sneer. "You put it all into Crits! You are now the deadliest thing in the world that can be killed by a moderately aggressive sneeze. You have the structural integrity of a wet paper towel!"
+
+"But I have 100% Critical Hit Rate," Artie argued, trying to find the silver lining. "That means every hit is... critical?"
+
+"It means you’re a glitch, Arthur. A walking, breathing math error." Fizz sighed, her glow dimming to a resigned teal. "The System hates math errors. It's going to try to 'balance' you. And by balance, I mean it's going to send everything in the tutorial zone to delete you from the census."
+
+The floor beneath Artie began to vibrate. The blackness of the void started to crack, revealing flashes of a lush, green forest below.
+
+"Wait, I'm not ready!" Artie grabbed his Corporate ID Badge as if the plastic sleeve could protect him. 
+
+"Ready or not, here comes the grind," Fizz said, disappearing into a puff of blue code. "Try not to die in the first five seconds. It makes my paperwork look terrible."
+
+The void dissolved. Artie felt a sickening lurch in his stomach as gravity suddenly remembered he existed. He plummeted toward the green canopy below, the wind whistling through his rumpled dress shirt.
+
+[Tutorial Quest Initiated: Survive the Spawn]
+[Objective: Reach the Safe Zone without taking damage.]
+[Reward: A sense of self-worth and 10 XP.]
+
+"I just wanted my chips!" Artie screamed as the trees rushed up to meet him.

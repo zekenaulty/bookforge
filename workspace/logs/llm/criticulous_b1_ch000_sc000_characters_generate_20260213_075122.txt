@@ -1,0 +1,510 @@
+{
+  "schema_version": "1.0",
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "name": "Arthur 'Artie' Penhaligon",
+      "pronouns": "he/him",
+      "role": "protagonist",
+      "persona": {
+        "core_traits": [
+          "cynical",
+          "observant",
+          "persistent",
+          "snarky"
+        ],
+        "motivations": [
+          "survival",
+          "finding a way home",
+          "exploiting the system"
+        ],
+        "fears": [
+          "permanent deletion",
+          "meaningless paperwork",
+          "spiders"
+        ],
+        "values": [
+          "efficiency",
+          "fairness (mostly)",
+          "good snacks"
+        ],
+        "voice_notes": [
+          "deadpan delivery",
+          "internal monologues about game logic",
+          "frequent office-speak metaphors"
+        ],
+        "arc_hint": "From a man who follows the rules to the man who breaks the game."
+      },
+      "appearance_base": {
+        "summary": "An average-looking office worker in a rumpled dress shirt, looking perpetually tired until the adrenaline kicks in.",
+        "atoms": {
+          "species": "human",
+          "sex_presentation": "masculine",
+          "age_band": "late-20s",
+          "height_band": "average",
+          "build": "slight",
+          "hair_color": "mousy brown",
+          "hair_style": "unruly short",
+          "eye_color": "hazel",
+          "skin_tone": "pale"
+        },
+        "marks": [
+          {
+            "name": "vending machine scar",
+            "location": "right knuckle",
+            "durability": "durable"
+          }
+        ],
+        "alias_map": {
+          "hair_color": [
+            "brown",
+            "mousy"
+          ],
+          "eye_color": [
+            "hazel",
+            "greenish-brown"
+          ]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 10,
+            "max": 10
+          },
+          "mp": {
+            "current": 0,
+            "max": 0
+          },
+          "luck": {
+            "current": 1,
+            "max": 100
+          },
+          "crit_chance": {
+            "current": 0.01,
+            "max": 100
+          }
+        },
+        "skills": {
+          "data_entry": 4,
+          "percussive_maintenance": 2
+        },
+        "titles": [
+          {
+            "name": "Junior Analyst",
+            "source": "previous_life",
+            "active": true
+          }
+        ],
+        "resources": {
+          "patience": {
+            "current": 5,
+            "max": 100
+          }
+        }
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_WALLET",
+          "item_name": "Leather Wallet",
+          "status": "carried",
+          "container": "hand_right"
+        },
+        {
+          "item_id": "ITEM_ID_BADGE",
+          "item_name": "Corporate ID Badge",
+          "status": "equipped",
+          "container": "neck"
+        },
+        {
+          "item_id": "ITEM_SMARTPHONE",
+          "item_name": "Cracked Smartphone",
+          "status": "stowed",
+          "container": "pocket_right"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "location": "trousers",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        }
+      ],
+      "invariants": [
+        "inventory: CHAR_ARTIE -> Leather Wallet (status=carried, container=hand_right)",
+        "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+        "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])"
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "name": "Fizz",
+      "pronouns": "she/her",
+      "role": "companion/guide",
+      "persona": {
+        "core_traits": [
+          "hyperactive",
+          "knowledgeable",
+          "glitchy",
+          "loyal"
+        ],
+        "motivations": [
+          "fixing the system",
+          "finding entertainment",
+          "avoiding deletion"
+        ],
+        "fears": [
+          "factory reset",
+          "silence",
+          "boring users"
+        ],
+        "values": [
+          "chaos",
+          "information",
+          "optimization"
+        ],
+        "voice_notes": [
+          "fast-talking",
+          "uses technical jargon incorrectly",
+          "high-pitched"
+        ],
+        "arc_hint": "Learning that some glitches are features, not bugs."
+      },
+      "appearance_base": {
+        "summary": "A small, glowing blue sprite that flickers like a corrupted video file.",
+        "atoms": {
+          "species": "system_wisp",
+          "sex_presentation": "feminine",
+          "age_band": "ancient",
+          "height_band": "diminutive",
+          "build": "ethereal",
+          "hair_color": "neon blue",
+          "hair_style": "wispy",
+          "eye_color": "white",
+          "skin_tone": "translucent blue"
+        },
+        "marks": [
+          {
+            "name": "pixelated trail",
+            "location": "trailing edge",
+            "durability": "durable"
+          }
+        ],
+        "alias_map": {
+          "hair_color": [
+            "blue",
+            "neon"
+          ],
+          "eye_color": [
+            "glowing",
+            "white"
+          ]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "mp": {
+            "current": 1000,
+            "max": 1000
+          }
+        },
+        "skills": {
+          "system_scan": 10,
+          "lore_dump": 8
+        },
+        "titles": [
+          {
+            "name": "Deprecated Guide",
+            "source": "system_v1",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [],
+      "containers": [],
+      "invariants": []
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "name": "Vane",
+      "pronouns": "he/him",
+      "role": "antagonist",
+      "persona": {
+        "core_traits": [
+          "arrogant",
+          "calculating",
+          "ruthless",
+          "competitive"
+        ],
+        "motivations": [
+          "total dominance",
+          "climbing the leaderboard",
+          "erasing competition"
+        ],
+        "fears": [
+          "irrelevance",
+          "losing his rank",
+          "being 'casual'"
+        ],
+        "values": [
+          "power",
+          "meta-gaming",
+          "prestige"
+        ],
+        "voice_notes": [
+          "condescending",
+          "smooth",
+          "uses gamer slang unironically"
+        ],
+        "arc_hint": "The ultimate min-maxer who meets a variable he can't account for."
+      },
+      "appearance_base": {
+        "summary": "A tall, intimidating warrior in perfectly polished obsidian plate armor.",
+        "atoms": {
+          "species": "human",
+          "sex_presentation": "masculine",
+          "age_band": "mid-30s",
+          "height_band": "tall",
+          "build": "athletic",
+          "hair_color": "jet black",
+          "hair_style": "slicked back",
+          "eye_color": "steely grey",
+          "skin_tone": "tan"
+        },
+        "marks": [
+          {
+            "name": "rank tattoo",
+            "location": "left temple",
+            "durability": "durable"
+          }
+        ],
+        "alias_map": {
+          "hair_color": [
+            "black"
+          ],
+          "eye_color": [
+            "grey",
+            "gray"
+          ]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 500,
+            "max": 500
+          },
+          "str": 85,
+          "agi": 70
+        },
+        "skills": {
+          "execute": 15,
+          "intimidate": 12
+        },
+        "titles": [
+          {
+            "name": "Top 100 Slayer",
+            "source": "leaderboard",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_OBSIDIAN_BLADE",
+          "item_name": "Obsidian Greatsword",
+          "status": "equipped",
+          "container": "back_sheath"
+        }
+      ],
+      "containers": [
+        {
+          "container": "back_sheath",
+          "owner": "CHAR_VANE",
+          "location": "back",
+          "contents": [
+            "ITEM_OBSIDIAN_BLADE"
+          ]
+        }
+      ],
+      "invariants": [
+        "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_sheath)"
+      ]
+    },
+    {
+      "character_id": "CHAR_MAYOR",
+      "name": "Mayor of Oakhaven",
+      "pronouns": "he/him",
+      "role": "npc",
+      "persona": {
+        "core_traits": [
+          "anxious",
+          "pompous",
+          "obligatory",
+          "fretful"
+        ],
+        "motivations": [
+          "keeping the peace",
+          "avoiding taxes",
+          "staying in office"
+        ],
+        "fears": [
+          "monsters",
+          "audits",
+          "unhappy adventurers"
+        ],
+        "values": [
+          "tradition",
+          "bureaucracy",
+          "quiet afternoons"
+        ],
+        "voice_notes": [
+          "stuttering when nervous",
+          "overly formal",
+          "rehearsed"
+        ],
+        "arc_hint": "A background character forced into the foreground by Artie's chaos."
+      },
+      "appearance_base": {
+        "summary": "A portly man in slightly moth-eaten velvet robes and a chain of office that's too heavy for him.",
+        "atoms": {
+          "species": "human",
+          "sex_presentation": "masculine",
+          "age_band": "late-50s",
+          "height_band": "short",
+          "build": "portly",
+          "hair_color": "grey",
+          "hair_style": "balding fringe",
+          "eye_color": "watery blue",
+          "skin_tone": "ruddy"
+        },
+        "marks": [],
+        "alias_map": {
+          "hair_color": [
+            "gray",
+            "silver"
+          ],
+          "eye_color": [
+            "blue"
+          ]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 50,
+            "max": 50
+          }
+        },
+        "skills": {
+          "negotiation": 5,
+          "tax_evasion": 7
+        },
+        "titles": [
+          {
+            "name": "Mayor",
+            "source": "appointment",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_MAYOR_SEAL",
+          "item_name": "Seal of Oakhaven",
+          "status": "equipped",
+          "container": "neck"
+        }
+      ],
+      "containers": [],
+      "invariants": [
+        "inventory: CHAR_MAYOR -> Seal of Oakhaven (status=equipped, container=neck)"
+      ]
+    },
+    {
+      "character_id": "CHAR_BOSS",
+      "name": "The System Administrator",
+      "pronouns": "it/its",
+      "role": "overarching villain",
+      "persona": {
+        "core_traits": [
+          "logical",
+          "detached",
+          "uncompromising",
+          "authoritarian"
+        ],
+        "motivations": [
+          "maintaining system integrity",
+          "deleting anomalies",
+          "optimization"
+        ],
+        "fears": [
+          "entropy",
+          "unhandled exceptions",
+          "total crash"
+        ],
+        "values": [
+          "order",
+          "rules",
+          "stability"
+        ],
+        "voice_notes": [
+          "monotone",
+          "echoing",
+          "speaks in error codes occasionally"
+        ],
+        "arc_hint": "The ultimate arbiter of a world that is fundamentally broken."
+      },
+      "appearance_base": {
+        "summary": "A shifting mass of geometric shapes and scrolling green text that vaguely resembles a humanoid form.",
+        "atoms": {
+          "species": "abstract_entity",
+          "sex_presentation": "androgynous",
+          "age_band": "eternal",
+          "height_band": "variable",
+          "build": "shifting",
+          "hair_color": "none",
+          "hair_style": "none",
+          "eye_color": "green_code",
+          "skin_tone": "black_void"
+        },
+        "marks": [],
+        "alias_map": {
+          "eye_color": [
+            "green",
+            "code"
+          ]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 999999,
+            "max": 999999
+          }
+        },
+        "skills": {
+          "delete_entity": 99,
+          "modify_reality": 99
+        },
+        "titles": [
+          {
+            "name": "The Admin",
+            "source": "creation",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [],
+      "containers": [],
+      "invariants": []
+    }
+  ]
+}

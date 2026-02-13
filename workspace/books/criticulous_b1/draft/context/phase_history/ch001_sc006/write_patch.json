@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Oakhaven - Gatehouse Interior",
+    "recent_facts": [
+      "Artie narrowly escaped a monster horde by entering Oakhaven just as the gates slammed shut.",
+      "The Oakhaven gate guards verified Artie's 'Statistical Anomaly' status via an automated scanner.",
+      "Artie's 100% Crit Rate and 1 HP build have been flagged as a 'Paradoxical Threat' by city defenses.",
+      "The Participation Trophy continues to act as a Monster Beacon even inside the city."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_PARTICIPATION_TROPHY"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is developing a deep resentment for the 'gambling' culture of the game world's inhabitants."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 6
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "stamina": {
+            "current": 1,
+            "max": 100
+          }
+        },
+        "reason": "Completion of 'Run for Your Life!' quest and arrival at Oakhaven."
+      },
+      "delta": {
+        "resources": {
+          "currency_silver": 10,
+          "xp": 50
+        }
+      },
+      "chapter": 1,
+      "scene": 6
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie reached the gates of Oakhaven while pursued by a monster horde, only to be delayed by guards betting on his survival.",
+      "After being scanned and flagged as a Paradoxical Anomaly, Artie was admitted into the city seconds before the horde reached him."
+    ],
+    "key_events": [
+      "Artie arrived at the Oakhaven gates with 1 Stamina remaining.",
+      "The automated gate scanner confirmed Artie's 100% Crit Rate and 1 HP status.",
+      "The guards Ted and Bill delayed entry to gamble on Artie's survival.",
+      "Artie successfully entered Oakhaven, completing the 'Run for Your Life!' quest.",
+      "The gate slammed shut, killing the lead monster of the pursuing horde."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie's stamina dropped to 60/100 during the chase.",
+      "REMOVE: Artie is currently under the 'Marked for Death' and 'Monster Beacon' statuses.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "milestone: survive_the_spawn_initiated = DONE",
+      "milestone: run_for_your_life_completed = DONE",
+      "milestone: oakhaven_entered = DONE",
+      "Artie is Level 2 with 1/1 HP and 100% Crit Rate.",
+      "Artie is currently under the 'Marked for Death' and 'Monster Beacon' statuses.",
+      "location: Oakhaven Interior"
+    ],
+    "chapter_so_far_add": [
+      "Artie has successfully navigated the first major environmental threat and reached the safety of Oakhaven, though his glitchy nature is now public knowledge."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "late-20s",
+      "slight",
+      "hazel",
+      "eyes",
+      "mousy",
+      "hair",
+      "pale",
+      "human",
+      "vending",
+      "machine",
+      "scar."
+    ],
+    "CHAR_FIZZ": [
+      "ancient",
+      "ethereal",
+      "white",
+      "eyes",
+      "neon",
+      "blue",
+      "diminutive",
+      "translucent",
+      "blue",
+      "system",
+      "wisp",
+      "pixelated",
+      "trail."
+    ]
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_MAYOR"
+    ],
+    "location": "Oakhaven - Mayor's Office",
+    "recent_facts": [
+      "Artie met the Mayor of Oakhaven and discussed the economic value of his 100% Crit Rate.",
+      "The Mayor revealed that Artie's Anomaly status makes him a target for 'System Sentinels' seeking to patch him.",
+      "The Monster Beacon status of the Participation Trophy is actively increasing the local Aggro Meter even inside the office.",
+      "The Mayor offered Artie a protection deal to mask his signature in exchange for exclusive use of his Crit abilities."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_PARTICIPATION_TROPHY"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie realizes his 1 HP build makes him a political pawn as much as a glass cannon."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 7
+    },
+    {
+      "character_id": "CHAR_MAYOR",
+      "inventory": [
+        {
+          "item": "ITEM_MAYOR_SEAL",
+          "container": "neck",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_MAYOR",
+          "contents": [
+            "ITEM_MAYOR_SEAL"
+          ]
+        }
+      ],
+      "persona_updates": [],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 7
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "stamina": {
+            "current": 9
+          }
+        },
+        "resources": {
+          "aggro_meter": 92
+        },
+        "reason": "Aggro buildup from Participation Trophy during meeting"
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 7
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie met the Mayor of Oakhaven, who explained that his 100% Crit Rate makes him a 'Market Disruptor' and a target for System deletion.",
+      "The Mayor offered Artie a deal: protection from System Sentinels in exchange for exclusive access to Artie's reality-warping Crits."
+    ],
+    "key_events": [
+      "Artie's Anomaly status was confirmed by the Mayor's office scanners.",
+      "The Mayor explained the 'Crit Economy' and why Artie is a high-value asset.",
+      "The Participation Trophy's 'Monster Beacon' status continued to drive up the Aggro Meter (92%).",
+      "The Mayor proposed a deal involving a 'Cloak of the Bureaucrat' to mask Artie's signature."
+    ],
+    "must_stay_true": [
+      "REMOVE: location: Oakhaven Gatehouse Interior",
+      "location: Oakhaven - Mayor's Office",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+      "inventory: CHAR_MAYOR -> Seal of Oakhaven (status=equipped, container=neck)",
+      "Artie is under the 'Marked for Death' and 'Monster Beacon' statuses (Active).",
+      "milestone: mayor_met = DONE",
+      "milestone: protection_deal_offered = DONE",
+      "Artie's HP is 1/1 and Crit Rate is 100%."
+    ],
+    "chapter_so_far_add": [
+      "Artie has been identified as a Paradoxical Anomaly by the leadership of Oakhaven, turning his survival into a matter of political and economic interest."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "hazel",
+      "eyes",
+      "mousy",
+      "brown",
+      "hair",
+      "slight",
+      "build",
+      "late-20s."
+    ],
+    "CHAR_MAYOR": [
+      "watery",
+      "blue",
+      "eyes",
+      "portly",
+      "build",
+      "balding",
+      "fringe",
+      "ruddy",
+      "skin."
+    ]
+  }
+}

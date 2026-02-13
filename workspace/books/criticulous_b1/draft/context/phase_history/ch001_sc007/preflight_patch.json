@@ -1,0 +1,270 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "location": "Oakhaven - Mayor's Office",
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_MAYOR"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 7,
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_PARTICIPATION_TROPHY"
+          ]
+        }
+      ],
+      "notes": "Artie arrives at the Mayor's office, still clutching the cursed trophy.",
+      "persona_updates": [],
+      "invariants_add": []
+    },
+    {
+      "character_id": "CHAR_MAYOR",
+      "chapter": 1,
+      "scene": 7,
+      "inventory": [
+        {
+          "item": "ITEM_MAYOR_SEAL",
+          "container": "neck",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_MAYOR",
+          "contents": [
+            "ITEM_MAYOR_SEAL"
+          ]
+        }
+      ],
+      "notes": "The Mayor is introduced in his office, wearing his seal of office.",
+      "persona_updates": [],
+      "invariants_add": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "delta": {
+        "stats": {
+          "stamina": {
+            "current": 9
+          }
+        }
+      },
+      "set": {
+        "reason": "Rest during walk to Mayor's office",
+        "reason_category": "location_transition"
+      },
+      "chapter": 1,
+      "scene": 7
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "world_type": "settlement_interior"
+      },
+      "reason": "Transition to settlement interior"
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "container": "hand_left",
+            "status": "held"
+          }
+        ],
+        "containers": [
+          {
+            "container": "neck",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_ID_BADGE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          },
+          {
+            "container": "hand_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_PARTICIPATION_TROPHY"
+            ]
+          }
+        ]
+      },
+      "reason": "Arrival at Mayor's office with trophy held.",
+      "reason_category": "location_transition"
+    },
+    {
+      "character_id": "CHAR_MAYOR",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_MAYOR_SEAL",
+            "container": "neck",
+            "status": "equipped"
+          }
+        ],
+        "containers": [
+          {
+            "container": "neck",
+            "owner": "CHAR_MAYOR",
+            "contents": [
+              "ITEM_MAYOR_SEAL"
+            ]
+          }
+        ]
+      },
+      "reason": "Mayor wearing his seal of office.",
+      "reason_category": "location_transition"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_PARTICIPATION_TROPHY",
+      "set": {
+        "name": "Participation Trophy",
+        "display_name": "Participation Trophy",
+        "type": "cursed_item",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [
+          "THREAD_SYSTEM_GLITCH"
+        ],
+        "state_tags": [
+          "cursed",
+          "monster_beacon"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 6,
+          "location": "Oakhaven Gatehouse Interior"
+        }
+      },
+      "reason": "Initial registry population for durable items"
+    },
+    {
+      "item_id": "ITEM_MAYOR_SEAL",
+      "set": {
+        "name": "Seal of Oakhaven",
+        "display_name": "Seal of Oakhaven",
+        "type": "accessory",
+        "owner_scope": "character",
+        "custodian": "CHAR_MAYOR",
+        "linked_threads": [],
+        "state_tags": [
+          "official"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 7,
+          "location": "Oakhaven - Mayor's Office"
+        }
+      },
+      "reason": "Initial registry population for durable items"
+    },
+    {
+      "item_id": "ITEM_ID_BADGE",
+      "set": {
+        "name": "Corporate ID Badge",
+        "display_name": "Corporate ID Badge",
+        "type": "accessory",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [],
+        "state_tags": [
+          "mundane"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 6,
+          "location": "Oakhaven Gatehouse Interior"
+        }
+      },
+      "reason": "Initial registry population for durable items"
+    },
+    {
+      "item_id": "ITEM_SMARTPHONE",
+      "set": {
+        "name": "Cracked Smartphone",
+        "display_name": "Cracked Smartphone",
+        "type": "device",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [],
+        "state_tags": [
+          "mundane",
+          "damaged"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 6,
+          "location": "Oakhaven Gatehouse Interior"
+        }
+      },
+      "reason": "Initial registry population for durable items"
+    }
+  ],
+  "plot_device_updates": [],
+  "transfer_updates": []
+}

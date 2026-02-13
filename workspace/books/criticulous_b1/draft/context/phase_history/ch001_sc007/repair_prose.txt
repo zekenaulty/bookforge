@@ -1,0 +1,43 @@
+The Mayor of Oakhaven didn’t look like a man who held the keys to Artie’s survival. He looked like a man who had spent the last twenty years aggressively negotiating with a buffet. He sat behind a desk made of dark, polished ironwood, his watery blue eyes fixed on a hovering projection of Artie’s character sheet.
+
+[Warning: Paradoxical Anomaly Detected]
+[Subject: Arthur 'Artie' Penhaligon]
+[Current HP: 1 / 1]
+[Critical Hit Rate: 100% (Hard-Capped)]
+
+"One health point," the Mayor whispered, his voice a mixture of awe and professional greed. He adjusted the Seal of Oakhaven hanging from his neck; the heavy gold medallion clinked against his velvet robes. "And a guaranteed crit on every single interaction. Do you have any idea what you are, Mr. Penhaligon?"
+
+"A mistake?" Artie suggested, shifting his weight. He was still clutching the Participation Trophy in his left hand. The cursed thing was vibrating again, emitting a low-frequency hum that made his teeth ache. "Look, I’m just trying to get through the day without a stray breeze deleting my existence. And this Participation Trophy is currently acting like a flare gun for every monster in a three-mile radius."
+
+[Aggro Meter: 88% (Rising - Monster Beacon Active)]
+
+The Mayor leaned forward, his ruddy face glowing in the light of Artie’s glitchy stats. "In Oakhaven, we don't call it a mistake. We call it a 'Market Disruptor.' Our entire economy is built on the scarcity of the Critical Hit. The nobility pay fortunes for gear that gives them a measly five percent boost. You? You’re a walking mint. You’re a one-man industrial revolution."
+
+"I'm a one-man 'Game Over' screen if someone sneezes in my direction," Artie countered. He held up the Participation Trophy. "Can you fix this? The guards said you were the one to talk to about 'status stabilization.'"
+
+The Mayor’s eyes flicked to the Participation Trophy, then back to Artie’s face. "Fix it? My dear boy, that 'Monster Beacon' is the only reason the wolves didn't stop at the gate. They want what you have. The System wants to 'balance' you, which in this world means erasing you. But Oakhaven... Oakhaven is a sanctuary for those who know how to hedge their bets."
+
+He stood up, his portly frame straining against his robes. He walked to the window, looking out over the town where the bioluminescent streetlamps were beginning to flicker. 
+
+"You are currently flagged as a Paradoxical Anomaly. The moment you step out of this office without my protection, the System Sentinels will find a reason to 'patch' you. And their patches usually involve a very permanent deletion of your data."
+
+[System Notification: Reality Stability 44%]
+[Warning: Localized Anomaly may further degrade stability.]
+
+"So what's the catch?" Artie asked, his grip tightening on the Participation Trophy. "You don't strike me as the 'protection for the sake of charity' type."
+
+The Mayor turned, a predatory smile stretching across his face. "I want a monopoly on your output. You stay in Oakhaven, under my 'mentorship.' You provide the Crits when I need a lock opened, a legendary item forged, or a political rival... inconvenienced. In exchange, I provide you with the 'Cloak of the Bureaucrat.' It won't give you more HP, but it will mask your Anomaly signature from the System's automated scans."
+
+Artie looked at the Seal of Oakhaven around the Mayor's neck. It was more than just jewelry; it was a tether to the world's rules. He looked at his own 1 HP. 
+
+"You're offering to hide me in plain sight," Artie said.
+
+"I'm offering to make you the most valuable secret in the kingdom," the Mayor replied. "But we have to move fast. That Participation Trophy is screaming, and the city's internal sensors are already starting to log the 'Monster Beacon' status. If the Aggro Meter hits a hundred inside the walls, the automated turrets won't care if you're a guest or a glitch."
+
+[Aggro Meter: 92%]
+
+The hum from the Participation Trophy grew louder, a rhythmic thrumming that seemed to sync with Artie’s own frantic heartbeat. He was a Junior Analyst. He knew a bad deal when he saw one, but he also knew when he didn't have the leverage to ask for a better one. 
+
+"Fine," Artie said, the word feeling like a lead weight in his mouth. "Tell me about this 'deal.'"
+
+The Mayor’s smile widened, revealing a gold-capped tooth. "Excellent. Let's talk about your new career as Oakhaven's most guarded asset."

@@ -1,0 +1,199 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Tutorial Zone (Lush Forest)",
+    "recent_facts": [
+      "Artie arrived in the Lush Forest tutorial zone.",
+      "Artie encountered a Level 1 Lesser Puddle Slime.",
+      "Artie realized that 1 HP means any hit is fatal."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "Artie arrived in the Lush Forest tutorial zone and was immediately confronted by the reality of his 1 HP build.",
+      "A Lesser Puddle Slime attacked, forcing Artie to realize that he must dodge every single attack to survive."
+    ],
+    "key_events": [
+      "Artie spawns in the Lush Forest with his Corporate ID Badge and Cracked Smartphone.",
+      "The System initiates the 'Survive the Spawn' quest.",
+      "Artie confirms his stats: Level 1, 1/1 HP, and 100% Crit Rate.",
+      "A Lesser Puddle Slime (Lvl 1) aggros on Artie.",
+      "Artie successfully dodges the slime's first leap, consuming 5 stamina.",
+      "Artie is cornered against a thicket of thorns as the slime prepares a second lunge."
+    ],
+    "must_stay_true": [
+      "milestone: artie_electrocuted = DONE",
+      "milestone: crit_build_finalized = DONE",
+      "milestone: survive_the_spawn_initiated = DONE",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "container: neck (owner=CHAR_ARTIE, contents=[Corporate ID Badge])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[Cracked Smartphone])",
+      "injury: vending machine scar on right knuckle"
+    ],
+    "chapter_so_far_add": [
+      "Artie has entered the game world and faced his first lethal threat, establishing the high stakes of his glitchy build."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 3,
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        }
+      ],
+      "invariants_add": [
+        "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+        "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)"
+      ],
+      "persona_updates": [
+        "Artie is beginning to understand that his 'Statistical Anomaly' title is a literal warning of his fragility."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "level": 1,
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100,
+          "stamina": {
+            "current": 95,
+            "max": 100
+          }
+        },
+        "titles": [
+          {
+            "name": "Statistical Anomaly",
+            "source": "system_glitch",
+            "active": true
+          }
+        ],
+        "reason": "Establishing base level and tracking stamina consumption after first dodge."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 3
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "neck",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_ID_BADGE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          }
+        ]
+      },
+      "reason": "Normalization of inventory posture upon arrival in the tutorial zone."
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "world_type": "tutorial_zone",
+        "reality_stability": 45
+      },
+      "reason": "Confirmed arrival in the Lush Forest tutorial instance."
+    }
+  ],
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "late-20s",
+      "slight",
+      "build",
+      "hazel",
+      "eyes",
+      "mousy",
+      "brown",
+      "hair",
+      "unruly",
+      "short",
+      "pale",
+      "skin",
+      "human",
+      "vending",
+      "machine",
+      "scar."
+    ],
+    "CHAR_FIZZ": [
+      "ancient",
+      "ethereal",
+      "white",
+      "eyes",
+      "neon",
+      "blue",
+      "hair",
+      "wispy",
+      "diminutive",
+      "translucent",
+      "blue",
+      "skin",
+      "system_wisp",
+      "pixelated",
+      "trail."
+    ]
+  }
+}

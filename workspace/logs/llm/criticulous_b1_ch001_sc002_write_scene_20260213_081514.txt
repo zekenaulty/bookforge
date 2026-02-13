@@ -1,0 +1,192 @@
+COMPLIANCE:
+Scene ID: SC_001_002
+Allowed events: Artie meets Fizz, point buy interaction, accidental stat allocation to Crit, 1 HP realization, build confirmation.
+Forbidden milestones: acquisition of participation trophy, arrival at Oakhaven, level up, slime combat.
+Current arm-side / inventory facts: inventory: CHAR_ARTIE -> Corporate ID Badge (equipped, container=neck), inventory: CHAR_ARTIE -> Cracked Smartphone (stowed, container=pocket_right).
+Durable changes committed: CHAR_ARTIE stats (HP max 1, Crit Rate 100%), stat_points 0, title "Statistical Anomaly" added.
+
+APPEARANCE_CHECK:
+- CHAR_ARTIE: late-20s, slight build, hazel eyes, mousy brown hair, unruly short, pale skin.
+- CHAR_FIZZ: ancient, ethereal, white eyes, neon blue hair, wispy, diminutive, translucent blue skin.
+
+PROSE:
+The void didn't smell like ozone or the afterlife. It smelled like a server room that hadn't been dusted since the late nineties. Arthur 'Artie' Penhaligon stood in the center of a black expanse that felt less like infinite space and more like a loading screen with the lights turned off.
+
+"Oh, look. Another one. And this one's still wearing his lanyard. How professional."
+
+Artie spun around, his hand instinctively reaching for the Corporate ID Badge hanging from his neck. A small, glowing blue sprite flickered into existence, trailing a wake of pixelated dust that looked like a GPU having a seizure. 
+
+"Where am I?" Artie asked, his voice cracking. "I was just... the vending machine. The chips. There was a spark."
+
+"The Snack-Master 4000 claimed another soul," the sprite said, her voice dripping with a boredom that spanned eons. "I'm Fizz. I’m your System Guide, though 'Guide' is a strong word for someone who mostly watches people like you make terrible life choices. You’re dead, Arthur. Welcome to the Character Creation Void. Try not to track mud on the nothingness."
+
+[System Notification: Welcome, User 9,421,084!]
+[Current Status: Deceased (Pending Resurrection)]
+[Available Stat Points: 10]
+
+A translucent blue screen shimmered into existence between them. It was filled with numbers, bars, and a list of attributes that made Artie’s head swim. He felt the weight of his Cracked Smartphone in his pocket, a useless brick of glass in this digital purgatory.
+
+"Character creation?" Artie squinted at the screen. "Is this a game? I’m a Junior Analyst. I don't do games. I do spreadsheets."
+
+"Then think of this as a very high-stakes spreadsheet where 'Error 404' means your soul gets deleted," Fizz said, hovering closer. "You have ten points. Put them into Strength if you want to hit things, Agility if you want to run away like a coward, or Vitality if you want to survive more than a stiff breeze. Hurry up. I have a three-o'clock with a guy who died choking on a grape."
+
+Artie looked at the list. He saw 'Critical Hit Rate' at the bottom, currently sitting at a measly 1%. 
+
+"Critical," Artie muttered. "That sounds important. In my performance reviews, 'critical thinking' was always the top metric. If I want to be efficient, I should maximize the critical stuff, right?"
+
+"I wouldn't—" Fizz started, her glowing eyes widening.
+
+Artie tapped the plus sign next to Critical Hit Rate. He didn't just tap it; his finger, still twitchy from the electrocution, spasmed. The '10' in his point pool vanished instantly.
+
+[Warning: Stat Allocation Finalized!]
+[System Error: Statistical Anomaly Detected!]
+[Recalculating Build...]
+
+"What did you do?" Fizz shrieked, her pixelated trail turning a violent shade of red. "You just dumped the entire starter pool into a sub-stat! You didn't even touch Vitality!"
+
+Artie blinked as the screen turned a blinding gold.
+
+[Build Confirmed: The Glass Cannon]
+[HP: 1/1]
+[Critical Hit Rate: 100%]
+[Title Earned: Statistical Anomaly]
+
+"One?" Artie stared at the HP bar. It was so thin it was practically invisible. "Why is my health one? I had ten points!"
+
+"You had ten points to spend on *everything*, you absolute walnut!" Fizz hovered inches from his nose, her translucent blue face contorted in a sneer. "You put it all into Crits! You are now the deadliest thing in the world that can be killed by a moderately aggressive sneeze. You have the structural integrity of a wet paper towel!"
+
+"But I have 100% Critical Hit Rate," Artie argued, trying to find the silver lining. "That means every hit is... critical?"
+
+"It means you’re a glitch, Arthur. A walking, breathing math error." Fizz sighed, her glow dimming to a resigned teal. "The System hates math errors. It's going to try to 'balance' you. And by balance, I mean it's going to send everything in the tutorial zone to delete you from the census."
+
+The floor beneath Artie began to vibrate. The blackness of the void started to crack, revealing flashes of a lush, green forest below.
+
+"Wait, I'm not ready!" Artie grabbed his Corporate ID Badge as if the plastic sleeve could protect him. 
+
+"Ready or not, here comes the grind," Fizz said, disappearing into a puff of blue code. "Try not to die in the first five seconds. It makes my paperwork look terrible."
+
+The void dissolved. Artie felt a sickening lurch in his stomach as gravity suddenly remembered he existed. He plummeted toward the green canopy below, the wind whistling through his rumpled dress shirt.
+
+[Tutorial Quest Initiated: Survive the Spawn]
+[Objective: Reach the Safe Zone without taking damage.]
+[Reward: A sense of self-worth and 10 XP.]
+
+"I just wanted my chips!" Artie screamed as the trees rushed up to meet him.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Character Creation Void",
+    "recent_facts": [
+      "Artie met his System Guide, Fizz.",
+      "Artie accidentally allocated all 10 stat points into Critical Hit Rate.",
+      "Artie's HP is locked at 1.",
+      "Artie earned the 'Statistical Anomaly' title."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is now aware he is in a game-like system but lacks the gaming literacy to realize how dangerous a 1 HP build is."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100
+        },
+        "resources": {
+          "stat_points": 0
+        },
+        "titles": [
+          {
+            "name": "Junior Analyst",
+            "source": "previous_life",
+            "active": false
+          },
+          {
+            "name": "Statistical Anomaly",
+            "source": "system_glitch",
+            "active": true
+          }
+        ]
+      },
+      "reason": "Accidental point-buy allocation during character creation."
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "reality_stability": 45
+      },
+      "reason": "Introduction of a 100% Crit Rate anomaly into the system."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie met Fizz in the Character Creation Void and struggled to understand the LitRPG mechanics.",
+      "Due to a misunderstanding and a physical spasm, Artie spent all 10 stat points on Critical Hit Rate.",
+      "Artie was finalized as a 'Statistical Anomaly' with 1 HP and 100% Crit Rate before being dropped into the tutorial."
+    ],
+    "key_events": [
+      "Fizz introduced herself as Artie's System Guide.",
+      "Artie interacted with the Point Buy UI.",
+      "Artie dumped 10 points into Critical Hit Rate.",
+      "Artie's HP was set to 1/1.",
+      "Artie earned the title 'Statistical Anomaly'.",
+      "The System initiated the 'Survive the Spawn' tutorial quest.",
+      "Artie was pulled from the void toward the tutorial world."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "REMOVE: inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "milestone: artie_electrocuted = DONE",
+      "milestone: crit_build_finalized = DONE",
+      "injury: vending machine scar on right knuckle",
+      "state: world_dissolving = FALSE",
+      "state: tutorial_active = TRUE"
+    ],
+    "chapter_so_far_add": [
+      "Artie met his guide Fizz and accidentally created a broken 1 HP / 100% Crit build."
+    ]
+  }
+}

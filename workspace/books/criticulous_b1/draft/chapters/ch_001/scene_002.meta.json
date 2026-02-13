@@ -1,0 +1,291 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_002",
+  "chapter": 1,
+  "scene": 2,
+  "scene_target": "Artie accepts a 1 HP / 100% Crit build.",
+  "goal": "Complete character creation while surviving Fizz's insults.",
+  "conflict": "Artie's lack of gaming knowledge vs. a glitchy, impatient System guide.",
+  "required_callbacks": [
+    "artie_electrocuted"
+  ],
+  "constraints": [
+    "target_words: 2000",
+    "style: snarky",
+    "mechanic: point_buy_accident"
+  ],
+  "end_condition": "Artie confirms the build and is pulled toward the tutorial spawn point.",
+  "ui_allowed": true,
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "introduces": [
+    "Fizz"
+  ],
+  "introduces_ids": [
+    "CHAR_FIZZ"
+  ],
+  "thread_ids": [
+    "THREAD_CRIT_EXPLOIT"
+  ],
+  "required_in_custody": [
+    "ITEM_ID_BADGE",
+    "ITEM_SMARTPHONE"
+  ],
+  "required_scene_accessible": [],
+  "required_visible_on_page": [],
+  "forbidden_visible": [
+    "ITEM_WALLET"
+  ],
+  "device_presence": [],
+  "transition_type": "death_to_void",
+  "timeline_scope": "present",
+  "ontological_scope": "non_real",
+  "continuity_system_focus": [
+    "stats",
+    "titles",
+    "resources"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Crit Rate",
+    "System Notification",
+    "Point Buy"
+  ],
+  "prose_path": "draft/chapters/ch_001/scene_002.md",
+  "state_patch": {
+    "character_continuity_system_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "set": {
+          "resources": {
+            "stat_points": 0
+          },
+          "stats": {
+            "crit_rate": 100,
+            "hp": {
+              "current": 1,
+              "max": 1
+            }
+          },
+          "titles": [
+            {
+              "active": false,
+              "name": "Junior Analyst",
+              "source": "previous_life"
+            },
+            {
+              "active": true,
+              "name": "Statistical Anomaly",
+              "source": "system_glitch"
+            }
+          ],
+          "reason": "Accidental point-buy allocation during character creation in the System Void.",
+          "reason_category": "timeline_override",
+          "scope_override": true
+        },
+        "delta": {},
+        "chapter": 1,
+        "scene": 2
+      }
+    ],
+    "character_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "persona_updates": [
+          "Artie is now aware he is in a game-like system but lacks the gaming literacy to realize how dangerous a 1 HP build is."
+        ],
+        "reason": "Character creation awareness.",
+        "reason_category": "timeline_override",
+        "scope_override": true,
+        "invariants_add": [],
+        "chapter": 1,
+        "scene": 2
+      }
+    ],
+    "global_continuity_system_updates": [
+      {
+        "reason": "Introduction of a 100% Crit Rate anomaly into the system.",
+        "reason_category": "timeline_override",
+        "scope_override": true,
+        "set": {
+          "reality_stability": 45
+        }
+      }
+    ],
+    "inventory_alignment_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "reason": "Normalization of inventory posture upon entering the void.",
+        "reason_category": "timeline_override",
+        "scope_override": true,
+        "set": {
+          "containers": [
+            {
+              "container": "pocket_right",
+              "contents": [
+                "ITEM_SMARTPHONE"
+              ],
+              "owner": "CHAR_ARTIE"
+            }
+          ],
+          "inventory": [
+            {
+              "container": "neck",
+              "item": "ITEM_ID_BADGE",
+              "status": "equipped"
+            },
+            {
+              "container": "pocket_right",
+              "item": "ITEM_SMARTPHONE",
+              "status": "stowed"
+            }
+          ]
+        }
+      }
+    ],
+    "item_registry_updates": [
+      {
+        "item_id": "ITEM_ID_BADGE",
+        "reason": "Update last seen location.",
+        "reason_category": "timeline_override",
+        "scope_override": true,
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "location": "Character Creation Void",
+            "scene": 2
+          }
+        }
+      },
+      {
+        "item_id": "ITEM_SMARTPHONE",
+        "reason": "Update last seen location.",
+        "reason_category": "timeline_override",
+        "scope_override": true,
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "location": "Character Creation Void",
+            "scene": 2
+          }
+        }
+      }
+    ],
+    "plot_device_updates": [
+      {
+        "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+        "reason": "Activation of the 100% Crit build.",
+        "reason_category": "timeline_override",
+        "scope_override": true,
+        "set": {
+          "activation_state": "active",
+          "last_seen": {
+            "chapter": 1,
+            "location": "Character Creation Void",
+            "scene": 2
+          }
+        }
+      }
+    ],
+    "schema_version": "1.0",
+    "summary_update": {
+      "chapter_so_far_add": [
+        "Artie met his guide Fizz and accidentally created a broken 1 HP / 100% Crit build."
+      ],
+      "key_events": [
+        "Artie encounters Fizz, a snarky System Guide, in the server-room-scented void.",
+        "The System presents a Point Buy UI with 10 available stat points.",
+        "Artie mistakes 'Critical Hit Rate' for a performance metric and dumps all points into it.",
+        "The System confirms the build, locking Artie at 1/1 HP and 100% Crit Rate.",
+        "Artie earns the title 'Statistical Anomaly' and the 'Glass Cannon' build designation.",
+        "The Tutorial Quest 'Survive the Spawn' is initiated as the void dissolves.",
+        "Artie is dropped from the void into a lush forest tutorial zone."
+      ],
+      "last_scene": [
+        "Artie met his System Guide, Fizz, in the Character Creation Void following his death.",
+        "Due to a physical spasm and a misunderstanding of gaming terminology, he accidentally allocated all his starting stat points into Critical Hit Rate.",
+        "This resulted in a 'Glass Cannon' build with only 1 HP but a 100% chance to land critical hits."
+      ],
+      "must_stay_true": [
+        "inventory: world -> Leather Wallet (status=dropped, container=floor)",
+        "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+        "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+        "milestone: artie_electrocuted = DONE",
+        "milestone: crit_build_finalized = DONE",
+        "injury: vending machine scar on right knuckle",
+        "REMOVE: state: world_dissolving = TRUE",
+        "state: tutorial_active = TRUE"
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "CHAR_ARTIE",
+        "CHAR_FIZZ"
+      ],
+      "location": "Character Creation Void",
+      "open_threads": [
+        "THREAD_CRIT_EXPLOIT"
+      ]
+    }
+  },
+  "scene_summary": [
+    "Artie met his System Guide, Fizz, in the Character Creation Void following his death.",
+    "Due to a physical spasm and a misunderstanding of gaming terminology, he accidentally allocated all his starting stat points into Critical Hit Rate.",
+    "This resulted in a 'Glass Cannon' build with only 1 HP but a 100% chance to land critical hits."
+  ],
+  "key_events": [
+    "Artie encounters Fizz, a snarky System Guide, in the server-room-scented void.",
+    "The System presents a Point Buy UI with 10 available stat points.",
+    "Artie mistakes 'Critical Hit Rate' for a performance metric and dumps all points into it.",
+    "The System confirms the build, locking Artie at 1/1 HP and 100% Crit Rate.",
+    "Artie earns the title 'Statistical Anomaly' and the 'Glass Cannon' build designation.",
+    "The Tutorial Quest 'Survive the Spawn' is initiated as the void dissolves.",
+    "Artie is dropped from the void into a lush forest tutorial zone."
+  ],
+  "must_stay_true": [
+    "inventory: world -> Leather Wallet (status=dropped, container=floor)",
+    "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+    "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+    "milestone: artie_electrocuted = DONE",
+    "milestone: crit_build_finalized = DONE",
+    "injury: vending machine scar on right knuckle",
+    "REMOVE: state: world_dissolving = TRUE",
+    "state: tutorial_active = TRUE"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "appearance_check_missing",
+        "message": "Appearance check missing for CHAR_ARTIE in the authoritative surface.",
+        "severity": "warning"
+      },
+      {
+        "code": "appearance_check_missing",
+        "message": "Appearance check missing for CHAR_FIZZ in the authoritative surface.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Available Stat Points but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Critical Hit Rate but no matching stat exists in state.",
+        "severity": "warning"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 1,
+  "updated_at": "2026-02-13T08:25:47Z"
+}

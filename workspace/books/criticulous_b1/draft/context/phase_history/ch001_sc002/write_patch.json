@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Character Creation Void",
+    "recent_facts": [
+      "Artie met his System Guide, Fizz.",
+      "Artie accidentally allocated all 10 stat points into Critical Hit Rate.",
+      "Artie's HP is locked at 1.",
+      "Artie earned the 'Statistical Anomaly' title."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is now aware he is in a game-like system but lacks the gaming literacy to realize how dangerous a 1 HP build is."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100
+        },
+        "resources": {
+          "stat_points": 0
+        },
+        "titles": [
+          {
+            "name": "Junior Analyst",
+            "source": "previous_life",
+            "active": false
+          },
+          {
+            "name": "Statistical Anomaly",
+            "source": "system_glitch",
+            "active": true
+          }
+        ],
+        "reason": "Accidental point-buy allocation during character creation."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "reality_stability": 45
+      },
+      "reason": "Introduction of a 100% Crit Rate anomaly into the system."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie met Fizz in the Character Creation Void and struggled to understand the LitRPG mechanics.",
+      "Due to a misunderstanding and a physical spasm, Artie spent all 10 stat points on Critical Hit Rate.",
+      "Artie was finalized as a 'Statistical Anomaly' with 1 HP and 100% Crit Rate before being dropped into the tutorial."
+    ],
+    "key_events": [
+      "Fizz introduced herself as Artie's System Guide.",
+      "Artie interacted with the Point Buy UI.",
+      "Artie dumped 10 points into Critical Hit Rate.",
+      "Artie's HP was set to 1/1.",
+      "Artie earned the title 'Statistical Anomaly'.",
+      "The System initiated the 'Survive the Spawn' tutorial quest.",
+      "Artie was pulled from the void toward the tutorial world."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "REMOVE: inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "milestone: artie_electrocuted = DONE",
+      "milestone: crit_build_finalized = DONE",
+      "injury: vending machine scar on right knuckle",
+      "state: world_dissolving = FALSE",
+      "state: tutorial_active = TRUE"
+    ],
+    "chapter_so_far_add": [
+      "Artie met his guide Fizz and accidentally created a broken 1 HP / 100% Crit build."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "late-20s",
+      "slight",
+      "build",
+      "hazel",
+      "eyes",
+      "mousy",
+      "brown",
+      "hair",
+      "unruly",
+      "short",
+      "pale",
+      "skin."
+    ],
+    "CHAR_FIZZ": [
+      "ancient",
+      "ethereal",
+      "white",
+      "eyes",
+      "neon",
+      "blue",
+      "hair",
+      "wispy",
+      "diminutive",
+      "translucent",
+      "blue",
+      "skin."
+    ]
+  }
+}

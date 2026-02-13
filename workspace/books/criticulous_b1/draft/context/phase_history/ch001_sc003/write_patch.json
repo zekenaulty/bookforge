@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Tutorial Zone (Lush Forest)",
+    "recent_facts": [
+      "Artie arrived in the Tutorial Zone and encountered a Level 1 Slime.",
+      "Artie realized that 1 HP makes even the weakest enemy a lethal threat.",
+      "Artie is currently cornered by the slime near a thorn thicket."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "Artie arrived in the Lush Forest tutorial zone after his death in the mundane world.",
+      "He encountered a Level 1 Slime and realized his 1 HP build means any contact is fatal.",
+      "Fizz provided snarky guidance as Artie narrowly dodged the slime's first attack."
+    ],
+    "key_events": [
+      "Artie spawns in the Tutorial Zone (Lush Forest) with his mundane items.",
+      "Artie checks his stats and confirms his 1/1 HP and 100% Crit Rate.",
+      "A Level 1 Lesser Puddle Slime agros on Artie.",
+      "Artie dodges the slime's initial leap, witnessing its corrosive mucus.",
+      "Artie is cornered by the slime against a thorn thicket.",
+      "Artie realizes the absolute lethality of his 'Glass Cannon' build."
+    ],
+    "must_stay_true": [
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "milestone: artie_electrocuted = DONE",
+      "milestone: crit_build_finalized = DONE",
+      "state: tutorial_active = TRUE",
+      "injury: vending machine scar on right knuckle",
+      "Artie has 1/1 HP and 100% Crit Rate."
+    ],
+    "chapter_so_far_add": [
+      "Artie arrived in the tutorial zone and faced his first life-threatening encounter with a Level 1 Slime."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is now acutely aware that his 1 HP build makes him the most fragile entity in the world.",
+        "Artie's fear is tempered by a desperate need to utilize his 100% Crit Rate to survive."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 3
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100
+        },
+        "titles": [
+          {
+            "name": "Statistical Anomaly",
+            "source": "system_glitch",
+            "active": true
+          }
+        ]
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 3
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "reality_stability": 45
+      },
+      "reason": "Initial world state upon entering the tutorial zone."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_ID_BADGE",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 3,
+          "location": "Tutorial Zone (Lush Forest)"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_SMARTPHONE",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 3,
+          "location": "Tutorial Zone (Lush Forest)"
+        }
+      }
+    }
+  ],
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "late-20s",
+      "hazel",
+      "eyes",
+      "mousy",
+      "brown",
+      "hair",
+      "slight",
+      "build."
+    ],
+    "CHAR_FIZZ": [
+      "diminutive",
+      "sprite",
+      "neon",
+      "blue",
+      "hair",
+      "white",
+      "eyes",
+      "translucent",
+      "blue",
+      "skin."
+    ]
+  }
+}
