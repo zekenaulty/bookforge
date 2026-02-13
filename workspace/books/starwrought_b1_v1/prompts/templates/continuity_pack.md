@@ -50,3 +50,4 @@ Item registry (canonical):
 
 Plot devices (canonical):
 {{plot_devices}}
+

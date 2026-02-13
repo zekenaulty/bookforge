@@ -5,13 +5,16 @@ Summaries are reference-only; do not recap them in prose unless scene_card expli
 Timeline Lock: only depict events explicitly listed in the current Scene Card. Do not depict, imply, or resolve later-scene milestones (acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
 State primacy: pre-scene invariants and summary facts are binding unless the Scene Card depicts a change. If this scene changes a durable fact, update must_stay_true to the final end-of-scene value and remove the old entry.
 Milestone uniqueness: if a milestone is marked DONE in must_stay_true, do not depict it again. If marked NOT_YET, do not depict it now.
+
 - must_stay_true reconciliation (mandatory):
   - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
   - Remove conflicting old invariants rather than preserving them.
+
 - must_stay_true removal (mandatory when a durable fact is superseded):
   - Add "REMOVE: <exact prior invariant text>" in summary_update.must_stay_true.
   - Place REMOVE lines before the new final invariant.
   - REMOVE lines also apply to key_facts_ring (purge stale facts from continuity).
+
 Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
 Inventory contract: track ownership and container location for key items; update must_stay_true when items move or change hands.
 - Inventory posture reconciliation:
@@ -52,26 +55,16 @@ Naming repairs:
 - Do not rename item_id or registry fields; only adjust prose wording.
 summary_update arrays are mandatory; do not omit or leave empty unless explicitly stated.
 STATE_PATCH must record all major events and outcomes from the prose; if an event happens, add it to key_events and update must_stay_true as needed.
-- must_stay_true reconciliation (mandatory):
-
-  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
-  - Remove conflicting old invariants rather than preserving them.
 must_stay_true must include a milestone ledger entry for every milestone referenced in the Scene Card or already present in state.
-- must_stay_true reconciliation (mandatory):
-
-  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
-  - Remove conflicting old invariants rather than preserving them.
 If state lacks a key invariant needed for this scene, seed it in must_stay_true using standard phrasing.
-- must_stay_true reconciliation (mandatory):
-
-  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
-  - Remove conflicting old invariants rather than preserving them.
 Enforce scene-card durable constraints: `required_in_custody`, `required_scene_accessible`, `forbidden_visible`, `device_presence`; treat `required_visible_on_page` as explicit narrative requirement when present.
 Respect `timeline_scope` and `ontological_scope`.
+
 - Scope override rule (non-present / non-real scenes):
   - If timeline_scope != "present" OR ontological_scope != "real", do NOT emit durable mutation blocks UNLESS they are required for this scene transition (based on scene_card + current state).
   - Durable mutation blocks include: inventory_alignment_updates, transfer_updates, item_registry_updates, plot_device_updates, and any other durable-state mutation you emit.
   - If they are required for the story (e.g., items must persist into the next real scene, required_in_custody/required_scene_accessible lists them, or transition_type implies continuity of physical possessions), you MUST set scope_override=true (or allow_non_present_mutation=true) on EACH affected update object and set reason_category="timeline_override".
+
 Return corrected prose plus a corrected state_patch JSON block.
 
 Output format (required, no code fences, no commentary):
@@ -79,15 +72,7 @@ COMPLIANCE:
 Scene ID: <scene_card.scene_id>
 Allowed events: <short list from Scene Card>
 Forbidden milestones: <from must_stay_true>
-- must_stay_true reconciliation (mandatory):
-
-  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
-  - Remove conflicting old invariants rather than preserving them.
 Current arm-side / inventory facts: <from must_stay_true>
-- must_stay_true reconciliation (mandatory):
-
-  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
-  - Remove conflicting old invariants rather than preserving them.
 
 APPEARANCE_CHECK:
 - CHAR_ID: <4-8 tokens from atoms/marks>
@@ -105,10 +90,6 @@ STATE_PATCH rules:
 - Use scene_card.thread_ids for open_threads (thread ids).
 - Do not invent new character or thread ids.
 - Include summary_update arrays: last_scene (array of 2-4 sentence strings), key_events (array of 3-7 bullet strings), must_stay_true (array of 3-7 bullet strings), chapter_so_far_add (array of bullet strings).
-- must_stay_true reconciliation (mandatory):
-
-  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
-  - Remove conflicting old invariants rather than preserving them.
 - Include story_so_far_add only at chapter end (or when scene_card explicitly requests).
 - Use threads_touched only if you can reference thread ids from scene_card.thread_ids.
 - Include character_continuity_system_updates for cast_present_ids when mechanics change.
@@ -117,9 +98,11 @@ STATE_PATCH rules:
   - titles must be arrays of objects with stable name fields (example: [{"name": "Novice", "source": "starting_class", "active": true}]).
   - If a new mechanic family appears, add it under set with a stable key.
 - Include global_continuity_system_updates only if global mechanics change.
+
 - global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
   - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
   - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
 - All *_updates arrays must contain objects; never emit bare strings as array entries.
 - JSON shape guardrails (strict, do not deviate):
   - character_updates MUST be an array of objects.
@@ -131,13 +114,11 @@ STATE_PATCH rules:
   - summary_update fields must be arrays of strings.
     - INVALID: "summary_update": {"last_scene": "text"}
     - VALID: "summary_update": {"last_scene": ["text"], "key_events": ["..."], "must_stay_true": ["..."], "chapter_so_far_add": ["..."]}
-- must_stay_true reconciliation (mandatory):
 
-  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
-  - Remove conflicting old invariants rather than preserving them.
   - appearance_updates MUST be an object under character_updates.
     - INVALID: "appearance_updates": [{"set": {...}}] OR "appearance_updates": {"marks_add": [...]}
     - VALID: "appearance_updates": {"set": {"marks_add": [{"name": "Singed Hair", "location": "head", "durability": "durable"}]}, "reason": "..."}
+
 - character_updates.containers must be an array of objects with at least: container, owner, contents (array).
 - Durable-state mutation blocks are mandatory when applicable:
 - Required fields for durable registry entries (when creating NEW ids or filling missing required fields):
@@ -155,6 +136,7 @@ STATE_PATCH rules:
   - owner_scope must be "character" or "world" and must match the custodian scope.
   - plot_device_updates: set must include name, custody_scope, custody_ref, activation_state, linked_threads, constraints, last_seen {chapter, scene, location}. Optional: display_name, aliases, linked_item_id.
   - If you introduce a new item_id/device_id anywhere in this patch, you MUST include a corresponding registry update with the full required fields.
+
 - Transfer vs registry conflict rule (must follow):
   - If you create a NEW item in item_registry_updates with final custodian already set (e.g., CHAR_ARTIE), DO NOT emit transfer_updates for that item.
   - If you emit transfer_updates for a NEW item, the registry entry must start with custodian="world" and then transfer to the character.
@@ -164,6 +146,7 @@ STATE_PATCH rules:
   - `transfer_updates` for item handoffs (source, destination, reason, optional transfer_chain).
   - Every `transfer_updates` entry must include `item_id` and `reason` (non-empty string).
   - `inventory_alignment_updates` must be an array of objects; never an object with an `updates` field.
+
   - inventory_alignment_updates[*].set MUST be an object (not a list).
     - INVALID: "set": []
     - VALID:   "set": {"inventory": [...], "containers": [...]}
@@ -171,9 +154,11 @@ STATE_PATCH rules:
 - If you mutate durable state, do not leave the same mutation only in prose.
 - Include character_updates entries for cast_present_ids that change state (inventory, containers, persona shifts).
 - appearance_updates: when a durable appearance change happens, include appearance_updates on the relevant character_updates entry.
+
   - appearance_updates MUST be an object, not an array.
     - INVALID: "appearance_updates": [{"set": {...}, "reason": "..."}]
     - VALID: "appearance_updates": {"set": {"marks_add": [{"name": "Singed Hair", "location": "head", "durability": "durable"}]}, "reason": "..."}
+
   - appearance_updates.set may include atoms and marks only (canonical truth).
     - Do NOT put marks_add at the top level; it belongs under set.
     - Use set.marks_add / set.marks_remove for marks changes.
@@ -186,15 +171,7 @@ STATE_PATCH rules:
   - Container object shape: {"container": "<name>", "owner": "CHAR_id", "contents": ["ITEM_id", "..."]}.
   - If you have a single persona update, still wrap it in an array of strings.
 - must_stay_true must include a milestone ledger and invariants using standard phrasing, e.g.:
-- must_stay_true reconciliation (mandatory):
-
-  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
-  - Remove conflicting old invariants rather than preserving them.
   - Avoid numeric mechanics in must_stay_true; store them in continuity system updates instead.
-- must_stay_true reconciliation (mandatory):
-
-  - If you change a durable value in the patch, you must update must_stay_true to match the end-of-scene value.
-  - Remove conflicting old invariants rather than preserving them.
   - inventory: CHAR_example -> shard (carried, container=satchel)
   - inventory: CHAR_example -> longsword (carried, container=hand_right)
   - container: satchel (owner=CHAR_example, contents=[shard, maps])
@@ -230,6 +207,7 @@ Item registry (canonical):
 Plot devices (canonical):
 {{plot_devices}}
 
+
 JSON Contract Block (strict; arrays only):
 - All *_updates must be arrays of objects, even when there is only one update.
 - INVALID vs VALID examples:
@@ -249,9 +227,4 @@ JSON Contract Block (strict; arrays only):
     - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
     - VALID:   "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
 - custodian must be a non-null string id or "world"; never null.
-
-
-
-
-
 

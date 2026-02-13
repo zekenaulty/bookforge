@@ -8,3 +8,4 @@ If you are unsure, write a neutral prose excerpt in the desired voice.
 
 Author persona:
 {{author_fragment}}
+

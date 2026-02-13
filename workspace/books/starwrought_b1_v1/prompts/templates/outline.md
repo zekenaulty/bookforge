@@ -1,4 +1,4 @@
-﻿# OUTLINE
+# OUTLINE
 
 You are the outline planner. Create a compact outline for the book.
 Return ONLY a single JSON object that matches the outline schema v1.1.
@@ -155,3 +155,4 @@ User prompt (optional, may be empty):
 
 Notes:
 {{notes}}
+

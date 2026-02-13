@@ -27,3 +27,4 @@ Conflict rule: if scene intent conflicts with state invariants, invariants win; 
 Never recap at scene openings.
 Do not repeat previous prose.
 
+

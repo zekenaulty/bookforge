@@ -11,10 +11,12 @@ Goal:
   - If this scene changes a durable fact (stats/HP/status/title/custody), you MUST update must_stay_true to reflect the final end-of-scene value.
   - Remove or replace any prior must_stay_true entries that conflict with new durable values.
   - Do NOT carry forward conflicting legacy invariants once the scene updates them.
+
 - must_stay_true removal (mandatory when a durable fact is superseded):
   - Add "REMOVE: <exact prior invariant text>" in summary_update.must_stay_true.
   - Place REMOVE lines before the new final invariant.
   - REMOVE lines also apply to key_facts_ring (purge stale facts from continuity).
+
 - Ensure mechanic/UI ownership in continuity system updates.
 
 Rules:
@@ -65,9 +67,11 @@ Naming repairs:
 - Inventory object shape: {"item": "ITEM_or_name", "container": "hand_left|hand_right|<container>", "status": "held|carried|equipped|stowed"}.
   - Container object shape: {"container": "<name>", "owner": "CHAR_id", "contents": ["ITEM_id", "..."]}.
 - Use character_continuity_system_updates / global_continuity_system_updates to reconcile mechanics.
+
 - global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
   - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
   - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
 - If a new mechanic family appears in prose/UI, add it under set with a stable key.
 - All *_updates arrays must contain objects; never emit bare strings as array entries.
 - JSON shape guardrails (strict, do not deviate):
@@ -100,6 +104,7 @@ Naming repairs:
   - owner_scope must be "character" or "world" and must match the custodian scope.
   - plot_device_updates: set must include name, custody_scope, custody_ref, activation_state, linked_threads, constraints, last_seen {chapter, scene, location}. Optional: display_name, aliases, linked_item_id.
   - If you introduce a new item_id/device_id anywhere in this patch, you MUST include a corresponding registry update with the full required fields.
+
 - Transfer vs registry conflict rule (must follow):
   - If you create a NEW item in item_registry_updates with final custodian already set (e.g., CHAR_ARTIE), DO NOT emit transfer_updates for that item.
   - If you emit transfer_updates for a NEW item, the registry entry must start with custodian="world" and then transfer to the character.
@@ -109,6 +114,7 @@ Naming repairs:
   - `transfer_updates` for item handoffs (source, destination, reason, optional transfer_chain).
   - Every `transfer_updates` entry must include `item_id` and `reason` (non-empty string).
   - `inventory_alignment_updates` must be an array of objects; never an object with an `updates` field.
+
   - inventory_alignment_updates[*].set MUST be an object (not a list).
     - INVALID: "set": []
     - VALID:   "set": {"inventory": [...], "containers": [...]}
@@ -116,10 +122,12 @@ Naming repairs:
 - If durable mutation is implied but ambiguous, keep canonical state unchanged and emit an explicit repair note in reason fields.
 - Honor scene-card durable constraints (`required_in_custody`, `required_scene_accessible`, `forbidden_visible`, `device_presence`; optional `required_visible_on_page`).
 - Respect `timeline_scope` and `ontological_scope`; avoid physical custody changes in non-present/non-real scope unless explicit override is present.
+
 - Scope override rule (non-present / non-real scenes):
   - If timeline_scope != "present" OR ontological_scope != "real", do NOT emit durable mutation blocks UNLESS they are required for this scene transition (based on scene_card + current state).
   - Durable mutation blocks include: inventory_alignment_updates, transfer_updates, item_registry_updates, plot_device_updates, and any other durable-state mutation you emit.
   - If they are required for the story (e.g., items must persist into the next real scene, required_in_custody/required_scene_accessible lists them, or transition_type implies continuity of physical possessions), you MUST set scope_override=true (or allow_non_present_mutation=true) on EACH affected update object and set reason_category="timeline_override".
+
 Inputs
 - prose: final scene text
 - state: pre-scene state
@@ -160,6 +168,7 @@ Item registry (canonical):
 Plot devices (canonical):
 {{plot_devices}}
 
+
 JSON Contract Block (strict; arrays only):
 - All *_updates must be arrays of objects, even when there is only one update.
 - INVALID vs VALID examples:
@@ -179,11 +188,4 @@ JSON Contract Block (strict; arrays only):
     - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
     - VALID:   "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
 - custodian must be a non-null string id or "world"; never null.
-
-
-
-
-
-
-
 
