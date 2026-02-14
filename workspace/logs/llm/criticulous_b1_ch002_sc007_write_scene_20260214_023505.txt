@@ -1,0 +1,166 @@
+COMPLIANCE:
+Scene ID: SC_002_007
+Allowed events: Artie hiding in a sarcophagus, Vane's party clearing the room, tactical liability of the neon cloak, Vane's party exiting.
+Forbidden milestones: loot_glitch_discovered (marked DONE), skeleton_archer_defeated (marked DONE).
+
+Current arm-side / inventory facts: 
+- Artie: hand_left = Participation Trophy, back = Cloak of the Cowardly Lion, neck = Corporate ID Badge, pocket_right = Cracked Smartphone, cloak_pockets = Ancient Copper Coins, 'Almost-Legendary' Calcium Supplement.
+- Vane: hand_right = Obsidian Greatsword.
+
+Durable changes committed: 
+- milestone: vane_party_witnessed = DONE
+- stamina: 60/100 (stress-related drain)
+
+APPEARANCE_CHECK:
+- CHAR_ARTIE: slight build, mousy brown hair, neon yellow glow torso.
+- CHAR_VANE: tall, athletic build, steely grey eyes, rank tattoo temple.
+
+PROSE:
+
+The stone lid of the sarcophagus didn't fit perfectly, which was both a blessing for Artie’s oxygen levels and a death sentence for his stealth. Through the half-inch gap of ancient granite, the world was a narrow horizontal slice of flickering torchlight and damp shadows. 
+
+It was also screamingly, aggressively yellow.
+
+[Aggro Meter: 100% (Critical Density)] (Warning: High Visibility detected)
+
+Artie squeezed his eyes shut, trying to wish away the garish radiance leaking from the Cloak of the Cowardly Lion. The garment didn't just provide evasion; it provided the kind of luminescence usually reserved for radioactive waste or poorly themed bowling alleys. He clutched the Participation Trophy against his chest with his left hand, the cold metal of the cursed award doing nothing to dampen the 100% Aggro pulse thrumming through his veins.
+
+"Clear left," a voice boomed, vibrating the very stone Artie was hiding in. It was a voice like a tectonic plate having a bad day.
+
+Artie peered through the crack. A pair of boots, polished to a mirror finish and crafted from obsidian-black steel, stepped into his narrow field of vision. This was Vane. The man didn't walk; he conquered the floor.
+
+[Vane - Lvl 45] [HP: 500/500]
+
+Artie’s breath hitched. He was Level 2. He had 1 HP. If Vane so much as sneezed in the direction of this sarcophagus, Artie would be reduced to a very confused ghost.
+
+"Nothing but dust and low-level scrap, Vane," another voice said—a woman, sounding bored. "The 'Anomaly' scanner picked up a spike here, but it’s probably just a ghost-glitch. This wing is a graveyard for a reason."
+
+"The System doesn't spike for 'probably,'" Vane replied. He shifted his weight, and the hum of a high-level weapon filled the room. Artie saw the tip of the Obsidian Greatsword, a blade so dark it seemed to suck the light out of the air—except for the neon yellow light.
+
+A stray beam of Artie’s cloak hit the edge of Vane’s greave.
+
+Artie froze. His heart hammered against his ribs like a trapped bird.
+
+[Stamina: 60/100] (Stress Penalty Applied)
+
+"Wait," Vane said, his voice dropping to a low, dangerous register. 
+
+Artie watched through the crack as Vane turned. The tall warrior’s athletic build was encased in plate armor that looked like it cost more than Artie’s entire previous life’s salary. Vane leaned down, his steely grey eyes narrowing as he scanned the base of the sarcophagus. The rank tattoo on his left temple seemed to pulse with a faint, threatening light.
+
+"There’s a glow," Vane muttered. He raised the Obsidian Greatsword.
+
+"Vane! Boss-room trigger just went off in the South Hall!" the woman shouted from the corridor. "If we don't move now, the loot-lock engages!"
+
+Vane paused. The blade hovered inches from the stone lid. Artie could see the microscopic chips in the granite. He could smell the ozone coming off the legendary weapon.
+
+"Efficiency first," Vane grunted. He stood up, the movement fluid and terrifyingly fast. "We’ll sweep the 'Anomaly' on the way back. If it’s a player, they’re already dead. Nothing survives this much Aggro Density at this level."
+
+The heavy clatter of armored boots receded, followed by the rhythmic chanting of a high-level haste spell. The room plunged back into a relative silence, save for the hum of Artie’s own terror and the soft, mocking glow of his neon cloak.
+
+Artie didn't move. He didn't even breathe until the [Aggro Meter] dipped to a pulsing 98%. He was alone in the dark, clutching a trophy he couldn't drop, wearing a cloak that made him a target, and realizing that in the eyes of the System’s elite, he wasn't even a threat. 
+
+He was just a glitch waiting to be patched out.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": ["CHAR_ARTIE", "CHAR_VANE"],
+    "location": "Low-Level Crypts",
+    "recent_facts": [
+      "Artie hid inside a stone sarcophagus to avoid Vane's party.",
+      "Vane's party cleared the chamber with high-level efficiency but left to chase a boss-room trigger.",
+      "The neon glow of the Cloak of the Cowardly Lion nearly revealed Artie's position."
+    ],
+    "open_threads": ["THREAD_CRIT_EXPLOIT", "THREAD_SYSTEM_GLITCH", "THREAD_VANE_RIVALRY"]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {"item": "ITEM_ID_BADGE", "container": "neck", "status": "equipped"},
+        {"item": "ITEM_SMARTPHONE", "container": "pocket_right", "status": "stowed"},
+        {"item": "ITEM_PARTICIPATION_TROPHY", "container": "hand_left", "status": "held"},
+        {"item": "ITEM_CLOAK_COWARDLY_LION", "container": "back", "status": "equipped"},
+        {"item": "ITEM_ANCIENT_COPPER_COINS", "container": "cloak_pockets", "status": "stowed"},
+        {"item": "ITEM_CALCIUM_SUPPLEMENT", "container": "cloak_pockets", "status": "stowed"}
+      ],
+      "containers": [
+        {"container": "neck", "owner": "CHAR_ARTIE", "contents": ["ITEM_ID_BADGE"]},
+        {"container": "pocket_right", "owner": "CHAR_ARTIE", "contents": ["ITEM_SMARTPHONE"]},
+        {"container": "hand_left", "owner": "CHAR_ARTIE", "contents": ["ITEM_PARTICIPATION_TROPHY"]},
+        {"container": "back", "owner": "CHAR_ARTIE", "contents": ["ITEM_CLOAK_COWARDLY_LION"]},
+        {"container": "cloak_pockets", "owner": "CHAR_ARTIE", "contents": ["ITEM_ANCIENT_COPPER_COINS", "ITEM_CALCIUM_SUPPLEMENT"]}
+      ],
+      "persona_updates": [
+        "Artie is deeply shaken by the power gap between himself and Vane.",
+        "Artie's survival instinct is being honed by extreme, high-stakes hiding."
+      ],
+      "appearance_updates": {
+        "set": {
+          "marks_add": [
+            {"name": "Neon Yellow Glow", "location": "torso", "durability": "ephemeral"}
+          ]
+        },
+        "reason": "The cloak's neon glow is a persistent tactical liability in dark environments."
+      }
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "inventory": [
+        {"item": "ITEM_OBSIDIAN_BLADE", "container": "hand_right", "status": "held"}
+      ],
+      "containers": [
+        {"container": "hand_right", "owner": "CHAR_VANE", "contents": ["ITEM_OBSIDIAN_BLADE"]}
+      ],
+      "persona_updates": [
+        "Vane prioritizes efficiency and high-level loot over investigating minor anomalies."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "resources": {
+          "stamina": 60
+        }
+      },
+      "reason": "Stress and tension during the hiding sequence drained Artie's stamina."
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "aggro_meter": 98
+      },
+      "reason": "Aggro slightly decayed after Vane's party moved out of immediate range."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie hid inside a sarcophagus in the Low-Level Crypts to avoid Vane's high-level party.",
+      "The neon glow of the Cloak of the Cowardly Lion nearly exposed him, but a boss-room trigger distracted Vane.",
+      "Artie survived the encounter but remains shaken by the overwhelming power gap."
+    ],
+    "key_events": [
+      "Artie entered a sarcophagus to hide from Vane's party.",
+      "Vane's party cleared the surrounding chamber with ease.",
+      "The Cloak of the Cowardly Lion's neon glow nearly revealed Artie's location.",
+      "Vane's party abandoned the search to pursue a boss-room trigger.",
+      "Artie's stamina dropped to 60/100 due to the stress of the encounter."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie is Level 2 with 1/1 HP, 100% Crit Rate, and 64/100 Stamina.",
+      "Artie is Level 2 with 1/1 HP, 100% Crit Rate, and 60/100 Stamina.",
+      "milestone: vane_party_witnessed = DONE",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=back)",
+      "The Cloak of the Cowardly Lion emits a tactical neon yellow glow.",
+      "Vane is Level 45 with 500/500 HP and an Obsidian Greatsword."
+    ],
+    "chapter_so_far_add": [
+      "Artie witnessed the overwhelming power of a high-level party led by Vane while hiding in a sarcophagus."
+    ]
+  }
+}

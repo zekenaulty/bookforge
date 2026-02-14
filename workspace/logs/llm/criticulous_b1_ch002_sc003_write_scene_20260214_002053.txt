@@ -1,0 +1,232 @@
+COMPLIANCE:
+Scene ID: SC_002_003
+Allowed events: Claiming the Cloak of the Cowardly Lion, equipping the gear, surviving mob aggro, escaping the shop.
+Forbidden milestones: Any mention of Vane’s arrival in the shop (he is currently left behind in the alley), acquisition of items not listed in the scene card.
+
+Current arm-side / inventory facts: 
+- inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left, soul-bound=TRUE)
+- inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)
+- inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)
+- inventory: world -> Cloak of the Cowardly Lion (status=floating, container=pedestal)
+
+Durable changes committed:
+- inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=torso)
+- stats: evasion = 50
+- milestone: cloak_of_the_cowardly_lion_equipped = DONE
+- milestone: shop_escape_successful = DONE
+
+APPEARANCE_CHECK:
+- CHAR_ARTIE: late-20s, slight build, hazel eyes, mousy brown hair, unruly short hair, pale skin.
+
+PROSE:
+
+The golden haze from the vaporized lock hadn't even settled before the front window of Barnaby's Bargains & Blunders imploded. A hail of glass shards whistled through the air, narrowly missing Artie's head as he lunged toward the pedestal. Outside, the roar of the mob had shifted from a general riot to a focused, predatory chant.
+
+[Aggro Meter: 99% (CRITICAL DENSITY)]
+
+Artie didn't look back. He reached into the shimmering light and snatched the Cloak of the Cowardly Lion. The fabric felt like wet silk and looked like someone had bottled the essence of a thousand high-visibility safety vests. It wasn't just yellow; it was aggressively, offensively neon.
+
+[System Notification: Item Equipped!]
+[Cloak of the Cowardly Lion (Unique)]
+[Type: Armor/Back]
+[Stats: +50 Evasion]
+[Passive: Coward’s Sprint - Movement speed increased by 20% when moving away from enemies.]
+[Penalty: -100 Dignity (The world knows what you are.)]
+
+"Fifty evasion?" Artie hissed, throwing the garment over his shoulders. He didn't have time to worry about his dignity; he had exactly one hit point and a shop full of people who suddenly wanted him dead. "I’ll take it."
+
+The moment the cloak settled on his frame, a translucent blue box flickered in his peripheral vision.
+
+[HP: 1/1]
+[Evasion: 50]
+
+A heavy-set townsperson, eyes glowing with the unnatural red light of the 'Marked for Death' status, vaulted over the shattered counter. He swung a meat cleaver in a wide, desperate arc. Artie didn't even have time to think about dodging. His body simply blurred. He felt a strange, greasy sensation as the air itself seemed to push him three inches to the left. The cleaver buried itself in the wood of the pedestal with a dull *thunk*.
+
+[Evasion Proc! (50% Chance)]
+
+"Sorry! Just passing through!" Artie shouted, his voice cracking. He pivoted, the neon yellow fabric of the Cloak of the Cowardly Lion snapping behind him like a flare in a dark cave. 
+
+The Participation Trophy remained firmly fused to his left hand, its golden surface pulsing in time with the Aggro Meter. He felt like a walking lighthouse. Every monster, guard, and disgruntled shopper within a mile was currently recalculating their route to intersect with his face.
+
+The back wall of the shop groaned as a stray spell from the street outside clipped the foundation. Dust rained down in thick sheets. Artie scrambled over a pile of ruined crates, his eyes locked on the small, unassuming service door at the rear of the building.
+
+Another attacker—a low-level thief who had probably just been looking for a quick score—lunged from the shadows of the rafters. Artie’s new gear reacted again. He did a frantic, uncoordinated stumble-step that somehow resulted in the thief’s dagger passing through the empty space where Artie’s ribs had been a millisecond prior.
+
+[Evasion Proc! (50% Chance)]
+
+"I hate this game!" Artie yelled, kicking the back door open. 
+
+He burst out into the narrow alleyway behind the shop. The 'Coward’s Sprint' kicked in immediately, his legs feeling light and twitchy as he bolted away from the collapsing structure. Behind him, the shop gave one final, agonizing creak before the roof caved in, momentarily burying the entrance and the mob that had been trying to squeeze through it.
+
+Artie didn't stop to check the loot. He kept running, a streak of neon yellow blurring through the gray shadows of Oakhaven’s backstreets, his heart hammering against his single point of health.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": ["CHAR_ARTIE"],
+    "location": "Oakhaven - Residential Backstreet",
+    "recent_facts": [
+      "Artie successfully equipped the Cloak of the Cowardly Lion amidst the chaos of the shop collapse.",
+      "The cloak's high evasion stat allowed Artie to survive two lethal attacks with 1 HP intact.",
+      "Artie escaped Barnaby's Bargains & Blunders through a rear service door.",
+      "The shop's roof collapsed, temporarily hindering the pursuing mob."
+    ],
+    "open_threads": ["THREAD_CRIT_EXPLOIT", "THREAD_SYSTEM_GLITCH", "THREAD_VANE_RIVALRY"]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_CLOAK_COWARDLY_LION",
+          "container": "torso",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": ["ITEM_ID_BADGE"]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": ["ITEM_SMARTPHONE"]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": ["ITEM_PARTICIPATION_TROPHY"]
+        },
+        {
+          "container": "torso",
+          "owner": "CHAR_ARTIE",
+          "contents": ["ITEM_CLOAK_COWARDLY_LION"]
+        }
+      ],
+      "persona_updates": [
+        "Artie is now prioritizing survival over dignity, accepting the neon yellow cloak's aesthetic penalty for its evasion benefits."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "evasion": 50
+        },
+        "statuses": [
+          {
+            "name": "Coward's Shame",
+            "effect": "-100 Dignity",
+            "source": "ITEM_CLOAK_COWARDLY_LION"
+          },
+          {
+            "name": "Coward's Sprint",
+            "effect": "+20% Movement Speed when fleeing",
+            "source": "ITEM_CLOAK_COWARDLY_LION"
+          }
+        ]
+      },
+      "reason": "Equipping the Cloak of the Cowardly Lion and surviving the shop collapse."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_CLOAK_COWARDLY_LION",
+      "set": {
+        "custodian": "CHAR_ARTIE",
+        "owner_scope": "character",
+        "last_seen": {
+          "chapter": 2,
+          "scene": 3,
+          "location": "Oakhaven - Residential Backstreet"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_CLOAK_COWARDLY_LION",
+      "reason": "Acquired from pedestal and equipped during shop collapse."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "container": "hand_left",
+            "status": "held"
+          },
+          {
+            "item": "ITEM_CLOAK_COWARDLY_LION",
+            "container": "torso",
+            "status": "equipped"
+          }
+        ]
+      },
+      "reason": "Post-escape inventory posture normalization."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie grabbed the Cloak of the Cowardly Lion from its pedestal as Barnaby's shop collapsed around him.",
+      "The cloak provided enough evasion for Artie to dodge lethal blows from aggroed townspeople.",
+      "Artie escaped into the backstreets of Oakhaven, wearing the neon yellow gear and still clutching the soul-bound trophy."
+    ],
+    "key_events": [
+      "Artie claimed and equipped the Cloak of the Cowardly Lion.",
+      "The Evasion stat increased to 50, and the Dignity penalty was applied.",
+      "Artie survived two close-quarters attacks thanks to evasion procs.",
+      "Artie escaped the collapsing merchant shop through the back door.",
+      "The Aggro Meter remains at a critical level as Artie enters the residential backstreets."
+    ],
+    "must_stay_true": [
+      "milestone: shop_lock_vaporized = DONE",
+      "milestone: cloak_of_the_cowardly_lion_revealed = DONE",
+      "milestone: cloak_of_the_cowardly_lion_equipped = DONE",
+      "milestone: shop_escape_successful = DONE",
+      "REMOVE: inventory: world -> Cloak of the Cowardly Lion (status=floating, container=pedestal)",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=torso)",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left, soul-bound=TRUE)",
+      "Artie is Level 2 with 1/1 HP and 100% Crit Rate.",
+      "Artie's Evasion is 50.",
+      "Artie is under the 'Coward's Shame' status (-100 Dignity)."
+    ],
+    "chapter_so_far_add": [
+      "Artie acquired the Cloak of the Cowardly Lion, gaining a massive evasion boost at the cost of his dignity.",
+      "Artie successfully escaped the mob-infested merchant shop after it collapsed."
+    ]
+  }
+}

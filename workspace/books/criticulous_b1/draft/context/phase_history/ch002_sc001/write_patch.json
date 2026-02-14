@@ -1,0 +1,204 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Oakhaven - Merchant Shop",
+    "recent_facts": [
+      "Artie attempted to sell the Participation Trophy to Barnaby, but the transaction failed due to the item's soul-bound status.",
+      "The Participation Trophy's 'Monster Beacon' effect caused an immediate aggro spike in the surrounding area.",
+      "The merchant Barnaby expelled Artie from the shop after the failed transaction caused a magical backlash."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH",
+      "THREAD_VANE_RIVALRY"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_PARTICIPATION_TROPHY"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie has accepted that he is a permanent 'objective' for monsters due to his soul-bound trophy."
+      ],
+      "invariants_add": [],
+      "chapter": 2,
+      "scene": 1
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "delta": {
+        "resources": {
+          "aggro_meter": 4
+        }
+      },
+      "set": {
+        "statuses": [
+          {
+            "name": "Monster Beacon",
+            "source": "ITEM_PARTICIPATION_TROPHY",
+            "effect": "Massively increases aggro radius; monsters within 1km are aware of your location."
+          },
+          {
+            "name": "Marked for Death",
+            "source": "system_event",
+            "effect": "Maximum aggro from all local entities."
+          },
+          {
+            "name": "The Eternal Participant",
+            "source": "ITEM_PARTICIPATION_TROPHY",
+            "effect": "Item is soul-bound and cannot be discarded or sold."
+          }
+        ],
+        "reason": "Failed sale of soul-bound cursed item caused aggro spike and status lock."
+      },
+      "chapter": 2,
+      "scene": 1
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "delta": {
+        "reality_stability": -2
+      },
+      "reason": "Critical success on a forbidden data-entry transaction caused minor localized instability."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_PARTICIPATION_TROPHY",
+      "set": {
+        "state_tags": [
+          "cursed",
+          "monster_beacon",
+          "soul-bound"
+        ],
+        "last_seen": {
+          "chapter": 2,
+          "scene": 1,
+          "location": "Oakhaven - Merchant Shop"
+        }
+      }
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie attempted to sell the Participation Trophy to a local merchant named Barnaby to lower his aggro.",
+      "The transaction failed because the trophy is soul-bound and cursed, causing a massive aggro spike that drew monsters and hostile NPCs to the shop.",
+      "Artie was forced to flee the shop, realizing the trophy and its 'Monster Beacon' status are permanent fixtures of his build."
+    ],
+    "key_events": [
+      "Artie entered Barnaby's Bargains & Blunders to offload the Participation Trophy.",
+      "Artie used a Critical Hit with his Data Entry skill to attempt a forced trade.",
+      "The System blocked the trade, revealing the Participation Trophy is soul-bound.",
+      "The Aggro Meter spiked to 98%, causing local animals and guards to turn hostile.",
+      "Artie gained the permanent status 'The Eternal Participant'.",
+      "Barnaby kicked Artie out of the shop as it was besieged by aggroed mobs."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie's Aggro Meter is at 94% and cooling down after escaping Vane.",
+      "Artie's Aggro Meter is at 98% and actively drawing hostiles.",
+      "milestone: trophy_sale_attempted = DONE",
+      "milestone: trophy_soulbound_revealed = DONE",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left, tags=[soul-bound])",
+      "Artie is Level 2 with 1/1 HP and 100% Crit Rate.",
+      "injury: vending machine scar on right knuckle"
+    ],
+    "chapter_so_far_add": [
+      "Artie's attempt to fix his 'Monster Beacon' status backfired, confirming the trophy is soul-bound and permanent."
+    ]
+  },
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "container": "hand_left",
+            "status": "held"
+          }
+        ]
+      },
+      "reason": "Posture normalization after failed trade attempt."
+    }
+  ],
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "hazel",
+      "eyes",
+      "mousy",
+      "brown",
+      "hair",
+      "slight",
+      "build",
+      "late-20s",
+      "vending",
+      "machine",
+      "scar."
+    ],
+    "CHAR_FIZZ": [
+      "neon",
+      "blue",
+      "translucent",
+      "pixelated",
+      "trail",
+      "diminutive",
+      "height."
+    ]
+  }
+}

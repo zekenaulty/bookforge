@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "cursor": {
+    "chapter": 2,
+    "scene": 6
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Low-Level Crypts",
+    "recent_facts": [
+      "Artie destroyed a Level 4 Skeleton Archer with a single punch.",
+      "The 100% Crit Rate triggered a 'System Overload' loot glitch.",
+      "Artie collected a massive amount of loot from a single low-level mob.",
+      "Artie realized his build is economically broken in his favor."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_CLOAK_COWARDLY_LION",
+          "container": "back",
+          "status": "equipped"
+        },
+        {
+          "item": "Bone Shards (x20)",
+          "container": "cloak_pockets",
+          "status": "stowed"
+        },
+        {
+          "item": "Ancient Copper Coin (x50)",
+          "container": "cloak_pockets",
+          "status": "stowed"
+        },
+        {
+          "item": "Rusty Arrowheads (x5)",
+          "container": "cloak_pockets",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "cloak_pockets",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "Bone Shards (x20)",
+            "Ancient Copper Coin (x50)",
+            "Rusty Arrowheads (x5)"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie has shifted from pure survival anxiety to a greedy, tactical focus on exploiting the System's math."
+      ],
+      "invariants_add": [],
+      "chapter": 2,
+      "scene": 6
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "delta": {
+        "resources": {
+          "stamina": -5
+        }
+      },
+      "set": {
+        "reason": "Expended stamina to punch the Skeleton Archer.",
+        "reason_category": "after_combat_cleanup"
+      },
+      "chapter": 2,
+      "scene": 6
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "delta": {
+        "reality_stability": -2
+      },
+      "reason": "System Overload caused by 100% Crit loot glitch."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie engaged the Skeleton Archer after it ran out of arrows, using a single punch to trigger his 100% Crit Rate.",
+      "The resulting damage caused a System Overload, resulting in a massive 'loot explosion' far exceeding normal drop rates.",
+      "Artie and Fizz realized that his broken build allows him to farm resources with unprecedented efficiency."
+    ],
+    "key_events": [
+      "Artie approached the ammunition-depleted Skeleton Archer.",
+      "Artie landed a 100% Critical Hit punch on the skeleton.",
+      "The System triggered a 'Statistical Anomaly' warning and a loot table recalculation.",
+      "A massive loot geyser erupted, providing Artie with high volumes of crafting materials and currency.",
+      "Artie realized the economic viability of his 'Statistical Anomaly' status.",
+      "Artie stowed the loot in his cloak pockets."
+    ],
+    "must_stay_true": [
+      "milestone: loot_glitch_discovered = DONE",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left, soul-bound=TRUE)",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=back)",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "container: cloak_pockets (owner=CHAR_ARTIE, contents=[Bone Shards, Ancient Copper Coin, Rusty Arrowheads])",
+      "Artie is Level 2 with 1/1 HP, 100% Crit Rate, and 50 Evasion.",
+      "REMOVE: milestone: skeleton_archer_encounter_survived = DONE",
+      "milestone: skeleton_archer_defeated = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Artie discovered that his 100% Crit Rate can break the loot tables, leading to massive resource gains."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "pale",
+      "human",
+      "male",
+      "slight",
+      "build",
+      "mousy",
+      "brown",
+      "hair",
+      "neon",
+      "yellow",
+      "glow."
+    ]
+  }
+}

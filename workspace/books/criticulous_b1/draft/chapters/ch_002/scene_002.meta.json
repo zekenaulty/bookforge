@@ -1,0 +1,313 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_002_002",
+  "chapter": 2,
+  "scene": 2,
+  "scene_target": "Artie crits a high-level lock to bypass a quest requirement.",
+  "goal": "Obtain the Cloak of the Cowardly Lion from the shop's secure inventory.",
+  "conflict": "Time is running out as mobs break into the shop and the Aggro Meter pulses at 98%.",
+  "required_callbacks": [
+    "milestone: eternal_participant_status_gained"
+  ],
+  "constraints": [
+    "target_words: 2000",
+    "must_depict_aggro_meter_at_98_percent"
+  ],
+  "end_condition": "The lock is vaporized into gold dust, revealing the cloak.",
+  "ui_allowed": true,
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [],
+  "required_in_custody": [
+    "ITEM_PARTICIPATION_TROPHY"
+  ],
+  "required_scene_accessible": [
+    "ITEM_PARTICIPATION_TROPHY"
+  ],
+  "required_visible_on_page": [
+    "ITEM_PARTICIPATION_TROPHY"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "combat_aftermath",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "skills",
+    "resources"
+  ],
+  "ui_mechanics_expected": [
+    "Aggro Meter",
+    "Crit Rate",
+    "System Notification"
+  ],
+  "prose_path": "draft/chapters/ch_002/scene_002.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "summary_update": {
+      "last_scene": [
+        "Artie stood his ground in the crumbling shop as mobs breached the perimeter.",
+        "Using his 100% Crit Rate, he punched the High-Level Shop Lock, causing a system overflow that vaporized the device.",
+        "The Cloak of the Cowardly Lion was revealed in the resulting golden haze, ready for Artie to claim."
+      ],
+      "key_events": [
+        "The Aggro Meter reached 99%, triggering a critical density of mobs outside the shop.",
+        "Artie used 'Percussive Maintenance' on the High-Level Shop Lock.",
+        "The lock was destroyed by a 'NaN' damage critical hit.",
+        "The Cloak of the Cowardly Lion was revealed on the pedestal.",
+        "Artie's 'Gate-Crasher' title became active."
+      ],
+      "must_stay_true": [
+        "REMOVE: Artie's Aggro Meter is at 98% and pulsing (MAXIMUM PROXIMITY ALERT).",
+        "REMOVE: Artie possesses the 'Gate-Crasher' title (Inactive).",
+        "Artie's Aggro Meter is at 99% (CRITICAL DENSITY).",
+        "Artie possesses the 'Gate-Crasher' title (Active).",
+        "milestones: shop_lock_vaporized and cloak_of_the_cowardly_lion_revealed are DONE.",
+        "inventory: world -> Cloak of the Cowardly Lion (status=floating, container=pedestal)",
+        "injury: vending machine scar on right knuckle"
+      ],
+      "chapter_so_far_add": [
+        "Artie successfully bypassed a high-level security lock using his crit glitch, revealing the gear he needs to survive."
+      ]
+    },
+    "character_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "persona_updates": [
+          "Artie is becoming increasingly comfortable with using his 'Anomaly' status to break physical laws."
+        ],
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "container": "hand_left",
+            "status": "held"
+          }
+        ],
+        "containers": [
+          {
+            "container": "neck",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_ID_BADGE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          },
+          {
+            "container": "hand_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_PARTICIPATION_TROPHY"
+            ]
+          }
+        ],
+        "invariants_add": [],
+        "chapter": 2,
+        "scene": 2
+      }
+    ],
+    "character_continuity_system_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "set": {
+          "resources": {
+            "aggro_meter": 99
+          },
+          "titles": [
+            {
+              "active": true,
+              "name": "Statistical Anomaly",
+              "source": "system_glitch"
+            },
+            {
+              "active": true,
+              "name": "Gate-Crasher",
+              "source": "quest_reward"
+            }
+          ]
+        },
+        "delta": {},
+        "chapter": 2,
+        "scene": 2
+      }
+    ],
+    "global_continuity_system_updates": [
+      {
+        "delta": {
+          "reality_stability": -2
+        },
+        "reason": "Integer overflow during lock vaporization"
+      }
+    ],
+    "item_registry_updates": [
+      {
+        "item_id": "ITEM_CLOAK_COWARD",
+        "set": {
+          "name": "Cloak of the Cowardly Lion",
+          "display_name": "Cloak of the Cowardly Lion",
+          "type": "wearable",
+          "owner_scope": "world",
+          "custodian": "world",
+          "linked_threads": [],
+          "state_tags": [
+            "quest_item",
+            "high_evasion"
+          ],
+          "last_seen": {
+            "chapter": 2,
+            "scene": 2,
+            "location": "Oakhaven - Merchant Shop"
+          }
+        }
+      }
+    ],
+    "plot_device_updates": [
+      {
+        "device_id": "DEVICE_SECURE_LOCK",
+        "set": {
+          "activation_state": "destroyed"
+        },
+        "reason": "Vaporized by Artie's critical hit"
+      }
+    ],
+    "inventory_alignment_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "set": {
+          "inventory": [
+            {
+              "item": "ITEM_ID_BADGE",
+              "container": "neck",
+              "status": "equipped"
+            },
+            {
+              "item": "ITEM_SMARTPHONE",
+              "container": "pocket_right",
+              "status": "stowed"
+            },
+            {
+              "item": "ITEM_PARTICIPATION_TROPHY",
+              "container": "hand_left",
+              "status": "held"
+            }
+          ],
+          "containers": [
+            {
+              "container": "neck",
+              "owner": "CHAR_ARTIE",
+              "contents": [
+                "ITEM_ID_BADGE"
+              ]
+            },
+            {
+              "container": "pocket_right",
+              "owner": "CHAR_ARTIE",
+              "contents": [
+                "ITEM_SMARTPHONE"
+              ]
+            },
+            {
+              "container": "hand_left",
+              "owner": "CHAR_ARTIE",
+              "contents": [
+                "ITEM_PARTICIPATION_TROPHY"
+              ]
+            }
+          ]
+        },
+        "reason": "Posture normalization for shop lock bypass"
+      }
+    ],
+    "world_updates": {
+      "cast_present": [
+        "CHAR_ARTIE",
+        "CHAR_FIZZ"
+      ],
+      "location": "Oakhaven - Merchant Shop",
+      "open_threads": [
+        "THREAD_CRIT_EXPLOIT",
+        "THREAD_SYSTEM_GLITCH",
+        "THREAD_VANE_RIVALRY"
+      ]
+    }
+  },
+  "scene_summary": [
+    "Artie stood his ground in the crumbling shop as mobs breached the perimeter.",
+    "Using his 100% Crit Rate, he punched the High-Level Shop Lock, causing a system overflow that vaporized the device.",
+    "The Cloak of the Cowardly Lion was revealed in the resulting golden haze, ready for Artie to claim."
+  ],
+  "key_events": [
+    "The Aggro Meter reached 99%, triggering a critical density of mobs outside the shop.",
+    "Artie used 'Percussive Maintenance' on the High-Level Shop Lock.",
+    "The lock was destroyed by a 'NaN' damage critical hit.",
+    "The Cloak of the Cowardly Lion was revealed on the pedestal.",
+    "Artie's 'Gate-Crasher' title became active."
+  ],
+  "must_stay_true": [
+    "REMOVE: Artie's Aggro Meter is at 98% and pulsing (MAXIMUM PROXIMITY ALERT).",
+    "REMOVE: Artie possesses the 'Gate-Crasher' title (Inactive).",
+    "Artie's Aggro Meter is at 99% (CRITICAL DENSITY).",
+    "Artie possesses the 'Gate-Crasher' title (Active).",
+    "milestones: shop_lock_vaporized and cloak_of_the_cowardly_lion_revealed are DONE.",
+    "inventory: world -> Cloak of the Cowardly Lion (status=floating, container=pedestal)",
+    "injury: vending machine scar on right knuckle"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "appearance_check_missing",
+        "message": "Appearance check missing for CHAR_ARTIE",
+        "severity": "warning"
+      },
+      {
+        "code": "appearance_check_missing",
+        "message": "Appearance check missing for CHAR_FIZZ",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Aggro Meter but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Crit Rate but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Aggro Meter but no matching stat exists in state.",
+        "severity": "warning"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 1,
+  "updated_at": "2026-02-14T00:19:21Z"
+}

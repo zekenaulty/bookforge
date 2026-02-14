@@ -1,0 +1,241 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "Artie entered the Low-Level Crypts, where his neon yellow cloak immediately attracted a group of skeletons.",
+      "He successfully utilized the Cloak of the Cowardly Lion's automated evasion to survive multiple lethal attacks.",
+      "Artie realized the skeletons moved in predictable, rhythmic patterns and began treating the encounter like a rhythm game."
+    ],
+    "key_events": [
+      "Artie arrived at the Low-Level Crypts interior.",
+      "The Aggro Meter reached 100% (MAXIMUM OVERDRIVE) due to the 'Monster Beacon' effect of the cloak and trophy.",
+      "Artie survived multiple 'Evasion Procs' from the Cloak of the Cowardly Lion.",
+      "Artie identified the 120-BPM movement script of the Crypt Skirmishers.",
+      "Artie gained the 'Pattern Recognition' skill (Rank G).",
+      "Artie successfully navigated past the first encounter using rhythm-based movement."
+    ],
+    "must_stay_true": [
+      "REMOVE: location: Oakhaven - Backstreets",
+      "location: Low-Level Crypts - Interior",
+      "REMOVE: Artie's Aggro Meter is at 99% (CRITICAL DENSITY).",
+      "Artie's Aggro Meter is at 100% (MAXIMUM OVERDRIVE).",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=back)",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left, soul-bound=TRUE)",
+      "Artie possesses the 'Pattern Recognition' skill (Rank G).",
+      "milestone: skeleton_rhythm_discovered = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Artie entered the Low-Level Crypts and discovered the rhythmic movement patterns of the skeletons.",
+      "Artie gained the 'Pattern Recognition' skill, allowing him to treat combat as a rhythm game."
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Low-Level Crypts - Interior",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH",
+      "THREAD_VANE_RIVALRY"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "persona_updates": [
+        "Artie has shifted from pure panic to a focused, mechanical mindset, treating combat as a rhythmic data-entry task."
+      ],
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_CLOAK_COWARDLY_LION",
+          "container": "back",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_PARTICIPATION_TROPHY"
+          ]
+        },
+        {
+          "container": "back",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_CLOAK_COWARDLY_LION"
+          ]
+        }
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "skills": {
+          "pattern_recognition": 1
+        },
+        "resources": {
+          "aggro_meter": 100
+        }
+      },
+      "reason": "Gained Pattern Recognition skill and Aggro Meter reached 100%."
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "aggro_meter": 100
+      },
+      "reason": "Aggro Meter reached maximum capacity."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "container": "hand_left",
+            "status": "held"
+          },
+          {
+            "item": "ITEM_CLOAK_COWARDLY_LION",
+            "container": "back",
+            "status": "equipped"
+          }
+        ],
+        "containers": [
+          {
+            "container": "neck",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_ID_BADGE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          },
+          {
+            "container": "hand_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_PARTICIPATION_TROPHY"
+            ]
+          },
+          {
+            "container": "back",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_CLOAK_COWARDLY_LION"
+            ]
+          }
+        ]
+      },
+      "reason": "Normalization of inventory posture in the crypts.",
+      "reason_category": "after_combat_cleanup"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_CLOAK_COWARDLY_LION",
+      "set": {
+        "last_seen": {
+          "chapter": 2,
+          "scene": 4,
+          "location": "Low-Level Crypts - Interior"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_PARTICIPATION_TROPHY",
+      "set": {
+        "last_seen": {
+          "chapter": 2,
+          "scene": 4,
+          "location": "Low-Level Crypts - Interior"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_ID_BADGE",
+      "set": {
+        "last_seen": {
+          "chapter": 2,
+          "scene": 4,
+          "location": "Low-Level Crypts - Interior"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_SMARTPHONE",
+      "set": {
+        "last_seen": {
+          "chapter": 2,
+          "scene": 4,
+          "location": "Low-Level Crypts - Interior"
+        }
+      }
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "DEVICE_the_system_s_stability_da5be7b7",
+      "set": {
+        "last_seen": {
+          "chapter": 2,
+          "scene": 4,
+          "location": "Low-Level Crypts - Interior"
+        }
+      }
+    }
+  ]
+}

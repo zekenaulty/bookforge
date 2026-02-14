@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_002_001",
+  "chapter": 2,
+  "scene": 1,
+  "scene_target": "Artie attempts to sell the Participation Trophy to a local merchant to lower his aggro.",
+  "goal": "Offload the 'Monster Beacon' item and reduce the Aggro Meter.",
+  "conflict": "The item is soul-bound and cursed; its presence causes the merchant to panic as the Aggro Meter spikes.",
+  "required_callbacks": [
+    "milestone: vane_encounter_survived",
+    "milestone: mayor_met"
+  ],
+  "constraints": [
+    "target_words: 2000"
+  ],
+  "end_condition": "Artie is forced to keep the trophy and realizes he is a permanent lighthouse for monsters.",
+  "ui_allowed": true,
+  "cast_present": [
+    "Artie",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "THREAD_CRIT_EXPLOIT",
+    "THREAD_SYSTEM_GLITCH"
+  ],
+  "required_in_custody": [
+    "ITEM_PARTICIPATION_TROPHY",
+    "ITEM_ID_BADGE",
+    "ITEM_SMARTPHONE"
+  ],
+  "required_scene_accessible": [
+    "ITEM_PARTICIPATION_TROPHY"
+  ],
+  "required_visible_on_page": [
+    "ITEM_PARTICIPATION_TROPHY"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "combat_aftermath",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "resources",
+    "statuses",
+    "inventory"
+  ],
+  "ui_mechanics_expected": [
+    "Aggro Meter",
+    "System Notification",
+    "HP"
+  ]
+}

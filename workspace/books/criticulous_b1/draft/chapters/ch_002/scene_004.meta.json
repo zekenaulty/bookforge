@@ -1,0 +1,385 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_002_004",
+  "chapter": 2,
+  "scene": 4,
+  "scene_target": "Artie reaches the Low-Level Crypts and discovers the predictable, turn-based movement patterns of the skeletons.",
+  "goal": "Reach the dungeon interior and test the Cloak of the Cowardly Lion's evasion mechanics against predictable enemies.",
+  "conflict": "The neon yellow glow of the cloak makes Artie an unavoidable target for every skeleton in the crypt, forcing him to dodge perfectly.",
+  "required_callbacks": [
+    "SC_002_003"
+  ],
+  "constraints": [
+    "target_words: 2000",
+    "no-recaps",
+    "forward-motion"
+  ],
+  "end_condition": "Artie realizes the skeletons move in a fixed rhythm and begins treating the encounter like a rhythm game.",
+  "ui_allowed": true,
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "thread_ids": [],
+  "required_in_custody": [
+    "ITEM_CLOAK_COWARDLY_LION",
+    "ITEM_PARTICIPATION_TROPHY",
+    "ITEM_ID_BADGE",
+    "ITEM_SMARTPHONE"
+  ],
+  "required_scene_accessible": [
+    "ITEM_CLOAK_COWARDLY_LION",
+    "ITEM_PARTICIPATION_TROPHY"
+  ],
+  "required_visible_on_page": [
+    "ITEM_CLOAK_COWARDLY_LION",
+    "ITEM_PARTICIPATION_TROPHY"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "travel_arrival",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources",
+    "skills"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Evasion",
+    "Aggro Meter",
+    "System Notification",
+    "Damage Number"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "prose_path": "draft/chapters/ch_002/scene_004.md",
+  "state_patch": {
+    "character_continuity_system_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "set": {
+          "resources": {
+            "aggro_meter": 100
+          },
+          "skills": {
+            "data_entry": 4,
+            "pattern_recognition": 1,
+            "percussive_maintenance": 2
+          },
+          "stats": {
+            "crit_rate": 100,
+            "evasion": 50,
+            "hp": {
+              "current": 1,
+              "max": 1
+            }
+          },
+          "statuses": [
+            {
+              "effect": "-100 Dignity",
+              "name": "Coward's Shame",
+              "source": "ITEM_CLOAK_COWARDLY_LION"
+            },
+            {
+              "effect": "+20% Movement Speed when fleeing",
+              "name": "Coward's Sprint",
+              "source": "ITEM_CLOAK_COWARDLY_LION"
+            },
+            {
+              "effect": "Aggro Magnet",
+              "name": "Marked for Death",
+              "source": "system"
+            },
+            {
+              "effect": "High Visibility",
+              "name": "Monster Beacon",
+              "source": "ITEM_PARTICIPATION_TROPHY"
+            }
+          ]
+        },
+        "delta": {},
+        "chapter": 2,
+        "scene": 4
+      }
+    ],
+    "character_updates": [
+      {
+        "appearance_updates": {
+          "reason": "The Cloak of the Cowardly Lion emits a constant, garish neon light.",
+          "set": {
+            "marks_add": [
+              {
+                "durability": "ephemeral",
+                "location": "torso",
+                "name": "Neon Yellow Glow"
+              }
+            ]
+          }
+        },
+        "character_id": "CHAR_ARTIE",
+        "containers": [
+          {
+            "container": "neck",
+            "contents": [
+              "ITEM_ID_BADGE"
+            ],
+            "owner": "CHAR_ARTIE"
+          },
+          {
+            "container": "pocket_right",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ],
+            "owner": "CHAR_ARTIE"
+          },
+          {
+            "container": "hand_left",
+            "contents": [
+              "ITEM_PARTICIPATION_TROPHY"
+            ],
+            "owner": "CHAR_ARTIE"
+          },
+          {
+            "container": "back",
+            "contents": [
+              "ITEM_CLOAK_COWARDLY_LION"
+            ],
+            "owner": "CHAR_ARTIE"
+          }
+        ],
+        "inventory": [
+          {
+            "container": "neck",
+            "item": "ITEM_ID_BADGE",
+            "status": "equipped"
+          },
+          {
+            "container": "pocket_right",
+            "item": "ITEM_SMARTPHONE",
+            "status": "stowed"
+          },
+          {
+            "container": "hand_left",
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "status": "held"
+          },
+          {
+            "container": "back",
+            "item": "ITEM_CLOAK_COWARDLY_LION",
+            "status": "equipped"
+          }
+        ],
+        "persona_updates": [],
+        "invariants_add": [],
+        "chapter": 2,
+        "scene": 4
+      }
+    ],
+    "global_continuity_system_updates": [
+      {
+        "reason": "Artie has entered a combat-active dungeon zone and triggered maximum aggro.",
+        "set": {
+          "aggro_meter": 100,
+          "world_type": "dungeon_interior"
+        }
+      }
+    ],
+    "inventory_alignment_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "reason": "Normalization of inventory posture for dungeon exploration.",
+        "reason_category": "after_combat_cleanup",
+        "set": {
+          "containers": [
+            {
+              "container": "neck",
+              "contents": [
+                "ITEM_ID_BADGE"
+              ],
+              "owner": "CHAR_ARTIE"
+            },
+            {
+              "container": "pocket_right",
+              "contents": [
+                "ITEM_SMARTPHONE"
+              ],
+              "owner": "CHAR_ARTIE"
+            },
+            {
+              "container": "hand_left",
+              "contents": [
+                "ITEM_PARTICIPATION_TROPHY"
+              ],
+              "owner": "CHAR_ARTIE"
+            },
+            {
+              "container": "back",
+              "contents": [
+                "ITEM_CLOAK_COWARDLY_LION"
+              ],
+              "owner": "CHAR_ARTIE"
+            }
+          ],
+          "inventory": [
+            {
+              "container": "neck",
+              "item": "ITEM_ID_BADGE",
+              "status": "equipped"
+            },
+            {
+              "container": "pocket_right",
+              "item": "ITEM_SMARTPHONE",
+              "status": "stowed"
+            },
+            {
+              "container": "hand_left",
+              "item": "ITEM_PARTICIPATION_TROPHY",
+              "status": "held"
+            },
+            {
+              "container": "back",
+              "item": "ITEM_CLOAK_COWARDLY_LION",
+              "status": "equipped"
+            }
+          ]
+        }
+      }
+    ],
+    "item_registry_updates": [
+      {
+        "item_id": "ITEM_CLOAK_COWARDLY_LION",
+        "set": {
+          "last_seen": {
+            "chapter": 2,
+            "location": "Low-Level Crypts",
+            "scene": 4
+          }
+        }
+      },
+      {
+        "item_id": "ITEM_PARTICIPATION_TROPHY",
+        "set": {
+          "last_seen": {
+            "chapter": 2,
+            "location": "Low-Level Crypts",
+            "scene": 4
+          }
+        }
+      },
+      {
+        "item_id": "ITEM_ID_BADGE",
+        "set": {
+          "last_seen": {
+            "chapter": 2,
+            "location": "Low-Level Crypts",
+            "scene": 4
+          }
+        }
+      },
+      {
+        "item_id": "ITEM_SMARTPHONE",
+        "set": {
+          "last_seen": {
+            "chapter": 2,
+            "location": "Low-Level Crypts",
+            "scene": 4
+          }
+        }
+      }
+    ],
+    "schema_version": "1.0",
+    "summary_update": {
+      "chapter_so_far_add": [
+        "Artie has entered the Low-Level Crypts and discovered that his data-entry background allows him to predict enemy movement patterns."
+      ],
+      "key_events": [
+        "Artie arrived at the Low-Level Crypts and triggered a 100% Aggro state due to his neon yellow cloak.",
+        "The Cloak of the Cowardly Lion's 'Coward's Shame' effect automated Artie's evasion against three Crypt Skirmishers.",
+        "Artie identified the skeletons' movement patterns as a 120-BPM combat script.",
+        "Artie gained the Pattern Recognition (Rank G) skill.",
+        "Artie successfully kited the skeletons using rhythmic timing, taking zero damage."
+      ],
+      "last_scene": [
+        "Artie entered the Low-Level Crypts, where his neon yellow cloak acted as a monster beacon, pushing his Aggro Meter to 100%.",
+        "He survived an ambush by three Crypt Skirmishers through automated evasion procs and rhythmic movement.",
+        "By identifying the skeletons' predictable loops, he unlocked the Pattern Recognition skill and began treating the dungeon like a rhythm game."
+      ],
+      "must_stay_true": [
+        "REMOVE: Artie's Aggro Meter is at 99% (CRITICAL DENSITY).",
+        "REMOVE: Artie is Level 2 with 1/1 HP, 100% Crit Rate, and 50 Evasion.",
+        "Artie is Level 2 with 1/1 HP, 100% Crit Rate, 50 Evasion, and 100% Aggro.",
+        "Artie possesses the Pattern Recognition (Rank G) skill.",
+        "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left, soul-bound=TRUE)",
+        "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=back)",
+        "milestone: pattern_recognition_unlocked = DONE"
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "CHAR_ARTIE",
+        "CHAR_FIZZ"
+      ],
+      "location": "Low-Level Crypts",
+      "open_threads": [
+        "THREAD_CRIT_EXPLOIT",
+        "THREAD_SYSTEM_GLITCH",
+        "THREAD_VANE_RIVALRY"
+      ]
+    }
+  },
+  "scene_summary": [
+    "Artie entered the Low-Level Crypts, where his neon yellow cloak acted as a monster beacon, pushing his Aggro Meter to 100%.",
+    "He survived an ambush by three Crypt Skirmishers through automated evasion procs and rhythmic movement.",
+    "By identifying the skeletons' predictable loops, he unlocked the Pattern Recognition skill and began treating the dungeon like a rhythm game."
+  ],
+  "key_events": [
+    "Artie arrived at the Low-Level Crypts and triggered a 100% Aggro state due to his neon yellow cloak.",
+    "The Cloak of the Cowardly Lion's 'Coward's Shame' effect automated Artie's evasion against three Crypt Skirmishers.",
+    "Artie identified the skeletons' movement patterns as a 120-BPM combat script.",
+    "Artie gained the Pattern Recognition (Rank G) skill.",
+    "Artie successfully kited the skeletons using rhythmic timing, taking zero damage."
+  ],
+  "must_stay_true": [
+    "REMOVE: Artie's Aggro Meter is at 99% (CRITICAL DENSITY).",
+    "REMOVE: Artie is Level 2 with 1/1 HP, 100% Crit Rate, and 50 Evasion.",
+    "Artie is Level 2 with 1/1 HP, 100% Crit Rate, 50 Evasion, and 100% Aggro.",
+    "Artie possesses the Pattern Recognition (Rank G) skill.",
+    "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left, soul-bound=TRUE)",
+    "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=back)",
+    "milestone: pattern_recognition_unlocked = DONE"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "fail",
+    "issues": [
+      {
+        "code": "continuity",
+        "message": "The scene location 'Low-Level Crypts' contradicts the must_stay_true invariant 'location: Oakhaven - Backstreets'.",
+        "severity": "error",
+        "evidence": {
+          "line": 1,
+          "excerpt": "The stone archway of the Low-Level Crypts didn't so much welcome Artie as it did provide a convenient frame for his inevitable demise."
+        }
+      },
+      {
+        "code": "appearance_check_missing",
+        "message": "Appearance check is missing for cast member CHAR_ARTIE.",
+        "severity": "warning"
+      },
+      {
+        "code": "appearance_check_missing",
+        "message": "Appearance check is missing for cast member CHAR_FIZZ.",
+        "severity": "warning"
+      }
+    ]
+  },
+  "write_attempts": 2,
+  "updated_at": "2026-02-14T01:05:33Z"
+}

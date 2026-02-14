@@ -1,0 +1,371 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_002_001",
+  "chapter": 2,
+  "scene": 1,
+  "scene_target": "Artie attempts to sell the Participation Trophy to a local merchant to lower his aggro.",
+  "goal": "Offload the 'Monster Beacon' item and reduce the Aggro Meter.",
+  "conflict": "The item is soul-bound and cursed; its presence causes the merchant to panic as the Aggro Meter spikes.",
+  "required_callbacks": [
+    "milestone: vane_encounter_survived",
+    "milestone: mayor_met"
+  ],
+  "constraints": [
+    "target_words: 2000"
+  ],
+  "end_condition": "Artie is forced to keep the trophy and realizes he is a permanent lighthouse for monsters.",
+  "ui_allowed": true,
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [],
+  "required_in_custody": [
+    "ITEM_PARTICIPATION_TROPHY",
+    "ITEM_ID_BADGE",
+    "ITEM_SMARTPHONE"
+  ],
+  "required_scene_accessible": [
+    "ITEM_PARTICIPATION_TROPHY"
+  ],
+  "required_visible_on_page": [
+    "ITEM_PARTICIPATION_TROPHY"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "combat_aftermath",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "resources",
+    "statuses",
+    "inventory"
+  ],
+  "ui_mechanics_expected": [
+    "Aggro Meter",
+    "System Notification",
+    "HP"
+  ],
+  "prose_path": "draft/chapters/ch_002/scene_001.md",
+  "state_patch": {
+    "character_continuity_system_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "set": {
+          "resources": {
+            "aggro_meter": 98
+          },
+          "statuses": [
+            {
+              "effect": "Massively increases aggro radius; monsters within 1km are aware of your location.",
+              "name": "Monster Beacon",
+              "source": "ITEM_PARTICIPATION_TROPHY"
+            },
+            {
+              "effect": "Maximum aggro from all local entities.",
+              "name": "Marked for Death",
+              "source": "system_event"
+            },
+            {
+              "effect": "Item is soul-bound and cannot be discarded or sold.",
+              "name": "The Eternal Participant",
+              "source": "ITEM_PARTICIPATION_TROPHY"
+            }
+          ],
+          "reason": "Failed transaction triggered soul-bound lock and permanent status assignment."
+        },
+        "delta": {},
+        "chapter": 2,
+        "scene": 1
+      }
+    ],
+    "character_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "containers": [
+          {
+            "container": "neck",
+            "contents": [
+              "ITEM_ID_BADGE"
+            ],
+            "owner": "CHAR_ARTIE"
+          },
+          {
+            "container": "pocket_right",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ],
+            "owner": "CHAR_ARTIE"
+          },
+          {
+            "container": "hand_left",
+            "contents": [
+              "ITEM_PARTICIPATION_TROPHY"
+            ],
+            "owner": "CHAR_ARTIE"
+          }
+        ],
+        "inventory": [
+          {
+            "container": "neck",
+            "item": "ITEM_ID_BADGE",
+            "status": "equipped"
+          },
+          {
+            "container": "pocket_right",
+            "item": "ITEM_SMARTPHONE",
+            "status": "stowed"
+          },
+          {
+            "container": "hand_left",
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "status": "held"
+          }
+        ],
+        "persona_updates": [
+          "Artie is now resigned to his role as a walking lighthouse for monsters, his anxiety shifting into a grim, survivalist focus."
+        ],
+        "invariants_add": [],
+        "chapter": 2,
+        "scene": 1
+      }
+    ],
+    "global_continuity_system_updates": [
+      {
+        "reason": "System error and shockwave during failed soul-bound item transfer.",
+        "set": {
+          "reality_stability": 42
+        }
+      }
+    ],
+    "inventory_alignment_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "reason": "Post-transaction inventory lock and posture normalization.",
+        "reason_category": "handoff_transfer",
+        "set": {
+          "containers": [
+            {
+              "container": "neck",
+              "contents": [
+                "ITEM_ID_BADGE"
+              ],
+              "owner": "CHAR_ARTIE"
+            },
+            {
+              "container": "pocket_right",
+              "contents": [
+                "ITEM_SMARTPHONE"
+              ],
+              "owner": "CHAR_ARTIE"
+            },
+            {
+              "container": "hand_left",
+              "contents": [
+                "ITEM_PARTICIPATION_TROPHY"
+              ],
+              "owner": "CHAR_ARTIE"
+            }
+          ],
+          "inventory": [
+            {
+              "container": "neck",
+              "item": "ITEM_ID_BADGE",
+              "status": "equipped"
+            },
+            {
+              "container": "pocket_right",
+              "item": "ITEM_SMARTPHONE",
+              "status": "stowed"
+            },
+            {
+              "container": "hand_left",
+              "item": "ITEM_PARTICIPATION_TROPHY",
+              "status": "held"
+            }
+          ]
+        }
+      }
+    ],
+    "item_registry_updates": [
+      {
+        "item_id": "ITEM_PARTICIPATION_TROPHY",
+        "set": {
+          "custodian": "CHAR_ARTIE",
+          "last_seen": {
+            "chapter": 2,
+            "location": "Oakhaven - Merchant Shop",
+            "scene": 1
+          },
+          "linked_threads": [
+            "THREAD_SYSTEM_GLITCH"
+          ],
+          "name": "Participation Trophy",
+          "owner_scope": "character",
+          "state_tags": [
+            "cursed",
+            "monster_beacon",
+            "soul-bound"
+          ],
+          "type": "cursed_item"
+        }
+      }
+    ],
+    "schema_version": "1.0",
+    "summary_update": {
+      "chapter_so_far_add": [
+        "Artie's attempt to fix his aggro problem backfired, making the Participation Trophy a permanent part of his build."
+      ],
+      "key_events": [
+        "Artie entered Barnaby's Bargains & Blunders to offload the Participation Trophy.",
+        "The merchant Barnaby identified the trophy as a massive liability and refused the trade.",
+        "Artie used a Data Entry critical success to force the trade, but the System blocked it with a soul-bound error.",
+        "The Participation Trophy manifested back in Artie's hand with a shockwave that destroyed the shop's interior.",
+        "Artie gained the permanent 'The Eternal Participant' status.",
+        "The shop was surrounded by aggro-crazed mobs, forcing Artie to look for a back exit."
+      ],
+      "last_scene": [
+        "Artie attempted to sell the cursed Participation Trophy to a merchant in Oakhaven to lower his aggro.",
+        "The transaction failed because the item is soul-bound, causing a system error that spiked his Aggro Meter to 98%.",
+        "Artie is now permanently stuck with the trophy and must flee the shop as monsters and guards converge on his location."
+      ],
+      "must_stay_true": [
+        "REMOVE: location: Oakhaven - Residential Backstreet",
+        "location: Oakhaven - Merchant Shop",
+        "REMOVE: Artie's Aggro Meter is at 94% and cooling down after escaping Vane.",
+        "Artie's Aggro Meter is at 98% and pulsing (MAXIMUM PROXIMITY ALERT).",
+        "REMOVE: inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+        "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left, soul-bound=TRUE)",
+        "milestone: eternal_participant_status_gained = DONE"
+      ]
+    },
+    "transfer_updates": [
+      {
+        "destination": "CHAR_ARTIE",
+        "item_id": "ITEM_PARTICIPATION_TROPHY",
+        "reason": "Failed transaction: item is soul-bound and manifested back in owner's hand.",
+        "source": "CHAR_ARTIE",
+        "from": {}
+      }
+    ],
+    "world_updates": {
+      "cast_present": [
+        "CHAR_ARTIE",
+        "CHAR_FIZZ"
+      ],
+      "location": "Oakhaven - Merchant Shop",
+      "open_threads": [
+        "THREAD_CRIT_EXPLOIT",
+        "THREAD_SYSTEM_GLITCH",
+        "THREAD_VANE_RIVALRY"
+      ],
+      "recent_facts": [
+        "Artie attempted to sell the Participation Trophy to Barnaby, but the transaction failed due to a soul-bound error.",
+        "The failed transfer caused a system shockwave, destroying Barnaby's stock and spiking Artie's Aggro Meter to 98%.",
+        "Artie gained the permanent status 'The Eternal Participant', making the Participation Trophy impossible to discard.",
+        "The merchant shop is currently under siege by aggro-crazed local entities."
+      ]
+    }
+  },
+  "scene_summary": [
+    "Artie attempted to sell the cursed Participation Trophy to a merchant in Oakhaven to lower his aggro.",
+    "The transaction failed because the item is soul-bound, causing a system error that spiked his Aggro Meter to 98%.",
+    "Artie is now permanently stuck with the trophy and must flee the shop as monsters and guards converge on his location."
+  ],
+  "key_events": [
+    "Artie entered Barnaby's Bargains & Blunders to offload the Participation Trophy.",
+    "The merchant Barnaby identified the trophy as a massive liability and refused the trade.",
+    "Artie used a Data Entry critical success to force the trade, but the System blocked it with a soul-bound error.",
+    "The Participation Trophy manifested back in Artie's hand with a shockwave that destroyed the shop's interior.",
+    "Artie gained the permanent 'The Eternal Participant' status.",
+    "The shop was surrounded by aggro-crazed mobs, forcing Artie to look for a back exit."
+  ],
+  "must_stay_true": [
+    "REMOVE: location: Oakhaven - Residential Backstreet",
+    "location: Oakhaven - Merchant Shop",
+    "REMOVE: Artie's Aggro Meter is at 94% and cooling down after escaping Vane.",
+    "Artie's Aggro Meter is at 98% and pulsing (MAXIMUM PROXIMITY ALERT).",
+    "REMOVE: inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+    "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left, soul-bound=TRUE)",
+    "milestone: eternal_participant_status_gained = DONE"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "appearance_check_missing",
+        "message": "Authoritative appearance check is missing for cast member CHAR_ARTIE.",
+        "severity": "warning"
+      },
+      {
+        "code": "appearance_check_missing",
+        "message": "Authoritative appearance check is missing for cast member CHAR_FIZZ.",
+        "severity": "warning"
+      },
+      {
+        "code": "item_naming",
+        "message": "Unambiguous descriptor 'trophy' used post-anchor instead of canonical display_name 'Participation Trophy'.",
+        "severity": "warning",
+        "evidence": {
+          "line": 11,
+          "excerpt": "\"You dump the trophy, the 'Monster Beacon' status falls off...\""
+        }
+      },
+      {
+        "code": "item_naming",
+        "message": "Unambiguous descriptor 'trophy' used post-anchor instead of canonical display_name 'Participation Trophy'.",
+        "severity": "warning",
+        "evidence": {
+          "line": 26,
+          "excerpt": "...yanked it back as if the trophy were made of white-hot maggot-fire."
+        }
+      },
+      {
+        "code": "item_naming",
+        "message": "Unambiguous descriptor 'trophy' used post-anchor instead of canonical display_name 'Participation Trophy'.",
+        "severity": "warning",
+        "evidence": {
+          "line": 33,
+          "excerpt": "\"It\u2019s just a trophy!\" Artie hissed."
+        }
+      },
+      {
+        "code": "item_naming",
+        "message": "Unambiguous descriptor 'trophy' used post-anchor instead of canonical display_name 'Participation Trophy'.",
+        "severity": "warning",
+        "evidence": {
+          "line": 74,
+          "excerpt": "Artie looked at the trophy, then at his 1/1 HP bar..."
+        }
+      },
+      {
+        "code": "item_naming",
+        "message": "Unambiguous descriptor 'trophy' used post-anchor instead of canonical display_name 'Participation Trophy'.",
+        "severity": "warning",
+        "evidence": {
+          "line": 81,
+          "excerpt": "\"Remind me to crit the next person who offers me a trophy.\""
+        }
+      },
+      {
+        "code": "item_naming",
+        "message": "Unambiguous descriptor 'trophy' used post-anchor instead of canonical display_name 'Participation Trophy'.",
+        "severity": "warning",
+        "evidence": {
+          "line": 84,
+          "excerpt": "He gripped the trophy tight, the hum now vibrating through his entire arm."
+        }
+      }
+    ]
+  },
+  "write_attempts": 2,
+  "updated_at": "2026-02-14T00:03:06Z"
+}

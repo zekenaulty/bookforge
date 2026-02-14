@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Low-Level Crypts - Interior",
+    "recent_facts": [
+      "Artie entered the Low-Level Crypts, his neon cloak acting as a massive aggro magnet.",
+      "Artie tested the Cloak of the Cowardly Lion's evasion mechanics against a group of skeletons.",
+      "Artie discovered that the skeletons move in a predictable, rhythmic pattern.",
+      "Artie gained the Pattern Recognition skill and began treating the dungeon like a rhythm game."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_CLOAK_COWARDLY_LION",
+          "container": "back",
+          "status": "equipped"
+        }
+      ],
+      "persona_updates": [
+        "Artie has shifted from pure panic to a focused, mechanical mindset, treating combat as a rhythmic data-entry task."
+      ],
+      "invariants_add": [],
+      "chapter": 2,
+      "scene": 4
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "skills": {
+          "pattern_recognition": 1
+        },
+        "reason": "Discovered skeleton movement patterns and engaged in rhythmic evasion."
+      },
+      "delta": {
+        "resources": {
+          "aggro_meter": 1
+        }
+      },
+      "chapter": 2,
+      "scene": 4
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie entered the Low-Level Crypts, where his neon yellow cloak immediately attracted a group of skeletons.",
+      "He successfully utilized the Cloak of the Cowardly Lion's automated evasion to survive multiple lethal attacks.",
+      "Artie realized the skeletons moved in predictable, rhythmic patterns and began treating the encounter like a rhythm game."
+    ],
+    "key_events": [
+      "Artie arrived at the Low-Level Crypts interior.",
+      "The Aggro Meter reached 100% due to the 'Monster Beacon' effect of the cloak and trophy.",
+      "Artie survived three 'Evasion Procs' from the Cloak of the Cowardly Lion.",
+      "Artie identified the 120-BPM movement script of the Crypt Skirmishers.",
+      "Artie gained the 'Pattern Recognition' skill (Rank G).",
+      "Artie successfully navigated past the first encounter using rhythm-based movement."
+    ],
+    "must_stay_true": [
+      "milestone: crypt_arrival = DONE",
+      "milestone: skeleton_rhythm_discovered = DONE",
+      "location: Low-Level Crypts - Interior",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=back)",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left, soul-bound=TRUE)",
+      "Artie is Level 2 with 1/1 HP and 100% Crit Rate.",
+      "Artie possesses the 'Pattern Recognition' skill (Rank G)."
+    ],
+    "chapter_so_far_add": []
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "pale",
+      "human",
+      "male",
+      "late-20s",
+      "slight",
+      "build",
+      "mousy",
+      "brown",
+      "hair",
+      "neon",
+      "yellow",
+      "glow."
+    ],
+    "CHAR_FIZZ": [
+      "small",
+      "glowing",
+      "blue",
+      "sprite",
+      "translucent",
+      "wispy",
+      "neon",
+      "hair",
+      "pixelated",
+      "trail."
+    ]
+  }
+}
