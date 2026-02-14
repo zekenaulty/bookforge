@@ -1,0 +1,26 @@
+- Artie was electrocuted by a vending machine while trying to get chips.
+- Artie has died and his consciousness is transitioning to the System.
+- Artie met Fizz in the System Void.
+- Artie allocated all points into Critical Hit Rate, including a 50-point Bonus Anomaly Pool.
+- The System locked Artie's HP at 1 and granted him the 'Crit or Quit' title.
+- The System Void transitioned into the Slime Fields tutorial zone.
+- Artie and Fizz arrived in the Slime Fields tutorial zone.
+- Artie confirmed his 1 HP status and Glass Soul mechanical lock.
+- A Lesser Green Slime aggroed on Artie, forcing him into a defensive struggle.
+- Artie realized that even environmental impacts are a threat to his 1 HP build.
+- Artie defeated a Lesser Green Slime with a massive overkill critical hit.
+- The critical hit vaporized a large oak tree and created a scorched trench in the Slime Fields.
+- Artie reached Level 2 due to the massive experience gain from the overkill.
+- The System issued a warning regarding environmental damage.
+- Artie reached the Oakhaven gates with 2 Stamina remaining.
+- The Oakhaven gate scanner flagged Artie as a 'Statistical Anomaly' due to his glitched build.
+- The 'Beacon of Trash' aggro reset upon entering the Safe Zone.
+- Gate guards have detained Artie for administrative review.
+- Artie was released from detention and met Barnaby at his tavern.
+- Barnaby appraised Artie's 100% Crit Rate and 1 HP build.
+- Artie learned that his stats make him a high-value economic resource in Oakhaven.
+- Artie's presence has been logged in the city's census, marking him as a target.
+- Vane confronted Artie in Barnaby's tavern, identifying his 1 HP anomaly status.
+- Vane issued a formal duel challenge to Artie with 'ownership' as the stakes.
+- Artie used a fake 'patch update' distraction to escape Vane's Aura of Intimidation.
+- Artie is currently fleeing through the Oakhaven night with 4 stamina remaining.
