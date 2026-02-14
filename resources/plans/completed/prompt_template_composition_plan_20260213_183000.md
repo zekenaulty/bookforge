@@ -435,11 +435,23 @@ Acceptance:
 - Story 2: `completed`
 - Story 3: `completed`
 - Story 4: `completed`
-- Story 5: `pending` (behavioral baseline suite not yet executed)
+- Story 5: `in_progress` (targeted chapter-2 scene-sequence validation passed; full 8x3 behavioral baseline still pending)
+
+### Targeted Validation Update (Completed 2026-02-14)
+- Executed scene-by-scene resume testing for `workspace/books/criticulous_b1` chapter 2 completed scenes (`scene_001` through `scene_006`) and collected phase-history/lint/repair artifacts.
+- Validation objective passed for this run scope: phase pipeline completed and artifacts were produced for each completed scene.
+- Deep trace investigation identified one potential prompt wording gap in stale invariant reconciliation behavior during repair/state_repair cycles.
+- Fix applied: strengthened system-level invariant carry-forward wording to require stale or superseded facts be explicitly removed with `REMOVE: <exact prior invariant text>` before restating current truth.
+- Updated files for wording fix:
+  - `resources/prompt_templates/system_base.md`
+  - `workspace/books/criticulous_b1/prompts/templates/system_base.md`
+  - `workspace/books/criticulous_b1/prompts/system_v1.md`
+  - `resources/prompt_blocks/phase/system_base/global_system_rules.md`
 
 ## Immediate Next Actions
-1. Execute Story 5 baseline suite (8 scenes x 3 seeds) and record threshold comparison metrics in `validation_log.md`.
-2. Run Stage C behavioral review and capture approval/rejections in `review_log.md` + `decision_log.md`.
+1. Execute the remaining Story 5 baseline matrix (8 scenes x 3 seeds) and record threshold comparison metrics in `validation_log.md`.
+2. Run Stage C behavioral review and capture approvals/rejections in `review_log.md` + `decision_log.md`.
 3. Wire `scripts/validate_prompt_composition_controls.py` into CI with changed-file inputs from git diff.
-4. If Story 5 passes, move Go/No-Go gate status to release-ready and capture final sign-off evidence.
+4. If Story 5 thresholds pass, move Go/No-Go gate status to release-ready and capture final sign-off evidence.
+
 
