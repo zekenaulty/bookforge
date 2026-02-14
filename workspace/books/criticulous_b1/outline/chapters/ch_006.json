@@ -1,12 +1,12 @@
 {
   "chapter_id": 6,
   "title": "The Final Roll",
-  "goal": "Defeat Vane in the rigged finals and survive the System's direct intervention.",
+  "goal": "Defeat Vane and survive the System's attempt to delete Artie.",
   "chapter_role": "climax",
-  "stakes_shift": "The survival of the entire game world is threatened as Artie's crits begin to unravel the source code.",
+  "stakes_shift": "The conflict escalates from a personal duel to a reality-breaking crash of the entire game world.",
   "bridge": {
     "from_prev": "Artie enters the ring for the final match.",
-    "to_next": "The System crashes, leaving Artie and Fizz stranded in the wreckage of the world."
+    "to_next": "The System crashes, and Artie is left in the wreckage."
   },
   "pacing": {
     "intensity": 5,
@@ -17,65 +17,120 @@
     {
       "section_id": 1,
       "title": "Vane's Ultimate Build",
-      "intent": "Show the power of a 'Whale' player vs. a 'Glitch' player.",
+      "intent": "A desperate struggle where Vane's 'Whale' gear and System hacks strip Artie of his defenses.",
       "scenes": [
         {
           "scene_id": 1,
-          "summary": "Vane enters with legendary armor that reflects 50% of all damage. Artie realizes if he crits Vane, he crits himself.",
+          "summary": "Vane enters with legendary armor that reflects 50% of all damage, making Artie's crits a suicide button.",
           "type": "setup",
           "outcome": "Artie's main weapon is now a suicide button.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_VANE"
           ],
-          "hands_off_to": "6:2"
+          "threads": [
+            "THREAD_VANE_RIVALRY"
+          ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "6:2",
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The scene opens at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 2,
-          "summary": "Vane uses the 'System Override' scroll to turn off Artie's Evasion stat.",
+          "summary": "Vane uses the 'System Override' scroll to turn off Artie's Evasion stat entirely.",
           "type": "escalation",
           "outcome": "Artie is now a 1 HP character who can't dodge.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_VANE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "6:3",
           "consumes_outcome_from": "6:1",
-          "hands_off_to": "6:3"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 3,
-          "summary": "Fizz sacrifices her 'Guide' status to temporarily hack the arena's gravity, giving Artie a few seconds of weightlessness.",
+          "summary": "Fizz sacrifices her 'Guide' status to temporarily hack the arena's gravity, giving Artie 3D movement.",
           "type": "choice",
           "outcome": "Artie can move in 3D, bypassing the 'No-Evasion' ground rule.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "6:4",
           "consumes_outcome_from": "6:2",
-          "hands_off_to": "6:4"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 4,
-          "summary": "Artie realizes he doesn't need to hit Vane; he needs to hit the 'Reflect' buff itself.",
+          "summary": "Artie realizes he doesn't need to hit Vane; he needs to hit the 'Reflect' buff itself to break the logic.",
           "type": "reveal",
-          "outcome": "Artie targets the magic aura around Vane's armor to bypass the Reflect buff.",
+          "outcome": "Artie realizes he must target the magic aura of Vane's 'Reflect' buff directly.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "6:5",
           "consumes_outcome_from": "6:3",
-          "end_condition_echo": "Artie targets the magic aura around Vane's armor to bypass the Reflect buff.",
-          "hands_off_to": "6:5"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "end_condition_echo": "Artie realizes he must target the magic aura of Vane's 'Reflect' buff directly.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         }
       ]
     },
     {
       "section_id": 2,
       "title": "Breaking the Game",
-      "intent": "The moment of peak absurdity where the world begins to dissolve.",
+      "intent": "The peak climax where Artie's 'Meta-Crit' crashes the game and he faces the System Administrator.",
       "scenes": [
         {
           "scene_id": 5,
-          "summary": "Artie lands a 'Meta-Crit' on the Reflect buff. The System can't handle the math of a crit reflecting a crit reflecting a crit.",
+          "summary": "Artie lands a 'Meta-Crit' on the Reflect buff, causing an infinite loop that dissolves the arena into pixels.",
           "type": "action",
           "outcome": "The arena begins to pixelate and dissolve.",
           "characters": [
@@ -85,103 +140,206 @@
           "threads": [
             "THREAD_CRIT_EXPLOIT"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "6:6",
           "consumes_outcome_from": "6:4",
-          "hands_off_to": "6:6"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 6,
-          "summary": "Vane panics as his armor turns into a swarm of error messages.",
+          "summary": "Vane panics as his armor turns into a swarm of error messages, leaving him defenseless.",
           "type": "escalation",
           "outcome": "Vane is defenseless and terrified.",
           "characters": [
             "CHAR_VANE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "6:7",
           "consumes_outcome_from": "6:5",
-          "hands_off_to": "6:7"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 7,
-          "summary": "Artie delivers the final blow\u2014a crit so powerful it deletes Vane's character data (but not the person).",
+          "summary": "Artie delivers the final blow, a crit so powerful it deletes Vane's character data from the server.",
           "type": "action",
           "outcome": "Vane is kicked from the game, and Artie is the champion of a broken world.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_VANE"
           ],
+          "threads": [
+            "THREAD_VANE_RIVALRY"
+          ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "6:8",
           "consumes_outcome_from": "6:6",
-          "hands_off_to": "6:8"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 8,
-          "summary": "The System Administrator (a giant floating head) appears to manually delete Artie.",
+          "summary": "The System Administrator appears to manually delete Artie for his reality-breaking actions.",
           "type": "reveal",
           "outcome": "The true antagonist is revealed.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_BOSS"
           ],
-          "introduces": [
-            "CHAR_BOSS"
-          ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "6:9",
           "consumes_outcome_from": "6:7",
-          "hands_off_to": "6:9"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 9,
-          "summary": "Artie crits the Admin's 'Delete' button, causing the entire world to freeze.",
+          "summary": "Artie crits the Admin's 'Delete' button, causing the entire world to freeze in a 'Pause' state.",
           "type": "action",
           "outcome": "Artie has successfully 'paused' reality.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "6:10",
           "consumes_outcome_from": "6:8",
-          "hands_off_to": "6:10"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 10,
-          "summary": "Fizz uses the pause to rewrite Artie's location data, teleporting them out of the arena.",
+          "summary": "Fizz uses the pause to rewrite Artie's location data, teleporting them to a Null-Zone safe harbor.",
           "type": "choice",
-          "outcome": "Artie and Fizz escape deletion as the world enters 'Safe Mode'.",
+          "outcome": "Artie and Fizz teleport to a 'Null-Zone' as the world enters Safe Mode.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "6:11",
           "consumes_outcome_from": "6:9",
-          "end_condition_echo": "Artie and Fizz escape deletion as the world enters 'Safe Mode'.",
-          "hands_off_to": "6:11"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "end_condition_echo": "Artie and Fizz teleport to a 'Null-Zone' as the world enters Safe Mode.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         }
       ]
     },
     {
       "section_id": 3,
       "title": "The Aftermath of the Crash",
-      "intent": "Show the immediate consequences of the reality crash.",
+      "intent": "Establish the immediate consequences of the reality-break and Artie's new status.",
       "scenes": [
         {
           "scene_id": 11,
-          "summary": "Artie and Fizz wake up in a 'Null-Zone' where the graphics are all wireframes.",
+          "summary": "Artie and Fizz wake up in a 'Null-Zone' where the graphics are all wireframes and the world is dying.",
           "type": "aftermath",
           "outcome": "They are safe for now, but the world is dying.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "6:12",
           "consumes_outcome_from": "6:10",
-          "hands_off_to": "6:12"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 12,
-          "summary": "Artie looks at his stats and sees his HP is now 'NaN' (Not a Number).",
+          "summary": "Artie looks at his stats and sees his HP is no longer 1, but 'NaN' (Not a Number).",
           "type": "reveal",
-          "outcome": "Artie realizes his HP is now 'NaN' and he has become a virus.",
+          "outcome": "Artie realizes his HP is no longer 1, but 'NaN' (Not a Number).",
           "characters": [
             "CHAR_ARTIE"
           ],
           "threads": [
             "THREAD_SYSTEM_GLITCH"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "6:11",
-          "end_condition_echo": "Artie realizes his HP is now 'NaN' and he has become a virus."
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "end_condition_echo": "Artie realizes his HP is no longer 1, but 'NaN' (Not a Number).",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         }
       ]
     }

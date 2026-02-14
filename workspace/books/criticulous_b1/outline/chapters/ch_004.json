@@ -1,12 +1,12 @@
 {
   "chapter_id": 4,
   "title": "The Capital of Crits",
-  "goal": "Artie must navigate the social and political landscape of the capital while avoiding the 'System Police'.",
+  "goal": "Artie must hide in plain sight while trying to find a way to stabilize his build.",
   "chapter_role": "investigation",
-  "stakes_shift": "The threat moves from physical monsters to social exposure and the risk of permanent character deletion.",
+  "stakes_shift": "The stakes move from physical survival to social navigation and avoiding the 'System Police'.",
   "bridge": {
-    "from_prev": "Artie arrives at the capital as a fugitive from Vane's ego.",
-    "to_next": "Artie enters the Grand Arena tournament to win a way to fix his HP."
+    "from_prev": "Artie is a fugitive from Vane's ego.",
+    "to_next": "Artie enters the Grand Arena for a 'Low-Stakes' tournament."
   },
   "pacing": {
     "intensity": 2,
@@ -17,76 +17,125 @@
     {
       "section_id": 1,
       "title": "The City of Gold and Glitches",
-      "intent": "Establish the capital city and the religious weight of 'Crits'.",
+      "intent": "Explore the religious reverence for RNG in the capital and the illegality of stat-wiping.",
       "scenes": [
         {
           "scene_id": 1,
-          "summary": "Artie enters the city and sees the 'Temple of the D20,' where priests pray for high rolls.",
+          "summary": "Artie enters the capital and witnesses the 'Temple of the D20,' where priests pray for high rolls.",
           "type": "setup",
-          "outcome": "Artie realizes he is basically a walking god in this religion, connecting his fate to the First Glitch.",
+          "outcome": "Artie realizes he is basically a walking god in this religion.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
-          "threads": [
-            "THREAD_THE_ASCENSION"
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "4:2",
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
           ],
-          "hands_off_to": "4:2"
+          "transition_in_text": "The scene opens at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 2,
           "summary": "Artie tries to find a 'Stat-Wiper' to fix his 1 HP, but finds out it's a crime punishable by 'Deletion'.",
           "type": "reveal",
-          "outcome": "Artie realizes his 1 HP build is permanent and illegal to fix.",
+          "outcome": "Artie accepts that he is stuck with his 1 HP glass cannon build forever.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "threads": [
+            "THREAD_THE_ASCENSION"
+          ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "4:3",
           "consumes_outcome_from": "4:1",
-          "end_condition_echo": "Artie realizes his 1 HP build is permanent and illegal to fix.",
-          "hands_off_to": "4:3"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "end_condition_echo": "Artie accepts that he is stuck with his 1 HP glass cannon build forever.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         }
       ]
     },
     {
       "section_id": 2,
       "title": "The Underground Market",
-      "intent": "Artie looks for illegal mods to help him survive.",
+      "intent": "Introduce the 'Dev-Haters' faction and provide Artie with illegal survival tools.",
       "scenes": [
         {
           "scene_id": 3,
-          "summary": "Fizz leads Artie to a black market run by a group of 'Dev-Haters' who sell items that bypass System rules.",
+          "summary": "Fizz leads Artie to a black market run by 'Dev-Haters' who sell items that bypass System rules, including a 'Lag-Switch' potion.",
           "type": "transition",
           "outcome": "Artie gains access to a 'Lag-Switch' potion.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "4:4",
           "consumes_outcome_from": "4:2",
-          "hands_off_to": "4:4"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 4,
-          "summary": "Artie meets Zero, a black-market informant who tells him that Vane is the son of the High Priest of RNG.",
+          "summary": "Artie meets Silas again, acting as an informant who reveals that Vane is the son of the High Priest of RNG.",
           "type": "reveal",
           "outcome": "The rivalry with Vane just became a religious war.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_ZERO"
-          ],
-          "introduces": [
-            "CHAR_ZERO"
+            "CHAR_SILAS"
           ],
           "threads": [
             "THREAD_VANE_RIVALRY"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "4:5",
           "consumes_outcome_from": "4:3",
-          "hands_off_to": "4:5"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 5,
-          "summary": "The black market is raided by the 'System Sentinels,' and Artie has to use his first 'Lag-Switch' to escape.",
+          "summary": "The market is raided by 'System Sentinels,' and Artie uses his Lag-Switch to escape, though it leaves him speaking in binary.",
           "type": "action",
-          "outcome": "Artie escapes a Sentinel raid with a Lag-Switch potion and a binary speech curse.",
+          "outcome": "Artie escapes a sentinel raid but is left speaking in binary for an hour.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
@@ -94,16 +143,29 @@
           "threads": [
             "THREAD_SYSTEM_GLITCH"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "4:6",
           "consumes_outcome_from": "4:4",
-          "end_condition_echo": "Artie escapes a Sentinel raid with a Lag-Switch potion and a binary speech curse.",
-          "hands_off_to": "4:6"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "end_condition_echo": "Artie escapes a sentinel raid but is left speaking in binary for an hour.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         }
       ]
     },
     {
       "section_id": 3,
       "title": "The Arena Invitation",
-      "intent": "Set up the tournament climax and the high financial stakes.",
+      "intent": "Force Artie into the public spotlight through financial desperation and a high-stakes tournament.",
       "scenes": [
         {
           "scene_id": 6,
@@ -113,31 +175,72 @@
           "characters": [
             "CHAR_ARTIE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "4:7",
           "consumes_outcome_from": "4:5",
-          "hands_off_to": "4:7"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 7,
-          "summary": "Artie registers under the name 'Crit-iculous' and accidentally sets his entry fee to 'All My Gold'.",
+          "summary": "Artie registers under the name 'Crit-iculous' and accidentally sets his entry fee to his entire gold reserve.",
           "type": "consequence",
           "outcome": "Artie is now broke and must win the tournament to survive.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "4:8",
           "consumes_outcome_from": "4:6",
-          "hands_off_to": "4:8"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 8,
-          "summary": "Vane sees the name on the roster and smiles, knowing he can finally 'delete' Artie in front of a crowd.",
+          "summary": "Vane sees Artie's name on the tournament roster and prepares to 'delete' him in front of the public.",
           "type": "escalation",
-          "outcome": "Vane prepares to 'delete' Artie in the upcoming tournament.",
+          "outcome": "Vane sees Artie's name on the tournament roster, setting the stage for the final duel.",
           "characters": [
             "CHAR_VANE"
           ],
+          "threads": [
+            "THREAD_VANE_RIVALRY"
+          ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "4:7",
-          "end_condition_echo": "Vane prepares to 'delete' Artie in the upcoming tournament."
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "end_condition_echo": "Vane sees Artie's name on the tournament roster, setting the stage for the final duel.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         }
       ]
     }

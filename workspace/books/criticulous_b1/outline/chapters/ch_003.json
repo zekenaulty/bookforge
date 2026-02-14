@@ -1,12 +1,12 @@
 {
   "chapter_id": 3,
   "title": "Math-Boss vs. The Glitch",
-  "goal": "Defeat the Floor Guardian and secure the first major loot drop of the series.",
+  "goal": "Survive the Floor Guardian and secure the first major loot drop.",
   "chapter_role": "pressure",
-  "stakes_shift": "Artie transitions from a lucky survivor to a Level 10 'Anomaly' with a reputation for breaking bosses.",
+  "stakes_shift": "Artie moves from a lucky survivor to a recognized 'Anomaly' with significant power potential.",
   "bridge": {
-    "from_prev": "The Bone Golem is summoned, forcing Artie into a fight he isn't built for.",
-    "to_next": "Artie flees the crypts with legendary-tier items and a high-level rival on his heels."
+    "from_prev": "The Bone Golem is ready to smash Artie.",
+    "to_next": "Artie leaves the crypts with a legendary-tier item that he can't actually use yet."
   },
   "pacing": {
     "intensity": 5,
@@ -17,109 +17,200 @@
     {
       "section_id": 1,
       "title": "The Dance of Death",
-      "intent": "A high-octane fight where Artie must dodge every single attack.",
+      "intent": "A high-stakes combat sequence where Artie must exploit physics to survive a 'Crit-Resist' boss.",
       "scenes": [
         {
           "scene_id": 1,
-          "summary": "Artie uses the Crypt environment to kite the Bone Golem, using 'Crit-Punches' to chip away at its armor.",
+          "summary": "Artie uses the Crypt environment to kite the Bone Golem, using 'Crit-Punches' to chip away at its armor plating.",
           "type": "action",
           "outcome": "The Golem's armor is shattered, but Artie is running out of stamina.",
           "characters": [
             "CHAR_ARTIE"
           ],
-          "hands_off_to": "3:2"
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "3:2",
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The scene opens at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 2,
-          "summary": "Fizz discovers that the Golem has a 'Crit-Resist' buff, making Artie's main weapon useless.",
+          "summary": "Fizz discovers that the Golem has a 'Crit-Resist' buff, making Artie's main offensive tool useless.",
           "type": "reveal",
           "outcome": "Artie must find a way to bypass the resistance or die.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "3:3",
           "consumes_outcome_from": "3:1",
-          "hands_off_to": "3:3"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 3,
-          "summary": "Artie attempts to 'Crit' the ground beneath the Golem, hoping for a physics glitch.",
+          "summary": "Artie attempts to 'Crit' the ground beneath the Golem, hoping to trigger a physics glitch in the floor geometry.",
           "type": "choice",
-          "outcome": "The floor collapses, trapping the Golem in a hole.",
+          "outcome": "The floor collapses, trapping the Bone Golem in a hole.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "3:4",
           "consumes_outcome_from": "3:2",
-          "end_condition_echo": "Artie collapses the floor, trapping the Golem in a physics glitch.",
-          "hands_off_to": "3:4"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "end_condition_echo": "The floor collapses, trapping the Bone Golem in a hole.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 20
         }
       ]
     },
     {
       "section_id": 2,
       "title": "The Final Blow",
-      "intent": "Resolve the boss fight with a comedic but effective exploit.",
+      "intent": "Resolve the boss fight through a comedic System exploit and secure massive XP.",
       "scenes": [
         {
           "scene_id": 4,
-          "summary": "While the Golem is stuck, Artie spends five minutes 'charging' a punch, which the System interprets as a 'Heavy Attack'.",
+          "summary": "While the Golem is stuck, Artie spends five minutes 'charging' a punch, which the System misinterprets as a 'Heavy Attack'.",
           "type": "setup",
           "outcome": "Artie prepares his most powerful hit yet.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "3:5",
           "consumes_outcome_from": "3:3",
-          "hands_off_to": "3:5"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 5,
-          "summary": "Artie lands the hit, but instead of damage, the System rolls a 'Cosmetic Crit,' turning the Golem into a pile of very expensive porcelain teacups.",
+          "summary": "Artie lands the hit, but the System rolls a 'Cosmetic Crit,' turning the Golem into a pile of porcelain teacups.",
           "type": "action",
-          "outcome": "The boss is defeated, but the loot is... unconventional.",
+          "outcome": "The boss is defeated, but the loot is unconventional.",
           "characters": [
             "CHAR_ARTIE"
           ],
           "threads": [
             "THREAD_CRIT_EXPLOIT"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "3:6",
           "consumes_outcome_from": "3:4",
-          "hands_off_to": "3:6"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 20
         },
         {
           "scene_id": 6,
-          "summary": "The System panics and tries to 'recalculate' the XP, resulting in Artie jumping five levels instantly.",
+          "summary": "The System panics during XP recalculation, resulting in Artie jumping five levels instantly due to a rounding error.",
           "type": "aftermath",
-          "outcome": "Artie is now Level 10, but the System is watching him more closely.",
+          "outcome": "Artie hits Level 10 instantly after the System panics during XP recalculation.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "3:7",
           "consumes_outcome_from": "3:5",
-          "end_condition_echo": "Artie hits Level 10 and the System begins monitoring him closely.",
-          "hands_off_to": "3:7"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "end_condition_echo": "Artie hits Level 10 instantly after the System panics during XP recalculation.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         }
       ]
     },
     {
       "section_id": 3,
       "title": "Looting the Teacups",
-      "intent": "Examine the rewards and the consequences of the fight.",
+      "intent": "Establish deeper world-building regarding 'First Glitches' and escape Vane's pursuit.",
       "scenes": [
         {
           "scene_id": 7,
-          "summary": "Artie finds a 'Ring of the Gambler' among the teacups, which doubles crit damage but makes every 20th hit a self-crit.",
+          "summary": "Artie finds a 'Ring of the Gambler' among the teacups, which doubles crit damage but introduces a self-crit risk.",
           "type": "reveal",
           "outcome": "Artie accepts the double-edged sword.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "3:8",
           "consumes_outcome_from": "3:6",
-          "hands_off_to": "3:8"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 8,
-          "summary": "A hidden door opens, revealing a mural of the 'First Glitch'\u2014a hero who looked suspiciously like Artie's high school gym teacher.",
+          "summary": "A hidden door reveals a mural of the 'First Glitch,' a hero who broke the world in a similar fashion.",
           "type": "reveal",
           "outcome": "Artie realizes he isn't the first person to break this game.",
           "characters": [
@@ -129,32 +220,73 @@
           "threads": [
             "THREAD_THE_ASCENSION"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "3:9",
           "consumes_outcome_from": "3:7",
-          "hands_off_to": "3:9"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 9,
-          "summary": "Artie exits the crypt to find Vane waiting for him, looking very confused by the lack of a boss.",
+          "summary": "Artie exits the crypt to find Vane waiting, furious that the boss has been cleared in such an 'unprofessional' manner.",
           "type": "escalation",
           "outcome": "Vane realizes Artie stole his kill.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_VANE"
           ],
+          "threads": [
+            "THREAD_VANE_RIVALRY"
+          ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "3:10",
           "consumes_outcome_from": "3:8",
-          "hands_off_to": "3:10"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 10,
-          "summary": "Artie uses his new level-up speed to outrun Vane's party, heading toward the capital city.",
+          "summary": "Artie uses his new level-up speed to outrun Vane's party, heading toward the capital city for safety.",
           "type": "transition",
-          "outcome": "The chase is on.",
+          "outcome": "Artie uses his new speed to outrun Vane's party toward the capital city.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_VANE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "3:9",
-          "end_condition_echo": "Artie uses his new speed to outrun Vane's party toward the capital."
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "end_condition_echo": "Artie uses his new speed to outrun Vane's party toward the capital city.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         }
       ]
     }

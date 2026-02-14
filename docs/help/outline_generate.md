@@ -6,7 +6,8 @@ Purpose
 Usage
 - bookforge outline generate --book <id> [--rerun] [--resume] [--new-version] [--prompt-file <path>]
 - bookforge outline generate --book <id> [--from-phase <phase_id> | --to-phase <phase_id> | --phase <phase_id>]
-- bookforge outline generate --book <id> [--transition-hints-file <path>] [--strict-transition-hints]
+- bookforge outline generate --book <id> [--transition-hints-file <path>] [--strict-transition-hints] [--strict-transition-bridges]
+- bookforge outline generate --book <id> [--transition-insert-budget-per-chapter <n>] [--allow-transition-scene-insertions | --disallow-transition-scene-insertions]
 - bookforge outline generate --book <id> [--scene-count-range <min:max>] [--exact-scene-count]
 - bookforge outline generate --book <id> [--force-rerun-with-draft]
 
@@ -26,6 +27,10 @@ Optional parameters
 - --phase: Run a single phase (same as --from-phase X --to-phase X).
 - --transition-hints-file: Path to transition-hints input file.
 - --strict-transition-hints: Require non-empty, schema-valid transition hints and strict compliance reporting.
+- --strict-transition-bridges: Enable strict transition-bridge enforcement (hard-block semantics for strict error-level attention items).
+- --transition-insert-budget-per-chapter: Transition insertion budget per chapter (default: 2).
+- --allow-transition-scene-insertions: Allow transition scene insertion (default enabled).
+- --disallow-transition-scene-insertions: Disable transition scene insertion.
 - --scene-count-range: Optional scene-count range in min:max form (range mode).
 - --exact-scene-count: Force strict exact matching against chapters[].pacing.expected_scene_count.
 - --force-rerun-with-draft: Allow rerun even if drafted scene outputs already exist.
@@ -49,9 +54,10 @@ Compatibility and safety
 - `--phase` cannot be combined with `--from-phase` or `--to-phase`.
 - Strict transition hints validates input against `schemas/outline_transition_hints.schema.json`.
 - Scene-count policy:
-  - Default: chapter totals are validated strongly against `expected_scene_count`.
+  - Default (`strong_non_exact`): chapter totals are validated strongly but mismatch is warning-level by default.
   - Range mode: `--scene-count-range` allows in-range totals and emits high-end bias warnings.
   - Exact mode: `--exact-scene-count` enforces strict chapter-total equality.
+- Transition-quality summary is always printed at the end of outline generation and written to `outline/pipeline_runs/<run_id>/outline_pipeline_report.json`.
 
 Outputs
 - Writes outline/outline.json and outline/chapters/ch_###.json.
@@ -60,6 +66,9 @@ Outputs
 - The prompt file can include a plain-English summary, characters, world, or system notes to ground the outline.
 - If the outline includes characters, writes outline/characters.json.
 - Updates state.json with outline path and status when applicable.
+- Writes outline pipeline summary report:
+  - outline/pipeline_runs/<run_id>/outline_pipeline_report.json
+  - includes result status, mode values, seam outcomes, attention items, and top seam decisions.
 
 Debugging
 - If the model returns invalid JSON, the raw response is written to workspace/logs/llm/outline_generate_<timestamp>.json.
@@ -88,3 +97,5 @@ Examples
   bookforge outline generate --book my_novel_v1 --phase phase_04_transition_causality_refinement --rerun
 - Strict hints + exact count:
   bookforge outline generate --book my_novel_v1 --rerun --transition-hints-file prompts\transition_hints.json --strict-transition-hints --exact-scene-count
+- Strict bridges + custom insertion budget:
+  bookforge outline generate --book my_novel_v1 --rerun --strict-transition-bridges --transition-insert-budget-per-chapter 3

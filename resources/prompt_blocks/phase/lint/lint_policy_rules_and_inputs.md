@@ -12,6 +12,15 @@ Return ONLY JSON matching the lint_report schema.
   - If scene_card.ui_allowed=false and any authoritative UI blocks appear, emit issue code 'ui_gate_violation' (severity depends on lint mode).
   - If ui_allowed is missing and UI blocks appear, emit 'ui_gate_unknown' (warning) requesting explicit ui_allowed; do not fail solely for missing flag.
   - Inline bracketed UI (e.g., [HP: 1/1]) is still UI and should be gated the same way; do not embed UI mid-sentence.
+- Transition bridge gate:
+  - Emit issue code "transition_bridge_missing" when scene_card indicates non-direct handoff (or location/handoff metadata implies discontinuity) and the opening span lacks transition realization evidence.
+  - Opening span scope for this check: first paragraph or first 400 characters, whichever is shorter.
+  - Transition realization evidence is either:
+    - exact scene_card.transition_in_text, or
+    - equivalent wording containing all scene_card.transition_in_anchors.
+  - Severity policy:
+    - warning in non-strict transition mode.
+    - error in strict transition mode.
 - If uncertain, default to EPHEMERAL (warning at most), not DURABLE (error).
 - status="fail" only if there is at least one issue with severity="error"; warnings alone => status="pass".
 - Item naming enforcement scope:
@@ -125,6 +134,5 @@ Post-summary (facts-only):
 
 Post-invariants (must_stay_true + key facts):
 {{post_invariants}}
-
 
 

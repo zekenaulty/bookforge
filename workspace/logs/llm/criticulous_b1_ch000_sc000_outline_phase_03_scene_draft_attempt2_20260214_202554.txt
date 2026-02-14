@@ -1,0 +1,2043 @@
+{
+  "schema_version": "1.1",
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "name": "Arthur 'Artie' Penhaligon",
+      "pronouns": "he/him",
+      "role": "protagonist",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      }
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "name": "Fizz",
+      "pronouns": "she/her",
+      "role": "companion/guide",
+      "intro": {
+        "chapter": 1,
+        "scene": 2
+      }
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "name": "Vane",
+      "pronouns": "he/him",
+      "role": "antagonist",
+      "intro": {
+        "chapter": 1,
+        "scene": 8
+      }
+    },
+    {
+      "character_id": "CHAR_MAYOR",
+      "name": "Mayor of Oakhaven",
+      "pronouns": "he/him",
+      "role": "npc",
+      "intro": {
+        "chapter": 1,
+        "scene": 7
+      }
+    },
+    {
+      "character_id": "CHAR_BOSS",
+      "name": "The System Administrator",
+      "pronouns": "it/its",
+      "role": "overarching villain",
+      "intro": {
+        "chapter": 6,
+        "scene": 8
+      }
+    }
+  ],
+  "threads": [
+    {
+      "thread_id": "THREAD_CRIT_EXPLOIT",
+      "label": "The 100% Crit Glitch",
+      "status": "open"
+    },
+    {
+      "thread_id": "THREAD_VANE_RIVALRY",
+      "label": "The Vane Vendetta",
+      "status": "open"
+    },
+    {
+      "thread_id": "THREAD_SYSTEM_GLITCH",
+      "label": "The System's Stability",
+      "status": "open"
+    },
+    {
+      "thread_id": "THREAD_THE_ASCENSION",
+      "label": "The Path of the First Glitch",
+      "status": "open"
+    }
+  ],
+  "chapters": [
+    {
+      "chapter_id": 1,
+      "title": "Welcome to the RNG-Hellscape",
+      "goal": "Introduce Artie and his broken 'Crit-Only' status in a high-stakes environment.",
+      "chapter_role": "hook",
+      "stakes_shift": "Artie goes from an office drone to a level 1 glitch in a lethal game world.",
+      "bridge": {
+        "from_prev": "N/A",
+        "to_next": "Artie must find a way to survive his first night with zero defensive stats."
+      },
+      "pacing": {
+        "intensity": 4,
+        "tempo": "rush",
+        "expected_scene_count": 8
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Exit Interview",
+          "intent": "Establish Artie's mundane life and sudden, absurd death.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie argues with a vending machine over a bag of chips before a freak electrical surge sends him to the great login screen in the sky.",
+              "type": "setup",
+              "outcome": "Artie dies and enters the System's character creation void.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "introduces": [
+                "CHAR_ARTIE"
+              ],
+              "transition_in": {
+                "transition_in_text": "The hum of the breakroom was the soundtrack of Artie's life.",
+                "transition_in_anchors": [
+                  "stale coffee",
+                  "fluorescent lights",
+                  "vending machine"
+                ],
+                "location_start": "Office Breakroom",
+                "location_end": "Office Breakroom",
+                "handoff_mode": "immediate",
+                "constraint_state": "mortal"
+              },
+              "transition_out": "The world turned white as the machine surged.",
+              "hands_off_to": "1:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "The System, personified as a snarky UI, mocks Artie's life choices while he accidentally dumps all his points into the 'Crit' stat.",
+              "type": "reveal",
+              "outcome": "Artie is locked into a 'Crit or Quit' build with 1 HP and 100% Critical Hit rate.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "introduces": [
+                "CHAR_FIZZ"
+              ],
+              "threads": [
+                "THREAD_CRIT_EXPLOIT"
+              ],
+              "consumes_outcome_from": "1:1",
+              "transition_in": {
+                "transition_in_text": "Consciousness returned as a series of floating blue windows.",
+                "transition_in_anchors": [
+                  "blue light",
+                  "stat screen",
+                  "snarky voice"
+                ],
+                "location_start": "Office Breakroom",
+                "location_end": "The Void",
+                "handoff_mode": "hard",
+                "constraint_state": "glitched"
+              },
+              "transition_out": "The 'Accept' button flashed with ominous finality.",
+              "hands_off_to": "1:3",
+              "end_condition_echo": "Artie is locked into a 'Crit or Quit' build with 1 HP and 100% Critical Hit rate."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The First Spawn",
+          "intent": "Show the immediate danger of a 1 HP build.",
+          "scenes": [
+            {
+              "scene_id": 3,
+              "summary": "Artie spawns in the middle of a tutorial zone and is immediately targeted by a Level 1 Slime that looks suspiciously aggressive.",
+              "type": "escalation",
+              "outcome": "Artie realizes that in this world, '1 HP' means a stiff breeze could kill him.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "1:2",
+              "transition_in": {
+                "transition_in_text": "The void dissolved into a lush, green meadow.",
+                "transition_in_anchors": [
+                  "green grass",
+                  "tutorial sign",
+                  "blue slime"
+                ],
+                "location_start": "The Void",
+                "location_end": "Tutorial Meadow",
+                "handoff_mode": "soft",
+                "constraint_state": "vulnerable"
+              },
+              "transition_out": "The slime wobbled forward with murderous intent.",
+              "hands_off_to": "1:4"
+            },
+            {
+              "scene_id": 4,
+              "summary": "Artie tries to punch the slime; he misses five times before landing a 'Super-Mega-Ultra-Crit' that vaporizes the slime and the tree behind it.",
+              "type": "action",
+              "outcome": "Artie gains his first level and realizes his power is terrifyingly inconsistent.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_CRIT_EXPLOIT"
+              ],
+              "consumes_outcome_from": "1:3",
+              "transition_in": {
+                "transition_in_text": "Artie squared his shoulders and swung a desperate fist.",
+                "transition_in_anchors": [
+                  "wobbly slime",
+                  "clenched fist",
+                  "exploding tree"
+                ],
+                "location_start": "Tutorial Meadow",
+                "location_end": "Tutorial Meadow",
+                "handoff_mode": "immediate",
+                "constraint_state": "active"
+              },
+              "transition_out": "Level Up! The notification was blinding.",
+              "hands_off_to": "1:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "The System awards Artie a 'Participation Trophy' item that actually attracts monsters.",
+              "type": "consequence",
+              "outcome": "Artie is forced to run for his life as the tutorial zone aggros on him.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "1:4",
+              "transition_in": {
+                "transition_in_text": "A golden trophy materialized in Artie's hands.",
+                "transition_in_anchors": [
+                  "golden trophy",
+                  "monster roar",
+                  "shaking ground"
+                ],
+                "location_start": "Tutorial Meadow",
+                "location_end": "Tutorial Meadow",
+                "handoff_mode": "soft",
+                "constraint_state": "aggroed"
+              },
+              "transition_out": "He didn't look back as the forest began to move.",
+              "hands_off_to": "1:6",
+              "end_condition_echo": "Artie is forced to flee the tutorial zone as it aggressively aggros on his anomaly status."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Safe Zone?",
+          "intent": "Reach the first hub and establish the world's culture.",
+          "scenes": [
+            {
+              "scene_id": 6,
+              "summary": "Artie reaches the gates of Oakhaven, where the guards are busy betting on the 'Crit-Rate' of incoming travelers.",
+              "type": "transition",
+              "outcome": "Artie enters the town but is flagged as a 'Statistical Anomaly' by the gate scanners.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "1:5",
+              "transition_in": {
+                "transition_in_text": "The stone walls of Oakhaven loomed ahead.",
+                "transition_in_anchors": [
+                  "stone gates",
+                  "gambling guards",
+                  "glowing scanner"
+                ],
+                "location_start": "Tutorial Forest",
+                "location_end": "Oakhaven Gates",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "The scanner turned a deep, angry red.",
+              "hands_off_to": "1:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Artie meets the local Tavern Keeper, who explains that 'Crits' are the only currency that matters to the local nobility.",
+              "type": "reveal",
+              "outcome": "Artie understands his 'broken' stat makes him a target for the powerful.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_MAYOR"
+              ],
+              "introduces": [
+                "CHAR_MAYOR"
+              ],
+              "consumes_outcome_from": "1:6",
+              "transition_in": {
+                "transition_in_text": "The tavern smelled of spilled ale and desperation.",
+                "transition_in_anchors": [
+                  "wooden bar",
+                  "clinking coins",
+                  "mayor's sash"
+                ],
+                "location_start": "Oakhaven Gates",
+                "location_end": "The Lucky Roll Tavern",
+                "handoff_mode": "soft",
+                "constraint_state": "safe_zone"
+              },
+              "transition_out": "The Mayor's eyes glinted with greed.",
+              "hands_off_to": "1:8"
+            },
+            {
+              "scene_id": 8,
+              "summary": "A high-level Paladin, Vane, notices Artie's glowing 'Anomaly' aura and decides to 'mentor' him (bully him).",
+              "type": "escalation",
+              "outcome": "Artie makes his first rival and barely escapes a forced duel.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_VANE"
+              ],
+              "introduces": [
+                "CHAR_VANE"
+              ],
+              "threads": [
+                "THREAD_VANE_RIVALRY"
+              ],
+              "consumes_outcome_from": "1:7",
+              "transition_in": {
+                "transition_in_text": "The tavern door slammed open, framing a man in shining armor.",
+                "transition_in_anchors": [
+                  "golden armor",
+                  "heavy boots",
+                  "haughty sneer"
+                ],
+                "location_start": "The Lucky Roll Tavern",
+                "location_end": "Oakhaven Streets",
+                "handoff_mode": "hard",
+                "constraint_state": "threatened"
+              },
+              "transition_out": "Artie ducked into an alley as Vane's sword cleared its scabbard.",
+              "hands_off_to": "2:1",
+              "end_condition_echo": "Artie makes a high-level rival in Vane and barely escapes a forced duel."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 2,
+      "title": "The Glass Cannon's Guide to Not Dying",
+      "goal": "Artie needs gear that doesn't rely on him being hit, as he can't take a single blow.",
+      "chapter_role": "setup",
+      "stakes_shift": "Survival shifts from luck to tactical exploitation of the System's bugs.",
+      "bridge": {
+        "from_prev": "Artie is a marked man in Oakhaven.",
+        "to_next": "Artie heads to the Low-Level Crypts to farm 'Evasion' gear."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "steady",
+        "expected_scene_count": 9
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Shopping for Scraps",
+          "intent": "Equip Artie with the bare minimum to survive a dungeon.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie tries to sell his 'Participation Trophy' but finds out it's soul-bound and cursed.",
+              "type": "choice",
+              "outcome": "Artie is stuck with a lighthouse-beacon for monsters.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "1:8",
+              "transition_in": {
+                "transition_in_text": "The morning sun hit Oakhaven's market square.",
+                "transition_in_anchors": [
+                  "market stall",
+                  "cursed trophy",
+                  "angry merchant"
+                ],
+                "location_start": "Oakhaven Streets",
+                "location_end": "Oakhaven Market",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "The trophy hummed with a low, sinister vibration.",
+              "hands_off_to": "2:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Fizz points out a loophole in the 'Starter Pack' quest that allows Artie to steal a high-tier cloak if he can crit a lock.",
+              "type": "reveal",
+              "outcome": "Artie successfully crits a lock, causing it to explode into gold dust.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "2:1",
+              "transition_in": {
+                "transition_in_text": "Fizz hovered near a heavy iron chest behind the counter.",
+                "transition_in_anchors": [
+                  "iron lock",
+                  "floating sprite",
+                  "heavy dust"
+                ],
+                "location_start": "Oakhaven Market",
+                "location_end": "The Backroom",
+                "handoff_mode": "immediate",
+                "constraint_state": "stealth"
+              },
+              "transition_out": "The lock didn't just open; it ceased to exist.",
+              "hands_off_to": "2:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie acquires the 'Cloak of the Cowardly Lion,' which gives +50 Evasion but -100 Dignity.",
+              "type": "aftermath",
+              "outcome": "Artie is now slightly harder to hit but looks like a neon yellow cat.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:2",
+              "transition_in": {
+                "transition_in_text": "Artie pulled the neon fabric over his shoulders.",
+                "transition_in_anchors": [
+                  "yellow fur",
+                  "cat ears",
+                  "stat boost"
+                ],
+                "location_start": "The Backroom",
+                "location_end": "Oakhaven Streets",
+                "handoff_mode": "soft",
+                "constraint_state": "equipped"
+              },
+              "transition_out": "He looked ridiculous, but he felt... safer.",
+              "hands_off_to": "2:4",
+              "end_condition_echo": "Artie acquires the 'Cloak of the Cowardly Lion' and looks like a neon yellow cat."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Crypt of Bad Math",
+          "intent": "Test the new gear and the Crit-build in a controlled environment.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie enters the Crypts and finds that the skeletons move in predictable, turn-based patterns.",
+              "type": "setup",
+              "outcome": "Artie begins to treat the world like a rhythm game.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "2:3",
+              "transition_in": {
+                "transition_in_text": "The air in the crypt was cold and smelled of old math.",
+                "transition_in_anchors": [
+                  "stone stairs",
+                  "rhythmic clicking",
+                  "glowing skeletons"
+                ],
+                "location_start": "Oakhaven Gates",
+                "location_end": "The Crypt Entrance",
+                "handoff_mode": "soft",
+                "constraint_state": "dungeon_active"
+              },
+              "transition_out": "Click. Clack. The rhythm was easy to follow.",
+              "hands_off_to": "2:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "A Skeleton Archer fires at Artie; the Cloak's evasion procs, causing Artie to do an accidental backflip.",
+              "type": "action",
+              "outcome": "Artie survives his first ranged encounter and gains confidence.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:4",
+              "transition_in": {
+                "transition_in_text": "A bone arrow whistled through the dark.",
+                "transition_in_anchors": [
+                  "bone arrow",
+                  "accidental flip",
+                  "yellow blur"
+                ],
+                "location_start": "The Crypt Entrance",
+                "location_end": "Crypt Tunnels",
+                "handoff_mode": "immediate",
+                "constraint_state": "in_combat"
+              },
+              "transition_out": "The arrow shattered against the wall behind him.",
+              "hands_off_to": "2:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie realizes his crits don't just do damage; they cause 'System Overload' effects like turning enemies into loot-filled pinatas.",
+              "type": "reveal",
+              "outcome": "Artie discovers he can farm resources much faster than anyone else.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "threads": [
+                "THREAD_CRIT_EXPLOIT"
+              ],
+              "consumes_outcome_from": "2:5",
+              "transition_in": {
+                "transition_in_text": "His fist connected with a skeleton's ribcage.",
+                "transition_in_anchors": [
+                  "shattering bone",
+                  "candy shower",
+                  "exploding loot"
+                ],
+                "location_start": "Crypt Tunnels",
+                "location_end": "Crypt Chamber",
+                "handoff_mode": "immediate",
+                "constraint_state": "active"
+              },
+              "transition_out": "The floor was covered in gold and... jellybeans?",
+              "hands_off_to": "2:7",
+              "end_condition_echo": "Artie discovers he can turn enemies into loot-filled pinatas via System Overload."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Rival's Shadow",
+          "intent": "Reintroduce Vane as a persistent threat.",
+          "scenes": [
+            {
+              "scene_id": 7,
+              "summary": "Vane enters the crypts with a full party, clearing rooms with ease while Artie hides in a sarcophagus.",
+              "type": "escalation",
+              "outcome": "Artie sees the gap between a 'proper' build and his own.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_VANE"
+              ],
+              "consumes_outcome_from": "2:6",
+              "transition_in": {
+                "transition_in_text": "Heavy footsteps echoed from the tunnel entrance.",
+                "transition_in_anchors": [
+                  "sarcophagus lid",
+                  "shining torchlight",
+                  "vane's laughter"
+                ],
+                "location_start": "Crypt Chamber",
+                "location_end": "Crypt Chamber",
+                "handoff_mode": "soft",
+                "constraint_state": "stealth"
+              },
+              "transition_out": "Vane's party moved on, leaving destruction in their wake.",
+              "hands_off_to": "2:8"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Vane's party leaves behind a 'Boss Trigger'\u2014a rare item that summons a Floor Guardian.",
+              "type": "choice",
+              "outcome": "Artie decides to take the risk and summon the boss for the massive XP.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "2:7",
+              "transition_in": {
+                "transition_in_text": "A glowing crystal sat on a pedestal, forgotten.",
+                "transition_in_anchors": [
+                  "glowing crystal",
+                  "boss trigger",
+                  "temptation"
+                ],
+                "location_start": "Crypt Chamber",
+                "location_end": "Boss Room Entrance",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "He reached out and touched the crystal.",
+              "hands_off_to": "2:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "The Floor Guardian, a Bone Golem, emerges, and Artie realizes he forgot to check its 'Minimum Damage' stat.",
+              "type": "consequence",
+              "outcome": "The boss battle begins with Artie at a massive disadvantage.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:8",
+              "transition_in": {
+                "transition_in_text": "The ground shook as bones knitted together into a giant.",
+                "transition_in_anchors": [
+                  "bone golem",
+                  "minimum damage",
+                  "looming shadow"
+                ],
+                "location_start": "Boss Room Entrance",
+                "location_end": "Boss Room",
+                "handoff_mode": "hard",
+                "constraint_state": "boss_fight"
+              },
+              "transition_out": "The golem raised a massive fist.",
+              "hands_off_to": "3:1",
+              "end_condition_echo": "The Bone Golem emerges, initiating a boss battle where Artie is at a massive disadvantage."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 3,
+      "title": "Math-Boss vs. The Glitch",
+      "goal": "Survive the Floor Guardian and secure the first major loot drop.",
+      "chapter_role": "pressure",
+      "stakes_shift": "If Artie wins, he becomes the first Level 10 'Anomaly'; if he loses, it's Game Over.",
+      "bridge": {
+        "from_prev": "The Bone Golem is ready to smash Artie.",
+        "to_next": "Artie leaves the crypts with a legendary-tier item that he can't actually use yet."
+      },
+      "pacing": {
+        "intensity": 5,
+        "tempo": "steady",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Dance of Death",
+          "intent": "A high-octane fight where Artie must dodge every single attack.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie uses the Crypt environment to kite the Bone Golem, using 'Crit-Punches' to chip away at its armor.",
+              "type": "action",
+              "outcome": "The Golem's armor is shattered, but Artie is running out of stamina.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:9",
+              "transition_in": {
+                "transition_in_text": "Artie scrambled across the uneven floor.",
+                "transition_in_anchors": [
+                  "cracked pillars",
+                  "shattered armor",
+                  "heavy breathing"
+                ],
+                "location_start": "Boss Room",
+                "location_end": "Boss Room",
+                "handoff_mode": "immediate",
+                "constraint_state": "boss_fight"
+              },
+              "transition_out": "The golem roared, a sound of grinding stone.",
+              "hands_off_to": "3:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Fizz discovers that the Golem has a 'Crit-Resist' buff, making Artie's main weapon useless.",
+              "type": "reveal",
+              "outcome": "Artie must find a way to bypass the resistance or die.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "3:1",
+              "transition_in": {
+                "transition_in_text": "Fizz's wings buzzed with frantic energy.",
+                "transition_in_anchors": [
+                  "crit-resist buff",
+                  "floating icon",
+                  "desperate look"
+                ],
+                "location_start": "Boss Room",
+                "location_end": "Boss Room",
+                "handoff_mode": "immediate",
+                "constraint_state": "threatened"
+              },
+              "transition_out": "His punches were bouncing off like rubber balls.",
+              "hands_off_to": "3:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie attempts to 'Crit' the ground beneath the Golem, hoping for a physics glitch.",
+              "type": "choice",
+              "outcome": "The floor collapses, trapping the Golem in a hole.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "3:2",
+              "transition_in": {
+                "transition_in_text": "Artie looked at the floor tiles, then at the Golem's weight.",
+                "transition_in_anchors": [
+                  "floor tiles",
+                  "winding punch",
+                  "structural failure"
+                ],
+                "location_start": "Boss Room",
+                "location_end": "Boss Room",
+                "handoff_mode": "immediate",
+                "constraint_state": "active"
+              },
+              "transition_out": "The stone gave way with a thunderous crack.",
+              "hands_off_to": "3:4",
+              "end_condition_echo": "The floor collapses, trapping the Bone Golem in a hole."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Final Blow",
+          "intent": "Resolve the boss fight with a comedic but effective exploit.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "While the Golem is stuck, Artie spends five minutes 'charging' a punch, which the System interprets as a 'Heavy Attack'.",
+              "type": "setup",
+              "outcome": "Artie prepares his most powerful hit yet.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "3:3",
+              "transition_in": {
+                "transition_in_text": "The Golem flailed in the pit, unable to reach the edge.",
+                "transition_in_anchors": [
+                  "charging bar",
+                  "sweating brow",
+                  "ticking clock"
+                ],
+                "location_start": "Boss Room",
+                "location_end": "Boss Pit",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "The bar reached 100%.",
+              "hands_off_to": "3:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Artie lands the hit, but instead of damage, the System rolls a 'Cosmetic Crit,' turning the Golem into a pile of very expensive porcelain teacups.",
+              "type": "action",
+              "outcome": "The boss is defeated, but the loot is... unconventional.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_CRIT_EXPLOIT"
+              ],
+              "consumes_outcome_from": "3:4",
+              "transition_in": {
+                "transition_in_text": "He released the punch with a primal yell.",
+                "transition_in_anchors": [
+                  "porcelain clatter",
+                  "teacup pile",
+                  "stunned silence"
+                ],
+                "location_start": "Boss Pit",
+                "location_end": "Boss Pit",
+                "handoff_mode": "immediate",
+                "constraint_state": "active"
+              },
+              "transition_out": "A single teacup rolled to a stop at his feet.",
+              "hands_off_to": "3:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "The System panics and tries to 'recalculate' the XP, resulting in Artie jumping five levels instantly.",
+              "type": "aftermath",
+              "outcome": "Artie is now Level 10, but the System is watching him more closely.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "3:5",
+              "transition_in": {
+                "transition_in_text": "The air shimmered with XP orbs.",
+                "transition_in_anchors": [
+                  "xp recalculation",
+                  "level-up chime",
+                  "system warning"
+                ],
+                "location_start": "Boss Pit",
+                "location_end": "Boss Pit",
+                "handoff_mode": "soft",
+                "constraint_state": "leveled_up"
+              },
+              "transition_out": "The level-up sound played five times in rapid succession.",
+              "hands_off_to": "3:7",
+              "end_condition_echo": "Artie hits Level 10 instantly after the System panics during XP recalculation."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Looting the Teacups",
+          "intent": "Examine the rewards and the consequences of the fight.",
+          "scenes": [
+            {
+              "scene_id": 7,
+              "summary": "Artie finds a 'Ring of the Gambler' among the teacups, which doubles crit damage but makes every 20th hit a self-crit.",
+              "type": "reveal",
+              "outcome": "Artie accepts the double-edged sword.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "3:6",
+              "transition_in": {
+                "transition_in_text": "Artie sifted through the porcelain remains.",
+                "transition_in_anchors": [
+                  "gambler's ring",
+                  "shiny gold",
+                  "self-crit warning"
+                ],
+                "location_start": "Boss Pit",
+                "location_end": "Boss Room",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "He slipped the ring onto his finger.",
+              "hands_off_to": "3:8"
+            },
+            {
+              "scene_id": 8,
+              "summary": "A hidden door opens, revealing a mural of the 'First Glitch'\u2014a hero who looked suspiciously like Artie's high school gym teacher.",
+              "type": "reveal",
+              "outcome": "Artie realizes he isn't the first person to break this game.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "threads": [
+                "THREAD_THE_ASCENSION"
+              ],
+              "consumes_outcome_from": "3:7",
+              "transition_in": {
+                "transition_in_text": "A stone slab slid back with a groan.",
+                "transition_in_anchors": [
+                  "ancient mural",
+                  "gym teacher",
+                  "pixelated hero"
+                ],
+                "location_start": "Boss Room",
+                "location_end": "Hidden Mural Room",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "The history of the world was written in bugs.",
+              "hands_off_to": "3:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Artie exits the crypt to find Vane waiting for him, looking very confused by the lack of a boss.",
+              "type": "escalation",
+              "outcome": "Vane realizes Artie stole his kill.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_VANE"
+              ],
+              "consumes_outcome_from": "3:8",
+              "transition_in": {
+                "transition_in_text": "The fresh air of the surface was a relief.",
+                "transition_in_anchors": [
+                  "crypt exit",
+                  "vane's party",
+                  "confused paladin"
+                ],
+                "location_start": "Hidden Mural Room",
+                "location_end": "Crypt Exit",
+                "handoff_mode": "soft",
+                "constraint_state": "threatened"
+              },
+              "transition_out": "Vane's confusion turned to cold fury.",
+              "hands_off_to": "3:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Artie uses his new level-up speed to outrun Vane's party, heading toward the capital city.",
+              "type": "transition",
+              "outcome": "The chase is on.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_VANE"
+              ],
+              "consumes_outcome_from": "3:9",
+              "transition_in": {
+                "transition_in_text": "Artie's legs felt like coiled springs.",
+                "transition_in_anchors": [
+                  "running feet",
+                  "dust cloud",
+                  "shouting paladin"
+                ],
+                "location_start": "Crypt Exit",
+                "location_end": "Road to Capital",
+                "handoff_mode": "immediate",
+                "constraint_state": "active"
+              },
+              "transition_out": "The city of gold appeared on the horizon.",
+              "hands_off_to": "4:1",
+              "end_condition_echo": "Artie uses his new speed to outrun Vane's party toward the capital city."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 4,
+      "title": "The Capital of Crits",
+      "goal": "Artie must hide in plain sight while trying to find a way to stabilize his build.",
+      "chapter_role": "investigation",
+      "stakes_shift": "The stakes move from physical survival to social navigation and avoiding the 'System Police'.",
+      "bridge": {
+        "from_prev": "Artie is a fugitive from Vane's ego.",
+        "to_next": "Artie enters the Grand Arena for a 'Low-Stakes' tournament."
+      },
+      "pacing": {
+        "intensity": 2,
+        "tempo": "slow_burn",
+        "expected_scene_count": 8
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The City of Gold and Glitches",
+          "intent": "Establish the capital city as a place where 'Crits' are worshiped.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie enters the city and sees the 'Temple of the D20,' where priests pray for high rolls.",
+              "type": "setup",
+              "outcome": "Artie realizes he is basically a walking god in this religion.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "3:10",
+              "transition_in": {
+                "transition_in_text": "The capital was a riot of gold and marble.",
+                "transition_in_anchors": [
+                  "temple of d20",
+                  "dice priests",
+                  "crowded streets"
+                ],
+                "location_start": "Road to Capital",
+                "location_end": "Capital Gates",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "Everywhere he looked, people were rolling for luck.",
+              "hands_off_to": "4:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie tries to find a 'Stat-Wiper' to fix his 1 HP, but finds out it's a crime punishable by 'Deletion'.",
+              "type": "reveal",
+              "outcome": "Artie is stuck with his glass cannon build forever.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "4:1",
+              "transition_in": {
+                "transition_in_text": "He found a shady shop in the back alleys.",
+                "transition_in_anchors": [
+                  "stat-wiper",
+                  "deletion warning",
+                  "shady merchant"
+                ],
+                "location_start": "Capital Gates",
+                "location_end": "Capital Streets",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "The hope of a normal build vanished.",
+              "hands_off_to": "4:3",
+              "end_condition_echo": "Artie accepts that he is stuck with his 1 HP glass cannon build forever."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Underground Market",
+          "intent": "Artie looks for illegal mods to help him survive.",
+          "scenes": [
+            {
+              "scene_id": 3,
+              "summary": "Fizz leads Artie to a black market run by a group of 'Dev-Haters' who sell items that bypass System rules.",
+              "type": "transition",
+              "outcome": "Artie gains access to a 'Lag-Switch' potion.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "4:2",
+              "transition_in": {
+                "transition_in_text": "They descended into a cellar beneath a bakery.",
+                "transition_in_anchors": [
+                  "dev-haters",
+                  "lag-switch potion",
+                  "hidden cellar"
+                ],
+                "location_start": "Capital Streets",
+                "location_end": "Underground Market",
+                "handoff_mode": "hard",
+                "constraint_state": "illegal"
+              },
+              "transition_out": "The potion bottle felt cold and glitchy.",
+              "hands_off_to": "4:4"
+            },
+            {
+              "scene_id": 4,
+              "summary": "Artie meets an informant who tells him that Vane is the son of the High Priest of RNG.",
+              "type": "reveal",
+              "outcome": "The rivalry with Vane just became a religious war.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_VANE_RIVALRY"
+              ],
+              "consumes_outcome_from": "4:3",
+              "transition_in": {
+                "transition_in_text": "A hooded figure leaned out of the shadows.",
+                "transition_in_anchors": [
+                  "high priest",
+                  "vane's family",
+                  "religious war"
+                ],
+                "location_start": "Underground Market",
+                "location_end": "Back Alley",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "Vane wasn't just a bully; he was the establishment.",
+              "hands_off_to": "4:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "The black market is raided by the 'System Sentinels,' and Artie has to use his first 'Lag-Switch' to escape.",
+              "type": "action",
+              "outcome": "Artie escapes, but the potion has a side effect: he speaks in binary for an hour.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "4:4",
+              "transition_in": {
+                "transition_in_text": "Blue lights flashed as the ceiling buckled.",
+                "transition_in_anchors": [
+                  "system sentinels",
+                  "lag-switch",
+                  "binary speech"
+                ],
+                "location_start": "Back Alley",
+                "location_end": "Market Exit",
+                "handoff_mode": "hard",
+                "constraint_state": "threatened"
+              },
+              "transition_out": "01001000 01100101 01101100 01110000.",
+              "hands_off_to": "4:6",
+              "end_condition_echo": "Artie escapes a sentinel raid but is left speaking in binary for an hour."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Arena Invitation",
+          "intent": "Set up the climax of the book.",
+          "scenes": [
+            {
+              "scene_id": 6,
+              "summary": "Artie sees a flyer for the 'Grand Crit-Off,' where the prize is a 'Shield of Infinite Health'.",
+              "type": "choice",
+              "outcome": "Artie decides to enter, despite the risk of exposure.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "4:5",
+              "transition_in": {
+                "transition_in_text": "The binary wore off as he reached the main square.",
+                "transition_in_anchors": [
+                  "tournament flyer",
+                  "shield prize",
+                  "desperate hope"
+                ],
+                "location_start": "Market Exit",
+                "location_end": "Tournament Registration",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "He signed his name with a flourish.",
+              "hands_off_to": "4:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Artie registers under the name 'Crit-iculous' and accidentally sets his entry fee to 'All My Gold'.",
+              "type": "consequence",
+              "outcome": "Artie is now broke and must win the tournament to survive.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "4:6",
+              "transition_in": {
+                "transition_in_text": "The registration clerk looked at him with pity.",
+                "transition_in_anchors": [
+                  "empty wallet",
+                  "entry fee",
+                  "arena lobby"
+                ],
+                "location_start": "Tournament Registration",
+                "location_end": "Arena Lobby",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "It was win or starve.",
+              "hands_off_to": "4:8"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Vane sees the name on the roster and smiles, knowing he can finally 'delete' Artie in front of a crowd.",
+              "type": "escalation",
+              "outcome": "The stage is set for the final confrontation.",
+              "characters": [
+                "CHAR_VANE"
+              ],
+              "consumes_outcome_from": "4:7",
+              "transition_in": {
+                "transition_in_text": "Vane stood in his private viewing box.",
+                "transition_in_anchors": [
+                  "tournament roster",
+                  "vane's smile",
+                  "arena floor"
+                ],
+                "location_start": "Arena Lobby",
+                "location_end": "Vane's Viewing Box",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "The final duel was inevitable.",
+              "hands_off_to": "5:1",
+              "end_condition_echo": "Vane sees Artie's name on the tournament roster, setting the stage for the final duel."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 5,
+      "title": "The Tournament of Tiers",
+      "goal": "Artie must fight through the brackets without taking a single point of damage.",
+      "chapter_role": "trial",
+      "stakes_shift": "Artie becomes a crowd favorite, which makes the System even more eager to 'balance' him.",
+      "bridge": {
+        "from_prev": "Artie is the underdog in the arena.",
+        "to_next": "Artie reaches the finals against Vane."
+      },
+      "pacing": {
+        "intensity": 4,
+        "tempo": "steady",
+        "expected_scene_count": 11
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Round of 32",
+          "intent": "Show Artie's growth and tactical use of his crits.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie faces a 'Tank' who has 10,000 HP. Artie wins in one second by critting the Tank's belt buckle, causing his armor to fall off.",
+              "type": "action",
+              "outcome": "The crowd goes wild; Artie is the 'One-Hit Wonder'.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "4:8",
+              "transition_in": {
+                "transition_in_text": "The arena sand was hot under his boots.",
+                "transition_in_anchors": [
+                  "tank opponent",
+                  "belt buckle",
+                  "cheering crowd"
+                ],
+                "location_start": "Arena Lobby",
+                "location_end": "Arena Ring",
+                "handoff_mode": "hard",
+                "constraint_state": "in_combat"
+              },
+              "transition_out": "The Tank stood there in his polka-dot boxers.",
+              "hands_off_to": "5:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "The System tries to nerf Artie mid-match by introducing 'Wind Resistance'.",
+              "type": "escalation",
+              "outcome": "Artie has to learn to time his punches with the wind gusts.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "5:1",
+              "transition_in": {
+                "transition_in_text": "A sudden gale whipped through the stadium.",
+                "transition_in_anchors": [
+                  "wind resistance",
+                  "timed punch",
+                  "system nerf"
+                ],
+                "location_start": "Arena Ring",
+                "location_end": "Arena Ring",
+                "handoff_mode": "immediate",
+                "constraint_state": "active"
+              },
+              "transition_out": "The wind howled, trying to knock him over.",
+              "hands_off_to": "5:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie wins the second round by critting the air so hard it creates a vacuum, sucking his opponent out of the ring.",
+              "type": "action",
+              "outcome": "Artie moves to the quarter-finals.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "5:2",
+              "transition_in": {
+                "transition_in_text": "He swung at the empty air.",
+                "transition_in_anchors": [
+                  "vacuum crit",
+                  "flying opponent",
+                  "stunned crowd"
+                ],
+                "location_start": "Arena Ring",
+                "location_end": "Arena Ring",
+                "handoff_mode": "immediate",
+                "constraint_state": "active"
+              },
+              "transition_out": "The match was over before the crowd could blink.",
+              "hands_off_to": "5:4",
+              "end_condition_echo": "Artie moves to the quarter-finals after vacuum-critting his opponent out of the ring."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Quarter-Finals: The Mirror Match",
+          "intent": "Artie faces a character with high evasion, just like him.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie's opponent is a 'Dodge-Build' rogue who also has low HP.",
+              "type": "setup",
+              "outcome": "The fight becomes a high-speed game of tag.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "5:3",
+              "transition_in": {
+                "transition_in_text": "A blur of black silk entered the ring.",
+                "transition_in_anchors": [
+                  "dodge-build",
+                  "rogue opponent",
+                  "high speed"
+                ],
+                "location_start": "Arena Ring",
+                "location_end": "Arena Ring",
+                "handoff_mode": "soft",
+                "constraint_state": "in_combat"
+              },
+              "transition_out": "Two blurs circled each other.",
+              "hands_off_to": "5:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Neither can land a hit for ten minutes. The crowd starts booing.",
+              "type": "escalation",
+              "outcome": "Artie realizes he needs to change his strategy.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "5:4",
+              "transition_in": {
+                "transition_in_text": "The stalemate was agonizing.",
+                "transition_in_anchors": [
+                  "booing crowd",
+                  "missed hits",
+                  "strategy shift"
+                ],
+                "location_start": "Arena Ring",
+                "location_end": "Arena Ring",
+                "handoff_mode": "immediate",
+                "constraint_state": "active"
+              },
+              "transition_out": "He needed an edge.",
+              "hands_off_to": "5:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie uses his 'Participation Trophy' to lure a swarm of arena-flies, which distract the rogue just long enough for a crit.",
+              "type": "choice",
+              "outcome": "Artie wins, but the 'Trophy' is now glowing with dark energy.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_SYSTEM_GLITCH"
+              ],
+              "consumes_outcome_from": "5:5",
+              "transition_in": {
+                "transition_in_text": "He pulled the trophy from his bag.",
+                "transition_in_anchors": [
+                  "arena-flies",
+                  "dark glow",
+                  "distracted rogue"
+                ],
+                "location_start": "Arena Ring",
+                "location_end": "Arena Ring",
+                "handoff_mode": "immediate",
+                "constraint_state": "active"
+              },
+              "transition_out": "The rogue swatted at a fly and lost his head.",
+              "hands_off_to": "5:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "The System issues a 'Warning' to Artie for 'Unsportsmanlike Exploitation'.",
+              "type": "consequence",
+              "outcome": "Artie's next match will have a 'Random Debuff' applied.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "5:6",
+              "transition_in": {
+                "transition_in_text": "A red window popped up in front of his face.",
+                "transition_in_anchors": [
+                  "system warning",
+                  "random debuff",
+                  "fizz's worry"
+                ],
+                "location_start": "Arena Ring",
+                "location_end": "Arena Medical Bay",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "The next round was going to be painful.",
+              "hands_off_to": "5:8",
+              "end_condition_echo": "Artie wins but receives a System warning for 'Unsportsmanlike Exploitation'."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Semi-Finals: The Debuff",
+          "intent": "Artie must overcome a mechanical handicap.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Artie's debuff is 'Inverted Controls'. Every time he tries to move left, he goes right.",
+              "type": "setup",
+              "outcome": "Artie looks like he's drunk-fighting.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "5:7",
+              "transition_in": {
+                "transition_in_text": "The buzzer sounded for the semi-finals.",
+                "transition_in_anchors": [
+                  "inverted controls",
+                  "stumbling steps",
+                  "drunk-fighting"
+                ],
+                "location_start": "Arena Medical Bay",
+                "location_end": "Arena Ring",
+                "handoff_mode": "hard",
+                "constraint_state": "debuffed"
+              },
+              "transition_out": "He nearly walked out of the ring immediately.",
+              "hands_off_to": "5:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Artie's opponent is a Mage who uses AOE spells. Artie has to 'moonwalk' through the fireballs.",
+              "type": "action",
+              "outcome": "Artie manages to reach the Mage and lands a crit that turns the Mage's staff into a rubber chicken.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "5:8",
+              "transition_in": {
+                "transition_in_text": "Fireballs rained down from the sky.",
+                "transition_in_anchors": [
+                  "moonwalk dodge",
+                  "rubber chicken",
+                  "mage opponent"
+                ],
+                "location_start": "Arena Ring",
+                "location_end": "Arena Ring",
+                "handoff_mode": "immediate",
+                "constraint_state": "active"
+              },
+              "transition_out": "The Mage stared at the squeaking chicken in horror.",
+              "hands_off_to": "5:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "The Mage surrenders out of pure embarrassment.",
+              "type": "aftermath",
+              "outcome": "Artie reaches the finals.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "5:9",
+              "transition_in": {
+                "transition_in_text": "The crowd was laughing, not cheering.",
+                "transition_in_anchors": [
+                  "mage surrender",
+                  "embarrassment",
+                  "finalist"
+                ],
+                "location_start": "Arena Ring",
+                "location_end": "Arena Ring",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "Artie took a bow, still walking sideways.",
+              "hands_off_to": "5:11"
+            },
+            {
+              "scene_id": 11,
+              "summary": "Vane watches from the wings, holding a 'System Override' scroll he bought from the black market.",
+              "type": "reveal",
+              "outcome": "The final fight will be rigged.",
+              "characters": [
+                "CHAR_VANE"
+              ],
+              "consumes_outcome_from": "5:10",
+              "transition_in": {
+                "transition_in_text": "Vane stepped into the shadows of the tunnel.",
+                "transition_in_anchors": [
+                  "override scroll",
+                  "rigged fight",
+                  "vane's plan"
+                ],
+                "location_start": "Arena Ring",
+                "location_end": "Arena Tunnels",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "The real game was about to begin.",
+              "hands_off_to": "6:1",
+              "end_condition_echo": "Vane prepares to use a 'System Override' scroll to rig the final fight."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 6,
+      "title": "The Final Roll",
+      "goal": "Defeat Vane and survive the System's attempt to delete Artie.",
+      "chapter_role": "climax",
+      "stakes_shift": "The survival of the entire game world is threatened as Artie's crits start breaking the source code.",
+      "bridge": {
+        "from_prev": "Artie enters the ring for the final match.",
+        "to_next": "The System crashes, and Artie is left in the wreckage."
+      },
+      "pacing": {
+        "intensity": 5,
+        "tempo": "rush",
+        "expected_scene_count": 12
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Vane's Ultimate Build",
+          "intent": "Show the power of a 'Whale' player vs. a 'Glitch' player.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Vane enters with legendary armor that reflects 50% of all damage. Artie realizes if he crits Vane, he crits himself.",
+              "type": "setup",
+              "outcome": "Artie's main weapon is now a suicide button.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_VANE"
+              ],
+              "consumes_outcome_from": "5:11",
+              "transition_in": {
+                "transition_in_text": "The final match began under a blood-red sky.",
+                "transition_in_anchors": [
+                  "reflect armor",
+                  "suicide button",
+                  "vane's entrance"
+                ],
+                "location_start": "Arena Tunnels",
+                "location_end": "Arena Ring",
+                "handoff_mode": "hard",
+                "constraint_state": "boss_fight"
+              },
+              "transition_out": "The armor hummed with a defensive aura.",
+              "hands_off_to": "6:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Vane uses the 'System Override' scroll to turn off Artie's Evasion stat.",
+              "type": "escalation",
+              "outcome": "Artie is now a 1 HP character who can't dodge.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_VANE"
+              ],
+              "consumes_outcome_from": "6:1",
+              "transition_in": {
+                "transition_in_text": "Vane unfurled a black parchment.",
+                "transition_in_anchors": [
+                  "override scroll",
+                  "evasion disabled",
+                  "vulnerable"
+                ],
+                "location_start": "Arena Ring",
+                "location_end": "Arena Ring",
+                "handoff_mode": "immediate",
+                "constraint_state": "nerfed"
+              },
+              "transition_out": "The yellow cloak turned grey and limp.",
+              "hands_off_to": "6:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Fizz sacrifices her 'Guide' status to temporarily hack the arena's gravity, giving Artie a few seconds of weightlessness.",
+              "type": "choice",
+              "outcome": "Artie can move in 3D, bypassing the 'No-Evasion' ground rule.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "6:2",
+              "transition_in": {
+                "transition_in_text": "Fizz dove into the arena's code.",
+                "transition_in_anchors": [
+                  "gravity hack",
+                  "weightlessness",
+                  "fizz's sacrifice"
+                ],
+                "location_start": "Arena Ring",
+                "location_end": "Arena Ring",
+                "handoff_mode": "immediate",
+                "constraint_state": "active"
+              },
+              "transition_out": "Artie drifted off the sand.",
+              "hands_off_to": "6:4"
+            },
+            {
+              "scene_id": 4,
+              "summary": "Artie realizes he doesn't need to hit Vane; he needs to hit the 'Reflect' buff itself.",
+              "type": "reveal",
+              "outcome": "Artie targets the magic aura around Vane's armor.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "6:3",
+              "transition_in": {
+                "transition_in_text": "He saw the code shimmering around Vane.",
+                "transition_in_anchors": [
+                  "aura targeting",
+                  "magic shimmer",
+                  "vane's armor"
+                ],
+                "location_start": "Arena Ring",
+                "location_end": "Arena Ring",
+                "handoff_mode": "immediate",
+                "constraint_state": "active"
+              },
+              "transition_out": "He aimed for the air three inches from Vane's chest.",
+              "hands_off_to": "6:5",
+              "end_condition_echo": "Artie realizes he must target the magic aura of Vane's 'Reflect' buff directly."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Breaking the Game",
+          "intent": "The moment of peak absurdity and power.",
+          "scenes": [
+            {
+              "scene_id": 5,
+              "summary": "Artie lands a 'Meta-Crit' on the Reflect buff. The System can't handle the math of a crit reflecting a crit reflecting a crit.",
+              "type": "action",
+              "outcome": "The arena begins to pixelate and dissolve.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_VANE"
+              ],
+              "threads": [
+                "THREAD_CRIT_EXPLOIT"
+              ],
+              "consumes_outcome_from": "6:4",
+              "transition_in": {
+                "transition_in_text": "The impact sounded like a computer crashing.",
+                "transition_in_anchors": [
+                  "meta-crit",
+                  "pixelated arena",
+                  "math error"
+                ],
+                "location_start": "Arena Ring",
+                "location_end": "Arena Ring",
+                "handoff_mode": "immediate",
+                "constraint_state": "crashing"
+              },
+              "transition_out": "The ground turned into wireframes.",
+              "hands_off_to": "6:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Vane panics as his armor turns into a swarm of error messages.",
+              "type": "escalation",
+              "outcome": "Vane is defenseless and terrified.",
+              "characters": [
+                "CHAR_VANE"
+              ],
+              "consumes_outcome_from": "6:5",
+              "transition_in": {
+                "transition_in_text": "Vane screamed as his gear dissolved.",
+                "transition_in_anchors": [
+                  "error messages",
+                  "defenseless",
+                  "vane's panic"
+                ],
+                "location_start": "Arena Ring",
+                "location_end": "Arena Ring",
+                "handoff_mode": "immediate",
+                "constraint_state": "crashing"
+              },
+              "transition_out": "The golden boy was now just a man in rags.",
+              "hands_off_to": "6:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Artie delivers the final blow\u2014a crit so powerful it deletes Vane's character data (but not the person).",
+              "type": "action",
+              "outcome": "Vane is kicked from the game, and Artie is the champion of a broken world.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_VANE"
+              ],
+              "consumes_outcome_from": "6:6",
+              "transition_in": {
+                "transition_in_text": "Artie wound up for the final hit.",
+                "transition_in_anchors": [
+                  "data deletion",
+                  "final blow",
+                  "vane's exit"
+                ],
+                "location_start": "Arena Ring",
+                "location_end": "Arena Ring",
+                "handoff_mode": "immediate",
+                "constraint_state": "active"
+              },
+              "transition_out": "Vane vanished in a shower of blue sparks.",
+              "hands_off_to": "6:8"
+            },
+            {
+              "scene_id": 8,
+              "summary": "The System Administrator (a giant floating head) appears to manually delete Artie.",
+              "type": "reveal",
+              "outcome": "The true antagonist is revealed.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BOSS"
+              ],
+              "introduces": [
+                "CHAR_BOSS"
+              ],
+              "consumes_outcome_from": "6:7",
+              "transition_in": {
+                "transition_in_text": "The sky split open to reveal a massive face.",
+                "transition_in_anchors": [
+                  "admin head",
+                  "true antagonist",
+                  "void space"
+                ],
+                "location_start": "Arena Ring",
+                "location_end": "Void Space",
+                "handoff_mode": "hard",
+                "constraint_state": "threatened"
+              },
+              "transition_out": "A giant finger descended from the clouds.",
+              "hands_off_to": "6:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Artie crits the Admin's 'Delete' button, causing the entire world to freeze.",
+              "type": "action",
+              "outcome": "Artie has successfully 'paused' reality.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "6:8",
+              "transition_in": {
+                "transition_in_text": "He didn't run; he punched the finger.",
+                "transition_in_anchors": [
+                  "delete button",
+                  "reality pause",
+                  "frozen world"
+                ],
+                "location_start": "Void Space",
+                "location_end": "Void Space",
+                "handoff_mode": "immediate",
+                "constraint_state": "paused"
+              },
+              "transition_out": "The Admin's face froze in mid-sneer.",
+              "hands_off_to": "6:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Fizz uses the pause to rewrite Artie's location data, teleporting them out of the arena.",
+              "type": "choice",
+              "outcome": "They escape the deletion, but the world is now in 'Safe Mode'.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "6:9",
+              "transition_in": {
+                "transition_in_text": "Fizz glowed with a frantic, white light.",
+                "transition_in_anchors": [
+                  "teleportation",
+                  "safe mode",
+                  "location rewrite"
+                ],
+                "location_start": "Void Space",
+                "location_end": "Void Space",
+                "handoff_mode": "immediate",
+                "constraint_state": "active"
+              },
+              "transition_out": "The arena vanished, replaced by nothingness.",
+              "hands_off_to": "6:11",
+              "end_condition_echo": "Artie and Fizz teleport to a 'Null-Zone' as the world enters Safe Mode."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Aftermath of the Crash",
+          "intent": "Show the immediate consequences of the climax.",
+          "scenes": [
+            {
+              "scene_id": 11,
+              "summary": "Artie and Fizz wake up in a 'Null-Zone' where the graphics are all wireframes.",
+              "type": "aftermath",
+              "outcome": "They are safe for now, but the world is dying.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "6:10",
+              "transition_in": {
+                "transition_in_text": "The ground was a grid of white lines.",
+                "transition_in_anchors": [
+                  "null-zone",
+                  "wireframes",
+                  "dying world"
+                ],
+                "location_start": "Void Space",
+                "location_end": "Null-Zone",
+                "handoff_mode": "hard",
+                "constraint_state": "safe"
+              },
+              "transition_out": "The silence was absolute.",
+              "hands_off_to": "6:12"
+            },
+            {
+              "scene_id": 12,
+              "summary": "Artie looks at his stats and sees his HP is now 'NaN' (Not a Number).",
+              "type": "reveal",
+              "outcome": "Artie is no longer a player; he is a virus.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_SYSTEM_GLITCH"
+              ],
+              "consumes_outcome_from": "6:11",
+              "transition_in": {
+                "transition_in_text": "He pulled up his character sheet.",
+                "transition_in_anchors": [
+                  "nan hp",
+                  "virus status",
+                  "broken stats"
+                ],
+                "location_start": "Null-Zone",
+                "location_end": "Null-Zone",
+                "handoff_mode": "immediate",
+                "constraint_state": "glitched"
+              },
+              "transition_out": "The game was over, but he was still here.",
+              "hands_off_to": "7:1",
+              "end_condition_echo": "Artie realizes his HP is no longer 1, but 'NaN' (Not a Number)."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 7,
+      "title": "Rebooting for the Sequel",
+      "goal": "Set up the long-term quest to fix (or further break) the world.",
+      "chapter_role": "aftermath",
+      "stakes_shift": "Artie is now the most wanted entity in the multiverse.",
+      "bridge": {
+        "from_prev": "Artie is in the Null-Zone.",
+        "to_next": "Book 2: The Quest for the Source Code."
+      },
+      "pacing": {
+        "intensity": 2,
+        "tempo": "slow_burn",
+        "expected_scene_count": 8
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The New Normal",
+          "intent": "Establish the new status quo for Artie and Fizz.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie learns how to eat 'Data-Packets' instead of food.",
+              "type": "setup",
+              "outcome": "Artie adapts to his new existence.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "6:12",
+              "transition_in": {
+                "transition_in_text": "Hunger felt different in the Null-Zone.",
+                "transition_in_anchors": [
+                  "data-packets",
+                  "new existence",
+                  "digital hunger"
+                ],
+                "location_start": "Null-Zone",
+                "location_end": "Null-Zone",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "The packet tasted like static and blueberries.",
+              "hands_off_to": "7:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Fizz explains that the only way to save the world is to reach the 'Server Room' at the center of the world.",
+              "type": "reveal",
+              "outcome": "The long-term goal is established.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "threads": [
+                "THREAD_THE_ASCENSION"
+              ],
+              "consumes_outcome_from": "7:1",
+              "transition_in": {
+                "transition_in_text": "Fizz projected a map of the world's core.",
+                "transition_in_anchors": [
+                  "server room",
+                  "world center",
+                  "long-term goal"
+                ],
+                "location_start": "Null-Zone",
+                "location_end": "Null-Zone",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "The path was long and filled with errors.",
+              "hands_off_to": "7:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie tests his 'NaN' HP by jumping off a cliff; he doesn't die, he just clips through the floor and ends up back at the top.",
+              "type": "choice",
+              "outcome": "Artie realizes his immortality is just as annoying as his 1 HP build.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "7:2",
+              "transition_in": {
+                "transition_in_text": "He looked over the edge of a wireframe cliff.",
+                "transition_in_anchors": [
+                  "nan hp test",
+                  "floor clipping",
+                  "annoying immortality"
+                ],
+                "location_start": "Null-Zone",
+                "location_end": "Null-Zone",
+                "handoff_mode": "immediate",
+                "constraint_state": "active"
+              },
+              "transition_out": "He was back where he started, perfectly fine and perfectly bored.",
+              "hands_off_to": "7:4",
+              "end_condition_echo": "Artie realizes his new immortality is just as annoying as his previous fragility."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Resistance",
+          "intent": "Introduce the faction that will help Artie in the future.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "A group of 'Beta-Testers' finds Artie in the Null-Zone.",
+              "type": "transition",
+              "outcome": "Artie finds allies who know the world's secrets.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "7:3",
+              "transition_in": {
+                "transition_in_text": "Figures emerged from the white fog.",
+                "transition_in_anchors": [
+                  "beta-testers",
+                  "new allies",
+                  "world secrets"
+                ],
+                "location_start": "Null-Zone",
+                "location_end": "Null-Zone",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "They wore armor made of raw code.",
+              "hands_off_to": "7:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "The Beta-Testers reveal that Vane is still alive and has been 'upgraded' by the System to be a 'Patch-Hunter'.",
+              "type": "reveal",
+              "outcome": "The rivalry continues with higher stakes.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_VANE_RIVALRY"
+              ],
+              "consumes_outcome_from": "7:4",
+              "transition_in": {
+                "transition_in_text": "The leader of the testers checked a terminal.",
+                "transition_in_anchors": [
+                  "vane alive",
+                  "patch-hunter",
+                  "higher stakes"
+                ],
+                "location_start": "Null-Zone",
+                "location_end": "Null-Zone",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "Vane was coming for him, and this time, he was the patch.",
+              "hands_off_to": "7:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie receives his first 'Legendary' quest: 'Delete the Admin'.",
+              "type": "reveal",
+              "outcome": "The series arc is locked in.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "7:5",
+              "transition_in": {
+                "transition_in_text": "A golden quest window appeared, larger than any before.",
+                "transition_in_anchors": [
+                  "legendary quest",
+                  "delete admin",
+                  "series arc"
+                ],
+                "location_start": "Null-Zone",
+                "location_end": "Null-Zone",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "He clicked 'Accept' without hesitation.",
+              "hands_off_to": "7:7",
+              "end_condition_echo": "Artie accepts the legendary quest to 'Delete the Admin'."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The First Step",
+          "intent": "End on a high note of action and anticipation.",
+          "scenes": [
+            {
+              "scene_id": 7,
+              "summary": "Artie and his new allies prepare to leave the Null-Zone and head to the 'Glitch-Woods'.",
+              "type": "transition",
+              "outcome": "The journey begins anew.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "7:6",
+              "transition_in": {
+                "transition_in_text": "They gathered their gear at the edge of the zone.",
+                "transition_in_anchors": [
+                  "glitch-woods",
+                  "new journey",
+                  "portal site"
+                ],
+                "location_start": "Null-Zone",
+                "location_end": "Portal Site",
+                "handoff_mode": "soft",
+                "constraint_state": "active"
+              },
+              "transition_out": "The portal swirled with green and purple light.",
+              "hands_off_to": "7:8"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Artie looks at the sky and says, 'I hope the next world has better drop rates,' before stepping into a portal.",
+              "type": "aftermath",
+              "outcome": "End of Book 1.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "7:7",
+              "transition_in": {
+                "transition_in_text": "Artie stood before the shimmering gate.",
+                "transition_in_anchors": [
+                  "better drop rates",
+                  "stepping forward",
+                  "final beat"
+                ],
+                "location_start": "Portal Site",
+                "location_end": "Glitch-Woods Portal",
+                "handoff_mode": "hard",
+                "constraint_state": "active"
+              },
+              "transition_out": "The light swallowed him whole.",
+              "end_condition_echo": "Artie steps into a portal to the Glitch-Woods, hoping for better drop rates."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

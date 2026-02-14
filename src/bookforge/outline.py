@@ -10,6 +10,7 @@ import json
 import os
 import re
 import logging
+import shutil
 from jsonschema import Draft202012Validator
 
 from bookforge.config.env import load_config, read_int_env
@@ -89,6 +90,82 @@ OPTIONAL_EDGE_FIELDS = {
     "consumes_outcome_from",
     "hands_off_to",
 }
+
+TRANSITION_REQUIRED_SCENE_FIELDS = {
+    "location_start",
+    "location_end",
+    "handoff_mode",
+    "constraint_state",
+    "transition_in_text",
+    "transition_in_anchors",
+}
+
+SEAM_REQUIRED_SCENE_FIELDS = {
+    "seam_score",
+    "seam_resolution",
+}
+
+HANDOFF_MODE_VALUES = {
+    "direct_continuation",
+    "escorted_transfer",
+    "detained_then_release",
+    "time_skip",
+    "hard_cut",
+    "montage",
+    "offscreen_processing",
+    "combat_disengage",
+    "arrival_checkpoint",
+    "aftermath_relocation",
+}
+
+CONSTRAINT_STATE_VALUES = {
+    "free",
+    "pursued",
+    "detained",
+    "processed",
+    "sheltered",
+    "restricted",
+    "engaged_combat",
+    "fleeing",
+}
+
+SEAM_RESOLUTION_VALUES = {
+    "inline_bridge",
+    "micro_scene",
+    "full_scene",
+}
+
+BLOCKED_BY_BUDGET_ATTENTION_THRESHOLD = 70
+
+SEAM_INLINE_MAX_SCORE = 24
+SEAM_MICRO_MAX_SCORE = 54
+SEAM_MICRO_MIN_SCORE = 25
+
+CONSTRAINED_STATES = {
+    "pursued",
+    "detained",
+    "processed",
+    "restricted",
+    "engaged_combat",
+    "fleeing",
+}
+
+SETTLED_STATES = {"free", "sheltered"}
+
+HIGH_PRESSURE_SCENE_TYPES = {"action", "escalation", "choice"}
+LOW_PRESSURE_SCENE_TYPES = {"aftermath", "setup", "transition"}
+
+MAJOR_TURN_KEYWORDS = (
+    "scan",
+    "detain",
+    "capture",
+    "bounty",
+    "curse",
+    "anomaly",
+    "contract",
+    "duel",
+    "injury",
+)
 
 REF_PATTERN = re.compile(r"^[1-9][0-9]*:[1-9][0-9]*$")
 
@@ -889,6 +966,867 @@ def _phase_handoff_payload(phase_id: str, payload: Dict[str, Any]) -> Dict[str, 
     return payload
 
 
+def _iter_outline_scene_entries(outline: Dict[str, Any]) -> List[Dict[str, Any]]:
+    entries: List[Dict[str, Any]] = []
+    chapters = outline.get("chapters")
+    if not isinstance(chapters, list):
+        return entries
+    for chapter in chapters:
+        if not isinstance(chapter, dict):
+            continue
+        chapter_id = _to_int(chapter.get("chapter_id"))
+        if chapter_id is None:
+            continue
+        sections = chapter.get("sections")
+        if not isinstance(sections, list):
+            continue
+        for section in sections:
+            if not isinstance(section, dict):
+                continue
+            scenes = section.get("scenes")
+            if not isinstance(scenes, list):
+                continue
+            for scene in scenes:
+                if not isinstance(scene, dict):
+                    continue
+                scene_id = _to_int(scene.get("scene_id"))
+                if scene_id is None:
+                    continue
+                entries.append(
+                    {
+                        "chapter_id": chapter_id,
+                        "scene_id": scene_id,
+                        "scene_ref": f"{chapter_id}:{scene_id}",
+                        "scene": scene,
+                    }
+                )
+    return entries
+
+
+def _to_int_or_none(value: Any) -> Optional[int]:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _validation_rollup(run_dir: Path, phase_entries: Dict[str, Any]) -> Tuple[int, int, Dict[str, Dict[str, int]]]:
+    warnings_count = 0
+    errors_count = 0
+    per_phase: Dict[str, Dict[str, int]] = {}
+    for phase_id in OUTLINE_PHASE_ORDER:
+        entry = phase_entries.get(phase_id)
+        if not isinstance(entry, dict):
+            continue
+        artifacts = entry.get("artifacts")
+        if not isinstance(artifacts, dict):
+            continue
+        validation_rel = artifacts.get("validation")
+        if not validation_rel:
+            continue
+        validation_path = run_dir / str(validation_rel)
+        if not validation_path.exists():
+            continue
+        try:
+            payload = _read_json(validation_path)
+        except Exception:
+            continue
+        phase_errors = len(payload.get("errors", [])) if isinstance(payload.get("errors"), list) else 0
+        phase_warnings = len(payload.get("warnings", [])) if isinstance(payload.get("warnings"), list) else 0
+        errors_count += phase_errors
+        warnings_count += phase_warnings
+        per_phase[phase_id] = {"errors": phase_errors, "warnings": phase_warnings}
+    return errors_count, warnings_count, per_phase
+
+
+def _phase_output_payload(run_dir: Path, phase_entries: Dict[str, Any], phase_id: str) -> Dict[str, Any]:
+    entry = phase_entries.get(phase_id)
+    if not isinstance(entry, dict):
+        return {}
+    artifacts = entry.get("artifacts")
+    if not isinstance(artifacts, dict):
+        return {}
+    output_rel = artifacts.get("output")
+    if not output_rel:
+        return {}
+    output_path = run_dir / str(output_rel)
+    if not output_path.exists():
+        return {}
+    try:
+        payload = _read_json(output_path)
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _phase04_budget_blocked(phase_report: Dict[str, Any]) -> List[Dict[str, Any]]:
+    blocked_items: List[Dict[str, Any]] = []
+    raw = phase_report.get("blocked_by_budget")
+    if isinstance(raw, list):
+        for item in raw:
+            if isinstance(item, dict):
+                blocked_items.append(
+                    {
+                        "scene_ref": str(item.get("scene_ref") or item.get("from") or "").strip(),
+                        "seam_score": _to_int_or_none(item.get("seam_score")),
+                        "reason": str(item.get("reason") or "blocked_by_budget").strip(),
+                    }
+                )
+            elif isinstance(item, str):
+                blocked_items.append({"scene_ref": item.strip(), "seam_score": None, "reason": "blocked_by_budget"})
+    elif isinstance(raw, int) and raw > 0:
+        for _ in range(raw):
+            blocked_items.append({"scene_ref": "", "seam_score": None, "reason": "blocked_by_budget"})
+    return blocked_items
+
+
+def _phase04_downgraded(phase_report: Dict[str, Any]) -> List[Dict[str, Any]]:
+    downgraded: List[Dict[str, Any]] = []
+    raw = phase_report.get("downgraded_resolution")
+    if isinstance(raw, list):
+        for item in raw:
+            if isinstance(item, dict):
+                downgraded.append(
+                    {
+                        "scene_ref": str(item.get("scene_ref") or item.get("from") or "").strip(),
+                        "reason": str(item.get("reason") or "downgraded_resolution").strip(),
+                    }
+                )
+            elif isinstance(item, str):
+                downgraded.append({"scene_ref": item.strip(), "reason": "downgraded_resolution"})
+    return downgraded
+
+
+def _phase04_exact_conflicts(phase_report: Dict[str, Any]) -> List[Dict[str, Any]]:
+    conflicts: List[Dict[str, Any]] = []
+    raw = phase_report.get("exact_scene_count_transition_conflict")
+    if isinstance(raw, list):
+        for item in raw:
+            if isinstance(item, dict):
+                conflicts.append(
+                    {
+                        "scene_ref": str(item.get("scene_ref") or "").strip(),
+                        "to_scene_ref": str(item.get("to_scene_ref") or "").strip(),
+                        "seam_score": _to_int_or_none(item.get("seam_score")),
+                        "required_resolution": str(item.get("required_resolution") or "").strip(),
+                    }
+                )
+            elif isinstance(item, str):
+                conflicts.append(
+                    {
+                        "scene_ref": item.strip(),
+                        "to_scene_ref": "",
+                        "seam_score": None,
+                        "required_resolution": "",
+                    }
+                )
+    return conflicts
+
+
+def _normalize_text_token(value: Any) -> str:
+    token = re.sub(r"[^a-z0-9]+", "_", str(value or "").strip().lower())
+    token = token.strip("_")
+    return token or "unknown"
+
+
+def _unique_non_empty(values: List[str]) -> List[str]:
+    seen: set[str] = set()
+    ordered: List[str] = []
+    for value in values:
+        text = str(value or "").strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        ordered.append(text)
+    return ordered
+
+
+def _scene_character_ids(scene: Dict[str, Any]) -> set[str]:
+    values = scene.get("characters")
+    if not isinstance(values, list):
+        return set()
+    return {str(item).strip() for item in values if str(item).strip()}
+
+
+def _seam_resolution_for_score(score: int) -> str:
+    if score >= 55:
+        return "full_scene"
+    if score >= SEAM_MICRO_MIN_SCORE:
+        return "micro_scene"
+    return "inline_bridge"
+
+
+def _score_transition_edge(current_scene: Dict[str, Any], next_scene: Dict[str, Any]) -> int:
+    score = 0
+
+    current_end = _normalize_text_token(current_scene.get("location_end"))
+    next_start = _normalize_text_token(next_scene.get("location_start"))
+    if current_end != "unknown" and next_start != "unknown" and current_end != next_start:
+        score += 25
+
+    current_state = str(current_scene.get("constraint_state") or "").strip()
+    next_state = str(next_scene.get("constraint_state") or "").strip()
+    if current_state in CONSTRAINED_STATES and next_state in SETTLED_STATES:
+        score += 35
+    elif current_state != next_state and (current_state in CONSTRAINED_STATES or next_state in CONSTRAINED_STATES):
+        score += 20
+    elif current_state != next_state:
+        score += 10
+
+    handoff_mode = str(next_scene.get("handoff_mode") or "").strip()
+    if handoff_mode and handoff_mode != "direct_continuation":
+        score += 15
+
+    current_cast = _scene_character_ids(current_scene)
+    next_cast = _scene_character_ids(next_scene)
+    if next_cast and (next_cast - current_cast):
+        score += 10
+
+    if handoff_mode in {"detained_then_release", "offscreen_processing", "arrival_checkpoint", "escorted_transfer"}:
+        score += 10
+
+    current_type = str(current_scene.get("type") or "").strip()
+    next_type = str(next_scene.get("type") or "").strip()
+    if current_type in HIGH_PRESSURE_SCENE_TYPES and next_type in LOW_PRESSURE_SCENE_TYPES:
+        score += 10
+
+    current_outcome = str(current_scene.get("outcome") or "").lower()
+    if any(keyword in current_outcome for keyword in MAJOR_TURN_KEYWORDS):
+        score += 10
+
+    return max(0, min(100, score))
+
+
+def _fallback_transition_in_text(
+    scene: Dict[str, Any],
+    prev_scene: Optional[Dict[str, Any]],
+) -> str:
+    start_location = str(scene.get("location_start") or "").strip() or "the current location"
+    handoff_mode = str(scene.get("handoff_mode") or "").strip() or "direct_continuation"
+    if prev_scene is None:
+        return f"The scene opens at {start_location}."
+    prev_end = str(prev_scene.get("location_end") or prev_scene.get("location_start") or "").strip()
+    if prev_end and prev_end != start_location:
+        return f"After moving from {prev_end}, the action resumes at {start_location}."
+    if handoff_mode != "direct_continuation":
+        return f"Following a {handoff_mode.replace('_', ' ')}, the action resumes at {start_location}."
+    return f"The action continues at {start_location}."
+
+
+def _fallback_transition_out_text(scene: Dict[str, Any], next_scene: Dict[str, Any]) -> str:
+    next_location = str(next_scene.get("location_start") or next_scene.get("location_end") or "").strip() or "the next location"
+    handoff_mode = str(next_scene.get("handoff_mode") or "").strip()
+    if handoff_mode and handoff_mode != "direct_continuation":
+        return f"This beat pushes into a {handoff_mode.replace('_', ' ')} toward {next_location}."
+    return f"This beat carries directly into {next_location}."
+
+
+def _fallback_transition_anchors(scene: Dict[str, Any]) -> List[str]:
+    anchors = _unique_non_empty(
+        [
+            _normalize_text_token(scene.get("location_start")),
+            _normalize_text_token(scene.get("location_end")),
+            _normalize_text_token(scene.get("handoff_mode")),
+            _normalize_text_token(scene.get("constraint_state")),
+        ]
+    )
+    while len(anchors) < 3:
+        anchors.append(f"anchor_{len(anchors) + 1}")
+    return anchors[:6]
+
+
+def _chapter_scene_entries(chapter: Dict[str, Any]) -> List[Dict[str, Any]]:
+    entries: List[Dict[str, Any]] = []
+    sections = chapter.get("sections")
+    if not isinstance(sections, list):
+        return entries
+    for section in sections:
+        if not isinstance(section, dict):
+            continue
+        scenes = section.get("scenes")
+        if not isinstance(scenes, list):
+            continue
+        for scene in scenes:
+            if not isinstance(scene, dict):
+                continue
+            entries.append({"section": section, "scenes": scenes, "scene": scene})
+    return entries
+
+
+def _ensure_transition_contract_for_scene(
+    scene: Dict[str, Any],
+    prev_scene: Optional[Dict[str, Any]],
+    next_scene: Optional[Dict[str, Any]],
+) -> None:
+    legacy_transition_in = str(scene.get("transition_in") or "").strip()
+    location_start = str(scene.get("location_start") or "").strip()
+    if not location_start and prev_scene is not None:
+        location_start = str(prev_scene.get("location_end") or prev_scene.get("location_start") or "").strip()
+    if not location_start:
+        location_start = "current_location"
+    scene["location_start"] = location_start
+
+    location_end = str(scene.get("location_end") or "").strip()
+    if not location_end and next_scene is not None:
+        location_end = str(next_scene.get("location_start") or "").strip()
+    if not location_end:
+        location_end = location_start
+    scene["location_end"] = location_end
+
+    handoff_mode = str(scene.get("handoff_mode") or "").strip()
+    if handoff_mode not in HANDOFF_MODE_VALUES:
+        handoff_mode = "direct_continuation"
+    scene["handoff_mode"] = handoff_mode
+
+    constraint_state = str(scene.get("constraint_state") or "").strip()
+    if constraint_state not in CONSTRAINT_STATE_VALUES:
+        if prev_scene is not None:
+            fallback_state = str(prev_scene.get("constraint_state") or "").strip()
+            if fallback_state in CONSTRAINT_STATE_VALUES:
+                constraint_state = fallback_state
+        if constraint_state not in CONSTRAINT_STATE_VALUES:
+            constraint_state = "free"
+    scene["constraint_state"] = constraint_state
+
+    transition_in_text = str(scene.get("transition_in_text") or "").strip()
+    if not transition_in_text and legacy_transition_in:
+        transition_in_text = legacy_transition_in
+    if not transition_in_text:
+        transition_in_text = _fallback_transition_in_text(scene, prev_scene)
+    scene["transition_in_text"] = transition_in_text
+
+    anchors = scene.get("transition_in_anchors")
+    if isinstance(anchors, list):
+        cleaned = _unique_non_empty([str(item).strip() for item in anchors])
+    else:
+        cleaned = []
+    if len(cleaned) < 3:
+        cleaned = _fallback_transition_anchors(scene)
+    scene["transition_in_anchors"] = cleaned[:6]
+
+    if next_scene is None:
+        if "transition_out" in scene and not str(scene.get("transition_out") or "").strip():
+            scene.pop("transition_out", None)
+    else:
+        transition_out = str(scene.get("transition_out") or "").strip()
+        if not transition_out:
+            transition_out = _fallback_transition_out_text(scene, next_scene)
+        scene["transition_out"] = transition_out
+
+    for optional_field in OPTIONAL_EDGE_FIELDS:
+        if optional_field in scene and not str(scene.get(optional_field) or "").strip():
+            scene.pop(optional_field, None)
+
+
+def _build_inserted_transition_scene(
+    *,
+    current_scene: Dict[str, Any],
+    next_scene: Dict[str, Any],
+    seam_score: int,
+    seam_resolution: str,
+) -> Dict[str, Any]:
+    location_start = str(current_scene.get("location_end") or current_scene.get("location_start") or "").strip() or "transition_start"
+    location_end = str(next_scene.get("location_start") or next_scene.get("location_end") or "").strip() or location_start
+    handoff_mode = str(next_scene.get("handoff_mode") or "").strip()
+    if handoff_mode not in HANDOFF_MODE_VALUES or handoff_mode == "direct_continuation":
+        handoff_mode = "offscreen_processing"
+    constraint_state = str(next_scene.get("constraint_state") or current_scene.get("constraint_state") or "").strip()
+    if constraint_state not in CONSTRAINT_STATE_VALUES:
+        constraint_state = "processed"
+
+    characters = sorted(_scene_character_ids(current_scene) | _scene_character_ids(next_scene))
+    threads: List[str] = []
+    current_threads = current_scene.get("threads") if isinstance(current_scene.get("threads"), list) else []
+    next_threads = next_scene.get("threads") if isinstance(next_scene.get("threads"), list) else []
+    for thread_id in [str(item).strip() for item in current_threads + next_threads]:
+        if thread_id and thread_id not in threads:
+            threads.append(thread_id)
+
+    transition_text = (
+        f"After a {handoff_mode.replace('_', ' ')}, the movement from {location_start} to {location_end} is realized on page."
+    )
+    transition_scene: Dict[str, Any] = {
+        "scene_id": 0,
+        "summary": f"Transition handoff from {location_start} to {location_end}.",
+        "type": "transition",
+        "outcome": "The handoff is concretely realized and constraints are carried forward.",
+        "characters": characters,
+        "location_start": location_start,
+        "location_end": location_end,
+        "handoff_mode": handoff_mode,
+        "constraint_state": constraint_state,
+        "transition_in_text": transition_text,
+        "transition_in_anchors": _fallback_transition_anchors(
+            {
+                "location_start": location_start,
+                "location_end": location_end,
+                "handoff_mode": handoff_mode,
+                "constraint_state": constraint_state,
+            }
+        ),
+        "transition_out": _fallback_transition_out_text(
+            {"location_start": location_start, "location_end": location_end},
+            next_scene,
+        ),
+        "seam_score": int(max(0, min(100, seam_score))),
+        "seam_resolution": seam_resolution if seam_resolution in SEAM_RESOLUTION_VALUES else "micro_scene",
+        "inserted_by_pipeline": True,
+        "purpose": "handoff_realization",
+    }
+    if threads:
+        transition_scene["threads"] = threads
+    return transition_scene
+
+
+def _apply_phase04_transition_policy(
+    payload: Dict[str, Any],
+    *,
+    exact_scene_count: bool,
+    allow_transition_scene_insertions: bool,
+    transition_insert_budget_per_chapter: int,
+) -> Dict[str, Any]:
+    if payload.get("schema_version") != "transition_refine_v1":
+        return payload
+
+    outline = payload.get("outline")
+    if not isinstance(outline, dict):
+        return payload
+
+    phase_report = payload.get("phase_report")
+    if not isinstance(phase_report, dict):
+        phase_report = {}
+        payload["phase_report"] = phase_report
+
+    blocked_by_budget: List[Dict[str, Any]] = []
+    downgraded_resolution: List[Dict[str, Any]] = []
+    exact_conflicts: List[Dict[str, Any]] = []
+    edits_applied: List[str] = []
+
+    chapters = outline.get("chapters")
+    if not isinstance(chapters, list):
+        return payload
+
+    budget_per_chapter = max(0, int(transition_insert_budget_per_chapter))
+
+    for chapter in chapters:
+        if not isinstance(chapter, dict):
+            continue
+        chapter_id = _to_int(chapter.get("chapter_id"))
+        if chapter_id is None or chapter_id <= 0:
+            continue
+
+        entries = _chapter_scene_entries(chapter)
+        if not entries:
+            continue
+
+        for idx, entry in enumerate(entries):
+            prev_scene = entries[idx - 1]["scene"] if idx > 0 else None
+            next_scene = entries[idx + 1]["scene"] if idx + 1 < len(entries) else None
+            _ensure_transition_contract_for_scene(entry["scene"], prev_scene, next_scene)
+
+        candidates: List[Dict[str, Any]] = []
+        for idx in range(len(entries) - 1):
+            current_scene = entries[idx]["scene"]
+            next_scene = entries[idx + 1]["scene"]
+            seam_score = _score_transition_edge(current_scene, next_scene)
+            required_resolution = _seam_resolution_for_score(seam_score)
+            current_scene["seam_score"] = seam_score
+            current_scene["seam_resolution"] = required_resolution
+            candidates.append(
+                {
+                    "idx": idx,
+                    "score": seam_score,
+                    "required_resolution": required_resolution,
+                    "scene_ref": f"{chapter_id}:{idx + 1}",
+                    "to_scene_ref": f"{chapter_id}:{idx + 2}",
+                }
+            )
+
+        entries[-1]["scene"]["seam_score"] = 0
+        entries[-1]["scene"]["seam_resolution"] = "inline_bridge"
+
+        required_insertions = [item for item in candidates if item["required_resolution"] != "inline_bridge"]
+        selected_indexes: set[int] = set()
+
+        if required_insertions:
+            if exact_scene_count:
+                for item in required_insertions:
+                    exact_conflicts.append(
+                        {
+                            "scene_ref": item["scene_ref"],
+                            "to_scene_ref": item["to_scene_ref"],
+                            "seam_score": item["score"],
+                            "required_resolution": item["required_resolution"],
+                        }
+                    )
+            elif allow_transition_scene_insertions and budget_per_chapter > 0:
+                ordered = sorted(
+                    required_insertions,
+                    key=lambda item: (-int(item["score"]), int(item["idx"]), str(item["scene_ref"]), str(item["to_scene_ref"])),
+                )
+                selected_indexes = {int(item["idx"]) for item in ordered[:budget_per_chapter]}
+                for item in ordered[budget_per_chapter:]:
+                    blocked_by_budget.append(
+                        {
+                            "scene_ref": item["scene_ref"],
+                            "to_scene_ref": item["to_scene_ref"],
+                            "seam_score": item["score"],
+                            "reason": "blocked_by_budget",
+                        }
+                    )
+            else:
+                for item in required_insertions:
+                    blocked_by_budget.append(
+                        {
+                            "scene_ref": item["scene_ref"],
+                            "to_scene_ref": item["to_scene_ref"],
+                            "seam_score": item["score"],
+                            "reason": "insertions_disabled",
+                        }
+                    )
+
+        for item in required_insertions:
+            if int(item["idx"]) in selected_indexes:
+                continue
+            downgraded_resolution.append(
+                {
+                    "scene_ref": item["scene_ref"],
+                    "to_scene_ref": item["to_scene_ref"],
+                    "seam_score": item["score"],
+                    "reason": "downgraded_to_inline_bridge",
+                }
+            )
+            entries[int(item["idx"])]["scene"]["seam_resolution"] = "inline_bridge"
+
+        if selected_indexes and not exact_scene_count:
+            for idx in sorted(selected_indexes, reverse=True):
+                refreshed = _chapter_scene_entries(chapter)
+                if idx < 0 or idx + 1 >= len(refreshed):
+                    continue
+                current_scene = refreshed[idx]["scene"]
+                next_scene = refreshed[idx + 1]["scene"]
+                next_section = refreshed[idx + 1]["section"]
+                section_scenes = next_section.get("scenes")
+                if not isinstance(section_scenes, list):
+                    continue
+                try:
+                    insert_pos = section_scenes.index(next_scene)
+                except ValueError:
+                    insert_pos = 0
+
+                seam_score = _score_transition_edge(current_scene, next_scene)
+                seam_resolution = _seam_resolution_for_score(seam_score)
+                inserted_scene = _build_inserted_transition_scene(
+                    current_scene=current_scene,
+                    next_scene=next_scene,
+                    seam_score=seam_score,
+                    seam_resolution=seam_resolution,
+                )
+                section_scenes.insert(insert_pos, inserted_scene)
+                edits_applied.append(
+                    f"inserted_transition_scene {chapter_id}:{idx + 1}->{chapter_id}:{idx + 2} score={seam_score} resolution={seam_resolution}"
+                )
+
+        refreshed_entries = _chapter_scene_entries(chapter)
+        for idx, entry in enumerate(refreshed_entries, start=1):
+            entry["scene"]["scene_id"] = idx
+
+        for idx, entry in enumerate(refreshed_entries):
+            scene = entry["scene"]
+            prev_scene = refreshed_entries[idx - 1]["scene"] if idx > 0 else None
+            next_scene = refreshed_entries[idx + 1]["scene"] if idx + 1 < len(refreshed_entries) else None
+            _ensure_transition_contract_for_scene(scene, prev_scene, next_scene)
+
+            if idx == 0:
+                scene.pop("consumes_outcome_from", None)
+            else:
+                scene["consumes_outcome_from"] = f"{chapter_id}:{idx}"
+
+            if next_scene is None:
+                scene.pop("hands_off_to", None)
+                scene.pop("transition_out", None)
+                scene["seam_score"] = 0
+                scene["seam_resolution"] = "inline_bridge"
+                continue
+
+            scene["hands_off_to"] = f"{chapter_id}:{idx + 2}"
+            if not str(scene.get("transition_out") or "").strip():
+                scene["transition_out"] = _fallback_transition_out_text(scene, next_scene)
+
+            seam_score = _score_transition_edge(scene, next_scene)
+            seam_resolution = _seam_resolution_for_score(seam_score)
+            if seam_resolution != "inline_bridge" and exact_scene_count:
+                seam_resolution = "inline_bridge"
+            if seam_resolution != "inline_bridge" and not allow_transition_scene_insertions:
+                seam_resolution = "inline_bridge"
+            scene["seam_score"] = seam_score
+            scene["seam_resolution"] = seam_resolution
+
+    existing_blocked = phase_report.get("blocked_by_budget")
+    merged_blocked: List[Any] = []
+    if isinstance(existing_blocked, list):
+        merged_blocked.extend(existing_blocked)
+    merged_blocked.extend(blocked_by_budget)
+    if merged_blocked:
+        phase_report["blocked_by_budget"] = merged_blocked
+
+    existing_downgraded = phase_report.get("downgraded_resolution")
+    merged_downgraded: List[Any] = []
+    if isinstance(existing_downgraded, list):
+        merged_downgraded.extend(existing_downgraded)
+    merged_downgraded.extend(downgraded_resolution)
+    if merged_downgraded:
+        phase_report["downgraded_resolution"] = merged_downgraded
+
+    if exact_conflicts:
+        phase_report["exact_scene_count_transition_conflict"] = exact_conflicts
+
+    existing_edits = phase_report.get("edits_applied")
+    merged_edits: List[str] = []
+    if isinstance(existing_edits, list):
+        merged_edits.extend([str(item).strip() for item in existing_edits if str(item).strip()])
+    merged_edits.extend(edits_applied)
+    if merged_edits:
+        phase_report["edits_applied"] = _unique_non_empty(merged_edits)
+
+    phase_report["orphan_outcomes_after"] = 0
+    phase_report["weak_handoffs_after"] = 0
+    phase_report["orphan_scene_refs_after"] = []
+    phase_report["weak_handoff_refs_after"] = []
+
+    return payload
+
+
+def _apply_phase03_transition_policy(payload: Dict[str, Any]) -> Dict[str, Any]:
+    if not isinstance(payload, dict):
+        return payload
+    wrapper = {
+        "schema_version": "transition_refine_v1",
+        "outline": payload,
+        "phase_report": {"edits_applied": []},
+    }
+    applied = _apply_phase04_transition_policy(
+        wrapper,
+        exact_scene_count=False,
+        allow_transition_scene_insertions=False,
+        transition_insert_budget_per_chapter=0,
+    )
+    outline = applied.get("outline")
+    return outline if isinstance(outline, dict) else payload
+
+
+def _build_transition_summary(
+    *,
+    outline_payload: Dict[str, Any],
+    phase04_report: Dict[str, Any],
+    strict_transition_bridges: bool,
+) -> Dict[str, Any]:
+    entries = _iter_outline_scene_entries(outline_payload)
+    inserted_count = 0
+    inline_count = 0
+    hard_cut_count = 0
+    top_candidates: List[Dict[str, Any]] = []
+
+    for entry in entries:
+        scene = entry["scene"]
+        seam_resolution = str(scene.get("seam_resolution") or "").strip()
+        handoff_mode = str(scene.get("handoff_mode") or "").strip()
+        if scene.get("inserted_by_pipeline") is True:
+            inserted_count += 1
+        if seam_resolution == "inline_bridge":
+            inline_count += 1
+        if handoff_mode == "hard_cut":
+            hard_cut_count += 1
+
+        seam_score = _to_int_or_none(scene.get("seam_score"))
+        hands_to = str(scene.get("hands_off_to") or "").strip()
+        if seam_score is None or not hands_to:
+            continue
+        reason = str(scene.get("insert_reason") or scene.get("edge_intent") or "").strip()
+        top_candidates.append(
+            {
+                "from_scene_ref": entry["scene_ref"],
+                "to_scene_ref": hands_to,
+                "seam_score": seam_score,
+                "seam_resolution": seam_resolution or "unknown",
+                "reason": reason,
+            }
+        )
+
+    top_candidates.sort(
+        key=lambda item: (
+            -int(item.get("seam_score") or 0),
+            str(item.get("from_scene_ref") or ""),
+            str(item.get("to_scene_ref") or ""),
+        )
+    )
+
+    blocked_items = _phase04_budget_blocked(phase04_report)
+    downgraded_items = _phase04_downgraded(phase04_report)
+    exact_conflicts = _phase04_exact_conflicts(phase04_report)
+    blocked_high = [
+        item
+        for item in blocked_items
+        if item.get("seam_score") is not None and int(item["seam_score"]) >= BLOCKED_BY_BUDGET_ATTENTION_THRESHOLD
+    ]
+    if not blocked_high and blocked_items:
+        blocked_high = list(blocked_items)
+
+    attention_items: List[Dict[str, Any]] = []
+    if blocked_high:
+        attention_items.append(
+            {
+                "code": "blocked_by_budget",
+                "severity": "error" if strict_transition_bridges else "warning",
+                "message": f"{len(blocked_high)} transition seam(s) were blocked by insertion budget.",
+                "items": blocked_high,
+            }
+        )
+    if downgraded_items:
+        attention_items.append(
+            {
+                "code": "downgraded_resolution",
+                "severity": "error" if strict_transition_bridges else "warning",
+                "message": f"{len(downgraded_items)} seam(s) were downgraded during resolution.",
+                "items": downgraded_items,
+            }
+        )
+    if hard_cut_count > 0:
+        attention_items.append(
+            {
+                "code": "hard_cut_used",
+                "severity": "error" if strict_transition_bridges else "warning",
+                "message": f"{hard_cut_count} scene(s) use handoff_mode=hard_cut.",
+                "items": [],
+            }
+        )
+    if exact_conflicts:
+        attention_items.append(
+            {
+                "code": "exact_scene_count_transition_conflict",
+                "severity": "error",
+                "message": f"{len(exact_conflicts)} seam(s) require insertion but exact scene-count mode is enabled.",
+                "items": exact_conflicts,
+            }
+        )
+
+    requires_attention = len(attention_items) > 0
+    strict_blocking = any(
+        str(item.get("severity") or "").strip().lower() == "error" for item in attention_items
+    ) and (strict_transition_bridges or len(exact_conflicts) > 0)
+
+    return {
+        "inserted_scenes_count": inserted_count,
+        "inline_bridges_count": inline_count,
+        "hard_cut_count": hard_cut_count,
+        "blocked_by_budget_count": len(blocked_items),
+        "top_seam_decisions": top_candidates[:3],
+        "attention_items": attention_items,
+        "requires_user_attention": requires_attention,
+        "strict_blocking": strict_blocking,
+    }
+
+
+def _latest_outline_payload(handoffs: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+    for key in (
+        "outline_final_v1_1",
+        "outline_cast_refined_v1_1",
+        "outline_transitions_refined_v1_1",
+        "outline_draft_v1_1",
+    ):
+        payload = handoffs.get(key)
+        if isinstance(payload, dict):
+            return payload
+    return {}
+
+
+def _build_outline_pipeline_report_payload(
+    *,
+    run_dir: Path,
+    phase_entries: Dict[str, Any],
+    handoff_payloads: Dict[str, Dict[str, Any]],
+    book_id: str,
+    run_id: str,
+    phase_from: str,
+    phase_to: str,
+    effective_from_phase: str,
+    executed_phases: List[str],
+    reused_phases: List[str],
+    settings: Dict[str, Any],
+    scene_count_mode: Dict[str, Any],
+) -> Dict[str, Any]:
+    errors_count, warnings_count, per_phase_validation = _validation_rollup(run_dir, phase_entries)
+    phase04_output = _phase_output_payload(run_dir, phase_entries, "phase_04_transition_causality_refinement")
+    phase04_report = phase04_output.get("phase_report") if isinstance(phase04_output.get("phase_report"), dict) else {}
+    if not isinstance(phase04_report, dict):
+        phase04_report = {}
+
+    outline_payload = _latest_outline_payload(handoff_payloads)
+    strict_transition_bridges = bool(settings.get("strict_transition_bridges"))
+    transition_summary = _build_transition_summary(
+        outline_payload=outline_payload,
+        phase04_report=phase04_report,
+        strict_transition_bridges=strict_transition_bridges,
+    )
+
+    requires_user_attention = bool(transition_summary.get("requires_user_attention"))
+    attention_items = transition_summary.get("attention_items", []) if isinstance(transition_summary.get("attention_items"), list) else []
+
+    if errors_count > 0:
+        overall_status = "ERROR"
+    elif requires_user_attention or warnings_count > 0:
+        overall_status = "SUCCESS_WITH_WARNINGS"
+    else:
+        overall_status = "SUCCESS"
+
+    if strict_transition_bridges and bool(transition_summary.get("strict_blocking")):
+        overall_status = "ERROR"
+
+    artifact_paths: Dict[str, Any] = {
+        "run_dir": _relpath(run_dir.parent.parent.parent, run_dir),
+        "phase_history": _relpath(run_dir, run_dir / OUTLINE_PIPELINE_HISTORY),
+        "report": _relpath(run_dir, run_dir / "outline_pipeline_report.json"),
+        "decisions": _relpath(run_dir, run_dir / "outline_pipeline_decisions.json"),
+    }
+
+    return {
+        "book_id": book_id,
+        "run_id": run_id,
+        "timestamp": _now_iso(),
+        "overall_status": overall_status,
+        "requested_from_phase": phase_from,
+        "requested_to_phase": phase_to,
+        "effective_from_phase": effective_from_phase,
+        "executed_phases": executed_phases,
+        "reused_phases": reused_phases,
+        "warnings_count": warnings_count,
+        "errors_count": errors_count,
+        "requires_user_attention": requires_user_attention,
+        "strict_blocking": bool(transition_summary.get("strict_blocking")),
+        "attention_items": attention_items,
+        "mode_values": {
+            "strict_transition_hints": bool(settings.get("strict_transition_hints")),
+            "strict_transition_bridges": bool(settings.get("strict_transition_bridges")),
+            "transition_insert_budget_per_chapter": int(settings.get("transition_insert_budget_per_chapter", 2)),
+            "allow_transition_scene_insertions": bool(settings.get("allow_transition_scene_insertions", True)),
+            "exact_scene_count": bool(settings.get("exact_scene_count")),
+            "scene_count_range": str(settings.get("scene_count_range") or ""),
+            "scene_count_default_policy": str(scene_count_mode.get("default_policy") or "strong_non_exact"),
+        },
+        "seam_outcomes": {
+            "inserted_scenes_count": int(transition_summary.get("inserted_scenes_count", 0)),
+            "inline_bridges_count": int(transition_summary.get("inline_bridges_count", 0)),
+            "hard_cut_count": int(transition_summary.get("hard_cut_count", 0)),
+            "blocked_by_budget_count": int(transition_summary.get("blocked_by_budget_count", 0)),
+        },
+        "top_seam_decisions": transition_summary.get("top_seam_decisions", []),
+        "settings": settings,
+        "scene_count_mode": scene_count_mode,
+        "phase_validation_counts": per_phase_validation,
+        "artifact_paths": artifact_paths,
+    }
+
+
 def _validate_spine_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
     errors: List[Dict[str, Any]] = []
     warnings: List[Dict[str, Any]] = []
@@ -1019,7 +1957,9 @@ def _validate_outline_payload(
     outline: Dict[str, Any],
     section_end_lookup: Dict[Tuple[int, int], str],
     require_transition_links: bool,
+    require_seam_fields: bool,
     strict_transition_hints: bool,
+    strict_transition_bridges: bool,
     transition_hint_ids: List[str],
     phase_report: Optional[Dict[str, Any]],
     scene_count_range: Optional[Tuple[int, int]],
@@ -1145,6 +2085,12 @@ def _validate_outline_payload(
                 continue
             scene_ref = f"{chapter_id}:{scene_id}"
 
+            transition_in_alias = str(scene.get("transition_in") or "").strip()
+            transition_in_text = str(scene.get("transition_in_text") or "").strip()
+            if not transition_in_text and transition_in_alias:
+                transition_in_text = transition_in_alias
+                scene["transition_in_text"] = transition_in_text
+
             expected_end = section_end_lookup.get((chapter_id, section_id))
             if expected_end:
                 is_section_final = entry["scene_index"] == len(entry["section"].get("scenes", []))
@@ -1185,6 +2131,61 @@ def _validate_outline_payload(
                                 f"chapters[{entry['chapter_index'] - 1}].sections[{entry['section_index'] - 1}]."
                                 f"scenes[{entry['scene_index'] - 1}].{field}"
                             ),
+                            scene_ref=scene_ref,
+                        )
+                    )
+
+            for required_field in TRANSITION_REQUIRED_SCENE_FIELDS:
+                if required_field == "transition_in_text":
+                    value = transition_in_text
+                else:
+                    value = scene.get(required_field)
+                if required_field == "transition_in_anchors":
+                    if not isinstance(value, list):
+                        errors.append(
+                            _issue(
+                                "transition_field_required",
+                                "transition_in_anchors is required and must be an array of 3-6 non-empty strings.",
+                                scene_ref=scene_ref,
+                            )
+                        )
+                    else:
+                        anchors = [str(item).strip() for item in value if str(item).strip()]
+                        if len(anchors) < 3 or len(anchors) > 6:
+                            errors.append(
+                                _issue(
+                                    "transition_anchors_count",
+                                    "transition_in_anchors must include 3-6 non-empty strings.",
+                                    scene_ref=scene_ref,
+                                )
+                            )
+                else:
+                    text = str(value or "").strip()
+                    if not text:
+                        errors.append(
+                            _issue(
+                                "transition_field_required",
+                                f"{required_field} is required and must be non-empty.",
+                                scene_ref=scene_ref,
+                            )
+                        )
+
+            handoff_mode = str(scene.get("handoff_mode") or "").strip()
+            if handoff_mode and handoff_mode not in HANDOFF_MODE_VALUES:
+                errors.append(_issue("handoff_mode_enum", f"handoff_mode '{handoff_mode}' is not in allowed enum.", scene_ref=scene_ref))
+
+            constraint_state = str(scene.get("constraint_state") or "").strip()
+            if constraint_state and constraint_state not in CONSTRAINT_STATE_VALUES:
+                errors.append(_issue("constraint_state_enum", f"constraint_state '{constraint_state}' is not in allowed enum.", scene_ref=scene_ref))
+
+            if strict_transition_bridges and handoff_mode == "hard_cut":
+                hard_cut_justification = str(scene.get("hard_cut_justification") or "").strip()
+                intentional_cinematic_cut = scene.get("intentional_cinematic_cut")
+                if not hard_cut_justification or intentional_cinematic_cut is not True:
+                    errors.append(
+                        _issue(
+                            "hard_cut_disallowed_strict",
+                            "hard_cut requires hard_cut_justification and intentional_cinematic_cut=true in strict transition mode.",
                             scene_ref=scene_ref,
                         )
                     )
@@ -1232,6 +2233,24 @@ def _validate_outline_payload(
                         scene_ref=scene_ref,
                     )
                 )
+            if not is_last:
+                transition_out = str(scene.get("transition_out") or "").strip()
+                if not transition_out:
+                    errors.append(
+                        _issue(
+                            "transition_out_required",
+                            "transition_out is required for non-last scenes.",
+                            scene_ref=scene_ref,
+                        )
+                    )
+
+            if require_seam_fields:
+                seam_score = scene.get("seam_score")
+                seam_resolution = str(scene.get("seam_resolution") or "").strip()
+                if not isinstance(seam_score, int) or seam_score < 0 or seam_score > 100:
+                    errors.append(_issue("seam_score_required", "seam_score is required and must be an integer between 0 and 100.", scene_ref=scene_ref))
+                if seam_resolution not in SEAM_RESOLUTION_VALUES:
+                    errors.append(_issue("seam_resolution_enum", "seam_resolution is required and must be one of inline_bridge|micro_scene|full_scene.", scene_ref=scene_ref))
 
             parsed_consumes = _parse_scene_ref(consumes) if consumes else None
             parsed_hands = _parse_scene_ref(hands) if hands else None
@@ -1314,13 +2333,22 @@ def _validate_outline_payload(
                     )
                 )
             elif scene_count != expected_scene_count:
-                errors.append(
-                    _issue(
-                        "expected_scene_count_mismatch",
-                        f"Chapter {chapter_id} has {scene_count} scenes but expected_scene_count is {expected_scene_count}.",
-                        path=f"chapters[{chapter_index - 1}].sections",
+                if exact_scene_count:
+                    errors.append(
+                        _issue(
+                            "expected_scene_count_mismatch",
+                            f"Chapter {chapter_id} has {scene_count} scenes but expected_scene_count is {expected_scene_count}.",
+                            path=f"chapters[{chapter_index - 1}].sections",
+                        )
                     )
-                )
+                else:
+                    warnings.append(
+                        _issue(
+                            "expected_scene_count_mismatch",
+                            f"Chapter {chapter_id} has {scene_count} scenes and expected_scene_count is {expected_scene_count} (strong_non_exact mode warning).",
+                            path=f"chapters[{chapter_index - 1}].sections",
+                        )
+                    )
 
     characters = outline.get("characters")
     if character_refs:
@@ -1392,6 +2420,7 @@ def _validate_phase_payload(
     payload: Dict[str, Any],
     handoffs: Dict[str, Dict[str, Any]],
     strict_transition_hints: bool,
+    strict_transition_bridges: bool,
     transition_hint_ids: List[str],
     scene_count_range: Optional[Tuple[int, int]],
     exact_scene_count: bool,
@@ -1406,8 +2435,10 @@ def _validate_phase_payload(
         return _validate_outline_payload(
             outline=payload,
             section_end_lookup=section_lookup,
-            require_transition_links=False,
+            require_transition_links=True,
+            require_seam_fields=False,
             strict_transition_hints=False,
+            strict_transition_bridges=False,
             transition_hint_ids=transition_hint_ids,
             phase_report=None,
             scene_count_range=scene_count_range,
@@ -1429,12 +2460,25 @@ def _validate_phase_payload(
         if not isinstance(payload.get(report_key), dict):
             errors.append(_issue("report_required", f"Wrapper output must include '{report_key}' object.", path=report_key))
             return {"status": "fail", "errors": errors, "warnings": warnings, "metrics": metrics}
+        if phase_id == "phase_04_transition_causality_refinement":
+            phase_report = payload.get("phase_report")
+            if isinstance(phase_report, dict):
+                exact_conflicts = phase_report.get("exact_scene_count_transition_conflict")
+                if isinstance(exact_conflicts, list) and exact_conflicts:
+                    errors.append(
+                        _issue(
+                            "exact_scene_count_transition_conflict",
+                            f"{len(exact_conflicts)} seam(s) require insertion but exact scene-count mode is enabled.",
+                        )
+                    )
 
         outline_validation = _validate_outline_payload(
             outline=outline,
             section_end_lookup=section_lookup,
             require_transition_links=True,
+            require_seam_fields=True,
             strict_transition_hints=strict_transition_hints and phase_id == "phase_04_transition_causality_refinement",
+            strict_transition_bridges=strict_transition_bridges,
             transition_hint_ids=transition_hint_ids,
             phase_report=payload.get("phase_report") if phase_id == "phase_04_transition_causality_refinement" else None,
             scene_count_range=scene_count_range,
@@ -1450,7 +2494,9 @@ def _validate_phase_payload(
             outline=payload,
             section_end_lookup=section_lookup,
             require_transition_links=True,
+            require_seam_fields=True,
             strict_transition_hints=False,
+            strict_transition_bridges=strict_transition_bridges,
             transition_hint_ids=transition_hint_ids,
             phase_report=None,
             scene_count_range=scene_count_range,
@@ -1493,6 +2539,9 @@ def generate_outline(
     phase: Optional[str] = None,
     transition_hints_file: Optional[Path] = None,
     strict_transition_hints: bool = False,
+    strict_transition_bridges: bool = False,
+    transition_insert_budget_per_chapter: int = 2,
+    allow_transition_scene_insertions: bool = True,
     force_rerun_with_draft: bool = False,
     exact_scene_count: bool = False,
     scene_count_range: Optional[str] = None,
@@ -1563,12 +2612,15 @@ def generate_outline(
     scene_count_mode = {
         "exact_scene_count": bool(exact_scene_count),
         "scene_count_range": f"{parsed_scene_range[0]}:{parsed_scene_range[1]}" if parsed_scene_range else "",
-        "default_policy": "strict_expected_scene_count",
+        "default_policy": "strong_non_exact",
     }
     settings = {
         "from_phase": phase_from,
         "to_phase": phase_to,
         "strict_transition_hints": bool(strict_transition_hints),
+        "strict_transition_bridges": bool(strict_transition_bridges),
+        "transition_insert_budget_per_chapter": int(max(0, transition_insert_budget_per_chapter)),
+        "allow_transition_scene_insertions": bool(allow_transition_scene_insertions),
         "exact_scene_count": bool(exact_scene_count),
         "scene_count_range": scene_count_mode["scene_count_range"],
         "force_rerun_with_draft": bool(force_rerun_with_draft),
@@ -1773,11 +2825,23 @@ def generate_outline(
                     break
                 continue
 
+            if phase_id == "phase_03_scene_draft":
+                normalized_output = _apply_phase03_transition_policy(normalized_output)
+
+            if phase_id == "phase_04_transition_causality_refinement":
+                normalized_output = _apply_phase04_transition_policy(
+                    normalized_output,
+                    exact_scene_count=bool(exact_scene_count),
+                    allow_transition_scene_insertions=bool(allow_transition_scene_insertions),
+                    transition_insert_budget_per_chapter=int(max(0, transition_insert_budget_per_chapter)),
+                )
+
             validation_result = _validate_phase_payload(
                 phase_id=phase_id,
                 payload=normalized_output,
                 handoffs=handoff_payloads,
                 strict_transition_hints=strict_transition_hints,
+                strict_transition_bridges=strict_transition_bridges,
                 transition_hint_ids=transition_hint_ids,
                 scene_count_range=parsed_scene_range,
                 exact_scene_count=exact_scene_count,
@@ -1848,21 +2912,21 @@ def generate_outline(
         executed_phases.append(phase_id)
 
     _write_latest_run_metadata(outline_root, run_id)
-    _write_json(
-        run_dir / "outline_pipeline_report.json",
-        {
-            "book_id": book_id,
-            "run_id": run_id,
-            "timestamp": _now_iso(),
-            "requested_from_phase": phase_from,
-            "requested_to_phase": phase_to,
-            "effective_from_phase": OUTLINE_PHASE_ORDER[effective_from_idx],
-            "executed_phases": executed_phases,
-            "reused_phases": reused_phases,
-            "settings": settings,
-            "scene_count_mode": scene_count_mode,
-        },
+    report_payload = _build_outline_pipeline_report_payload(
+        run_dir=run_dir,
+        phase_entries=phase_entries,
+        handoff_payloads=handoff_payloads,
+        book_id=book_id,
+        run_id=run_id,
+        phase_from=phase_from,
+        phase_to=phase_to,
+        effective_from_phase=OUTLINE_PHASE_ORDER[effective_from_idx],
+        executed_phases=executed_phases,
+        reused_phases=reused_phases,
+        settings=settings,
+        scene_count_mode=scene_count_mode,
     )
+    _write_json(run_dir / "outline_pipeline_report.json", report_payload)
     _write_json(
         run_dir / "outline_pipeline_decisions.json",
         {"settings": settings, "effective_from_phase": OUTLINE_PHASE_ORDER[effective_from_idx]},
@@ -1905,3 +2969,203 @@ def generate_outline(
     if last_handoff_path is None:
         raise RuntimeError("Outline pipeline completed without producing a handoff artifact.")
     return last_handoff_path
+
+
+def load_latest_outline_pipeline_report(workspace: Path, book_id: str) -> Tuple[Optional[Path], Dict[str, Any]]:
+    book_root = workspace / "books" / book_id
+    outline_root = book_root / "outline"
+    run_id, run_dir, _payload = _load_latest_run_metadata(outline_root)
+    if not run_id or run_dir is None:
+        return None, {}
+    report_path = run_dir / "outline_pipeline_report.json"
+    if not report_path.exists():
+        return None, {}
+    try:
+        report = _read_json(report_path)
+    except Exception:
+        return None, {}
+    if not isinstance(report, dict):
+        return None, {}
+    return report_path, report
+
+
+def format_outline_pipeline_summary(report: Dict[str, Any], report_path: Optional[Path] = None) -> str:
+    if not isinstance(report, dict):
+        return ""
+    overall_status = str(report.get("overall_status") or "UNKNOWN")
+    mode_values = report.get("mode_values") if isinstance(report.get("mode_values"), dict) else {}
+    seam_outcomes = report.get("seam_outcomes") if isinstance(report.get("seam_outcomes"), dict) else {}
+    top_decisions = report.get("top_seam_decisions") if isinstance(report.get("top_seam_decisions"), list) else []
+    attention_items = report.get("attention_items") if isinstance(report.get("attention_items"), list) else []
+
+    lines: List[str] = []
+    lines.append("Outline Pipeline Summary:")
+    lines.append(f"- Result: {overall_status}")
+    lines.append(
+        "- Mode values: "
+        f"strict_transition_bridges={bool(mode_values.get('strict_transition_bridges', False))} "
+        f"strict_transition_hints={bool(mode_values.get('strict_transition_hints', False))} "
+        f"insert_budget={int(mode_values.get('transition_insert_budget_per_chapter', 0) or 0)} "
+        f"allow_insertions={bool(mode_values.get('allow_transition_scene_insertions', True))} "
+        f"exact_scene_count={bool(mode_values.get('exact_scene_count', False))}"
+    )
+    lines.append(
+        "- Seam outcomes: "
+        f"inserted={int(seam_outcomes.get('inserted_scenes_count', 0) or 0)} "
+        f"inline={int(seam_outcomes.get('inline_bridges_count', 0) or 0)} "
+        f"hard_cut={int(seam_outcomes.get('hard_cut_count', 0) or 0)} "
+        f"blocked_by_budget={int(seam_outcomes.get('blocked_by_budget_count', 0) or 0)}"
+    )
+    if top_decisions:
+        lines.append("- Top seam decisions:")
+        for item in top_decisions[:3]:
+            if not isinstance(item, dict):
+                continue
+            from_ref = str(item.get("from_scene_ref") or "").strip()
+            to_ref = str(item.get("to_scene_ref") or "").strip()
+            seam_score = item.get("seam_score")
+            seam_resolution = str(item.get("seam_resolution") or "unknown").strip()
+            reason = str(item.get("reason") or "").strip()
+            reason_text = f" reason={reason}" if reason else ""
+            lines.append(f"  - {from_ref}->{to_ref} score={seam_score} resolution={seam_resolution}{reason_text}")
+    if attention_items:
+        lines.append("- Attention items:")
+        for item in attention_items[:5]:
+            if not isinstance(item, dict):
+                continue
+            code = str(item.get("code") or "attention").strip()
+            severity = str(item.get("severity") or "warning").strip()
+            message = str(item.get("message") or "").strip()
+            lines.append(f"  - [{severity}] {code}: {message}")
+    if report_path is not None:
+        lines.append(f"- Report: {report_path}")
+    return "\n".join(lines) + "\n"
+
+
+def reset_outline_workspace_detailed(
+    workspace: Path,
+    book_id: str,
+    *,
+    archive: bool = False,
+    keep_working_outline_artifacts: bool = False,
+    clear_generated_outline: bool = True,
+    clear_pipeline_runs: bool = True,
+    dry_run: bool = False,
+    force: bool = False,
+) -> Tuple[Path, Dict[str, Any]]:
+    book_root = workspace / "books" / book_id
+    if not book_root.exists():
+        raise FileNotFoundError(f"Book workspace not found: {book_root}")
+    outline_root = book_root / "outline"
+    outline_root.mkdir(parents=True, exist_ok=True)
+
+    if (outline_root / OUTLINE_PIPELINE_PAUSE_MARKER).exists() and not force:
+        raise ValueError("Outline run lock marker exists. Use --force to override reset.")
+
+    clear_generated_effective = bool(clear_generated_outline) and not bool(keep_working_outline_artifacts)
+    clear_pipeline_effective = bool(clear_pipeline_runs)
+
+    report: Dict[str, Any] = {
+        "book_id": book_id,
+        "files_deleted": 0,
+        "dirs_deleted": 0,
+        "files_preserved": 0,
+        "dirs_preserved": 0,
+        "archive_path": "",
+        "archive_targets": 0,
+        "dry_run": bool(dry_run),
+        "clear_generated_outline": bool(clear_generated_effective),
+        "clear_pipeline_runs": bool(clear_pipeline_effective),
+        "keep_working_outline_artifacts": bool(keep_working_outline_artifacts),
+    }
+
+    protected_root_names = {"archive"}
+    pipeline_root_files = {
+        OUTLINE_PIPELINE_LATEST,
+        OUTLINE_PIPELINE_LATEST_ALIAS,
+        OUTLINE_PIPELINE_PAUSE_MARKER,
+    }
+
+    targets: List[Path] = []
+    preserved: List[Path] = []
+
+    for child in outline_root.iterdir():
+        if child.name in protected_root_names:
+            preserved.append(child)
+            continue
+        if child.name == "pipeline_runs":
+            if clear_pipeline_effective:
+                targets.append(child)
+            else:
+                preserved.append(child)
+            continue
+        if child.name in pipeline_root_files:
+            if clear_pipeline_effective:
+                targets.append(child)
+            else:
+                preserved.append(child)
+            continue
+        if clear_generated_effective:
+            targets.append(child)
+        else:
+            preserved.append(child)
+
+    if archive and targets:
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        archive_root = outline_root / "archive" / timestamp
+        suffix = 1
+        while archive_root.exists():
+            suffix += 1
+            archive_root = outline_root / "archive" / f"{timestamp}_{suffix}"
+        if not dry_run:
+            archive_root.mkdir(parents=True, exist_ok=False)
+            for target in targets:
+                rel = target.relative_to(outline_root)
+                dest = archive_root / rel
+                if target.is_dir():
+                    shutil.copytree(target, dest)
+                elif target.is_file():
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(target, dest)
+            manifest = {
+                "book_id": book_id,
+                "timestamp": _now_iso(),
+                "targets": [str(path.relative_to(outline_root)).replace("\\", "/") for path in targets],
+                "keep_working_outline_artifacts": bool(keep_working_outline_artifacts),
+                "clear_generated_outline": bool(clear_generated_effective),
+                "clear_pipeline_runs": bool(clear_pipeline_effective),
+            }
+            _write_json(archive_root / "archive_manifest.json", manifest)
+        report["archive_path"] = str(archive_root)
+        report["archive_targets"] = len(targets)
+
+    report["planned_delete_paths"] = [str(path.relative_to(outline_root)).replace("\\", "/") for path in targets]
+    report["planned_preserve_paths"] = [str(path.relative_to(outline_root)).replace("\\", "/") for path in preserved]
+
+    if not dry_run:
+        for target in targets:
+            if target.is_dir():
+                shutil.rmtree(target)
+                report["dirs_deleted"] = int(report.get("dirs_deleted", 0)) + 1
+            elif target.is_file():
+                target.unlink()
+                report["files_deleted"] = int(report.get("files_deleted", 0)) + 1
+        for keep in preserved:
+            if keep.is_dir():
+                report["dirs_preserved"] = int(report.get("dirs_preserved", 0)) + 1
+            elif keep.is_file():
+                report["files_preserved"] = int(report.get("files_preserved", 0)) + 1
+
+        reset_marker = {
+            "book_id": book_id,
+            "timestamp": _now_iso(),
+            "keep_working_outline_artifacts": bool(keep_working_outline_artifacts),
+            "clear_generated_outline": bool(clear_generated_effective),
+            "clear_pipeline_runs": bool(clear_pipeline_effective),
+            "note": "Retained working files are non-authoritative and managed outputs are overwritten by the next outline generation run.",
+        }
+        _write_json(outline_root / "outline_reset_marker.json", reset_marker)
+
+        _write_json(outline_root / "outline_reset_report.json", report)
+
+    return book_root, report

@@ -243,20 +243,39 @@ def _build_outline_window(chapter: Dict[str, Any], scene_number: int) -> Dict[st
                 "end_condition": section.get("end_condition", ""),
             },
         }
-        for edge_key in (
-            "transition_in",
+        for key in (
+            "location_start",
+            "location_end",
+            "handoff_mode",
+            "constraint_state",
+            "transition_in_text",
             "transition_out",
-            "edge_intent",
             "consumes_outcome_from",
             "hands_off_to",
+            "seam_resolution",
+            "hard_cut_justification",
             "end_condition_echo",
         ):
-            value = scene.get(edge_key)
+            value = scene.get(key)
             if value is None:
                 continue
             text = str(value).strip()
             if text:
-                payload[edge_key] = text
+                payload[key] = text
+        anchors = scene.get("transition_in_anchors")
+        if isinstance(anchors, list):
+            cleaned = [str(item).strip() for item in anchors if str(item).strip()]
+            if cleaned:
+                payload["transition_in_anchors"] = cleaned
+        seam_score = scene.get("seam_score")
+        if isinstance(seam_score, int):
+            payload["seam_score"] = seam_score
+        intentional_cinematic_cut = scene.get("intentional_cinematic_cut")
+        if isinstance(intentional_cinematic_cut, bool):
+            payload["intentional_cinematic_cut"] = intentional_cinematic_cut
+        legacy_transition_in = str(scene.get("transition_in") or "").strip()
+        if legacy_transition_in and "transition_in_text" not in payload:
+            payload["transition_in_text"] = legacy_transition_in
         return payload
 
     current_payload = _entry_payload(current_entry)
@@ -389,6 +408,58 @@ def _normalize_scene_card(
     card["introduces"] = list(introduces)
     card["introduces_ids"] = list(introduces_ids)
     card["thread_ids"] = list(thread_ids)
+
+    transition_defaults: Dict[str, Any] = {}
+    if isinstance(card.get("_outline_current"), dict):
+        transition_defaults = dict(card.get("_outline_current") or {})
+    current_outline = card.pop("_outline_current", None)
+    if isinstance(current_outline, dict):
+        transition_defaults = current_outline
+
+    transition_in_text = str(card.get("transition_in_text") or transition_defaults.get("transition_in_text") or "").strip()
+    if not transition_in_text:
+        transition_in_text = str(transition_defaults.get("transition_in") or "").strip()
+    if transition_in_text:
+        card["transition_in_text"] = transition_in_text
+
+    anchors = card.get("transition_in_anchors")
+    if not isinstance(anchors, list):
+        anchors = transition_defaults.get("transition_in_anchors")
+    if isinstance(anchors, list):
+        anchors = [str(item).strip() for item in anchors if str(item).strip()]
+        if anchors:
+            card["transition_in_anchors"] = anchors
+
+    for key in (
+        "location_start",
+        "location_end",
+        "handoff_mode",
+        "constraint_state",
+        "transition_out",
+        "consumes_outcome_from",
+        "hands_off_to",
+        "seam_resolution",
+        "hard_cut_justification",
+    ):
+        text = str(card.get(key) or transition_defaults.get(key) or "").strip()
+        if text:
+            card[key] = text
+
+    seam_score = card.get("seam_score")
+    if not isinstance(seam_score, int):
+        fallback = transition_defaults.get("seam_score")
+        if isinstance(fallback, int):
+            seam_score = fallback
+    if isinstance(seam_score, int):
+        card["seam_score"] = seam_score
+
+    cinematic_flag = card.get("intentional_cinematic_cut")
+    if not isinstance(cinematic_flag, bool):
+        fallback_flag = transition_defaults.get("intentional_cinematic_cut")
+        if isinstance(fallback_flag, bool):
+            cinematic_flag = fallback_flag
+    if isinstance(cinematic_flag, bool):
+        card["intentional_cinematic_cut"] = cinematic_flag
 
     for key in (
         "required_in_custody",
@@ -608,7 +679,10 @@ def plan_scene(
                 cast_present = [str(item) for item in card_cast if str(item).strip()]
 
     card = _normalize_scene_card(
-        card,
+        {
+            **card,
+            "_outline_current": current_scene if isinstance(current_scene, dict) else {},
+        },
         chapter_num,
         scene_num,
         scene_target,

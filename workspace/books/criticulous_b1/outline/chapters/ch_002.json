@@ -1,12 +1,12 @@
 {
   "chapter_id": 2,
   "title": "The Glass Cannon's Guide to Not Dying",
-  "goal": "Artie needs gear that compensates for his 1 HP pool and exploits the System's bugs.",
+  "goal": "Artie needs gear that doesn't rely on him being hit, as he can't take a single blow.",
   "chapter_role": "setup",
-  "stakes_shift": "Survival shifts from pure luck to the tactical exploitation of game mechanics and item loopholes.",
+  "stakes_shift": "Survival shifts from pure luck to tactical exploitation of the System's bugs.",
   "bridge": {
-    "from_prev": "Artie is a marked man in Oakhaven after being flagged as an anomaly.",
-    "to_next": "Artie heads to the Low-Level Crypts to farm 'Evasion' gear and test his build."
+    "from_prev": "Artie is a marked man in Oakhaven.",
+    "to_next": "Artie heads to the Low-Level Crypts to farm 'Evasion' gear."
   },
   "pacing": {
     "intensity": 3,
@@ -17,18 +17,31 @@
     {
       "section_id": 1,
       "title": "Shopping for Scraps",
-      "intent": "Equip Artie with the bare minimum to survive a dungeon through exploits.",
+      "intent": "Equip Artie with the bare minimum gear required to survive a dungeon without taking damage.",
       "scenes": [
         {
           "scene_id": 1,
-          "summary": "Artie tries to sell his 'Participation Trophy' but finds out it's soul-bound and cursed.",
+          "summary": "Artie tries to sell his 'Participation Trophy' but finds out it's soul-bound and cursed to attract hostility.",
           "type": "choice",
           "outcome": "Artie is stuck with a lighthouse-beacon for monsters.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
-          "hands_off_to": "2:2"
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "2:2",
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The scene opens at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 2,
@@ -39,56 +52,108 @@
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "2:3",
           "consumes_outcome_from": "2:1",
-          "hands_off_to": "2:3"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 3,
-          "summary": "Artie acquires the 'Cloak of the Cowardly Lion,' which gives +50 Evasion but -100 Dignity.",
+          "summary": "Artie acquires the 'Cloak of the Cowardly Lion,' which gives massive Evasion but a ridiculous neon appearance.",
           "type": "aftermath",
-          "outcome": "Artie is now slightly harder to hit but looks like a neon yellow cat.",
+          "outcome": "Artie acquires the 'Cloak of the Cowardly Lion' and looks like a neon yellow cat.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "2:4",
           "consumes_outcome_from": "2:2",
-          "end_condition_echo": "Artie acquires the 'Cloak of the Cowardly Lion' and a cursed beacon item.",
-          "hands_off_to": "2:4"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "end_condition_echo": "Artie acquires the 'Cloak of the Cowardly Lion' and looks like a neon yellow cat.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         }
       ]
     },
     {
       "section_id": 2,
       "title": "The Crypt of Bad Math",
-      "intent": "Test the new gear and the Crit-build in a controlled environment.",
+      "intent": "Test the Crit-build's resource farming potential in a controlled dungeon crawl.",
       "scenes": [
         {
           "scene_id": 4,
-          "summary": "Artie enters the Crypts and finds that the skeletons move in predictable, turn-based patterns.",
+          "summary": "Artie enters the Crypts and finds that the skeletons move in predictable, turn-based patterns he can exploit.",
           "type": "setup",
           "outcome": "Artie begins to treat the world like a rhythm game.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "2:5",
           "consumes_outcome_from": "2:3",
-          "hands_off_to": "2:5"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 5,
-          "summary": "A Skeleton Archer fires at Artie; the Cloak's evasion procs, causing Artie to do an accidental backflip.",
+          "summary": "A Skeleton Archer fires at Artie; the Cloak's evasion procs, causing Artie to do a physics-defying backflip.",
           "type": "action",
           "outcome": "Artie survives his first ranged encounter and gains confidence.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "2:6",
           "consumes_outcome_from": "2:4",
-          "hands_off_to": "2:6"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 6,
-          "summary": "Artie realizes his crits don't just do damage; they cause 'System Overload' effects like turning enemies into loot-filled pinatas.",
+          "summary": "Artie realizes his crits cause 'System Overload' effects, turning defeated enemies into loot-filled pinatas.",
           "type": "reveal",
-          "outcome": "Artie discovers he can farm resources via System Overload effects.",
+          "outcome": "Artie discovers he can turn enemies into loot-filled pinatas via System Overload.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
@@ -96,16 +161,29 @@
           "threads": [
             "THREAD_CRIT_EXPLOIT"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "2:7",
           "consumes_outcome_from": "2:5",
-          "end_condition_echo": "Artie discovers he can farm resources via System Overload effects.",
-          "hands_off_to": "2:7"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "end_condition_echo": "Artie discovers he can turn enemies into loot-filled pinatas via System Overload.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         }
       ]
     },
     {
       "section_id": 3,
       "title": "The Rival's Shadow",
-      "intent": "Reintroduce Vane as a persistent threat and trigger the boss encounter.",
+      "intent": "Escalate the tension by showing Vane's power and forcing Artie into a boss encounter.",
       "scenes": [
         {
           "scene_id": 7,
@@ -116,31 +194,72 @@
             "CHAR_ARTIE",
             "CHAR_VANE"
           ],
+          "threads": [
+            "THREAD_VANE_RIVALRY"
+          ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "2:8",
           "consumes_outcome_from": "2:6",
-          "hands_off_to": "2:8"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 8,
-          "summary": "Vane's party leaves behind a 'Boss Trigger'\u2014a rare item that summons a Floor Guardian.",
+          "summary": "Vane's party leaves behind a 'Boss Trigger' item, which Artie decides to take to secure massive XP.",
           "type": "choice",
           "outcome": "Artie decides to take the risk and summon the boss for the massive XP.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "2:9",
           "consumes_outcome_from": "2:7",
-          "hands_off_to": "2:9"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 9,
-          "summary": "The Floor Guardian, a Bone Golem, emerges, and Artie realizes he forgot to check its 'Minimum Damage' stat.",
+          "summary": "The Floor Guardian, a Bone Golem, emerges, and Artie realizes he is woefully unprepared for its minimum damage floor.",
           "type": "consequence",
-          "outcome": "The boss battle begins with Artie at a massive disadvantage.",
+          "outcome": "The Bone Golem emerges, initiating a boss battle where Artie is at a massive disadvantage.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "2:8",
-          "end_condition_echo": "The Bone Golem emerges, placing Artie at a massive mechanical disadvantage."
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "end_condition_echo": "The Bone Golem emerges, initiating a boss battle where Artie is at a massive disadvantage.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         }
       ]
     }

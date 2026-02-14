@@ -4,7 +4,7 @@ Purpose
 - Run the scene generation loop (plan -> preflight -> write -> repair -> state_repair -> lint -> commit).
 
 Usage
-- bookforge run --book <id> [--steps <n>] [--until chapter:N | chapter:N:scene:M] [--resume]
+- bookforge run --book <id> [--steps <n>] [--until chapter:N | chapter:N:scene:M] [--resume] [--ack-outline-attention-items]
 
 Scope
 - Requires explicit --book (current-book selection is not implemented).
@@ -16,11 +16,20 @@ Optional parameters
 - --steps: Number of loop iterations to run.
 - --until: Stop condition. Formats: chapter:N or chapter:N:scene:M.
 - --resume: Resume a prior run.
+- --ack-outline-attention-items: Acknowledge non-strict outline attention items and continue writing.
 - --workspace: Override workspace root (global option).
 
 
 Defaults
 - If neither --steps nor --until is provided, the run loop executes 1 scene step.
+
+Outline attention gate
+- Before writing, `run` checks the latest outline pipeline report at:
+  - `workspace/books/<book>/outline/pipeline_runs/<run_id>/outline_pipeline_report.json`
+- If `requires_user_attention=true`:
+  - strict blocking (`strict_blocking=true`): run always stops before writing.
+  - non-strict attention (`strict_blocking=false`): run stops unless `--ack-outline-attention-items` is provided.
+- `--ack-outline-attention-items` is logged in run metadata for auditability.
 
 Resume notes
 - --resume reuses phase history and scene artifacts in draft/context/phase_history to continue without re-running completed phases.
@@ -56,6 +65,8 @@ Examples
   bookforge run --book my_novel_v1
 - With optional parameters:
   bookforge --workspace workspace run --book my_novel_v1 --steps 10 --until chapter:3 --resume
+- Continue past non-strict outline attention items:
+  bookforge run --book my_novel_v1 --ack-outline-attention-items
 
 - Force outline context on continuity and lint too:
   BOOKFORGE_CONTINUITY_PACK_INCLUDE_OUTLINE=1 BOOKFORGE_LINT_INCLUDE_OUTLINE=1 bookforge run --book my_novel_v1 --until chapter:1

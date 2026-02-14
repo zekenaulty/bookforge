@@ -619,13 +619,13 @@ Expected v2.1 behavior:
 Status key: `pending`, `in_progress`, `completed`, `blocked`.
 
 1. v2.1 plan creation: `completed`
-2. prompt contract updates: `pending`
-3. schema updates: `pending`
-4. outline validator updates: `pending`
-5. seam scoring/insertion implementation: `pending`
-6. planner propagation updates: `pending`
-7. write/lint enforcement updates: `pending`
-8. test expansion: `pending`
+2. prompt contract updates: `completed`
+3. schema updates: `completed`
+4. outline validator updates: `completed`
+5. seam scoring/insertion implementation: `completed`
+6. planner propagation updates: `completed`
+7. write/lint enforcement updates: `completed`
+8. test expansion: `completed`
 9. chapter 1 pilot validation: `pending`
 10. reviewer delta lock integration (phase-03 hard fail, exact-mode interaction, tie-breaks, constraint_state, hard_cut strictness, anchors): `completed`
 11. reviewer follow-up clarifications (non-exact insertion allowance, no auto-repair in phase 03, optional field omission rule, explicit opening-span scope): `completed`

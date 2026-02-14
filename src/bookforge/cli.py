@@ -3,7 +3,12 @@ from pathlib import Path
 import sys
 
 from bookforge.author import generate_author
-from bookforge.outline import generate_outline
+from bookforge.outline import (
+    generate_outline,
+    load_latest_outline_pipeline_report,
+    format_outline_pipeline_summary,
+    reset_outline_workspace_detailed,
+)
 from bookforge.runner import run_loop
 from bookforge.characters import generate_characters
 from bookforge.workspace import init_book_workspace, parse_genre, parse_targets, reset_book_workspace_detailed, update_book_templates
@@ -65,6 +70,9 @@ def _outline_generate(args: argparse.Namespace) -> int:
             phase=getattr(args, "phase", None),
             transition_hints_file=transition_hints_file,
             strict_transition_hints=bool(getattr(args, "strict_transition_hints", False)),
+            strict_transition_bridges=bool(getattr(args, "strict_transition_bridges", False)),
+            transition_insert_budget_per_chapter=int(getattr(args, "transition_insert_budget_per_chapter", 2) or 2),
+            allow_transition_scene_insertions=bool(getattr(args, "allow_transition_scene_insertions", True)),
             force_rerun_with_draft=bool(getattr(args, "force_rerun_with_draft", False)),
             exact_scene_count=bool(getattr(args, "exact_scene_count", False)),
             scene_count_range=getattr(args, "scene_count_range", None),
@@ -73,6 +81,42 @@ def _outline_generate(args: argparse.Namespace) -> int:
         sys.stderr.write(f"Outline generation failed: {exc}\n")
         return 1
     sys.stdout.write(f"Outline created at {outline_path}\n")
+    report_path, report = load_latest_outline_pipeline_report(workspace=workspace, book_id=args.book)
+    if report:
+        sys.stdout.write(format_outline_pipeline_summary(report, report_path=report_path))
+    return 0
+
+
+def _outline_reset(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        book_root, report = reset_outline_workspace_detailed(
+            workspace=workspace,
+            book_id=args.book,
+            archive=bool(getattr(args, "archive", False)),
+            keep_working_outline_artifacts=bool(getattr(args, "keep_working_outline_artifacts", False)),
+            clear_generated_outline=bool(getattr(args, "clear_generated_outline", True)),
+            clear_pipeline_runs=bool(getattr(args, "clear_pipeline_runs", True)),
+            dry_run=bool(getattr(args, "dry_run", False)),
+            force=bool(getattr(args, "force", False)),
+        )
+    except Exception as exc:
+        sys.stderr.write(f"Outline reset failed: {exc}\n")
+        return 1
+    mode = "dry-run" if bool(getattr(args, "dry_run", False)) else "applied"
+    sys.stdout.write(f"Outline reset ({mode}) at {book_root}\n")
+    if report.get("archive_path"):
+        sys.stdout.write(f"Outline archive created at {report.get('archive_path')}\n")
+    sys.stdout.write(
+        "Outline reset summary: "
+        f"files_deleted={report.get('files_deleted', 0)} "
+        f"dirs_deleted={report.get('dirs_deleted', 0)} "
+        f"files_preserved={report.get('files_preserved', 0)} "
+        f"dirs_preserved={report.get('dirs_preserved', 0)} "
+        f"clear_generated_outline={report.get('clear_generated_outline', False)} "
+        f"clear_pipeline_runs={report.get('clear_pipeline_runs', False)} "
+        f"keep_working_outline_artifacts={report.get('keep_working_outline_artifacts', False)}\n"
+    )
     return 0
 
 
@@ -87,6 +131,7 @@ def _run(args: argparse.Namespace) -> int:
             steps=args.steps,
             until=args.until,
             resume=args.resume,
+            ack_outline_attention_items=bool(getattr(args, "ack_outline_attention_items", False)),
         )
     except Exception as exc:
         sys.stderr.write(f"Run failed: {exc}\n")
@@ -236,6 +281,30 @@ def build_parser() -> argparse.ArgumentParser:
         help="Enforce strict transition-hint compliance checks.",
     )
     outline_generate.add_argument(
+        "--strict-transition-bridges",
+        action="store_true",
+        help="Enable strict transition-bridge enforcement mode.",
+    )
+    outline_generate.add_argument(
+        "--transition-insert-budget-per-chapter",
+        type=int,
+        default=2,
+        help="Transition scene insertion budget per chapter (default: 2).",
+    )
+    outline_generate.add_argument(
+        "--allow-transition-scene-insertions",
+        dest="allow_transition_scene_insertions",
+        action="store_true",
+        default=True,
+        help="Allow transition scene insertion during outline refinement (default: enabled).",
+    )
+    outline_generate.add_argument(
+        "--disallow-transition-scene-insertions",
+        dest="allow_transition_scene_insertions",
+        action="store_false",
+        help="Disable transition scene insertion during outline refinement.",
+    )
+    outline_generate.add_argument(
         "--force-rerun-with-draft",
         action="store_true",
         help="Allow rerun even when drafted scene artifacts already exist.",
@@ -250,6 +319,56 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional chapter scene-count range, format min:max.",
     )
     outline_generate.set_defaults(func=_outline_generate)
+
+    outline_reset = outline_sub.add_parser("reset", help="Archive/reset outline pipeline artifacts.")
+    outline_reset.add_argument("--book", required=True, help="Book id.")
+    outline_reset.add_argument(
+        "--archive",
+        action="store_true",
+        help="Archive outline targets before reset.",
+    )
+    outline_reset.add_argument(
+        "--keep-working-outline-artifacts",
+        action="store_true",
+        help="Keep working outline files in place after archive/reset.",
+    )
+    outline_reset.add_argument(
+        "--clear-generated-outline",
+        dest="clear_generated_outline",
+        action="store_true",
+        default=True,
+        help="Clear generated outline working artifacts (default: true).",
+    )
+    outline_reset.add_argument(
+        "--no-clear-generated-outline",
+        dest="clear_generated_outline",
+        action="store_false",
+        help="Do not clear generated outline working artifacts.",
+    )
+    outline_reset.add_argument(
+        "--clear-pipeline-runs",
+        dest="clear_pipeline_runs",
+        action="store_true",
+        default=True,
+        help="Clear outline pipeline run artifacts and metadata (default: true).",
+    )
+    outline_reset.add_argument(
+        "--no-clear-pipeline-runs",
+        dest="clear_pipeline_runs",
+        action="store_false",
+        help="Do not clear outline pipeline run artifacts and metadata.",
+    )
+    outline_reset.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show reset/archive actions without mutating files.",
+    )
+    outline_reset.add_argument(
+        "--force",
+        action="store_true",
+        help="Force outline reset even if outline run lock marker exists.",
+    )
+    outline_reset.set_defaults(func=_outline_reset)
 
     characters_parser = subparsers.add_parser("characters", help="Character commands.")
     characters_sub = characters_parser.add_subparsers(dest="characters_command", required=True)
@@ -267,6 +386,11 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--steps", type=int, help="Number of steps to run.")
     run_parser.add_argument("--until", help="Stop condition, e.g. chapter:5.")
     run_parser.add_argument("--resume", action="store_true", help="Resume prior run.")
+    run_parser.add_argument(
+        "--ack-outline-attention-items",
+        action="store_true",
+        help="Acknowledge non-strict outline attention items and proceed with run.",
+    )
     run_parser.set_defaults(func=_run)
 
     compile_parser = subparsers.add_parser("compile", help="Compile a manuscript.")

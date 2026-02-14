@@ -1,12 +1,12 @@
 {
   "chapter_id": 7,
   "title": "Rebooting for the Sequel",
-  "goal": "Establish a new status quo and set the long-term quest to reach the Server Room.",
+  "goal": "Set up the long-term quest to fix (or further break) the world.",
   "chapter_role": "aftermath",
-  "stakes_shift": "Artie is no longer just a player; he has become a multiversal virus and the most wanted entity in the game.",
+  "stakes_shift": "Artie transitions from a player trying to survive to a virus-entity leading a resistance against the System.",
   "bridge": {
-    "from_prev": "Artie and Fizz wake up in the Null-Zone after the reality crash.",
-    "to_next": "Artie joins the Beta-Tester resistance to begin the quest for the Source Code."
+    "from_prev": "Artie is in the Null-Zone.",
+    "to_next": "Artie begins the quest for the Source Code in Book 2."
   },
   "pacing": {
     "intensity": 2,
@@ -17,22 +17,35 @@
     {
       "section_id": 1,
       "title": "The New Normal",
-      "intent": "Establish the new status quo for Artie and Fizz in the Null-Zone.",
+      "intent": "Show Artie adapting to life as a 'virus' entity within the broken game world.",
       "scenes": [
         {
           "scene_id": 1,
-          "summary": "Artie learns how to eat 'Data-Packets' instead of food.",
+          "summary": "Artie learns how to eat 'Data-Packets' instead of food to maintain his existence.",
           "type": "setup",
           "outcome": "Artie adapts to his new existence.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
-          "hands_off_to": "7:2"
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "7:2",
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The scene opens at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 2,
-          "summary": "Fizz explains that the only way to save the world is to reach the 'Server Room' at the center of the world.",
+          "summary": "Fizz explains that the only way to save the world is to reach the 'Server Room' at the world's center.",
           "type": "reveal",
           "outcome": "The long-term goal is established.",
           "characters": [
@@ -42,98 +55,186 @@
           "threads": [
             "THREAD_THE_ASCENSION"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "7:3",
           "consumes_outcome_from": "7:1",
-          "hands_off_to": "7:3"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 3,
-          "summary": "Artie tests his 'NaN' HP by jumping off a cliff; he doesn't die, he just clips through the floor and ends up back at the top.",
+          "summary": "Artie tests his 'NaN' HP by jumping off a cliff, only to clip through the floor and end up back at the top.",
           "type": "choice",
-          "outcome": "Artie realizes his immortality is as glitchy and annoying as his 1 HP build.",
+          "outcome": "Artie realizes his new immortality is just as annoying as his previous fragility.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "7:4",
           "consumes_outcome_from": "7:2",
-          "end_condition_echo": "Artie realizes his immortality is as glitchy and annoying as his 1 HP build.",
-          "hands_off_to": "7:4"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "end_condition_echo": "Artie realizes his new immortality is just as annoying as his previous fragility.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 20
         }
       ]
     },
     {
       "section_id": 2,
       "title": "The Resistance",
-      "intent": "Introduce the Beta-Tester faction and the long-term goal.",
+      "intent": "Introduce the Beta-Tester faction and set up the series-long pursuit of the Admin.",
       "scenes": [
         {
           "scene_id": 4,
-          "summary": "A group of 'Beta-Testers' led by Zero finds Artie in the Null-Zone.",
+          "summary": "Silas and a group of 'Beta-Testers' find Artie in the Null-Zone and reveals they've been waiting for a glitch like him.",
           "type": "transition",
           "outcome": "Artie finds allies who know the world's secrets.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_ZERO"
+            "CHAR_SILAS"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "7:5",
           "consumes_outcome_from": "7:3",
-          "hands_off_to": "7:5"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 5,
-          "summary": "Zero reveals that Vane is still alive and has been 'upgraded' by the System to be a 'Patch-Hunter'.",
+          "summary": "The Beta-Testers reveal that Vane has been 'upgraded' by the System to be a 'Patch-Hunter' to track Artie.",
           "type": "reveal",
           "outcome": "The rivalry continues with higher stakes.",
           "characters": [
-            "CHAR_ARTIE",
-            "CHAR_ZERO"
+            "CHAR_ARTIE"
           ],
           "threads": [
             "THREAD_VANE_RIVALRY"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "7:6",
           "consumes_outcome_from": "7:4",
-          "hands_off_to": "7:6"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 6,
-          "summary": "Artie receives his first 'Legendary' quest: 'Delete the Admin'.",
+          "summary": "Artie receives a legendary quest to 'Delete the Admin,' locking in the series arc.",
           "type": "reveal",
-          "outcome": "The series quest to 'Delete the Admin' is officially locked in.",
+          "outcome": "Artie accepts the legendary quest to 'Delete the Admin'.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "7:7",
           "consumes_outcome_from": "7:5",
-          "end_condition_echo": "The series quest to 'Delete the Admin' is officially locked in.",
-          "hands_off_to": "7:7"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "end_condition_echo": "Artie accepts the legendary quest to 'Delete the Admin'.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         }
       ]
     },
     {
       "section_id": 3,
       "title": "The First Step",
-      "intent": "End on a high note of action and anticipation for the sequel.",
+      "intent": "Conclude the book with a transition toward the next adventure and a comedic final beat.",
       "scenes": [
         {
           "scene_id": 7,
-          "summary": "Artie, Fizz, and Zero prepare to leave the Null-Zone and head to the 'Glitch-Woods'.",
+          "summary": "Artie and his new allies prepare to leave the Null-Zone and head to the 'Glitch-Woods'.",
           "type": "transition",
           "outcome": "The journey begins anew.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_FIZZ",
-            "CHAR_ZERO"
+            "CHAR_FIZZ"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "7:8",
           "consumes_outcome_from": "7:6",
-          "hands_off_to": "7:8"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 8,
-          "summary": "Artie looks at the sky and says, 'I hope the next world has better drop rates,' before stepping into a portal.",
+          "summary": "Artie steps into a portal to the Glitch-Woods, hoping for better drop rates in the next zone.",
           "type": "aftermath",
-          "outcome": "Artie steps into a portal to the Glitch-Woods, ending Book 1.",
+          "outcome": "Artie steps into a portal to the Glitch-Woods, hoping for better drop rates.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "7:7",
-          "end_condition_echo": "Artie steps into a portal to the Glitch-Woods, ending Book 1."
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "end_condition_echo": "Artie steps into a portal to the Glitch-Woods, hoping for better drop rates.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         }
       ]
     }

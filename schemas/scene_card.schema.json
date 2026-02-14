@@ -12,7 +12,15 @@
     "conflict",
     "required_callbacks",
     "constraints",
-    "end_condition"
+    "end_condition",
+    "location_start",
+    "location_end",
+    "handoff_mode",
+    "constraint_state",
+    "transition_in_text",
+    "transition_in_anchors",
+    "seam_score",
+    "seam_resolution"
   ],
   "properties": {
     "schema_version": {
@@ -52,6 +60,57 @@
     },
     "end_condition": {
       "type": "string"
+    },
+    "location_start": {
+      "type": "string"
+    },
+    "location_end": {
+      "type": "string"
+    },
+    "handoff_mode": {
+      "type": "string"
+    },
+    "constraint_state": {
+      "type": "string"
+    },
+    "transition_in_text": {
+      "type": "string"
+    },
+    "transition_in_anchors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "maxItems": 6
+    },
+    "transition_out": {
+      "type": "string"
+    },
+    "consumes_outcome_from": {
+      "type": "string"
+    },
+    "hands_off_to": {
+      "type": "string"
+    },
+    "seam_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "seam_resolution": {
+      "type": "string",
+      "enum": [
+        "inline_bridge",
+        "micro_scene",
+        "full_scene"
+      ]
+    },
+    "hard_cut_justification": {
+      "type": "string"
+    },
+    "intentional_cinematic_cut": {
+      "type": "boolean"
     },
     "cast_present": {
       "type": "array",

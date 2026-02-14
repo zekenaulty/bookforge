@@ -57,6 +57,14 @@ def test_plan_scene_writes_scene_card(tmp_path: Path) -> None:
                                 "type": "setup",
                                 "outcome": "The hero is summoned.",
                                 "characters": ["CHAR_new_character_name"],
+                                "location_start": "Town Square",
+                                "location_end": "Town Square",
+                                "handoff_mode": "direct_continuation",
+                                "constraint_state": "free",
+                                "transition_in_text": "The summons arrives as the hero stands in the square.",
+                                "transition_in_anchors": ["summons", "hero", "square"],
+                                "seam_score": 10,
+                                "seam_resolution": "inline_bridge",
                             }
                         ],
                     }
@@ -80,6 +88,14 @@ def test_plan_scene_writes_scene_card(tmp_path: Path) -> None:
         "required_callbacks": [],
         "constraints": [],
         "end_condition": "The hero commits.",
+        "location_start": "Town Square",
+        "location_end": "Town Square",
+        "handoff_mode": "direct_continuation",
+        "constraint_state": "free",
+        "transition_in_text": "The summons arrives as the hero stands in the square.",
+        "transition_in_anchors": ["summons", "hero", "square"],
+        "seam_score": 10,
+        "seam_resolution": "inline_bridge",
     }
 
     client = DummyClient(json.dumps(scene_card))

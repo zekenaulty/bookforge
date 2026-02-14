@@ -1,12 +1,12 @@
 {
   "chapter_id": 5,
   "title": "The Tournament of Tiers",
-  "goal": "Artie must win the tournament brackets without taking a single point of damage.",
+  "goal": "Artie must fight through the brackets without taking a single point of damage.",
   "chapter_role": "trial",
-  "stakes_shift": "Artie becomes a public icon, making him a primary target for the System's 'balancing' algorithms.",
+  "stakes_shift": "Public exposure turns Artie from a hidden glitch into a populist hero and a high-priority System threat.",
   "bridge": {
     "from_prev": "Artie is the underdog in the arena.",
-    "to_next": "Artie reaches the finals against Vane, who has rigged the game."
+    "to_next": "Artie reaches the finals against Vane."
   },
   "pacing": {
     "intensity": 4,
@@ -17,75 +17,140 @@
     {
       "section_id": 1,
       "title": "The Round of 32",
-      "intent": "Show Artie's growth and tactical use of his crits in the arena.",
+      "intent": "Showcase Artie's growing tactical creativity and the System's attempt to nerf him mid-match.",
       "scenes": [
         {
           "scene_id": 1,
-          "summary": "Artie faces a 'Tank' who has 10,000 HP. Artie wins in one second by critting the Tank's belt buckle, causing his armor to fall off and disqualify him.",
+          "summary": "Artie faces a 'Tank' and wins instantly by critting the Tank's belt buckle, causing a disqualification.",
           "type": "action",
           "outcome": "The crowd goes wild; Artie is the 'One-Hit Wonder'.",
           "characters": [
             "CHAR_ARTIE"
           ],
-          "hands_off_to": "5:2"
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "5:2",
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The scene opens at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 2,
-          "summary": "The System tries to nerf Artie mid-match by introducing 'Wind Resistance'.",
+          "summary": "The System tries to nerf Artie mid-match by introducing 'Wind Resistance' to the arena.",
           "type": "escalation",
           "outcome": "Artie has to learn to time his punches with the wind gusts.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "5:3",
           "consumes_outcome_from": "5:1",
-          "hands_off_to": "5:3"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 3,
-          "summary": "Artie wins the second round by critting the air so hard it creates a vacuum, sucking his opponent out of the ring.",
+          "summary": "Artie wins the next round by critting the air so hard it creates a vacuum, sucking his opponent out of the ring.",
           "type": "action",
-          "outcome": "Artie moves to the quarter-finals despite mid-match System nerfs.",
+          "outcome": "Artie moves to the quarter-finals after vacuum-critting his opponent out of the ring.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "5:4",
           "consumes_outcome_from": "5:2",
-          "end_condition_echo": "Artie moves to the quarter-finals despite mid-match System nerfs.",
-          "hands_off_to": "5:4"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "end_condition_echo": "Artie moves to the quarter-finals after vacuum-critting his opponent out of the ring.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         }
       ]
     },
     {
       "section_id": 2,
-      "title": "The Quarter-Finals: The Mirror Match",
-      "intent": "Artie faces a character with high evasion, forcing a change in strategy.",
+      "title": "The Mirror Match",
+      "intent": "Artie faces a high-evasion rogue, forcing him to use unconventional environmental exploits.",
       "scenes": [
         {
           "scene_id": 4,
-          "summary": "Artie's opponent is a 'Dodge-Build' rogue who also has low HP.",
+          "summary": "Artie's opponent is a 'Dodge-Build' rogue who also has low HP, leading to a stalemate.",
           "type": "setup",
           "outcome": "The fight becomes a high-speed game of tag.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "5:5",
           "consumes_outcome_from": "5:3",
-          "hands_off_to": "5:5"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 5,
-          "summary": "Neither can land a hit for ten minutes. The crowd starts booing.",
+          "summary": "Neither can land a hit for ten minutes, and the crowd begins to boo the lack of action.",
           "type": "escalation",
           "outcome": "Artie realizes he needs to change his strategy.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "5:6",
           "consumes_outcome_from": "5:4",
-          "hands_off_to": "5:6"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 6,
-          "summary": "Artie uses his 'Participation Trophy' to lure a swarm of arena-flies, which distract the rogue just long enough for a crit.",
+          "summary": "Artie uses his 'Participation Trophy' to lure a swarm of arena-flies, distracting the rogue for a finishing crit.",
           "type": "choice",
           "outcome": "Artie wins, but the 'Trophy' is now glowing with dark energy.",
           "characters": [
@@ -94,72 +159,152 @@
           "threads": [
             "THREAD_SYSTEM_GLITCH"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "5:7",
           "consumes_outcome_from": "5:5",
-          "hands_off_to": "5:7"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 7,
-          "summary": "The System issues a 'Warning' to Artie for 'Unsportsmanlike Exploitation'.",
+          "summary": "The System issues a 'Warning' to Artie for 'Unsportsmanlike Exploitation' following the fly tactic.",
           "type": "consequence",
-          "outcome": "The System applies a 'Random Debuff' to Artie for his next match.",
+          "outcome": "Artie wins but receives a System warning for 'Unsportsmanlike Exploitation'.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "5:8",
           "consumes_outcome_from": "5:6",
-          "end_condition_echo": "The System applies a 'Random Debuff' to Artie for his next match.",
-          "hands_off_to": "5:8"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "end_condition_echo": "Artie wins but receives a System warning for 'Unsportsmanlike Exploitation'.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         }
       ]
     },
     {
       "section_id": 3,
-      "title": "The Semi-Finals: The Debuff",
-      "intent": "Artie must overcome a mechanical handicap (Inverted Controls).",
+      "title": "The Semi-Finals",
+      "intent": "Artie overcomes a mechanical handicap ('Inverted Controls') to reach the finals.",
       "scenes": [
         {
           "scene_id": 8,
-          "summary": "Artie's debuff is 'Inverted Controls'. Every time he tries to move left, he goes right.",
+          "summary": "Artie's debuff for the semi-finals is 'Inverted Controls,' making every movement erratic.",
           "type": "setup",
           "outcome": "Artie looks like he's drunk-fighting.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "5:9",
           "consumes_outcome_from": "5:7",
-          "hands_off_to": "5:9"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         },
         {
           "scene_id": 9,
-          "summary": "Artie's opponent is a Mage who uses AOE spells. Artie has to 'moonwalk' through the fireballs.",
+          "summary": "Artie's opponent is a Mage who uses AOE spells, forcing Artie to 'moonwalk' through the fireballs.",
           "type": "action",
           "outcome": "Artie manages to reach the Mage and lands a crit that turns the Mage's staff into a rubber chicken.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "5:10",
           "consumes_outcome_from": "5:8",
-          "hands_off_to": "5:10"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 10,
-          "summary": "The Mage surrenders out of pure embarrassment.",
+          "summary": "The Mage surrenders out of pure embarrassment, sending Artie to the finals.",
           "type": "aftermath",
           "outcome": "Artie reaches the finals.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "5:11",
           "consumes_outcome_from": "5:9",
-          "hands_off_to": "5:11"
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "transition_out": "This beat carries directly into the next location.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 10
         },
         {
           "scene_id": 11,
-          "summary": "Vane watches from the wings, holding a 'System Override' scroll he bought from the black market.",
+          "summary": "Vane watches from the wings, holding a 'System Override' scroll he bought from the black market to rig the final match.",
           "type": "reveal",
-          "outcome": "Artie reaches the finals against a rigged Vane.",
+          "outcome": "Vane prepares to use a 'System Override' scroll to rig the final fight.",
           "characters": [
             "CHAR_VANE"
           ],
+          "threads": [
+            "THREAD_VANE_RIVALRY"
+          ],
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "5:10",
-          "end_condition_echo": "Artie reaches the finals against a rigged Vane."
+          "location_start": "current_location",
+          "location_end": "current_location",
+          "transition_in_anchors": [
+            "current_location",
+            "direct_continuation",
+            "free"
+          ],
+          "transition_in_text": "The action continues at current_location.",
+          "end_condition_echo": "Vane prepares to use a 'System Override' scroll to rig the final fight.",
+          "seam_resolution": "inline_bridge",
+          "seam_score": 0
         }
       ]
     }

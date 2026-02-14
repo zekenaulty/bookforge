@@ -51,6 +51,7 @@ from bookforge.pipeline.durable import _durable_state_context
 from bookforge.pipeline.parse import _extract_prose_and_patch
 from bookforge.pipeline.log import _status, _now_iso, set_run_log_path
 from bookforge.util.schema import validate_json
+from bookforge.outline import load_latest_outline_pipeline_report, format_outline_pipeline_summary
 
 PAUSE_EXIT_CODE = 75
 
@@ -427,6 +428,7 @@ def run_loop(
     steps: Optional[int] = None,
     until: Optional[str] = None,
     resume: bool = False,
+    ack_outline_attention_items: bool = False,
 ) -> None:
     book_root = workspace / "books" / book_id
     if not book_root.exists():
@@ -456,6 +458,26 @@ def run_loop(
     book = _load_json(book_path)
     outline = _load_json(outline_path)
     validate_json(outline, "outline")
+
+    report_path, outline_report = load_latest_outline_pipeline_report(workspace=workspace, book_id=book_id)
+    if outline_report:
+        requires_attention = bool(outline_report.get("requires_user_attention", False))
+        strict_blocking = bool(outline_report.get("strict_blocking", False))
+        if requires_attention:
+            summary = format_outline_pipeline_summary(outline_report, report_path=report_path).rstrip()
+            if summary:
+                _status(summary)
+            if strict_blocking:
+                raise ValueError(
+                    "Outline report requires strict attention handling; run is blocked until outline issues are resolved."
+                )
+            if not ack_outline_attention_items:
+                raise ValueError(
+                    "Outline report requires attention; re-run with --ack-outline-attention-items after review."
+                )
+            _append_run_log(book_root, run_id, "outline_attention_ack=true")
+        else:
+            _append_run_log(book_root, run_id, "outline_attention_ack=false")
 
     chapter_order, scene_counts = _outline_summary(outline)
     character_registry = _build_character_registry(outline)

@@ -287,7 +287,7 @@ def _coerce_transfer_endpoint(value: Any) -> Dict[str, Any]:
         return {"custodian": "world"}
     if text.upper().startswith("CHAR_"):
         return {"character_id": text, "custodian": text}
-    return {"custodian": text}
+    return {}
 
 
 def _merge_transfer_endpoints(primary: Dict[str, Any], fallback: Dict[str, Any]) -> Dict[str, Any]:
