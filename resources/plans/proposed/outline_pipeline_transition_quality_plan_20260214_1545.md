@@ -25,6 +25,8 @@ The following refinements are adopted as hard requirements for v2.1:
 4. Custody/authority seam scoring must use explicit machine fields (`constraint_state`) rather than free-text inference.
 5. Strict mode constrains `hard_cut` usage and requires explicit justification metadata.
 6. Transition realization hardening uses `transition_in_text` + `transition_in_anchors` for deterministic write/lint checks.
+7. User-visible surfacing and run-report visibility are mandatory; downgrade/skip/fail states cannot be artifact-only.
+8. Retry/stop behavior is explicit and deterministic; auto-retry is bounded and reason-scoped.
 
 ## Problem Statement
 Current improvements solve graph-level continuity better than before, but they do not reliably force rendered transition handoffs in prose.
@@ -354,6 +356,11 @@ No change in shape; ensure transition validation errors map cleanly into reason-
    - deterministic seam detector and issue code
 5. `schemas/outline.schema.json`, `schemas/scene_card.schema.json`
    - transition payload structure enforcement
+6. `src/bookforge/runner.py` (or run command entrypoint)
+   - enforce write gate using latest outline pipeline report
+   - print required transition-quality summary before write continuation
+7. outline run report serializer
+   - write required summary/attention fields for visibility contract
 
 ## CLI/Config Additions (Planned)
 1. `--transition-insert-budget-per-chapter <int>` (default 1)
@@ -363,8 +370,85 @@ No change in shape; ensure transition validation errors map cleanly into reason-
 5. exact-mode insertion behavior lock:
    - default: insertions disabled in exact mode,
    - explicit override flag (future, optional) is not part of v2.1 implementation scope.
+6. write gate override flag:
+   - `--ack-outline-attention-items` allows `bookforge run` to proceed when outline report requires user attention.
+   - default behavior without override is hard stop before writing.
 
 All active mode values must be logged in run metadata.
+
+## User-Visible Surfacing Contract (Hard Requirement)
+Outline transition-quality decisions must be visible at run time, not only in artifacts.
+
+### Console summary (always printed)
+At the end of `bookforge outline generate`, always print:
+1. `Result`: `SUCCESS`, `SUCCESS_WITH_WARNINGS`, `PAUSED`, or `ERROR`.
+2. Active mode values:
+   - strict transition mode,
+   - insertion budget,
+   - allow/disable insertion mode,
+   - exact scene-count mode.
+3. Seam decision counters:
+   - inserted scenes count,
+   - inline bridges count,
+   - hard-cut count,
+   - `blocked_by_budget` count.
+4. Top-N seam decisions (N=3 default):
+   - edge ref (`chapter:scene -> chapter:scene`),
+   - seam score,
+   - chosen resolution,
+   - deterministic reason.
+5. If `ERROR`/`PAUSED`/attention state exists, print reason codes and report path.
+
+### Run report contract (always written)
+For every run, write `outline_pipeline_report.json` with required summary keys:
+1. `overall_status`
+2. `warnings_count`
+3. `errors_count`
+4. `requires_user_attention` (boolean)
+5. `attention_items` (array) with reason codes, including at minimum:
+   - `blocked_by_budget`
+   - `downgraded_resolution`
+   - `hard_cut_used`
+   - `exact_scene_count_transition_conflict`
+6. `mode_values` (strictness/budget/insertion/exact-mode)
+7. `top_seam_decisions` (same shape surfaced in console)
+8. `artifact_paths` (phase outputs/validation reports)
+
+### Attention severity policy
+1. Non-strict mode:
+   - `blocked_by_budget` becomes user-attention when any blocked seam score is `>=55`.
+2. Strict mode:
+   - any blocked seam score `>=55` is an error-level attention item.
+   - any insertion-required seam blocked by budget is an error-level attention item.
+
+## Write Gate Contract (No Silent Continuation)
+`bookforge run` must read the latest outline pipeline report before writing scene prose.
+
+Required behavior:
+1. If `requires_user_attention=false`, proceed normally.
+2. If `requires_user_attention=true`:
+   - print the same short attention summary and reason codes to console,
+   - stop before writing unless `--ack-outline-attention-items` is provided.
+3. Override usage (`--ack-outline-attention-items`) must be logged in run metadata and report.
+
+## Retry and Stop Contract (Deterministic)
+### Within-phase auto-retry (LLM retry)
+1. Max attempts per phase: 2.
+2. Auto-retry allowed only when validator emits bounded fix-list errors:
+   - missing required fields,
+   - schema/type violations,
+   - empty/placeholder forbidden values.
+3. Auto-retry is not allowed for subjective quality preferences.
+4. On second failure, emit `error_v1` and stop.
+
+### Deterministic policy resolution (no LLM retry)
+1. Budget conflicts and seam tie-break selection are policy-resolved deterministically without additional LLM attempts.
+2. Non-selected seam candidates must be logged with `blocked_by_budget` evidence.
+3. Policy-resolved downgrades/conflicts must populate `attention_items`.
+
+### Fail-loud rules
+1. Exact mode conflicts must fail with `exact_scene_count_transition_conflict`.
+2. Failure summaries must include affected seam refs and reason codes in console + report.
 
 ## Resume and Determinism Considerations
 1. seam scoring and insertion decisions must be deterministic for unchanged fingerprints.
@@ -397,6 +481,14 @@ All active mode values must be logged in run metadata.
    - resume reuses valid phase outputs and respects transition settings fingerprint.
 10. Exact mode conflict:
    - exact mode + required insertion returns explicit `exact_scene_count_transition_conflict`.
+11. Visibility summary:
+   - console summary is always printed and includes mode values + seam counters + top seam decisions.
+12. Attention gate:
+   - `requires_user_attention=true` blocks `bookforge run` unless `--ack-outline-attention-items` is provided.
+13. Retry contract:
+   - validator-bounded retry only; max two attempts; no subjective auto-retry.
+14. Fail-loud reporting:
+   - exact-mode conflicts and budget-blocked high-seam cases are visible in console and `outline_pipeline_report.json`.
 
 ## Immediate Pilot Target (Criticulous Chapter 1)
 Target seam:
@@ -435,6 +527,12 @@ Expected v2.1 behavior:
 1. add unit/integration tests.
 2. run chapter 1 scene-by-scene pilot and produce seam delta report.
 
+### WP7 - Visibility, retry, and write-gate controls
+1. implement console summary contract for outline runs.
+2. implement `outline_pipeline_report.json` summary/attention schema.
+3. implement `bookforge run` pre-write attention gate with explicit override flag.
+4. add retry-policy tests (bounded fix-list retries only).
+
 ## Progress Tracker (v2.1)
 Status key: `pending`, `in_progress`, `completed`, `blocked`.
 
@@ -449,6 +547,8 @@ Status key: `pending`, `in_progress`, `completed`, `blocked`.
 9. chapter 1 pilot validation: `pending`
 10. reviewer delta lock integration (phase-03 hard fail, exact-mode interaction, tie-breaks, constraint_state, hard_cut strictness, anchors): `completed`
 11. reviewer follow-up clarifications (non-exact insertion allowance, no auto-repair in phase 03, optional field omission rule, explicit opening-span scope): `completed`
+12. visibility contract (console + report + attention items): `completed`
+13. retry/stop contract and write-gate policy: `completed`
 
 ## Review Questions for Next Iteration
 1. Should exact-mode insertion remain disabled beyond v2.1, or do we schedule compensating merge/removal strategy in v2.2?
