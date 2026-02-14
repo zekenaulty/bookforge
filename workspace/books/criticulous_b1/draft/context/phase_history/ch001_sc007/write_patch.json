@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_BARNABY"
+    ],
+    "location": "Oakhaven - Barnaby's Tavern",
+    "recent_facts": [
+      "Artie was released from administrative detention and arrived at Barnaby's Tavern.",
+      "Barnaby used Appraisal on Artie and discovered his 100% Crit Rate and 1 HP.",
+      "Barnaby explained that Crits are a primary currency and power source for the Oakhaven nobility.",
+      "Artie realized that his anomalous stats make him a target for powerful factions."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_OFFICE_ID",
+          "container": "lanyard",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_WALLET",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_OFFICE_ID"
+          ]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is now aware that his 'Crit or Quit' build is a valuable and dangerous commodity in Oakhaven's political landscape."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 7
+    },
+    {
+      "character_id": "CHAR_BARNABY",
+      "inventory": [
+        {
+          "item": "ITEM_WOODEN_PIPE",
+          "container": "hand_right",
+          "status": "carried"
+        }
+      ],
+      "containers": [],
+      "persona_updates": [],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 7
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "resources": {
+          "stamina": 10,
+          "stamina_max": 100
+        },
+        "reason": "Recovery from drink and tavern atmosphere; progression toward 'One-Hit Wonder' title."
+      },
+      "delta": {
+        "titles_progress": {
+          "One-Hit Wonder": 1
+        }
+      },
+      "chapter": 1,
+      "scene": 7
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie was released from detention and made his way to Barnaby's Tavern in Oakhaven.",
+      "He met Barnaby, who appraised his stats and revealed the high value placed on 'Crits' by the local nobility.",
+      "Artie realized his 100% Crit Rate and 1 HP make him a high-value target for exploitation."
+    ],
+    "key_events": [
+      "Artie arrived at Barnaby's Tavern after being released from gate detention.",
+      "Barnaby performed an Appraisal, confirming Artie's 1 HP and 100% Crit Rate anomaly.",
+      "Barnaby explained the 'Crit Economy' of Oakhaven and the danger it poses to Artie.",
+      "Artie gained progression toward the 'One-Hit Wonder' title.",
+      "The System logged Artie's presence in the Oakhaven Census Bureau, increasing his visibility to powerful entities."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie is detained by Oakhaven gate guards for administrative review.",
+      "milestone: gate_scan_anomaly = DONE",
+      "milestone: barnaby_met = DONE",
+      "character_status: CHAR_ARTIE -> released_from_detention",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_BARNABY -> Wooden Pipe (status=carried, container=hand_right)",
+      "The 'Glass Soul' condition makes all incoming damage fatal for Artie.",
+      "Artie's HP is 1/1 (locked), Level is 3, and Crit Rate is 100%."
+    ],
+    "chapter_so_far_add": [
+      "Artie met Barnaby and learned that his glitchy stats are a prized commodity in the capital's economy, turning him into a target for the powerful."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "human",
+      "slender",
+      "mousy",
+      "brown",
+      "hair",
+      "hazel",
+      "eyes",
+      "pale",
+      "skin",
+      "electrical",
+      "burns."
+    ],
+    "CHAR_BARNABY": [
+      "human",
+      "stocky",
+      "salt",
+      "and",
+      "pepper",
+      "hair",
+      "thick",
+      "beard",
+      "weathered",
+      "skin."
+    ]
+  }
+}

@@ -1,0 +1,238 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "reason": "Maintaining 1 HP build status during first combat encounter.",
+        "reason_category": "combat_interaction",
+        "stats": {
+          "crit_rate": 100,
+          "hp": {
+            "current": 1,
+            "max": 1
+          }
+        },
+        "statuses": [
+          {
+            "effect": "HP locked at 1; all incoming damage is fatal.",
+            "name": "Glass Soul",
+            "type": "mechanical_lock"
+          }
+        ],
+        "titles": [
+          {
+            "active": true,
+            "name": "Crit or Quit",
+            "source": "stat_allocation_anomaly"
+          }
+        ]
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "lanyard",
+          "contents": [
+            "ITEM_OFFICE_ID"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "pocket_left",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "pocket_right",
+          "contents": [
+            "ITEM_WALLET"
+          ],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "lanyard",
+          "item": "ITEM_OFFICE_ID",
+          "status": "equipped"
+        },
+        {
+          "container": "pocket_left",
+          "item": "ITEM_SMARTPHONE",
+          "status": "stowed"
+        },
+        {
+          "container": "pocket_right",
+          "item": "ITEM_WALLET",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": [
+        "Artie is beginning to understand the terrifying reality of his 1 HP build.",
+        "Artie feels a sense of mounting panic as he realizes he has no way to defend himself."
+      ]
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "reason": "Stability remains at 95% during tutorial arrival.",
+      "set": {
+        "reality_stability": 95
+      }
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "reason": "Posture alignment for Slime Fields arrival.",
+      "reason_category": "location_jump_normalize",
+      "set": {
+        "containers": [
+          {
+            "container": "lanyard",
+            "contents": [
+              "ITEM_OFFICE_ID"
+            ],
+            "owner": "CHAR_ARTIE"
+          },
+          {
+            "container": "pocket_left",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ],
+            "owner": "CHAR_ARTIE"
+          },
+          {
+            "container": "pocket_right",
+            "contents": [
+              "ITEM_WALLET"
+            ],
+            "owner": "CHAR_ARTIE"
+          }
+        ],
+        "inventory": [
+          {
+            "container": "lanyard",
+            "item": "ITEM_OFFICE_ID",
+            "status": "equipped"
+          },
+          {
+            "container": "pocket_left",
+            "item": "ITEM_SMARTPHONE",
+            "status": "stowed"
+          },
+          {
+            "container": "pocket_right",
+            "item": "ITEM_WALLET",
+            "status": "stowed"
+          }
+        ]
+      }
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_OFFICE_ID",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "location": "Slime Fields",
+          "scene": 3
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_SMARTPHONE",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "location": "Slime Fields",
+          "scene": 3
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_WALLET",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "location": "Slime Fields",
+          "scene": 3
+        }
+      }
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "location": "Slime Fields",
+          "scene": 3
+        }
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie arrived in the Slime Fields and immediately faced the lethal reality of his 1 HP build."
+    ],
+    "key_events": [
+      "Artie and Fizz transition from the System Void to the Slime Fields tutorial zone.",
+      "Artie checks his status and confirms the 'Glass Soul' condition locks his HP at 1/1.",
+      "A Level 1 Lesser Green Slime aggros on Artie, demonstrating the high stakes of his low-HP build.",
+      "Artie narrowly dodges a 'Tutorial Bounce' attack, receiving a system warning about impact durability.",
+      "Artie is cornered against a low-poly rock as the slime prepares a lethal 'Tutorial Slam'."
+    ],
+    "last_scene": [
+      "Artie and Fizz arrived in the neon-green Slime Fields, where Artie confirmed his mundane items\u2014ID badge, smartphone, and wallet\u2014survived the transition.",
+      "Artie reviewed his 'Glass Soul' status, realizing that his 1 HP lock makes even the slightest environmental impact or tutorial enemy fatal.",
+      "A Lesser Green Slime attacked, cornering a weaponless Artie against a rock and forcing him to realize that his 100% Crit Rate is useless without a way to deal base damage."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "REMOVE: inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "REMOVE: inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "REMOVE: container: lanyard (owner=CHAR_ARTIE, contents=[Corporate ID Badge])",
+      "REMOVE: container: pocket_left (owner=CHAR_ARTIE, contents=[Smartphone])",
+      "REMOVE: container: pocket_right (owner=CHAR_ARTIE, contents=[Leather Wallet])",
+      "REMOVE: container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+      "REMOVE: container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+      "REMOVE: container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])",
+      "milestone: slime_encounter = DONE",
+      "milestone: glass_soul_realization = DONE",
+      "Artie's HP is locked at 1/1 with 100% Crit Rate.",
+      "reality_stability: 95"
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Slime Fields",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie and Fizz arrived in the Slime Fields.",
+      "Artie encountered a Lesser Green Slime.",
+      "Artie realized that his 1 HP Glass Soul status makes even a tutorial slime lethal.",
+      "Artie is currently cornered by the slime against a rock."
+    ]
+  }
+}

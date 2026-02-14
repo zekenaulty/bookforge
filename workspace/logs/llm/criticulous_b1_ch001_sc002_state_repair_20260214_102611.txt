@@ -1,0 +1,220 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "Artie finalized his character build in the System Void, ignoring Fizz's warnings about balance and survival.",
+      "By dumping all his bonus points into Critical Hit Rate, Artie triggered the 'Glass Soul' condition, locking his HP at 1/1.",
+      "The System granted Artie the title 'Crit or Quit' and transitioned him and Fizz to the Slime Fields tutorial zone."
+    ],
+    "key_events": [
+      "Artie discovers and spends the 50-point Bonus Anomaly Pool on Critical Hit Rate.",
+      "Artie bypasses the Level 1 Crit Rate cap, reaching a guaranteed 100%.",
+      "The System locks Artie's HP at 1/1 as a penalty for the statistical anomaly.",
+      "Artie unlocks the 'Crit or Quit' title, guaranteeing critical hits but making all incoming damage fatal.",
+      "The System Void dissolves, and Artie arrives in the Slime Fields to begin the combat tutorial."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie meets Fizz (Tutorial Guide v4.2) in the Character Creation Void.",
+      "REMOVE: Artie begins the transition to the Slime Fields tutorial zone.",
+      "Artie and Fizz are in the Slime Fields tutorial zone.",
+      "Artie's HP is 1/1 (locked) and Crit Rate is 100%.",
+      "Title 'Crit or Quit' is active for Artie.",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "milestone: crit_build_locked = DONE",
+      "reality_stability: 97"
+    ],
+    "chapter_so_far_add": [
+      "Artie met Fizz and committed to a glitchy 1 HP, 100% Crit build in the System Void."
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Slime Fields - Tutorial Zone",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "persona_updates": [
+        "Artie is fully committed to his glass-cannon build, viewing the 1 HP lock as a fair trade for 100% Crits."
+      ],
+      "inventory": [
+        {
+          "item": "ITEM_OFFICE_ID",
+          "container": "lanyard",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_WALLET",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_OFFICE_ID"
+          ]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET"
+          ]
+        }
+      ],
+      "invariants_add": [
+        "Artie's HP is 1/1 (locked) and Crit Rate is 100%.",
+        "Title 'Crit or Quit' is active for Artie."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "crit_rate": 100,
+          "hp": {
+            "current": 1,
+            "max": 1
+          }
+        },
+        "resources": {
+          "bonus_anomaly_pool": 0
+        },
+        "statuses": [
+          {
+            "name": "Glass Soul",
+            "effect": "HP locked at 1; all incoming damage is fatal.",
+            "type": "mechanical_lock"
+          }
+        ],
+        "titles": [
+          {
+            "name": "Crit or Quit",
+            "source": "stat_allocation_anomaly",
+            "active": true
+          }
+        ],
+        "system_tracking_metadata": {
+          "crit_only_mode": true,
+          "glitch_factor": 0.5
+        }
+      },
+      "reason": "Build finalization in the System Void.",
+      "reason_category": "stat_allocation"
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "reality_stability": 97
+      },
+      "reason": "Stable transition to the Slime Fields despite anomaly allocation."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_OFFICE_ID",
+            "container": "lanyard",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_WALLET",
+            "container": "pocket_right",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "lanyard",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_OFFICE_ID"
+            ]
+          },
+          {
+            "container": "pocket_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_WALLET"
+            ]
+          }
+        ]
+      },
+      "reason": "Normalization after transition to Slime Fields.",
+      "reason_category": "location_jump_normalize"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_OFFICE_ID",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "Slime Fields - Tutorial Zone"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_SMARTPHONE",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "Slime Fields - Tutorial Zone"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_WALLET",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "Slime Fields - Tutorial Zone"
+        }
+      }
+    }
+  ]
+}

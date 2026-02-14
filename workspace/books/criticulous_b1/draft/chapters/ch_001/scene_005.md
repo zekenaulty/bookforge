@@ -1,0 +1,70 @@
+The smoke from the vaporized oak tree tasted like ozone and charcoal, a gritty reminder that Artie’s right hand was now legally a weapon of mass destruction. He stood in the center of a scorched, blackened trench, his chest heaving. Every breath felt like dragging a wire brush through his lungs, but his HP bar remained a steady, terrifying 1/1.
+
+"Well," Fizz chirped, fluttering down from a safe distance. She hovered just outside the lingering heat haze, her pixelated wings shimmering. "That was certainly... a choice. Most people use a sword. You used a glitch in the fundamental laws of mathematics."
+
+Artie wiped soot from his forehead, leaving a dark smear across his pale skin. "I didn't mean to delete the geography, Fizz. I just wanted the slime to stop looking at me like I was a snack."
+
+[Quest Complete: Tutorial Combat 101]
+[Reward: Overkill Bonus Calculated...]
+[Processing... Processing... System Error: Math.div(0) avoided by rounding up to 'Absurd'.]
+
+A chime like a broken xylophone echoed through the fields. In front of Artie, the air rippled, and a heavy, metallic object materialized with a thud. It was a trophy—a cheap-looking, gold-plated plastic cup mounted on a base of simulated marble. It glowed with a sickly, neon-purple light that seemed to pulse in time with Artie’s heartbeat.
+
+[Item Acquired: Participation Trophy]
+[Quality: Trash (Cursed)]
+[Description: Congratulations! You broke the tutorial. This item serves as a permanent beacon for every monster in the zone who feels personally insulted by your existence.]
+
+Artie reached down and gripped the cold, vibrating stem of the Participation Trophy with his right hand. The moment his fingers closed around it, the purple glow intensified, shooting a beam of light straight into the sky like a flare.
+
+"Oh, that's not good," Fizz said, her voice dropping an octave. "That’s really, really not good."
+
+"Why is it glowing, Fizz? Why is my reward a lighthouse for murder?"
+
+[System Notification: Level Up!]
+[Arthur 'Artie' Penhaligon has reached Level 3!]
+[Stat Points Gained: 5 (Held for anomaly verification)]
+
+Artie didn't have time to celebrate the 'ding.' A low, rhythmic thrumming began to vibrate through the soles of his shoes. It wasn't the wind. It was the sound of ten thousand gelatinous bodies hitting the grass at once.
+
+[Aggro Meter: 100% (MAXIMUM)]
+[Zone Alert: Slime Migration Inbound. Current Target: Statistical Anomaly #001.]
+
+"Artie," Fizz said, her tiny blue hands pointing toward the horizon. "You remember how I said the slimes were passive unless provoked?"
+
+"Yeah?"
+
+"You just provoked the entire ecosystem."
+
+On the crest of the surrounding hills, the green horizon began to bulge. Hundreds—no, thousands—of Lesser Green Slimes were cresting the ridge. They weren't wobbling aimlessly anymore. They were moving with a terrifying, synchronized purpose, their translucent bodies glistening under the purple light of the Participation Trophy.
+
+"Run?" Artie asked, his voice cracking.
+
+"Run," Fizz confirmed.
+
+Artie didn't wait for a second opinion. He bolted. He sprinted down the scorched trench, the Participation Trophy clutched tightly in his right hand. Every time the trophy struck his thigh, it emitted a high-pitched *ping* that seemed to act as a homing signal. 
+
+Behind him, the Slime Fields had turned into a literal sea of green. The sound of their collective movement was a wet, squelching roar. 
+
+[Warning: Stamina Depleting]
+[Stamina: 45/100]
+
+"Put the trophy away!" Artie wheezed, his mousy brown hair plastered to his forehead with sweat.
+
+"You can't!" Fizz shouted, flying alongside his head. "It’s soul-bound and 'Always-Equipped' until you reach a Safe Zone. It’s part of the curse! You’re the shiny new toy, Artie, and the toddlers are coming to play!"
+
+He looked back. The lead slimes were gaining. They were launching themselves through the air in long, parabolic arcs, their bodies stretching into lethal green teardrops. One landed inches from his heels, the impact cratering the soft earth. 
+
+Artie swerved, nearly tripping over a protruding root. His 1 HP build meant that if even a single drop of that acidic slime touched his skin, the "Glass Soul" condition would shatter his existence. He was a Level 3 god of destruction who could be killed by a stray sneeze.
+
+"The gate!" Fizz screamed, pointing toward a distant stone archway flickering on the edge of the zone. "Oakhaven! If you cross the threshold, the zone-aggro resets!"
+
+"How far?" Artie gasped.
+
+[Distance to Oakhaven Gate: 400 Meters]
+[Slime Proximity: 12 Meters and Closing]
+
+"I hate this game!" Artie yelled, his lungs burning as he pushed his slender frame to its absolute limit. "I want a refund! I want to talk to the manager!"
+
+[System Response: Manager is currently busy laughing. Please hold your Participation Trophy higher so the slimes can see it better.]
+
+The purple light flared again, blindingly bright, as the first wave of slimes prepared to leap.

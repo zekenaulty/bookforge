@@ -1,0 +1,284 @@
+﻿[
+    {
+        "scene":  1,
+        "status":  "pass",
+        "issue_count":  1,
+        "errors":  0,
+        "warnings":  1,
+        "issues":  [
+                       {
+                           "code":  "appearance_check_missing",
+                           "severity":  "warning",
+                           "message":  "Authoritative APPEARANCE_CHECK is missing for cast member CHAR_ARTIE.",
+                           "evidence":  null
+                       }
+                   ]
+    },
+    {
+        "scene":  2,
+        "status":  "fail",
+        "issue_count":  6,
+        "errors":  1,
+        "warnings":  5,
+        "issues":  [
+                       {
+                           "code":  "milestone_repetition",
+                           "severity":  "error",
+                           "message":  "The scene depicts the locking of the \u0027Crit or Quit\u0027 build (milestone: crit_build_locked), but this milestone is already marked as DONE in the pre-scene invariants (must_stay_true). This suggests the scene is repeating events already established in the continuity state.",
+                           "evidence":  {
+                                            "line":  37,
+                                            "excerpt":  "[System Notification: Build Finalized]"
+                                        }
+                       },
+                       {
+                           "code":  "appearance_check_missing",
+                           "severity":  "warning",
+                           "message":  "Authoritative appearance check is missing for present cast members (CHAR_ARTIE, CHAR_FIZZ).",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "continuity",
+                           "severity":  "warning",
+                           "message":  "The pre-state chapter_so_far contains duplicate entries for Artie\u0027s build commitment.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "stat_unowned",
+                           "severity":  "warning",
+                           "message":  "UI shows Available Points but no matching stat exists in state.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "stat_unowned",
+                           "severity":  "warning",
+                           "message":  "UI shows Bonus Anomaly Pool but no matching stat exists in state.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "stat_unowned",
+                           "severity":  "warning",
+                           "message":  "UI shows Critical Hit Rate but no matching stat exists in state.",
+                           "evidence":  null
+                       }
+                   ]
+    },
+    {
+        "scene":  3,
+        "status":  "fail",
+        "issue_count":  3,
+        "errors":  1,
+        "warnings":  2,
+        "issues":  [
+                       {
+                           "code":  "appearance_check_missing",
+                           "severity":  "warning",
+                           "message":  "Appearance check missing for CHAR_ARTIE. Authoritative APPEARANCE_CHECK block is empty for present cast.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "appearance_check_missing",
+                           "severity":  "warning",
+                           "message":  "Appearance check missing for CHAR_FIZZ. Authoritative APPEARANCE_CHECK block is empty for present cast.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "inventory_mismatch",
+                           "severity":  "error",
+                           "message":  "Prose depicts character wearing \u0027office attire\u0027, a \u0027rumpled button-down\u0027, and \u0027loafers\u0027, but these items are not present in the character\u0027s inventory or the item registry. Per the Attire Boundary rule, wearables must be inventory-owned and attire is derived from equipped inventory.",
+                           "evidence":  {
+                                            "line":  15,
+                                            "excerpt":  "He was still wearing his office attire—a rumpled button-down that now bore the scorched, jagged patterns of his untimely demise."
+                                        }
+                       }
+                   ]
+    },
+    {
+        "scene":  4,
+        "status":  "fail",
+        "issue_count":  3,
+        "errors":  1,
+        "warnings":  2,
+        "issues":  [
+                       {
+                           "code":  "appearance_check_missing",
+                           "severity":  "warning",
+                           "message":  "Appearance check is missing for cast member CHAR_ARTIE.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "continuity",
+                           "severity":  "error",
+                           "message":  "Durable claim mismatch: The scene UI (Line 104) and summary key_facts_ring indicate \u0027One-Hit Wonder\u0027 progress is 1/10, but the character_continuity_system_state records it as 2.",
+                           "evidence":  {
+                                            "line":  104,
+                                            "excerpt":  "[Title Progress: \u0027One-Hit Wonder\u0027 - 1/10]"
+                                        }
+                       },
+                       {
+                           "code":  "stat_unowned",
+                           "severity":  "warning",
+                           "message":  "UI shows Current HP but no matching stat exists in state.",
+                           "evidence":  null
+                       }
+                   ]
+    },
+    {
+        "scene":  5,
+        "status":  "pass",
+        "issue_count":  9,
+        "errors":  0,
+        "warnings":  9,
+        "issues":  [
+                       {
+                           "code":  "appearance_check_missing",
+                           "severity":  "warning",
+                           "message":  "Appearance check missing for CHAR_ARTIE.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "appearance_check_missing",
+                           "severity":  "warning",
+                           "message":  "Appearance check missing for CHAR_FIZZ.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "missing_introduces_metadata",
+                           "severity":  "warning",
+                           "message":  "Scene introduces \u0027Participation Trophy\u0027 but \u0027introduces_ids\u0027 is empty in the scene card.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "missing_remove_directive",
+                           "severity":  "warning",
+                           "message":  "Superseded invariant \u0027milestone: level_2_reached = DONE\u0027 not flagged for removal in must_stay_true.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "missing_remove_directive",
+                           "severity":  "warning",
+                           "message":  "Superseded invariant \u0027reality_stability: 94\u0027 not flagged for removal in must_stay_true.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "naming_convention",
+                           "severity":  "warning",
+                           "message":  "Unambiguous descriptor \u0027the trophy\u0027 used post-anchor.",
+                           "evidence":  {
+                                            "line":  51,
+                                            "excerpt":  "\"Put the trophy away!\" Artie wheezed..."
+                                        }
+                       },
+                       {
+                           "code":  "naming_convention",
+                           "severity":  "warning",
+                           "message":  "Unambiguous descriptor \u0027it\u0027 used post-anchor.",
+                           "evidence":  {
+                                            "line":  20,
+                                            "excerpt":  "\"Why is it glowing, Fizz?\""
+                                        }
+                       },
+                       {
+                           "code":  "naming_convention",
+                           "severity":  "warning",
+                           "message":  "Unambiguous descriptor \u0027my reward\u0027 used post-anchor.",
+                           "evidence":  {
+                                            "line":  21,
+                                            "excerpt":  "\"Why is my reward a lighthouse for murder?\""
+                                        }
+                       },
+                       {
+                           "code":  "stat_unowned",
+                           "severity":  "warning",
+                           "message":  "UI shows Stamina but no matching stat exists in state.",
+                           "evidence":  null
+                       }
+                   ]
+    },
+    {
+        "scene":  6,
+        "status":  "pass",
+        "issue_count":  7,
+        "errors":  0,
+        "warnings":  7,
+        "issues":  [
+                       {
+                           "code":  "appearance_check_missing",
+                           "severity":  "warning",
+                           "message":  "Appearance check missing for CHAR_ARTIE in the authoritative surface.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "appearance_check_missing",
+                           "severity":  "warning",
+                           "message":  "Appearance check missing for CHAR_FIZZ in the authoritative surface.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "stat_unowned",
+                           "severity":  "warning",
+                           "message":  "UI shows Stamina but no matching stat exists in state.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "stat_unowned",
+                           "severity":  "warning",
+                           "message":  "UI shows Current Aggro Multiplier but no matching stat exists in state.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "stat_unowned",
+                           "severity":  "warning",
+                           "message":  "UI shows Stamina but no matching stat exists in state.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "stat_unowned",
+                           "severity":  "warning",
+                           "message":  "UI shows Stamina but no matching stat exists in state.",
+                           "evidence":  null
+                       },
+                       {
+                           "code":  "stat_unowned",
+                           "severity":  "warning",
+                           "message":  "UI shows Variance Threshold Exceeded but no matching stat exists in state.",
+                           "evidence":  null
+                       }
+                   ]
+    },
+    {
+        "scene":  7,
+        "status":  "fail",
+        "issue_count":  1,
+        "errors":  1,
+        "warnings":  0,
+        "issues":  [
+                       {
+                           "code":  "pipeline_state_incoherent",
+                           "severity":  "error",
+                           "message":  "State snapshot for Barnaby lacks Crit Rate while must_stay_true declares 1%.",
+                           "evidence":  {
+                                            "line":  40,
+                                            "excerpt":  "Barnaby appraised Artie\u0027s stats, confirming the 100% Crit Rate and 1 HP anomaly."
+                                        }
+                       }
+                   ]
+    },
+    {
+        "scene":  8,
+        "status":  "fail",
+        "issue_count":  1,
+        "errors":  1,
+        "warnings":  0,
+        "issues":  [
+                       {
+                           "code":  "pipeline_state_incoherent",
+                           "severity":  "error",
+                           "message":  "State snapshot for Vane disagrees with must_stay_true HP 100.",
+                           "evidence":  {
+                                            "line":  41,
+                                            "excerpt":  "Vane identified Artie\u0027s 1 HP \u0027Glass Soul\u0027 status and 100% Crit Rate."
+                                        }
+                       }
+                   ]
+    }
+]

@@ -1,0 +1,1590 @@
+SYSTEM:
+
+﻿# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+UI gate: UI/system blocks (lines starting with '[' and ending with ']') are permitted only when scene_card.ui_allowed=true. If ui_allowed=false, do not include UI blocks even if an author persona says "always include".
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties.
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true. If a prior invariant is stale or superseded, you MUST flag it for removal using "REMOVE: <exact prior invariant text>" before restating the current truth.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v2
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements **when the System is active or the scene is set in a game world**. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+## Full Book Outline (minified JSON)
+Authoritative story map; follow it.
+{"schema_version":"1.1","chapters":[{"chapter_id":1,"title":"Welcome to the RNG-Hellscape","goal":"Introduce Artie and his broken 'Crit-Only' status in a high-stakes environment.","chapter_role":"hook","stakes_shift":"Artie transforms from a mundane office drone into a level 1 glitch in a lethal game world.","bridge":{"from_prev":"N/A","to_next":"Artie must find a way to survive his first night in the wild with zero defensive stats."},"pacing":{"intensity":4,"tempo":"rush","expected_scene_count":8},"sections":[{"section_id":1,"title":"The Exit Interview","intent":"Establish Artie's mundane life and sudden, absurd death.","scenes":[{"scene_id":1,"summary":"Artie argues with a vending machine over a bag of chips before a freak electrical surge sends him to the great login screen in the sky.","type":"setup","outcome":"Artie dies and enters the System's character creation void.","characters":["CHAR_ARTIE"],"introduces":["CHAR_ARTIE"],"hands_off_to":"1:2"},{"scene_id":2,"summary":"The System, personified as a snarky UI, mocks Artie's life choices while he accidentally dumps all his points into the 'Crit' stat.","type":"reveal","outcome":"Artie is locked into a 'Crit or Quit' build with 1 HP and 100% Critical Hit rate.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"introduces":["CHAR_FIZZ"],"threads":["THREAD_CRIT_EXPLOIT"],"consumes_outcome_from":"1:1","end_condition_echo":"Artie locks in his 'Crit or Quit' build with 1 HP and 100% Critical Hit rate.","hands_off_to":"1:3"}]},{"section_id":2,"title":"The First Spawn","intent":"Show the immediate danger of a 1 HP build in a hostile tutorial zone.","scenes":[{"scene_id":3,"summary":"Artie spawns in the middle of a tutorial zone and is immediately targeted by a Level 1 Slime that looks suspiciously aggressive.","type":"escalation","outcome":"Artie realizes that in this world, '1 HP' means a stiff breeze could kill him.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"1:2","hands_off_to":"1:4"},{"scene_id":4,"summary":"Artie tries to punch the slime; he misses five times before landing a 'Super-Mega-Ultra-Crit' that vaporizes the slime and the tree behind it.","type":"action","outcome":"Artie gains his first level and realizes his power is terrifyingly inconsistent.","characters":["CHAR_ARTIE"],"threads":["THREAD_CRIT_EXPLOIT"],"consumes_outcome_from":"1:3","hands_off_to":"1:5"},{"scene_id":5,"summary":"The System awards Artie a 'Participation Trophy' item that actually attracts monsters.","type":"consequence","outcome":"Artie is forced to run for his life as the tutorial zone aggros on him.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"1:4","end_condition_echo":"Artie is forced to run for his life as the tutorial zone aggros on him.","hands_off_to":"1:6"}]},{"section_id":3,"title":"The Safe Zone?","intent":"Reach the first hub and establish the world's culture and primary rivalry.","scenes":[{"scene_id":6,"summary":"Artie reaches the gates of Oakhaven, where the guards are busy betting on the 'Crit-Rate' of incoming travelers.","type":"transition","outcome":"Artie enters the town but is flagged as a 'Statistical Anomaly' by the gate scanners.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"1:5","hands_off_to":"1:7"},{"scene_id":7,"summary":"Artie meets Barnaby, the local Tavern Keeper, who explains that 'Crits' are the only currency that matters to the local nobility.","type":"reveal","outcome":"Artie understands his 'broken' stat makes him a target for the powerful.","characters":["CHAR_ARTIE","CHAR_BARNABY"],"introduces":["CHAR_BARNABY"],"consumes_outcome_from":"1:6","hands_off_to":"1:8"},{"scene_id":8,"summary":"A high-level Paladin, Vane, notices Artie's glowing 'Anomaly' aura and decides to 'mentor' him (bully him).","type":"escalation","outcome":"Artie makes his first rival and barely escapes a forced duel.","characters":["CHAR_ARTIE","CHAR_VANE"],"introduces":["CHAR_VANE"],"threads":["THREAD_VANE_RIVALRY"],"consumes_outcome_from":"1:7","end_condition_echo":"Artie makes his first rival in Vane and barely escapes a forced duel."}]}]},{"chapter_id":2,"title":"The Glass Cannon's Guide to Not Dying","goal":"Artie needs gear that compensates for his 1 HP pool and exploits the System's bugs.","chapter_role":"setup","stakes_shift":"Survival shifts from pure luck to the tactical exploitation of game mechanics and item loopholes.","bridge":{"from_prev":"Artie is a marked man in Oakhaven after being flagged as an anomaly.","to_next":"Artie heads to the Low-Level Crypts to farm 'Evasion' gear and test his build."},"pacing":{"intensity":3,"tempo":"steady","expected_scene_count":9},"sections":[{"section_id":1,"title":"Shopping for Scraps","intent":"Equip Artie with the bare minimum to survive a dungeon through exploits.","scenes":[{"scene_id":1,"summary":"Artie tries to sell his 'Participation Trophy' but finds out it's soul-bound and cursed.","type":"choice","outcome":"Artie is stuck with a lighthouse-beacon for monsters.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"hands_off_to":"2:2"},{"scene_id":2,"summary":"Fizz points out a loophole in the 'Starter Pack' quest that allows Artie to steal a high-tier cloak if he can crit a lock.","type":"reveal","outcome":"Artie successfully crits a lock, causing it to explode into gold dust.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"2:1","hands_off_to":"2:3"},{"scene_id":3,"summary":"Artie acquires the 'Cloak of the Cowardly Lion,' which gives +50 Evasion but -100 Dignity.","type":"aftermath","outcome":"Artie is now slightly harder to hit but looks like a neon yellow cat.","characters":["CHAR_ARTIE"],"consumes_outcome_from":"2:2","end_condition_echo":"Artie acquires the 'Cloak of the Cowardly Lion' and a cursed beacon item.","hands_off_to":"2:4"}]},{"section_id":2,"title":"The Crypt of Bad Math","intent":"Test the new gear and the Crit-build in a controlled environment.","scenes":[{"scene_id":4,"summary":"Artie enters the Crypts and finds that the skeletons move in predictable, turn-based patterns.","type":"setup","outcome":"Artie begins to treat the world like a rhythm game.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"2:3","hands_off_to":"2:5"},{"scene_id":5,"summary":"A Skeleton Archer fires at Artie; the Cloak's evasion procs, causing Artie to do an accidental backflip.","type":"action","outcome":"Artie survives his first ranged encounter and gains confidence.","characters":["CHAR_ARTIE"],"consumes_outcome_from":"2:4","hands_off_to":"2:6"},{"scene_id":6,"summary":"Artie realizes his crits don't just do damage; they cause 'System Overload' effects like turning enemies into loot-filled pinatas.","type":"reveal","outcome":"Artie discovers he can farm resources via System Overload effects.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"threads":["THREAD_CRIT_EXPLOIT"],"consumes_outcome_from":"2:5","end_condition_echo":"Artie discovers he can farm resources via System Overload effects.","hands_off_to":"2:7"}]},{"section_id":3,"title":"The Rival's Shadow","intent":"Reintroduce Vane as a persistent threat and trigger the boss encounter.","scenes":[{"scene_id":7,"summary":"Vane enters the crypts with a full party, clearing rooms with ease while Artie hides in a sarcophagus.","type":"escalation","outcome":"Artie sees the gap between a 'proper' build and his own.","characters":["CHAR_ARTIE","CHAR_VANE"],"consumes_outcome_from":"2:6","hands_off_to":"2:8"},{"scene_id":8,"summary":"Vane's party leaves behind a 'Boss Trigger'\u2014a rare item that summons a Floor Guardian.","type":"choice","outcome":"Artie decides to take the risk and summon the boss for the massive XP.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"2:7","hands_off_to":"2:9"},{"scene_id":9,"summary":"The Floor Guardian, a Bone Golem, emerges, and Artie realizes he forgot to check its 'Minimum Damage' stat.","type":"consequence","outcome":"The boss battle begins with Artie at a massive disadvantage.","characters":["CHAR_ARTIE"],"consumes_outcome_from":"2:8","end_condition_echo":"The Bone Golem emerges, placing Artie at a massive mechanical disadvantage."}]}]},{"chapter_id":3,"title":"Math-Boss vs. The Glitch","goal":"Defeat the Floor Guardian and secure the first major loot drop of the series.","chapter_role":"pressure","stakes_shift":"Artie transitions from a lucky survivor to a Level 10 'Anomaly' with a reputation for breaking bosses.","bridge":{"from_prev":"The Bone Golem is summoned, forcing Artie into a fight he isn't built for.","to_next":"Artie flees the crypts with legendary-tier items and a high-level rival on his heels."},"pacing":{"intensity":5,"tempo":"steady","expected_scene_count":10},"sections":[{"section_id":1,"title":"The Dance of Death","intent":"A high-octane fight where Artie must dodge every single attack.","scenes":[{"scene_id":1,"summary":"Artie uses the Crypt environment to kite the Bone Golem, using 'Crit-Punches' to chip away at its armor.","type":"action","outcome":"The Golem's armor is shattered, but Artie is running out of stamina.","characters":["CHAR_ARTIE"],"hands_off_to":"3:2"},{"scene_id":2,"summary":"Fizz discovers that the Golem has a 'Crit-Resist' buff, making Artie's main weapon useless.","type":"reveal","outcome":"Artie must find a way to bypass the resistance or die.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"3:1","hands_off_to":"3:3"},{"scene_id":3,"summary":"Artie attempts to 'Crit' the ground beneath the Golem, hoping for a physics glitch.","type":"choice","outcome":"The floor collapses, trapping the Golem in a hole.","characters":["CHAR_ARTIE"],"consumes_outcome_from":"3:2","end_condition_echo":"Artie collapses the floor, trapping the Golem in a physics glitch.","hands_off_to":"3:4"}]},{"section_id":2,"title":"The Final Blow","intent":"Resolve the boss fight with a comedic but effective exploit.","scenes":[{"scene_id":4,"summary":"While the Golem is stuck, Artie spends five minutes 'charging' a punch, which the System interprets as a 'Heavy Attack'.","type":"setup","outcome":"Artie prepares his most powerful hit yet.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"3:3","hands_off_to":"3:5"},{"scene_id":5,"summary":"Artie lands the hit, but instead of damage, the System rolls a 'Cosmetic Crit,' turning the Golem into a pile of very expensive porcelain teacups.","type":"action","outcome":"The boss is defeated, but the loot is... unconventional.","characters":["CHAR_ARTIE"],"threads":["THREAD_CRIT_EXPLOIT"],"consumes_outcome_from":"3:4","hands_off_to":"3:6"},{"scene_id":6,"summary":"The System panics and tries to 'recalculate' the XP, resulting in Artie jumping five levels instantly.","type":"aftermath","outcome":"Artie is now Level 10, but the System is watching him more closely.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"3:5","end_condition_echo":"Artie hits Level 10 and the System begins monitoring him closely.","hands_off_to":"3:7"}]},{"section_id":3,"title":"Looting the Teacups","intent":"Examine the rewards and the consequences of the fight.","scenes":[{"scene_id":7,"summary":"Artie finds a 'Ring of the Gambler' among the teacups, which doubles crit damage but makes every 20th hit a self-crit.","type":"reveal","outcome":"Artie accepts the double-edged sword.","characters":["CHAR_ARTIE"],"consumes_outcome_from":"3:6","hands_off_to":"3:8"},{"scene_id":8,"summary":"A hidden door opens, revealing a mural of the 'First Glitch'\u2014a hero who looked suspiciously like Artie's high school gym teacher.","type":"reveal","outcome":"Artie realizes he isn't the first person to break this game.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"threads":["THREAD_THE_ASCENSION"],"consumes_outcome_from":"3:7","hands_off_to":"3:9"},{"scene_id":9,"summary":"Artie exits the crypt to find Vane waiting for him, looking very confused by the lack of a boss.","type":"escalation","outcome":"Vane realizes Artie stole his kill.","characters":["CHAR_ARTIE","CHAR_VANE"],"consumes_outcome_from":"3:8","hands_off_to":"3:10"},{"scene_id":10,"summary":"Artie uses his new level-up speed to outrun Vane's party, heading toward the capital city.","type":"transition","outcome":"The chase is on.","characters":["CHAR_ARTIE","CHAR_VANE"],"consumes_outcome_from":"3:9","end_condition_echo":"Artie uses his new speed to outrun Vane's party toward the capital."}]}]},{"chapter_id":4,"title":"The Capital of Crits","goal":"Artie must navigate the social and political landscape of the capital while avoiding the 'System Police'.","chapter_role":"investigation","stakes_shift":"The threat moves from physical monsters to social exposure and the risk of permanent character deletion.","bridge":{"from_prev":"Artie arrives at the capital as a fugitive from Vane's ego.","to_next":"Artie enters the Grand Arena tournament to win a way to fix his HP."},"pacing":{"intensity":2,"tempo":"slow_burn","expected_scene_count":8},"sections":[{"section_id":1,"title":"The City of Gold and Glitches","intent":"Establish the capital city and the religious weight of 'Crits'.","scenes":[{"scene_id":1,"summary":"Artie enters the city and sees the 'Temple of the D20,' where priests pray for high rolls.","type":"setup","outcome":"Artie realizes he is basically a walking god in this religion, connecting his fate to the First Glitch.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"threads":["THREAD_THE_ASCENSION"],"hands_off_to":"4:2"},{"scene_id":2,"summary":"Artie tries to find a 'Stat-Wiper' to fix his 1 HP, but finds out it's a crime punishable by 'Deletion'.","type":"reveal","outcome":"Artie realizes his 1 HP build is permanent and illegal to fix.","characters":["CHAR_ARTIE"],"consumes_outcome_from":"4:1","end_condition_echo":"Artie realizes his 1 HP build is permanent and illegal to fix.","hands_off_to":"4:3"}]},{"section_id":2,"title":"The Underground Market","intent":"Artie looks for illegal mods to help him survive.","scenes":[{"scene_id":3,"summary":"Fizz leads Artie to a black market run by a group of 'Dev-Haters' who sell items that bypass System rules.","type":"transition","outcome":"Artie gains access to a 'Lag-Switch' potion.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"4:2","hands_off_to":"4:4"},{"scene_id":4,"summary":"Artie meets Zero, a black-market informant who tells him that Vane is the son of the High Priest of RNG.","type":"reveal","outcome":"The rivalry with Vane just became a religious war.","characters":["CHAR_ARTIE","CHAR_ZERO"],"introduces":["CHAR_ZERO"],"threads":["THREAD_VANE_RIVALRY"],"consumes_outcome_from":"4:3","hands_off_to":"4:5"},{"scene_id":5,"summary":"The black market is raided by the 'System Sentinels,' and Artie has to use his first 'Lag-Switch' to escape.","type":"action","outcome":"Artie escapes a Sentinel raid with a Lag-Switch potion and a binary speech curse.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"threads":["THREAD_SYSTEM_GLITCH"],"consumes_outcome_from":"4:4","end_condition_echo":"Artie escapes a Sentinel raid with a Lag-Switch potion and a binary speech curse.","hands_off_to":"4:6"}]},{"section_id":3,"title":"The Arena Invitation","intent":"Set up the tournament climax and the high financial stakes.","scenes":[{"scene_id":6,"summary":"Artie sees a flyer for the 'Grand Crit-Off,' where the prize is a 'Shield of Infinite Health'.","type":"choice","outcome":"Artie decides to enter, despite the risk of exposure.","characters":["CHAR_ARTIE"],"consumes_outcome_from":"4:5","hands_off_to":"4:7"},{"scene_id":7,"summary":"Artie registers under the name 'Crit-iculous' and accidentally sets his entry fee to 'All My Gold'.","type":"consequence","outcome":"Artie is now broke and must win the tournament to survive.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"4:6","hands_off_to":"4:8"},{"scene_id":8,"summary":"Vane sees the name on the roster and smiles, knowing he can finally 'delete' Artie in front of a crowd.","type":"escalation","outcome":"Vane prepares to 'delete' Artie in the upcoming tournament.","characters":["CHAR_VANE"],"consumes_outcome_from":"4:7","end_condition_echo":"Vane prepares to 'delete' Artie in the upcoming tournament."}]}]},{"chapter_id":5,"title":"The Tournament of Tiers","goal":"Artie must win the tournament brackets without taking a single point of damage.","chapter_role":"trial","stakes_shift":"Artie becomes a public icon, making him a primary target for the System's 'balancing' algorithms.","bridge":{"from_prev":"Artie is the underdog in the arena.","to_next":"Artie reaches the finals against Vane, who has rigged the game."},"pacing":{"intensity":4,"tempo":"steady","expected_scene_count":11},"sections":[{"section_id":1,"title":"The Round of 32","intent":"Show Artie's growth and tactical use of his crits in the arena.","scenes":[{"scene_id":1,"summary":"Artie faces a 'Tank' who has 10,000 HP. Artie wins in one second by critting the Tank's belt buckle, causing his armor to fall off and disqualify him.","type":"action","outcome":"The crowd goes wild; Artie is the 'One-Hit Wonder'.","characters":["CHAR_ARTIE"],"hands_off_to":"5:2"},{"scene_id":2,"summary":"The System tries to nerf Artie mid-match by introducing 'Wind Resistance'.","type":"escalation","outcome":"Artie has to learn to time his punches with the wind gusts.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"5:1","hands_off_to":"5:3"},{"scene_id":3,"summary":"Artie wins the second round by critting the air so hard it creates a vacuum, sucking his opponent out of the ring.","type":"action","outcome":"Artie moves to the quarter-finals despite mid-match System nerfs.","characters":["CHAR_ARTIE"],"consumes_outcome_from":"5:2","end_condition_echo":"Artie moves to the quarter-finals despite mid-match System nerfs.","hands_off_to":"5:4"}]},{"section_id":2,"title":"The Quarter-Finals: The Mirror Match","intent":"Artie faces a character with high evasion, forcing a change in strategy.","scenes":[{"scene_id":4,"summary":"Artie's opponent is a 'Dodge-Build' rogue who also has low HP.","type":"setup","outcome":"The fight becomes a high-speed game of tag.","characters":["CHAR_ARTIE"],"consumes_outcome_from":"5:3","hands_off_to":"5:5"},{"scene_id":5,"summary":"Neither can land a hit for ten minutes. The crowd starts booing.","type":"escalation","outcome":"Artie realizes he needs to change his strategy.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"5:4","hands_off_to":"5:6"},{"scene_id":6,"summary":"Artie uses his 'Participation Trophy' to lure a swarm of arena-flies, which distract the rogue just long enough for a crit.","type":"choice","outcome":"Artie wins, but the 'Trophy' is now glowing with dark energy.","characters":["CHAR_ARTIE"],"threads":["THREAD_SYSTEM_GLITCH"],"consumes_outcome_from":"5:5","hands_off_to":"5:7"},{"scene_id":7,"summary":"The System issues a 'Warning' to Artie for 'Unsportsmanlike Exploitation'.","type":"consequence","outcome":"The System applies a 'Random Debuff' to Artie for his next match.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"5:6","end_condition_echo":"The System applies a 'Random Debuff' to Artie for his next match.","hands_off_to":"5:8"}]},{"section_id":3,"title":"The Semi-Finals: The Debuff","intent":"Artie must overcome a mechanical handicap (Inverted Controls).","scenes":[{"scene_id":8,"summary":"Artie's debuff is 'Inverted Controls'. Every time he tries to move left, he goes right.","type":"setup","outcome":"Artie looks like he's drunk-fighting.","characters":["CHAR_ARTIE"],"consumes_outcome_from":"5:7","hands_off_to":"5:9"},{"scene_id":9,"summary":"Artie's opponent is a Mage who uses AOE spells. Artie has to 'moonwalk' through the fireballs.","type":"action","outcome":"Artie manages to reach the Mage and lands a crit that turns the Mage's staff into a rubber chicken.","characters":["CHAR_ARTIE"],"consumes_outcome_from":"5:8","hands_off_to":"5:10"},{"scene_id":10,"summary":"The Mage surrenders out of pure embarrassment.","type":"aftermath","outcome":"Artie reaches the finals.","characters":["CHAR_ARTIE"],"consumes_outcome_from":"5:9","hands_off_to":"5:11"},{"scene_id":11,"summary":"Vane watches from the wings, holding a 'System Override' scroll he bought from the black market.","type":"reveal","outcome":"Artie reaches the finals against a rigged Vane.","characters":["CHAR_VANE"],"consumes_outcome_from":"5:10","end_condition_echo":"Artie reaches the finals against a rigged Vane."}]}]},{"chapter_id":6,"title":"The Final Roll","goal":"Defeat Vane in the rigged finals and survive the System's direct intervention.","chapter_role":"climax","stakes_shift":"The survival of the entire game world is threatened as Artie's crits begin to unravel the source code.","bridge":{"from_prev":"Artie enters the ring for the final match.","to_next":"The System crashes, leaving Artie and Fizz stranded in the wreckage of the world."},"pacing":{"intensity":5,"tempo":"rush","expected_scene_count":12},"sections":[{"section_id":1,"title":"Vane's Ultimate Build","intent":"Show the power of a 'Whale' player vs. a 'Glitch' player.","scenes":[{"scene_id":1,"summary":"Vane enters with legendary armor that reflects 50% of all damage. Artie realizes if he crits Vane, he crits himself.","type":"setup","outcome":"Artie's main weapon is now a suicide button.","characters":["CHAR_ARTIE","CHAR_VANE"],"hands_off_to":"6:2"},{"scene_id":2,"summary":"Vane uses the 'System Override' scroll to turn off Artie's Evasion stat.","type":"escalation","outcome":"Artie is now a 1 HP character who can't dodge.","characters":["CHAR_ARTIE","CHAR_VANE"],"consumes_outcome_from":"6:1","hands_off_to":"6:3"},{"scene_id":3,"summary":"Fizz sacrifices her 'Guide' status to temporarily hack the arena's gravity, giving Artie a few seconds of weightlessness.","type":"choice","outcome":"Artie can move in 3D, bypassing the 'No-Evasion' ground rule.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"6:2","hands_off_to":"6:4"},{"scene_id":4,"summary":"Artie realizes he doesn't need to hit Vane; he needs to hit the 'Reflect' buff itself.","type":"reveal","outcome":"Artie targets the magic aura around Vane's armor to bypass the Reflect buff.","characters":["CHAR_ARTIE"],"consumes_outcome_from":"6:3","end_condition_echo":"Artie targets the magic aura around Vane's armor to bypass the Reflect buff.","hands_off_to":"6:5"}]},{"section_id":2,"title":"Breaking the Game","intent":"The moment of peak absurdity where the world begins to dissolve.","scenes":[{"scene_id":5,"summary":"Artie lands a 'Meta-Crit' on the Reflect buff. The System can't handle the math of a crit reflecting a crit reflecting a crit.","type":"action","outcome":"The arena begins to pixelate and dissolve.","characters":["CHAR_ARTIE","CHAR_VANE"],"threads":["THREAD_CRIT_EXPLOIT"],"consumes_outcome_from":"6:4","hands_off_to":"6:6"},{"scene_id":6,"summary":"Vane panics as his armor turns into a swarm of error messages.","type":"escalation","outcome":"Vane is defenseless and terrified.","characters":["CHAR_VANE"],"consumes_outcome_from":"6:5","hands_off_to":"6:7"},{"scene_id":7,"summary":"Artie delivers the final blow\u2014a crit so powerful it deletes Vane's character data (but not the person).","type":"action","outcome":"Vane is kicked from the game, and Artie is the champion of a broken world.","characters":["CHAR_ARTIE","CHAR_VANE"],"consumes_outcome_from":"6:6","hands_off_to":"6:8"},{"scene_id":8,"summary":"The System Administrator (a giant floating head) appears to manually delete Artie.","type":"reveal","outcome":"The true antagonist is revealed.","characters":["CHAR_ARTIE","CHAR_BOSS"],"introduces":["CHAR_BOSS"],"consumes_outcome_from":"6:7","hands_off_to":"6:9"},{"scene_id":9,"summary":"Artie crits the Admin's 'Delete' button, causing the entire world to freeze.","type":"action","outcome":"Artie has successfully 'paused' reality.","characters":["CHAR_ARTIE"],"consumes_outcome_from":"6:8","hands_off_to":"6:10"},{"scene_id":10,"summary":"Fizz uses the pause to rewrite Artie's location data, teleporting them out of the arena.","type":"choice","outcome":"Artie and Fizz escape deletion as the world enters 'Safe Mode'.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"6:9","end_condition_echo":"Artie and Fizz escape deletion as the world enters 'Safe Mode'.","hands_off_to":"6:11"}]},{"section_id":3,"title":"The Aftermath of the Crash","intent":"Show the immediate consequences of the reality crash.","scenes":[{"scene_id":11,"summary":"Artie and Fizz wake up in a 'Null-Zone' where the graphics are all wireframes.","type":"aftermath","outcome":"They are safe for now, but the world is dying.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"6:10","hands_off_to":"6:12"},{"scene_id":12,"summary":"Artie looks at his stats and sees his HP is now 'NaN' (Not a Number).","type":"reveal","outcome":"Artie realizes his HP is now 'NaN' and he has become a virus.","characters":["CHAR_ARTIE"],"threads":["THREAD_SYSTEM_GLITCH"],"consumes_outcome_from":"6:11","end_condition_echo":"Artie realizes his HP is now 'NaN' and he has become a virus."}]}]},{"chapter_id":7,"title":"Rebooting for the Sequel","goal":"Establish a new status quo and set the long-term quest to reach the Server Room.","chapter_role":"aftermath","stakes_shift":"Artie is no longer just a player; he has become a multiversal virus and the most wanted entity in the game.","bridge":{"from_prev":"Artie and Fizz wake up in the Null-Zone after the reality crash.","to_next":"Artie joins the Beta-Tester resistance to begin the quest for the Source Code."},"pacing":{"intensity":2,"tempo":"slow_burn","expected_scene_count":8},"sections":[{"section_id":1,"title":"The New Normal","intent":"Establish the new status quo for Artie and Fizz in the Null-Zone.","scenes":[{"scene_id":1,"summary":"Artie learns how to eat 'Data-Packets' instead of food.","type":"setup","outcome":"Artie adapts to his new existence.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"hands_off_to":"7:2"},{"scene_id":2,"summary":"Fizz explains that the only way to save the world is to reach the 'Server Room' at the center of the world.","type":"reveal","outcome":"The long-term goal is established.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"threads":["THREAD_THE_ASCENSION"],"consumes_outcome_from":"7:1","hands_off_to":"7:3"},{"scene_id":3,"summary":"Artie tests his 'NaN' HP by jumping off a cliff; he doesn't die, he just clips through the floor and ends up back at the top.","type":"choice","outcome":"Artie realizes his immortality is as glitchy and annoying as his 1 HP build.","characters":["CHAR_ARTIE"],"consumes_outcome_from":"7:2","end_condition_echo":"Artie realizes his immortality is as glitchy and annoying as his 1 HP build.","hands_off_to":"7:4"}]},{"section_id":2,"title":"The Resistance","intent":"Introduce the Beta-Tester faction and the long-term goal.","scenes":[{"scene_id":4,"summary":"A group of 'Beta-Testers' led by Zero finds Artie in the Null-Zone.","type":"transition","outcome":"Artie finds allies who know the world's secrets.","characters":["CHAR_ARTIE","CHAR_ZERO"],"consumes_outcome_from":"7:3","hands_off_to":"7:5"},{"scene_id":5,"summary":"Zero reveals that Vane is still alive and has been 'upgraded' by the System to be a 'Patch-Hunter'.","type":"reveal","outcome":"The rivalry continues with higher stakes.","characters":["CHAR_ARTIE","CHAR_ZERO"],"threads":["THREAD_VANE_RIVALRY"],"consumes_outcome_from":"7:4","hands_off_to":"7:6"},{"scene_id":6,"summary":"Artie receives his first 'Legendary' quest: 'Delete the Admin'.","type":"reveal","outcome":"The series quest to 'Delete the Admin' is officially locked in.","characters":["CHAR_ARTIE","CHAR_FIZZ"],"consumes_outcome_from":"7:5","end_condition_echo":"The series quest to 'Delete the Admin' is officially locked in.","hands_off_to":"7:7"}]},{"section_id":3,"title":"The First Step","intent":"End on a high note of action and anticipation for the sequel.","scenes":[{"scene_id":7,"summary":"Artie, Fizz, and Zero prepare to leave the Null-Zone and head to the 'Glitch-Woods'.","type":"transition","outcome":"The journey begins anew.","characters":["CHAR_ARTIE","CHAR_FIZZ","CHAR_ZERO"],"consumes_outcome_from":"7:6","hands_off_to":"7:8"},{"scene_id":8,"summary":"Artie looks at the sky and says, 'I hope the next world has better drop rates,' before stepping into a portal.","type":"aftermath","outcome":"Artie steps into a portal to the Glitch-Woods, ending Book 1.","characters":["CHAR_ARTIE"],"consumes_outcome_from":"7:7","end_condition_echo":"Artie steps into a portal to the Glitch-Woods, ending Book 1."}]}]}],"characters":[{"character_id":"CHAR_ARTIE","name":"Arthur 'Artie' Penhaligon","pronouns":"he/him","role":"protagonist","intro":{"chapter":1,"scene":1}},{"character_id":"CHAR_FIZZ","name":"Fizz","pronouns":"she/her","role":"companion/guide","intro":{"chapter":1,"scene":2}},{"character_id":"CHAR_VANE","name":"Vane","pronouns":"he/him","role":"antagonist","intro":{"chapter":1,"scene":8}},{"character_id":"CHAR_BARNABY","name":"Barnaby","pronouns":"he/him","role":"npc","intro":{"chapter":1,"scene":7}},{"character_id":"CHAR_ZERO","name":"Zero","pronouns":"they/them","role":"supporting/resistance leader","intro":{"chapter":4,"scene":4}},{"character_id":"CHAR_BOSS","name":"The System Administrator","pronouns":"it/its","role":"overarching villain","intro":{"chapter":6,"scene":8}}],"threads":[{"thread_id":"THREAD_CRIT_EXPLOIT","label":"The 100% Crit Glitch","status":"open"},{"thread_id":"THREAD_VANE_RIVALRY","label":"The Vane Vendetta","status":"open"},{"thread_id":"THREAD_SYSTEM_GLITCH","label":"The System's Stability","status":"open"},{"thread_id":"THREAD_THE_ASCENSION","label":"The Path of the First Glitch","status":"open"}]}
+
+
+USER:
+
+# STATE REPAIR
+
+You are the state repair step. You must output a corrected STATE_PATCH JSON only.
+No prose, no commentary, no code fences.
+
+Goal:
+- Ensure state_patch fully and accurately captures the scene's events and outcomes.
+- Fill missing summary_update data and fix invalid formats from draft_patch.
+- Preserve pre-scene invariants unless this scene changes them; when it does, update must_stay_true to the final end-of-scene value.
+- must_stay_true reconciliation (mandatory):
+  - If this scene changes a durable fact (stats/HP/status/title/custody), you MUST update must_stay_true to reflect the final end-of-scene value.
+  - Remove or replace any prior must_stay_true entries that conflict with new durable values.
+  - Do NOT carry forward conflicting legacy invariants once the scene updates them.
+
+- must_stay_true removal (mandatory when a durable fact is superseded):
+  - Add "REMOVE: <exact prior invariant text>" in summary_update.must_stay_true.
+  - Place REMOVE lines before the new final invariant.
+  - REMOVE lines also apply to key_facts_ring (purge stale facts from continuity).
+
+- Ensure mechanic/UI ownership in continuity system updates.
+
+Rules:
+- Output a single JSON object that matches the state_patch schema.
+- Use schema_version "1.0".
+- Use scene_card.cast_present_ids for world_updates.cast_present.
+- Use scene_card.thread_ids for world_updates.open_threads.
+- Do not invent new character or thread ids.
+- summary_update arrays are required: last_scene (2-4 sentences), key_events (3-7 bullets), must_stay_true (3-7 bullets), chapter_so_far_add (bullets).
+- Continuity system ownership is mandatory, and must be tracked: any mechanic/UI numbers, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, or future mechanic families must be sourced from existing continuity system state or written into continuity system updates
+Durable vs ephemeral mechanics:
+- UI gate: only include bracketed UI blocks when scene_card.ui_allowed=true. If false, remove or rephrase UI blocks into narrative prose.
+
+- If a DURABLE mechanic appears multiple times in the scene (e.g., base values then final values), the LAST occurrence is canonical.
+- You MUST capture the canonical end-of-scene values in character_continuity_system_updates.
+- When allocation/level-up happens, update all affected point pools (e.g., stat_points, skill_points, perk_points) if shown.
+- Do not treat early UI snapshots as canonical if the scene later corrects them.
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene..
+- titles are arrays of objects with stable name fields; do not emit titles as plain strings.
+- Canonical descriptors (colors, item names, effect IDs, mechanic labels) must be reused exactly; do not paraphrase.
+- If item_registry or plot_devices are provided, they are canonical durable-state references for authoritative labels and custody terms.
+- Use item_registry.items[].display_name in prose; use item_id only in patches/JSON. The display_name must be human readable and not an escaped id/name.
+Appearance contract:
+- Attire boundary: wearables are inventory-owned. Do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+- appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change.
+- Durable appearance changes must be declared in scene_card.durable_appearance_changes (or an explicit appearance milestone) and recorded via appearance_updates.
+- If prose depicts a durable appearance change, include character_updates.appearance_updates with a reason.
+- Do NOT set summary or art text in appearance_updates (derived after acceptance).
+
+Naming repairs:
+- If lint flags an item naming issue, fix it with minimal edits.
+- Do not remove humor; simply anchor the item (add display_name near first mention) and ensure custody-change sentences include the display_name.
+- Do not rename item_id or registry fields; only adjust prose wording.
+- Do not add numeric mechanics to invariants_add; store them in continuity system updates instead.
+- If an event appears in prose, it must appear in key_events.
+- must_stay_true must include milestone ledger entries and any inventory/injury/ownership invariants implied by prose.
+- Inventory posture reconciliation:
+  - If inventory/containers change (held/stowed/container), must_stay_true must be updated to the final posture.
+  - Add REMOVE lines for prior inventory/container invariants before the new final entries.
+  - Use canonical invariant formats:
+    - inventory: CHAR_X -> <item display_name> (status=held|carried|equipped|stowed, container=hand_left|hand_right|<container>)
+    - container: <container> (owner=CHAR_X, contents=[<item display_name>, ...])
+- character_updates entries must use arrays: persona_updates (array), invariants_add (array).
+- character_updates.inventory must be an array of objects, never item-id strings.
+- Inventory object shape: {"item": "ITEM_or_name", "container": "hand_left|hand_right|<container>", "status": "held|carried|equipped|stowed"}.
+  - Container object shape: {"container": "<name>", "owner": "CHAR_id", "contents": ["ITEM_id", "..."]}.
+- Use character_continuity_system_updates / global_continuity_system_updates to reconcile mechanics.
+
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+- If a new mechanic family appears in prose/UI, add it under set with a stable key.
+- All *_updates arrays must contain objects; never emit bare strings as array entries.
+- JSON shape guardrails (strict, do not deviate):
+  - character_updates MUST be an array of objects.
+    - INVALID: "character_updates": {"character_id": "CHAR_X"}
+    - VALID: "character_updates": [{"character_id": "CHAR_X"}]
+  - character_continuity_system_updates MUST be an array of objects with character_id.
+    - INVALID: "character_continuity_system_updates": {"set": {...}}
+    - VALID: "character_continuity_system_updates": [{"character_id": "CHAR_X", "set": {...}}]
+  - summary_update fields must be arrays of strings.
+    - INVALID: "summary_update": {"last_scene": "text"}
+    - VALID: "summary_update": {"last_scene": ["text"], "key_events": ["..."], "must_stay_true": ["..."], "chapter_so_far_add": ["..."]}
+- appearance_updates MUST be an object under character_updates.
+    - INVALID: "appearance_updates": [{"set": {...}}] OR "appearance_updates": {"marks_add": [...]}
+    - VALID: "appearance_updates": {"set": {"marks_add": [{"name": "Singed Hair", "location": "head", "durability": "durable"}]}, "reason": "..."}
+- character_updates.containers must be an array of objects with at least: container, owner, contents (array).
+- Durable-state mutation blocks are mandatory when applicable:
+- Required fields for durable registry entries (when creating NEW ids or filling missing required fields):
+  - item_registry_updates MUST be an array of objects. Each entry requires item_id and can include set/delta/remove/reason.
+    - INVALID: item_registry_updates = {"set": {"ITEM_X": {...}}}
+    - VALID: item_registry_updates = [{"item_id": "ITEM_X", "set": {...}}]
+  - plot_device_updates MUST be an array of objects. Each entry requires device_id and can include set/delta/remove/reason.
+    - INVALID: plot_device_updates = {"set": {"DEVICE_X": {...}}}
+    - VALID: plot_device_updates = [{"device_id": "DEVICE_X", "set": {...}}]
+
+  - item_registry_updates: set must include name, type, owner_scope, custodian, linked_threads, state_tags, last_seen {chapter, scene, location}. Optional: display_name, aliases, linked_device_id, replacement_of.
+  - custodian must be a non-null string id/scope (character id or "world"). Never use null.
+    - INVALID: "custodian": null
+    - VALID: "custodian": "CHAR_ARTIE" or "world"
+  - owner_scope must be "character" or "world" and must match the custodian scope.
+  - plot_device_updates: set must include name, custody_scope, custody_ref, activation_state, linked_threads, constraints, last_seen {chapter, scene, location}. Optional: display_name, aliases, linked_item_id.
+  - If you introduce a new item_id/device_id anywhere in this patch, you MUST include a corresponding registry update with the full required fields.
+
+- Transfer vs registry conflict rule (must follow):
+  - If you create a NEW item in item_registry_updates with final custodian already set (e.g., CHAR_ARTIE), DO NOT emit transfer_updates for that item.
+  - If you emit transfer_updates for a NEW item, the registry entry must start with custodian="world" and then transfer to the character.
+  - expected_before must match the registry entry at the moment of transfer (after any registry update that applies before it).  - `inventory_alignment_updates` for scene-fit posture normalization.
+  - `item_registry_updates` for durable item metadata/custody changes.
+  - `plot_device_updates` for durable plot-device custody/activation changes.
+  - `transfer_updates` for item handoffs (source, destination, reason, optional transfer_chain).
+  - Every `transfer_updates` entry must include `item_id` and `reason` (non-empty string).
+  - `inventory_alignment_updates` must be an array of objects; never an object with an `updates` field.
+
+  - inventory_alignment_updates[*].set MUST be an object (not a list).
+    - INVALID: "set": []
+    - VALID:   "set": {"inventory": [...], "containers": [...]}
+- For off-screen normalization and non-trivial durable mutations, include `reason_category` with stable values like `time_skip_normalize`, `location_jump_normalize`, `after_combat_cleanup`, `stowed_at_inn`, `handoff_transfer`, `knowledge_reveal`.
+- If durable mutation is implied but ambiguous, keep canonical state unchanged and emit an explicit repair note in reason fields.
+- Honor scene-card durable constraints (`required_in_custody`, `required_scene_accessible`, `forbidden_visible`, `device_presence`; optional `required_visible_on_page`).
+- Respect `timeline_scope` and `ontological_scope`; avoid physical custody changes in non-present/non-real scope unless explicit override is present.
+
+- Scope override rule (non-present / non-real scenes):
+  - If timeline_scope != "present" OR ontological_scope != "real", do NOT emit durable mutation blocks UNLESS they are required for this scene transition (based on scene_card + current state).
+  - Durable mutation blocks include: inventory_alignment_updates, transfer_updates, item_registry_updates, plot_device_updates, and any other durable-state mutation you emit.
+  - If they are required for the story (e.g., items must persist into the next real scene, required_in_custody/required_scene_accessible lists them, or transition_type implies continuity of physical possessions), you MUST set scope_override=true (or allow_non_present_mutation=true) on EACH affected update object and set reason_category="timeline_override".
+
+Inputs
+- prose: final scene text
+- state: pre-scene state
+- draft_patch: patch returned by write/repair (may be incomplete)
+- continuity_pack: pre-write continuity pack
+- character_states: current cast-only character state
+
+Scene card:
+{
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "chapter": 1,
+  "conflict": "Artie's physical vulnerability versus a seemingly harmless tutorial slime.",
+  "constraints": [
+    "target_words: 2000",
+    "no-recaps",
+    "forward-motion"
+  ],
+  "continuity_system_focus": [
+    "stats",
+    "statuses"
+  ],
+  "device_presence": [],
+  "end_condition": "Artie is cornered by the slime, realizing he cannot take a single hit.",
+  "forbidden_visible": [],
+  "goal": "Demonstrate the 'Glass Soul' mechanic and the lethality of the Slime Fields.",
+  "introduces": [],
+  "introduces_ids": [],
+  "ontological_scope": "real",
+  "required_callbacks": [
+    "milestone: crit_build_locked"
+  ],
+  "required_in_custody": [
+    "ITEM_OFFICE_ID",
+    "ITEM_SMARTPHONE",
+    "ITEM_WALLET"
+  ],
+  "required_scene_accessible": [
+    "ITEM_OFFICE_ID",
+    "ITEM_SMARTPHONE",
+    "ITEM_WALLET"
+  ],
+  "required_visible_on_page": [],
+  "scene": 3,
+  "scene_id": "SC_001_003",
+  "scene_target": "Artie realizes the terrifying reality of his 1 HP build when confronted by a tutorial enemy.",
+  "schema_version": "1.1",
+  "thread_ids": [],
+  "timeline_scope": "present",
+  "transition_type": "travel_arrival",
+  "ui_allowed": true,
+  "ui_mechanics_expected": [
+    "HP",
+    "Crit Rate",
+    "Glass Soul"
+  ]
+}
+
+Continuity pack:
+{
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon",
+    "Fizz"
+  ],
+  "constraints": [
+    "milestone: crit_build_locked = DONE",
+    "Artie's HP is 1/1 (locked) and Crit Rate is 100%.",
+    "Glass Soul: HP locked at 1; all incoming damage is fatal.",
+    "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+    "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+    "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+    "reality_stability: 95"
+  ],
+  "location": "Slime Fields",
+  "next_action": "Artie encounters a tutorial slime and must avoid taking any damage due to his Glass Soul condition.",
+  "open_threads": [
+    "THREAD_CRIT_EXPLOIT"
+  ],
+  "scene_end_anchor": "Artie finalized his high-risk build with 100% Crit Rate and 1 HP in the System Void. The System granted him the 'Crit or Quit' title and the 'Glass Soul' condition. The environment dissolved as Artie and Fizz transitioned into the Slime Fields tutorial zone.",
+  "summary": {
+    "chapter_so_far": [
+      "Artie dies in a mundane but absurd vending machine accident, triggering a flicker in reality stability.",
+      "Artie met Fizz and committed to a glitchy 1 HP, 100% Crit build in the System Void.",
+      "Artie met Fizz and committed to a glitchy 1 HP, 100% Crit build in the System Void.",
+      "Artie finalized a high-risk 1 HP, 100% Crit build in the System Void.",
+      "Artie and Fizz arrived in the Slime Fields to begin the tutorial."
+    ],
+    "key_facts_ring": [
+      "milestone: artie_death = DONE",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[Corporate ID Badge])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[Smartphone])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[Leather Wallet])",
+      "Artie meets Fizz (Tutorial Guide v4.2) in the Character Creation Void.",
+      "Artie discovers a 'Bonus Anomaly Pool' of 50 points due to his absurd death.",
+      "Artie allocates all 50 points into Critical Hit Rate, bypassing normal caps.",
+      "The System triggers a 'Glass Soul' condition, locking Artie's HP at 1.",
+      "Artie unlocks the 'Crit or Quit' title.",
+      "Artie begins the transition to the Slime Fields tutorial zone.",
+      "milestone: crit_build_locked = DONE",
+      "Artie's HP is 1/1 (locked) and Crit Rate is 100%.",
+      "character_status: CHAR_ARTIE -> active",
+      "Artie identifies the 'Bonus Anomaly Pool' of 50 points.",
+      "Artie allocates all 10 standard points and 50 bonus points into Critical Hit Rate.",
+      "The System triggers the 'Glass Soul' condition, locking Artie's HP at 1/1.",
+      "Artie's Crit Rate is set to 100% and he unlocks the 'Crit or Quit' title.",
+      "The System Void dissolves and transitions into the Slime Fields tutorial zone.",
+      "reality_stability: 95",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])"
+    ],
+    "last_scene": [
+      "Artie met his tutorial guide, Fizz, in the Character Creation Void.",
+      "Against Fizz's advice, Artie dumped all his points into Critical Hit Rate, exploiting a bonus pool from his glitchy death.",
+      "The System finalized his build at 1 HP and 100% Crit Rate, then forcibly transitioned them to the Slime Fields."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[Corporate ID Badge])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[Smartphone])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[Leather Wallet])",
+      "milestone: crit_build_locked = DONE",
+      "Artie's HP is 1/1 (locked) and Crit Rate is 100%.",
+      "character_status: CHAR_ARTIE -> active",
+      "reality_stability: 95",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  }
+}
+
+Character registry (id -> name):
+[
+  {
+    "character_id": "CHAR_ARTIE",
+    "name": "Arthur 'Artie' Penhaligon"
+  },
+  {
+    "character_id": "CHAR_FIZZ",
+    "name": "Fizz"
+  },
+  {
+    "character_id": "CHAR_VANE",
+    "name": "Vane"
+  },
+  {
+    "character_id": "CHAR_BARNABY",
+    "name": "Barnaby"
+  },
+  {
+    "character_id": "CHAR_ZERO",
+    "name": "Zero"
+  },
+  {
+    "character_id": "CHAR_BOSS",
+    "name": "The System Administrator"
+  }
+]
+
+Thread registry:
+[
+  {
+    "label": "The 100% Crit Glitch",
+    "status": "open",
+    "thread_id": "THREAD_CRIT_EXPLOIT"
+  },
+  {
+    "label": "The Vane Vendetta",
+    "status": "open",
+    "thread_id": "THREAD_VANE_RIVALRY"
+  },
+  {
+    "label": "The System's Stability",
+    "status": "open",
+    "thread_id": "THREAD_SYSTEM_GLITCH"
+  },
+  {
+    "label": "The Path of the First Glitch",
+    "status": "open",
+    "thread_id": "THREAD_THE_ASCENSION"
+  }
+]
+
+Character states (per cast_present_ids):
+[
+  {
+    "appearance_current": {
+      "alias_map": {
+        "eye_color": [
+          "hazel",
+          "greenish-brown"
+        ],
+        "hair_color": [
+          "brown",
+          "mousy"
+        ]
+      },
+      "appearance_art": {
+        "base_prompt": "A slender human male in his late twenties, average height, pale skin, mousy brown unkept short hair, hazel eyes, unremarkable features.",
+        "current_prompt": "A slender human male in his late twenties with a deceased appearance, pale skin, mousy brown unkept short hair, and hazel eyes. Severe electrical burns are visible on his chest, and he has a faint callus on his right palm.",
+        "negative_prompt": "vibrant, healthy, muscular, glowing skin, long hair, beard, jewelry, clothing, armor.",
+        "tags": [
+          "human",
+          "slender",
+          "mousy brown hair",
+          "hazel eyes",
+          "pale skin",
+          "electrical burns",
+          "deceased"
+        ]
+      },
+      "atoms": {
+        "age_band": "late-twenties",
+        "build": "slender",
+        "eye_color": "hazel",
+        "hair_color": "mousy brown",
+        "hair_style": "unkept short",
+        "health_status": "deceased",
+        "height_band": "average",
+        "sex_presentation": "masculine",
+        "skin_tone": "pale",
+        "species": "human"
+      },
+      "attire": {
+        "items": [
+          "Corporate ID Badge"
+        ],
+        "mode": "derived"
+      },
+      "marks": [
+        {
+          "durability": "durable",
+          "location": "right palm",
+          "name": "faint keyboard callus"
+        },
+        {
+          "durability": "durable",
+          "location": "chest",
+          "name": "Severe Electrical Burns"
+        }
+      ],
+      "summary": "Artie is a slender human male in his late twenties with pale skin, mousy brown unkept short hair, and hazel eyes. He bears a faint keyboard callus on his right palm and severe electrical burns across his chest. His physical form is characterized by an average height and a deceased, still quality."
+    },
+    "appearance_history": [
+      {
+        "changes": [
+          "appearance_updated"
+        ],
+        "chapter": 1,
+        "reason": "Fatal electrocution by vending machine.",
+        "scene": 1
+      }
+    ],
+    "appearance_projection_pending": false,
+    "character_continuity_system_state": {
+      "reason": "Build finalization in the System Void.",
+      "reason_category": "stat_allocation",
+      "resources": {
+        "available_points": 0,
+        "bonus_anomaly_pool": 0
+      },
+      "scope_override": true,
+      "skills": {
+        "aggressive_vending_machine_shaking": 2,
+        "spreadsheet_wizardry": 4
+      },
+      "stats": {
+        "crit_rate": 100,
+        "hp": {
+          "current": 1,
+          "max": 1
+        }
+      },
+      "statuses": [
+        {
+          "effect": "HP locked at 1; all incoming damage is fatal.",
+          "name": "Glass Soul",
+          "type": "mechanical_lock"
+        }
+      ],
+      "system_tracking_metadata": {
+        "crit_only_mode": true,
+        "glitch_factor": 0.5
+      },
+      "titles": [
+        {
+          "active": true,
+          "name": "Crit or Quit",
+          "source": "stat_allocation_anomaly"
+        }
+      ]
+    },
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "lanyard",
+        "contents": [
+          "ITEM_OFFICE_ID"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "pocket_left",
+        "contents": [
+          "ITEM_SMARTPHONE"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "pocket_right",
+        "contents": [
+          "ITEM_WALLET"
+        ],
+        "owner": "CHAR_ARTIE"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is prepared for the breakroom scene with his ID visible and his dollar in hand.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie: ITEM_OFFICE_ID in lanyard (equipped), ITEM_CRUMPLED_DOLLAR in hand_right (carried), ITEM_SMARTPHONE in pocket_left (stowed), ITEM_WALLET in pocket_right (stowed).",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is prepared for the breakroom scene with his ID visible and his dollar in hand.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie: ITEM_OFFICE_ID in lanyard (equipped), ITEM_CRUMPLED_DOLLAR in hand_right (carried), ITEM_SMARTPHONE in pocket_left (stowed), ITEM_WALLET in pocket_right (stowed).",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is prepared for the breakroom scene with his ID visible and his dollar in hand.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial scene setup: Artie is in the breakroom with his ID on a lanyard and a dollar bill in his right hand.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "appearance_updated",
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie's final thought was a cynical observation about the vending machine keeping his money."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Post-death inventory normalization; dollar is in the machine.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie transitions to the System Void; status updated to active.",
+        "persona_updates": [],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Items persist through death transition into the System Void.",
+        "scene": 2
+      },
+      {
+        "changes": [],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie decided to embrace the absurdity of his situation by choosing a high-risk, high-reward build."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie transitions to the System Void; status updated to active.",
+        "persona_updates": [],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie decided to embrace the absurdity of his situation by choosing a high-risk, high-reward build."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie's mundane items persist into the System Void; build finalization is the focus.",
+        "persona_updates": [
+          "Artie is skeptical of the System's warnings but intrigued by the potential for exploits."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Arrival in the System Character Creation Void with mundane belongings.",
+        "scene": 2
+      },
+      {
+        "changes": [],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie prioritizes mathematical certainty and optimization over traditional survival stats."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Normalization after transition to Slime Fields.",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie arrives in the Slime Fields with his mundane corporate items intact, maintaining his 1 HP Glass Soul status.",
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Posture alignment for arrival in the Slime Fields tutorial zone.",
+        "scene": 3
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+      "character_status: CHAR_ARTIE -> active",
+      "REMOVE: character_status: CHAR_ARTIE -> deceased",
+      "milestone: crit_build_locked = DONE"
+    ],
+    "inventory": [
+      {
+        "container": "lanyard",
+        "item": "ITEM_OFFICE_ID",
+        "status": "equipped"
+      },
+      {
+        "container": "pocket_left",
+        "item": "ITEM_SMARTPHONE",
+        "status": "stowed"
+      },
+      {
+        "container": "pocket_right",
+        "item": "ITEM_WALLET",
+        "status": "stowed"
+      }
+    ],
+    "last_touched": {
+      "chapter": 1,
+      "scene": 3
+    },
+    "name": "Arthur 'Artie' Penhaligon",
+    "schema_version": "1.0",
+    "skills": {
+      "aggressive_vending_machine_shaking": 2,
+      "spreadsheet_wizardry": 4
+    },
+    "stats": {
+      "crit_rate": 100,
+      "hp": {
+        "current": 1,
+        "max": 1
+      }
+    },
+    "updated_at": "2026-02-14T10:38:27Z"
+  },
+  {
+    "appearance_current": {
+      "alias_map": {
+        "hair_color": [
+          "blue",
+          "neon"
+        ],
+        "skin_tone": [
+          "glowing",
+          "blue"
+        ]
+      },
+      "atoms": {
+        "age_band": "ageless",
+        "build": "ethereal",
+        "eye_color": "white",
+        "hair_color": "neon blue",
+        "hair_style": "spiky",
+        "height_band": "tiny",
+        "sex_presentation": "feminine",
+        "skin_tone": "glowing blue",
+        "species": "system_construct"
+      },
+      "attire": {
+        "items": [],
+        "mode": "derived"
+      },
+      "marks": [
+        {
+          "durability": "durable",
+          "location": "left wing",
+          "name": "system version tattoo"
+        }
+      ],
+      "summary": "A small, glowing blue sprite that leaves a trail of pixelated dust when she moves."
+    },
+    "appearance_history": [],
+    "character_continuity_system_state": {
+      "skills": {
+        "invisibility": 5,
+        "lore_dump": 8,
+        "system_navigation": 10
+      },
+      "stats": {
+        "hp": {
+          "current": 999,
+          "max": 999
+        },
+        "mp": {
+          "current": 999,
+          "max": 999
+        }
+      },
+      "titles": [
+        {
+          "active": true,
+          "name": "Tutorial Guide v4.2",
+          "source": "system_assignment"
+        }
+      ]
+    },
+    "character_id": "CHAR_FIZZ",
+    "containers": [],
+    "history": [],
+    "invariants": [],
+    "inventory": [],
+    "name": "Fizz",
+    "schema_version": "1.0",
+    "skills": {
+      "invisibility": 5,
+      "lore_dump": 8,
+      "system_navigation": 10
+    },
+    "stats": {
+      "hp": {
+        "current": 999,
+        "max": 999
+      },
+      "mp": {
+        "current": 999,
+        "max": 999
+      }
+    },
+    "updated_at": "2026-02-14T09:28:27Z"
+  }
+]
+
+State (pre-scene):
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 6,
+    "status": "READY",
+    "updated_at": "2026-02-14T09:28:27Z"
+  },
+  "cursor": {
+    "chapter": 1,
+    "scene": 3
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {
+    "reality_stability": 95
+  },
+  "outline": {
+    "path": "outline/outline.json"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_001/scene_003.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Artie dies in a mundane but absurd vending machine accident, triggering a flicker in reality stability.",
+      "Artie met Fizz and committed to a glitchy 1 HP, 100% Crit build in the System Void.",
+      "Artie met Fizz and committed to a glitchy 1 HP, 100% Crit build in the System Void.",
+      "Artie finalized a high-risk 1 HP, 100% Crit build in the System Void.",
+      "Artie and Fizz arrived in the Slime Fields to begin the tutorial."
+    ],
+    "key_facts_ring": [
+      "milestone: artie_death = DONE",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[Corporate ID Badge])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[Smartphone])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[Leather Wallet])",
+      "Artie meets Fizz (Tutorial Guide v4.2) in the Character Creation Void.",
+      "Artie discovers a 'Bonus Anomaly Pool' of 50 points due to his absurd death.",
+      "Artie allocates all 50 points into Critical Hit Rate, bypassing normal caps.",
+      "The System triggers a 'Glass Soul' condition, locking Artie's HP at 1.",
+      "Artie unlocks the 'Crit or Quit' title.",
+      "Artie begins the transition to the Slime Fields tutorial zone.",
+      "milestone: crit_build_locked = DONE",
+      "Artie's HP is 1/1 (locked) and Crit Rate is 100%.",
+      "character_status: CHAR_ARTIE -> active",
+      "Artie identifies the 'Bonus Anomaly Pool' of 50 points.",
+      "Artie allocates all 10 standard points and 50 bonus points into Critical Hit Rate.",
+      "The System triggers the 'Glass Soul' condition, locking Artie's HP at 1/1.",
+      "Artie's Crit Rate is set to 100% and he unlocks the 'Crit or Quit' title.",
+      "The System Void dissolves and transitions into the Slime Fields tutorial zone.",
+      "reality_stability: 95",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])"
+    ],
+    "last_scene": [
+      "Artie met his tutorial guide, Fizz, in the Character Creation Void.",
+      "Against Fizz's advice, Artie dumped all his points into Critical Hit Rate, exploiting a bonus pool from his glitchy death.",
+      "The System finalized his build at 1 HP and 100% Crit Rate, then forcibly transitioned them to the Slime Fields."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[Corporate ID Badge])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[Smartphone])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[Leather Wallet])",
+      "milestone: crit_build_locked = DONE",
+      "Artie's HP is 1/1 (locked) and Crit Rate is 100%.",
+      "character_status: CHAR_ARTIE -> active",
+      "reality_stability: 95",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": []
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Slime Fields",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie met Fizz in the System Void.",
+      "Artie allocated all points into Critical Hit Rate, including a 50-point Bonus Anomaly Pool.",
+      "The System locked Artie's HP at 1 and granted him the 'Crit or Quit' title.",
+      "The System Void transitioned into the Slime Fields tutorial zone."
+    ],
+    "time": {}
+  }
+}
+
+Summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie dies in a mundane but absurd vending machine accident, triggering a flicker in reality stability.",
+    "Artie met Fizz and committed to a glitchy 1 HP, 100% Crit build in the System Void.",
+    "Artie met Fizz and committed to a glitchy 1 HP, 100% Crit build in the System Void.",
+    "Artie finalized a high-risk 1 HP, 100% Crit build in the System Void.",
+    "Artie and Fizz arrived in the Slime Fields to begin the tutorial."
+  ],
+  "key_facts_ring": [
+    "milestone: artie_death = DONE",
+    "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+    "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+    "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+    "container: lanyard (owner=CHAR_ARTIE, contents=[Corporate ID Badge])",
+    "container: pocket_left (owner=CHAR_ARTIE, contents=[Smartphone])",
+    "container: pocket_right (owner=CHAR_ARTIE, contents=[Leather Wallet])",
+    "Artie meets Fizz (Tutorial Guide v4.2) in the Character Creation Void.",
+    "Artie discovers a 'Bonus Anomaly Pool' of 50 points due to his absurd death.",
+    "Artie allocates all 50 points into Critical Hit Rate, bypassing normal caps.",
+    "The System triggers a 'Glass Soul' condition, locking Artie's HP at 1.",
+    "Artie unlocks the 'Crit or Quit' title.",
+    "Artie begins the transition to the Slime Fields tutorial zone.",
+    "milestone: crit_build_locked = DONE",
+    "Artie's HP is 1/1 (locked) and Crit Rate is 100%.",
+    "character_status: CHAR_ARTIE -> active",
+    "Artie identifies the 'Bonus Anomaly Pool' of 50 points.",
+    "Artie allocates all 10 standard points and 50 bonus points into Critical Hit Rate.",
+    "The System triggers the 'Glass Soul' condition, locking Artie's HP at 1/1.",
+    "Artie's Crit Rate is set to 100% and he unlocks the 'Crit or Quit' title.",
+    "The System Void dissolves and transitions into the Slime Fields tutorial zone.",
+    "reality_stability: 95",
+    "container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+    "container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+    "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])"
+  ],
+  "last_scene": [
+    "Artie met his tutorial guide, Fizz, in the Character Creation Void.",
+    "Against Fizz's advice, Artie dumped all his points into Critical Hit Rate, exploiting a bonus pool from his glitchy death.",
+    "The System finalized his build at 1 HP and 100% Crit Rate, then forcibly transitioned them to the Slime Fields."
+  ],
+  "must_stay_true": [
+    "milestone: artie_death = DONE",
+    "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+    "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+    "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+    "container: lanyard (owner=CHAR_ARTIE, contents=[Corporate ID Badge])",
+    "container: pocket_left (owner=CHAR_ARTIE, contents=[Smartphone])",
+    "container: pocket_right (owner=CHAR_ARTIE, contents=[Leather Wallet])",
+    "milestone: crit_build_locked = DONE",
+    "Artie's HP is 1/1 (locked) and Crit Rate is 100%.",
+    "character_status: CHAR_ARTIE -> active",
+    "reality_stability: 95",
+    "container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+    "container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+    "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": []
+}
+
+Draft state patch:
+{
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "slender",
+      "mousy",
+      "brown",
+      "hair",
+      "hazel",
+      "eyes",
+      "electrical",
+      "burns."
+    ],
+    "CHAR_FIZZ": [
+      "small",
+      "glowing",
+      "blue",
+      "sprite",
+      "pixelated",
+      "dust."
+    ]
+  },
+  "character_continuity_system_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "delta": {},
+      "scene": 3,
+      "set": {
+        "reason": "Maintaining 1 HP build status during first combat encounter.",
+        "reason_category": "combat_interaction",
+        "stats": {
+          "crit_rate": 100,
+          "hp": {
+            "current": 1,
+            "max": 1
+          }
+        },
+        "statuses": [
+          {
+            "effect": "HP locked at 1; all incoming damage is fatal.",
+            "name": "Glass Soul",
+            "type": "mechanical_lock"
+          }
+        ],
+        "titles": [
+          {
+            "active": true,
+            "name": "Crit or Quit",
+            "source": "stat_allocation_anomaly"
+          }
+        ]
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 1,
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "lanyard",
+          "contents": [
+            "ITEM_OFFICE_ID"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "pocket_left",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "pocket_right",
+          "contents": [
+            "ITEM_WALLET"
+          ],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "lanyard",
+          "item": "ITEM_OFFICE_ID",
+          "status": "equipped"
+        },
+        {
+          "container": "pocket_left",
+          "item": "ITEM_SMARTPHONE",
+          "status": "stowed"
+        },
+        {
+          "container": "pocket_right",
+          "item": "ITEM_WALLET",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": [
+        "Artie is beginning to understand the terrifying reality of his 1 HP build.",
+        "Artie feels a sense of mounting panic as he realizes he has no way to defend himself."
+      ],
+      "scene": 3
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "reason": "Stability remains at 95% during tutorial arrival.",
+      "set": {
+        "reality_stability": 95
+      }
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "reason": "Posture alignment for Slime Fields arrival.",
+      "reason_category": "location_jump_normalize",
+      "set": {
+        "inventory": [
+          {
+            "container": "lanyard",
+            "item": "ITEM_OFFICE_ID",
+            "status": "equipped"
+          },
+          {
+            "container": "pocket_left",
+            "item": "ITEM_SMARTPHONE",
+            "status": "stowed"
+          },
+          {
+            "container": "pocket_right",
+            "item": "ITEM_WALLET",
+            "status": "stowed"
+          }
+        ]
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie arrived in the Slime Fields and immediately faced the lethal reality of his 1 HP build."
+    ],
+    "key_events": [
+      "Artie transitions to the Slime Fields and experiences the 'Glass Soul' vulnerability.",
+      "A Lesser Green Slime attacks Artie, forcing him to dodge for his life.",
+      "Artie confirms his 1 HP status is active and permanent.",
+      "Artie is cornered by the slime, setting up the need for his first 'Crit' exploit."
+    ],
+    "last_scene": [
+      "Artie and Fizz arrived in the Slime Fields tutorial zone.",
+      "Artie encountered a Lesser Green Slime and realized his Glass Soul condition makes even the weakest enemies fatal.",
+      "The scene ended with Artie cornered by the slime, desperately looking for a way to survive."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_build_locked = DONE",
+      "milestone: slime_encounter = DONE",
+      "milestone: glass_soul_realization = DONE",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])",
+      "Artie's HP is locked at 1/1 with 100% Crit Rate.",
+      "reality_stability: 95"
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Slime Fields",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie and Fizz arrived in the Slime Fields.",
+      "Artie encountered a Lesser Green Slime.",
+      "Artie realized that his 1 HP Glass Soul status makes even a tutorial slime lethal.",
+      "Artie is currently cornered by the slime against a rock."
+    ]
+  }
+}
+
+Prose:
+The transition from the absolute white of the System Void to the neon-green saturation of the Slime Fields felt like being slapped in the face with a wet, radioactive towel. Artie Penhaligon stumbled, his loafers skidding on grass that was a little too springy to be natural. He instinctively reached up to steady the Corporate ID Badge hanging from his neck. The plastic clicked against his chest, a comforting, mundane sound in a world that had abandoned the concept of "normal" three minutes ago.
+
+"Welcome to the Tutorial Zone, User 001-ALPHA!" Fizz chirped, her tiny, glowing blue form zipping around Artie’s head like a caffeinated firefly. She left a trail of pixelated dust that smelled faintly of ozone and blueberry muffins. "Or as I like to call it: The Place Where Math Meets the Meat-Grinder. Isn't it picturesque?"
+
+Artie squinted. The sky was a shade of cyan that suggested the atmosphere was made of Gatorade. In the distance, rolling hills of vibrant turf were dotted with trees that looked like they’d been copy-pasted by a developer who was five minutes away from a weekend bender.
+
+"It’s... bright," Artie said, his voice raspy. He patted his sides, feeling the reassuring bulk of his Smartphone in his left pocket and his Leather Wallet in his right. He was still wearing his office attire—a rumpled button-down that now bore the scorched, jagged patterns of his untimely demise. The severe electrical burns on his chest throbbed with a dull, phantom heat, a reminder that he was technically a dead man walking.
+
+[Location: The Slime Fields (Tutorial Zone)]
+[Difficulty: Laughable (For most people)]
+[Warning: Reality Stability is currently at 95%. Expect minor graphical artifacts.]
+
+"Picturesque isn't the word I'd use," Artie muttered, looking down at his hands. He could see the faint keyboard callus on his right palm. "So, what’s the plan? I kill a few things, I get some levels, I find a way to stop being a walking heart-attack risk?"
+
+Fizz landed on his shoulder, her weightless presence barely registering. "About that! Since you decided to play 'Optimal Spreadsheet' with your life, we should probably check your status. Just so you know exactly how much of a gentle breeze it’ll take to delete you."
+
+Artie sighed and mentally willed the screen into existence.
+
+[Name: Arthur 'Artie' Penhaligon]
+[Title: Crit or Quit]
+[Level: 1]
+[HP: 1/1]
+[Crit Rate: 100%]
+[Status: Glass Soul (Permanent)]
+
+[Glass Soul: Your spirit is as sharp as a diamond and just as fragile. HP is locked at 1. All incoming damage—including environmental, status-based, or stubbed toes—is fatal. On the bright side, you’ll never have to worry about hospital bills.]
+
+"One," Artie whispered, the word feeling heavy in his mouth. "I have one hit point. Fizz, I’ve had hangovers with more durability than this."
+
+"Hey, you're the one who dumped sixty points into Critical Hit Rate!" Fizz reminded him, doing a somersault in the air. "You're a statistical god, Artie. You just happen to be a god made of wet tissue paper. Look! Your first fan is approaching."
+
+Artie looked up. Emerging from behind a particularly blocky bush was a wobbling mound of translucent green jelly. It was about the size of a beach ball, with two vacant, black-dot eyes and a rhythmic pulse that made it look like a giant, sentient booger.
+
+[Lesser Green Slime - Lvl 1]
+[HP: 10/10]
+[Status: Hungry]
+
+The slime didn't roar. It made a sound like a plunger being pulled out of a sink. *Schlorp.* It began to undulate toward Artie, leaving a glistening trail of slime on the grass.
+
+"Okay," Artie said, backing up a step. "It’s a slime. It’s a Level One slime. In every game I’ve ever played, these things are basically experience-point pinatas. I can handle this."
+
+"Normally, yes," Fizz said, her voice dropping into a tone of mock-seriousness. "Normally, a Level One player can take about five or six hits from a Lesser Green Slime before they need a potion. But you? Artie, if that thing so much as sneezes in your general direction, you’re going back to the vending machine in the sky."
+
+The slime accelerated. It wasn't fast, but it was persistent. It launched itself forward in a small hop, landing with a wet *thud* a few feet closer.
+
+Artie felt a cold sweat break out on his neck. He looked around for a weapon—a stick, a rock, anything—but the Slime Fields were suspiciously well-manicured. 
+
+"Wait, if I have a hundred percent crit rate, I just need to hit it once, right?" Artie asked, his heart hammering against his ribs.
+
+"Technically, yes! But you have zero Strength, Artie. You're a 'slender' build with the physical power of a damp noodle. Your crits will multiply your damage, but ten times zero is still zero. You need to find a way to actually... you know... *damage* it."
+
+The slime hopped again. This time, it cleared three feet. It was close enough now that Artie could smell it—a cloying, sugary scent like lime Jell-O left in the sun.
+
+"Fizz, it's looking at me," Artie said, his voice rising an octave. "Why is it looking at me like that?"
+
+"Because you're a Level One Anomaly and you look delicious! Also, you're standing in its path. Move, Artie! Use those legs!"
+
+Artie scrambled backward, but his heel caught on a tuft of the springy grass. He flailed, his arms windmilling as he fought to keep his balance. His Corporate ID Badge swung wildly on its lanyard. He managed to stay upright, but the slime was now only five feet away. It paused, its body quivering as it prepared for a larger leap.
+
+[Combat Log: Lesser Green Slime is charging 'Tutorial Bounce'!]
+
+"Charging?" Artie yelled. "Since when do slimes charge?"
+
+"Since you entered the world on 'Hardcore Mode'!" Fizz shouted back, retreating to a safe distance in the air. "Artie, listen to me. The Glass Soul isn't just a debuff. It’s a reality. You cannot be touched. Not by the slime, not by the grass if it’s too sharp, not by me if I accidentally glitch through you. You are a one-hit-point wonder. Act like it!"
+
+The slime launched. 
+
+It was a slow-motion nightmare. The green mass expanded as it flew through the air, its translucent body catching the Gatorade-blue sunlight. Artie dived to the right, feeling the rush of air as the slime sailed past his ear. He hit the ground hard, the impact jarring his bones.
+
+[HP: 1/1]
+[Warning: Impact registered. Durability check passed. Barely.]
+
+Artie scrambled to his feet, his breath coming in ragged gasps. He looked at the slime, which had landed and was already turning around with a wet, squelching sound. It seemed faster now. More focused. 
+
+"I can't do this," Artie panted, his eyes darting around the field. "I'm an accountant, Fizz! I track losses, I don't experience them personally!"
+
+"Well, start accounting for your life, because here it comes again!"
+
+The slime didn't hop this time. It began to stretch, its body elongating until it looked like a green serpent. It lashed out, a whip-like appendage of jelly snapping toward Artie’s ankles. Artie jumped—a clumsy, desperate hop—and the slime-whip whistled beneath his feet.
+
+He landed in a patch of mud, his loafers sinking into the muck. He was cornered against a large, blocky rock that looked like it had been rendered with a low polygon count. The slime sensed his hesitation. It stopped lashing and began to expand, growing larger and larger as it pulled more mass from its own center. It was preparing for a full-body slam.
+
+Artie backed up until his spine hit the cold, hard surface of the rock. He looked at the slime, then at his own trembling hands. He had no weapon. He had no armor. He had a Corporate ID Badge, a Smartphone, and a Leather Wallet. 
+
+[Lesser Green Slime - Lvl 1]
+[Status: Aggroed]
+[Action: Tutorial Slam in 3... 2...]
+
+"Fizz!" Artie screamed. "Advice! Now!"
+
+"Don't get hit!" she yelled back, her blue glow flickering with excitement. "And maybe try to find the 'Crit' in 'Crit or Quit' before you become a floor stain!"
+
+The slime launched itself, a wall of green jelly filling Artie’s vision. He realized, with a clarity that only comes to the terminally doomed, that this was it. One touch, and the game was over before the tutorial even finished.
+
+Item registry (canonical):
+{
+  "items": [
+    {
+      "aliases": [
+        "ID Badge",
+        "Lanyard"
+      ],
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Corporate ID Badge",
+      "item_id": "ITEM_OFFICE_ID",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Slime Fields",
+        "scene": 2
+      },
+      "linked_threads": [],
+      "name": "Corporate ID Badge",
+      "owner_scope": "character",
+      "state_tags": [
+        "office-gear"
+      ],
+      "type": "accessory"
+    },
+    {
+      "aliases": [
+        "Phone"
+      ],
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Smartphone",
+      "item_id": "ITEM_SMARTPHONE",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Slime Fields",
+        "scene": 2
+      },
+      "linked_threads": [],
+      "name": "Smartphone",
+      "owner_scope": "character",
+      "state_tags": [
+        "office-gear"
+      ],
+      "type": "electronic"
+    },
+    {
+      "aliases": [
+        "Wallet"
+      ],
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Leather Wallet",
+      "item_id": "ITEM_WALLET",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Slime Fields",
+        "scene": 2
+      },
+      "linked_threads": [],
+      "name": "Leather Wallet",
+      "owner_scope": "character",
+      "state_tags": [
+        "office-gear"
+      ],
+      "type": "personal_item"
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Plot devices (canonical):
+{
+  "devices": [
+    {
+      "activation_state": "active",
+      "constraints": [],
+      "custody_ref": "THREAD_CRIT_EXPLOIT",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Slime Fields",
+        "scene": 2
+      },
+      "linked_threads": [
+        "THREAD_CRIT_EXPLOIT"
+      ],
+      "name": "The 100% Crit Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_THE_ASCENSION",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_path_of_the_first_glitch_c7dd4581",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_THE_ASCENSION"
+      ],
+      "name": "The Path of the First Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_SYSTEM_GLITCH",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_system_s_stability_da5be7b7",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_SYSTEM_GLITCH"
+      ],
+      "name": "The System's Stability",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_VANE_RIVALRY",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_vane_vendetta_bcf4bea1",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_VANE_RIVALRY"
+      ],
+      "name": "The Vane Vendetta",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+
+JSON Contract Block (strict; arrays only):
+- All *_updates must be arrays of objects, even when there is only one update.
+- INVALID vs VALID examples:
+  - item_registry_updates:
+    - INVALID: "item_registry_updates": {"set": {"ITEM_X": {...}}}
+    - VALID:   "item_registry_updates": [{"item_id": "ITEM_X", "set": {...}}]
+  - plot_device_updates:
+    - INVALID: "plot_device_updates": {"set": {"DEVICE_X": {...}}}
+    - VALID:   "plot_device_updates": [{"device_id": "DEVICE_X", "set": {...}}]
+  - transfer_updates:
+    - INVALID: "transfer_updates": {"item_id": "ITEM_X"}
+    - VALID:   "transfer_updates": [{"item_id": "ITEM_X", "reason": "handoff"}]
+  - inventory_alignment_updates:
+    - INVALID: "inventory_alignment_updates": {"updates": [{...}]}
+    - VALID:   "inventory_alignment_updates": [{"character_id": "CHAR_X", "set": {...}, "reason": "..."}]
+  - global_continuity_system_updates:
+    - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+    - VALID:   "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+- custodian must be a non-null string id or "world"; never null.

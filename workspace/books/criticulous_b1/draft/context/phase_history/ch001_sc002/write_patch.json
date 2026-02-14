@@ -1,0 +1,224 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Slime Fields - Tutorial Zone",
+    "recent_facts": [
+      "Artie finalized his build in the System Void.",
+      "Artie used 50 bonus anomaly points to reach 100% Critical Hit Rate.",
+      "The System applied the 'Glass Soul' condition, locking Artie's HP at 1.",
+      "Artie unlocked the 'Crit or Quit' title.",
+      "Artie and Fizz transitioned from the Void to the Slime Fields."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_OFFICE_ID",
+          "container": "lanyard",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_WALLET",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_OFFICE_ID"
+          ]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is fully committed to his glass-cannon build, viewing the 1 HP lock as a fair trade for 100% Crits."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100
+        },
+        "resources": {
+          "bonus_anomaly_pool": 0
+        },
+        "titles": [
+          {
+            "name": "Crit or Quit",
+            "source": "stat_allocation_anomaly",
+            "active": true
+          }
+        ],
+        "statuses": [
+          {
+            "name": "Glass Soul",
+            "effect": "HP locked at 1; all incoming damage is fatal.",
+            "type": "mechanical_lock"
+          }
+        ],
+        "reason": "Build finalization in the System Void."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "reality_stability": 97
+      },
+      "reason": "Stable transition to the Slime Fields despite anomaly allocation."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_OFFICE_ID",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "Slime Fields - Tutorial Zone"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_SMARTPHONE",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "Slime Fields - Tutorial Zone"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_WALLET",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "Slime Fields - Tutorial Zone"
+        }
+      }
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie finalized his character build in the System Void, ignoring Fizz's warnings.",
+      "By dumping all points into Critical Hit Rate, Artie triggered a 'Glass Soul' condition that locked his HP at 1.",
+      "The System granted Artie the title 'Crit or Quit' and transitioned him to the Slime Fields tutorial zone."
+    ],
+    "key_events": [
+      "Artie discovers and spends the 50-point Bonus Anomaly Pool.",
+      "Artie bypasses the Level 1 Crit Rate cap, reaching 100%.",
+      "The System locks Artie's HP at 1/1 as a penalty for the anomaly build.",
+      "Artie unlocks the 'Crit or Quit' title.",
+      "Artie and Fizz arrive in the Slime Fields to begin the combat tutorial."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_build_locked = DONE",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "Artie's HP is 1/1 (locked) and Crit Rate is 100%.",
+      "character_status: CHAR_ARTIE -> active",
+      "Title 'Crit or Quit' is active for Artie."
+    ],
+    "chapter_so_far_add": [
+      "Artie met Fizz and committed to a glitchy 1 HP, 100% Crit build in the System Void."
+    ]
+  },
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_OFFICE_ID",
+            "container": "lanyard",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_WALLET",
+            "container": "pocket_right",
+            "status": "stowed"
+          }
+        ]
+      },
+      "reason": "Normalization after transition to Slime Fields."
+    }
+  ],
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "slender",
+      "pale",
+      "skin",
+      "mousy",
+      "brown",
+      "hair",
+      "hazel",
+      "eyes",
+      "electrical",
+      "burns."
+    ],
+    "CHAR_FIZZ": [
+      "tiny",
+      "glowing",
+      "blue",
+      "sprite",
+      "neon",
+      "blue",
+      "spiky",
+      "hair",
+      "white",
+      "eyes."
+    ]
+  }
+}

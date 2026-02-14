@@ -1,0 +1,241 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Slime Fields",
+    "recent_facts": [
+      "Artie met Fizz in the System Void.",
+      "Artie allocated all points into Critical Hit Rate, including a 50-point Bonus Anomaly Pool.",
+      "The System locked Artie's HP at 1 and granted him the 'Crit or Quit' title.",
+      "The System Void transitioned into the Slime Fields tutorial zone."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "Artie met his tutorial guide, Fizz, in the Character Creation Void.",
+      "Against Fizz's advice, Artie dumped all his points into Critical Hit Rate, exploiting a bonus pool from his glitchy death.",
+      "The System finalized his build at 1 HP and 100% Crit Rate, then forcibly transitioned them to the Slime Fields."
+    ],
+    "key_events": [
+      "Artie rejects standard Vigor allocation in favor of Critical Hit Rate.",
+      "Artie utilizes the 50-point Bonus Anomaly Pool to bypass Level 1 stat caps.",
+      "The System triggers the 'Glass Soul' condition, locking Artie's HP at 1/1.",
+      "Artie unlocks the 'Crit or Quit' title.",
+      "Fizz transitions to invisible Guide mode as the environment shifts to the Slime Fields."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_build_locked = DONE",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])",
+      "character_status: CHAR_ARTIE -> active",
+      "reality_stability: 95"
+    ],
+    "chapter_so_far_add": [
+      "Artie finalized a high-risk 1 HP, 100% Crit build in the System Void.",
+      "Artie and Fizz arrived in the Slime Fields to begin the tutorial."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_OFFICE_ID",
+          "container": "lanyard",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_WALLET",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_OFFICE_ID"
+          ]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie prioritizes mathematical certainty and optimization over traditional survival stats."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100
+        },
+        "resources": {
+          "available_points": 0,
+          "bonus_anomaly_pool": 0
+        },
+        "titles": [
+          {
+            "name": "Crit or Quit",
+            "source": "stat_allocation_anomaly",
+            "active": true
+          }
+        ],
+        "statuses": [
+          {
+            "name": "Glass Soul",
+            "effect": "HP locked at 1; all incoming damage is fatal.",
+            "type": "mechanical_lock"
+          }
+        ],
+        "reason": "Build finalization in the System Void.",
+        "reason_category": "stat_allocation"
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "reality_stability": 95
+      },
+      "reason": "System stress due to illegal stat allocation and anomaly pool usage.",
+      "reason_category": "system_glitch"
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "set": {
+        "activation_state": "active",
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "System Character Creation Void"
+        }
+      }
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_OFFICE_ID",
+            "container": "lanyard",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_WALLET",
+            "container": "pocket_right",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "lanyard",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_OFFICE_ID"
+            ]
+          },
+          {
+            "container": "pocket_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_WALLET"
+            ]
+          }
+        ]
+      },
+      "reason": "Normalization after build finalization.",
+      "reason_category": "after_combat_cleanup"
+    }
+  ],
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "slender",
+      "mousy",
+      "brown",
+      "hair",
+      "hazel",
+      "eyes",
+      "pale",
+      "skin",
+      "electrical",
+      "burns",
+      "on",
+      "chest",
+      "keyboard",
+      "callus."
+    ],
+    "CHAR_FIZZ": [
+      "tiny",
+      "glowing",
+      "blue",
+      "sprite",
+      "spiky",
+      "neon",
+      "blue",
+      "hair",
+      "white",
+      "eyes",
+      "pixelated",
+      "dust",
+      "trail."
+    ]
+  }
+}

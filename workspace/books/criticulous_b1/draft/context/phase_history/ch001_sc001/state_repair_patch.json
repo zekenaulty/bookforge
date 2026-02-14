@@ -1,0 +1,196 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "Artie attempted to purchase a bag of chips from a malfunctioning vending machine using a Crumpled Dollar Bill.",
+      "The machine jammed, leading Artie to shake it aggressively, which triggered a fatal high-voltage electrical surge.",
+      "Artie was electrocuted and died on the breakroom floor as the chips finally fell."
+    ],
+    "key_events": [
+      "Artie smoothed and fed the Crumpled Dollar Bill into the Snack-o-Matic 3000 after several failed attempts.",
+      "The machine jammed on the last bag of Cool Ranch chips, leaving them dangling over the drop zone.",
+      "Artie shook the machine to dislodge the snack, triggering a high-pitched electronic whine and a massive discharge.",
+      "A blue arc of electricity struck Artie in the chest, using his Corporate ID Badge as a lightning rod.",
+      "Artie died instantly, his consciousness flickering as reality stability dropped to 99%.",
+      "The bag of chips fell onto Artie's chest after his death."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "REMOVE: inventory: CHAR_ARTIE -> Crumpled Dollar Bill (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[Corporate ID Badge])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[Smartphone])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[Leather Wallet])",
+      "reality_stability: 99",
+      "character_status: CHAR_ARTIE -> deceased"
+    ],
+    "chapter_so_far_add": [
+      "Artie dies in a mundane but absurd vending machine accident, triggering a flicker in reality stability."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "appearance_updates": {
+        "set": {
+          "atoms": {
+            "health_status": "deceased"
+          },
+          "marks_add": [
+            {
+              "name": "Severe Electrical Burns",
+              "location": "chest",
+              "durability": "durable"
+            }
+          ]
+        },
+        "reason": "Fatal electrocution by vending machine."
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_OFFICE_ID",
+          "container": "lanyard",
+          "status": "equipped",
+          "item": "ITEM_OFFICE_ID"
+        },
+        {
+          "item_id": "ITEM_SMARTPHONE",
+          "container": "pocket_left",
+          "status": "stowed",
+          "item": "ITEM_SMARTPHONE"
+        },
+        {
+          "item_id": "ITEM_WALLET",
+          "container": "pocket_right",
+          "status": "stowed",
+          "item": "ITEM_WALLET"
+        }
+      ],
+      "containers": [
+        {
+          "container": "lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_OFFICE_ID"
+          ]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie's final thought was a cynical observation about the vending machine keeping his money."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 1
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 0,
+            "max": 10
+          },
+          "lck": 1.0
+        },
+        "reason": "Artie has died; establishing base luck stat mentioned in narrative."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 1
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "reality_stability": 99
+      },
+      "reason": "Reality flickered during the fatal electrical surge."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_CRUMPLED_DOLLAR",
+      "set": {
+        "name": "Crumpled Dollar Bill",
+        "type": "currency",
+        "owner_scope": "world",
+        "custodian": "world",
+        "linked_threads": [],
+        "state_tags": [
+          "mundane",
+          "inside_machine"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "Office Breakroom (Inside Vending Machine)"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_CRUMPLED_DOLLAR",
+      "source": "CHAR_ARTIE",
+      "destination": "world",
+      "reason": "Artie fed the bill into the vending machine before dying.",
+      "reason_category": "handoff_transfer",
+      "from": {}
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item_id": "ITEM_OFFICE_ID",
+            "container": "lanyard",
+            "status": "equipped"
+          },
+          {
+            "item_id": "ITEM_SMARTPHONE",
+            "container": "pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item_id": "ITEM_WALLET",
+            "container": "pocket_right",
+            "status": "stowed"
+          }
+        ]
+      },
+      "reason": "Post-death inventory normalization; dollar is in the machine.",
+      "reason_category": "after_combat_cleanup"
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Office Breakroom",
+    "open_threads": [],
+    "recent_facts": [
+      "Artie was electrocuted by a vending machine while trying to get chips.",
+      "Artie has died and his consciousness is transitioning to the System."
+    ]
+  }
+}

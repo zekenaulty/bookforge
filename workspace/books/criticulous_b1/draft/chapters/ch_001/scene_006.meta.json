@@ -1,0 +1,301 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_006",
+  "chapter": 1,
+  "scene": 6,
+  "scene_target": "Artie reaches the safety of Oakhaven but is immediately flagged by the city's scanning system.",
+  "goal": "Escape the slime horde and enter the hub city.",
+  "conflict": "The gate guards' scanning system versus Artie's glitched stats.",
+  "required_callbacks": [
+    "milestone: tutorial_aggro_event",
+    "milestone: participation_trophy_acquired"
+  ],
+  "constraints": [
+    "target_words: 2000",
+    "no-recaps",
+    "forward-motion"
+  ],
+  "end_condition": "Artie is flagged as a 'Statistical Anomaly' by the gate scanners.",
+  "ui_allowed": true,
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [],
+  "required_in_custody": [
+    "ITEM_PARTICIPATION_TROPHY",
+    "ITEM_OFFICE_ID",
+    "ITEM_SMARTPHONE",
+    "ITEM_WALLET"
+  ],
+  "required_scene_accessible": [
+    "ITEM_PARTICIPATION_TROPHY"
+  ],
+  "required_visible_on_page": [
+    "ITEM_PARTICIPATION_TROPHY"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "travel_arrival",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources",
+    "titles"
+  ],
+  "ui_mechanics_expected": [
+    "Stamina",
+    "Crit Rate",
+    "System Notification",
+    "HP"
+  ],
+  "prose_path": "draft/chapters/ch_001/scene_006.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "character_continuity_system_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "set": {
+          "resources": {
+            "stamina": 2,
+            "stamina_max": 100,
+            "available_points": 5
+          },
+          "reason": "Final stamina value after the sprint to Oakhaven gates.",
+          "reason_category": "after_combat_cleanup"
+        },
+        "delta": {},
+        "chapter": 1,
+        "scene": 6
+      }
+    ],
+    "character_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "persona_updates": [
+          "Artie is experiencing severe physical exhaustion and the realization that his build makes him a legal liability.",
+          "Artie feels a sense of relief at surviving the tutorial, tempered by the immediate threat of detention."
+        ],
+        "invariants_add": [
+          "Artie is detained by Oakhaven gate guards for administrative review.",
+          "milestone: tutorial_zone_escaped = DONE",
+          "milestone: gate_scan_anomaly = DONE"
+        ],
+        "chapter": 1,
+        "scene": 6
+      }
+    ],
+    "inventory_alignment_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "set": {
+          "inventory": [
+            {
+              "item": "ITEM_OFFICE_ID",
+              "container": "lanyard",
+              "status": "equipped"
+            },
+            {
+              "item": "ITEM_SMARTPHONE",
+              "container": "pocket_left",
+              "status": "stowed"
+            },
+            {
+              "item": "ITEM_WALLET",
+              "container": "pocket_right",
+              "status": "stowed"
+            },
+            {
+              "item": "ITEM_PARTICIPATION_TROPHY",
+              "container": "hand_right",
+              "status": "held"
+            }
+          ],
+          "containers": [
+            {
+              "container": "lanyard",
+              "owner": "CHAR_ARTIE",
+              "contents": [
+                "ITEM_OFFICE_ID"
+              ]
+            },
+            {
+              "container": "pocket_left",
+              "owner": "CHAR_ARTIE",
+              "contents": [
+                "ITEM_SMARTPHONE"
+              ]
+            },
+            {
+              "container": "pocket_right",
+              "owner": "CHAR_ARTIE",
+              "contents": [
+                "ITEM_WALLET"
+              ]
+            }
+          ]
+        },
+        "reason": "Normalization of inventory posture after arriving at Oakhaven gates.",
+        "reason_category": "location_jump_normalize"
+      }
+    ],
+    "item_registry_updates": [
+      {
+        "item_id": "ITEM_PARTICIPATION_TROPHY",
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "scene": 6,
+            "location": "Oakhaven Gates"
+          }
+        }
+      },
+      {
+        "item_id": "ITEM_OFFICE_ID",
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "scene": 6,
+            "location": "Oakhaven Gates"
+          }
+        }
+      },
+      {
+        "item_id": "ITEM_SMARTPHONE",
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "scene": 6,
+            "location": "Oakhaven Gates"
+          }
+        }
+      },
+      {
+        "item_id": "ITEM_WALLET",
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "scene": 6,
+            "location": "Oakhaven Gates"
+          }
+        }
+      }
+    ],
+    "summary_update": {
+      "last_scene": [
+        "Artie narrowly escaped a massive slime horde by sprinting to the Oakhaven gates, nearly depleting his stamina to zero.",
+        "Upon arrival, the city's automated Gatekeeper Scan analyzed Artie and flagged him as a 'Statistical Anomaly' due to his 100% Crit build and 1 HP.",
+        "Artie was detained by the gate guards as the System issued a red-box warning for administrative review."
+      ],
+      "key_events": [
+        "Artie entered the Oakhaven Safe Zone, successfully resetting the 'Beacon of Trash' aggro event.",
+        "Artie's stamina dropped to a critical 2/100 during the desperate flight from the tutorial zone.",
+        "The Oakhaven Gatekeeper Scan identified Artie's 'Crit or Quit' build as a high-variance anomaly.",
+        "Gate guards detained Artie under suspicion of 'glitching' the system after the scanner turned violet.",
+        "Artie confirmed his mundane belongings (Smartphone, Wallet, ID) survived the transition to the hub."
+      ],
+      "must_stay_true": [
+        "REMOVE: Artie's stamina depleted to 45/100 as he began a desperate sprint toward the Oakhaven gate.",
+        "Artie's stamina is 2/100 following the sprint to Oakhaven.",
+        "milestone: tutorial_zone_escaped = DONE",
+        "milestone: gate_scan_anomaly = DONE",
+        "Artie is detained by Oakhaven gate guards for administrative review.",
+        "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_right)",
+        "The 'Glass Soul' condition makes all incoming damage fatal for Artie."
+      ],
+      "chapter_so_far_add": [
+        "Artie reached the safety of Oakhaven but was immediately flagged as a statistical anomaly by the city's security scanners and detained."
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "CHAR_ARTIE",
+        "CHAR_FIZZ"
+      ],
+      "location": "Oakhaven Gates",
+      "open_threads": [
+        "THREAD_CRIT_EXPLOIT",
+        "THREAD_SYSTEM_GLITCH"
+      ],
+      "recent_facts": [
+        "Artie reached the Oakhaven gates with 2 Stamina remaining.",
+        "The Oakhaven gate scanner flagged Artie as a 'Statistical Anomaly' due to his glitched build.",
+        "The 'Beacon of Trash' aggro reset upon entering the Safe Zone.",
+        "Gate guards have detained Artie for administrative review."
+      ]
+    }
+  },
+  "scene_summary": [
+    "Artie narrowly escaped a massive slime horde by sprinting to the Oakhaven gates, nearly depleting his stamina to zero.",
+    "Upon arrival, the city's automated Gatekeeper Scan analyzed Artie and flagged him as a 'Statistical Anomaly' due to his 100% Crit build and 1 HP.",
+    "Artie was detained by the gate guards as the System issued a red-box warning for administrative review."
+  ],
+  "key_events": [
+    "Artie entered the Oakhaven Safe Zone, successfully resetting the 'Beacon of Trash' aggro event.",
+    "Artie's stamina dropped to a critical 2/100 during the desperate flight from the tutorial zone.",
+    "The Oakhaven Gatekeeper Scan identified Artie's 'Crit or Quit' build as a high-variance anomaly.",
+    "Gate guards detained Artie under suspicion of 'glitching' the system after the scanner turned violet.",
+    "Artie confirmed his mundane belongings (Smartphone, Wallet, ID) survived the transition to the hub."
+  ],
+  "must_stay_true": [
+    "REMOVE: Artie's stamina depleted to 45/100 as he began a desperate sprint toward the Oakhaven gate.",
+    "Artie's stamina is 2/100 following the sprint to Oakhaven.",
+    "milestone: tutorial_zone_escaped = DONE",
+    "milestone: gate_scan_anomaly = DONE",
+    "Artie is detained by Oakhaven gate guards for administrative review.",
+    "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_right)",
+    "The 'Glass Soul' condition makes all incoming damage fatal for Artie."
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "appearance_check_missing",
+        "message": "Appearance check missing for CHAR_ARTIE in the authoritative surface.",
+        "severity": "warning"
+      },
+      {
+        "code": "appearance_check_missing",
+        "message": "Appearance check missing for CHAR_FIZZ in the authoritative surface.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Stamina but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Current Aggro Multiplier but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Stamina but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Stamina but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Variance Threshold Exceeded but no matching stat exists in state.",
+        "severity": "warning"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 1,
+  "updated_at": "2026-02-14T11:50:36Z"
+}

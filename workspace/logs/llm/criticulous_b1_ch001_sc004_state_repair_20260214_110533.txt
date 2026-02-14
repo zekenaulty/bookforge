@@ -1,0 +1,186 @@
+{
+  "schema_version": "1.0",
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "level": 2,
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100
+        },
+        "titles_progress": {
+          "One-Hit Wonder": 1
+        }
+      },
+      "reason": "Level up after defeating first enemy with a massive overkill crit; progress toward One-Hit Wonder title recorded.",
+      "chapter": 1,
+      "scene": 4
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "reality_stability": 94
+      },
+      "reason": "Massive overkill crit caused a reality stutter and localized pixelation in the Slime Fields."
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "persona_updates": [
+        "Artie is now terrified of his own power after witnessing the overkill crit.",
+        "Artie realizes his 'Crit or Quit' build is fundamentally broken in the System's eyes."
+      ],
+      "invariants_add": [
+        "milestone: first_kill = DONE",
+        "milestone: level_2_reached = DONE"
+      ],
+      "chapter": 1,
+      "scene": 4
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_OFFICE_ID",
+            "container": "lanyard",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_WALLET",
+            "container": "pocket_right",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "lanyard",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_OFFICE_ID"
+            ]
+          },
+          {
+            "container": "pocket_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_WALLET"
+            ]
+          }
+        ]
+      },
+      "reason": "Normalization of inventory posture after combat encounter.",
+      "reason_category": "after_combat_cleanup"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_OFFICE_ID",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 4,
+          "location": "Slime Fields"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_SMARTPHONE",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 4,
+          "location": "Slime Fields"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_WALLET",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 4,
+          "location": "Slime Fields"
+        }
+      }
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 4,
+          "location": "Slime Fields"
+        }
+      }
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie faced a Lesser Green Slime in the Slime Fields and struggled with five consecutive misses due to his lack of combat experience.",
+      "On his sixth attempt, a pathetic shove triggered a 'Super-Mega-Ultra-Crit' that vaporized the slime and a nearby tree.",
+      "Artie reached Level 2 and realized the terrifying, glitchy scale of his 100% Crit build."
+    ],
+    "key_events": [
+      "Artie narrowly dodges a lethal 'Tutorial Slam' from a Lesser Green Slime.",
+      "Artie misses five consecutive attacks due to poor form and environmental factors.",
+      "Artie lands a massive critical hit on his sixth attempt, dealing 1.2 trillion damage.",
+      "The crit vaporizes the slime and an environmental tree, leaving a smoking crater.",
+      "Artie levels up to Level 2.",
+      "The System warns Artie about excessive environmental damage and offers 'Toddler Mode'."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie's HP is 1/1 (locked), Level is 1, and Crit Rate is 100%.",
+      "REMOVE: Artie is cornered by a Lesser Green Slime in the Slime Fields.",
+      "REMOVE: reality_stability: 95",
+      "Artie's HP is 1/1 (locked), Level is 2, and Crit Rate is 100%.",
+      "reality_stability: 94",
+      "milestone: first_kill = DONE",
+      "milestone: level_2_reached = DONE",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "The immediate area in the Slime Fields contains a smoking crater and a vaporized tree."
+    ],
+    "chapter_so_far_add": [
+      "Artie survives his first combat encounter through a massive, glitchy critical hit that levels him up and destroys the local environment."
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Slime Fields",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie defeated a Lesser Green Slime using a massive, glitchy critical hit.",
+      "The critical hit was so powerful it vaporized a nearby tree and left a smoking crater.",
+      "Artie reached Level 2 despite his poor combat form.",
+      "The System issued a warning about environmental destruction."
+    ]
+  }
+}

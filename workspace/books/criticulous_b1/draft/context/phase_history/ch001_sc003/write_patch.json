@@ -1,0 +1,188 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Slime Fields",
+    "recent_facts": [
+      "Artie and Fizz arrived in the Slime Fields.",
+      "Artie encountered a Lesser Green Slime.",
+      "Artie realized that his 1 HP Glass Soul status makes even a tutorial slime lethal.",
+      "Artie is currently cornered by the slime against a rock."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_OFFICE_ID",
+          "container": "lanyard",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_WALLET",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_OFFICE_ID"
+          ]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is beginning to understand the terrifying reality of his 1 HP build.",
+        "Artie feels a sense of mounting panic as he realizes he has no way to defend himself."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 3
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100
+        },
+        "statuses": [
+          {
+            "name": "Glass Soul",
+            "effect": "HP locked at 1; all incoming damage is fatal.",
+            "type": "mechanical_lock"
+          }
+        ],
+        "titles": [
+          {
+            "name": "Crit or Quit",
+            "source": "stat_allocation_anomaly",
+            "active": true
+          }
+        ],
+        "reason": "Maintaining 1 HP build status during first combat encounter.",
+        "reason_category": "combat_interaction"
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 3
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie and Fizz arrived in the Slime Fields tutorial zone.",
+      "Artie encountered a Lesser Green Slime and realized his Glass Soul condition makes even the weakest enemies fatal.",
+      "The scene ended with Artie cornered by the slime, desperately looking for a way to survive."
+    ],
+    "key_events": [
+      "Artie transitions to the Slime Fields and experiences the 'Glass Soul' vulnerability.",
+      "A Lesser Green Slime attacks Artie, forcing him to dodge for his life.",
+      "Artie confirms his 1 HP status is active and permanent.",
+      "Artie is cornered by the slime, setting up the need for his first 'Crit' exploit."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: crit_build_locked = DONE",
+      "milestone: slime_encounter = DONE",
+      "milestone: glass_soul_realization = DONE",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])",
+      "Artie's HP is locked at 1/1 with 100% Crit Rate.",
+      "reality_stability: 95"
+    ],
+    "chapter_so_far_add": [
+      "Artie arrived in the Slime Fields and immediately faced the lethal reality of his 1 HP build."
+    ]
+  },
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_OFFICE_ID",
+            "container": "lanyard",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_WALLET",
+            "container": "pocket_right",
+            "status": "stowed"
+          }
+        ]
+      },
+      "reason": "Posture alignment for Slime Fields arrival.",
+      "reason_category": "location_jump_normalize"
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "reality_stability": 95
+      },
+      "reason": "Stability remains at 95% during tutorial arrival."
+    }
+  ],
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "slender",
+      "mousy",
+      "brown",
+      "hair",
+      "hazel",
+      "eyes",
+      "electrical",
+      "burns."
+    ],
+    "CHAR_FIZZ": [
+      "small",
+      "glowing",
+      "blue",
+      "sprite",
+      "pixelated",
+      "dust."
+    ]
+  }
+}

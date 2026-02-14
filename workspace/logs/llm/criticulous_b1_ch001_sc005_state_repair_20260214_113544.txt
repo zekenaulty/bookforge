@@ -1,0 +1,197 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "Artie received the Participation Trophy, a cursed reward that grants a massive aggro boost, as a result of his overkill critical hit.",
+      "The entire tutorial zone's population of slimes aggroed on Artie simultaneously, forcing him into a desperate sprint.",
+      "Artie reached Level 3, though his stat points are currently held for verification, and he is fleeing toward the Oakhaven Gate."
+    ],
+    "key_events": [
+      "Artie acquired the Participation Trophy (Cursed) in his right hand.",
+      "Artie reached Level 3, gaining 5 stat points (held for verification).",
+      "The 'Beacon of Trash' curse triggered a zone-wide mass-aggro event.",
+      "Artie's stamina dropped to 45/100 during his flight.",
+      "Artie and Fizz initiated a retreat toward the Oakhaven Gate to reset zone aggro."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie's HP is 1/1 (locked), Level is 2, and Crit Rate is 100%.",
+      "Artie's HP is 1/1 (locked), Level is 3, and Crit Rate is 100%.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_right)",
+      "container: hand_right (owner=CHAR_ARTIE, contents=[Participation Trophy])",
+      "milestone: participation_trophy_acquired = DONE",
+      "milestone: mass_aggro_triggered = DONE",
+      "The 'Beacon of Trash' curse provides +1000% Aggro Radius and is soul-bound."
+    ],
+    "chapter_so_far_add": [
+      "Artie received a cursed Participation Trophy that turned him into a zone-wide monster magnet."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "persona_updates": [
+        "Artie is realizing that his high-crit power comes with a proportional increase in systemic hostility.",
+        "Artie's survival instinct is shifting from 'office drone panic' to 'calculated desperation'."
+      ],
+      "invariants_add": [
+        "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_right)",
+        "container: hand_right (owner=CHAR_ARTIE, contents=[Participation Trophy])"
+      ],
+      "appearance_updates": {
+        "set": {
+          "marks_add": [
+            {
+              "name": "Soot Smudges",
+              "location": "forehead",
+              "durability": "ephemeral"
+            }
+          ]
+        },
+        "reason": "Explosion residue from the vaporized tree."
+      }
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "level": 3,
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100
+        },
+        "resources": {
+          "stamina": 45,
+          "available_points": 5
+        },
+        "statuses": [
+          {
+            "name": "Glass Soul",
+            "effect": "HP locked at 1; all incoming damage is fatal.",
+            "type": "mechanical_lock"
+          },
+          {
+            "name": "Beacon of Trash",
+            "effect": "+1000% Aggro Radius; cannot be unequipped in combat zones.",
+            "type": "curse"
+          }
+        ]
+      },
+      "reason": "Level up and acquisition of cursed item."
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "reality_stability": 94
+      },
+      "reason": "Stability remains constant despite localized system errors."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_PARTICIPATION_TROPHY",
+      "set": {
+        "name": "Participation Trophy",
+        "display_name": "Participation Trophy",
+        "type": "accessory",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [
+          "THREAD_SYSTEM_GLITCH"
+        ],
+        "state_tags": [
+          "cursed",
+          "aggro-beacon",
+          "soul-bound",
+          "trash-quality"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 5,
+          "location": "Slime Fields"
+        }
+      }
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_OFFICE_ID",
+            "container": "lanyard",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_WALLET",
+            "container": "pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "container": "hand_right",
+            "status": "held"
+          }
+        ],
+        "containers": [
+          {
+            "container": "lanyard",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_OFFICE_ID"
+            ]
+          },
+          {
+            "container": "pocket_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_WALLET"
+            ]
+          },
+          {
+            "container": "hand_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_PARTICIPATION_TROPHY"
+            ]
+          }
+        ]
+      },
+      "reason": "Acquisition of trophy and transition to flee-posture."
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Slime Fields",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ],
+    "recent_facts": [
+      "Artie received the Participation Trophy as a cursed reward for his overkill crit.",
+      "The Participation Trophy acts as a high-intensity aggro beacon.",
+      "A zone-wide mass-aggro event has been triggered in the Slime Fields.",
+      "Artie reached Level 3, though his stat points are currently held for verification.",
+      "Artie is fleeing toward the Oakhaven Gate to escape the slime swarm."
+    ]
+  }
+}

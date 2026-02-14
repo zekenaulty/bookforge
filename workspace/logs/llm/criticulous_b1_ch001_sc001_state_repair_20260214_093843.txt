@@ -1,0 +1,209 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 0,
+            "max": 10
+          }
+        }
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "appearance_updates": {
+        "reason": "Artie has transitioned to the void; his appearance is now a conceptual projection of his former self.",
+        "set": {
+          "atoms": {
+            "eye_color": "hazel",
+            "hair_color": "mousy brown",
+            "skin_tone": "pale"
+          }
+        }
+      },
+      "character_id": "CHAR_ARTIE",
+      "persona_updates": [
+        "Artie is disoriented but maintains his snarky internal monologue even in death.",
+        "Artie perceives his new environment with heightened clarity."
+      ]
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "reality_stability": 99,
+        "system_active": true
+      }
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "reason": "Transition to the void; physical items left behind on corpse.",
+      "reason_category": "timeline_override",
+      "scope_override": true,
+      "set": {
+        "containers": [],
+        "inventory": []
+      }
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_OFFICE_ID",
+      "set": {
+        "custodian": "world",
+        "last_seen": {
+          "chapter": 1,
+          "location": "Office Breakroom",
+          "scene": 1
+        },
+        "linked_threads": [],
+        "name": "Corporate ID Badge",
+        "owner_scope": "world",
+        "state_tags": [
+          "mundane",
+          "abandoned"
+        ],
+        "type": "accessory"
+      }
+    },
+    {
+      "item_id": "ITEM_CRUMPLED_DOLLAR",
+      "set": {
+        "custodian": "world",
+        "last_seen": {
+          "chapter": 1,
+          "location": "Office Breakroom",
+          "scene": 1
+        },
+        "linked_threads": [],
+        "name": "Crumpled Dollar Bill",
+        "owner_scope": "world",
+        "state_tags": [
+          "mundane",
+          "abandoned"
+        ],
+        "type": "currency"
+      }
+    },
+    {
+      "item_id": "ITEM_SMARTPHONE",
+      "set": {
+        "custodian": "world",
+        "last_seen": {
+          "chapter": 1,
+          "location": "Office Breakroom",
+          "scene": 1
+        },
+        "linked_threads": [],
+        "name": "Smartphone",
+        "owner_scope": "world",
+        "state_tags": [
+          "mundane",
+          "abandoned"
+        ],
+        "type": "tool"
+      }
+    },
+    {
+      "item_id": "ITEM_WALLET",
+      "set": {
+        "custodian": "world",
+        "last_seen": {
+          "chapter": 1,
+          "location": "Office Breakroom",
+          "scene": 1
+        },
+        "linked_threads": [],
+        "name": "Leather Wallet",
+        "owner_scope": "world",
+        "state_tags": [
+          "mundane",
+          "abandoned"
+        ],
+        "type": "container"
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie died over a bag of Nacho Cheese rings and woke up in the System void."
+    ],
+    "key_events": [
+      "Artie attempts to buy Nacho Cheese rings with a crumpled dollar bill in the office breakroom.",
+      "The Snack-O-Matic 3000 rejects the bill repeatedly, leading to a physical struggle.",
+      "Artie aggressively shakes the machine, triggering a massive electrical surge.",
+      "Artie is electrocuted and dies, his HP dropping to 0.",
+      "Artie's consciousness transitions from the mundane world into a blinding white void."
+    ],
+    "last_scene": [
+      "Artie's mundane life ended in a snack-related tragedy in his office breakroom.",
+      "After a struggle with a malfunctioning vending machine, he was fatally electrocuted.",
+      "His consciousness transitioned into a white void, marking the start of his System journey."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "milestone: void_entry = DONE",
+      "REMOVE: inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "REMOVE: inventory: CHAR_ARTIE -> Crumpled Dollar Bill (status=carried, container=hand_right)",
+      "REMOVE: inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "REMOVE: inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: world -> Corporate ID Badge (status=abandoned, location=Office Breakroom)",
+      "inventory: world -> Crumpled Dollar Bill (status=abandoned, location=Office Breakroom)",
+      "inventory: world -> Smartphone (status=abandoned, location=Office Breakroom)",
+      "inventory: world -> Leather Wallet (status=abandoned, location=Office Breakroom)",
+      "Artie's current location is The Void."
+    ]
+  },
+  "transfer_updates": [
+    {
+      "from": "CHAR_ARTIE",
+      "item_id": "ITEM_OFFICE_ID",
+      "reason": "Left on physical corpse in Office Breakroom.",
+      "reason_category": "timeline_override",
+      "scope_override": true,
+      "to": "world"
+    },
+    {
+      "from": "CHAR_ARTIE",
+      "item_id": "ITEM_CRUMPLED_DOLLAR",
+      "reason": "Dropped or left on physical corpse in Office Breakroom.",
+      "reason_category": "timeline_override",
+      "scope_override": true,
+      "to": "world"
+    },
+    {
+      "from": "CHAR_ARTIE",
+      "item_id": "ITEM_SMARTPHONE",
+      "reason": "Left in pocket of physical corpse in Office Breakroom.",
+      "reason_category": "timeline_override",
+      "scope_override": true,
+      "to": "world"
+    },
+    {
+      "from": "CHAR_ARTIE",
+      "item_id": "ITEM_WALLET",
+      "reason": "Left in pocket of physical corpse in Office Breakroom.",
+      "reason_category": "timeline_override",
+      "scope_override": true,
+      "to": "world"
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "The Void",
+    "open_threads": [],
+    "recent_facts": [
+      "Artie was electrocuted by a vending machine in the office breakroom.",
+      "Artie's consciousness has transitioned to a white void.",
+      "Artie is physically dead in the 'real' world."
+    ]
+  }
+}

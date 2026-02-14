@@ -1,0 +1,207 @@
+{
+  "schema_version": "1.0",
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "appearance_updates": {
+        "set": {
+          "atoms": {
+            "health_status": "deceased"
+          },
+          "marks_add": [
+            {
+              "name": "Severe Electrical Burns",
+              "location": "chest",
+              "durability": "durable"
+            }
+          ]
+        },
+        "reason": "Fatal electrocution by vending machine."
+      },
+      "persona_updates": [
+        "Artie's mundane life as a Junior Data Analyst has ended with his death."
+      ],
+      "inventory": [
+        {
+          "item_id": "ITEM_OFFICE_ID",
+          "container": "lanyard",
+          "status": "equipped"
+        },
+        {
+          "item_id": "ITEM_SMARTPHONE",
+          "container": "pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item_id": "ITEM_WALLET",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_OFFICE_ID"
+          ]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET"
+          ]
+        }
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 0,
+            "max": 10
+          }
+        }
+      },
+      "reason": "HP reduced to zero due to fatal electrical surge."
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "reality_stability": 99
+      },
+      "reason": "Localized reality flicker caused by a fatal system anomaly during Artie's death."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_CRUMPLED_DOLLAR",
+      "set": {
+        "custodian": "world",
+        "state_tags": [
+          "consumed",
+          "mundane"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "Office Breakroom"
+        }
+      },
+      "reason": "The dollar was accepted and consumed by the vending machine."
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_CRUMPLED_DOLLAR",
+      "source_character_id": "CHAR_ARTIE",
+      "destination_custodian": "world",
+      "reason": "Artie inserted the dollar into the Snack-o-Matic 3000."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item_id": "ITEM_OFFICE_ID",
+            "container": "lanyard",
+            "status": "equipped"
+          },
+          {
+            "item_id": "ITEM_SMARTPHONE",
+            "container": "pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item_id": "ITEM_WALLET",
+            "container": "pocket_right",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "lanyard",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_OFFICE_ID"
+            ]
+          },
+          {
+            "container": "pocket_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_WALLET"
+            ]
+          }
+        ]
+      },
+      "reason_category": "after_combat_cleanup",
+      "reason": "Normalizing inventory after Artie's death and the loss of the dollar bill."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie attempted to buy a bag of chips from a malfunctioning vending machine in his office breakroom.",
+      "After the machine jammed, Artie's attempt to shake it triggered a massive electrical surge that killed him instantly."
+    ],
+    "key_events": [
+      "Artie inserted the Crumpled Dollar Bill into the Snack-o-Matic 3000.",
+      "The vending machine jammed on a bag of Cool Ranch chips.",
+      "Artie used his 'aggressive shaking' skill to dislodge the snack.",
+      "A fatal electrical surge traveled through Artie's Corporate ID Badge and chest.",
+      "Artie died on the breakroom floor as the chips finally fell onto his chest.",
+      "The System recorded a fatal error and reality stability flickered to 99%."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "REMOVE: inventory: CHAR_ARTIE -> Crumpled Dollar Bill (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])",
+      "Artie is physically deceased in the Office Breakroom with 0 HP."
+    ],
+    "chapter_so_far_add": [
+      "Arthur 'Artie' Penhaligon died in a freak vending machine accident, ending his mundane life."
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Office Breakroom",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_VANE_RIVALRY",
+      "THREAD_SYSTEM_GLITCH",
+      "THREAD_THE_ASCENSION"
+    ],
+    "recent_facts": [
+      "Artie was killed by a Snack-o-Matic 3000 electrical surge.",
+      "The bag of chips successfully dispensed after Artie's death."
+    ]
+  }
+}

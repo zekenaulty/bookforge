@@ -1,0 +1,241 @@
+{
+  "schema_version": "1.0",
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "resources": {
+          "stamina": 4
+        }
+      },
+      "reason": "Stamina drain from Aura of Intimidation and desperate escape.",
+      "reason_category": "after_combat_cleanup"
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "persona_updates": [
+        "Artie's survival instinct has shifted from 'avoiding work' to 'avoiding high-level paladins'."
+      ],
+      "inventory": [
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_right",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_OFFICE_ID",
+          "container": "lanyard",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_WALLET",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_OFFICE_ID"
+          ]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET"
+          ]
+        }
+      ]
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "persona_updates": [
+        "Vane views Artie not as a person, but as a misallocated resource to be claimed."
+      ],
+      "inventory": [
+        {
+          "item": "ITEM_EBON_CLAYMORE",
+          "container": "back_sheath",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "back_sheath",
+          "owner": "CHAR_VANE",
+          "contents": [
+            "ITEM_EBON_CLAYMORE"
+          ]
+        }
+      ]
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "reason": "Artie is fleeing into the alleyways while clutching his trophy.",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "container": "hand_right",
+            "status": "held"
+          },
+          {
+            "item": "ITEM_OFFICE_ID",
+            "container": "lanyard",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_WALLET",
+            "container": "pocket_right",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "lanyard",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_OFFICE_ID"
+            ]
+          },
+          {
+            "container": "pocket_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_WALLET"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "reason": "Vane remains in the tavern after Artie's escape.",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_EBON_CLAYMORE",
+            "container": "back_sheath",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "back_sheath",
+            "owner": "CHAR_VANE",
+            "contents": [
+              "ITEM_EBON_CLAYMORE"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_EBON_CLAYMORE",
+      "set": {
+        "custodian": "CHAR_VANE",
+        "last_seen": {
+          "chapter": 1,
+          "scene": 8,
+          "location": "Oakhaven - Barnaby's Tavern"
+        }
+      }
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "DEVICE_the_vane_vendetta_bcf4bea1",
+      "set": {
+        "activation_state": "active",
+        "last_seen": {
+          "chapter": 1,
+          "scene": 8,
+          "location": "Oakhaven - Barnaby's Tavern"
+        }
+      }
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "reality_stability": 93
+      }
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Vane confronted Artie in Barnaby's tavern, identifying him as a 'Glass Soul' anomaly with a 100% Crit Rate.",
+      "Vane issued a formal duel challenge with ownership of Artie as the stakes, which the System logged despite the level disparity.",
+      "Artie used a fake 'patch update' notification to distract Vane and escape into the Oakhaven alleyways."
+    ],
+    "key_events": [
+      "Vane's Aura of Intimidation (Rank B) drained Artie's stamina from 10 to 4.",
+      "Vane identified Artie's 1 HP 'Glass Soul' status and 100% Crit Rate.",
+      "The System issued a Formal Duel Request from Vane to Artie with ownership stakes.",
+      "Artie successfully distracted Vane with a fake UI alert and fled the tavern."
+    ],
+    "must_stay_true": [
+      "milestone: vane_rivalry_established = DONE",
+      "milestone: formal_duel_issued = DONE",
+      "REMOVE: Artie's stamina is 10/100 following a drink at Barnaby's tavern.",
+      "Artie's stamina is 4/100 after escaping Vane's Aura of Intimidation.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_right)",
+      "inventory: CHAR_VANE -> Ebon Claymore (status=stowed, container=back_sheath)",
+      "The 'Glass Soul' condition makes all incoming damage fatal for Artie."
+    ],
+    "chapter_so_far_add": [
+      "Artie encountered Vane, a level 52 paladin, who issued a formal duel challenge for ownership of Artie's anomaly build."
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_VANE"
+    ],
+    "location": "Oakhaven - Alleyways",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH",
+      "THREAD_VANE_RIVALRY"
+    ],
+    "recent_facts": [
+      "Vane confronted Artie in Barnaby's tavern, identifying his 1 HP anomaly status.",
+      "Vane issued a formal duel challenge to Artie with 'ownership' as the stakes.",
+      "Artie used a fake 'patch update' distraction to escape Vane's Aura of Intimidation.",
+      "Artie is currently fleeing through the Oakhaven night with 4 stamina remaining."
+    ]
+  }
+}

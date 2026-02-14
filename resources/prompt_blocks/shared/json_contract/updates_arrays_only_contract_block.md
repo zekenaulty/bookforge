@@ -9,12 +9,15 @@ JSON Contract Block (strict; arrays only):
     - VALID:   "plot_device_updates": [{"device_id": "DEVICE_X", "set": {...}}]
   - transfer_updates:
     - INVALID: "transfer_updates": {"item_id": "ITEM_X"}
-    - VALID:   "transfer_updates": [{"item_id": "ITEM_X", "reason": "handoff"}]
+    - INVALID: "transfer_updates": [{"item_id": "ITEM_X", "source": "CHAR_A", "destination": "world", "reason": "handoff"}]
+    - INVALID: "transfer_updates": [{"item_id": "ITEM_X", "from": "CHAR_A", "to": "world", "reason": "handoff"}]
+    - VALID:   "transfer_updates": [{"item_id": "ITEM_X", "from": {"character_id": "CHAR_A"}, "to": {"custodian": "world"}, "reason": "handoff"}]
   - inventory_alignment_updates:
     - INVALID: "inventory_alignment_updates": {"updates": [{...}]}
+    - INVALID: "inventory_alignment_updates": [{"remove": [{"item_id": "ITEM_X"}]}]
     - VALID:   "inventory_alignment_updates": [{"character_id": "CHAR_X", "set": {...}, "reason": "..."}]
+    - VALID:   "inventory_alignment_updates": [{"character_id": "CHAR_X", "remove": ["inventory.ITEM_X"], "reason": "..."}]
   - global_continuity_system_updates:
     - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
     - VALID:   "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
 - custodian must be a non-null string id or "world"; never null.
-

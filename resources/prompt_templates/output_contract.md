@@ -15,7 +15,7 @@ Durable vs ephemeral mechanics:
 - DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
 - EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
 For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
-For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string).
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string), and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
 `inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
 Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
 - global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.

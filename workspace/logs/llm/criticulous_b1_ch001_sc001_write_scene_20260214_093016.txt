@@ -1,0 +1,217 @@
+COMPLIANCE:
+Scene ID: SC_001_001
+Allowed events: Artie vs vending machine, dollar bill rejection, chip coil failure, use of aggressive_vending_machine_shaking skill, electrocution, death.
+Forbidden milestones: THREAD_CRIT_EXPLOIT (not yet active), CHAR_FIZZ (not yet present), THREAD_THE_ASCENSION (not yet active).
+
+Current arm-side / inventory facts:
+- inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)
+- inventory: CHAR_ARTIE -> Crumpled Dollar Bill (status=carried, container=hand_right)
+- inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)
+- inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)
+
+Durable changes committed:
+- inventory: CHAR_ARTIE -> Crumpled Dollar Bill (status=stowed, container=vending_machine)
+- milestone: artie_electrocution = DONE
+- milestone: artie_death = DONE
+- character_continuity_system_updates: CHAR_ARTIE HP set to 0.
+
+APPEARANCE_CHECK:
+- CHAR_ARTIE: slender build, mousy brown hair, hazel eyes, pale skin.
+
+PROSE:
+
+Arthur Penhaligon, known to absolutely no one of importance as Artie, smoothed the Crumpled Dollar Bill against the edge of the Snack-O-Matic 3000 with the desperate intensity of a man performing CPR on a fallen comrade. 
+
+It was 3:14 PM. The fluorescent lights of the office breakroom hummed with a low-frequency dread that resonated perfectly with the dull ache in Artie’s lower back—a gift from eight hours of sitting in a chair designed by someone who clearly hated human anatomy. He was a Junior Data Analyst, which was corporate-speak for "the guy who fixes the pivot tables when the seniors break them." His life was a series of cells and rows, a spreadsheet that never quite balanced, and right now, the only thing that could make the next two hours of data entry bearable was a bag of Extreme Nacho-Flavored Dust-Rings.
+
+He fed the Crumpled Dollar Bill into the machine’s hungry, glowing maw. The bill was a tragic thing, limp and creased from being forgotten in his pocket through three wash cycles. The machine took it halfway, hummed with mechanical judgment, and then spat it back out with a sound like a disappointed sigh.
+
+"Come on, you bucket of bolts," Artie muttered. He adjusted his Corporate ID Badge, which was tangled in its lanyard and currently tickling his collarbone. He smoothed the dollar again, this time using the plastic edge of his badge to iron out the stubborn crease across George Washington’s nose. 
+
+He was slender, perhaps a bit too pale from a lack of sunlight, and his mousy brown hair was currently standing up in a small tuft at the back of his head—a physical manifestation of his rising blood pressure. He looked at the machine. The machine looked back, its glass front reflecting his perpetually tired hazel eyes.
+
+He tried again. The dollar went in. The machine groaned. It churned. 
+
+*Accepted.*
+
+Artie exhaled a breath he hadn't realized he was holding. He pressed the buttons: B-4. The coil began to rotate. The Extreme Nacho-Flavored Dust-Rings shifted. They leaned forward. They reached the precipice of the metal spiral. And then, with the malicious precision of a scripted event, the bag snagged. It dangled there, suspended by a single plastic corner, mocking the laws of gravity and Artie’s very existence.
+
+"You have got to be kidding me," Artie whispered. 
+
+He looked around the breakroom. It was empty, save for a half-empty pot of lukewarm coffee that smelled like burnt rubber. This was a test. The universe was checking to see if he had a breaking point. 
+
+Artie didn't just have a breaking point; he had a specialized technique for it. Over the last three years, he had developed a very specific set of skills. They weren't the kind of skills that got you a raise, but they were the kind that got you snacks. 
+
+He stepped forward and placed his hands on the sides of the Snack-O-Matic 3000. He planted his feet, shifting his weight to his heels. This was the opening move of his aggressive vending machine shaking. It wasn't about brute strength—Artie’s Strength was, at best, a rounding error. It was about resonance. It was about finding the frequency of the machine and disrupting it.
+
+He gave the machine a sharp, rhythmic shove. *Thump-thump.* The glass rattled. The bag of chips danced, but the snag held.
+
+"Give. Me. My. Rings," Artie grunted, his voice rising with every word. 
+
+He increased the intensity. He wasn't just shaking a machine anymore; he was shaking the entire corporate structure that kept him chained to a desk. He was shaking the spreadsheets, the meetings that could have been emails, and the fact that he was twenty-eight and his biggest achievement of the week was finding a shortcut for a VLOOKUP formula.
+
+The machine rocked on its base. Inside, the coil vibrated. The bag of chips slipped a millimeter. 
+
+Artie lunged in for the finisher. He put his shoulder into the frame and gave it a violent, twisting heave. It was a move he’d perfected over dozens of failed snack-drops, a masterpiece of kinetic frustration.
+
+Something inside the machine clicked. Not the satisfying click of a falling bag, but a sharp, metallic *crack*. 
+
+A spark jumped behind the glass. The hum of the fluorescent lights suddenly intensified, rising to a piercing whine. Artie felt a strange tingling in his fingertips, a static charge that made the hair on his arms stand up. He should have let go. Any sane person would have stepped back. But the Extreme Nacho-Flavored Dust-Rings were so close. They were right there.
+
+"Just... one... more!"
+
+As he delivered the final, most aggressive shake of his career, the Snack-O-Matic 3000 decided it had had enough of Artie’s resonance. A massive electrical surge, triggered by a frayed wire and Artie’s own stubbornness, tore through the machine’s internal circuitry. 
+
+Blue light erupted from the coin slot. 
+
+Artie didn't even have time to scream. The current slammed into his chest, throwing his heart out of rhythm and locking his muscles in a jagged, agonizing spasm. His vision didn't just go blurry; it shattered into a million white pixels. 
+
+The last thing he felt wasn't pain, but a profound sense of irony. He was dying for a bag of chips that cost a dollar he’d had to iron with his ID badge. 
+
+The breakroom, the humming lights, and the smell of burnt coffee vanished. 
+
+The world cut to black.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Office Breakroom",
+    "recent_facts": [
+      "Artie attempted to buy snacks from a vending machine.",
+      "The vending machine malfunctioned, trapping Artie's chips.",
+      "Artie used his aggressive vending machine shaking skill.",
+      "A massive electrical surge from the machine electrocuted Artie."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_VANE_RIVALRY",
+      "THREAD_SYSTEM_GLITCH",
+      "THREAD_THE_ASCENSION"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item_id": "ITEM_OFFICE_ID",
+          "container": "lanyard",
+          "status": "equipped"
+        },
+        {
+          "item_id": "ITEM_SMARTPHONE",
+          "container": "pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item_id": "ITEM_WALLET",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET"
+          ]
+        },
+        {
+          "container": "lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_OFFICE_ID"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie's mundane life has ended in a freak accident."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 0,
+            "max": 10
+          }
+        },
+        "statuses": [
+          "Deceased (Mundane)"
+        ]
+      },
+      "reason": "Artie was electrocuted to death by a vending machine."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_CRUMPLED_DOLLAR",
+      "set": {
+        "custodian": "world",
+        "state_tags": [
+          "stowed",
+          "vending_machine"
+        ]
+      },
+      "reason": "The dollar bill was accepted by the vending machine before Artie's death."
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_CRUMPLED_DOLLAR",
+      "reason": "Artie fed the dollar into the vending machine.",
+      "source": "CHAR_ARTIE",
+      "destination": "world"
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "remove": [
+        {
+          "item_id": "ITEM_CRUMPLED_DOLLAR"
+        }
+      ],
+      "reason": "Dollar is no longer in Artie's possession."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie struggled with a vending machine in his office breakroom over a bag of chips.",
+      "After his dollar was accepted but the chips remained stuck, he attempted to shake the machine.",
+      "The machine short-circuited, electrocuting Artie and ending his life in the mundane world."
+    ],
+    "key_events": [
+      "Artie used his 'Aggressive Vending Machine Shaking' skill on the Snack-O-Matic 3000.",
+      "The vending machine suffered a critical electrical failure.",
+      "Artie was electrocuted and died, triggering the transition to the System world."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: CHAR_ARTIE -> Crumpled Dollar Bill (status=carried, container=hand_right)",
+      "milestone: artie_electrocution = DONE",
+      "milestone: artie_death = DONE",
+      "inventory: world -> Crumpled Dollar Bill (status=stowed, container=vending_machine)",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)"
+    ],
+    "chapter_so_far_add": [
+      "Artie's mundane life as a Junior Data Analyst ended abruptly in a breakroom accident."
+    ]
+  }
+}

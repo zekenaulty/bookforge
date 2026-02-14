@@ -1,0 +1,333 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_002",
+  "chapter": 1,
+  "scene": 2,
+  "scene_target": "Artie locks in his 'Crit or Quit' build with 1 HP and 100% Critical Hit rate.",
+  "goal": "Establish Artie's glitchy build and his dynamic with the tutorial guide, Fizz.",
+  "conflict": "Artie's reckless stat allocation versus Fizz's standard tutorial protocols and safety warnings.",
+  "required_callbacks": [],
+  "constraints": [
+    "target_words: 2000"
+  ],
+  "end_condition": "Artie's build is finalized and the System Void begins to transition into the Slime Fields tutorial zone.",
+  "ui_allowed": true,
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "introduces": [
+    "Fizz"
+  ],
+  "introduces_ids": [
+    "CHAR_FIZZ"
+  ],
+  "thread_ids": [
+    "THREAD_CRIT_EXPLOIT"
+  ],
+  "required_in_custody": [
+    "ITEM_OFFICE_ID",
+    "ITEM_SMARTPHONE",
+    "ITEM_WALLET"
+  ],
+  "required_scene_accessible": [
+    "ITEM_OFFICE_ID",
+    "ITEM_SMARTPHONE",
+    "ITEM_WALLET"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "travel_arrival",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "titles",
+    "resources"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Crit Rate",
+    "System Notification",
+    "Title Unlocked",
+    "Bonus Anomaly Pool"
+  ],
+  "prose_path": "draft/chapters/ch_001/scene_002.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "summary_update": {
+      "last_scene": [
+        "Artie met his tutorial guide, Fizz, in the Character Creation Void.",
+        "Against Fizz's advice, Artie dumped all his points into Critical Hit Rate, exploiting a bonus pool from his glitchy death.",
+        "The System finalized his build at 1 HP and 100% Crit Rate, then forcibly transitioned them to the Slime Fields."
+      ],
+      "key_events": [
+        "Artie identifies the 'Bonus Anomaly Pool' of 50 points.",
+        "Artie allocates all 10 standard points and 50 bonus points into Critical Hit Rate.",
+        "The System triggers the 'Glass Soul' condition, locking Artie's HP at 1/1.",
+        "Artie's Crit Rate is set to 100% and he unlocks the 'Crit or Quit' title.",
+        "The System Void dissolves and transitions into the Slime Fields tutorial zone."
+      ],
+      "must_stay_true": [
+        "milestone: artie_death = DONE",
+        "milestone: crit_build_locked = DONE",
+        "REMOVE: reality_stability: 97",
+        "reality_stability: 95",
+        "Artie's HP is 1/1 (locked) and Crit Rate is 100%.",
+        "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+        "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+        "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+        "container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+        "container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+        "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])",
+        "character_status: CHAR_ARTIE -> active"
+      ],
+      "chapter_so_far_add": [
+        "Artie finalized a high-risk 1 HP, 100% Crit build in the System Void.",
+        "Artie and Fizz arrived in the Slime Fields to begin the tutorial."
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "CHAR_ARTIE",
+        "CHAR_FIZZ"
+      ],
+      "location": "Slime Fields",
+      "open_threads": [
+        "THREAD_CRIT_EXPLOIT"
+      ],
+      "recent_facts": [
+        "Artie met Fizz in the System Void.",
+        "Artie allocated all points into Critical Hit Rate, including a 50-point Bonus Anomaly Pool.",
+        "The System locked Artie's HP at 1 and granted him the 'Crit or Quit' title.",
+        "The System Void transitioned into the Slime Fields tutorial zone."
+      ]
+    },
+    "character_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "persona_updates": [
+          "Artie prioritizes mathematical certainty and optimization over traditional survival stats."
+        ],
+        "invariants_add": [],
+        "chapter": 1,
+        "scene": 2
+      }
+    ],
+    "character_continuity_system_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "set": {
+          "stats": {
+            "hp": {
+              "current": 1,
+              "max": 1
+            },
+            "crit_rate": 100
+          },
+          "resources": {
+            "available_points": 0,
+            "bonus_anomaly_pool": 0
+          },
+          "statuses": [
+            {
+              "name": "Glass Soul",
+              "effect": "HP locked at 1; all incoming damage is fatal.",
+              "type": "mechanical_lock"
+            }
+          ],
+          "titles": [
+            {
+              "name": "Crit or Quit",
+              "active": true,
+              "source": "stat_allocation_anomaly"
+            }
+          ],
+          "reason": "Build finalization in the System Void.",
+          "reason_category": "stat_allocation"
+        },
+        "delta": {},
+        "chapter": 1,
+        "scene": 2
+      }
+    ],
+    "global_continuity_system_updates": [
+      {
+        "set": {
+          "reality_stability": 95
+        },
+        "reason": "System stress due to illegal stat allocation and anomaly pool usage.",
+        "reason_category": "system_glitch"
+      }
+    ],
+    "item_registry_updates": [
+      {
+        "item_id": "ITEM_OFFICE_ID",
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "scene": 2,
+            "location": "Slime Fields"
+          }
+        }
+      },
+      {
+        "item_id": "ITEM_SMARTPHONE",
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "scene": 2,
+            "location": "Slime Fields"
+          }
+        }
+      },
+      {
+        "item_id": "ITEM_WALLET",
+        "set": {
+          "last_seen": {
+            "chapter": 1,
+            "scene": 2,
+            "location": "Slime Fields"
+          }
+        }
+      }
+    ],
+    "plot_device_updates": [
+      {
+        "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+        "set": {
+          "activation_state": "active",
+          "last_seen": {
+            "chapter": 1,
+            "scene": 2,
+            "location": "Slime Fields"
+          }
+        }
+      }
+    ],
+    "inventory_alignment_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "set": {
+          "inventory": [
+            {
+              "item": "ITEM_OFFICE_ID",
+              "container": "lanyard",
+              "status": "equipped"
+            },
+            {
+              "item": "ITEM_SMARTPHONE",
+              "container": "pocket_left",
+              "status": "stowed"
+            },
+            {
+              "item": "ITEM_WALLET",
+              "container": "pocket_right",
+              "status": "stowed"
+            }
+          ],
+          "containers": [
+            {
+              "container": "lanyard",
+              "owner": "CHAR_ARTIE",
+              "contents": [
+                "ITEM_OFFICE_ID"
+              ]
+            },
+            {
+              "container": "pocket_left",
+              "owner": "CHAR_ARTIE",
+              "contents": [
+                "ITEM_SMARTPHONE"
+              ]
+            },
+            {
+              "container": "pocket_right",
+              "owner": "CHAR_ARTIE",
+              "contents": [
+                "ITEM_WALLET"
+              ]
+            }
+          ]
+        },
+        "reason": "Normalization after transition to Slime Fields.",
+        "reason_category": "location_jump_normalize"
+      }
+    ]
+  },
+  "scene_summary": [
+    "Artie met his tutorial guide, Fizz, in the Character Creation Void.",
+    "Against Fizz's advice, Artie dumped all his points into Critical Hit Rate, exploiting a bonus pool from his glitchy death.",
+    "The System finalized his build at 1 HP and 100% Crit Rate, then forcibly transitioned them to the Slime Fields."
+  ],
+  "key_events": [
+    "Artie identifies the 'Bonus Anomaly Pool' of 50 points.",
+    "Artie allocates all 10 standard points and 50 bonus points into Critical Hit Rate.",
+    "The System triggers the 'Glass Soul' condition, locking Artie's HP at 1/1.",
+    "Artie's Crit Rate is set to 100% and he unlocks the 'Crit or Quit' title.",
+    "The System Void dissolves and transitions into the Slime Fields tutorial zone."
+  ],
+  "must_stay_true": [
+    "milestone: artie_death = DONE",
+    "milestone: crit_build_locked = DONE",
+    "REMOVE: reality_stability: 97",
+    "reality_stability: 95",
+    "Artie's HP is 1/1 (locked) and Crit Rate is 100%.",
+    "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+    "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+    "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+    "container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+    "container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+    "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])",
+    "character_status: CHAR_ARTIE -> active"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "fail",
+    "issues": [
+      {
+        "code": "milestone_repetition",
+        "message": "The scene depicts the locking of the 'Crit or Quit' build (milestone: crit_build_locked), but this milestone is already marked as DONE in the pre-scene invariants (must_stay_true). This suggests the scene is repeating events already established in the continuity state.",
+        "severity": "error",
+        "evidence": {
+          "line": 37,
+          "excerpt": "[System Notification: Build Finalized]"
+        }
+      },
+      {
+        "code": "appearance_check_missing",
+        "message": "Authoritative appearance check is missing for present cast members (CHAR_ARTIE, CHAR_FIZZ).",
+        "severity": "warning"
+      },
+      {
+        "code": "continuity",
+        "message": "The pre-state chapter_so_far contains duplicate entries for Artie's build commitment.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Available Points but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Bonus Anomaly Pool but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Critical Hit Rate but no matching stat exists in state.",
+        "severity": "warning"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 2,
+  "updated_at": "2026-02-14T10:37:31Z"
+}

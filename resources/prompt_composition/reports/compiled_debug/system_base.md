@@ -20,13 +20,13 @@ State contract: you must create and maintain key state data each scene. summary_
 Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
 UI gate: UI/system blocks (lines starting with '[' and ending with ']') are permitted only when scene_card.ui_allowed=true. If ui_allowed=false, do not include UI blocks even if an author persona says "always include".
 Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
-Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties, and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
 JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
 Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
-Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it unless explicitly removing a stale fact with REMOVE and restating the current truth.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true. If a prior invariant is stale or superseded, you MUST flag it for removal using "REMOVE: <exact prior invariant text>" before restating the current truth.
 Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
 Never recap at scene openings.
 Do not repeat previous prose.
-
+ 
 
 <!-- end entry=E001 semantic=system_base.global_system_rules -->

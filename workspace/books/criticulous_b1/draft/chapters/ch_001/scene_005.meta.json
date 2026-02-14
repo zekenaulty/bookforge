@@ -1,0 +1,381 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_005",
+  "chapter": 1,
+  "scene": 5,
+  "scene_target": "Artie receives a cursed reward that escalates the danger from a single encounter to a zone-wide threat.",
+  "goal": "Introduce the 'Participation Trophy' item and trigger a mass-aggro event in the Slime Fields.",
+  "conflict": "Artie must survive a swarm of enemies with only 1 HP and a weapon that makes him a target.",
+  "required_callbacks": [
+    "SC_001_004"
+  ],
+  "constraints": [
+    "target_words: 2000",
+    "no-recaps",
+    "forward-motion",
+    "depict the 'Participation Trophy' as a physical item Artie must hold"
+  ],
+  "end_condition": "Artie is forced to run for his life as the tutorial zone aggros on him.",
+  "ui_allowed": true,
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [],
+  "required_in_custody": [
+    "ITEM_OFFICE_ID",
+    "ITEM_SMARTPHONE",
+    "ITEM_WALLET"
+  ],
+  "required_scene_accessible": [],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "combat_aftermath",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources",
+    "titles"
+  ],
+  "ui_mechanics_expected": [
+    "System Notification",
+    "Item Description",
+    "Aggro Meter",
+    "Level Up"
+  ],
+  "prose_path": "draft/chapters/ch_001/scene_005.md",
+  "state_patch": {
+    "character_continuity_system_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "set": {
+          "stats": {
+            "crit_rate": 100,
+            "hp": {
+              "current": 1,
+              "max": 1
+            },
+            "level": 3
+          },
+          "resources": {
+            "available_points": 5,
+            "stamina": 45,
+            "stamina_max": 100
+          },
+          "statuses": [
+            {
+              "effect": "HP locked at 1; all incoming damage is fatal.",
+              "name": "Glass Soul",
+              "type": "mechanical_lock"
+            },
+            {
+              "effect": "+1000% Aggro Radius; cannot be unequipped in combat zones.",
+              "name": "Beacon of Trash",
+              "type": "curse"
+            }
+          ],
+          "reason": "Level up to 3 and acquisition of the cursed Participation Trophy.",
+          "reason_category": "stat_allocation"
+        },
+        "delta": {},
+        "chapter": 1,
+        "scene": 5
+      }
+    ],
+    "character_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "persona_updates": [
+          "Artie is beginning to realize that the System's rewards are often as dangerous as its monsters.",
+          "Artie's frustration with the System is peaking as he realizes he is a 'god of destruction' who can be killed by a stray sneeze."
+        ],
+        "inventory": [
+          {
+            "item": "ITEM_OFFICE_ID",
+            "container": "lanyard",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_WALLET",
+            "container": "pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "container": "hand_right",
+            "status": "held"
+          }
+        ],
+        "containers": [
+          {
+            "container": "lanyard",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_OFFICE_ID"
+            ]
+          },
+          {
+            "container": "pocket_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_WALLET"
+            ]
+          }
+        ],
+        "invariants_add": [],
+        "chapter": 1,
+        "scene": 5
+      }
+    ],
+    "global_continuity_system_updates": [
+      {
+        "delta": {
+          "reality_stability": -1
+        },
+        "reason": "System error Math.div(0) avoided by rounding up to 'Absurd' during reward calculation."
+      }
+    ],
+    "inventory_alignment_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "reason": "Acquisition of Participation Trophy and transition to flight posture.",
+        "reason_category": "after_combat_cleanup",
+        "set": {
+          "inventory": [
+            {
+              "item": "ITEM_OFFICE_ID",
+              "container": "lanyard",
+              "status": "equipped"
+            },
+            {
+              "item": "ITEM_SMARTPHONE",
+              "container": "pocket_left",
+              "status": "stowed"
+            },
+            {
+              "item": "ITEM_WALLET",
+              "container": "pocket_right",
+              "status": "stowed"
+            },
+            {
+              "item": "ITEM_PARTICIPATION_TROPHY",
+              "container": "hand_right",
+              "status": "held"
+            }
+          ],
+          "containers": [
+            {
+              "container": "lanyard",
+              "owner": "CHAR_ARTIE",
+              "contents": [
+                "ITEM_OFFICE_ID"
+              ]
+            },
+            {
+              "container": "pocket_left",
+              "owner": "CHAR_ARTIE",
+              "contents": [
+                "ITEM_SMARTPHONE"
+              ]
+            },
+            {
+              "container": "pocket_right",
+              "owner": "CHAR_ARTIE",
+              "contents": [
+                "ITEM_WALLET"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "item_registry_updates": [
+      {
+        "item_id": "ITEM_PARTICIPATION_TROPHY",
+        "set": {
+          "name": "Participation Trophy",
+          "display_name": "Participation Trophy",
+          "type": "cursed_item",
+          "owner_scope": "character",
+          "custodian": "CHAR_ARTIE",
+          "linked_threads": [
+            "THREAD_SYSTEM_GLITCH"
+          ],
+          "state_tags": [
+            "cursed",
+            "beacon",
+            "quest-reward",
+            "soul-bound"
+          ],
+          "last_seen": {
+            "chapter": 1,
+            "scene": 5,
+            "location": "Slime Fields"
+          }
+        }
+      }
+    ],
+    "schema_version": "1.0",
+    "summary_update": {
+      "chapter_so_far_add": [
+        "Artie's success in combat backfired when the System awarded him a cursed beacon that aggroed the entire tutorial zone."
+      ],
+      "key_events": [
+        "Artie acquired the ITEM_PARTICIPATION_TROPHY, which is soul-bound and cursed with the 'Beacon of Trash' effect.",
+        "Artie reached Level 3, though his 5 new stat points are being held for verification by the System.",
+        "The 'Beacon of Trash' effect triggered a zone-wide aggro event, drawing thousands of slimes toward Artie.",
+        "Artie's stamina depleted to 45/100 as he began a desperate sprint toward the Oakhaven gate.",
+        "The System Administrator mocked Artie's request for a manager through a UI notification."
+      ],
+      "last_scene": [
+        "Artie received the cursed Participation Trophy as a reward for his overkill victory in the Slime Fields.",
+        "The trophy's beacon effect triggered a zone-wide aggro event, turning the tutorial area into a sea of hostile slimes.",
+        "Artie reached Level 3 and began a frantic run toward the Oakhaven gate to reset the aggro and survive."
+      ],
+      "must_stay_true": [
+        "milestone: artie_death = DONE",
+        "milestone: crit_build_locked = DONE",
+        "milestone: tutorial_combat_first = DONE",
+        "REMOVE: milestone: level_2_reached = DONE",
+        "milestone: level_3_reached = DONE",
+        "milestone: participation_trophy_acquired = DONE",
+        "milestone: tutorial_aggro_event = DONE",
+        "REMOVE: Artie's HP is 1/1 (locked), Level is 2, and Crit Rate is 100%.",
+        "Artie's HP is 1/1 (locked), Level is 3, and Crit Rate is 100%.",
+        "REMOVE: reality_stability: 94",
+        "reality_stability: 93",
+        "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_right)",
+        "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+        "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+        "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)"
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "CHAR_ARTIE",
+        "CHAR_FIZZ"
+      ],
+      "location": "Slime Fields",
+      "open_threads": [
+        "THREAD_CRIT_EXPLOIT",
+        "THREAD_SYSTEM_GLITCH"
+      ]
+    }
+  },
+  "scene_summary": [
+    "Artie received the cursed Participation Trophy as a reward for his overkill victory in the Slime Fields.",
+    "The trophy's beacon effect triggered a zone-wide aggro event, turning the tutorial area into a sea of hostile slimes.",
+    "Artie reached Level 3 and began a frantic run toward the Oakhaven gate to reset the aggro and survive."
+  ],
+  "key_events": [
+    "Artie acquired the ITEM_PARTICIPATION_TROPHY, which is soul-bound and cursed with the 'Beacon of Trash' effect.",
+    "Artie reached Level 3, though his 5 new stat points are being held for verification by the System.",
+    "The 'Beacon of Trash' effect triggered a zone-wide aggro event, drawing thousands of slimes toward Artie.",
+    "Artie's stamina depleted to 45/100 as he began a desperate sprint toward the Oakhaven gate.",
+    "The System Administrator mocked Artie's request for a manager through a UI notification."
+  ],
+  "must_stay_true": [
+    "milestone: artie_death = DONE",
+    "milestone: crit_build_locked = DONE",
+    "milestone: tutorial_combat_first = DONE",
+    "REMOVE: milestone: level_2_reached = DONE",
+    "milestone: level_3_reached = DONE",
+    "milestone: participation_trophy_acquired = DONE",
+    "milestone: tutorial_aggro_event = DONE",
+    "REMOVE: Artie's HP is 1/1 (locked), Level is 2, and Crit Rate is 100%.",
+    "Artie's HP is 1/1 (locked), Level is 3, and Crit Rate is 100%.",
+    "REMOVE: reality_stability: 94",
+    "reality_stability: 93",
+    "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_right)",
+    "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+    "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+    "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "appearance_check_missing",
+        "message": "Appearance check missing for CHAR_ARTIE.",
+        "severity": "warning"
+      },
+      {
+        "code": "appearance_check_missing",
+        "message": "Appearance check missing for CHAR_FIZZ.",
+        "severity": "warning"
+      },
+      {
+        "code": "missing_introduces_metadata",
+        "message": "Scene introduces 'Participation Trophy' but 'introduces_ids' is empty in the scene card.",
+        "severity": "warning"
+      },
+      {
+        "code": "missing_remove_directive",
+        "message": "Superseded invariant 'milestone: level_2_reached = DONE' not flagged for removal in must_stay_true.",
+        "severity": "warning"
+      },
+      {
+        "code": "missing_remove_directive",
+        "message": "Superseded invariant 'reality_stability: 94' not flagged for removal in must_stay_true.",
+        "severity": "warning"
+      },
+      {
+        "code": "naming_convention",
+        "message": "Unambiguous descriptor 'the trophy' used post-anchor.",
+        "severity": "warning",
+        "evidence": {
+          "line": 51,
+          "excerpt": "\"Put the trophy away!\" Artie wheezed..."
+        }
+      },
+      {
+        "code": "naming_convention",
+        "message": "Unambiguous descriptor 'it' used post-anchor.",
+        "severity": "warning",
+        "evidence": {
+          "line": 20,
+          "excerpt": "\"Why is it glowing, Fizz?\""
+        }
+      },
+      {
+        "code": "naming_convention",
+        "message": "Unambiguous descriptor 'my reward' used post-anchor.",
+        "severity": "warning",
+        "evidence": {
+          "line": 21,
+          "excerpt": "\"Why is my reward a lighthouse for murder?\""
+        }
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Stamina but no matching stat exists in state.",
+        "severity": "warning"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 2,
+  "updated_at": "2026-02-14T11:47:51Z"
+}

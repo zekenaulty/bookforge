@@ -1,0 +1,212 @@
+COMPLIANCE:
+Scene ID: SC_001_007
+Allowed events: Artie released from detention, travel to Barnaby's Tavern, introduction of Barnaby, exposition on Crit economy, Artie realizes he is a target.
+Forbidden milestones: Vane rivalry escalation (SC 8), acquisition of evasion gear (Chapter 2).
+
+Current arm-side / inventory facts: 
+- inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_right)
+- inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)
+- inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)
+- inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)
+- inventory: CHAR_BARNABY -> Wooden Pipe (status=carried, container=hand_right)
+
+Durable changes committed:
+- milestone: barnaby_met = DONE
+- character_status: CHAR_ARTIE -> released_from_detention
+- stamina: 10/100 (recovery)
+
+APPEARANCE_CHECK:
+- CHAR_ARTIE: human, slender, mousy brown hair, hazel eyes, pale skin, electrical burns.
+- CHAR_BARNABY: human, stocky, salt and pepper hair, thick beard, weathered skin.
+
+PROSE:
+
+The stool groaned under Artie’s weight, a sound that felt dangerously like a physical attack against his remaining health. He didn’t collapse, mostly because collapsing required more stamina than he currently possessed, but he did let his forehead rest against the cool, scarred wood of the bar. 
+
+[HP: 1/1]
+[Stamina: 5/100]
+[Status: Exhausted - All physical actions cost 2x Stamina]
+
+"You look like something a Level 100 Necromancer coughed up," a gravelly voice observed.
+
+Artie didn't look up. He just tightened his grip on the Participation Trophy, the cheap gold-painted plastic feeling absurdly heavy in his right hand. The cursed item was still humming with that low-grade "come kill me" energy, but inside the walls of Oakhaven, the effect felt muffled, like a radio station losing its signal.
+
+"I was detained," Artie muttered into the wood. "Administrative review. Apparently, having a heart that beats in binary is a security risk."
+
+A heavy thud echoed as a wooden mug was placed in front of him. Artie finally raised his head, blinking his hazel eyes against the dim, amber light of the tavern. Standing behind the bar was a man who looked like he’d been carved out of an old oak stump. Barnaby was short, stocky, and possessed a salt-and-pepper beard so thick it probably had its own defensive stat. He was currently clenching a Wooden Pipe between his teeth, though he wasn't lighting it.
+
+"The gate guards mentioned a 'Statistical Anomaly' was headed my way," Barnaby said, his dark brown eyes scanning Artie with the practiced ease of a man who spent his life looking at price tags. "They didn't mention you were dressed like a middle-manager who got lost on the way to a spreadsheet convention."
+
+Artie glanced down at his chest. The Corporate ID Badge still dangled from the lanyard around his neck, the plastic flickering with a faint, ghostly light. Underneath it, the severe electrical burns from the vending machine accident were hidden by his singed shirt, but the memory of the shock still made his skin crawl.
+
+"It’s a vintage look," Artie said, his voice cracking. "Very exclusive. Only one in existence, hopefully."
+
+Barnaby leaned in, his weathered face inches from Artie’s. He didn't look at Artie’s face; he looked just above his head, squinting at the invisible UI elements that only certain NPCs and high-level players could see.
+
+[Skill Active: Appraisal (Rank B)]
+
+"One HP," Barnaby whispered, the Wooden Pipe nearly falling from his mouth. "And a Crit Rate of... one hundred percent? Lad, you’re not a player. You’re a walking math error."
+
+"I prefer the term 'optimal build,'" Artie lied. 
+
+"Optimal?" Barnaby let out a bark of a laugh that sounded like stones grinding together. "You’re a glass cannon made of actual glass. One stiff breeze, one misplaced pebble, or one particularly aggressive sneeze from a barmaid and you’re a loot drop. Do you have any idea what you are in this town?"
+
+Artie took a tentative sip of whatever was in the mug. It tasted like fermented apples and bad math. 
+
+[Stamina: +5]
+
+"A nuisance?" Artie suggested.
+
+"A whale," Barnaby corrected, his expression turning uncharacteristically serious. "In Oakhaven, 'Crits' aren't just a combat mechanic. They're the backbone of the local economy. The nobility here? They don't pray for rain or peace. They pray for high rolls. A man who can guarantee a Critical Hit every time he swings a fist? You’re not a hero, Artie. You’re a resource."
+
+Artie felt a cold lump form in his stomach that had nothing to do with the cider. He reached into his pocket_right, feeling the familiar edges of his Leather Wallet. It was empty of this world's currency, but it felt like a tether to a reality where 'Critical Hits' were just something that happened to other people's cars.
+
+"I just want a place to hide," Artie said. "Somewhere with a very high ceiling and zero sharp corners."
+
+Barnaby sighed, finally lighting his pipe. A cloud of sweet-smelling smoke drifted between them. "Safety is expensive, lad. And you? You're glowing like a neon sign in a dark alley. That scanner at the gate didn't just flag you for the guards. It logged your stats into the local registry. By tomorrow morning, every 'talent scout' and 'mentor' in the city is going to be looking for the Level 3 glitch with the hundred-percent hit rate."
+
+Artie looked at the Participation Trophy in his hand. He’d won it for surviving a slime-pocalypse, but now it felt like a target painted on his back. He thought about his Smartphone in his pocket_left, useless and dead, a relic of a world where the only thing he had to worry about was his 401k.
+
+"So, what you're saying is," Artie said, his voice dropping to a whisper, "I'm basically a winning lottery ticket that can be killed by a papercut."
+
+"Exactly," Barnaby said, tapping his pipe against the bar. "And in this world, people don't wait for the lottery to draw. They just take the ticket."
+
+Artie looked around the tavern. For the first time, the cozy atmosphere felt predatory. The shadows in the corners seemed a little deeper, the eyes of the other patrons a little sharper. He wasn't just a player in a game anymore. He was a glitch in a system that hated being broken, and a prize for anyone strong enough to claim him.
+
+[New Title Progress: One-Hit Wonder (2/10)]
+[Warning: Your presence has been logged by the Oakhaven Census Bureau.]
+
+"Great," Artie muttered, resting his head back on the bar. "I finally get to be a VIP, and the 'P' stands for 'Prey'."
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_BARNABY"
+    ],
+    "location": "Oakhaven - Barnaby's Tavern",
+    "recent_facts": [
+      "Artie was released from administrative detention and arrived at Barnaby's Tavern.",
+      "Barnaby used Appraisal on Artie and discovered his 100% Crit Rate and 1 HP.",
+      "Barnaby explained that Crits are a primary currency and power source for the Oakhaven nobility.",
+      "Artie realized that his anomalous stats make him a target for powerful factions."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_OFFICE_ID",
+          "container": "lanyard",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_WALLET",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_OFFICE_ID"
+          ]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is now aware that his 'Crit or Quit' build is a valuable and dangerous commodity in Oakhaven's political landscape."
+      ]
+    },
+    {
+      "character_id": "CHAR_BARNABY",
+      "inventory": [
+        {
+          "item": "ITEM_WOODEN_PIPE",
+          "container": "hand_right",
+          "status": "carried"
+        }
+      ],
+      "containers": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "resources": {
+          "stamina": 10,
+          "stamina_max": 100
+        }
+      },
+      "delta": {
+        "titles_progress": {
+          "One-Hit Wonder": 1
+        }
+      },
+      "reason": "Recovery from drink and tavern atmosphere; progression toward 'One-Hit Wonder' title."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie was released from detention and made his way to Barnaby's Tavern in Oakhaven.",
+      "He met Barnaby, who appraised his stats and revealed the high value placed on 'Crits' by the local nobility.",
+      "Artie realized his 100% Crit Rate and 1 HP make him a high-value target for exploitation."
+    ],
+    "key_events": [
+      "Artie arrived at Barnaby's Tavern after being released from gate detention.",
+      "Barnaby performed an Appraisal, confirming Artie's 1 HP and 100% Crit Rate anomaly.",
+      "Barnaby explained the 'Crit Economy' of Oakhaven and the danger it poses to Artie.",
+      "Artie gained progression toward the 'One-Hit Wonder' title.",
+      "The System logged Artie's presence in the Oakhaven Census Bureau, increasing his visibility to powerful entities."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie is detained by Oakhaven gate guards for administrative review.",
+      "milestone: gate_scan_anomaly = DONE",
+      "milestone: barnaby_met = DONE",
+      "character_status: CHAR_ARTIE -> released_from_detention",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_BARNABY -> Wooden Pipe (status=carried, container=hand_right)",
+      "The 'Glass Soul' condition makes all incoming damage fatal for Artie.",
+      "Artie's HP is 1/1 (locked), Level is 3, and Crit Rate is 100%."
+    ],
+    "chapter_so_far_add": [
+      "Artie met Barnaby and learned that his glitchy stats are a prized commodity in the capital's economy, turning him into a target for the powerful."
+    ]
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Office Breakroom",
+    "recent_facts": [
+      "Artie died due to a massive electrical surge from a vending machine.",
+      "The vending machine malfunctioned after Artie attempted to shake it to dislodge a bag of chips."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item_id": "ITEM_OFFICE_ID",
+          "container": "lanyard",
+          "status": "equipped",
+          "item": "ITEM_OFFICE_ID"
+        },
+        {
+          "item_id": "ITEM_SMARTPHONE",
+          "container": "pocket_left",
+          "status": "stowed",
+          "item": "ITEM_SMARTPHONE"
+        },
+        {
+          "item_id": "ITEM_WALLET",
+          "container": "pocket_right",
+          "status": "stowed",
+          "item": "ITEM_WALLET"
+        }
+      ],
+      "containers": [
+        {
+          "container": "lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_OFFICE_ID"
+          ]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET"
+          ]
+        }
+      ],
+      "appearance_updates": {
+        "set": {
+          "marks_add": [
+            {
+              "name": "Severe Electrical Burns",
+              "location": "chest",
+              "durability": "durable"
+            }
+          ],
+          "atoms": {
+            "health_status": "deceased"
+          }
+        },
+        "reason": "Artie was electrocuted by a vending machine."
+      },
+      "persona_updates": [
+        "Artie's mundane life has ended."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 1
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 0,
+            "max": 10
+          }
+        },
+        "reason": "Electrocution by malfunctioning vending machine."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 1
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "reality_stability": 99
+      },
+      "reason": "Localized reality flicker during a fatal anomaly."
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_CRUMPLED_DOLLAR",
+      "reason": "Consumed by the malfunctioning vending machine.",
+      "source_character_id": "CHAR_ARTIE",
+      "destination_custodian": "world",
+      "from": {}
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie attempted to buy chips from a malfunctioning vending machine in his office breakroom.",
+      "After the machine jammed, Artie used his 'aggressive shaking' skill, triggering a massive electrical surge that killed him instantly."
+    ],
+    "key_events": [
+      "Artie inserted the Crumpled Dollar Bill into the vending machine.",
+      "The machine jammed on a bag of chips, prompting Artie to shake it.",
+      "An electrical surge traveled through Artie's Corporate ID Badge and chest.",
+      "Artie's HP dropped to 0, resulting in his death."
+    ],
+    "must_stay_true": [
+      "milestone: artie_death = DONE",
+      "REMOVE: inventory: CHAR_ARTIE -> Crumpled Dollar Bill (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])"
+    ],
+    "chapter_so_far_add": [
+      "Arthur 'Artie' Penhaligon died in a freak vending machine accident, ending his life as a Junior Data Analyst."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "pale",
+      "skin",
+      "hazel",
+      "eyes",
+      "mousy",
+      "brown",
+      "hair",
+      "slender",
+      "build",
+      "late-twenties."
+    ]
+  }
+}

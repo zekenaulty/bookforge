@@ -8,6 +8,8 @@ No markdown, no code fences, no commentary. Use strict JSON (double quotes, no t
 If outline_window includes character information, keep those character ids in mind.
 If character_states are provided, keep inventory/persona/continuity mechanics consistent; do not invent conflicting facts.
 If outline_window.current.introduces is present, the scene must introduce those characters.
+If outline_window.section.end_condition is present, align scene-card end_condition to satisfy that closure target.
+If outline_window.current includes transition_in/transition_out/edge_intent or link hints (consumes_outcome_from, hands_off_to), treat them as continuity constraints for scene_target/goal/conflict/end_condition.
 If recent_lint_warnings include ui_gate_unknown, set ui_allowed explicitly for this scene.
 
 Required keys:
@@ -89,6 +91,5 @@ Recent lint warnings (prior scene, if any):
 
 Task:
 Create the next scene card.
-
 
 <!-- end entry=E001 semantic=plan.scene_card_prompt_contract_and_schema -->

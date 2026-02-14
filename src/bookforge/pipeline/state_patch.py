@@ -242,6 +242,63 @@ def _coerce_inventory_alignment_updates(patch: Dict[str, Any]) -> None:
                     normalized_inventory.append({"item": item, "status": "held"})
             update["inventory"] = normalized_inventory
 
+        remove_block = update.get("remove")
+        if isinstance(remove_block, dict):
+            normalized_remove = [str(key).strip() for key in remove_block.keys() if str(key).strip()]
+            if normalized_remove:
+                update["remove"] = normalized_remove
+            else:
+                update.pop("remove", None)
+        elif isinstance(remove_block, list):
+            normalized_remove: List[str] = []
+            for entry in remove_block:
+                if isinstance(entry, str):
+                    text = entry.strip()
+                    if text:
+                        normalized_remove.append(text)
+                    continue
+                if isinstance(entry, dict):
+                    extracted = ""
+                    for key in ("path", "field", "key", "item_id", "device_id", "character_id", "id", "name"):
+                        candidate = str(entry.get(key) or "").strip()
+                        if candidate:
+                            extracted = candidate
+                            break
+                    if extracted:
+                        normalized_remove.append(extracted)
+                    continue
+                if entry is not None:
+                    text = str(entry).strip()
+                    if text:
+                        normalized_remove.append(text)
+            if normalized_remove:
+                update["remove"] = normalized_remove
+            else:
+                update.pop("remove", None)
+
+
+def _coerce_transfer_endpoint(value: Any) -> Dict[str, Any]:
+    if isinstance(value, dict):
+        return dict(value)
+    text = str(value or "").strip()
+    if not text:
+        return {}
+    if text.lower() == "world":
+        return {"custodian": "world"}
+    if text.upper().startswith("CHAR_"):
+        return {"character_id": text, "custodian": text}
+    return {"custodian": text}
+
+
+def _merge_transfer_endpoints(primary: Dict[str, Any], fallback: Dict[str, Any]) -> Dict[str, Any]:
+    merged = dict(primary) if isinstance(primary, dict) else {}
+    if not isinstance(fallback, dict):
+        return merged
+    for key, value in fallback.items():
+        if key not in merged or merged.get(key) in (None, ""):
+            merged[key] = value
+    return merged
+
 
 def _coerce_transfer_updates(patch: Dict[str, Any]) -> None:
     updates = patch.get("transfer_updates")
@@ -258,8 +315,38 @@ def _coerce_transfer_updates(patch: Dict[str, Any]) -> None:
         if "reason" not in update or not str(update.get("reason") or "").strip():
             reason = update.get("reason_category") or "transfer_alignment"
             update["reason"] = str(reason)
-        if "from" not in update or not isinstance(update.get("from"), dict):
-            update["from"] = {}
+        source_alias = (
+            update.get("source_character_id")
+            or update.get("source")
+            or update.get("from_character_id")
+            or update.get("from_custodian")
+        )
+        destination_alias = (
+            update.get("destination_custodian")
+            or update.get("destination")
+            or update.get("to_character_id")
+            or update.get("to_custodian")
+        )
+
+        from_endpoint = _coerce_transfer_endpoint(update.get("from"))
+        to_endpoint = _coerce_transfer_endpoint(update.get("to"))
+        from_endpoint = _merge_transfer_endpoints(from_endpoint, _coerce_transfer_endpoint(source_alias))
+        to_endpoint = _merge_transfer_endpoints(to_endpoint, _coerce_transfer_endpoint(destination_alias))
+
+        update["from"] = from_endpoint
+        update["to"] = to_endpoint
+
+        for alias_key in (
+            "source",
+            "source_character_id",
+            "from_character_id",
+            "from_custodian",
+            "destination",
+            "destination_custodian",
+            "to_character_id",
+            "to_custodian",
+        ):
+            update.pop(alias_key, None)
 
 def _coerce_registry_updates(patch: Dict[str, Any], *, key: str, id_key: str) -> None:
     raw_updates = patch.get(key)

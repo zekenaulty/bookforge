@@ -1,0 +1,218 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Slime Fields",
+    "recent_facts": [
+      "Artie and Fizz arrived in the Slime Fields tutorial zone.",
+      "Artie confirmed his 1 HP status and Glass Soul mechanical lock.",
+      "A Lesser Green Slime aggroed on Artie, forcing him into a defensive struggle.",
+      "Artie realized that even environmental impacts are a threat to his 1 HP build."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_OFFICE_ID",
+          "container": "lanyard",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_WALLET",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_OFFICE_ID"
+          ]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is experiencing genuine terror as the mechanical reality of his 1 HP build sets in."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 3
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "persona_updates": [
+        "Fizz is treating Artie's life-or-death struggle with the detached amusement of a tutorial guide."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 3
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "level": 1,
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100
+        },
+        "reason": "Initializing level and confirming stats for the first combat encounter."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 3
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "reality_stability": 95
+      },
+      "reason": "Tracking minor instability in the tutorial zone."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_OFFICE_ID",
+            "container": "lanyard",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_WALLET",
+            "container": "pocket_right",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "lanyard",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_OFFICE_ID"
+            ]
+          },
+          {
+            "container": "pocket_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_WALLET"
+            ]
+          }
+        ]
+      },
+      "reason": "Normalization for arrival in Slime Fields.",
+      "reason_category": "location_jump_normalize"
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie and Fizz arrived in the Slime Fields, where Artie immediately realized the terrifying reality of his 1 HP build.",
+      "A Lesser Green Slime attacked Artie, who narrowly avoided death by diving away from its initial charge.",
+      "The scene ended with Artie cornered against a rock as the slime prepared a lethal body slam."
+    ],
+    "key_events": [
+      "Artie arrived in the Slime Fields tutorial zone.",
+      "Artie performed an inventory check of his mundane office items.",
+      "Artie viewed his status screen, confirming the 'Glass Soul' permanent lock.",
+      "A Level 1 Lesser Green Slime aggroed on Artie.",
+      "Artie passed a narrow durability check after falling to the ground.",
+      "Artie was cornered by the slime's 'Tutorial Slam' attack."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie's HP is 1/1 (locked) and Crit Rate is 100%.",
+      "REMOVE: character_status: CHAR_ARTIE -> deceased",
+      "milestone: crit_build_locked = DONE",
+      "character_status: CHAR_ARTIE -> active",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)",
+      "inventory: CHAR_ARTIE -> Smartphone (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "container: lanyard (owner=CHAR_ARTIE, contents=[ITEM_OFFICE_ID])",
+      "container: pocket_left (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_WALLET])",
+      "Artie's HP is 1/1 (locked), Level is 1, and Crit Rate is 100%.",
+      "reality_stability: 95"
+    ],
+    "chapter_so_far_add": [
+      "Artie arrived in the Slime Fields and faced his first combat encounter, realizing that his 1 HP build makes even tutorial enemies lethal."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "slender",
+      "human",
+      "male",
+      "mousy",
+      "brown",
+      "hair",
+      "hazel",
+      "eyes",
+      "electrical",
+      "burns",
+      "on",
+      "chest."
+    ],
+    "CHAR_FIZZ": [
+      "small",
+      "glowing",
+      "blue",
+      "sprite",
+      "spiky",
+      "neon",
+      "blue",
+      "hair",
+      "white",
+      "eyes",
+      "pixelated",
+      "dust",
+      "trail."
+    ]
+  }
+}

@@ -1,0 +1,232 @@
+COMPLIANCE:
+Scene ID: SC_001_008
+Allowed events: Vane's introduction, Aura of Intimidation effect, discovery of Artie's anomaly status, formal duel challenge, Artie's escape.
+Forbidden milestones: none (milestone: vane_rivalry_started = NOT_YET)
+
+Current arm-side / inventory facts:
+- inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_right)
+- inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=lanyard)
+- inventory: CHAR_VANE -> Ebon Claymore (status=stowed, container=back_sheath)
+
+Durable changes committed:
+- milestone: vane_rivalry_started = DONE
+- character_status: CHAR_VANE -> active
+- character_continuity_system_updates: Artie's stamina decreased by Aura effect.
+
+APPEARANCE_CHECK:
+- CHAR_ARTIE: slender human male, mousy brown unkept hair, hazel eyes, electrical burns on chest.
+- CHAR_VANE: tall, athletic build, piercing grey eyes, jet black slicked back hair, jagged scar on nose, black plate armor.
+
+PROSE:
+
+The temperature in Barnaby’s tavern didn't just drop; it plummeted with the weight of a lead coffin. One moment, Artie was nursing the dregs of a drink that tasted like fermented swamp water, and the next, the air felt thick enough to chew. The chatter of the local drunks died in their throats as the heavy oak doors creaked open.
+
+[Vane - Lvl 52] [Title: The Unbroken Blade]
+
+The man who stepped inside was less a person and more a localized weather event of pure arrogance. He was tall, his athletic frame encased in polished black plate armor that seemed to suck the flickering candlelight right out of the room. A jagged scar crossed the bridge of his nose, punctuating a face that looked like it had been carved out of granite and then taught how to sneer. On his back, the hilt of a massive blade—the Ebon Claymore—towered over his shoulder, the dark metal etched with faint, pulsing runes.
+
+Artie felt a familiar, unwelcome vibration in his marrow. It wasn't the vending machine this time; it was the System screaming a warning.
+
+[Effect: Aura of Intimidation (Rank B) - Stamina Drain: 1/sec]
+
+"Great," Artie wheezed, his lungs feeling like they were being squeezed by a giant invisible hand. "I survived a slime-pocalypse for this? My health bar is a single pixel, and now the room is trying to sit on me."
+
+Vane didn't look at the tavern keeper. He didn't look at the terrified regulars. His piercing grey eyes locked onto Artie, or more specifically, the violet shimmer that still clung to Artie's skin from the gate scanners.
+
+"An anomaly," Vane said, his voice a low rumble that made the ale in Artie's mug ripple. He crossed the floor in three strides, the Ebon Claymore clinking softly against his greaves. He stopped a foot away from Artie, the sheer level difference creating a physical pressure that forced Artie back against the bar. "The census log mentioned a glitch in the math. A 'Crit or Quit' build. I thought it was a clerical error."
+
+"Usually, I'm the one making the clerical errors," Artie said, clutching his Participation Trophy like a shield. The gold-plated plastic felt pathetically light against the presence of a man who could likely delete him by blinking too hard. "Look, if you're here about the trophy, it’s soul-bound. Believe me, I’ve tried to lose it."
+
+Vane ignored the joke, his gaze drifting to the Corporate ID Badge dangling from Artie's neck. "You’re raw data. Unrefined. A hundred-percent crit rate in the hands of a level three peasant is a waste of the System’s resources." He leaned in, his shadow swallowing Artie whole. "You need a handler. Someone to point that glitch in a direction that matters."
+
+"I have a direction," Artie countered, his heart hammering against his ribs. "It’s called 'away.' I’m very fond of it."
+
+Vane’s lip curled. He reached out, his gauntleted hand hovering inches from Artie’s chest. 
+
+[Arthur 'Artie' Penhaligon - Lvl 3] [HP: 1/1]
+
+The high-level warrior paused, a look of genuine confusion—and then dark amusement—flickering across his face. "One hit point? You’re a Glass Soul. One stray spark and you’re a memory."
+
+"I prefer the term 'statistically efficient,'" Artie snapped.
+
+Vane straightened, his hand dropping to the hilt of his weapon. "Efficiency requires survival. You won't last a week in the wild without a leash. I'm claiming your contract, Anomaly. Consider it a mercy."
+
+[System Notification: Formal Duel Requested by Vane (Lvl 52)]
+[Terms: Winner gains ownership of 'The Anomaly'.]
+[Warning: Level disparity exceeds 40. Auto-forfeit is disabled for Anomalies.]
+
+"Ownership? I’m not a used sedan," Artie said, his eyes darting toward the door. His stamina was ticking down into the red. 
+
+[Stamina: 4/100]
+
+"You are whatever I say you are," Vane replied. "Accept the challenge, or I’ll simply follow you until something smaller than me accidentally kills you. Then I’ll harvest your remains for the Crit-essence."
+
+"Option C," Artie whispered. He looked at Barnaby, who was wisely polishing a glass behind the bar as if he had suddenly gone deaf and blind. Artie looked back at Vane, then down at the Participation Trophy in his right hand. "Hey, look! A patch update!"
+
+Vane instinctively glanced toward his own UI. It was a half-second distraction, but for a man who lived on the edge of a 1 HP cliff, half a second was an eternity. Artie didn't run; he scrambled. He dived between Vane’s legs, his slender frame easily clearing the gap beneath the heavy plate armor. 
+
+He hit the floor, rolled, and bolted for the door.
+
+"You can't outrun the System, Penhaligon!" Vane’s roar followed him, vibrating the tavern walls. "The challenge is logged! You’re mine!"
+
+Artie didn't look back. He burst through the tavern doors and into the cool Oakhaven night, his lungs burning and his vision swimming. He had a level 52 paladin on his tail, a cursed trophy in his hand, and a health bar that couldn't survive a stiff breeze.
+
+"Still better than the office," he gasped, disappearing into the shadows of the alleyways.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_VANE"
+    ],
+    "location": "Oakhaven - Barnaby's Tavern / Streets",
+    "recent_facts": [
+      "Vane introduced himself as a Level 52 antagonist and identified Artie as a 'Statistical Anomaly'.",
+      "Vane's Aura of Intimidation drained Artie's stamina during the encounter.",
+      "Vane issued a formal duel challenge to claim ownership of Artie.",
+      "Artie escaped the tavern using a distraction, beginning a rivalry with Vane."
+    ],
+    "open_threads": [
+      "THREAD_VANE_RIVALRY",
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_right",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_OFFICE_ID",
+          "container": "lanyard",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_WALLET",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_OFFICE_ID"
+          ]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie's fear of Vane is balanced by his refusal to be 'owned' by a high-level player."
+      ]
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "inventory": [
+        {
+          "item": "ITEM_EBON_CLAYMORE",
+          "container": "back_sheath",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "back_sheath",
+          "owner": "CHAR_VANE",
+          "contents": [
+            "ITEM_EBON_CLAYMORE"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Vane views Artie as a resource to be harvested or controlled rather than a person."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "resources": {
+          "stamina": 4
+        }
+      },
+      "reason": "Stamina drain from Vane's Aura of Intimidation and desperate escape."
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "set": {
+        "stats": {
+          "level": 52,
+          "hp": {
+            "current": 4500,
+            "max": 4500
+          }
+        },
+        "skills": {
+          "aura_of_intimidation": 10
+        },
+        "titles": [
+          {
+            "name": "The Unbroken Blade",
+            "active": true
+          }
+        ]
+      },
+      "reason": "Initialize Vane's stats and titles for introduction."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie met Vane at Barnaby's tavern, where the high-level warrior identified him as a 'Statistical Anomaly'.",
+      "Vane used his Aura of Intimidation to pressure Artie and issued a formal duel challenge to claim him.",
+      "Artie managed to distract Vane and escape the tavern, solidifying a dangerous new rivalry."
+    ],
+    "key_events": [
+      "Vane enters Barnaby's tavern, exerting a Level 52 Aura of Intimidation.",
+      "Vane identifies Artie's 1 HP anomaly status and 100% Crit Rate.",
+      "Vane issues a Formal Duel Request with 'Ownership' as the stakes.",
+      "Artie uses a fake 'patch update' distraction to flee the tavern.",
+      "Vane declares Artie his future property, marking the start of their rivalry."
+    ],
+    "must_stay_true": [
+      "milestone: vane_rivalry_started = DONE",
+      "REMOVE: Artie's stamina is 10/100 following a drink at Barnaby's tavern.",
+      "Artie's stamina is 4/100 following the encounter with Vane.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_right)",
+      "inventory: CHAR_VANE -> Ebon Claymore (status=stowed, container=back_sheath)",
+      "Vane is a Level 52 warrior with the title 'The Unbroken Blade'.",
+      "milestone: oakhaven_detention_released = DONE",
+      "milestone: crit_economy_revealed = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Artie encountered his first major rival, Vane, who attempted to claim him as a resource due to his anomaly status."
+    ]
+  }
+}
