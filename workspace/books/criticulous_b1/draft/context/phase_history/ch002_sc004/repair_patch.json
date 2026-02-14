@@ -1,0 +1,274 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "Low-Level Crypts",
+    "recent_facts": [
+      "Artie reached the Low-Level Crypts and encountered three Crypt Skirmishers.",
+      "The Cloak of the Cowardly Lion triggered multiple evasion procs, saving Artie from lethal damage.",
+      "Artie identified the skeletons' movement as a rhythmic loop and unlocked the Pattern Recognition skill.",
+      "Artie is treating the dungeon encounter as a rhythm game to bypass enemy attacks."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH",
+      "THREAD_VANE_RIVALRY"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "Artie entered the Low-Level Crypts, where his neon yellow cloak acted as a monster beacon.",
+      "He survived an ambush by three skeletons thanks to the automated evasion of the Cloak of the Cowardly Lion.",
+      "By observing the skeletons' predictable patterns, Artie unlocked the Pattern Recognition skill and began treating combat like a rhythm game."
+    ],
+    "key_events": [
+      "Artie arrived at the Low-Level Crypts.",
+      "The Aggro Meter reached 100% due to the Cloak of the Cowardly Lion's glow.",
+      "Artie triggered multiple Evasion procs to survive 1 HP lethal encounters.",
+      "Artie gained the Pattern Recognition (Rank G) skill.",
+      "Artie successfully kited three skeletons using rhythmic movement."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie is Level 2 with 1/1 HP, 100% Crit Rate, and 50 Evasion.",
+      "milestone: crypt_reached = DONE",
+      "milestone: pattern_recognition_unlocked = DONE",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=back)",
+      "container: neck (owner=CHAR_ARTIE, contents=[ITEM_ID_BADGE])",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+      "container: hand_left (owner=CHAR_ARTIE, contents=[ITEM_PARTICIPATION_TROPHY])",
+      "container: back (owner=CHAR_ARTIE, contents=[ITEM_CLOAK_COWARDLY_LION])",
+      "Artie is under the 'Coward's Shame' status effect."
+    ],
+    "chapter_so_far_add": [
+      "Artie has entered the Low-Level Crypts and discovered that his data-entry background allows him to predict enemy movement patterns."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_CLOAK_COWARDLY_LION",
+          "container": "back",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_PARTICIPATION_TROPHY"
+          ]
+        },
+        {
+          "container": "back",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_CLOAK_COWARDLY_LION"
+          ]
+        }
+      ],
+      "appearance_updates": {
+        "set": {
+          "marks_add": [
+            {
+              "name": "Neon Yellow Glow",
+              "location": "torso",
+              "durability": "ephemeral"
+            }
+          ]
+        },
+        "reason": "The Cloak of the Cowardly Lion emits a constant, garish neon light."
+      },
+      "persona_updates": [],
+      "invariants_add": [],
+      "chapter": 2,
+      "scene": 4
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100,
+          "evasion": 50
+        },
+        "skills": {
+          "pattern_recognition": 1,
+          "data_entry": 4,
+          "percussive_maintenance": 2
+        },
+        "resources": {
+          "aggro_meter": 100
+        },
+        "statuses": [
+          {
+            "name": "Coward's Shame",
+            "effect": "-100 Dignity",
+            "source": "ITEM_CLOAK_COWARDLY_LION"
+          },
+          {
+            "name": "Coward's Sprint",
+            "effect": "+20% Movement Speed when fleeing",
+            "source": "ITEM_CLOAK_COWARDLY_LION"
+          },
+          {
+            "name": "Marked for Death",
+            "effect": "Aggro Magnet",
+            "source": "system"
+          },
+          {
+            "name": "Monster Beacon",
+            "effect": "High Visibility",
+            "source": "ITEM_PARTICIPATION_TROPHY"
+          }
+        ],
+        "scope_override": true,
+        "reason": "Unlocked Pattern Recognition and reached 100% Aggro in the crypts while maintaining core glitch stats."
+      },
+      "delta": {},
+      "chapter": 2,
+      "scene": 4
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "world_type": "dungeon_interior",
+        "aggro_meter": 100
+      },
+      "reason": "Artie has entered a combat-active dungeon zone."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "container": "hand_left",
+            "status": "held"
+          },
+          {
+            "item": "ITEM_CLOAK_COWARDLY_LION",
+            "container": "back",
+            "status": "equipped"
+          }
+        ],
+        "containers": [
+          {
+            "container": "neck",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_ID_BADGE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          },
+          {
+            "container": "hand_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_PARTICIPATION_TROPHY"
+            ]
+          },
+          {
+            "container": "back",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_CLOAK_COWARDLY_LION"
+            ]
+          }
+        ]
+      },
+      "reason": "Normalization of inventory posture for dungeon exploration."
+    }
+  ],
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "pale",
+      "human",
+      "male",
+      "late-20s",
+      "slight",
+      "build",
+      "unruly",
+      "short",
+      "mousy",
+      "brown",
+      "hair",
+      "hazel",
+      "eyes."
+    ],
+    "CHAR_FIZZ": [
+      "small",
+      "glowing",
+      "blue",
+      "sprite",
+      "white",
+      "eyes",
+      "neon",
+      "blue",
+      "hair",
+      "pixelated",
+      "trail."
+    ]
+  }
+}

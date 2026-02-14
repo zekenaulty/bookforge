@@ -3,23 +3,23 @@
   "character_id": "CHAR_VANE",
   "inventory": [
     {
-      "container": "hand_right",
       "item": "ITEM_OBSIDIAN_BLADE",
+      "container": "hand_right",
       "status": "held"
     }
   ],
   "containers": [
     {
       "container": "hand_right",
+      "owner": "CHAR_VANE",
       "contents": [
         "ITEM_OBSIDIAN_BLADE"
-      ],
-      "owner": "CHAR_VANE"
+      ]
     },
     {
       "container": "back_sheath",
-      "contents": [],
-      "owner": "CHAR_VANE"
+      "owner": "CHAR_VANE",
+      "contents": []
     }
   ],
   "invariants": [
@@ -80,6 +80,33 @@
         "inventory_alignment_updated"
       ],
       "notes": "Vane remains in a combat-ready posture after losing Artie in the alley."
+    },
+    {
+      "chapter": 2,
+      "scene": 7,
+      "changes": [
+        "inventory_updated",
+        "containers_updated"
+      ],
+      "persona_updates": [
+        "Vane is operating with high-level efficiency, clearing the crypt with clinical detachment and overwhelming power."
+      ],
+      "notes": "Vane is leading a party through the crypts, unaware of Artie's presence."
+    },
+    {
+      "changes": [
+        "continuity_system_state_updated"
+      ],
+      "chapter": 2,
+      "scene": 7
+    },
+    {
+      "chapter": 2,
+      "scene": 7,
+      "changes": [
+        "inventory_alignment_updated"
+      ],
+      "notes": "Vane is clearing the room with his Obsidian Blade (hand_right/held)."
     }
   ],
   "name": "Vane",
@@ -116,12 +143,10 @@
   "appearance_history": [],
   "character_continuity_system_state": {
     "stats": {
-      "agi": 70,
       "hp": {
         "current": 500,
         "max": 500
-      },
-      "str": 85
+      }
     },
     "skills": {
       "execute": 15,
@@ -135,23 +160,23 @@
       }
     ],
     "level": 45,
-    "reason": "Establishing Vane's canonical combat stats and title during his first encounter with Artie."
+    "reason": "Establishing Vane's high-level presence in the scene."
   },
   "stats": {
+    "agi": 70,
     "hp": {
       "current": 500,
       "max": 500
     },
-    "str": 85,
-    "agi": 70
+    "str": 85
   },
   "skills": {
     "execute": 15,
     "intimidate": 12
   },
-  "updated_at": "2026-02-13T10:22:59Z",
+  "updated_at": "2026-02-14T02:28:36Z",
   "last_touched": {
-    "chapter": 1,
-    "scene": 8
+    "chapter": 2,
+    "scene": 7
   }
 }

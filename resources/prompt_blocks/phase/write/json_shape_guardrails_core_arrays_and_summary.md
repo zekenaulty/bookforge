@@ -1,0 +1,13 @@
+- All *_updates arrays must contain objects; never emit bare strings as array entries.
+- JSON shape guardrails (strict, do not deviate):
+  - character_updates MUST be an array of objects.
+    - INVALID: "character_updates": {"character_id": "CHAR_X"}
+    - VALID: "character_updates": [{"character_id": "CHAR_X"}]
+  - character_continuity_system_updates MUST be an array of objects with character_id.
+    - INVALID: "character_continuity_system_updates": {"set": {...}}
+    - VALID: "character_continuity_system_updates": [{"character_id": "CHAR_X", "set": {...}}]
+  - summary_update fields must be arrays of strings.
+    - INVALID: "summary_update": {"last_scene": "text"}
+    - VALID: "summary_update": {"last_scene": ["text"], "key_events": ["..."], "must_stay_true": ["..."], "chapter_so_far_add": ["..."]}
+
+

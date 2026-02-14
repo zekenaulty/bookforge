@@ -19,3 +19,14 @@
 - The Mayor identified Artie as a 'Market Disruptor' due to his 100% Crit Rate.
 - The Mayor offered Artie protection and the 'Cloak of the Bureaucrat' in exchange for a monopoly on his crits.
 - Artie's Aggro Meter reached 92% due to the Participation Trophy's beacon effect.
+- Artie attempted to sell the Participation Trophy to Barnaby, but the transaction failed due to a soul-bound error.
+- The failed transfer caused a system shockwave, destroying Barnaby's stock and spiking Artie's Aggro Meter to 98%.
+- Artie gained the permanent status 'The Eternal Participant', making the Participation Trophy impossible to discard.
+- The merchant shop is currently under siege by aggro-crazed local entities.
+- Artie equipped the Cloak of the Cowardly Lion amidst the collapse of Barnaby's shop.
+- Artie successfully triggered multiple Evasion procs to survive attacks from aggro-crazed NPCs.
+- The merchant shop collapsed, temporarily blocking the pursuit of the mob.
+- Artie is currently fleeing through the backstreets of Oakhaven using Coward's Sprint.
+- Artie discovered that his 100% Crit Rate triggers a 'System Overload' loot glitch.
+- Artie successfully defeated a Level 4 Skeleton Archer using a single punch.
+- The loot drop from the skeleton was exponentially larger than standard due to the crit glitch.

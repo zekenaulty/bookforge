@@ -1,0 +1,211 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_VANE"
+    ],
+    "location": "Low-Level Crypts",
+    "recent_facts": [
+      "Artie hid inside a stone sarcophagus to avoid Vane's party.",
+      "Vane's party cleared the chamber with high-level efficiency but left to chase a boss-room trigger.",
+      "The neon glow of the Cloak of the Cowardly Lion nearly revealed Artie's position."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH",
+      "THREAD_VANE_RIVALRY"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_CLOAK_COWARDLY_LION",
+          "container": "back",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_ANCIENT_COPPER_COINS",
+          "container": "cloak_pockets",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_CALCIUM_SUPPLEMENT",
+          "container": "cloak_pockets",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_PARTICIPATION_TROPHY"
+          ]
+        },
+        {
+          "container": "back",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_CLOAK_COWARDLY_LION"
+          ]
+        },
+        {
+          "container": "cloak_pockets",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ANCIENT_COPPER_COINS",
+            "ITEM_CALCIUM_SUPPLEMENT"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is deeply shaken by the power gap between himself and Vane.",
+        "Artie's survival instinct is being honed by extreme, high-stakes hiding."
+      ],
+      "appearance_updates": {
+        "set": {
+          "marks_add": [
+            {
+              "name": "Neon Yellow Glow",
+              "location": "torso",
+              "durability": "ephemeral"
+            }
+          ]
+        },
+        "reason": "The cloak's neon glow is a persistent tactical liability in dark environments."
+      },
+      "invariants_add": [],
+      "chapter": 2,
+      "scene": 7
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "inventory": [
+        {
+          "item": "ITEM_OBSIDIAN_BLADE",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "CHAR_VANE",
+          "contents": [
+            "ITEM_OBSIDIAN_BLADE"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Vane prioritizes efficiency and high-level loot over investigating minor anomalies."
+      ],
+      "invariants_add": [],
+      "chapter": 2,
+      "scene": 7
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "resources": {
+          "stamina": 60
+        },
+        "reason": "Stress and tension during the hiding sequence drained Artie's stamina."
+      },
+      "delta": {},
+      "chapter": 2,
+      "scene": 7
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "aggro_meter": 98
+      },
+      "reason": "Aggro slightly decayed after Vane's party moved out of immediate range."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie hid inside a sarcophagus in the Low-Level Crypts to avoid Vane's high-level party.",
+      "The neon glow of the Cloak of the Cowardly Lion nearly exposed him, but a boss-room trigger distracted Vane.",
+      "Artie survived the encounter but remains shaken by the overwhelming power gap."
+    ],
+    "key_events": [
+      "Artie entered a sarcophagus to hide from Vane's party.",
+      "Vane's party cleared the surrounding chamber with ease.",
+      "The Cloak of the Cowardly Lion's neon glow nearly revealed Artie's location.",
+      "Vane's party abandoned the search to pursue a boss-room trigger.",
+      "Artie's stamina dropped to 60/100 due to the stress of the encounter."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie is Level 2 with 1/1 HP, 100% Crit Rate, and 64/100 Stamina.",
+      "Artie is Level 2 with 1/1 HP, 100% Crit Rate, and 60/100 Stamina.",
+      "milestone: vane_party_witnessed = DONE",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=back)",
+      "The Cloak of the Cowardly Lion emits a tactical neon yellow glow.",
+      "Vane is Level 45 with 500/500 HP and an Obsidian Greatsword."
+    ],
+    "chapter_so_far_add": [
+      "Artie witnessed the overwhelming power of a high-level party led by Vane while hiding in a sarcophagus."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "slight",
+      "build",
+      "mousy",
+      "brown",
+      "hair",
+      "neon",
+      "yellow",
+      "glow",
+      "torso."
+    ],
+    "CHAR_VANE": [
+      "tall",
+      "athletic",
+      "build",
+      "steely",
+      "grey",
+      "eyes",
+      "rank",
+      "tattoo",
+      "temple."
+    ]
+  }
+}

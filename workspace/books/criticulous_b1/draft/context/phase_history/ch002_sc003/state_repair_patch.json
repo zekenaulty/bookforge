@@ -1,0 +1,244 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "Artie snatched the Cloak of the Cowardly Lion from its pedestal as Barnaby's shop collapsed under the weight of an aggro-crazed mob.",
+      "He successfully triggered multiple evasion procs to survive lethal blows from a butcher and a thief before fleeing into the backstreets.",
+      "The Coward's Sprint passive allowed him to outrun his pursuers, though he remains a high-visibility target due to the cloak's neon glow."
+    ],
+    "key_events": [
+      "Artie equipped the Cloak of the Cowardly Lion (+50 Evasion, -100 Dignity).",
+      "Artie survived two lethal attacks via Evasion procs (50% chance) against a butcher and a thief.",
+      "The Aggro Meter remained at 99% Critical Density throughout the escape.",
+      "Artie activated the Coward's Sprint passive, increasing his movement speed by 20% while fleeing.",
+      "Barnaby's Bargains & Blunders collapsed, temporarily blocking the mob's pursuit.",
+      "Artie escaped into the backstreets of Oakhaven as a neon-yellow fugitive."
+    ],
+    "must_stay_true": [
+      "REMOVE: location: Oakhaven - Merchant Shop",
+      "REMOVE: inventory: world -> Cloak of the Cowardly Lion (status=floating, container=pedestal)",
+      "location: Oakhaven - Backstreets",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=back)",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left, soul-bound=TRUE)",
+      "Artie is Level 2 with 1/1 HP, 100% Crit Rate, and 50 Evasion.",
+      "Artie is under the 'Coward's Shame' and 'Coward's Sprint' statuses.",
+      "milestone: cloak_equipped = DONE",
+      "milestone: shop_escape_completed = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Artie acquired the Cloak of the Cowardly Lion, gaining a massive evasion boost at the cost of his dignity.",
+      "Artie escaped the collapsing merchant shop and is now a fugitive in the backstreets of Oakhaven."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "appearance_updates": {
+        "set": {
+          "marks_add": [
+            {
+              "name": "Neon Yellow Glow",
+              "location": "torso",
+              "durability": "ephemeral"
+            }
+          ]
+        },
+        "reason": "Equipping the aggressively neon Cloak of the Cowardly Lion."
+      },
+      "persona_updates": [
+        "Artie is now experiencing the mechanical reality of 'Evasion' as a physical force that moves his body against his will.",
+        "Artie feels a profound sense of shame due to the Cloak's dignity penalty, though survival remains his priority."
+      ],
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_CLOAK_COWARDLY_LION",
+          "container": "back",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_PARTICIPATION_TROPHY"
+          ]
+        },
+        {
+          "container": "back",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_CLOAK_COWARDLY_LION"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "chapter": 2,
+      "scene": 3
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "evasion": 50
+        },
+        "statuses": [
+          {
+            "name": "Coward's Shame",
+            "effect": "-100 Dignity",
+            "source": "ITEM_CLOAK_COWARDLY_LION"
+          },
+          {
+            "name": "Coward's Sprint",
+            "effect": "+20% Movement Speed when fleeing",
+            "source": "ITEM_CLOAK_COWARDLY_LION"
+          }
+        ],
+        "reason": "Equipped Cloak of the Cowardly Lion.",
+        "reason_category": "after_combat_cleanup"
+      },
+      "delta": {},
+      "chapter": 2,
+      "scene": 3
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "aggro_meter": 99
+      },
+      "reason": "Artie remains at critical aggro density due to the Participation Trophy and the neon cloak."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_CLOAK_COWARDLY_LION",
+      "set": {
+        "custodian": "CHAR_ARTIE",
+        "owner_scope": "character",
+        "last_seen": {
+          "chapter": 2,
+          "scene": 3,
+          "location": "Oakhaven - Backstreets"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_CLOAK_COWARDLY_LION",
+      "source": "world",
+      "destination": "CHAR_ARTIE",
+      "reason": "Artie snatched the cloak from the pedestal during the shop collapse.",
+      "from": {}
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "reason": "Equipping the cloak for survival and escaping the shop.",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "container": "hand_left",
+            "status": "held"
+          },
+          {
+            "item": "ITEM_CLOAK_COWARDLY_LION",
+            "container": "back",
+            "status": "equipped"
+          }
+        ],
+        "containers": [
+          {
+            "container": "neck",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_ID_BADGE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          },
+          {
+            "container": "hand_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_PARTICIPATION_TROPHY"
+            ]
+          },
+          {
+            "container": "back",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_CLOAK_COWARDLY_LION"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Oakhaven - Backstreets",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH",
+      "THREAD_VANE_RIVALRY"
+    ],
+    "recent_facts": [
+      "Artie equipped the Cloak of the Cowardly Lion amidst the collapse of Barnaby's shop.",
+      "Artie successfully triggered multiple Evasion procs to survive attacks from aggro-crazed NPCs.",
+      "The merchant shop collapsed, temporarily blocking the pursuit of the mob.",
+      "Artie is currently fleeing through the backstreets of Oakhaven using Coward's Sprint."
+    ]
+  }
+}

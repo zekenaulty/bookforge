@@ -1,0 +1,170 @@
+{
+  "schema_version": "1.0",
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 2,
+      "scene": 2,
+      "inventory": [
+        {
+          "item": "ITEM_ID_BADGE",
+          "container": "neck",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_PARTICIPATION_TROPHY",
+          "container": "hand_left",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "neck",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_ID_BADGE"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_SMARTPHONE"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_PARTICIPATION_TROPHY"
+          ]
+        }
+      ],
+      "persona_updates": [],
+      "invariants_add": [],
+      "notes": "Artie is preparing to crit the secure lock to obtain the Cloak of the Cowardly Lion while the shop is under siege."
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "resources": {
+          "aggro_meter": 98
+        }
+      },
+      "reason": "aligning aggro meter to scene constraints"
+    }
+  ],
+  "global_continuity_system_updates": [],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_ID_BADGE",
+            "container": "neck",
+            "status": "equipped"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_PARTICIPATION_TROPHY",
+            "container": "hand_left",
+            "status": "held"
+          }
+        ],
+        "containers": [
+          {
+            "container": "neck",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_ID_BADGE"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_SMARTPHONE"
+            ]
+          },
+          {
+            "container": "hand_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_PARTICIPATION_TROPHY"
+            ]
+          }
+        ]
+      },
+      "reason": "Artie is clutching the Participation Trophy while preparing to bypass the secure lock.",
+      "reason_category": "constraint_enforcement"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_CLOAK_COWARDLY_LION",
+      "set": {
+        "name": "Cloak of the Cowardly Lion",
+        "display_name": "Cloak of the Cowardly Lion",
+        "aliases": [
+          "neon yellow cloak",
+          "coward's cloak"
+        ],
+        "type": "wearable",
+        "owner_scope": "world",
+        "custodian": "world",
+        "linked_threads": [],
+        "state_tags": [
+          "secure",
+          "quest_item"
+        ],
+        "last_seen": {
+          "chapter": 2,
+          "scene": 2,
+          "location": "Oakhaven - Merchant Shop"
+        }
+      },
+      "reason": "introducing quest item for scene goal"
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "DEVICE_SECURE_LOCK",
+      "set": {
+        "name": "High-Level Shop Lock",
+        "display_name": "High-Level Shop Lock",
+        "aliases": [
+          "secure lock",
+          "shop lock"
+        ],
+        "custody_scope": "world",
+        "custody_ref": "Oakhaven - Merchant Shop",
+        "activation_state": "locked",
+        "linked_threads": [
+          "THREAD_CRIT_EXPLOIT"
+        ],
+        "constraints": [
+          "Requires high-level thievery or a glitch"
+        ],
+        "last_seen": {
+          "chapter": 2,
+          "scene": 2,
+          "location": "Oakhaven - Merchant Shop"
+        }
+      },
+      "reason": "introducing scene obstacle"
+    }
+  ],
+  "transfer_updates": []
+}

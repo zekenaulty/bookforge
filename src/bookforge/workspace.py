@@ -8,6 +8,7 @@ import shutil
 import hashlib
 from datetime import datetime, timezone
 
+from bookforge.prompt.composition import compose_prompt_templates
 from bookforge.prompt.system import write_system_prompt
 from bookforge.memory.durable_state import ensure_durable_state_files
 from bookforge.util.paths import repo_root
@@ -202,11 +203,16 @@ def _render_book_constitution(book: Dict[str, Any]) -> str:
 
 def _copy_prompt_templates(book_root: Path) -> None:
     root = repo_root(Path(__file__).resolve())
-    prompt_src = root / "resources" / "prompt_templates"
+    prompt_src = book_root / "prompts" / ".composition_build"
+    compose_prompt_templates(output_dir=prompt_src, write_reports=False, enforce_checksums=False)
+
     templates_dir = book_root / "prompts" / "templates"
     templates_dir.mkdir(parents=True, exist_ok=True)
     for name in PROMPT_TEMPLATE_FILES:
         shutil.copyfile(prompt_src / name, templates_dir / name)
+
+    if prompt_src.exists():
+        shutil.rmtree(prompt_src)
 
     registry_src = root / "resources" / "prompt_registry.json"
     (book_root / "prompts").mkdir(parents=True, exist_ok=True)

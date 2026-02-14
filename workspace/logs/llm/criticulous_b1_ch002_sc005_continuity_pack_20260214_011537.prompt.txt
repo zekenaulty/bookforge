@@ -1,0 +1,1551 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+UI gate: UI/system blocks (lines starting with '[' and ending with ']') are permitted only when scene_card.ui_allowed=true. If ui_allowed=false, do not include UI blocks even if an author persona says "always include".
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties.
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true; do not drop it unless explicitly removing a stale fact with REMOVE and restating the current truth.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v2
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements **when the System is active or the scene is set in a game world**. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, the total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+
+USER:
+
+# CONTINUITY PACK
+
+Create a continuity pack JSON object with these fields:
+- scene_end_anchor: 2-4 factual sentences about how the last scene ended (no prose).
+- constraints: list of immediate continuity constraints.
+- open_threads: list of active thread ids.
+- cast_present: list of character names present next.
+- location: location id or name.
+- next_action: the implied next action.
+- summary: echo state.summary (facts-only arrays; do not paraphrase).
+
+Return ONLY JSON.
+
+Rules:
+- Use only characters listed in scene_card.cast_present. Do not introduce new names.
+- summary must match state.summary and remain facts-only; do not add prose.
+- constraints must include the highest-priority invariants from summary.must_stay_true and summary.key_facts_ring (copy exact strings when possible).
+- constraints must include the highest-priority inventory/container invariants from summary.must_stay_true (copy exact strings when possible).
+- If character_states are provided, prefer their inventory/container facts and continuity mechanic facts; do not invent conflicting values.
+- If item_registry or plot_devices are provided, reuse canonical names/ids in constraints when referencing durable items/devices.
+- Prefer item_registry.items[].display_name for prose references; reserve item_id for canonical JSON. The display_name must be human readable and not an escaped id/name.
+- If state.global_continuity_system_state contains canonical mechanic labels/values, reuse those exact labels in constraints.
+- If scene_card.cast_present is empty, cast_present must be an empty array.
+- open_threads must be a subset of thread_registry thread_id values.
+- If scene_card.thread_ids is present, prefer those thread ids.
+- Do not invent new thread ids or character names.
+
+Scene card:
+{
+  "cast_present": [
+    "Arthur 'Artie' Penhaligon"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE"
+  ],
+  "chapter": 2,
+  "conflict": "A Skeleton Archer's arrows vs. Artie's 1 HP fragility.",
+  "constraints": [
+    "target_words: 2000",
+    "no-recaps"
+  ],
+  "continuity_system_focus": [
+    "stats",
+    "skills",
+    "resources"
+  ],
+  "device_presence": [],
+  "end_condition": "Artie successfully dodges the archer and prepares to counter-attack or move deeper.",
+  "forbidden_visible": [],
+  "goal": "Test the Cloak's evasion against a projectile and validate Pattern Recognition.",
+  "introduces": [],
+  "introduces_ids": [],
+  "ontological_scope": "real",
+  "required_callbacks": [
+    "milestone: pattern_recognition_unlocked"
+  ],
+  "required_in_custody": [
+    "ITEM_ID_BADGE",
+    "ITEM_SMARTPHONE",
+    "ITEM_PARTICIPATION_TROPHY",
+    "ITEM_CLOAK_COWARDLY_LION"
+  ],
+  "required_scene_accessible": [
+    "ITEM_CLOAK_COWARDLY_LION",
+    "ITEM_PARTICIPATION_TROPHY"
+  ],
+  "required_visible_on_page": [
+    "ITEM_CLOAK_COWARDLY_LION",
+    "ITEM_PARTICIPATION_TROPHY"
+  ],
+  "scene": 5,
+  "scene_id": "SC_002_005",
+  "scene_target": "Artie survives his first ranged encounter and gains confidence.",
+  "schema_version": "1.1",
+  "thread_ids": [],
+  "timeline_scope": "present",
+  "transition_type": "standard",
+  "ui_allowed": true,
+  "ui_mechanics_expected": [
+    "HP",
+    "Evasion",
+    "System Notification",
+    "Aggro Meter"
+  ]
+}
+
+Character registry (id -> name):
+[
+  {
+    "character_id": "CHAR_ARTIE",
+    "name": "Arthur 'Artie' Penhaligon"
+  },
+  {
+    "character_id": "CHAR_FIZZ",
+    "name": "Fizz"
+  },
+  {
+    "character_id": "CHAR_VANE",
+    "name": "Vane"
+  },
+  {
+    "character_id": "CHAR_MAYOR",
+    "name": "Mayor of Oakhaven"
+  },
+  {
+    "character_id": "CHAR_BOSS",
+    "name": "The System Administrator"
+  }
+]
+
+Thread registry:
+[
+  {
+    "label": "The 100% Crit Glitch",
+    "status": "open",
+    "thread_id": "THREAD_CRIT_EXPLOIT"
+  },
+  {
+    "label": "The Vane Vendetta",
+    "status": "open",
+    "thread_id": "THREAD_VANE_RIVALRY"
+  },
+  {
+    "label": "The System's Stability",
+    "status": "open",
+    "thread_id": "THREAD_SYSTEM_GLITCH"
+  },
+  {
+    "label": "The Path of the First Glitch",
+    "status": "open",
+    "thread_id": "THREAD_THE_ASCENSION"
+  }
+]
+
+Character states (per cast_present_ids):
+[
+  {
+    "appearance_current": {
+      "alias_map": {
+        "eye_color": [
+          "hazel",
+          "greenish-brown"
+        ],
+        "hair_color": [
+          "brown",
+          "mousy"
+        ]
+      },
+      "appearance_art": {
+        "base_prompt": "A pale human male in his late-20s with a slight build and average height, featuring unruly short mousy brown hair, hazel eyes, and a small scar on his right knuckle.",
+        "current_prompt": "A pale human male in his late-20s with a slight build and unruly short mousy brown hair, featuring a small scar on his right knuckle and a vibrant neon yellow glow emanating from his torso.",
+        "negative_prompt": "muscular, athletic, tall, beard, long hair, armor, fantasy robes, dark skin, jewelry, heavy clothing.",
+        "tags": [
+          "human",
+          "male",
+          "late-20s",
+          "slight build",
+          "mousy brown hair",
+          "hazel eyes",
+          "pale skin",
+          "scar",
+          "glowing torso"
+        ]
+      },
+      "atoms": {
+        "age_band": "late-20s",
+        "build": "slight",
+        "eye_color": "hazel",
+        "hair_color": "mousy brown",
+        "hair_style": "unruly short",
+        "height_band": "average",
+        "sex_presentation": "masculine",
+        "skin_tone": "pale",
+        "species": "human"
+      },
+      "marks": [
+        {
+          "durability": "durable",
+          "location": "right knuckle",
+          "name": "vending machine scar"
+        },
+        {
+          "durability": "ephemeral",
+          "location": "torso",
+          "name": "Neon Yellow Glow"
+        }
+      ],
+      "summary": "Artie is a pale human male in his late-20s with a slight build and average height. He features unruly short mousy brown hair and hazel eyes. A distinct, durable scar from a vending machine is located on his right knuckle."
+    },
+    "appearance_history": [
+      {
+        "changes": [
+          "appearance_updated"
+        ],
+        "chapter": 2,
+        "reason": "Equipping the aggressively neon Cloak of the Cowardly Lion.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "appearance_updated"
+        ],
+        "chapter": 2,
+        "reason": "The Cloak of the Cowardly Lion emits a constant, garish neon light.",
+        "scene": 4
+      }
+    ],
+    "appearance_projection_pending": false,
+    "character_continuity_system_state": {
+      "add": {
+        "titles": [
+          {
+            "active": false,
+            "name": "Gate-Crasher",
+            "source": "quest_reward"
+          }
+        ]
+      },
+      "reason": "Equipped Cloak of the Cowardly Lion.",
+      "reason_category": "after_combat_cleanup",
+      "resources": {
+        "aggro_meter": 100
+      },
+      "scope_override": true,
+      "skills": {
+        "data_entry": 4,
+        "pattern_recognition": 1,
+        "percussive_maintenance": 2
+      },
+      "stats": {
+        "crit_rate": 100,
+        "evasion": 50,
+        "hp": {
+          "current": 1,
+          "max": 1
+        }
+      },
+      "statuses": [
+        {
+          "effect": "-100 Dignity",
+          "name": "Coward's Shame",
+          "source": "ITEM_CLOAK_COWARDLY_LION"
+        },
+        {
+          "effect": "+20% Movement Speed when fleeing",
+          "name": "Coward's Sprint",
+          "source": "ITEM_CLOAK_COWARDLY_LION"
+        },
+        {
+          "effect": "Aggro Magnet",
+          "name": "Marked for Death",
+          "source": "system"
+        },
+        {
+          "effect": "High Visibility",
+          "name": "Monster Beacon",
+          "source": "ITEM_PARTICIPATION_TROPHY"
+        }
+      ],
+      "titles": [
+        {
+          "active": true,
+          "name": "Statistical Anomaly",
+          "source": "system_glitch"
+        },
+        {
+          "active": true,
+          "name": "Gate-Crasher",
+          "source": "quest_reward"
+        }
+      ]
+    },
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "neck",
+        "contents": [
+          "ITEM_ID_BADGE"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "pocket_right",
+        "contents": [
+          "ITEM_SMARTPHONE"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "hand_left",
+        "contents": [
+          "ITEM_PARTICIPATION_TROPHY"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "back",
+        "contents": [
+          "ITEM_CLOAK_COWARDLY_LION"
+        ],
+        "owner": "CHAR_ARTIE"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is in the breakroom, wallet in hand, ready to fight the vending machine.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Initial scene setup: Artie is holding his wallet to pay for chips.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie's final mundane thought was a regret about untasted chips."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Post-death inventory state.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie enters the void with his mundane items intact.",
+        "persona_updates": [],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie retains his Corporate ID Badge (neck, equipped) and Cracked Smartphone (pocket_right, stowed) upon entering the void.",
+        "scene": 2
+      },
+      {
+        "changes": [],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is now aware he is in a game-like system but lacks the gaming literacy to realize how dangerous a 1 HP build is."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Normalization of inventory posture upon entering the void.",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie arrives in the tutorial zone physically vulnerable and confused by his surroundings.",
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie arrives in the tutorial zone with his ID badge equipped and phone stowed.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is beginning to understand that his 'Statistical Anomaly' title is a literal warning of his fragility."
+        ],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Normalization of inventory posture upon arrival in the tutorial zone.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is cornered by the slime; preparing for the 'Statistical Anomaly' combat sequence.",
+        "persona_updates": [],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Confirming inventory posture for combat: ID badge equipped, phone stowed.",
+        "scene": 4
+      },
+      {
+        "changes": [],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is beginning to embrace the absurdity of his 'Statistical Anomaly' status and the reality-warping power of his build."
+        ],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Post-combat posture normalization.",
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie has just been awarded the Participation Trophy following the slime's vaporization.",
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is holding the newly spawned Participation Trophy in his left hand while his ID badge remains equipped and phone stowed.",
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is discovering that his high-damage build comes with extreme social and physical aggro."
+        ],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is holding the Participation Trophy while fleeing toward Oakhaven.",
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie arrives at the gates of Oakhaven, exhausted and clutching the cursed trophy.",
+        "persona_updates": [],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie reaches the gates clutching the Participation Trophy in his left hand, with his ID badge visible and phone stowed.",
+        "scene": 6
+      },
+      {
+        "changes": [],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is developing a deep resentment for the 'gambling' culture of the game world's inhabitants."
+        ],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Arrival at Oakhaven and posture normalization.",
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie arrives at the Mayor's office, still clutching the cursed trophy.",
+        "persona_updates": [],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Arrival at Mayor's office with trophy held.",
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is beginning to realize that his build makes him a political pawn as much as a glass cannon."
+        ],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Posture normalization for Mayor's office meeting.",
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is clutching the trophy as he leaves the Mayor's office and encounters Vane.",
+        "persona_updates": [
+          "Artie is feeling the pressure of the Aggro Meter as he faces Vane."
+        ],
+        "scene": 8
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 8
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Artie is holding the trophy as he exits the Mayor's office.",
+        "scene": 8
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is now fully aware that his 'Statistical Anomaly' status is a magnet for high-level aggression.",
+          "Artie has discovered that his mundane skills, like Percussive Maintenance, can have reality-warping effects in this world."
+        ],
+        "scene": 8
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 8
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "Normalization of inventory posture after the escape from Vane.",
+        "scene": 8
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "notes": "Artie enters the merchant shop clutching the Participation Trophy, hoping to offload it and lower his aggro.",
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 2,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 2,
+        "notes": "Artie enters the shop with the trophy held for sale, satisfying required_visible_on_page.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "persona_updates": [
+          "Artie is now resigned to his role as a walking lighthouse for monsters, his anxiety shifting into a grim, survivalist focus."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 2,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 2,
+        "notes": "Post-transaction inventory lock and posture normalization.",
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "notes": "Artie is preparing to crit the secure lock to obtain the Cloak of the Cowardly Lion while the shop is under siege.",
+        "persona_updates": [],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 2,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 2,
+        "notes": "Artie is clutching the Participation Trophy while preparing to bypass the secure lock.",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "persona_updates": [
+          "Artie is becoming increasingly comfortable with using his 'Anomaly' status to break physical laws."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 2,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 2,
+        "notes": "Posture normalization for shop lock bypass",
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "notes": "Artie is standing in the ruins of Barnaby's shop, clutching the soul-bound trophy while the Cloak of the Cowardly Lion floats on the nearby pedestal.",
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 2,
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 2,
+        "notes": "maintaining posture from previous scene aftermath: trophy held in left hand, ID badge equipped, phone stowed",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "appearance_updated",
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "persona_updates": [
+          "Artie is now experiencing the mechanical reality of 'Evasion' as a physical force that moves his body against his will.",
+          "Artie feels a profound sense of shame due to the Cloak's dignity penalty, though survival remains his priority."
+        ],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 2,
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 2,
+        "notes": "Equipping the cloak for survival and escaping the shop.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "persona_updates": [],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 2,
+        "notes": "Arrival at Low-Level Crypts; maintaining posture for visibility of Cloak of the Cowardly Lion (back/equipped) and Participation Trophy (hand_left/held).",
+        "scene": 4
+      },
+      {
+        "changes": [
+          "appearance_updated",
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "persona_updates": [],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 2,
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 2,
+        "notes": "Normalization of inventory posture for dungeon exploration.",
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 2,
+        "notes": "Artie: ITEM_ID_BADGE (neck/equipped), ITEM_SMARTPHONE (pocket_right/stowed), ITEM_PARTICIPATION_TROPHY (hand_left/held), ITEM_CLOAK_COWARDLY_LION (back/equipped)",
+        "scene": 5
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)"
+    ],
+    "inventory": [
+      {
+        "container": "neck",
+        "item": "ITEM_ID_BADGE",
+        "status": "equipped"
+      },
+      {
+        "container": "pocket_right",
+        "item": "ITEM_SMARTPHONE",
+        "status": "stowed"
+      },
+      {
+        "container": "hand_left",
+        "item": "ITEM_PARTICIPATION_TROPHY",
+        "status": "held"
+      },
+      {
+        "container": "back",
+        "item": "ITEM_CLOAK_COWARDLY_LION",
+        "status": "equipped"
+      }
+    ],
+    "last_touched": {
+      "chapter": 2,
+      "scene": 5
+    },
+    "name": "Arthur 'Artie' Penhaligon",
+    "schema_version": "1.0",
+    "skills": {
+      "data_entry": 4,
+      "pattern_recognition": 1,
+      "percussive_maintenance": 2
+    },
+    "stats": {
+      "crit_rate": 100,
+      "evasion": 50,
+      "hp": {
+        "current": 1,
+        "max": 1
+      }
+    },
+    "updated_at": "2026-02-14T01:10:44Z"
+  }
+]
+
+State:
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 5,
+    "status": "READY",
+    "updated_at": "2026-02-13T07:51:22Z"
+  },
+  "cursor": {
+    "chapter": 2,
+    "scene": 5
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {
+    "active_mechanics": [
+      "HP",
+      "Crit Rate",
+      "Point Buy",
+      "System Notification",
+      "Damage Number",
+      "Level Up",
+      "Aggro Meter"
+    ],
+    "aggro_meter": 100,
+    "reality_stability": 40,
+    "world_type": "dungeon_interior"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_002/scene_005.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Artie's attempt to fix his aggro problem backfired, making the Participation Trophy a permanent part of his build.",
+      "Artie successfully bypassed a high-level security lock using his crit glitch, revealing the gear he needs to survive.",
+      "Artie acquired the Cloak of the Cowardly Lion, gaining a massive evasion boost at the cost of his dignity.",
+      "Artie escaped the collapsing merchant shop and is now a fugitive in the backstreets of Oakhaven.",
+      "Artie has entered the Low-Level Crypts and discovered that his data-entry background allows him to predict enemy movement patterns."
+    ],
+    "key_facts_ring": [
+      "The lock was destroyed by a 'NaN' damage critical hit.",
+      "The Cloak of the Cowardly Lion was revealed on the pedestal.",
+      "Artie's 'Gate-Crasher' title became active.",
+      "Artie possesses the 'Gate-Crasher' title (Active).",
+      "milestones: shop_lock_vaporized and cloak_of_the_cowardly_lion_revealed are DONE.",
+      "injury: vending machine scar on right knuckle",
+      "Artie equipped the Cloak of the Cowardly Lion (+50 Evasion, -100 Dignity).",
+      "Artie survived two lethal attacks via Evasion procs (50% chance) against a butcher and a thief.",
+      "The Aggro Meter remained at 99% Critical Density throughout the escape.",
+      "Artie activated the Coward's Sprint passive, increasing his movement speed by 20% while fleeing.",
+      "Barnaby's Bargains & Blunders collapsed, temporarily blocking the mob's pursuit.",
+      "Artie escaped into the backstreets of Oakhaven as a neon-yellow fugitive.",
+      "location: Oakhaven - Backstreets",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=back)",
+      "Artie is under the 'Coward's Shame' and 'Coward's Sprint' statuses.",
+      "milestone: cloak_equipped = DONE",
+      "milestone: shop_escape_completed = DONE",
+      "Artie arrived at the Low-Level Crypts and triggered a 100% Aggro state due to his neon yellow cloak.",
+      "The Cloak of the Cowardly Lion's 'Coward's Shame' effect automated Artie's evasion against three Crypt Skirmishers.",
+      "Artie identified the skeletons' movement patterns as a 120-BPM combat script.",
+      "Artie gained the Pattern Recognition (Rank G) skill.",
+      "Artie successfully kited the skeletons using rhythmic timing, taking zero damage.",
+      "Artie is Level 2 with 1/1 HP, 100% Crit Rate, 50 Evasion, and 100% Aggro.",
+      "Artie possesses the Pattern Recognition (Rank G) skill.",
+      "milestone: pattern_recognition_unlocked = DONE"
+    ],
+    "last_scene": [
+      "Artie entered the Low-Level Crypts, where his neon yellow cloak acted as a monster beacon, pushing his Aggro Meter to 100%.",
+      "He survived an ambush by three Crypt Skirmishers through automated evasion procs and rhythmic movement.",
+      "By identifying the skeletons' predictable loops, he unlocked the Pattern Recognition skill and began treating the dungeon like a rhythm game."
+    ],
+    "must_stay_true": [
+      "milestone: run_for_your_life_completed = DONE",
+      "milestone: oakhaven_entered = DONE",
+      "Artie is under the 'Marked for Death' and 'Monster Beacon' statuses (Active).",
+      "milestone: mayor_met = DONE",
+      "inventory: CHAR_MAYOR -> Seal of Oakhaven (status=equipped, container=neck)",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=held, container=hand_right)",
+      "milestone: vane_encounter_survived = DONE",
+      "milestone: percussive_maintenance_triggered = DONE",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left, soul-bound=TRUE)",
+      "milestone: eternal_participant_status_gained = DONE",
+      "Artie possesses the 'Gate-Crasher' title (Active).",
+      "milestones: shop_lock_vaporized and cloak_of_the_cowardly_lion_revealed are DONE.",
+      "location: Oakhaven - Backstreets",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=back)",
+      "Artie is under the 'Coward's Shame' and 'Coward's Sprint' statuses.",
+      "milestone: cloak_equipped = DONE",
+      "milestone: shop_escape_completed = DONE",
+      "Artie is Level 2 with 1/1 HP, 100% Crit Rate, 50 Evasion, and 100% Aggro.",
+      "Artie possesses the Pattern Recognition (Rank G) skill.",
+      "milestone: pattern_recognition_unlocked = DONE"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": [
+      "REMOVE: container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+      "inventory: world -> Leather Wallet (status=dropped, container=floor)",
+      "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+      "milestone: artie_electrocuted = DONE",
+      "injury: vending machine scar on right knuckle",
+      "state: world_dissolving = TRUE",
+      "milestone: crit_build_finalized = DONE",
+      "REMOVE: state: world_dissolving = TRUE",
+      "state: tutorial_active = TRUE",
+      "milestone: survive_the_spawn_initiated = DONE",
+      "REMOVE: Artie confirms his stats: Level 1, 1/1 HP, and 100% Crit Rate.",
+      "REMOVE: Artie successfully dodges the slime's first leap, consuming 5 stamina.",
+      "REMOVE: Artie is cornered against a thicket of thorns as the slime prepares a second lunge.",
+      "Artie is Level 2 with 1/1 HP and 100% Crit Rate.",
+      "milestones: lesser_puddle_slime_defeated and tutorial_level_up_reached are DONE.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+      "Artie is currently under the 'Marked for Death' and 'Monster Beacon' statuses.",
+      "milestone: lesser_puddle_slime_defeated = DONE",
+      "milestone: tutorial_level_up_reached = DONE",
+      "REMOVE: Artie's stamina dropped to 60/100 during the chase.",
+      "REMOVE: state: tutorial_active = TRUE",
+      "REMOVE: Artie is currently under the 'Marked for Death' and 'Monster Beacon' statuses.",
+      "milestone: run_for_your_life_completed = DONE",
+      "milestone: oakhaven_entered = DONE",
+      "Artie possesses the 'Gate-Crasher' title (Inactive).",
+      "Artie is under the 'Marked for Death' and 'Monster Beacon' statuses (Active).",
+      "location: Oakhaven Gatehouse Interior",
+      "REMOVE: location: Oakhaven Gatehouse Interior",
+      "location: Oakhaven - Mayor's Office",
+      "Artie's Aggro Meter is at 92% and rising due to the Participation Trophy.",
+      "milestone: mayor_met = DONE",
+      "inventory: CHAR_MAYOR -> Seal of Oakhaven (status=equipped, container=neck)",
+      "REMOVE: location: Oakhaven - Mayor's Office",
+      "REMOVE: Artie's Aggro Meter is at 92% and rising due to the Participation Trophy.",
+      "location: Oakhaven - Residential Backstreet",
+      "Artie's Aggro Meter is at 94% and cooling down after escaping Vane.",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=held, container=hand_right)",
+      "milestone: vane_encounter_survived = DONE",
+      "milestone: percussive_maintenance_triggered = DONE"
+    ]
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "Low-Level Crypts",
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH",
+      "THREAD_VANE_RIVALRY"
+    ],
+    "recent_facts": [
+      "Artie equipped the Cloak of the Cowardly Lion amidst the collapse of Barnaby's shop.",
+      "Artie successfully triggered multiple Evasion procs to survive attacks from aggro-crazed NPCs.",
+      "The merchant shop collapsed, temporarily blocking the pursuit of the mob.",
+      "Artie is currently fleeing through the backstreets of Oakhaven using Coward's Sprint."
+    ],
+    "time": {}
+  }
+}
+
+Summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie's attempt to fix his aggro problem backfired, making the Participation Trophy a permanent part of his build.",
+    "Artie successfully bypassed a high-level security lock using his crit glitch, revealing the gear he needs to survive.",
+    "Artie acquired the Cloak of the Cowardly Lion, gaining a massive evasion boost at the cost of his dignity.",
+    "Artie escaped the collapsing merchant shop and is now a fugitive in the backstreets of Oakhaven.",
+    "Artie has entered the Low-Level Crypts and discovered that his data-entry background allows him to predict enemy movement patterns."
+  ],
+  "key_facts_ring": [
+    "The lock was destroyed by a 'NaN' damage critical hit.",
+    "The Cloak of the Cowardly Lion was revealed on the pedestal.",
+    "Artie's 'Gate-Crasher' title became active.",
+    "Artie possesses the 'Gate-Crasher' title (Active).",
+    "milestones: shop_lock_vaporized and cloak_of_the_cowardly_lion_revealed are DONE.",
+    "injury: vending machine scar on right knuckle",
+    "Artie equipped the Cloak of the Cowardly Lion (+50 Evasion, -100 Dignity).",
+    "Artie survived two lethal attacks via Evasion procs (50% chance) against a butcher and a thief.",
+    "The Aggro Meter remained at 99% Critical Density throughout the escape.",
+    "Artie activated the Coward's Sprint passive, increasing his movement speed by 20% while fleeing.",
+    "Barnaby's Bargains & Blunders collapsed, temporarily blocking the mob's pursuit.",
+    "Artie escaped into the backstreets of Oakhaven as a neon-yellow fugitive.",
+    "location: Oakhaven - Backstreets",
+    "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=back)",
+    "Artie is under the 'Coward's Shame' and 'Coward's Sprint' statuses.",
+    "milestone: cloak_equipped = DONE",
+    "milestone: shop_escape_completed = DONE",
+    "Artie arrived at the Low-Level Crypts and triggered a 100% Aggro state due to his neon yellow cloak.",
+    "The Cloak of the Cowardly Lion's 'Coward's Shame' effect automated Artie's evasion against three Crypt Skirmishers.",
+    "Artie identified the skeletons' movement patterns as a 120-BPM combat script.",
+    "Artie gained the Pattern Recognition (Rank G) skill.",
+    "Artie successfully kited the skeletons using rhythmic timing, taking zero damage.",
+    "Artie is Level 2 with 1/1 HP, 100% Crit Rate, 50 Evasion, and 100% Aggro.",
+    "Artie possesses the Pattern Recognition (Rank G) skill.",
+    "milestone: pattern_recognition_unlocked = DONE"
+  ],
+  "last_scene": [
+    "Artie entered the Low-Level Crypts, where his neon yellow cloak acted as a monster beacon, pushing his Aggro Meter to 100%.",
+    "He survived an ambush by three Crypt Skirmishers through automated evasion procs and rhythmic movement.",
+    "By identifying the skeletons' predictable loops, he unlocked the Pattern Recognition skill and began treating the dungeon like a rhythm game."
+  ],
+  "must_stay_true": [
+    "milestone: run_for_your_life_completed = DONE",
+    "milestone: oakhaven_entered = DONE",
+    "Artie is under the 'Marked for Death' and 'Monster Beacon' statuses (Active).",
+    "milestone: mayor_met = DONE",
+    "inventory: CHAR_MAYOR -> Seal of Oakhaven (status=equipped, container=neck)",
+    "inventory: CHAR_VANE -> Obsidian Greatsword (status=held, container=hand_right)",
+    "milestone: vane_encounter_survived = DONE",
+    "milestone: percussive_maintenance_triggered = DONE",
+    "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left, soul-bound=TRUE)",
+    "milestone: eternal_participant_status_gained = DONE",
+    "Artie possesses the 'Gate-Crasher' title (Active).",
+    "milestones: shop_lock_vaporized and cloak_of_the_cowardly_lion_revealed are DONE.",
+    "location: Oakhaven - Backstreets",
+    "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=back)",
+    "Artie is under the 'Coward's Shame' and 'Coward's Sprint' statuses.",
+    "milestone: cloak_equipped = DONE",
+    "milestone: shop_escape_completed = DONE",
+    "Artie is Level 2 with 1/1 HP, 100% Crit Rate, 50 Evasion, and 100% Aggro.",
+    "Artie possesses the Pattern Recognition (Rank G) skill.",
+    "milestone: pattern_recognition_unlocked = DONE"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": [
+    "REMOVE: container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_SMARTPHONE])",
+    "inventory: world -> Leather Wallet (status=dropped, container=floor)",
+    "inventory: CHAR_ARTIE -> Corporate ID Badge (status=equipped, container=neck)",
+    "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pocket_right)",
+    "milestone: artie_electrocuted = DONE",
+    "injury: vending machine scar on right knuckle",
+    "state: world_dissolving = TRUE",
+    "milestone: crit_build_finalized = DONE",
+    "REMOVE: state: world_dissolving = TRUE",
+    "state: tutorial_active = TRUE",
+    "milestone: survive_the_spawn_initiated = DONE",
+    "REMOVE: Artie confirms his stats: Level 1, 1/1 HP, and 100% Crit Rate.",
+    "REMOVE: Artie successfully dodges the slime's first leap, consuming 5 stamina.",
+    "REMOVE: Artie is cornered against a thicket of thorns as the slime prepares a second lunge.",
+    "Artie is Level 2 with 1/1 HP and 100% Crit Rate.",
+    "milestones: lesser_puddle_slime_defeated and tutorial_level_up_reached are DONE.",
+    "inventory: CHAR_ARTIE -> Participation Trophy (status=held, container=hand_left)",
+    "Artie is currently under the 'Marked for Death' and 'Monster Beacon' statuses.",
+    "milestone: lesser_puddle_slime_defeated = DONE",
+    "milestone: tutorial_level_up_reached = DONE",
+    "REMOVE: Artie's stamina dropped to 60/100 during the chase.",
+    "REMOVE: state: tutorial_active = TRUE",
+    "REMOVE: Artie is currently under the 'Marked for Death' and 'Monster Beacon' statuses.",
+    "milestone: run_for_your_life_completed = DONE",
+    "milestone: oakhaven_entered = DONE",
+    "Artie possesses the 'Gate-Crasher' title (Inactive).",
+    "Artie is under the 'Marked for Death' and 'Monster Beacon' statuses (Active).",
+    "location: Oakhaven Gatehouse Interior",
+    "REMOVE: location: Oakhaven Gatehouse Interior",
+    "location: Oakhaven - Mayor's Office",
+    "Artie's Aggro Meter is at 92% and rising due to the Participation Trophy.",
+    "milestone: mayor_met = DONE",
+    "inventory: CHAR_MAYOR -> Seal of Oakhaven (status=equipped, container=neck)",
+    "REMOVE: location: Oakhaven - Mayor's Office",
+    "REMOVE: Artie's Aggro Meter is at 92% and rising due to the Participation Trophy.",
+    "location: Oakhaven - Residential Backstreet",
+    "Artie's Aggro Meter is at 94% and cooling down after escaping Vane.",
+    "inventory: CHAR_VANE -> Obsidian Greatsword (status=held, container=hand_right)",
+    "milestone: vane_encounter_survived = DONE",
+    "milestone: percussive_maintenance_triggered = DONE"
+  ]
+}
+
+Recent facts:
+[
+  "The lock was destroyed by a 'NaN' damage critical hit.",
+  "The Cloak of the Cowardly Lion was revealed on the pedestal.",
+  "Artie's 'Gate-Crasher' title became active.",
+  "Artie possesses the 'Gate-Crasher' title (Active).",
+  "milestones: shop_lock_vaporized and cloak_of_the_cowardly_lion_revealed are DONE.",
+  "injury: vending machine scar on right knuckle",
+  "Artie equipped the Cloak of the Cowardly Lion (+50 Evasion, -100 Dignity).",
+  "Artie survived two lethal attacks via Evasion procs (50% chance) against a butcher and a thief.",
+  "The Aggro Meter remained at 99% Critical Density throughout the escape.",
+  "Artie activated the Coward's Sprint passive, increasing his movement speed by 20% while fleeing.",
+  "Barnaby's Bargains & Blunders collapsed, temporarily blocking the mob's pursuit.",
+  "Artie escaped into the backstreets of Oakhaven as a neon-yellow fugitive.",
+  "location: Oakhaven - Backstreets",
+  "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=back)",
+  "Artie is under the 'Coward's Shame' and 'Coward's Sprint' statuses.",
+  "milestone: cloak_equipped = DONE",
+  "milestone: shop_escape_completed = DONE",
+  "Artie arrived at the Low-Level Crypts and triggered a 100% Aggro state due to his neon yellow cloak.",
+  "The Cloak of the Cowardly Lion's 'Coward's Shame' effect automated Artie's evasion against three Crypt Skirmishers.",
+  "Artie identified the skeletons' movement patterns as a 120-BPM combat script.",
+  "Artie gained the Pattern Recognition (Rank G) skill.",
+  "Artie successfully kited the skeletons using rhythmic timing, taking zero damage.",
+  "Artie is Level 2 with 1/1 HP, 100% Crit Rate, 50 Evasion, and 100% Aggro.",
+  "Artie possesses the Pattern Recognition (Rank G) skill.",
+  "milestone: pattern_recognition_unlocked = DONE"
+]
+Item registry (canonical):
+{
+  "items": [
+    {
+      "aliases": [
+        "neon yellow cloak",
+        "coward's cloak"
+      ],
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Cloak of the Cowardly Lion",
+      "item_id": "ITEM_CLOAK_COWARDLY_LION",
+      "last_seen": {
+        "chapter": 2,
+        "location": "Low-Level Crypts",
+        "scene": 4
+      },
+      "linked_threads": [
+        "THREAD_CRIT_EXPLOIT"
+      ],
+      "name": "Cloak of the Cowardly Lion",
+      "owner_scope": "character",
+      "state_tags": [
+        "high_evasion",
+        "dignity_penalty",
+        "neon_yellow",
+        "quest_item"
+      ],
+      "type": "armor"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Corporate ID Badge",
+      "item_id": "ITEM_ID_BADGE",
+      "last_seen": {
+        "chapter": 2,
+        "location": "Low-Level Crypts",
+        "scene": 4
+      },
+      "linked_threads": [],
+      "name": "Corporate ID Badge",
+      "owner_scope": "character",
+      "state_tags": [
+        "mundane"
+      ],
+      "type": "accessory"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Participation Trophy",
+      "item_id": "ITEM_PARTICIPATION_TROPHY",
+      "last_seen": {
+        "chapter": 2,
+        "location": "Low-Level Crypts",
+        "scene": 4
+      },
+      "linked_threads": [
+        "THREAD_SYSTEM_GLITCH"
+      ],
+      "name": "Participation Trophy",
+      "owner_scope": "character",
+      "state_tags": [
+        "cursed",
+        "monster_beacon",
+        "soul-bound"
+      ],
+      "type": "cursed_item"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Cracked Smartphone",
+      "item_id": "ITEM_SMARTPHONE",
+      "last_seen": {
+        "chapter": 2,
+        "location": "Low-Level Crypts",
+        "scene": 4
+      },
+      "linked_threads": [],
+      "name": "Cracked Smartphone",
+      "owner_scope": "character",
+      "state_tags": [
+        "mundane",
+        "damaged"
+      ],
+      "type": "device"
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Plot devices (canonical):
+{
+  "devices": [
+    {
+      "activation_state": "active",
+      "constraints": [],
+      "custody_ref": "THREAD_CRIT_EXPLOIT",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Oakhaven - Mayor's Office",
+        "scene": 7
+      },
+      "linked_threads": [
+        "THREAD_CRIT_EXPLOIT"
+      ],
+      "name": "The 100% Crit Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_THE_ASCENSION",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_path_of_the_first_glitch_c7dd4581",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_THE_ASCENSION"
+      ],
+      "name": "The Path of the First Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_SYSTEM_GLITCH",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_system_s_stability_da5be7b7",
+      "last_seen": {
+        "chapter": 1,
+        "location": "Oakhaven - Mayor's Office",
+        "scene": 7
+      },
+      "linked_threads": [
+        "THREAD_SYSTEM_GLITCH"
+      ],
+      "name": "The System's Stability",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_VANE_RIVALRY",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_vane_vendetta_bcf4bea1",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_VANE_RIVALRY"
+      ],
+      "name": "The Vane Vendetta",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    }
+  ],
+  "schema_version": "1.0"
+}

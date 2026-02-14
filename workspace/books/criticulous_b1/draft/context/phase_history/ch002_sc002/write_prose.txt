@@ -1,0 +1,52 @@
+The front window of Barnaby’s Bargains & Blunders didn't just break; it detonated inward in a spray of enchanted glass that hummed with a low, dissonant frequency. Outside, the street was a churning sea of low-level Goblins and agitated Town Guards, all of them drawn by the invisible, screaming siren of Artie’s presence.
+
+[Aggro Meter: 98%] (MAXIMUM PROXIMITY ALERT)
+
+The bar at the top of Artie’s vision wasn't just red anymore. It was a violent, throbbing violet, pulsing in time with the frantic beat of his heart. Every time it flashed, a new thud echoed against the reinforced oak of the shop’s rear door.
+
+"Artie, we really, really need to go!" Fizz shrieked, her neon blue hair flickering so fast she looked like a strobe light in a blender. Her diminutive form zipped around his head, leaving a pixelated trail that smelled faintly of ozone and desperate math. "The System is literally spawning mobs in the alleyway just to fill the density requirements for your aggro signature!"
+
+Artie ignored her, his eyes locked on the heavy iron pedestal at the center of the room. In his left hand, the Participation Trophy felt impossibly heavy, its gold-plated surface warm and vibrating with the 'Monster Beacon' status that had turned his life into a nightmare. He shifted his grip, his thumb brushing the vending machine scar on his right knuckle—a souvenir from the mundane world that felt like a lifetime ago.
+
+"The cloak," Artie wheezed, his slight build trembling under the weight of the collective hatred of Oakhaven. "Fizz, if I don't get that cloak, I'm just a one-hit-point wonder waiting for a stray breeze to delete me."
+
+He stepped toward the pedestal. Resting atop it was a glass case reinforced with bands of shimmering, ethereal silver. Inside, a garment of neon yellow fur sat like a neon middle finger to the concept of stealth. This was the Cloak of the Cowardly Lion. 
+
+[Object: High-Level Shop Lock]
+[Status: Secure]
+[Requirement: Lvl 50 Thievery OR Master Key]
+
+"It’s a Level 50 lock, Artie!" Fizz hovered in front of the silver bands, her translucent blue skin glowing with alarm. "You’re Level 2! Your Thievery skill is literally 'Non-Existent'! If you touch that, the security feedback will vaporize your last health point before you can even say 'oops'!"
+
+"I'm not going to pick it," Artie said, pulling back his right fist. He felt the familiar, glitchy hum in his veins—the absolute, mathematical certainty of the Statistical Anomaly. "I'm going to apply some data entry logic. If the input is forceful enough, the system has to accept the result."
+
+[Crit Rate: 100%] (Locked)
+
+Another boom shook the shop. A green, clawed hand forced its way through the shattered front window, grasping blindly at the air. The Aggro Meter spiked, the violet bar now bleeding into a static-filled black.
+
+[Aggro Meter: 99%] (CRITICAL DENSITY REACHED)
+
+"Artie, don't!"
+
+"Percussive Maintenance!" Artie yelled, throwing his fist forward.
+
+He didn't aim for the glass. He aimed for the very center of the High-Level Shop Lock, the point where the silver bands met the iron pedestal. As his knuckle made contact, the world didn't just register a hit. It registered a catastrophe.
+
+[CRITICAL HIT!]
+[Damage: NaN]
+[System Error: Integer Overflow detected in 'Physical Resistance' calculation.]
+
+The sound wasn't a crash. It was the sound of a thousand crystal flutes being dropped into a jet engine. A blinding flash of gold light erupted from the point of impact, expanding outward in a perfect sphere. Artie felt the air get sucked out of the room as the System struggled to reconcile a Level 2 punch delivering an infinite amount of damage to a Level 50 security measure.
+
+The High-Level Shop Lock didn't break. It ceased to be a solid object. It dissolved into a shimmering cloud of gold dust, the silver bands twisting into liquid light before evaporating into the ceiling. The shockwave blew the encroaching Goblin back through the window and sent the shop’s remaining shelves clattering to the floor.
+
+As the dust settled, the glass case was gone. The pedestal was scorched. And there, floating in the center of a fading golden haze, was the Cloak of the Cowardly Lion, its neon yellow fur ruffling in the sudden vacuum.
+
+[System Notification: 'High-Level Shop Lock' has been removed from reality.]
+[Title Progress: 'Gate-Crasher' (Active)]
+
+Artie stood there, his hand still extended, his chest heaving. The golden dust coated his rumpled dress shirt like expensive glitter. 
+
+"Did... did you just delete the lock?" Fizz whispered, her eyes wide and white.
+
+Artie didn't answer. He just stared at the cloak, the only thing standing between him and the 99% aggro nightmare currently clawing at the back door.

@@ -1,0 +1,34 @@
+- Update operations use set/delta/remove/reason.
+- Dynamic mechanic families are allowed (stats, skills, titles, resources, effects, statuses, classes, custom systems).
+- titles must be arrays of objects with stable `name` fields, never arrays of strings.
+- Durable-state updates are authoritative and must be explicit in patch blocks.
+- If inventory posture is changed for scene fit, include `inventory_alignment_updates` with `reason` and `reason_category`.
+- If you emit inventory_alignment_updates, the reason MUST state the final posture (item + container + status) so downstream phases can reconcile must_stay_true. Do not omit posture intent.
+- `inventory_alignment_updates` must be an array of objects; do not wrap it in an object with an `updates` key.
+- If durable item custody or metadata changes, include `item_registry_updates` and/or `transfer_updates`.
+- Every `transfer_updates` entry must include `item_id` and `reason` (non-empty string).
+- If plot-device custody or activation changes, include `plot_device_updates`.
+- Never rely on prose implication for durable state mutation.
+- All *_updates arrays must contain objects; never emit bare strings as array entries.
+- character_updates.containers must be an array of objects with at least: container, owner, contents (array).
+- Transfer vs registry conflict rule (must follow):
+  - If you create a NEW item in item_registry_updates with final custodian already set (e.g., CHAR_ARTIE), DO NOT emit transfer_updates for that item.
+  - If you emit transfer_updates for a NEW item, the registry entry must start with custodian="world" and then transfer to the character.
+  - expected_before must match the registry entry at the moment of transfer (after any registry update that applies before it).- Safety check for non-trivial changes:
+  - When making a DISCONTINUOUS TRANSITION change that moves an item between containers, changes custody, or toggles a plot device:
+    - include expected_before with the minimal prior snapshot you are relying on (e.g., prior container/status/custodian).
+    - if expected_before does not match current state, prefer leaving unchanged and note the discrepancy in notes.
+- Patch coupling rule:
+  - If you emit inventory_alignment_updates for a character, you MUST also emit character_updates for that character with the final authoritative inventory/containers for this scene.
+  - The inventory arrays in both places should match (alignment is the justification record; character_updates is the durable state).
+- reason_category vocabulary (use one):
+  - continuity_fix
+  - constraint_enforcement
+  - location_transition
+  - time_skip
+  - scope_shift
+  - equipment_posture
+  - custody_transfer
+  - plot_device_state
+
+
