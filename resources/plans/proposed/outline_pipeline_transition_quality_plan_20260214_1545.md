@@ -27,6 +27,10 @@ The following refinements are adopted as hard requirements for v2.1:
 6. Transition realization hardening uses `transition_in_text` + `transition_in_anchors` for deterministic write/lint checks.
 7. User-visible surfacing and run-report visibility are mandatory; downgrade/skip/fail states cannot be artifact-only.
 8. Retry/stop behavior is explicit and deterministic; auto-retry is bounded and reason-scoped.
+9. Default scene-count mode for outline runs is `strong_non_exact`; exact mode is opt-in via explicit flag.
+10. Budget policy is biased toward giving seam resolution enough room before escalation.
+11. Strict mode is hard-block by default for error-level attention items; `ack` override does not bypass strict hard blocks.
+12. `ack` override applies to `bookforge run` only (no outline->run chaining behavior is assumed in v2.1).
 
 ## Problem Statement
 Current improvements solve graph-level continuity better than before, but they do not reliably force rendered transition handoffs in prose.
@@ -194,7 +198,7 @@ If none apply, resolver must downgrade to `inline_bridge`.
 
 ### Insertion budget safeguard
 Default:
-1. Max 1 inserted transition scene per chapter.
+1. Max 2 inserted transition scenes per chapter (v2.1 default breathing-room policy).
 
 Configurable:
 1. strict mode can increase budget.
@@ -363,16 +367,19 @@ No change in shape; ensure transition validation errors map cleanly into reason-
    - write required summary/attention fields for visibility contract
 
 ## CLI/Config Additions (Planned)
-1. `--transition-insert-budget-per-chapter <int>` (default 1)
+1. `--transition-insert-budget-per-chapter <int>` (default 2)
 2. `--strict-transition-bridges` (promote seam lint to error)
 3. `--allow-transition-scene-insertions` (default true)
 4. optional `--max-seam-score-inline <int>` override threshold
 5. exact-mode insertion behavior lock:
-   - default: insertions disabled in exact mode,
+   - default outline mode is `strong_non_exact` (not exact),
+   - exact-mode insertions are disabled by default,
    - explicit override flag (future, optional) is not part of v2.1 implementation scope.
 6. write gate override flag:
-   - `--ack-outline-attention-items` allows `bookforge run` to proceed when outline report requires user attention.
+   - `--ack-outline-attention-items` allows `bookforge run` to proceed when outline report has non-strict attention items.
    - default behavior without override is hard stop before writing.
+   - docs/help must define `ack` explicitly as: "operator reviewed attention items and accepts proceeding despite them."
+   - scope: `ack` is evaluated on `bookforge run` only; no chained outline->write command path is assumed in v2.1.
 
 All active mode values must be logged in run metadata.
 
@@ -416,10 +423,12 @@ For every run, write `outline_pipeline_report.json` with required summary keys:
 
 ### Attention severity policy
 1. Non-strict mode:
-   - `blocked_by_budget` becomes user-attention when any blocked seam score is `>=55`.
+   - `blocked_by_budget` becomes user-attention when any blocked seam score is `>=70`.
+   - severity defaults to warning unless strict mode is enabled.
 2. Strict mode:
-   - any blocked seam score `>=55` is an error-level attention item.
+   - any blocked seam score `>=70` is an error-level attention item.
    - any insertion-required seam blocked by budget is an error-level attention item.
+   - error-level attention items are hard-block conditions for downstream writing.
 
 ## Write Gate Contract (No Silent Continuation)
 `bookforge run` must read the latest outline pipeline report before writing scene prose.
@@ -428,8 +437,10 @@ Required behavior:
 1. If `requires_user_attention=false`, proceed normally.
 2. If `requires_user_attention=true`:
    - print the same short attention summary and reason codes to console,
-   - stop before writing unless `--ack-outline-attention-items` is provided.
+   - strict mode: stop before writing; `--ack-outline-attention-items` is ignored for strict error-level attention items.
+   - non-strict mode: stop before writing unless `--ack-outline-attention-items` is provided.
 3. Override usage (`--ack-outline-attention-items`) must be logged in run metadata and report.
+4. `ack` gate handling is implemented on `bookforge run` only; no command chaining assumptions.
 
 ## Retry and Stop Contract (Deterministic)
 ### Within-phase auto-retry (LLM retry)
@@ -449,6 +460,61 @@ Required behavior:
 ### Fail-loud rules
 1. Exact mode conflicts must fail with `exact_scene_count_transition_conflict`.
 2. Failure summaries must include affected seam refs and reason codes in console + report.
+
+## Outline Reset/Archive Planning Contract (Clean Test Reruns)
+Goal: provide a safe, deterministic way to archive/reset outline state for clean reruns without accidental stale-state carryover.
+
+### Required behavior
+1. Add outline-specific archive/reset flow independent of draft scene reset.
+2. Default behavior preserves source outline inputs while clearing generated outline pipeline state.
+3. Reset/archive must be deterministic, logged, and reversible via archive bundle.
+
+### Planned command surface
+1. `bookforge outline reset --book <id> --archive`
+2. Optional control flags:
+   - `--keep-working-outline-artifacts` (default false)
+   - `--clear-generated-outline` (default true)
+   - `--clear-pipeline-runs` (default true)
+   - `--dry-run`
+   - `--force`
+3. Future restore helper:
+   - `bookforge outline restore --book <id> --archive-path <path>`
+
+### Archive bundle contract
+1. Store bundle under:
+   - `workspace/books/<book_id>/outline/archive/<timestamp>/`
+2. Include:
+   - archived outline files,
+   - archived pipeline run state,
+   - checksum manifest,
+   - reset operation metadata (who/when/flags/reason).
+3. Never perform destructive reset without archive manifest when `--archive` is requested.
+
+### Clean-reset scope (default)
+1. Clear working outline artifacts after archive:
+   - `workspace/books/<book_id>/outline/outline.json`
+   - `workspace/books/<book_id>/outline/chapters/*.json`
+   - `workspace/books/<book_id>/outline/characters.json`
+   - `workspace/books/<book_id>/outline/threads.json`
+   - additional non-system outline artifacts in working outline directory (including manually created files such as `outline.original.json`) unless keep flag is enabled.
+2. Clear orchestration state:
+   - `workspace/books/<book_id>/outline/pipeline_runs/*`
+   - latest pointers/pause markers/report files tied to prior run state.
+3. Preserve archive bundle directory and reset reports.
+4. Emit post-reset report with exact cleared/preserved paths.
+
+### Keep-working behavior
+1. When `--keep-working-outline-artifacts` is enabled:
+   - files are retained in place after archive,
+   - managed outputs remain non-authoritative after reset marker write,
+   - next outline generation run overwrites managed output targets deterministically.
+2. Retained unmanaged files must not be used as implicit input unless explicitly referenced by command arguments.
+
+### Safety controls
+1. Reset is blocked when an outline run lock is active unless `--force`.
+2. `--dry-run` prints planned clear/preserve/archive actions with no file mutation.
+3. Help docs must include explicit warning about data removal scope and archive path.
+4. Help docs must explicitly call out that manually created outline files are archived and removed by default unless keep flag is set.
 
 ## Resume and Determinism Considerations
 1. seam scoring and insertion decisions must be deterministic for unchanged fingerprints.
@@ -484,11 +550,21 @@ Required behavior:
 11. Visibility summary:
    - console summary is always printed and includes mode values + seam counters + top seam decisions.
 12. Attention gate:
-   - `requires_user_attention=true` blocks `bookforge run` unless `--ack-outline-attention-items` is provided.
+   - strict mode blocks by default for error-level attention; non-strict mode requires `--ack-outline-attention-items` to continue.
 13. Retry contract:
    - validator-bounded retry only; max two attempts; no subjective auto-retry.
 14. Fail-loud reporting:
    - exact-mode conflicts and budget-blocked high-seam cases are visible in console and `outline_pipeline_report.json`.
+15. Scene-count default mode:
+   - default is `strong_non_exact`; exact mode is opt-in only.
+16. Outline reset/archive dry-run:
+   - reset command must provide no-mutation dry-run output listing preserve/clear/archive actions.
+17. Outline reset/archive integrity:
+   - reset with archive writes archive manifest and post-reset report with exact file-path accounting.
+18. Keep-working override behavior:
+   - with `--keep-working-outline-artifacts`, retained files are non-authoritative and managed outputs are deterministically overwritten on next run.
+19. Ack scope behavior:
+   - `--ack-outline-attention-items` is recognized on `bookforge run` only; strict error-level attention remains hard-block.
 
 ## Immediate Pilot Target (Criticulous Chapter 1)
 Target seam:
@@ -533,6 +609,12 @@ Expected v2.1 behavior:
 3. implement `bookforge run` pre-write attention gate with explicit override flag.
 4. add retry-policy tests (bounded fix-list retries only).
 
+### WP8 - Outline archive/reset controls
+1. implement `bookforge outline reset --archive` command flow with dry-run and force controls.
+2. implement archive manifest + post-reset report generation.
+3. implement preserve/clear path policy exactly as contracted, including keep-working behavior.
+4. add help-doc updates for reset scope, manual-file treatment, and `ack` override semantics/scope.
+
 ## Progress Tracker (v2.1)
 Status key: `pending`, `in_progress`, `completed`, `blocked`.
 
@@ -549,8 +631,11 @@ Status key: `pending`, `in_progress`, `completed`, `blocked`.
 11. reviewer follow-up clarifications (non-exact insertion allowance, no auto-repair in phase 03, optional field omission rule, explicit opening-span scope): `completed`
 12. visibility contract (console + report + attention items): `completed`
 13. retry/stop contract and write-gate policy: `completed`
+14. user policy integration (default strong-non-exact, budget breathing room, ack docs clarity): `completed`
+15. outline reset/archive planning contract (plan-only): `completed`
+16. strict hard-block + ack scope + keep-working reset policy integration: `completed`
 
 ## Review Questions for Next Iteration
 1. Should exact-mode insertion remain disabled beyond v2.1, or do we schedule compensating merge/removal strategy in v2.2?
-2. Is default insertion budget of 1 per chapter sufficient after chapter-1 and chapter-2 pilots?
+2. Is default insertion budget of 2 per chapter sufficient after chapter-1 and chapter-2 pilots?
 3. Should `micro_scene` and `full_scene` length targets remain soft targets, or become hard enforcement in strict mode?
