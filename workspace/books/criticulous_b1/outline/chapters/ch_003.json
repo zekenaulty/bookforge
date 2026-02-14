@@ -1,12 +1,12 @@
 {
   "chapter_id": 3,
   "title": "Math-Boss vs. The Glitch",
-  "goal": "Survive the Floor Guardian and secure the first major loot drop.",
+  "goal": "Defeat the Floor Guardian and secure the first major loot drop of the series.",
   "chapter_role": "pressure",
-  "stakes_shift": "If Artie wins, he becomes the first Level 10 'Anomaly'; if he loses, it's Game Over.",
+  "stakes_shift": "Artie transitions from a lucky survivor to a Level 10 'Anomaly' with a reputation for breaking bosses.",
   "bridge": {
-    "from_prev": "The Bone Golem is ready to smash Artie.",
-    "to_next": "Artie leaves the crypts with a legendary-tier item that he can't actually use yet."
+    "from_prev": "The Bone Golem is summoned, forcing Artie into a fight he isn't built for.",
+    "to_next": "Artie flees the crypts with legendary-tier items and a high-level rival on his heels."
   },
   "pacing": {
     "intensity": 5,
@@ -26,7 +26,8 @@
           "outcome": "The Golem's armor is shattered, but Artie is running out of stamina.",
           "characters": [
             "CHAR_ARTIE"
-          ]
+          ],
+          "hands_off_to": "3:2"
         },
         {
           "scene_id": 2,
@@ -36,7 +37,9 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "consumes_outcome_from": "3:1",
+          "hands_off_to": "3:3"
         },
         {
           "scene_id": 3,
@@ -45,7 +48,10 @@
           "outcome": "The floor collapses, trapping the Golem in a hole.",
           "characters": [
             "CHAR_ARTIE"
-          ]
+          ],
+          "consumes_outcome_from": "3:2",
+          "end_condition_echo": "Artie collapses the floor, trapping the Golem in a physics glitch.",
+          "hands_off_to": "3:4"
         }
       ]
     },
@@ -62,7 +68,9 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "consumes_outcome_from": "3:3",
+          "hands_off_to": "3:5"
         },
         {
           "scene_id": 5,
@@ -74,7 +82,9 @@
           ],
           "threads": [
             "THREAD_CRIT_EXPLOIT"
-          ]
+          ],
+          "consumes_outcome_from": "3:4",
+          "hands_off_to": "3:6"
         },
         {
           "scene_id": 6,
@@ -84,7 +94,10 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "consumes_outcome_from": "3:5",
+          "end_condition_echo": "Artie hits Level 10 and the System begins monitoring him closely.",
+          "hands_off_to": "3:7"
         }
       ]
     },
@@ -101,9 +114,8 @@
           "characters": [
             "CHAR_ARTIE"
           ],
-          "introduces": [
-            "CHAR_BOSS"
-          ]
+          "consumes_outcome_from": "3:6",
+          "hands_off_to": "3:8"
         },
         {
           "scene_id": 8,
@@ -116,7 +128,9 @@
           ],
           "threads": [
             "THREAD_THE_ASCENSION"
-          ]
+          ],
+          "consumes_outcome_from": "3:7",
+          "hands_off_to": "3:9"
         },
         {
           "scene_id": 9,
@@ -126,7 +140,9 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_VANE"
-          ]
+          ],
+          "consumes_outcome_from": "3:8",
+          "hands_off_to": "3:10"
         },
         {
           "scene_id": 10,
@@ -136,7 +152,9 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_VANE"
-          ]
+          ],
+          "consumes_outcome_from": "3:9",
+          "end_condition_echo": "Artie uses his new speed to outrun Vane's party toward the capital."
         }
       ]
     }

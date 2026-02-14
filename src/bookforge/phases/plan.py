@@ -165,6 +165,7 @@ def _flatten_scenes(chapter: Dict[str, Any]) -> List[Dict[str, Any]]:
             "title": section.get("title", ""),
             "intent": section.get("intent", ""),
             "section_role": section.get("section_role", ""),
+            "end_condition": section.get("end_condition", ""),
         }
         scenes = section.get("scenes", []) if isinstance(section.get("scenes", []), list) else []
         for scene in scenes:
@@ -225,7 +226,7 @@ def _build_outline_window(chapter: Dict[str, Any], scene_number: int) -> Dict[st
             return None
         scene = entry.get("scene", {})
         section = entry.get("section", {})
-        return {
+        payload: Dict[str, Any] = {
             "scene_id": scene.get("scene_id"),
             "summary": _scene_summary(scene),
             "type": scene.get("type"),
@@ -239,8 +240,24 @@ def _build_outline_window(chapter: Dict[str, Any], scene_number: int) -> Dict[st
                 "title": section.get("title", ""),
                 "intent": section.get("intent", ""),
                 "section_role": section.get("section_role", ""),
+                "end_condition": section.get("end_condition", ""),
             },
         }
+        for edge_key in (
+            "transition_in",
+            "transition_out",
+            "edge_intent",
+            "consumes_outcome_from",
+            "hands_off_to",
+            "end_condition_echo",
+        ):
+            value = scene.get(edge_key)
+            if value is None:
+                continue
+            text = str(value).strip()
+            if text:
+                payload[edge_key] = text
+        return payload
 
     current_payload = _entry_payload(current_entry)
 

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OutlineTransitionHints",
+  "oneOf": [
+    {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/hint"
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "hints"
+      ],
+      "properties": {
+        "hints": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/hint"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "hint": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "hint_id"
+      ],
+      "properties": {
+        "hint_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "hint": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,12 +1,12 @@
 {
   "chapter_id": 4,
   "title": "The Capital of Crits",
-  "goal": "Artie must hide in plain sight while trying to find a way to stabilize his build.",
+  "goal": "Artie must navigate the social and political landscape of the capital while avoiding the 'System Police'.",
   "chapter_role": "investigation",
-  "stakes_shift": "The stakes move from physical survival to social navigation and avoiding the 'System Police'.",
+  "stakes_shift": "The threat moves from physical monsters to social exposure and the risk of permanent character deletion.",
   "bridge": {
-    "from_prev": "Artie is a fugitive from Vane's ego.",
-    "to_next": "Artie enters the Grand Arena for a 'Low-Stakes' tournament."
+    "from_prev": "Artie arrives at the capital as a fugitive from Vane's ego.",
+    "to_next": "Artie enters the Grand Arena tournament to win a way to fix his HP."
   },
   "pacing": {
     "intensity": 2,
@@ -17,26 +17,33 @@
     {
       "section_id": 1,
       "title": "The City of Gold and Glitches",
-      "intent": "Establish the capital city as a place where 'Crits' are worshiped.",
+      "intent": "Establish the capital city and the religious weight of 'Crits'.",
       "scenes": [
         {
           "scene_id": 1,
           "summary": "Artie enters the city and sees the 'Temple of the D20,' where priests pray for high rolls.",
           "type": "setup",
-          "outcome": "Artie realizes he is basically a walking god in this religion.",
+          "outcome": "Artie realizes he is basically a walking god in this religion, connecting his fate to the First Glitch.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "threads": [
+            "THREAD_THE_ASCENSION"
+          ],
+          "hands_off_to": "4:2"
         },
         {
           "scene_id": 2,
           "summary": "Artie tries to find a 'Stat-Wiper' to fix his 1 HP, but finds out it's a crime punishable by 'Deletion'.",
           "type": "reveal",
-          "outcome": "Artie is stuck with his glass cannon build forever.",
+          "outcome": "Artie realizes his 1 HP build is permanent and illegal to fix.",
           "characters": [
             "CHAR_ARTIE"
-          ]
+          ],
+          "consumes_outcome_from": "4:1",
+          "end_condition_echo": "Artie realizes his 1 HP build is permanent and illegal to fix.",
+          "hands_off_to": "4:3"
         }
       ]
     },
@@ -53,36 +60,50 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "consumes_outcome_from": "4:2",
+          "hands_off_to": "4:4"
         },
         {
           "scene_id": 4,
-          "summary": "Artie meets an informant who tells him that Vane is the son of the High Priest of RNG.",
+          "summary": "Artie meets Zero, a black-market informant who tells him that Vane is the son of the High Priest of RNG.",
           "type": "reveal",
           "outcome": "The rivalry with Vane just became a religious war.",
           "characters": [
-            "CHAR_ARTIE"
+            "CHAR_ARTIE",
+            "CHAR_ZERO"
+          ],
+          "introduces": [
+            "CHAR_ZERO"
           ],
           "threads": [
             "THREAD_VANE_RIVALRY"
-          ]
+          ],
+          "consumes_outcome_from": "4:3",
+          "hands_off_to": "4:5"
         },
         {
           "scene_id": 5,
           "summary": "The black market is raided by the 'System Sentinels,' and Artie has to use his first 'Lag-Switch' to escape.",
           "type": "action",
-          "outcome": "Artie escapes, but the potion has a side effect: he speaks in binary for an hour.",
+          "outcome": "Artie escapes a Sentinel raid with a Lag-Switch potion and a binary speech curse.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "threads": [
+            "THREAD_SYSTEM_GLITCH"
+          ],
+          "consumes_outcome_from": "4:4",
+          "end_condition_echo": "Artie escapes a Sentinel raid with a Lag-Switch potion and a binary speech curse.",
+          "hands_off_to": "4:6"
         }
       ]
     },
     {
       "section_id": 3,
       "title": "The Arena Invitation",
-      "intent": "Set up the climax of the book.",
+      "intent": "Set up the tournament climax and the high financial stakes.",
       "scenes": [
         {
           "scene_id": 6,
@@ -91,7 +112,9 @@
           "outcome": "Artie decides to enter, despite the risk of exposure.",
           "characters": [
             "CHAR_ARTIE"
-          ]
+          ],
+          "consumes_outcome_from": "4:5",
+          "hands_off_to": "4:7"
         },
         {
           "scene_id": 7,
@@ -101,16 +124,20 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "consumes_outcome_from": "4:6",
+          "hands_off_to": "4:8"
         },
         {
           "scene_id": 8,
           "summary": "Vane sees the name on the roster and smiles, knowing he can finally 'delete' Artie in front of a crowd.",
           "type": "escalation",
-          "outcome": "The stage is set for the final confrontation.",
+          "outcome": "Vane prepares to 'delete' Artie in the upcoming tournament.",
           "characters": [
             "CHAR_VANE"
-          ]
+          ],
+          "consumes_outcome_from": "4:7",
+          "end_condition_echo": "Vane prepares to 'delete' Artie in the upcoming tournament."
         }
       ]
     }

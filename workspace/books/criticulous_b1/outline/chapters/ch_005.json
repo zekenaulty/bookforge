@@ -1,12 +1,12 @@
 {
   "chapter_id": 5,
   "title": "The Tournament of Tiers",
-  "goal": "Artie must fight through the brackets without taking a single point of damage.",
+  "goal": "Artie must win the tournament brackets without taking a single point of damage.",
   "chapter_role": "trial",
-  "stakes_shift": "Artie becomes a crowd favorite, which makes the System even more eager to 'balance' him.",
+  "stakes_shift": "Artie becomes a public icon, making him a primary target for the System's 'balancing' algorithms.",
   "bridge": {
     "from_prev": "Artie is the underdog in the arena.",
-    "to_next": "Artie reaches the finals against Vane."
+    "to_next": "Artie reaches the finals against Vane, who has rigged the game."
   },
   "pacing": {
     "intensity": 4,
@@ -17,7 +17,7 @@
     {
       "section_id": 1,
       "title": "The Round of 32",
-      "intent": "Show Artie's growth and tactical use of his crits.",
+      "intent": "Show Artie's growth and tactical use of his crits in the arena.",
       "scenes": [
         {
           "scene_id": 1,
@@ -26,7 +26,8 @@
           "outcome": "The crowd goes wild; Artie is the 'One-Hit Wonder'.",
           "characters": [
             "CHAR_ARTIE"
-          ]
+          ],
+          "hands_off_to": "5:2"
         },
         {
           "scene_id": 2,
@@ -36,23 +37,28 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "consumes_outcome_from": "5:1",
+          "hands_off_to": "5:3"
         },
         {
           "scene_id": 3,
           "summary": "Artie wins the second round by critting the air so hard it creates a vacuum, sucking his opponent out of the ring.",
           "type": "action",
-          "outcome": "Artie moves to the quarter-finals.",
+          "outcome": "Artie moves to the quarter-finals despite mid-match System nerfs.",
           "characters": [
             "CHAR_ARTIE"
-          ]
+          ],
+          "consumes_outcome_from": "5:2",
+          "end_condition_echo": "Artie moves to the quarter-finals despite mid-match System nerfs.",
+          "hands_off_to": "5:4"
         }
       ]
     },
     {
       "section_id": 2,
       "title": "The Quarter-Finals: The Mirror Match",
-      "intent": "Artie faces a character with high evasion, just like him.",
+      "intent": "Artie faces a character with high evasion, forcing a change in strategy.",
       "scenes": [
         {
           "scene_id": 4,
@@ -61,7 +67,9 @@
           "outcome": "The fight becomes a high-speed game of tag.",
           "characters": [
             "CHAR_ARTIE"
-          ]
+          ],
+          "consumes_outcome_from": "5:3",
+          "hands_off_to": "5:5"
         },
         {
           "scene_id": 5,
@@ -71,7 +79,9 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "consumes_outcome_from": "5:4",
+          "hands_off_to": "5:6"
         },
         {
           "scene_id": 6,
@@ -83,24 +93,29 @@
           ],
           "threads": [
             "THREAD_SYSTEM_GLITCH"
-          ]
+          ],
+          "consumes_outcome_from": "5:5",
+          "hands_off_to": "5:7"
         },
         {
           "scene_id": 7,
           "summary": "The System issues a 'Warning' to Artie for 'Unsportsmanlike Exploitation'.",
           "type": "consequence",
-          "outcome": "Artie's next match will have a 'Random Debuff' applied.",
+          "outcome": "The System applies a 'Random Debuff' to Artie for his next match.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "consumes_outcome_from": "5:6",
+          "end_condition_echo": "The System applies a 'Random Debuff' to Artie for his next match.",
+          "hands_off_to": "5:8"
         }
       ]
     },
     {
       "section_id": 3,
       "title": "The Semi-Finals: The Debuff",
-      "intent": "Artie must overcome a mechanical handicap.",
+      "intent": "Artie must overcome a mechanical handicap (Inverted Controls).",
       "scenes": [
         {
           "scene_id": 8,
@@ -109,7 +124,9 @@
           "outcome": "Artie looks like he's drunk-fighting.",
           "characters": [
             "CHAR_ARTIE"
-          ]
+          ],
+          "consumes_outcome_from": "5:7",
+          "hands_off_to": "5:9"
         },
         {
           "scene_id": 9,
@@ -118,7 +135,9 @@
           "outcome": "Artie manages to reach the Mage and lands a crit that turns the Mage's staff into a rubber chicken.",
           "characters": [
             "CHAR_ARTIE"
-          ]
+          ],
+          "consumes_outcome_from": "5:8",
+          "hands_off_to": "5:10"
         },
         {
           "scene_id": 10,
@@ -127,16 +146,20 @@
           "outcome": "Artie reaches the finals.",
           "characters": [
             "CHAR_ARTIE"
-          ]
+          ],
+          "consumes_outcome_from": "5:9",
+          "hands_off_to": "5:11"
         },
         {
           "scene_id": 11,
           "summary": "Vane watches from the wings, holding a 'System Override' scroll he bought from the black market.",
           "type": "reveal",
-          "outcome": "The final fight will be rigged.",
+          "outcome": "Artie reaches the finals against a rigged Vane.",
           "characters": [
             "CHAR_VANE"
-          ]
+          ],
+          "consumes_outcome_from": "5:10",
+          "end_condition_echo": "Artie reaches the finals against a rigged Vane."
         }
       ]
     }

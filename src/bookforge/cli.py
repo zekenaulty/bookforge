@@ -51,12 +51,23 @@ def _author_generate(args: argparse.Namespace) -> int:
 def _outline_generate(args: argparse.Namespace) -> int:
     workspace = Path(args.workspace)
     prompt_file = Path(args.prompt_file) if args.prompt_file else None
+    transition_hints_file = Path(args.transition_hints_file) if getattr(args, "transition_hints_file", None) else None
     try:
         outline_path = generate_outline(
             workspace=workspace,
             book_id=args.book,
             new_version=args.new_version,
             prompt_file=prompt_file,
+            rerun=bool(getattr(args, "rerun", False)),
+            resume=bool(getattr(args, "resume", False)),
+            from_phase=getattr(args, "from_phase", None),
+            to_phase=getattr(args, "to_phase", None),
+            phase=getattr(args, "phase", None),
+            transition_hints_file=transition_hints_file,
+            strict_transition_hints=bool(getattr(args, "strict_transition_hints", False)),
+            force_rerun_with_draft=bool(getattr(args, "force_rerun_with_draft", False)),
+            exact_scene_count=bool(getattr(args, "exact_scene_count", False)),
+            scene_count_range=getattr(args, "scene_count_range", None),
         )
     except Exception as exc:
         sys.stderr.write(f"Outline generation failed: {exc}\n")
@@ -192,6 +203,51 @@ def build_parser() -> argparse.ArgumentParser:
         "--new-version",
         action="store_true",
         help="Create a new outline version.",
+    )
+    outline_generate.add_argument(
+        "--rerun",
+        action="store_true",
+        help="Rerun the outline pipeline on an existing outline.",
+    )
+    outline_generate.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume a paused outline pipeline run.",
+    )
+    outline_generate.add_argument(
+        "--from-phase",
+        help="Start execution from phase id (outline pipeline mode).",
+    )
+    outline_generate.add_argument(
+        "--to-phase",
+        help="Stop execution at phase id (outline pipeline mode).",
+    )
+    outline_generate.add_argument(
+        "--phase",
+        help="Run only one phase (alias for --from-phase X --to-phase X).",
+    )
+    outline_generate.add_argument(
+        "--transition-hints-file",
+        help="Path to transition-hints JSON file.",
+    )
+    outline_generate.add_argument(
+        "--strict-transition-hints",
+        action="store_true",
+        help="Enforce strict transition-hint compliance checks.",
+    )
+    outline_generate.add_argument(
+        "--force-rerun-with-draft",
+        action="store_true",
+        help="Allow rerun even when drafted scene artifacts already exist.",
+    )
+    outline_generate.add_argument(
+        "--exact-scene-count",
+        action="store_true",
+        help="Force exact scene-count matching mode.",
+    )
+    outline_generate.add_argument(
+        "--scene-count-range",
+        help="Optional chapter scene-count range, format min:max.",
     )
     outline_generate.set_defaults(func=_outline_generate)
 

@@ -1,12 +1,12 @@
 {
   "chapter_id": 6,
   "title": "The Final Roll",
-  "goal": "Defeat Vane and survive the System's attempt to delete Artie.",
+  "goal": "Defeat Vane in the rigged finals and survive the System's direct intervention.",
   "chapter_role": "climax",
-  "stakes_shift": "The survival of the entire game world is threatened as Artie's crits start breaking the source code.",
+  "stakes_shift": "The survival of the entire game world is threatened as Artie's crits begin to unravel the source code.",
   "bridge": {
     "from_prev": "Artie enters the ring for the final match.",
-    "to_next": "The System crashes, and Artie is left in the wreckage."
+    "to_next": "The System crashes, leaving Artie and Fizz stranded in the wreckage of the world."
   },
   "pacing": {
     "intensity": 5,
@@ -27,7 +27,8 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_VANE"
-          ]
+          ],
+          "hands_off_to": "6:2"
         },
         {
           "scene_id": 2,
@@ -37,7 +38,9 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_VANE"
-          ]
+          ],
+          "consumes_outcome_from": "6:1",
+          "hands_off_to": "6:3"
         },
         {
           "scene_id": 3,
@@ -47,23 +50,28 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "consumes_outcome_from": "6:2",
+          "hands_off_to": "6:4"
         },
         {
           "scene_id": 4,
           "summary": "Artie realizes he doesn't need to hit Vane; he needs to hit the 'Reflect' buff itself.",
           "type": "reveal",
-          "outcome": "Artie targets the magic aura around Vane's armor.",
+          "outcome": "Artie targets the magic aura around Vane's armor to bypass the Reflect buff.",
           "characters": [
             "CHAR_ARTIE"
-          ]
+          ],
+          "consumes_outcome_from": "6:3",
+          "end_condition_echo": "Artie targets the magic aura around Vane's armor to bypass the Reflect buff.",
+          "hands_off_to": "6:5"
         }
       ]
     },
     {
       "section_id": 2,
       "title": "Breaking the Game",
-      "intent": "The moment of peak absurdity and power.",
+      "intent": "The moment of peak absurdity where the world begins to dissolve.",
       "scenes": [
         {
           "scene_id": 5,
@@ -76,7 +84,9 @@
           ],
           "threads": [
             "THREAD_CRIT_EXPLOIT"
-          ]
+          ],
+          "consumes_outcome_from": "6:4",
+          "hands_off_to": "6:6"
         },
         {
           "scene_id": 6,
@@ -85,7 +95,9 @@
           "outcome": "Vane is defenseless and terrified.",
           "characters": [
             "CHAR_VANE"
-          ]
+          ],
+          "consumes_outcome_from": "6:5",
+          "hands_off_to": "6:7"
         },
         {
           "scene_id": 7,
@@ -95,7 +107,9 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_VANE"
-          ]
+          ],
+          "consumes_outcome_from": "6:6",
+          "hands_off_to": "6:8"
         },
         {
           "scene_id": 8,
@@ -108,7 +122,9 @@
           ],
           "introduces": [
             "CHAR_BOSS"
-          ]
+          ],
+          "consumes_outcome_from": "6:7",
+          "hands_off_to": "6:9"
         },
         {
           "scene_id": 9,
@@ -117,24 +133,29 @@
           "outcome": "Artie has successfully 'paused' reality.",
           "characters": [
             "CHAR_ARTIE"
-          ]
+          ],
+          "consumes_outcome_from": "6:8",
+          "hands_off_to": "6:10"
         },
         {
           "scene_id": 10,
           "summary": "Fizz uses the pause to rewrite Artie's location data, teleporting them out of the arena.",
           "type": "choice",
-          "outcome": "They escape the deletion, but the world is now in 'Safe Mode'.",
+          "outcome": "Artie and Fizz escape deletion as the world enters 'Safe Mode'.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "consumes_outcome_from": "6:9",
+          "end_condition_echo": "Artie and Fizz escape deletion as the world enters 'Safe Mode'.",
+          "hands_off_to": "6:11"
         }
       ]
     },
     {
       "section_id": 3,
       "title": "The Aftermath of the Crash",
-      "intent": "Show the immediate consequences of the climax.",
+      "intent": "Show the immediate consequences of the reality crash.",
       "scenes": [
         {
           "scene_id": 11,
@@ -144,19 +165,23 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "consumes_outcome_from": "6:10",
+          "hands_off_to": "6:12"
         },
         {
           "scene_id": 12,
           "summary": "Artie looks at his stats and sees his HP is now 'NaN' (Not a Number).",
           "type": "reveal",
-          "outcome": "Artie is no longer a player; he is a virus.",
+          "outcome": "Artie realizes his HP is now 'NaN' and he has become a virus.",
           "characters": [
             "CHAR_ARTIE"
           ],
           "threads": [
             "THREAD_SYSTEM_GLITCH"
-          ]
+          ],
+          "consumes_outcome_from": "6:11",
+          "end_condition_echo": "Artie realizes his HP is now 'NaN' and he has become a virus."
         }
       ]
     }

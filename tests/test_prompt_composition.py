@@ -15,7 +15,7 @@ def test_compose_prompt_templates_contracts(tmp_path: Path) -> None:
         enforce_checksums=True,
     )
 
-    assert len(result.compiled_templates) == 14
+    assert len(result.compiled_templates) == 20
 
     for template_name, compiled_text in result.compiled_templates.items():
         assert "\r" not in compiled_text
@@ -34,4 +34,4 @@ def test_compose_prompt_templates_contracts(tmp_path: Path) -> None:
 
 def test_prompt_composition_determinism(tmp_path: Path) -> None:
     checksums = validate_prompt_composition_determinism(output_dir=tmp_path / "determinism")
-    assert len(checksums) == 14
+    assert len(checksums) == 20

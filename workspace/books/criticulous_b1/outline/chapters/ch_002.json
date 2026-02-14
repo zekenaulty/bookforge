@@ -1,12 +1,12 @@
 {
   "chapter_id": 2,
   "title": "The Glass Cannon's Guide to Not Dying",
-  "goal": "Artie needs gear that doesn't rely on him being hit, as he can't take a single blow.",
+  "goal": "Artie needs gear that compensates for his 1 HP pool and exploits the System's bugs.",
   "chapter_role": "setup",
-  "stakes_shift": "Survival shifts from luck to tactical exploitation of the System's bugs.",
+  "stakes_shift": "Survival shifts from pure luck to the tactical exploitation of game mechanics and item loopholes.",
   "bridge": {
-    "from_prev": "Artie is a marked man in Oakhaven.",
-    "to_next": "Artie heads to the Low-Level Crypts to farm 'Evasion' gear."
+    "from_prev": "Artie is a marked man in Oakhaven after being flagged as an anomaly.",
+    "to_next": "Artie heads to the Low-Level Crypts to farm 'Evasion' gear and test his build."
   },
   "pacing": {
     "intensity": 3,
@@ -17,7 +17,7 @@
     {
       "section_id": 1,
       "title": "Shopping for Scraps",
-      "intent": "Equip Artie with the bare minimum to survive a dungeon.",
+      "intent": "Equip Artie with the bare minimum to survive a dungeon through exploits.",
       "scenes": [
         {
           "scene_id": 1,
@@ -27,7 +27,8 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "hands_off_to": "2:2"
         },
         {
           "scene_id": 2,
@@ -37,7 +38,9 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "consumes_outcome_from": "2:1",
+          "hands_off_to": "2:3"
         },
         {
           "scene_id": 3,
@@ -46,7 +49,10 @@
           "outcome": "Artie is now slightly harder to hit but looks like a neon yellow cat.",
           "characters": [
             "CHAR_ARTIE"
-          ]
+          ],
+          "consumes_outcome_from": "2:2",
+          "end_condition_echo": "Artie acquires the 'Cloak of the Cowardly Lion' and a cursed beacon item.",
+          "hands_off_to": "2:4"
         }
       ]
     },
@@ -63,7 +69,9 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "consumes_outcome_from": "2:3",
+          "hands_off_to": "2:5"
         },
         {
           "scene_id": 5,
@@ -72,27 +80,32 @@
           "outcome": "Artie survives his first ranged encounter and gains confidence.",
           "characters": [
             "CHAR_ARTIE"
-          ]
+          ],
+          "consumes_outcome_from": "2:4",
+          "hands_off_to": "2:6"
         },
         {
           "scene_id": 6,
           "summary": "Artie realizes his crits don't just do damage; they cause 'System Overload' effects like turning enemies into loot-filled pinatas.",
           "type": "reveal",
-          "outcome": "Artie discovers he can farm resources much faster than anyone else.",
+          "outcome": "Artie discovers he can farm resources via System Overload effects.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
           "threads": [
             "THREAD_CRIT_EXPLOIT"
-          ]
+          ],
+          "consumes_outcome_from": "2:5",
+          "end_condition_echo": "Artie discovers he can farm resources via System Overload effects.",
+          "hands_off_to": "2:7"
         }
       ]
     },
     {
       "section_id": 3,
       "title": "The Rival's Shadow",
-      "intent": "Reintroduce Vane as a persistent threat.",
+      "intent": "Reintroduce Vane as a persistent threat and trigger the boss encounter.",
       "scenes": [
         {
           "scene_id": 7,
@@ -102,7 +115,9 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_VANE"
-          ]
+          ],
+          "consumes_outcome_from": "2:6",
+          "hands_off_to": "2:8"
         },
         {
           "scene_id": 8,
@@ -112,7 +127,9 @@
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
-          ]
+          ],
+          "consumes_outcome_from": "2:7",
+          "hands_off_to": "2:9"
         },
         {
           "scene_id": 9,
@@ -121,7 +138,9 @@
           "outcome": "The boss battle begins with Artie at a massive disadvantage.",
           "characters": [
             "CHAR_ARTIE"
-          ]
+          ],
+          "consumes_outcome_from": "2:8",
+          "end_condition_echo": "The Bone Golem emerges, placing Artie at a massive mechanical disadvantage."
         }
       ]
     }
