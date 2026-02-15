@@ -54,11 +54,17 @@ OUTLINE_PHASE_BLOCK_FALLBACK = {
     "phase_06_thread_payoff_refinement": "resources/prompt_blocks/phase/outline_pipeline/phase_06_thread_payoff_refinement_prompt_contract.md",
 }
 
+OUTLINE_SYSTEM_BLOCK_FALLBACK = (
+    "resources/prompt_blocks/phase/outline_pipeline/outline_system_execution_contract.md"
+)
+
 OUTLINE_PIPELINE_MAX_ATTEMPTS = 2
 OUTLINE_PIPELINE_PAUSE_MARKER = "pipeline_run_paused.json"
 OUTLINE_PIPELINE_HISTORY = "phase_history.json"
 OUTLINE_PIPELINE_LATEST = "pipeline_latest.json"
 OUTLINE_PIPELINE_LATEST_ALIAS = "outline_pipeline_latest.json"
+OUTLINE_PIPELINE_REPORT_LATEST = "outline_pipeline_report_latest.json"
+OUTLINE_PIPELINE_REPORT_LATEST_SNAPSHOT = "outline_pipeline_report_latest.snapshot.json"
 
 OUTLINE_PHASE_HANDOFF_KEY = {
     "phase_01_chapter_spine": "outline_spine_v1",
@@ -86,12 +92,15 @@ OUTLINE_WRAPPER_SCHEMA_BY_PHASE = {
 OPTIONAL_EDGE_FIELDS = {
     "transition_in",
     "transition_out",
+    "transition_out_text",
     "edge_intent",
     "consumes_outcome_from",
     "hands_off_to",
 }
 
 TRANSITION_REQUIRED_SCENE_FIELDS = {
+    "location_start_label",
+    "location_end_label",
     "location_start_id",
     "location_end_id",
     "location_start",
@@ -100,6 +109,11 @@ TRANSITION_REQUIRED_SCENE_FIELDS = {
     "constraint_state",
     "transition_in_text",
     "transition_in_anchors",
+}
+
+TRANSITION_OUT_REQUIRED_FIELDS = {
+    "transition_out_text",
+    "transition_out_anchors",
 }
 
 SEAM_REQUIRED_SCENE_FIELDS = {
@@ -171,8 +185,18 @@ MAJOR_TURN_KEYWORDS = (
 
 REF_PATTERN = re.compile(r"^[1-9][0-9]*:[1-9][0-9]*$")
 LOCATION_ID_PATTERN = re.compile(r"^LOC_[A-Z0-9_]+$")
-PLACEHOLDER_TOKEN_PATTERN = re.compile(r"\b(current_location|unknown|placeholder|tbd|here|there)\b", re.IGNORECASE)
+PLACEHOLDER_TOKEN_PATTERN = re.compile(r"\b(current_location|unknown|placeholder|tbd|here|there|n/?a)\b", re.IGNORECASE)
 PLACEHOLDER_ANCHOR_PATTERN = re.compile(r"^anchor_[0-9]+$", re.IGNORECASE)
+
+RETRYABLE_REASON_CODES = {
+    "json_parse",
+    "outline_schema",
+    "transition_placeholder",
+    "location_registry_missing",
+    "phase_contract_invalid",
+}
+
+SUCCESSFUL_OUTLINE_STATUSES = {"SUCCESS", "SUCCESS_WITH_WARNINGS"}
 
 
 @dataclass
@@ -542,6 +566,21 @@ def _extract_json(text: str) -> Dict[str, Any]:
     return data
 
 
+def _extract_json_object_only(text: str, label: str) -> Dict[str, Any]:
+    raw = str(text or "").strip()
+    if not raw:
+        raise ValueError(f"{label} response is empty.")
+    if not (raw.startswith("{") and raw.endswith("}")):
+        raise ValueError(f"{label} must be exactly one JSON object with no surrounding text.")
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"{label} JSON parse failed: {exc.msg}") from exc
+    if not isinstance(data, dict):
+        raise ValueError(f"{label} JSON must be an object.")
+    return data
+
+
 
 
 def _slugify(value: str) -> str:
@@ -758,16 +797,49 @@ def _resolve_phase_template(book_root: Path, phase_id: str) -> Path:
     raise FileNotFoundError(f"Missing outline phase template for {phase_id}: {template_name}")
 
 
+def _resolve_outline_system_overlay(book_root: Path) -> str:
+    book_overlay = book_root / "prompts" / "templates" / "outline_system_execution_contract.md"
+    if book_overlay.exists():
+        return book_overlay.read_text(encoding="utf-8").strip()
+    fallback = repo_root(Path(__file__).resolve()) / OUTLINE_SYSTEM_BLOCK_FALLBACK
+    if fallback.exists():
+        return fallback.read_text(encoding="utf-8").strip()
+    return ""
+
+
+def _canonical_phase_template_checksum(phase_id: str) -> str:
+    template_name = OUTLINE_PHASE_TEMPLATE_BY_ID[phase_id]
+    canonical_path = repo_root(Path(__file__).resolve()) / "resources" / "prompt_templates" / template_name
+    if not canonical_path.exists():
+        raise FileNotFoundError(f"Missing canonical outline template: {canonical_path}")
+    return _sha256_file(canonical_path)
+
+
+def _enforce_template_drift_guard(book_root: Path, template_paths: Dict[str, Path], template_checksums: Dict[str, str]) -> None:
+    for phase_id in OUTLINE_PHASE_ORDER:
+        resolved = template_paths.get(phase_id)
+        if not isinstance(resolved, Path):
+            continue
+        if not str(resolved).lower().replace("\\", "/").endswith("/prompts/templates/" + OUTLINE_PHASE_TEMPLATE_BY_ID[phase_id]):
+            continue
+        canonical_checksum = _canonical_phase_template_checksum(phase_id)
+        resolved_checksum = str(template_checksums.get(phase_id) or "").strip()
+        if resolved_checksum and canonical_checksum != resolved_checksum:
+            raise ValueError(
+                f"Template drift detected for {OUTLINE_PHASE_TEMPLATE_BY_ID[phase_id]}. "
+                f"Run: bookforge book update-templates --book {book_root.name}"
+            )
+
+
+def _active_location_registry_path(outline_root: Path) -> Path:
+    return outline_root / "location_registry_active.json"
+
+
 def _extract_json_strict(text: str, label: str) -> Dict[str, Any]:
-    data = extract_json(text, label=label)
-    if not isinstance(data, dict):
-        raise ValueError(f"{label} JSON must be an object.")
-    return data
+    return _extract_json_object_only(text, label)
 
 
 def _extract_phase_json(phase_id: str, text: str) -> Dict[str, Any]:
-    if phase_id in {"phase_03_scene_draft", "phase_06_thread_payoff_refinement"}:
-        return _extract_json(text)
     return _extract_json_strict(text, label=f"{phase_id} response")
 
 
@@ -901,6 +973,21 @@ def _write_latest_run_metadata(outline_root: Path, run_id: str) -> None:
     _write_json(outline_root / OUTLINE_PIPELINE_LATEST_ALIAS, payload)
 
 
+def _write_latest_report_pointer(outline_root: Path, run_dir: Path) -> Path:
+    report_path = run_dir / "outline_pipeline_report.json"
+    latest_pointer = outline_root / OUTLINE_PIPELINE_REPORT_LATEST
+    latest_snapshot = outline_root / OUTLINE_PIPELINE_REPORT_LATEST_SNAPSHOT
+    payload = {
+        "run_id": run_dir.name,
+        "updated_at": _now_iso(),
+        "path": _relpath(outline_root, report_path),
+    }
+    _write_json(latest_pointer, payload)
+    if report_path.exists():
+        shutil.copy2(report_path, latest_snapshot)
+    return latest_pointer
+
+
 def _load_history(run_dir: Path) -> Dict[str, Any]:
     path = run_dir / OUTLINE_PIPELINE_HISTORY
     if not path.exists():
@@ -949,17 +1036,86 @@ def _write_pause_marker(
 
 def _phase_retry_message(phase_id: str, validation: Dict[str, Any]) -> str:
     errors = validation.get("errors", []) if isinstance(validation, dict) else []
+    top_codes: List[str] = []
+    for item in errors:
+        if not isinstance(item, dict):
+            continue
+        code = str(item.get("code") or "").strip()
+        if code and code not in top_codes:
+            top_codes.append(code)
     lines = [
         f"Your previous {phase_id} output failed deterministic validation.",
-        "Return ONLY corrected JSON.",
+        "Return exactly ONE JSON object and nothing else.",
+        "Do not emit markdown, code fences, preambles, or trailing commentary.",
         "Fix these errors:",
     ]
+    if top_codes:
+        lines.append("Top reason codes:")
+        for code in top_codes[:5]:
+            lines.append(f"- {code}")
     for item in errors[:12]:
         if isinstance(item, dict):
             code = item.get("code", "validation_error")
             message = item.get("message", "")
             lines.append(f"- [{code}] {message}")
     return "\n".join(lines)
+
+
+def _is_error_v1_payload(payload: Dict[str, Any]) -> bool:
+    if not isinstance(payload, dict):
+        return False
+    if str(payload.get("result") or "").strip().upper() != "ERROR":
+        return False
+    return str(payload.get("schema_version") or "").strip() == "error_v1"
+
+
+def _error_v1_to_validation(phase_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    errors: List[Dict[str, Any]] = []
+    try:
+        validate_json(payload, "error_v1")
+    except Exception as exc:
+        errors.append(_issue("error_v1_schema", str(exc), path="<root>"))
+        return {"status": "fail", "errors": errors, "warnings": [], "metrics": {}}
+    reason_code = str(payload.get("reason_code") or "error_v1").strip()
+    missing_fields = payload.get("missing_fields")
+    if not isinstance(missing_fields, list):
+        missing_fields = []
+    action_hint = str(payload.get("action_hint") or "").strip()
+    message = f"{phase_id} returned error_v1: {reason_code}."
+    if missing_fields:
+        message += f" missing_fields={','.join(str(item) for item in missing_fields[:10])}."
+    if action_hint:
+        message += f" action_hint={action_hint}"
+    errors.append(_issue(reason_code, message, path="<root>"))
+    validator_evidence = payload.get("validator_evidence")
+    if isinstance(validator_evidence, list):
+        for item in validator_evidence:
+            if isinstance(item, dict):
+                errors.append(item)
+    return {"status": "fail", "errors": errors, "warnings": [], "metrics": {}}
+
+
+def _validation_signature(validation: Dict[str, Any]) -> str:
+    errors = validation.get("errors") if isinstance(validation.get("errors"), list) else []
+    if not errors:
+        return ""
+    first = errors[0]
+    if not isinstance(first, dict):
+        return str(first)
+    code = str(first.get("code") or "").strip()
+    message = str(first.get("message") or "").strip()
+    path = str(first.get("path") or "").strip()
+    scene_ref = str(first.get("scene_ref") or "").strip()
+    return f"{code}|{path}|{scene_ref}|{message[:160]}"
+
+
+def _is_retryable_validation(validation: Dict[str, Any]) -> bool:
+    errors = validation.get("errors") if isinstance(validation.get("errors"), list) else []
+    if not errors:
+        return False
+    first = errors[0] if isinstance(errors[0], dict) else {}
+    code = str(first.get("code") or "").strip()
+    return code in RETRYABLE_REASON_CODES
 
 
 def _phase_handoff_payload(phase_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
@@ -1042,6 +1198,66 @@ def _validation_rollup(run_dir: Path, phase_entries: Dict[str, Any]) -> Tuple[in
         warnings_count += phase_warnings
         per_phase[phase_id] = {"errors": phase_errors, "warnings": phase_warnings}
     return errors_count, warnings_count, per_phase
+
+
+def _phase_validation_payload(run_dir: Path, phase_entries: Dict[str, Any], phase_id: str) -> Dict[str, Any]:
+    entry = phase_entries.get(phase_id)
+    if not isinstance(entry, dict):
+        return {}
+    artifacts = entry.get("artifacts")
+    if not isinstance(artifacts, dict):
+        return {}
+    validation_rel = artifacts.get("validation")
+    if not validation_rel:
+        return {}
+    validation_path = run_dir / str(validation_rel)
+    if not validation_path.exists():
+        return {}
+    try:
+        payload = _read_json(validation_path)
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _collect_reason_codes(run_dir: Path, phase_entries: Dict[str, Any]) -> List[str]:
+    ordered: List[str] = []
+    seen: set[str] = set()
+    for phase_id in OUTLINE_PHASE_ORDER:
+        payload = _phase_validation_payload(run_dir, phase_entries, phase_id)
+        errors = payload.get("errors") if isinstance(payload.get("errors"), list) else []
+        for item in errors:
+            if not isinstance(item, dict):
+                continue
+            code = str(item.get("code") or "").strip()
+            if not code or code in seen:
+                continue
+            seen.add(code)
+            ordered.append(code)
+    return ordered
+
+
+def _phase_attempt_usage(phase_entries: Dict[str, Any]) -> Dict[str, str]:
+    usage: Dict[str, str] = {}
+    for phase_id in OUTLINE_PHASE_ORDER:
+        entry = phase_entries.get(phase_id)
+        if not isinstance(entry, dict):
+            continue
+        attempts = _to_int(entry.get("attempts"))
+        if attempts is None:
+            continue
+        usage[phase_id] = f"{attempts}/{OUTLINE_PIPELINE_MAX_ATTEMPTS}"
+    return usage
+
+
+def _phase_failed(phase_entries: Dict[str, Any]) -> str:
+    for phase_id in OUTLINE_PHASE_ORDER:
+        entry = phase_entries.get(phase_id)
+        if not isinstance(entry, dict):
+            continue
+        if str(entry.get("status") or "").strip() == "failed":
+            return phase_id
+    return ""
 
 
 def _phase_output_payload(run_dir: Path, phase_entries: Dict[str, Any], phase_id: str) -> Dict[str, Any]:
@@ -1160,6 +1376,220 @@ def _unique_non_empty(values: List[str]) -> List[str]:
     return ordered
 
 
+def _default_location_registry() -> Dict[str, Any]:
+    return {"schema_version": "location_registry_v1", "locations": []}
+
+
+def _load_location_registry(path: Path) -> Dict[str, Any]:
+    if not path.exists():
+        return _default_location_registry()
+    try:
+        payload = _read_json(path)
+    except Exception:
+        return _default_location_registry()
+    if not isinstance(payload, dict):
+        return _default_location_registry()
+    locations = payload.get("locations")
+    if not isinstance(locations, list):
+        payload["locations"] = []
+    if str(payload.get("schema_version") or "").strip() != "location_registry_v1":
+        payload["schema_version"] = "location_registry_v1"
+    return payload
+
+
+def _write_location_registry(path: Path, registry: Dict[str, Any]) -> None:
+    payload = _default_location_registry()
+    payload["locations"] = registry.get("locations") if isinstance(registry.get("locations"), list) else []
+    validate_json(payload, "outline_location_registry")
+    _write_json(path, payload)
+
+
+def _location_stability_key(label: str, parent_location_id: str = "") -> str:
+    normalized = _normalize_text_token(label)
+    parent = _normalize_text_token(parent_location_id)
+    return f"{parent}::{normalized}" if parent and parent != "unknown" else normalized
+
+
+def _location_display_slug(label: str) -> str:
+    token = _normalize_text_token(label).upper()
+    if token == "UNKNOWN":
+        token = "GENERIC_LOCATION"
+    return token
+
+
+def _compile_location_id(label: str, stability_key: str) -> str:
+    slug = _location_display_slug(label)
+    candidate = f"LOC_{slug}"
+    if len(candidate) <= 48:
+        return candidate
+    digest = hashlib.sha1(stability_key.encode("utf-8")).hexdigest()[:8].upper()
+    return f"LOC_{slug[:39]}_{digest}"
+
+
+def _resolve_location_registry_entry(
+    *,
+    registry: Dict[str, Any],
+    label: str,
+    scene_ref: str,
+    parent_location_id: str = "",
+) -> Tuple[str, bool]:
+    locations = registry.get("locations")
+    if not isinstance(locations, list):
+        locations = []
+        registry["locations"] = locations
+    clean_label = str(label or "").strip()
+    stability_key = _location_stability_key(clean_label, parent_location_id)
+    normalized = _normalize_text_token(clean_label)
+
+    for entry in locations:
+        if not isinstance(entry, dict):
+            continue
+        if str(entry.get("stability_key") or "").strip() == stability_key:
+            aliases = entry.get("aliases")
+            if not isinstance(aliases, list):
+                aliases = []
+                entry["aliases"] = aliases
+            if clean_label and clean_label != str(entry.get("display_name") or "").strip() and clean_label not in aliases:
+                aliases.append(clean_label)
+            return str(entry.get("location_id") or "").strip(), False
+
+    for entry in locations:
+        if not isinstance(entry, dict):
+            continue
+        display = _normalize_text_token(entry.get("display_name"))
+        aliases = entry.get("aliases") if isinstance(entry.get("aliases"), list) else []
+        alias_tokens = {_normalize_text_token(item) for item in aliases}
+        if normalized and (normalized == display or normalized in alias_tokens):
+            aliases_list = entry.get("aliases")
+            if not isinstance(aliases_list, list):
+                aliases_list = []
+                entry["aliases"] = aliases_list
+            if clean_label and clean_label not in aliases_list and clean_label != str(entry.get("display_name") or "").strip():
+                aliases_list.append(clean_label)
+            if not entry.get("stability_key"):
+                entry["stability_key"] = stability_key
+            return str(entry.get("location_id") or "").strip(), False
+
+    candidate = _compile_location_id(clean_label, stability_key)
+    existing_ids = {
+        str(entry.get("location_id") or "").strip()
+        for entry in locations
+        if isinstance(entry, dict) and str(entry.get("location_id") or "").strip()
+    }
+    if candidate in existing_ids:
+        digest = hashlib.sha1(stability_key.encode("utf-8")).hexdigest()[:8].upper()
+        candidate = f"{candidate}_{digest}"
+
+    new_entry: Dict[str, Any] = {
+        "location_id": candidate,
+        "display_name": clean_label,
+        "aliases": [],
+        "stability_key": stability_key,
+        "introduced_in": scene_ref,
+    }
+    parent = str(parent_location_id or "").strip()
+    if parent:
+        new_entry["parent_location_id"] = parent
+    locations.append(new_entry)
+    return candidate, True
+
+
+def _normalize_transition_aliases(scene: Dict[str, Any]) -> None:
+    transition_in_text = str(scene.get("transition_in_text") or "").strip()
+    legacy_in = str(scene.get("transition_in") or "").strip()
+    if not transition_in_text and legacy_in:
+        scene["transition_in_text"] = legacy_in
+    if "transition_in" in scene:
+        scene.pop("transition_in", None)
+
+    transition_out_text = str(scene.get("transition_out_text") or "").strip()
+    legacy_out = str(scene.get("transition_out") or "").strip()
+    if not transition_out_text and legacy_out:
+        scene["transition_out_text"] = legacy_out
+    if "transition_out" in scene:
+        scene.pop("transition_out", None)
+
+
+def _compile_outline_location_identity(
+    *,
+    outline: Dict[str, Any],
+    registry: Dict[str, Any],
+) -> Dict[str, Any]:
+    errors: List[Dict[str, Any]] = []
+    warnings: List[Dict[str, Any]] = []
+    minted: List[Dict[str, Any]] = []
+
+    chapters = outline.get("chapters")
+    if not isinstance(chapters, list):
+        return {"errors": errors, "warnings": warnings, "minted": minted}
+
+    for chapter in chapters:
+        if not isinstance(chapter, dict):
+            continue
+        chapter_id = _to_int(chapter.get("chapter_id"))
+        if chapter_id is None:
+            continue
+        entries = _chapter_scene_entries(chapter)
+        for idx, entry in enumerate(entries):
+            scene = entry["scene"]
+            scene_id = _to_int(scene.get("scene_id")) or (idx + 1)
+            scene_ref = f"{chapter_id}:{scene_id}"
+            _normalize_transition_aliases(scene)
+
+            start_label = str(scene.get("location_start_label") or scene.get("location_start") or "").strip()
+            end_label = str(scene.get("location_end_label") or scene.get("location_end") or "").strip()
+            if start_label:
+                scene["location_start_label"] = start_label
+                scene["location_start"] = start_label
+            if end_label:
+                scene["location_end_label"] = end_label
+                scene["location_end"] = end_label
+
+            if start_label and _is_placeholder_text(start_label):
+                errors.append(_issue("transition_placeholder", "location_start_label must not contain placeholder values.", scene_ref=scene_ref))
+            if end_label and _is_placeholder_text(end_label):
+                errors.append(_issue("transition_placeholder", "location_end_label must not contain placeholder values.", scene_ref=scene_ref))
+
+            start_id = str(scene.get("location_start_id") or "").strip()
+            end_id = str(scene.get("location_end_id") or "").strip()
+            handoff_mode = str(scene.get("handoff_mode") or "").strip()
+
+            if not start_id and start_label:
+                start_id, created = _resolve_location_registry_entry(
+                    registry=registry,
+                    label=start_label,
+                    scene_ref=scene_ref,
+                )
+                if created:
+                    minted.append({"scene_ref": scene_ref, "field": "location_start_id", "location_id": start_id, "label": start_label})
+            if not start_id and handoff_mode == "direct_continuation" and idx > 0:
+                prev_scene = entries[idx - 1]["scene"]
+                prev_end = str(prev_scene.get("location_end_id") or "").strip()
+                if prev_end and LOCATION_ID_PATTERN.fullmatch(prev_end):
+                    start_id = prev_end
+            if start_id:
+                scene["location_start_id"] = start_id
+
+            if not end_id and end_label:
+                end_id, created = _resolve_location_registry_entry(
+                    registry=registry,
+                    label=end_label,
+                    scene_ref=scene_ref,
+                    parent_location_id=start_id,
+                )
+                if created:
+                    minted.append({"scene_ref": scene_ref, "field": "location_end_id", "location_id": end_id, "label": end_label})
+            if end_id:
+                scene["location_end_id"] = end_id
+
+            if not str(scene.get("location_start_id") or "").strip():
+                errors.append(_issue("location_registry_missing", "location_start_id could not be derived from labels or continuation inheritance.", scene_ref=scene_ref))
+            if not str(scene.get("location_end_id") or "").strip():
+                errors.append(_issue("location_registry_missing", "location_end_id could not be derived from labels or registry.", scene_ref=scene_ref))
+
+    return {"errors": errors, "warnings": warnings, "minted": minted}
+
+
 def _scene_character_ids(scene: Dict[str, Any]) -> set[str]:
     values = scene.get("characters")
     if not isinstance(values, list):
@@ -1276,43 +1706,36 @@ def _ensure_transition_contract_for_scene(
     prev_scene: Optional[Dict[str, Any]],
     next_scene: Optional[Dict[str, Any]],
 ) -> None:
-    legacy_transition_in = str(scene.get("transition_in") or "").strip()
+    _normalize_transition_aliases(scene)
 
     location_start_id = str(scene.get("location_start_id") or "").strip()
-    if not location_start_id and prev_scene is not None:
-        location_start_id = str(prev_scene.get("location_end_id") or prev_scene.get("location_start_id") or "").strip()
     if location_start_id:
         scene["location_start_id"] = location_start_id
     else:
         scene.pop("location_start_id", None)
 
     location_end_id = str(scene.get("location_end_id") or "").strip()
-    if not location_end_id and next_scene is not None:
-        location_end_id = str(next_scene.get("location_start_id") or "").strip()
-    if not location_end_id:
-        location_end_id = location_start_id
     if location_end_id:
         scene["location_end_id"] = location_end_id
     else:
         scene.pop("location_end_id", None)
 
-    location_start = str(scene.get("location_start") or "").strip()
-    if not location_start and prev_scene is not None:
-        location_start = str(prev_scene.get("location_end") or prev_scene.get("location_start") or "").strip()
+    location_start_label = str(scene.get("location_start_label") or "").strip()
+    location_end_label = str(scene.get("location_end_label") or "").strip()
+    location_start = str(scene.get("location_start") or location_start_label).strip()
+    location_end = str(scene.get("location_end") or location_end_label).strip()
     if location_start:
         scene["location_start"] = location_start
+        scene["location_start_label"] = location_start_label or location_start
     else:
         scene.pop("location_start", None)
-
-    location_end = str(scene.get("location_end") or "").strip()
-    if not location_end and next_scene is not None:
-        location_end = str(next_scene.get("location_start") or "").strip()
-    if not location_end:
-        location_end = location_start
+        scene.pop("location_start_label", None)
     if location_end:
         scene["location_end"] = location_end
+        scene["location_end_label"] = location_end_label or location_end
     else:
         scene.pop("location_end", None)
+        scene.pop("location_end_label", None)
 
     handoff_mode = str(scene.get("handoff_mode") or "").strip()
     if handoff_mode:
@@ -1327,8 +1750,6 @@ def _ensure_transition_contract_for_scene(
         scene.pop("constraint_state", None)
 
     transition_in_text = str(scene.get("transition_in_text") or "").strip()
-    if not transition_in_text and legacy_transition_in:
-        transition_in_text = legacy_transition_in
     if transition_in_text:
         scene["transition_in_text"] = transition_in_text
     else:
@@ -1346,15 +1767,27 @@ def _ensure_transition_contract_for_scene(
     else:
         scene.pop("transition_in_anchors", None)
 
-    if next_scene is None:
-        if "transition_out" in scene and not str(scene.get("transition_out") or "").strip():
-            scene.pop("transition_out", None)
+    out_anchors = scene.get("transition_out_anchors")
+    if isinstance(out_anchors, list):
+        out_cleaned = _unique_non_empty([str(item).strip() for item in out_anchors])
     else:
-        transition_out = str(scene.get("transition_out") or "").strip()
-        if transition_out:
-            scene["transition_out"] = transition_out
+        out_cleaned = []
+    if not out_cleaned and next_scene is not None:
+        out_cleaned = _fallback_transition_anchors(scene)
+    if out_cleaned:
+        scene["transition_out_anchors"] = out_cleaned[:6]
+    else:
+        scene.pop("transition_out_anchors", None)
+
+    if next_scene is None:
+        if "transition_out_text" in scene and not str(scene.get("transition_out_text") or "").strip():
+            scene.pop("transition_out_text", None)
+    else:
+        transition_out_text = str(scene.get("transition_out_text") or "").strip()
+        if transition_out_text:
+            scene["transition_out_text"] = transition_out_text
         else:
-            scene.pop("transition_out", None)
+            scene.pop("transition_out_text", None)
 
     for optional_field in OPTIONAL_EDGE_FIELDS:
         if optional_field in scene and not str(scene.get(optional_field) or "").strip():
@@ -1409,6 +1842,8 @@ def _build_inserted_transition_scene(
         "type": "transition",
         "outcome": "The handoff is concretely realized and constraints are carried forward.",
         "characters": characters,
+        "location_start_label": location_start,
+        "location_end_label": location_end,
         "location_start_id": location_start_id,
         "location_end_id": location_end_id,
         "location_start": location_start,
@@ -1426,9 +1861,19 @@ def _build_inserted_transition_scene(
                 "constraint_state": constraint_state,
             }
         ),
-        "transition_out": _fallback_transition_out_text(
+        "transition_out_text": _fallback_transition_out_text(
             {"location_start": location_start, "location_end": location_end},
             next_scene,
+        ),
+        "transition_out_anchors": _fallback_transition_anchors(
+            {
+                "location_start_id": location_start_id,
+                "location_end_id": location_end_id,
+                "location_start": location_start,
+                "location_end": location_end,
+                "handoff_mode": handoff_mode,
+                "constraint_state": constraint_state,
+            }
         ),
         "seam_score": int(max(0, min(100, seam_score))),
         "seam_resolution": seam_resolution if seam_resolution in SEAM_RESOLUTION_VALUES else "micro_scene",
@@ -1702,7 +2147,16 @@ def _build_transition_summary(
         )
 
         placeholder_fields: List[str] = []
-        for field in ("location_start_id", "location_end_id", "location_start", "location_end", "transition_in_text"):
+        for field in (
+            "location_start_id",
+            "location_end_id",
+            "location_start",
+            "location_end",
+            "location_start_label",
+            "location_end_label",
+            "transition_in_text",
+            "transition_out_text",
+        ):
             value = str(scene.get(field) or "").strip()
             if value and _is_placeholder_text(value):
                 placeholder_fields.append(field)
@@ -1830,6 +2284,11 @@ def _build_outline_pipeline_report_payload(
     reused_phases: List[str],
     settings: Dict[str, Any],
     scene_count_mode: Dict[str, Any],
+    template_checksums: Optional[Dict[str, str]] = None,
+    terminal_status: Optional[str] = None,
+    terminal_reason_code: str = "",
+    raw_model_output_path: str = "",
+    retry_directive: str = "",
 ) -> Dict[str, Any]:
     errors_count, warnings_count, per_phase_validation = _validation_rollup(run_dir, phase_entries)
     phase04_output = _phase_output_payload(run_dir, phase_entries, "phase_04_transition_causality_refinement")
@@ -1849,16 +2308,30 @@ def _build_outline_pipeline_report_payload(
 
     requires_user_attention = bool(transition_summary.get("requires_user_attention"))
     attention_items = transition_summary.get("attention_items", []) if isinstance(transition_summary.get("attention_items"), list) else []
+    phase_failed = _phase_failed(phase_entries)
+    reason_codes = _collect_reason_codes(run_dir, phase_entries)
+    if terminal_reason_code and terminal_reason_code not in reason_codes:
+        reason_codes.insert(0, terminal_reason_code)
+    attempt_usage = _phase_attempt_usage(phase_entries)
+    top_errors: List[Dict[str, Any]] = []
+    if phase_failed:
+        failed_validation = _phase_validation_payload(run_dir, phase_entries, phase_failed)
+        errors = failed_validation.get("errors") if isinstance(failed_validation.get("errors"), list) else []
+        top_errors = [item for item in errors[:10] if isinstance(item, dict)]
 
-    if errors_count > 0:
+    if terminal_status:
+        overall_status = terminal_status
+    elif errors_count > 0:
         overall_status = "ERROR"
     elif requires_user_attention or warnings_count > 0:
         overall_status = "SUCCESS_WITH_WARNINGS"
     else:
         overall_status = "SUCCESS"
 
-    if bool(transition_summary.get("strict_blocking")):
+    if bool(transition_summary.get("strict_blocking")) and overall_status in {"SUCCESS", "SUCCESS_WITH_WARNINGS"}:
         overall_status = "ERROR"
+    if overall_status in {"ERROR", "PAUSED"}:
+        requires_user_attention = True
 
     artifact_paths: Dict[str, Any] = {
         "run_dir": _relpath(run_dir.parent.parent.parent, run_dir),
@@ -1867,11 +2340,15 @@ def _build_outline_pipeline_report_payload(
         "decisions": _relpath(run_dir, run_dir / "outline_pipeline_decisions.json"),
     }
 
-    return {
+    report_payload = {
         "book_id": book_id,
         "run_id": run_id,
         "timestamp": _now_iso(),
         "overall_status": overall_status,
+        "phase_failed": phase_failed,
+        "reason_codes": reason_codes,
+        "attempt_usage": attempt_usage,
+        "top_errors": top_errors,
         "requested_from_phase": phase_from,
         "requested_to_phase": phase_to,
         "effective_from_phase": effective_from_phase,
@@ -1882,6 +2359,8 @@ def _build_outline_pipeline_report_payload(
         "requires_user_attention": requires_user_attention,
         "strict_blocking": bool(transition_summary.get("strict_blocking")),
         "attention_items": attention_items,
+        "raw_model_output_path": raw_model_output_path,
+        "retry_directive": retry_directive,
         "mode_values": {
             "strict_transition_hints": bool(settings.get("strict_transition_hints")),
             "strict_transition_bridges": bool(settings.get("strict_transition_bridges")),
@@ -1903,7 +2382,14 @@ def _build_outline_pipeline_report_payload(
         "scene_count_mode": scene_count_mode,
         "phase_validation_counts": per_phase_validation,
         "artifact_paths": artifact_paths,
+        "location_registry_active": {
+            "path": str(settings.get("location_registry_active_path") or ""),
+            "sha256": str(settings.get("location_registry_active_sha256") or ""),
+        },
     }
+    if isinstance(template_checksums, dict):
+        report_payload["template_checksums"] = template_checksums
+    return report_payload
 
 
 def _validate_spine_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
@@ -2174,11 +2660,9 @@ def _validate_outline_payload(
                 continue
             scene_ref = f"{chapter_id}:{scene_id}"
 
-            transition_in_alias = str(scene.get("transition_in") or "").strip()
+            _normalize_transition_aliases(scene)
             transition_in_text = str(scene.get("transition_in_text") or "").strip()
-            if not transition_in_text and transition_in_alias:
-                transition_in_text = transition_in_alias
-                scene["transition_in_text"] = transition_in_text
+            transition_out_text = str(scene.get("transition_out_text") or "").strip()
 
             expected_end = section_end_lookup.get((chapter_id, section_id))
             if expected_end:
@@ -2277,7 +2761,15 @@ def _validate_outline_payload(
                                     scene_ref=scene_ref,
                                 )
                             )
-                        if required_field in {"location_start_id", "location_end_id", "location_start", "location_end", "transition_in_text"} and _is_placeholder_text(text):
+                        if required_field in {
+                            "location_start_id",
+                            "location_end_id",
+                            "location_start",
+                            "location_end",
+                            "location_start_label",
+                            "location_end_label",
+                            "transition_in_text",
+                        } and _is_placeholder_text(text):
                             issue = _issue(
                                 "transition_placeholder",
                                 f"{required_field} must not contain placeholder values.",
@@ -2352,25 +2844,43 @@ def _validate_outline_payload(
                     )
                 )
             if not is_last:
-                transition_out = str(scene.get("transition_out") or "").strip()
-                if not transition_out:
+                if not transition_out_text:
                     errors.append(
                         _issue(
                             "transition_out_required",
-                            "transition_out is required for non-last scenes.",
+                            "transition_out_text is required for non-last scenes.",
                             scene_ref=scene_ref,
                         )
                     )
-                elif _is_placeholder_text(transition_out):
+                elif _is_placeholder_text(transition_out_text):
                     issue = _issue(
                         "transition_placeholder",
-                        "transition_out must not contain placeholder values.",
+                        "transition_out_text must not contain placeholder values.",
                         scene_ref=scene_ref,
                     )
                     if strict_location_identity:
                         errors.append(issue)
                     else:
                         warnings.append(issue)
+                out_anchors = scene.get("transition_out_anchors")
+                if not isinstance(out_anchors, list):
+                    errors.append(
+                        _issue(
+                            "transition_out_anchors_required",
+                            "transition_out_anchors is required for non-last scenes.",
+                            scene_ref=scene_ref,
+                        )
+                    )
+                else:
+                    cleaned_out_anchors = [str(item).strip() for item in out_anchors if str(item).strip()]
+                    if len(cleaned_out_anchors) < 3 or len(cleaned_out_anchors) > 6:
+                        errors.append(
+                            _issue(
+                                "transition_out_anchors_count",
+                                "transition_out_anchors must include 3-6 non-empty strings.",
+                                scene_ref=scene_ref,
+                            )
+                        )
 
             if require_seam_fields:
                 seam_score = scene.get("seam_score")
@@ -2645,6 +3155,7 @@ def _phase_render_values(
     transition_hints_text: str,
     handoffs: Dict[str, Dict[str, Any]],
     scene_count_mode: Dict[str, Any],
+    location_registry: Dict[str, Any],
 ) -> Dict[str, Any]:
     return {
         "book": book,
@@ -2658,6 +3169,7 @@ def _phase_render_values(
         "outline_draft_v1_1": handoffs.get("outline_draft_v1_1", {}),
         "outline_transitions_refined_v1_1": handoffs.get("outline_transitions_refined_v1_1", {}),
         "outline_cast_refined_v1_1": handoffs.get("outline_cast_refined_v1_1", {}),
+        "location_registry": location_registry,
     }
 def generate_outline(
     workspace: Path,
@@ -2741,6 +3253,7 @@ def generate_outline(
         path = _resolve_phase_template(book_root, phase_id)
         template_paths[phase_id] = path
         template_checksums[phase_id] = _sha256_file(path)
+    _enforce_template_drift_guard(book_root, template_paths, template_checksums)
 
     scene_count_mode = {
         "exact_scene_count": bool(exact_scene_count),
@@ -2771,6 +3284,16 @@ def generate_outline(
         run_dir = outline_root / "pipeline_runs" / run_id
         run_dir.mkdir(parents=True, exist_ok=True)
 
+    active_registry_path = _active_location_registry_path(outline_root)
+    run_registry_path = run_dir / "location_registry.json"
+    if resume and run_registry_path.exists():
+        location_registry = _load_location_registry(run_registry_path)
+    else:
+        location_registry = _load_location_registry(active_registry_path)
+        _write_location_registry(run_registry_path, location_registry)
+    settings["location_registry_active_path"] = _relpath(book_root, active_registry_path)
+    settings["location_registry_active_sha256"] = _sha256_file(active_registry_path) if active_registry_path.exists() else ""
+
     history = _load_history(run_dir)
     phase_entries = history.get("phases") if isinstance(history.get("phases"), dict) else {}
     handoff_payloads: Dict[str, Dict[str, Any]] = {}
@@ -2790,12 +3313,17 @@ def generate_outline(
             continue
 
     fingerprint_handoff_hashes = prior_handoff_hashes if (not resume and requested_from_idx > 0) else {}
+    fingerprint_settings = {
+        key: value
+        for key, value in settings.items()
+        if not str(key).startswith("location_registry_active_")
+    }
     fingerprint = _build_run_fingerprint(
         book=book,
         user_prompt=user_prompt,
         transition_hints=transition_hints_text,
         template_checksums=template_checksums,
-        settings=settings,
+        settings=fingerprint_settings,
         prior_handoff_hashes=fingerprint_handoff_hashes,
     )
 
@@ -2841,10 +3369,52 @@ def generate_outline(
 
     max_tokens = _outline_max_tokens()
     key_slot = getattr(client, "key_slot", None)
-    system_prompt = system_path.read_text(encoding="utf-8")
+    base_system_prompt = system_path.read_text(encoding="utf-8").strip()
+    outline_system_overlay = _resolve_outline_system_overlay(book_root)
+    if outline_system_overlay:
+        system_prompt = f"{base_system_prompt}\n\n{outline_system_overlay}"
+    else:
+        system_prompt = base_system_prompt
     executed_phases: List[str] = []
     reused_phases: List[str] = []
     last_handoff_path: Optional[Path] = None
+
+    def _emit_pipeline_report(
+        *,
+        terminal_status: Optional[str] = None,
+        terminal_reason_code: str = "",
+        raw_model_output_path: str = "",
+        retry_directive: str = "",
+    ) -> Path:
+        report_payload = _build_outline_pipeline_report_payload(
+            run_dir=run_dir,
+            phase_entries=phase_entries,
+            handoff_payloads=handoff_payloads,
+            book_id=book_id,
+            run_id=run_id,
+            phase_from=phase_from,
+            phase_to=phase_to,
+            effective_from_phase=OUTLINE_PHASE_ORDER[effective_from_idx],
+            executed_phases=executed_phases,
+            reused_phases=reused_phases,
+            settings=settings,
+            scene_count_mode=scene_count_mode,
+            template_checksums=template_checksums,
+            terminal_status=terminal_status,
+            terminal_reason_code=terminal_reason_code,
+            raw_model_output_path=raw_model_output_path,
+            retry_directive=retry_directive,
+        )
+        validate_json(report_payload, "outline_pipeline_report")
+        report_path = run_dir / "outline_pipeline_report.json"
+        _write_json(report_path, report_payload)
+        _write_json(
+            run_dir / "outline_pipeline_decisions.json",
+            {"settings": settings, "effective_from_phase": OUTLINE_PHASE_ORDER[effective_from_idx]},
+        )
+        _write_latest_run_metadata(outline_root, run_id)
+        _write_latest_report_pointer(outline_root, run_dir)
+        return report_path
 
     for index in range(effective_from_idx, requested_to_idx + 1):
         phase_id = OUTLINE_PHASE_ORDER[index]
@@ -2874,6 +3444,7 @@ def generate_outline(
             transition_hints_text=transition_hints_text,
             handoffs=handoff_payloads,
             scene_count_mode=scene_count_mode,
+            location_registry=location_registry,
         )
         template_path = template_paths[phase_id]
         prompt = render_template_file(template_path, render_values)
@@ -2895,6 +3466,8 @@ def generate_outline(
         validation_result: Dict[str, Any] = {"status": "fail", "errors": [], "warnings": [], "metrics": {}}
         attempt_files: List[str] = []
         attempts_used = 0
+        validation_signature_last = ""
+        retry_directive = ""
 
         for attempt in range(1, OUTLINE_PIPELINE_MAX_ATTEMPTS + 1):
             messages: List[Message] = [
@@ -2913,6 +3486,17 @@ def generate_outline(
             except LLMRequestError as exc:
                 if should_log_llm():
                     log_llm_error(workspace, f"outline_{phase_id}_error", exc, request=request, messages=messages, extra=log_extra)
+                phase_entries[phase_id] = {
+                    "status": "paused",
+                    "timestamp": _now_iso(),
+                    "attempts": attempt,
+                    "artifacts": {
+                        "input": _relpath(run_dir, input_path),
+                        "attempts": attempt_files,
+                    },
+                }
+                history["updated_at"] = _now_iso()
+                _write_json(run_dir / OUTLINE_PIPELINE_HISTORY, history)
                 _write_pause_marker(
                     outline_root=outline_root,
                     book_id=book_id,
@@ -2922,6 +3506,12 @@ def generate_outline(
                     message=str(exc),
                     attempt=attempt,
                     resume_from_phase=phase_id,
+                )
+                _emit_pipeline_report(
+                    terminal_status="PAUSED",
+                    terminal_reason_code="llm_request_error",
+                    raw_model_output_path="",
+                    retry_directive="Retry outline generation after resolving provider/quota issue.",
                 )
                 raise
 
@@ -2955,6 +3545,16 @@ def generate_outline(
                 normalized_output = _extract_phase_json(phase_id, response.text)
             except ValueError as exc:
                 validation_result = {"status": "fail", "errors": [_issue("json_parse", str(exc), path="<root>")], "warnings": [], "metrics": {}}
+                retry_directive = "Return exactly one JSON object matching the required phase schema with no extra text."
+                if attempt == OUTLINE_PIPELINE_MAX_ATTEMPTS:
+                    break
+                continue
+
+            if _is_error_v1_payload(normalized_output):
+                validation_result = _error_v1_to_validation(phase_id, normalized_output)
+                retry_directive = _phase_retry_message(phase_id, validation_result)
+                if not _is_retryable_validation(validation_result):
+                    break
                 if attempt == OUTLINE_PIPELINE_MAX_ATTEMPTS:
                     break
                 continue
@@ -2970,6 +3570,29 @@ def generate_outline(
                     transition_insert_budget_per_chapter=int(max(0, transition_insert_budget_per_chapter)),
                 )
 
+            payload_for_registry: Optional[Dict[str, Any]] = None
+            if phase_id in {"phase_03_scene_draft", "phase_06_thread_payoff_refinement"}:
+                payload_for_registry = normalized_output if isinstance(normalized_output, dict) else None
+            elif phase_id in {"phase_04_transition_causality_refinement", "phase_05_cast_function_refinement"}:
+                outline_payload = normalized_output.get("outline") if isinstance(normalized_output, dict) else None
+                payload_for_registry = outline_payload if isinstance(outline_payload, dict) else None
+            if payload_for_registry is not None:
+                compile_result = _compile_outline_location_identity(outline=payload_for_registry, registry=location_registry)
+                compile_errors = compile_result.get("errors") if isinstance(compile_result.get("errors"), list) else []
+                compile_warnings = compile_result.get("warnings") if isinstance(compile_result.get("warnings"), list) else []
+                _write_location_registry(run_registry_path, location_registry)
+                if compile_errors or compile_warnings:
+                    temp_validation = {
+                        "status": "fail" if compile_errors else "pass",
+                        "errors": [item for item in compile_errors if isinstance(item, dict)],
+                        "warnings": [item for item in compile_warnings if isinstance(item, dict)],
+                        "metrics": {},
+                    }
+                else:
+                    temp_validation = {"status": "pass", "errors": [], "warnings": [], "metrics": {}}
+            else:
+                temp_validation = {"status": "pass", "errors": [], "warnings": [], "metrics": {}}
+
             validation_result = _validate_phase_payload(
                 phase_id=phase_id,
                 payload=normalized_output,
@@ -2981,6 +3604,18 @@ def generate_outline(
                 scene_count_range=parsed_scene_range,
                 exact_scene_count=exact_scene_count,
             )
+            if temp_validation.get("errors"):
+                validation_result["errors"] = list(temp_validation["errors"]) + list(validation_result.get("errors", []))
+            if temp_validation.get("warnings"):
+                validation_result["warnings"] = list(validation_result.get("warnings", [])) + list(temp_validation["warnings"])
+            if temp_validation.get("errors"):
+                validation_result["status"] = "fail"
+
+            retry_directive = _phase_retry_message(phase_id, validation_result)
+            current_signature = _validation_signature(validation_result)
+            if attempt > 1 and current_signature and current_signature == validation_signature_last:
+                break
+            validation_signature_last = current_signature
             if validation_result.get("status") == "pass":
                 phase_success = True
                 break
@@ -2992,10 +3627,12 @@ def generate_outline(
 
         if not phase_success:
             reasons = [str(item.get("message")) for item in validation_result.get("errors", []) if isinstance(item, dict)]
+            error_items = [item for item in validation_result.get("errors", []) if isinstance(item, dict)]
+            reason_code = str(error_items[0].get("code") or "phase_validation_failed") if error_items else "phase_validation_failed"
             failure = OutlinePhaseFailure(
                 phase=phase_id,
                 reasons=reasons or [f"{phase_id} validation failed."],
-                validator_evidence=[item for item in validation_result.get("errors", []) if isinstance(item, dict)],
+                validator_evidence=error_items,
             )
             phase_entries[phase_id] = {
                 "status": "failed",
@@ -3010,17 +3647,12 @@ def generate_outline(
             }
             history["updated_at"] = _now_iso()
             _write_json(run_dir / OUTLINE_PIPELINE_HISTORY, history)
-            _write_latest_run_metadata(outline_root, run_id)
-            _write_pause_marker(
-                outline_root=outline_root,
-                book_id=book_id,
-                run_id=run_id,
-                phase=phase_id,
-                reason_code="phase_validation_failed",
-                message=str(failure),
-                attempt=attempts_used if attempts_used else None,
-                resume_from_phase=phase_id,
-                details=failure.as_error_payload(),
+            raw_model_output_path = attempt_files[-1] if attempt_files else ""
+            _emit_pipeline_report(
+                terminal_status="ERROR",
+                terminal_reason_code=reason_code,
+                raw_model_output_path=raw_model_output_path,
+                retry_directive=retry_directive,
             )
             raise failure
 
@@ -3046,82 +3678,112 @@ def generate_outline(
         _write_json(run_dir / OUTLINE_PIPELINE_HISTORY, history)
         executed_phases.append(phase_id)
 
-    _write_latest_run_metadata(outline_root, run_id)
-    report_payload = _build_outline_pipeline_report_payload(
-        run_dir=run_dir,
-        phase_entries=phase_entries,
-        handoff_payloads=handoff_payloads,
-        book_id=book_id,
-        run_id=run_id,
-        phase_from=phase_from,
-        phase_to=phase_to,
-        effective_from_phase=OUTLINE_PHASE_ORDER[effective_from_idx],
-        executed_phases=executed_phases,
-        reused_phases=reused_phases,
-        settings=settings,
-        scene_count_mode=scene_count_mode,
-    )
-    _write_json(run_dir / "outline_pipeline_report.json", report_payload)
-    _write_json(
-        run_dir / "outline_pipeline_decisions.json",
-        {"settings": settings, "effective_from_phase": OUTLINE_PHASE_ORDER[effective_from_idx]},
-    )
+    final_handoff = handoff_payloads.get("outline_final_v1_1")
+    if requested_to_idx >= OUTLINE_PHASE_ORDER.index("phase_06_thread_payoff_refinement") and isinstance(final_handoff, dict):
+        try:
+            final_outline = final_handoff
+            if "schema_version" not in final_outline:
+                final_outline["schema_version"] = OUTLINE_SCHEMA_VERSION
+            characters = final_outline.get("characters")
+            if isinstance(characters, list):
+                final_outline["characters"] = _ensure_character_ids(characters)
+            chapters = final_outline.get("chapters")
+            if not isinstance(chapters, list) or not chapters:
+                raise ValueError("Final outline must include a non-empty chapters array.")
+            _warn_outline_enum_values(final_outline)
+            validate_json(final_outline, "outline")
 
+            outline_path.write_text(json.dumps(final_outline, ensure_ascii=True, indent=2), encoding="utf-8")
+            if isinstance(final_outline.get("characters"), list):
+                (outline_root / "characters.json").write_text(
+                    json.dumps(final_outline["characters"], ensure_ascii=True, indent=2),
+                    encoding="utf-8",
+                )
+            _write_outline_chapters(outline_root / "chapters", chapters)
+
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            state["outline"] = {"path": "outline/outline.json"}
+            if state.get("status") == "NEW":
+                state["status"] = "OUTLINED"
+            validate_json(state, "state")
+            state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
+
+            _write_location_registry(active_registry_path, location_registry)
+            settings["location_registry_active_sha256"] = _sha256_file(active_registry_path)
+            _emit_pipeline_report()
+
+            pause_marker = outline_root / OUTLINE_PIPELINE_PAUSE_MARKER
+            if pause_marker.exists():
+                pause_marker.unlink()
+            return outline_path
+        except Exception:
+            _emit_pipeline_report(
+                terminal_status="ERROR",
+                terminal_reason_code="outline_publish_failed",
+                raw_model_output_path="",
+                retry_directive="Fix final outline payload/state publish preconditions and rerun.",
+            )
+            raise
+
+    if last_handoff_path is None:
+        _emit_pipeline_report(
+            terminal_status="ERROR",
+            terminal_reason_code="missing_handoff_artifact",
+            raw_model_output_path="",
+            retry_directive="Rerun outline pipeline; no handoff artifact was produced.",
+        )
+        raise RuntimeError("Outline pipeline completed without producing a handoff artifact.")
+    _emit_pipeline_report()
     pause_marker = outline_root / OUTLINE_PIPELINE_PAUSE_MARKER
     if pause_marker.exists():
         pause_marker.unlink()
-
-    final_handoff = handoff_payloads.get("outline_final_v1_1")
-    if requested_to_idx >= OUTLINE_PHASE_ORDER.index("phase_06_thread_payoff_refinement") and isinstance(final_handoff, dict):
-        final_outline = final_handoff
-        if "schema_version" not in final_outline:
-            final_outline["schema_version"] = OUTLINE_SCHEMA_VERSION
-        characters = final_outline.get("characters")
-        if isinstance(characters, list):
-            final_outline["characters"] = _ensure_character_ids(characters)
-        chapters = final_outline.get("chapters")
-        if not isinstance(chapters, list) or not chapters:
-            raise ValueError("Final outline must include a non-empty chapters array.")
-        _warn_outline_enum_values(final_outline)
-        validate_json(final_outline, "outline")
-
-        outline_path.write_text(json.dumps(final_outline, ensure_ascii=True, indent=2), encoding="utf-8")
-        if isinstance(final_outline.get("characters"), list):
-            (outline_root / "characters.json").write_text(
-                json.dumps(final_outline["characters"], ensure_ascii=True, indent=2),
-                encoding="utf-8",
-            )
-        _write_outline_chapters(outline_root / "chapters", chapters)
-
-        state = json.loads(state_path.read_text(encoding="utf-8"))
-        state["outline"] = {"path": "outline/outline.json"}
-        if state.get("status") == "NEW":
-            state["status"] = "OUTLINED"
-        validate_json(state, "state")
-        state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
-        return outline_path
-
-    if last_handoff_path is None:
-        raise RuntimeError("Outline pipeline completed without producing a handoff artifact.")
     return last_handoff_path
 
 
 def load_latest_outline_pipeline_report(workspace: Path, book_id: str) -> Tuple[Optional[Path], Dict[str, Any]]:
     book_root = workspace / "books" / book_id
     outline_root = book_root / "outline"
+    latest_pointer = outline_root / OUTLINE_PIPELINE_REPORT_LATEST
+    if latest_pointer.exists():
+        try:
+            payload = _read_json(latest_pointer)
+        except Exception:
+            payload = {}
+        if isinstance(payload, dict):
+            rel = str(payload.get("path") or "").strip()
+            if rel:
+                candidate = (outline_root / rel).resolve()
+                if candidate.exists():
+                    try:
+                        report = _read_json(candidate)
+                    except Exception:
+                        report = {}
+                    if isinstance(report, dict):
+                        return candidate, report
+            run_id = str(payload.get("run_id") or "").strip()
+            if run_id:
+                candidate = outline_root / "pipeline_runs" / run_id / "outline_pipeline_report.json"
+                if candidate.exists():
+                    try:
+                        report = _read_json(candidate)
+                    except Exception:
+                        report = {}
+                    if isinstance(report, dict):
+                        return candidate, report
+
     run_id, run_dir, _payload = _load_latest_run_metadata(outline_root)
     if not run_id or run_dir is None:
         return None, {}
-    report_path = run_dir / "outline_pipeline_report.json"
-    if not report_path.exists():
+    candidate = run_dir / "outline_pipeline_report.json"
+    if not candidate.exists():
         return None, {}
     try:
-        report = _read_json(report_path)
+        report = _read_json(candidate)
     except Exception:
         return None, {}
     if not isinstance(report, dict):
         return None, {}
-    return report_path, report
+    return candidate, report
 
 
 def format_outline_pipeline_summary(report: Dict[str, Any], report_path: Optional[Path] = None) -> str:
@@ -3132,10 +3794,17 @@ def format_outline_pipeline_summary(report: Dict[str, Any], report_path: Optiona
     seam_outcomes = report.get("seam_outcomes") if isinstance(report.get("seam_outcomes"), dict) else {}
     top_decisions = report.get("top_seam_decisions") if isinstance(report.get("top_seam_decisions"), list) else []
     attention_items = report.get("attention_items") if isinstance(report.get("attention_items"), list) else []
+    phase_failed = str(report.get("phase_failed") or "").strip()
+    reason_codes = report.get("reason_codes") if isinstance(report.get("reason_codes"), list) else []
+    attempt_usage = report.get("attempt_usage") if isinstance(report.get("attempt_usage"), dict) else {}
 
     lines: List[str] = []
     lines.append("Outline Pipeline Summary:")
     lines.append(f"- Result: {overall_status}")
+    if phase_failed:
+        lines.append(f"- Phase failed: {phase_failed}")
+    if reason_codes:
+        lines.append(f"- Reason codes: {', '.join(str(item) for item in reason_codes[:5])}")
     lines.append(
         "- Mode values: "
         f"strict_transition_bridges={bool(mode_values.get('strict_transition_bridges', False))} "
@@ -3164,6 +3833,9 @@ def format_outline_pipeline_summary(report: Dict[str, Any], report_path: Optiona
             reason = str(item.get("reason") or "").strip()
             reason_text = f" reason={reason}" if reason else ""
             lines.append(f"  - {from_ref}->{to_ref} score={seam_score} resolution={seam_resolution}{reason_text}")
+    if attempt_usage:
+        phase_attempts = ", ".join(f"{key}:{value}" for key, value in list(attempt_usage.items())[:6])
+        lines.append(f"- Attempts: {phase_attempts}")
     if attention_items:
         lines.append("- Attention items:")
         for item in attention_items[:5]:
@@ -3173,6 +3845,7 @@ def format_outline_pipeline_summary(report: Dict[str, Any], report_path: Optiona
             severity = str(item.get("severity") or "warning").strip()
             message = str(item.get("message") or "").strip()
             lines.append(f"  - [{severity}] {code}: {message}")
+    lines.append(f"- Attention count: {len(attention_items)}")
     if report_path is not None:
         lines.append(f"- Report: {report_path}")
     return "\n".join(lines) + "\n"
@@ -3219,6 +3892,8 @@ def reset_outline_workspace_detailed(
     pipeline_root_files = {
         OUTLINE_PIPELINE_LATEST,
         OUTLINE_PIPELINE_LATEST_ALIAS,
+        OUTLINE_PIPELINE_REPORT_LATEST,
+        OUTLINE_PIPELINE_REPORT_LATEST_SNAPSHOT,
         OUTLINE_PIPELINE_PAUSE_MARKER,
     }
 

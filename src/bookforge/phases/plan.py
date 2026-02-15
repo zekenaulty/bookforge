@@ -246,12 +246,14 @@ def _build_outline_window(chapter: Dict[str, Any], scene_number: int) -> Dict[st
         for key in (
             "location_start_id",
             "location_end_id",
+            "location_start_label",
+            "location_end_label",
             "location_start",
             "location_end",
             "handoff_mode",
             "constraint_state",
             "transition_in_text",
-            "transition_out",
+            "transition_out_text",
             "consumes_outcome_from",
             "hands_off_to",
             "seam_resolution",
@@ -269,6 +271,11 @@ def _build_outline_window(chapter: Dict[str, Any], scene_number: int) -> Dict[st
             cleaned = [str(item).strip() for item in anchors if str(item).strip()]
             if cleaned:
                 payload["transition_in_anchors"] = cleaned
+        out_anchors = scene.get("transition_out_anchors")
+        if isinstance(out_anchors, list):
+            cleaned_out = [str(item).strip() for item in out_anchors if str(item).strip()]
+            if cleaned_out:
+                payload["transition_out_anchors"] = cleaned_out
         seam_score = scene.get("seam_score")
         if isinstance(seam_score, int):
             payload["seam_score"] = seam_score
@@ -278,6 +285,9 @@ def _build_outline_window(chapter: Dict[str, Any], scene_number: int) -> Dict[st
         legacy_transition_in = str(scene.get("transition_in") or "").strip()
         if legacy_transition_in and "transition_in_text" not in payload:
             payload["transition_in_text"] = legacy_transition_in
+        legacy_transition_out = str(scene.get("transition_out") or "").strip()
+        if legacy_transition_out and "transition_out_text" not in payload:
+            payload["transition_out_text"] = legacy_transition_out
         return payload
 
     current_payload = _entry_payload(current_entry)
@@ -435,11 +445,13 @@ def _normalize_scene_card(
     for key in (
         "location_start_id",
         "location_end_id",
+        "location_start_label",
+        "location_end_label",
         "location_start",
         "location_end",
         "handoff_mode",
         "constraint_state",
-        "transition_out",
+        "transition_out_text",
         "consumes_outcome_from",
         "hands_off_to",
         "seam_resolution",
@@ -448,6 +460,20 @@ def _normalize_scene_card(
         text = str(card.get(key) or transition_defaults.get(key) or "").strip()
         if text:
             card[key] = text
+
+    out_anchors = card.get("transition_out_anchors")
+    if not isinstance(out_anchors, list):
+        out_anchors = transition_defaults.get("transition_out_anchors")
+    if isinstance(out_anchors, list):
+        out_anchors = [str(item).strip() for item in out_anchors if str(item).strip()]
+        if out_anchors:
+            card["transition_out_anchors"] = out_anchors
+
+    legacy_transition_out = str(card.get("transition_out") or transition_defaults.get("transition_out") or "").strip()
+    if legacy_transition_out and "transition_out_text" not in card:
+        card["transition_out_text"] = legacy_transition_out
+    if "transition_out" in card:
+        card.pop("transition_out", None)
 
     seam_score = card.get("seam_score")
     if not isinstance(seam_score, int):

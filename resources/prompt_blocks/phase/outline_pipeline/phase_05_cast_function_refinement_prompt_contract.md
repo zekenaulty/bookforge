@@ -29,11 +29,12 @@ Goal:
 Rules:
 - Preserve chapter/section/scene ordering unless correction is required.
 - Preserve phase-04 transition requirements:
-  - location_start_id/location_end_id
+  - location_start_label/location_end_label
+  - location_start_id/location_end_id (optional in model output; orchestrator compiles canonical ids from labels)
   - location_start/location_end
   - handoff_mode/constraint_state
   - transition_in_text/transition_in_anchors
-  - consumes_outcome_from/hands_off_to/transition_out link obligations
+  - consumes_outcome_from/hands_off_to/transition_out_text/transition_out_anchors link obligations
   - seam_score/seam_resolution
 - Preserve section.end_condition for every section.
 - Keep link format chapter_id:scene_id.
@@ -47,10 +48,11 @@ If you cannot satisfy constraints after correction attempts, return error_v1:
 {
   "result": "ERROR",
   "schema_version": "error_v1",
+  "error_type": "validation_error",
+  "reason_code": "cast_refinement_blocked",
+  "missing_fields": ["outline.characters"],
   "phase": "phase_05_cast_function_refinement",
-  "reasons": ["..."],
-  "validator_evidence": [{"code": "validation_code", "message": "...", "path": "json.path", "scene_ref": "chapter:scene"}],
-  "retryable": false
+  "action_hint": "Preserve transition contract and supply required cast registry fields."
 }
 
 Transition-refined outline (phase 04):
@@ -64,3 +66,4 @@ Targets:
 
 Notes:
 {{notes}}
+

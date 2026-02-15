@@ -3,7 +3,7 @@ import json
 import pytest
 
 from bookforge.llm.types import LLMResponse
-from bookforge.outline import generate_outline
+from bookforge.outline import generate_outline, OutlinePhaseFailure, load_latest_outline_pipeline_report
 from bookforge.workspace import init_book_workspace
 
 
@@ -481,7 +481,7 @@ def test_generate_outline_resume_fingerprint_mismatch_blocks(tmp_path: Path) -> 
         )
 
 
-def test_generate_outline_repairs_missing_chapter_boundaries(tmp_path: Path) -> None:
+def test_generate_outline_strict_json_rejects_malformed_final_output(tmp_path: Path) -> None:
     author_dir = tmp_path / "authors" / "eldrik-vale" / "v1"
     author_dir.mkdir(parents=True)
     (author_dir / "system_fragment.md").write_text("Author fragment.", encoding="utf-8")
@@ -497,18 +497,21 @@ def test_generate_outline_repairs_missing_chapter_boundaries(tmp_path: Path) -> 
     )
 
     client = DummyClient(_pipeline_responses_with_final(_broken_outline_json()))
-    outline_path = generate_outline(
-        workspace=tmp_path,
-        book_id="my_book",
-        new_version=False,
-        client=client,
-        model="dummy",
-    )
+    with pytest.raises(OutlinePhaseFailure):
+        generate_outline(
+            workspace=tmp_path,
+            book_id="my_book",
+            new_version=False,
+            client=client,
+            model="dummy",
+        )
+    report_path, report = load_latest_outline_pipeline_report(workspace=tmp_path, book_id="my_book")
+    assert report_path is not None
+    assert report.get("overall_status") == "ERROR"
+    assert any(str(code) == "json_parse" for code in report.get("reason_codes", []))
 
-    assert outline_path.exists()
 
-
-def test_generate_outline_repairs_extra_data_before_threads(tmp_path: Path) -> None:
+def test_generate_outline_strict_json_rejects_extra_data_before_threads(tmp_path: Path) -> None:
     author_dir = tmp_path / "authors" / "eldrik-vale" / "v1"
     author_dir.mkdir(parents=True)
     (author_dir / "system_fragment.md").write_text("Author fragment.", encoding="utf-8")
@@ -524,12 +527,15 @@ def test_generate_outline_repairs_extra_data_before_threads(tmp_path: Path) -> N
     )
 
     client = DummyClient(_pipeline_responses_with_final(_broken_outline_extra_data_json()))
-    outline_path = generate_outline(
-        workspace=tmp_path,
-        book_id="my_book",
-        new_version=False,
-        client=client,
-        model="dummy",
-    )
-
-    assert outline_path.exists()
+    with pytest.raises(OutlinePhaseFailure):
+        generate_outline(
+            workspace=tmp_path,
+            book_id="my_book",
+            new_version=False,
+            client=client,
+            model="dummy",
+        )
+    report_path, report = load_latest_outline_pipeline_report(workspace=tmp_path, book_id="my_book")
+    assert report_path is not None
+    assert report.get("overall_status") == "ERROR"
+    assert any(str(code) == "json_parse" for code in report.get("reason_codes", []))

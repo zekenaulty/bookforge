@@ -60,8 +60,15 @@ Compatibility and safety
   - Default (`strong_non_exact`): chapter totals are validated strongly but mismatch is warning-level by default.
   - Range mode: `--scene-count-range` allows in-range totals and emits high-end bias warnings.
   - Exact mode: `--exact-scene-count` enforces strict chapter-total equality.
+- Outline phases run in strict JSON execution mode:
+  - output must be exactly one JSON object (no preamble/markdown/trailing text).
+  - optional fields must be omitted when unknown (no empty-string placeholders).
+  - hard failures should return `error_v1` JSON (`error_type`, `reason_code`, `missing_fields`, `phase`, `action_hint`).
 - Transition-quality summary is always printed at the end of outline generation and written to `outline/pipeline_runs/<run_id>/outline_pipeline_report.json`.
-- Outline phases require canonical location ids on scenes (`location_start_id`, `location_end_id`, format `LOC_[A-Z0-9_]+`) and reject placeholder values by default.
+- Outline phases require concrete location labels on scenes (`location_start_label`, `location_end_label`) and reject placeholder values by default.
+- Canonical `LOC_*` ids are compiled deterministically by the orchestrator and published to:
+  - `outline/location_registry_active.json`
+  - run-scoped copy: `outline/pipeline_runs/<run_id>/location_registry.json`
 
 Outputs
 - Writes outline/outline.json and outline/chapters/ch_###.json.
@@ -73,6 +80,7 @@ Outputs
 - Writes outline pipeline summary report:
   - outline/pipeline_runs/<run_id>/outline_pipeline_report.json
   - includes result status, mode values, seam outcomes, attention items, and top seam decisions.
+  - latest report pointer: `outline/outline_pipeline_report_latest.json`
 
 Debugging
 - If the model returns invalid JSON, the raw response is written to workspace/logs/llm/outline_generate_<timestamp>.json.

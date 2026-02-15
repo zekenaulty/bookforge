@@ -402,6 +402,8 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--resume", action="store_true", help="Resume prior run.")
     run_parser.add_argument(
         "--ack-outline-attention-items",
+        "--ack-outline-issues",
+        dest="ack_outline_attention_items",
         action="store_true",
         help="Acknowledge non-strict outline attention items and proceed with run.",
     )

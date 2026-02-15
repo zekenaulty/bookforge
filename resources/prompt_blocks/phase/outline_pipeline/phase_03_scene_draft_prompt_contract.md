@@ -29,8 +29,8 @@ Required chapter/section/scene constraints:
 - Each section-final scene must include end_condition_echo that exactly matches phase-02 end_condition.
 
 Required transition fields (phase 03 and later):
-- location_start_id (required, format LOC_[A-Z0-9_]+)
-- location_end_id (required, format LOC_[A-Z0-9_]+)
+- location_start_label (required, non-empty string)
+- location_end_label (required, non-empty string)
 - location_start (non-empty string)
 - location_end (non-empty string)
 - handoff_mode (enum string)
@@ -38,14 +38,18 @@ Required transition fields (phase 03 and later):
 - transition_in_text (non-empty string; connective action, not recap)
 - transition_in_anchors (array of 3-6 non-empty strings)
 - For non-first scenes: consumes_outcome_from (required, chapter_id:scene_id)
-- For non-last scenes: transition_out (required, non-empty) and hands_off_to (required, chapter_id:scene_id)
+- For non-last scenes: transition_out_text (required, non-empty), transition_out_anchors (required, 3-6 strings), and hands_off_to (required, chapter_id:scene_id)
+
+Location id compilation:
+- The orchestrator owns canonical LOC_* id generation from labels.
+- You may include location_start_id/location_end_id, but labels are mandatory and ids will be validated/normalized by the orchestrator.
 
 Transition enum guidance:
 - handoff_mode: direct_continuation, escorted_transfer, detained_then_release, time_skip, hard_cut, montage, offscreen_processing, combat_disengage, arrival_checkpoint, aftermath_relocation
 - constraint_state: free, pursued, detained, processed, sheltered, restricted, engaged_combat, fleeing
 
 Placeholder prohibition (hard):
-- Do NOT emit placeholder location/transition values such as current_location, unknown, placeholder, tbd, here, there.
+- Do NOT emit placeholder location/transition values such as current_location, unknown, placeholder, tbd, here, there, n/a.
 - If exact location identity is unavailable, return error_v1 with reason code missing_location_context.
 - Do not emit synthetic anchor labels (for example anchor_1, anchor_2).
 
@@ -64,10 +68,11 @@ If you cannot satisfy constraints after correction attempts, return error_v1:
 {
   "result": "ERROR",
   "schema_version": "error_v1",
+  "error_type": "validation_error",
+  "reason_code": "missing_location_context",
+  "missing_fields": ["chapters[0].sections[0].scenes[0].location_start_label"],
   "phase": "phase_03_scene_draft",
-  "reasons": ["..."],
-  "validator_evidence": [{"code": "validation_code", "message": "...", "path": "json.path", "scene_ref": "chapter:scene"}],
-  "retryable": false
+  "action_hint": "Provide concrete location labels and transition payload; do not use placeholders."
 }
 
 Outline spine (phase 01):
@@ -90,3 +95,4 @@ Notes:
 
 Transition hints (optional):
 {{transition_hints}}
+

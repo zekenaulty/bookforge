@@ -463,17 +463,26 @@ def run_loop(
     if outline_report:
         requires_attention = bool(outline_report.get("requires_user_attention", False))
         strict_blocking = bool(outline_report.get("strict_blocking", False))
+        overall_status = str(outline_report.get("overall_status") or "UNKNOWN").strip().upper()
+        summary = format_outline_pipeline_summary(outline_report, report_path=report_path).rstrip()
+        if summary:
+            _status(summary)
+
+        if overall_status not in {"SUCCESS", "SUCCESS_WITH_WARNINGS"}:
+            raise ValueError(
+                "WRITE GATED: latest outline pipeline status is "
+                f"{overall_status}. Resolve outline pipeline issues before writing. "
+                f"Report: {report_path}"
+            )
+
         if requires_attention:
-            summary = format_outline_pipeline_summary(outline_report, report_path=report_path).rstrip()
-            if summary:
-                _status(summary)
             if strict_blocking:
                 raise ValueError(
-                    "Outline report requires strict attention handling; run is blocked until outline issues are resolved."
+                    "WRITE GATED: outline report requires strict attention handling; resolve outline issues before writing."
                 )
             if not ack_outline_attention_items:
                 raise ValueError(
-                    "Outline report requires attention; re-run with --ack-outline-attention-items after review."
+                    "WRITE GATED: outline report requires attention. Re-run with --ack-outline-attention-items only after review."
                 )
             _append_run_log(book_root, run_id, "outline_attention_ack=true")
         else:

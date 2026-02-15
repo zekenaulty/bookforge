@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Outline Pipeline Report",
+  "type": "object",
+  "required": [
+    "book_id",
+    "run_id",
+    "timestamp",
+    "overall_status",
+    "requires_user_attention",
+    "phase_failed",
+    "reason_codes",
+    "attempt_usage"
+  ],
+  "properties": {
+    "book_id": {
+      "type": "string"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string"
+    },
+    "overall_status": {
+      "type": "string",
+      "enum": [
+        "SUCCESS",
+        "SUCCESS_WITH_WARNINGS",
+        "PAUSED",
+        "ERROR"
+      ]
+    },
+    "requires_user_attention": {
+      "type": "boolean"
+    },
+    "phase_failed": {
+      "type": "string"
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "attempt_usage": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "top_errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "attention_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "raw_model_output_path": {
+      "type": "string"
+    },
+    "retry_directive": {
+      "type": "string"
+    },
+    "template_checksums": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -41,10 +41,11 @@ If you cannot satisfy constraints after correction attempts, return error_v1:
 {
   "result": "ERROR",
   "schema_version": "error_v1",
+  "error_type": "validation_error",
+  "reason_code": "spine_contract_incomplete",
+  "missing_fields": ["chapters[0].goal"],
   "phase": "phase_01_chapter_spine",
-  "reasons": ["..."],
-  "validator_evidence": [{"code": "validation_code", "message": "...", "path": "json.path"}],
-  "retryable": false
+  "action_hint": "Provide all required chapter-level fields with valid types."
 }
 
 Book:

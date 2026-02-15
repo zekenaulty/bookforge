@@ -172,6 +172,14 @@
                         "type": "string",
                         "pattern": "^LOC_[A-Z0-9_]+$"
                       },
+                      "location_start_label": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "location_end_label": {
+                        "type": "string",
+                        "minLength": 1
+                      },
                       "location_start": {
                         "type": "string",
                         "minLength": 1
@@ -191,6 +199,16 @@
                         "minLength": 1
                       },
                       "transition_in_anchors": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "transition_out_text": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "transition_out_anchors": {
                         "type": "array",
                         "items": {
                           "type": "string"
@@ -308,6 +326,52 @@
         },
         "additionalProperties": true
       }
+    },
+    "location_registry": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string"
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "location_id",
+              "display_name"
+            ],
+            "properties": {
+              "location_id": {
+                "type": "string",
+                "pattern": "^LOC_[A-Z0-9_]+$"
+              },
+              "display_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "parent_location_id": {
+                "type": "string",
+                "pattern": "^LOC_[A-Z0-9_]+$"
+              },
+              "stability_key": {
+                "type": "string"
+              },
+              "introduced_in": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
     }
   },
   "additionalProperties": true
