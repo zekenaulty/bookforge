@@ -8,6 +8,7 @@ Write the scene described by the scene card.
 - Use character_registry to keep names consistent in prose.
 - Transition realization contract:
   - If scene_card.handoff_mode != "direct_continuation", the opening paragraph MUST realize scene_card.transition_in_text in 1-3 connective-action sentences.
+  - Respect scene_card.location_start_id and scene_card.location_end_id as canonical transition identity.
   - Do not replace transition realization with recap exposition.
   - Opening transition realization must include at least one concrete action verb and one concrete world noun tied to the handoff context.
   - Acceptable realization forms: exact transition_in_text or equivalent phrasing that includes all scene_card.transition_in_anchors.

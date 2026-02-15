@@ -13,6 +13,8 @@
     "required_callbacks",
     "constraints",
     "end_condition",
+    "location_start_id",
+    "location_end_id",
     "location_start",
     "location_end",
     "handoff_mode",
@@ -61,11 +63,21 @@
     "end_condition": {
       "type": "string"
     },
+    "location_start_id": {
+      "type": "string",
+      "pattern": "^LOC_[A-Z0-9_]+$"
+    },
+    "location_end_id": {
+      "type": "string",
+      "pattern": "^LOC_[A-Z0-9_]+$"
+    },
     "location_start": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "location_end": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "handoff_mode": {
       "type": "string"
@@ -74,7 +86,8 @@
       "type": "string"
     },
     "transition_in_text": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "transition_in_anchors": {
       "type": "array",

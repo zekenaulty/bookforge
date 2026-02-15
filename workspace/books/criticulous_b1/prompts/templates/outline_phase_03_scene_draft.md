@@ -25,12 +25,37 @@ Required chapter/section/scene constraints:
 - chapter_id must be sequential integers starting at 1.
 - section_id must be sequential integers within each chapter.
 - scene_id is chapter-local and must be monotonic across all sections in that chapter.
+- Preserve section.end_condition from phase 02 for every section.
 - Each section-final scene must include end_condition_echo that exactly matches phase-02 end_condition.
 
-Optional edge fields:
-- transition_in, transition_out, edge_intent, consumes_outcome_from, hands_off_to
-- If unknown, omit the field. Do NOT emit empty strings.
-- If present, consumes_outcome_from/hands_off_to must use "chapter_id:scene_id" format (example "2:7").
+Required transition fields (phase 03 and later):
+- location_start_id (required, format LOC_[A-Z0-9_]+)
+- location_end_id (required, format LOC_[A-Z0-9_]+)
+- location_start (non-empty string)
+- location_end (non-empty string)
+- handoff_mode (enum string)
+- constraint_state (enum string)
+- transition_in_text (non-empty string; connective action, not recap)
+- transition_in_anchors (array of 3-6 non-empty strings)
+- For non-first scenes: consumes_outcome_from (required, chapter_id:scene_id)
+- For non-last scenes: transition_out (required, non-empty) and hands_off_to (required, chapter_id:scene_id)
+
+Transition enum guidance:
+- handoff_mode: direct_continuation, escorted_transfer, detained_then_release, time_skip, hard_cut, montage, offscreen_processing, combat_disengage, arrival_checkpoint, aftermath_relocation
+- constraint_state: free, pursued, detained, processed, sheltered, restricted, engaged_combat, fleeing
+
+Placeholder prohibition (hard):
+- Do NOT emit placeholder location/transition values such as current_location, unknown, placeholder, tbd, here, there.
+- If exact location identity is unavailable, return error_v1 with reason code missing_location_context.
+- Do not emit synthetic anchor labels (for example anchor_1, anchor_2).
+
+Seam scoring fields are optional in phase 03 but recommended:
+- seam_score (0-100 int)
+- seam_resolution (inline_bridge|micro_scene|full_scene)
+
+Compatibility and omission rule:
+- If a field is optional, omit when unknown; do NOT emit empty strings.
+- Legacy transition_in may be present only as a compatibility alias; canonical field is transition_in_text.
 
 Output must remain compatible with scene-count policy:
 {{scene_count_policy}}

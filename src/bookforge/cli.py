@@ -71,6 +71,7 @@ def _outline_generate(args: argparse.Namespace) -> int:
             transition_hints_file=transition_hints_file,
             strict_transition_hints=bool(getattr(args, "strict_transition_hints", False)),
             strict_transition_bridges=bool(getattr(args, "strict_transition_bridges", False)),
+            strict_location_identity=bool(getattr(args, "strict_location_identity", True)),
             transition_insert_budget_per_chapter=int(getattr(args, "transition_insert_budget_per_chapter", 2) or 2),
             allow_transition_scene_insertions=bool(getattr(args, "allow_transition_scene_insertions", True)),
             force_rerun_with_draft=bool(getattr(args, "force_rerun_with_draft", False)),
@@ -284,6 +285,19 @@ def build_parser() -> argparse.ArgumentParser:
         "--strict-transition-bridges",
         action="store_true",
         help="Enable strict transition-bridge enforcement mode.",
+    )
+    outline_generate.add_argument(
+        "--strict-location-identity",
+        dest="strict_location_identity",
+        action="store_true",
+        default=True,
+        help="Require strict location identity validation (default: enabled).",
+    )
+    outline_generate.add_argument(
+        "--relaxed-location-identity",
+        dest="strict_location_identity",
+        action="store_false",
+        help="Allow placeholder-like location identity values as warnings instead of errors.",
     )
     outline_generate.add_argument(
         "--transition-insert-budget-per-chapter",

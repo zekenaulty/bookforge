@@ -22,12 +22,15 @@ Registry policy:
 Required integrity:
 - Keep chapter_id sequential and scene_id monotonic chapter-local.
 - Preserve required transition contract and link fields from phase 04/05:
+  - location_start_id/location_end_id
   - location_start/location_end
   - handoff_mode/constraint_state
   - transition_in_text/transition_in_anchors
   - transition_out/consumes_outcome_from/hands_off_to (chapter_id:scene_id)
   - seam_score/seam_resolution
+- Preserve section.end_condition for every section.
 - Preserve section closure anchors (end_condition_echo on section-final scenes).
+- Do NOT emit placeholder location/transition values (current_location, unknown, placeholder, tbd, here, there).
 - Maintain reference-integrity for all character/thread ids.
 
 Thread policy:

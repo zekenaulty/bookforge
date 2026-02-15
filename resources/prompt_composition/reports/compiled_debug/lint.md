@@ -15,6 +15,7 @@ Return ONLY JSON matching the lint_report schema.
   - Inline bracketed UI (e.g., [HP: 1/1]) is still UI and should be gated the same way; do not embed UI mid-sentence.
 - Transition bridge gate:
   - Emit issue code "transition_bridge_missing" when scene_card indicates non-direct handoff (or location/handoff metadata implies discontinuity) and the opening span lacks transition realization evidence.
+  - Treat scene_card.location_start_id and scene_card.location_end_id as canonical location identity for seam checks.
   - Opening span scope for this check: first paragraph or first 400 characters, whichever is shorter.
   - Transition realization evidence is either:
     - exact scene_card.transition_in_text, or
@@ -135,6 +136,5 @@ Post-summary (facts-only):
 
 Post-invariants (must_stay_true + key facts):
 {{post_invariants}}
-
 
 <!-- end entry=E001 semantic=lint.lint_policy_rules_and_inputs -->

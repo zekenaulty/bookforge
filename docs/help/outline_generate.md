@@ -7,6 +7,7 @@ Usage
 - bookforge outline generate --book <id> [--rerun] [--resume] [--new-version] [--prompt-file <path>]
 - bookforge outline generate --book <id> [--from-phase <phase_id> | --to-phase <phase_id> | --phase <phase_id>]
 - bookforge outline generate --book <id> [--transition-hints-file <path>] [--strict-transition-hints] [--strict-transition-bridges]
+- bookforge outline generate --book <id> [--strict-location-identity | --relaxed-location-identity]
 - bookforge outline generate --book <id> [--transition-insert-budget-per-chapter <n>] [--allow-transition-scene-insertions | --disallow-transition-scene-insertions]
 - bookforge outline generate --book <id> [--scene-count-range <min:max>] [--exact-scene-count]
 - bookforge outline generate --book <id> [--force-rerun-with-draft]
@@ -28,6 +29,8 @@ Optional parameters
 - --transition-hints-file: Path to transition-hints input file.
 - --strict-transition-hints: Require non-empty, schema-valid transition hints and strict compliance reporting.
 - --strict-transition-bridges: Enable strict transition-bridge enforcement (hard-block semantics for strict error-level attention items).
+- --strict-location-identity: Enforce hard validation for transition/location identity placeholders and malformed location ids (default enabled).
+- --relaxed-location-identity: Downgrade location-identity placeholder findings to warnings.
 - --transition-insert-budget-per-chapter: Transition insertion budget per chapter (default: 2).
 - --allow-transition-scene-insertions: Allow transition scene insertion (default enabled).
 - --disallow-transition-scene-insertions: Disable transition scene insertion.
@@ -58,6 +61,7 @@ Compatibility and safety
   - Range mode: `--scene-count-range` allows in-range totals and emits high-end bias warnings.
   - Exact mode: `--exact-scene-count` enforces strict chapter-total equality.
 - Transition-quality summary is always printed at the end of outline generation and written to `outline/pipeline_runs/<run_id>/outline_pipeline_report.json`.
+- Outline phases require canonical location ids on scenes (`location_start_id`, `location_end_id`, format `LOC_[A-Z0-9_]+`) and reject placeholder values by default.
 
 Outputs
 - Writes outline/outline.json and outline/chapters/ch_###.json.

@@ -244,6 +244,8 @@ def _build_outline_window(chapter: Dict[str, Any], scene_number: int) -> Dict[st
             },
         }
         for key in (
+            "location_start_id",
+            "location_end_id",
             "location_start",
             "location_end",
             "handoff_mode",
@@ -431,6 +433,8 @@ def _normalize_scene_card(
             card["transition_in_anchors"] = anchors
 
     for key in (
+        "location_start_id",
+        "location_end_id",
         "location_start",
         "location_end",
         "handoff_mode",

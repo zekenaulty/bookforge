@@ -26,9 +26,12 @@ Required chapter/section/scene constraints:
 - chapter_id must be sequential integers starting at 1.
 - section_id must be sequential integers within each chapter.
 - scene_id is chapter-local and must be monotonic across all sections in that chapter.
+- Preserve section.end_condition from phase 02 for every section.
 - Each section-final scene must include end_condition_echo that exactly matches phase-02 end_condition.
 
 Required transition fields (phase 03 and later):
+- location_start_id (required, format LOC_[A-Z0-9_]+)
+- location_end_id (required, format LOC_[A-Z0-9_]+)
 - location_start (non-empty string)
 - location_end (non-empty string)
 - handoff_mode (enum string)
@@ -41,6 +44,11 @@ Required transition fields (phase 03 and later):
 Transition enum guidance:
 - handoff_mode: direct_continuation, escorted_transfer, detained_then_release, time_skip, hard_cut, montage, offscreen_processing, combat_disengage, arrival_checkpoint, aftermath_relocation
 - constraint_state: free, pursued, detained, processed, sheltered, restricted, engaged_combat, fleeing
+
+Placeholder prohibition (hard):
+- Do NOT emit placeholder location/transition values such as current_location, unknown, placeholder, tbd, here, there.
+- If exact location identity is unavailable, return error_v1 with reason code missing_location_context.
+- Do not emit synthetic anchor labels (for example anchor_1, anchor_2).
 
 Seam scoring fields are optional in phase 03 but recommended:
 - seam_score (0-100 int)

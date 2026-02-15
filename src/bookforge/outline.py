@@ -92,6 +92,8 @@ OPTIONAL_EDGE_FIELDS = {
 }
 
 TRANSITION_REQUIRED_SCENE_FIELDS = {
+    "location_start_id",
+    "location_end_id",
     "location_start",
     "location_end",
     "handoff_mode",
@@ -168,6 +170,9 @@ MAJOR_TURN_KEYWORDS = (
 )
 
 REF_PATTERN = re.compile(r"^[1-9][0-9]*:[1-9][0-9]*$")
+LOCATION_ID_PATTERN = re.compile(r"^LOC_[A-Z0-9_]+$")
+PLACEHOLDER_TOKEN_PATTERN = re.compile(r"\b(current_location|unknown|placeholder|tbd|here|there)\b", re.IGNORECASE)
+PLACEHOLDER_ANCHOR_PATTERN = re.compile(r"^anchor_[0-9]+$", re.IGNORECASE)
 
 
 @dataclass
@@ -1129,6 +1134,20 @@ def _normalize_text_token(value: Any) -> str:
     return token or "unknown"
 
 
+def _is_placeholder_text(value: Any) -> bool:
+    text = str(value or "").strip()
+    if not text:
+        return False
+    return bool(PLACEHOLDER_TOKEN_PATTERN.search(text))
+
+
+def _is_placeholder_anchor(value: Any) -> bool:
+    text = str(value or "").strip()
+    if not text:
+        return False
+    return bool(PLACEHOLDER_ANCHOR_PATTERN.fullmatch(text) or PLACEHOLDER_TOKEN_PATTERN.search(text))
+
+
 def _unique_non_empty(values: List[str]) -> List[str]:
     seen: set[str] = set()
     ordered: List[str] = []
@@ -1159,8 +1178,8 @@ def _seam_resolution_for_score(score: int) -> str:
 def _score_transition_edge(current_scene: Dict[str, Any], next_scene: Dict[str, Any]) -> int:
     score = 0
 
-    current_end = _normalize_text_token(current_scene.get("location_end"))
-    next_start = _normalize_text_token(next_scene.get("location_start"))
+    current_end = _normalize_text_token(current_scene.get("location_end_id") or current_scene.get("location_end"))
+    next_start = _normalize_text_token(next_scene.get("location_start_id") or next_scene.get("location_start"))
     if current_end != "unknown" and next_start != "unknown" and current_end != next_start:
         score += 25
 
@@ -1222,17 +1241,16 @@ def _fallback_transition_out_text(scene: Dict[str, Any], next_scene: Dict[str, A
 
 
 def _fallback_transition_anchors(scene: Dict[str, Any]) -> List[str]:
-    anchors = _unique_non_empty(
+    return _unique_non_empty(
         [
+            _normalize_text_token(scene.get("location_start_id")),
+            _normalize_text_token(scene.get("location_end_id")),
             _normalize_text_token(scene.get("location_start")),
             _normalize_text_token(scene.get("location_end")),
             _normalize_text_token(scene.get("handoff_mode")),
             _normalize_text_token(scene.get("constraint_state")),
         ]
     )
-    while len(anchors) < 3:
-        anchors.append(f"anchor_{len(anchors) + 1}")
-    return anchors[:6]
 
 
 def _chapter_scene_entries(chapter: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -1259,59 +1277,84 @@ def _ensure_transition_contract_for_scene(
     next_scene: Optional[Dict[str, Any]],
 ) -> None:
     legacy_transition_in = str(scene.get("transition_in") or "").strip()
+
+    location_start_id = str(scene.get("location_start_id") or "").strip()
+    if not location_start_id and prev_scene is not None:
+        location_start_id = str(prev_scene.get("location_end_id") or prev_scene.get("location_start_id") or "").strip()
+    if location_start_id:
+        scene["location_start_id"] = location_start_id
+    else:
+        scene.pop("location_start_id", None)
+
+    location_end_id = str(scene.get("location_end_id") or "").strip()
+    if not location_end_id and next_scene is not None:
+        location_end_id = str(next_scene.get("location_start_id") or "").strip()
+    if not location_end_id:
+        location_end_id = location_start_id
+    if location_end_id:
+        scene["location_end_id"] = location_end_id
+    else:
+        scene.pop("location_end_id", None)
+
     location_start = str(scene.get("location_start") or "").strip()
     if not location_start and prev_scene is not None:
         location_start = str(prev_scene.get("location_end") or prev_scene.get("location_start") or "").strip()
-    if not location_start:
-        location_start = "current_location"
-    scene["location_start"] = location_start
+    if location_start:
+        scene["location_start"] = location_start
+    else:
+        scene.pop("location_start", None)
 
     location_end = str(scene.get("location_end") or "").strip()
     if not location_end and next_scene is not None:
         location_end = str(next_scene.get("location_start") or "").strip()
     if not location_end:
         location_end = location_start
-    scene["location_end"] = location_end
+    if location_end:
+        scene["location_end"] = location_end
+    else:
+        scene.pop("location_end", None)
 
     handoff_mode = str(scene.get("handoff_mode") or "").strip()
-    if handoff_mode not in HANDOFF_MODE_VALUES:
-        handoff_mode = "direct_continuation"
-    scene["handoff_mode"] = handoff_mode
+    if handoff_mode:
+        scene["handoff_mode"] = handoff_mode
+    else:
+        scene.pop("handoff_mode", None)
 
     constraint_state = str(scene.get("constraint_state") or "").strip()
-    if constraint_state not in CONSTRAINT_STATE_VALUES:
-        if prev_scene is not None:
-            fallback_state = str(prev_scene.get("constraint_state") or "").strip()
-            if fallback_state in CONSTRAINT_STATE_VALUES:
-                constraint_state = fallback_state
-        if constraint_state not in CONSTRAINT_STATE_VALUES:
-            constraint_state = "free"
-    scene["constraint_state"] = constraint_state
+    if constraint_state:
+        scene["constraint_state"] = constraint_state
+    else:
+        scene.pop("constraint_state", None)
 
     transition_in_text = str(scene.get("transition_in_text") or "").strip()
     if not transition_in_text and legacy_transition_in:
         transition_in_text = legacy_transition_in
-    if not transition_in_text:
-        transition_in_text = _fallback_transition_in_text(scene, prev_scene)
-    scene["transition_in_text"] = transition_in_text
+    if transition_in_text:
+        scene["transition_in_text"] = transition_in_text
+    else:
+        scene.pop("transition_in_text", None)
 
     anchors = scene.get("transition_in_anchors")
     if isinstance(anchors, list):
         cleaned = _unique_non_empty([str(item).strip() for item in anchors])
     else:
         cleaned = []
-    if len(cleaned) < 3:
+    if not cleaned:
         cleaned = _fallback_transition_anchors(scene)
-    scene["transition_in_anchors"] = cleaned[:6]
+    if cleaned:
+        scene["transition_in_anchors"] = cleaned[:6]
+    else:
+        scene.pop("transition_in_anchors", None)
 
     if next_scene is None:
         if "transition_out" in scene and not str(scene.get("transition_out") or "").strip():
             scene.pop("transition_out", None)
     else:
         transition_out = str(scene.get("transition_out") or "").strip()
-        if not transition_out:
-            transition_out = _fallback_transition_out_text(scene, next_scene)
-        scene["transition_out"] = transition_out
+        if transition_out:
+            scene["transition_out"] = transition_out
+        else:
+            scene.pop("transition_out", None)
 
     for optional_field in OPTIONAL_EDGE_FIELDS:
         if optional_field in scene and not str(scene.get(optional_field) or "").strip():
@@ -1325,8 +1368,23 @@ def _build_inserted_transition_scene(
     seam_score: int,
     seam_resolution: str,
 ) -> Dict[str, Any]:
-    location_start = str(current_scene.get("location_end") or current_scene.get("location_start") or "").strip() or "transition_start"
+    location_start = str(current_scene.get("location_end") or current_scene.get("location_start") or "").strip()
     location_end = str(next_scene.get("location_start") or next_scene.get("location_end") or "").strip() or location_start
+
+    location_start_id = str(current_scene.get("location_end_id") or current_scene.get("location_start_id") or "").strip()
+    location_end_id = str(next_scene.get("location_start_id") or next_scene.get("location_end_id") or "").strip() or location_start_id
+
+    def _derive_location_id(value: str) -> str:
+        if not value:
+            return ""
+        token = _normalize_text_token(value).upper()
+        return f"LOC_{token}" if token and token != "UNKNOWN" else ""
+
+    if not location_start_id:
+        location_start_id = _derive_location_id(location_start)
+    if not location_end_id:
+        location_end_id = _derive_location_id(location_end)
+
     handoff_mode = str(next_scene.get("handoff_mode") or "").strip()
     if handoff_mode not in HANDOFF_MODE_VALUES or handoff_mode == "direct_continuation":
         handoff_mode = "offscreen_processing"
@@ -1351,6 +1409,8 @@ def _build_inserted_transition_scene(
         "type": "transition",
         "outcome": "The handoff is concretely realized and constraints are carried forward.",
         "characters": characters,
+        "location_start_id": location_start_id,
+        "location_end_id": location_end_id,
         "location_start": location_start,
         "location_end": location_end,
         "handoff_mode": handoff_mode,
@@ -1358,6 +1418,8 @@ def _build_inserted_transition_scene(
         "transition_in_text": transition_text,
         "transition_in_anchors": _fallback_transition_anchors(
             {
+                "location_start_id": location_start_id,
+                "location_end_id": location_end_id,
                 "location_start": location_start,
                 "location_end": location_end,
                 "handoff_mode": handoff_mode,
@@ -1550,8 +1612,6 @@ def _apply_phase04_transition_policy(
                 continue
 
             scene["hands_off_to"] = f"{chapter_id}:{idx + 2}"
-            if not str(scene.get("transition_out") or "").strip():
-                scene["transition_out"] = _fallback_transition_out_text(scene, next_scene)
 
             seam_score = _score_transition_edge(scene, next_scene)
             seam_resolution = _seam_resolution_for_score(seam_score)
@@ -1598,21 +1658,7 @@ def _apply_phase04_transition_policy(
 
 
 def _apply_phase03_transition_policy(payload: Dict[str, Any]) -> Dict[str, Any]:
-    if not isinstance(payload, dict):
-        return payload
-    wrapper = {
-        "schema_version": "transition_refine_v1",
-        "outline": payload,
-        "phase_report": {"edits_applied": []},
-    }
-    applied = _apply_phase04_transition_policy(
-        wrapper,
-        exact_scene_count=False,
-        allow_transition_scene_insertions=False,
-        transition_insert_budget_per_chapter=0,
-    )
-    outline = applied.get("outline")
-    return outline if isinstance(outline, dict) else payload
+    return payload
 
 
 def _build_transition_summary(
@@ -1620,12 +1666,14 @@ def _build_transition_summary(
     outline_payload: Dict[str, Any],
     phase04_report: Dict[str, Any],
     strict_transition_bridges: bool,
+    strict_location_identity: bool,
 ) -> Dict[str, Any]:
     entries = _iter_outline_scene_entries(outline_payload)
     inserted_count = 0
     inline_count = 0
     hard_cut_count = 0
     top_candidates: List[Dict[str, Any]] = []
+    placeholder_identity_items: List[Dict[str, Any]] = []
 
     for entry in entries:
         scene = entry["scene"]
@@ -1652,6 +1700,25 @@ def _build_transition_summary(
                 "reason": reason,
             }
         )
+
+        placeholder_fields: List[str] = []
+        for field in ("location_start_id", "location_end_id", "location_start", "location_end", "transition_in_text"):
+            value = str(scene.get(field) or "").strip()
+            if value and _is_placeholder_text(value):
+                placeholder_fields.append(field)
+        anchors = scene.get("transition_in_anchors")
+        if isinstance(anchors, list):
+            for anchor in anchors:
+                if _is_placeholder_anchor(anchor):
+                    placeholder_fields.append("transition_in_anchors")
+                    break
+        if placeholder_fields:
+            placeholder_identity_items.append(
+                {
+                    "scene_ref": entry["scene_ref"],
+                    "fields": sorted(set(placeholder_fields)),
+                }
+            )
 
     top_candidates.sort(
         key=lambda item: (
@@ -1709,11 +1776,20 @@ def _build_transition_summary(
                 "items": exact_conflicts,
             }
         )
+    if placeholder_identity_items:
+        attention_items.append(
+            {
+                "code": "placeholder_location_identity",
+                "severity": "error" if strict_location_identity else "warning",
+                "message": f"{len(placeholder_identity_items)} scene(s) contain placeholder location/transition identity values.",
+                "items": placeholder_identity_items[:20],
+            }
+        )
 
     requires_attention = len(attention_items) > 0
     strict_blocking = any(
         str(item.get("severity") or "").strip().lower() == "error" for item in attention_items
-    ) and (strict_transition_bridges or len(exact_conflicts) > 0)
+    ) and (strict_transition_bridges or strict_location_identity or len(exact_conflicts) > 0)
 
     return {
         "inserted_scenes_count": inserted_count,
@@ -1763,10 +1839,12 @@ def _build_outline_pipeline_report_payload(
 
     outline_payload = _latest_outline_payload(handoff_payloads)
     strict_transition_bridges = bool(settings.get("strict_transition_bridges"))
+    strict_location_identity = bool(settings.get("strict_location_identity", True))
     transition_summary = _build_transition_summary(
         outline_payload=outline_payload,
         phase04_report=phase04_report,
         strict_transition_bridges=strict_transition_bridges,
+        strict_location_identity=strict_location_identity,
     )
 
     requires_user_attention = bool(transition_summary.get("requires_user_attention"))
@@ -1779,7 +1857,7 @@ def _build_outline_pipeline_report_payload(
     else:
         overall_status = "SUCCESS"
 
-    if strict_transition_bridges and bool(transition_summary.get("strict_blocking")):
+    if bool(transition_summary.get("strict_blocking")):
         overall_status = "ERROR"
 
     artifact_paths: Dict[str, Any] = {
@@ -1807,6 +1885,7 @@ def _build_outline_pipeline_report_payload(
         "mode_values": {
             "strict_transition_hints": bool(settings.get("strict_transition_hints")),
             "strict_transition_bridges": bool(settings.get("strict_transition_bridges")),
+            "strict_location_identity": bool(settings.get("strict_location_identity", True)),
             "transition_insert_budget_per_chapter": int(settings.get("transition_insert_budget_per_chapter", 2)),
             "allow_transition_scene_insertions": bool(settings.get("allow_transition_scene_insertions", True)),
             "exact_scene_count": bool(settings.get("exact_scene_count")),
@@ -1960,6 +2039,7 @@ def _validate_outline_payload(
     require_seam_fields: bool,
     strict_transition_hints: bool,
     strict_transition_bridges: bool,
+    strict_location_identity: bool,
     transition_hint_ids: List[str],
     phase_report: Optional[Dict[str, Any]],
     scene_count_range: Optional[Tuple[int, int]],
@@ -2026,6 +2106,15 @@ def _validate_outline_payload(
                     )
                 )
                 continue
+            section_end_condition = str(section.get("end_condition") or "").strip()
+            if not section_end_condition:
+                errors.append(
+                    _issue(
+                        "end_condition_required",
+                        "Section end_condition is required and must be non-empty.",
+                        path=f"chapters[{chapter_index - 1}].sections[{section_index - 1}].end_condition",
+                    )
+                )
             scenes = section.get("scenes")
             if not isinstance(scenes, list) or not scenes:
                 errors.append(
@@ -2159,6 +2248,16 @@ def _validate_outline_payload(
                                     scene_ref=scene_ref,
                                 )
                             )
+                        elif any(_is_placeholder_anchor(anchor) for anchor in anchors):
+                            issue = _issue(
+                                "transition_placeholder",
+                                "transition_in_anchors must not contain placeholder values.",
+                                scene_ref=scene_ref,
+                            )
+                            if strict_location_identity:
+                                errors.append(issue)
+                            else:
+                                warnings.append(issue)
                 else:
                     text = str(value or "").strip()
                     if not text:
@@ -2169,6 +2268,25 @@ def _validate_outline_payload(
                                 scene_ref=scene_ref,
                             )
                         )
+                    else:
+                        if required_field in {"location_start_id", "location_end_id"} and LOCATION_ID_PATTERN.fullmatch(text) is None:
+                            errors.append(
+                                _issue(
+                                    "location_id_format",
+                                    f"{required_field} must match LOC_[A-Z0-9_]+ format.",
+                                    scene_ref=scene_ref,
+                                )
+                            )
+                        if required_field in {"location_start_id", "location_end_id", "location_start", "location_end", "transition_in_text"} and _is_placeholder_text(text):
+                            issue = _issue(
+                                "transition_placeholder",
+                                f"{required_field} must not contain placeholder values.",
+                                scene_ref=scene_ref,
+                            )
+                            if strict_location_identity:
+                                errors.append(issue)
+                            else:
+                                warnings.append(issue)
 
             handoff_mode = str(scene.get("handoff_mode") or "").strip()
             if handoff_mode and handoff_mode not in HANDOFF_MODE_VALUES:
@@ -2243,6 +2361,16 @@ def _validate_outline_payload(
                             scene_ref=scene_ref,
                         )
                     )
+                elif _is_placeholder_text(transition_out):
+                    issue = _issue(
+                        "transition_placeholder",
+                        "transition_out must not contain placeholder values.",
+                        scene_ref=scene_ref,
+                    )
+                    if strict_location_identity:
+                        errors.append(issue)
+                    else:
+                        warnings.append(issue)
 
             if require_seam_fields:
                 seam_score = scene.get("seam_score")
@@ -2421,6 +2549,7 @@ def _validate_phase_payload(
     handoffs: Dict[str, Dict[str, Any]],
     strict_transition_hints: bool,
     strict_transition_bridges: bool,
+    strict_location_identity: bool,
     transition_hint_ids: List[str],
     scene_count_range: Optional[Tuple[int, int]],
     exact_scene_count: bool,
@@ -2439,6 +2568,7 @@ def _validate_phase_payload(
             require_seam_fields=False,
             strict_transition_hints=False,
             strict_transition_bridges=False,
+            strict_location_identity=strict_location_identity,
             transition_hint_ids=transition_hint_ids,
             phase_report=None,
             scene_count_range=scene_count_range,
@@ -2479,6 +2609,7 @@ def _validate_phase_payload(
             require_seam_fields=True,
             strict_transition_hints=strict_transition_hints and phase_id == "phase_04_transition_causality_refinement",
             strict_transition_bridges=strict_transition_bridges,
+            strict_location_identity=strict_location_identity,
             transition_hint_ids=transition_hint_ids,
             phase_report=payload.get("phase_report") if phase_id == "phase_04_transition_causality_refinement" else None,
             scene_count_range=scene_count_range,
@@ -2497,6 +2628,7 @@ def _validate_phase_payload(
             require_seam_fields=True,
             strict_transition_hints=False,
             strict_transition_bridges=strict_transition_bridges,
+            strict_location_identity=strict_location_identity,
             transition_hint_ids=transition_hint_ids,
             phase_report=None,
             scene_count_range=scene_count_range,
@@ -2540,6 +2672,7 @@ def generate_outline(
     transition_hints_file: Optional[Path] = None,
     strict_transition_hints: bool = False,
     strict_transition_bridges: bool = False,
+    strict_location_identity: bool = True,
     transition_insert_budget_per_chapter: int = 2,
     allow_transition_scene_insertions: bool = True,
     force_rerun_with_draft: bool = False,
@@ -2619,6 +2752,7 @@ def generate_outline(
         "to_phase": phase_to,
         "strict_transition_hints": bool(strict_transition_hints),
         "strict_transition_bridges": bool(strict_transition_bridges),
+        "strict_location_identity": bool(strict_location_identity),
         "transition_insert_budget_per_chapter": int(max(0, transition_insert_budget_per_chapter)),
         "allow_transition_scene_insertions": bool(allow_transition_scene_insertions),
         "exact_scene_count": bool(exact_scene_count),
@@ -2842,6 +2976,7 @@ def generate_outline(
                 handoffs=handoff_payloads,
                 strict_transition_hints=strict_transition_hints,
                 strict_transition_bridges=strict_transition_bridges,
+                strict_location_identity=strict_location_identity,
                 transition_hint_ids=transition_hint_ids,
                 scene_count_range=parsed_scene_range,
                 exact_scene_count=exact_scene_count,
@@ -3005,6 +3140,7 @@ def format_outline_pipeline_summary(report: Dict[str, Any], report_path: Optiona
         "- Mode values: "
         f"strict_transition_bridges={bool(mode_values.get('strict_transition_bridges', False))} "
         f"strict_transition_hints={bool(mode_values.get('strict_transition_hints', False))} "
+        f"strict_location_identity={bool(mode_values.get('strict_location_identity', True))} "
         f"insert_budget={int(mode_values.get('transition_insert_budget_per_chapter', 0) or 0)} "
         f"allow_insertions={bool(mode_values.get('allow_transition_scene_insertions', True))} "
         f"exact_scene_count={bool(mode_values.get('exact_scene_count', False))}"

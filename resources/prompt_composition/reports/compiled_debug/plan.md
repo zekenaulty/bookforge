@@ -10,6 +10,7 @@ If character_states are provided, keep inventory/persona/continuity mechanics co
 If outline_window.current.introduces is present, the scene must introduce those characters.
 If outline_window.section.end_condition is present, align scene-card end_condition to satisfy that closure target.
 If outline_window.current includes transition payload/link fields, copy them through into the scene card verbatim where possible. Do not re-derive or rename.
+Do not emit placeholder transition/location values (current_location, unknown, placeholder, tbd, here, there).
 If recent_lint_warnings include ui_gate_unknown, set ui_allowed explicitly for this scene.
 
 Required keys:
@@ -24,6 +25,8 @@ Required keys:
 - constraints (array)
 - end_condition
 - ui_allowed (boolean; true only when System/UI is active in this scene)
+- location_start_id (LOC_* canonical location id)
+- location_end_id (LOC_* canonical location id)
 - location_start
 - location_end
 - handoff_mode
@@ -75,6 +78,8 @@ JSON shape example (fill with real values):
   "constraints": ["target_words: 1900"],
   "end_condition": "The protagonist leaves home.",
   "ui_allowed": false,
+  "location_start_id": "LOC_OAKHAVEN_NORTH_GATE_CHECKPOINT",
+  "location_end_id": "LOC_OAKHAVEN_BARNABYS_TAVERN",
   "location_start": "North Gate Checkpoint",
   "location_end": "Barnaby's Tavern",
   "handoff_mode": "detained_then_release",

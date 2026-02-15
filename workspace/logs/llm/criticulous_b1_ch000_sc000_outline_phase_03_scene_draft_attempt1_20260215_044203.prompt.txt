@@ -1,0 +1,541 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+UI gate: UI/system blocks (lines starting with '[' and ending with ']') are permitted only when scene_card.ui_allowed=true. If ui_allowed=false, do not include UI blocks even if an author persona says "always include".
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties, and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true. If a prior invariant is stale or superseded, you MUST flag it for removal using "REMOVE: <exact prior invariant text>" before restating the current truth.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v2
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements **when the System is active or the scene is set in a game world**. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, follow the active scene-count policy:
+- Exact mode: total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+- Range mode: chapter totals must remain within the configured range and still align with pacing intent.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string), and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+
+USER:
+
+# OUTLINE PIPELINE PHASE 03: SCENE DRAFT
+
+Timeline Lock does not apply during outlining; you are planning, not writing a Scene Card.
+
+Return ONLY a single JSON object that matches outline schema v1.1.
+No markdown, no code fences, no commentary.
+Use strict JSON (double quotes, no trailing commas).
+
+Core contract:
+- Each scene is one writing unit.
+- Every scene must include type and outcome.
+- outcome must be a concrete state change.
+- Do not pad with travel/recap/mood-only scenes.
+
+Required top-level keys:
+- schema_version ("1.1")
+- chapters (array)
+
+Registry policy:
+- characters and threads are globally recommended.
+- If any scene references character ids, top-level characters becomes required.
+- If any scene references thread ids, top-level threads becomes required.
+
+Required chapter/section/scene constraints:
+- chapter_id must be sequential integers starting at 1.
+- section_id must be sequential integers within each chapter.
+- scene_id is chapter-local and must be monotonic across all sections in that chapter.
+- Preserve section.end_condition from phase 02 for every section.
+- Each section-final scene must include end_condition_echo that exactly matches phase-02 end_condition.
+
+Required transition fields (phase 03 and later):
+- location_start_id (required, format LOC_[A-Z0-9_]+)
+- location_end_id (required, format LOC_[A-Z0-9_]+)
+- location_start (non-empty string)
+- location_end (non-empty string)
+- handoff_mode (enum string)
+- constraint_state (enum string)
+- transition_in_text (non-empty string; connective action, not recap)
+- transition_in_anchors (array of 3-6 non-empty strings)
+- For non-first scenes: consumes_outcome_from (required, chapter_id:scene_id)
+- For non-last scenes: transition_out (required, non-empty) and hands_off_to (required, chapter_id:scene_id)
+
+Transition enum guidance:
+- handoff_mode: direct_continuation, escorted_transfer, detained_then_release, time_skip, hard_cut, montage, offscreen_processing, combat_disengage, arrival_checkpoint, aftermath_relocation
+- constraint_state: free, pursued, detained, processed, sheltered, restricted, engaged_combat, fleeing
+
+Placeholder prohibition (hard):
+- Do NOT emit placeholder location/transition values such as current_location, unknown, placeholder, tbd, here, there.
+- If exact location identity is unavailable, return error_v1 with reason code missing_location_context.
+- Do not emit synthetic anchor labels (for example anchor_1, anchor_2).
+
+Seam scoring fields are optional in phase 03 but recommended:
+- seam_score (0-100 int)
+- seam_resolution (inline_bridge|micro_scene|full_scene)
+
+Compatibility and omission rule:
+- If a field is optional, omit when unknown; do NOT emit empty strings.
+- Legacy transition_in may be present only as a compatibility alias; canonical field is transition_in_text.
+
+Output must remain compatible with scene-count policy:
+{
+  "default_policy": "strong_non_exact",
+  "exact_scene_count": false,
+  "scene_count_range": ""
+}
+
+If you cannot satisfy constraints after correction attempts, return error_v1:
+{
+  "result": "ERROR",
+  "schema_version": "error_v1",
+  "phase": "phase_03_scene_draft",
+  "reasons": ["..."],
+  "validator_evidence": [{"code": "validation_code", "message": "...", "path": "json.path", "scene_ref": "chapter:scene"}],
+  "retryable": false
+}
+
+Outline spine (phase 01):
+{
+  "chapters": [
+    {
+      "bridge": {
+        "from_prev": "The protagonist's final moments in a hospital bed.",
+        "to_next": "Artie realizes his starting gear cannot handle his massive damage output and will shatter upon the next hit."
+      },
+      "chapter_id": 1,
+      "chapter_role": "hook",
+      "goal": "Survive the glitchy transmigration into the world of Aethelgard and secure the first 'broken' skill.",
+      "pacing": {
+        "expected_scene_count": 6,
+        "intensity": 4,
+        "tempo": "steady"
+      },
+      "stakes_shift": "From a dying human in the real world to a low-level anomaly with a permanent 100% crit-rate glitch.",
+      "title": "Critical Failure"
+    },
+    {
+      "bridge": {
+        "from_prev": "Artie's realization that his glitch breaks standard equipment.",
+        "to_next": "The 'Tutorial Completion' trigger alerts the System to an illegal stat distribution."
+      },
+      "chapter_id": 2,
+      "chapter_role": "setup",
+      "goal": "Exploit a repeatable tutorial quest to acquire 'Indestructible' tier starter gear.",
+      "pacing": {
+        "expected_scene_count": 5,
+        "intensity": 3,
+        "tempo": "steady"
+      },
+      "stakes_shift": "From a fragile glass cannon to a geared-up exploiter capable of surviving basic System Sentinels.",
+      "title": "The Loot Loop"
+    },
+    {
+      "bridge": {
+        "from_prev": "The System's automated detection of Artie's illegal gear.",
+        "to_next": "Artie finds a hidden sanctuary used by other 'glitched' players."
+      },
+      "chapter_id": 3,
+      "chapter_role": "journey",
+      "goal": "Escape the starting zone while being pursued by high-level 'Correction' mobs.",
+      "pacing": {
+        "expected_scene_count": 7,
+        "intensity": 4,
+        "tempo": "rush"
+      },
+      "stakes_shift": "From a local anomaly to a regional fugitive with a rising 'System Threat' level.",
+      "title": "Aggro Magnet"
+    },
+    {
+      "bridge": {
+        "from_prev": "Arrival at the sanctuary of the Dev-Killers.",
+        "to_next": "A betrayal within the sanctuary reveals Artie's location to the regional Governor."
+      },
+      "chapter_id": 4,
+      "chapter_role": "investigation",
+      "goal": "Investigate the 'Underworld Market' to find a way to mask his glitch from the System's radar.",
+      "pacing": {
+        "expected_scene_count": 6,
+        "intensity": 3,
+        "tempo": "slow_burn"
+      },
+      "stakes_shift": "From a lone survivor to a potential member of a revolutionary group of exploiters.",
+      "title": "The Dev-Killers"
+    },
+    {
+      "bridge": {
+        "from_prev": "The need for high-tier stealth to bypass the Governor's gates.",
+        "to_next": "The economic collapse triggers an emergency 'World Event' boss spawn."
+      },
+      "chapter_id": 5,
+      "chapter_role": "pressure",
+      "goal": "Execute a high-stakes currency exploit to fund the purchase of a 'Legendary' stealth cloak.",
+      "pacing": {
+        "expected_scene_count": 8,
+        "intensity": 4,
+        "tempo": "steady"
+      },
+      "stakes_shift": "From a mere fugitive to an economic terrorist destabilizing the game's core systems.",
+      "title": "Hyper-Inflation"
+    },
+    {
+      "bridge": {
+        "from_prev": "The arrival of the Correction Avatar in the middle of the market collapse.",
+        "to_next": "The Avatar's defeat leaves a hole in the game's source code."
+      },
+      "chapter_id": 6,
+      "chapter_role": "climax",
+      "goal": "Defeat the System's 'Correction Avatar' before the zone is hard-reset and Artie is deleted.",
+      "pacing": {
+        "expected_scene_count": 10,
+        "intensity": 5,
+        "tempo": "rush"
+      },
+      "stakes_shift": "From a threat to the economy to a direct existential threat to the System's control.",
+      "title": "The Hotfix"
+    },
+    {
+      "bridge": {
+        "from_prev": "The destruction of the Correction Avatar and the temporary suspension of System laws.",
+        "to_next": "Artie enters the 'Beta Lands,' where his glitches are the only rules that matter."
+      },
+      "chapter_id": 7,
+      "chapter_role": "aftermath",
+      "goal": "Escape through the code-tear into an 'Unmapped' zone to evade the global server reboot.",
+      "pacing": {
+        "expected_scene_count": 4,
+        "intensity": 2,
+        "tempo": "steady"
+      },
+      "stakes_shift": "From a hunted glitch to a pioneer in the 'Wild Code' where the System has no power.",
+      "title": "Unpatched"
+    }
+  ],
+  "schema_version": "spine_v1"
+}
+
+Section architecture (phase 02):
+{
+  "chapters": [
+    {
+      "chapter_id": 1,
+      "sections": [
+        {
+          "end_condition": "Artie opens his eyes in the Aethelgard starting zone and sees the first UI glitch.",
+          "intent": "Establish Artie's transition from a terminal patient to a confused player in a glitching world.",
+          "section_id": 1,
+          "section_role": "setup",
+          "target_scene_count": 2,
+          "title": "The Final Breath"
+        },
+        {
+          "end_condition": "Artie kills a tutorial mob with a massive overkill critical hit.",
+          "intent": "Introduce the core mechanic of the permanent 100% crit-rate glitch through combat.",
+          "section_id": 2,
+          "section_role": "rising_action",
+          "target_scene_count": 2,
+          "title": "The 100% Solution"
+        },
+        {
+          "end_condition": "Artie's starting dagger shatters into dust after a final critical strike.",
+          "intent": "Reveal the downside of the glitch: the damage output destroys standard equipment.",
+          "section_id": 3,
+          "section_role": "rising_action",
+          "target_scene_count": 2,
+          "title": "Glass Cannon Problems"
+        }
+      ]
+    },
+    {
+      "chapter_id": 2,
+      "sections": [
+        {
+          "end_condition": "Artie confirms the tutorial quest 'First Steps' has failed to flag as completed, allowing a restart.",
+          "intent": "Artie discovers a way to repeat the tutorial quest to farm specific rewards.",
+          "section_id": 1,
+          "section_role": "rising_action",
+          "target_scene_count": 2,
+          "title": "Finding the Loop"
+        },
+        {
+          "end_condition": "Artie equips the 'Indestructible Ironwood Blade' and prepares to leave the tutorial.",
+          "intent": "Artie exploits the loop until he acquires gear that can withstand his damage.",
+          "section_id": 2,
+          "section_role": "development",
+          "target_scene_count": 3,
+          "title": "Gear Up"
+        }
+      ]
+    },
+    {
+      "chapter_id": 3,
+      "sections": [
+        {
+          "end_condition": "A System Sentinel manifests in the glade to investigate the anomaly.",
+          "intent": "The System's automated security detects the gear and stat anomaly.",
+          "section_id": 1,
+          "section_role": "rising_action",
+          "target_scene_count": 2,
+          "title": "System Ping"
+        },
+        {
+          "end_condition": "Artie crosses the physical boundary of the tutorial zone into the open world.",
+          "intent": "Artie must navigate the starting zone while avoiding or distracting the high-level Sentinels.",
+          "section_id": 2,
+          "section_role": "rising_action",
+          "target_scene_count": 3,
+          "title": "The Great Escape"
+        },
+        {
+          "end_condition": "Artie reaches the outskirts of the Grey Market, a known low-surveillance zone.",
+          "intent": "Artie seeks a place where the System's direct oversight is weaker.",
+          "section_id": 3,
+          "section_role": "transition",
+          "target_scene_count": 2,
+          "title": "Into the Wilds"
+        }
+      ]
+    },
+    {
+      "chapter_id": 4,
+      "sections": [
+        {
+          "end_condition": "Artie gains entry to the 'Null-Sector' where the most dangerous exploiters hide.",
+          "intent": "Artie navigates the social and mechanical complexities of the underground market.",
+          "section_id": 1,
+          "section_role": "setup",
+          "target_scene_count": 2,
+          "title": "Shadow Economy"
+        },
+        {
+          "end_condition": "Artie is accepted into the Dev-Killer hideout after demonstrating his glitch.",
+          "intent": "Artie meets a group of players dedicated to breaking the game's rules.",
+          "section_id": 2,
+          "section_role": "development",
+          "target_scene_count": 2,
+          "title": "The Dev-Killers"
+        },
+        {
+          "end_condition": "Artie identifies the Void-Stitch Cloak as his primary objective.",
+          "intent": "The group identifies a legendary item that can hide Artie's signature from the System.",
+          "section_id": 3,
+          "section_role": "rising_action",
+          "target_scene_count": 2,
+          "title": "The Masking Plan"
+        }
+      ]
+    },
+    {
+      "chapter_id": 5,
+      "sections": [
+        {
+          "end_condition": "The auction house prices for essential goods begin to spiral into hyper-inflation.",
+          "intent": "Artie and the Dev-Killers use a currency glitch to crash the local economy.",
+          "section_id": 1,
+          "section_role": "rising_action",
+          "target_scene_count": 3,
+          "title": "Market Manipulation"
+        },
+        {
+          "end_condition": "Artie collects the massive gold payout from the market collapse.",
+          "intent": "Artie converts the chaos into enough gold to buy the legendary cloak.",
+          "section_id": 2,
+          "section_role": "rising_action",
+          "target_scene_count": 3,
+          "title": "The Big Short"
+        },
+        {
+          "end_condition": "Artie equips the Void-Stitch Cloak and his System Threat level vanishes.",
+          "intent": "Artie acquires the cloak just as the System's 'World Event' response triggers.",
+          "section_id": 3,
+          "section_role": "development",
+          "target_scene_count": 2,
+          "title": "Buying Silence"
+        }
+      ]
+    },
+    {
+      "chapter_id": 6,
+      "sections": [
+        {
+          "end_condition": "The Correction Avatar descends from the sky and initiates the zone reset.",
+          "intent": "The System sends its ultimate enforcement unit to delete the glitched area.",
+          "section_id": 1,
+          "section_role": "rising_action",
+          "target_scene_count": 3,
+          "title": "The Correction"
+        },
+        {
+          "end_condition": "Artie lands a final, glitch-boosted critical hit on the Avatar's core.",
+          "intent": "Artie uses his 100% crit rate and indestructible gear to fight a being of pure code.",
+          "section_id": 2,
+          "section_role": "climax",
+          "target_scene_count": 4,
+          "title": "Breaking the Boss"
+        },
+        {
+          "end_condition": "The Correction Avatar dissolves into raw code fragments, leaving a hole in the world.",
+          "intent": "The defeat of the Avatar causes the local reality to begin unraveling.",
+          "section_id": 3,
+          "section_role": "falling_action",
+          "target_scene_count": 3,
+          "title": "Code Collapse"
+        }
+      ]
+    },
+    {
+      "chapter_id": 7,
+      "sections": [
+        {
+          "end_condition": "Artie locates the code-tear in the center of the collapsing Grey Market.",
+          "intent": "Artie must find the exit before the zone is hard-reset and he is deleted.",
+          "section_id": 1,
+          "section_role": "falling_action",
+          "target_scene_count": 2,
+          "title": "The Tear in the World"
+        },
+        {
+          "end_condition": "Artie steps through the tear into the Beta Lands as the server reboot begins.",
+          "intent": "Artie escapes the known world for the unmapped Beta Lands.",
+          "section_id": 2,
+          "section_role": "resolution",
+          "target_scene_count": 2,
+          "title": "Beyond the Patch"
+        }
+      ]
+    }
+  ],
+  "schema_version": "sections_v1"
+}
+
+Book:
+{
+  "author_ref": "eldrik-vale/v2",
+  "book_id": "criticulous_b1",
+  "genre": [
+    "litrpg",
+    "isekai",
+    "comedy"
+  ],
+  "invariants": [
+    "No world resets.",
+    "No convenient amnesia as a continuity device.",
+    "Do not change established names/relationships."
+  ],
+  "page_metrics": {
+    "chars_per_page": 1500,
+    "words_per_page": 250
+  },
+  "schema_version": "1.0",
+  "series_id": "crit-iculous",
+  "series_ref": "series/crit-iculous",
+  "targets": {
+    "avg_scene_words": 2000,
+    "chapters": 7
+  },
+  "title": "Crit Hit & Run",
+  "voice": {
+    "pov": "third_limited",
+    "style_tags": [
+      "no-recaps",
+      "forward-motion",
+      "tight-prose"
+    ],
+    "tense": "past"
+  }
+}
+
+Targets:
+{
+  "avg_scene_words": 2000,
+  "chapters": 7
+}
+
+User prompt (optional):
+
+
+Notes:
+
+
+Transition hints (optional):
