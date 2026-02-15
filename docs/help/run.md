@@ -4,7 +4,7 @@ Purpose
 - Run the scene generation loop (plan -> preflight -> write -> repair -> state_repair -> lint -> commit).
 
 Usage
-- bookforge run --book <id> [--steps <n>] [--until chapter:N | chapter:N:scene:M] [--resume] [--ack-outline-attention-items|--ack-outline-issues]
+- bookforge run --book <id> [--steps <n>] [--until chapter:N | chapter:N:scene:M] [--resume] [--ack-outline-attention-items|--ack-outline-issues] [--force-outline-gate-bypass]
 
 Scope
 - Requires explicit --book (current-book selection is not implemented).
@@ -17,6 +17,7 @@ Optional parameters
 - --until: Stop condition. Formats: chapter:N or chapter:N:scene:M.
 - --resume: Resume a prior run.
 - --ack-outline-attention-items / --ack-outline-issues: Acknowledge non-strict outline attention items and continue writing.
+- --force-outline-gate-bypass: Override outline write-gate checks (missing report, paused/error status, strict attention). Intended for testing/recovery only.
 - --workspace: Override workspace root (global option).
 
 
@@ -35,6 +36,12 @@ Outline attention gate
 - Ack flag semantics:
   - you are explicitly accepting non-strict outline warning risk for this run.
   - ack does not bypass `PAUSED`/`ERROR` statuses.
+- Missing/corrupt report behavior:
+  - run blocks by default when latest outline report is missing/unreadable.
+  - `--force-outline-gate-bypass` overrides this for testing/recovery.
+- Bypass flag semantics:
+  - bypass can override all outline gate checks, including `PAUSED`/`ERROR` and strict attention.
+  - bypass usage is logged in run metadata for auditability.
 - Ack usage is logged in run metadata for auditability.
 
 Resume notes
@@ -74,6 +81,8 @@ Examples
 - Continue past non-strict outline attention items:
   bookforge run --book my_novel_v1 --ack-outline-attention-items
   (alias: `--ack-outline-issues`)
+- Force bypass all outline gate checks (testing/recovery only):
+  bookforge run --book my_novel_v1 --force-outline-gate-bypass
 
 - Force outline context on continuity and lint too:
   BOOKFORGE_CONTINUITY_PACK_INCLUDE_OUTLINE=1 BOOKFORGE_LINT_INCLUDE_OUTLINE=1 bookforge run --book my_novel_v1 --until chapter:1

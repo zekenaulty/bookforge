@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 import ast
+import copy
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import hashlib
@@ -1255,7 +1256,7 @@ def _phase_failed(phase_entries: Dict[str, Any]) -> str:
         entry = phase_entries.get(phase_id)
         if not isinstance(entry, dict):
             continue
-        if str(entry.get("status") or "").strip() == "failed":
+        if str(entry.get("status") or "").strip() in {"failed", "paused"}:
             return phase_id
     return ""
 
@@ -1549,12 +1550,14 @@ def _compile_outline_location_identity(
                 errors.append(_issue("transition_placeholder", "location_start_label must not contain placeholder values.", scene_ref=scene_ref))
             if end_label and _is_placeholder_text(end_label):
                 errors.append(_issue("transition_placeholder", "location_end_label must not contain placeholder values.", scene_ref=scene_ref))
+            start_label_placeholder = bool(start_label and _is_placeholder_text(start_label))
+            end_label_placeholder = bool(end_label and _is_placeholder_text(end_label))
 
             start_id = str(scene.get("location_start_id") or "").strip()
             end_id = str(scene.get("location_end_id") or "").strip()
             handoff_mode = str(scene.get("handoff_mode") or "").strip()
 
-            if not start_id and start_label:
+            if not start_id and start_label and not start_label_placeholder:
                 start_id, created = _resolve_location_registry_entry(
                     registry=registry,
                     label=start_label,
@@ -1570,7 +1573,7 @@ def _compile_outline_location_identity(
             if start_id:
                 scene["location_start_id"] = start_id
 
-            if not end_id and end_label:
+            if not end_id and end_label and not end_label_placeholder:
                 end_id, created = _resolve_location_registry_entry(
                     registry=registry,
                     label=end_label,
@@ -2881,6 +2884,16 @@ def _validate_outline_payload(
                                 scene_ref=scene_ref,
                             )
                         )
+                    elif any(_is_placeholder_anchor(anchor) for anchor in cleaned_out_anchors):
+                        issue = _issue(
+                            "transition_placeholder",
+                            "transition_out_anchors must not contain placeholder values.",
+                            scene_ref=scene_ref,
+                        )
+                        if strict_location_identity:
+                            errors.append(issue)
+                        else:
+                            warnings.append(issue)
 
             if require_seam_fields:
                 seam_score = scene.get("seam_score")
@@ -3468,6 +3481,7 @@ def generate_outline(
         attempts_used = 0
         validation_signature_last = ""
         retry_directive = ""
+        registry_candidate_on_success: Optional[Dict[str, Any]] = None
 
         for attempt in range(1, OUTLINE_PIPELINE_MAX_ATTEMPTS + 1):
             messages: List[Message] = [
@@ -3571,16 +3585,20 @@ def generate_outline(
                 )
 
             payload_for_registry: Optional[Dict[str, Any]] = None
+            candidate_registry_for_attempt: Optional[Dict[str, Any]] = None
             if phase_id in {"phase_03_scene_draft", "phase_06_thread_payoff_refinement"}:
                 payload_for_registry = normalized_output if isinstance(normalized_output, dict) else None
             elif phase_id in {"phase_04_transition_causality_refinement", "phase_05_cast_function_refinement"}:
                 outline_payload = normalized_output.get("outline") if isinstance(normalized_output, dict) else None
                 payload_for_registry = outline_payload if isinstance(outline_payload, dict) else None
             if payload_for_registry is not None:
-                compile_result = _compile_outline_location_identity(outline=payload_for_registry, registry=location_registry)
+                candidate_registry_for_attempt = copy.deepcopy(location_registry)
+                compile_result = _compile_outline_location_identity(
+                    outline=payload_for_registry,
+                    registry=candidate_registry_for_attempt,
+                )
                 compile_errors = compile_result.get("errors") if isinstance(compile_result.get("errors"), list) else []
                 compile_warnings = compile_result.get("warnings") if isinstance(compile_result.get("warnings"), list) else []
-                _write_location_registry(run_registry_path, location_registry)
                 if compile_errors or compile_warnings:
                     temp_validation = {
                         "status": "fail" if compile_errors else "pass",
@@ -3617,6 +3635,8 @@ def generate_outline(
                 break
             validation_signature_last = current_signature
             if validation_result.get("status") == "pass":
+                if candidate_registry_for_attempt is not None:
+                    registry_candidate_on_success = candidate_registry_for_attempt
                 phase_success = True
                 break
 
@@ -3657,6 +3677,9 @@ def generate_outline(
             raise failure
 
         handoff_payload = _phase_handoff_payload(phase_id, normalized_output)
+        if registry_candidate_on_success is not None:
+            location_registry = registry_candidate_on_success
+        _write_location_registry(run_registry_path, location_registry)
         handoff_path = run_dir / OUTLINE_PHASE_HANDOFF_FILE[phase_id]
         _write_json(handoff_path, handoff_payload)
         handoff_payloads[phase_key] = handoff_payload

@@ -1,6 +1,12 @@
 from copy import deepcopy
 
-from bookforge.outline import _apply_phase04_transition_policy, _validate_phase_payload
+from bookforge.outline import (
+    _apply_phase04_transition_policy,
+    _compile_outline_location_identity,
+    _default_location_registry,
+    _phase_failed,
+    _validate_phase_payload,
+)
 
 
 def _phase04_payload_two_scenes() -> dict:
@@ -145,3 +151,66 @@ def test_phase04_policy_exact_mode_conflict_fails_validation() -> None:
     )
     assert validation["status"] == "fail"
     assert any(item.get("code") == "exact_scene_count_transition_conflict" for item in validation["errors"])
+
+
+def test_phase04_validation_rejects_placeholder_transition_out_anchors() -> None:
+    payload = _phase04_payload_two_scenes()
+    refined = _apply_phase04_transition_policy(
+        deepcopy(payload),
+        exact_scene_count=False,
+        allow_transition_scene_insertions=False,
+        transition_insert_budget_per_chapter=0,
+    )
+    scenes = refined["outline"]["chapters"][0]["sections"][0]["scenes"]
+    scenes[0]["transition_out_anchors"] = ["anchor_1", "gate", "release"]
+
+    validation = _validate_phase_payload(
+        phase_id="phase_04_transition_causality_refinement",
+        payload=refined,
+        handoffs={},
+        strict_transition_hints=False,
+        strict_transition_bridges=False,
+        strict_location_identity=True,
+        transition_hint_ids=[],
+        scene_count_range=None,
+        exact_scene_count=False,
+    )
+    assert validation["status"] == "fail"
+    assert any(item.get("code") == "transition_placeholder" for item in validation["errors"])
+
+
+def test_location_registry_does_not_mint_placeholder_labels() -> None:
+    outline = {
+        "schema_version": "1.1",
+        "chapters": [
+            {
+                "chapter_id": 1,
+                "sections": [
+                    {
+                        "section_id": 1,
+                        "scenes": [
+                            {
+                                "scene_id": 1,
+                                "location_start_label": "current_location",
+                                "location_end_label": "unknown",
+                                "handoff_mode": "direct_continuation",
+                            }
+                        ],
+                    }
+                ],
+            }
+        ],
+    }
+    registry = _default_location_registry()
+    result = _compile_outline_location_identity(outline=outline, registry=registry)
+    assert result["errors"]
+    assert any(item.get("code") == "transition_placeholder" for item in result["errors"] if isinstance(item, dict))
+    assert registry.get("locations") == []
+
+
+def test_phase_failed_reports_paused_phase() -> None:
+    phase_entries = {
+        "phase_01_chapter_spine": {"status": "success"},
+        "phase_02_section_architecture": {"status": "paused"},
+    }
+    assert _phase_failed(phase_entries) == "phase_02_section_architecture"

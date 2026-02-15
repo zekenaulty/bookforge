@@ -429,6 +429,7 @@ def run_loop(
     until: Optional[str] = None,
     resume: bool = False,
     ack_outline_attention_items: bool = False,
+    force_outline_gate_bypass: bool = False,
 ) -> None:
     book_root = workspace / "books" / book_id
     if not book_root.exists():
@@ -460,7 +461,16 @@ def run_loop(
     validate_json(outline, "outline")
 
     report_path, outline_report = load_latest_outline_pipeline_report(workspace=workspace, book_id=book_id)
-    if outline_report:
+    outline_attention_ack = False
+    if not outline_report:
+        if not force_outline_gate_bypass:
+            raise ValueError(
+                "WRITE GATED: outline pipeline report is missing or unreadable. "
+                "Run outline generation first, or use --force-outline-gate-bypass for testing."
+            )
+        _status("WRITE GATE BYPASS ENABLED: continuing without a readable outline pipeline report.")
+        _append_run_log(book_root, run_id, "outline_gate_bypass=true reason=missing_report")
+    else:
         requires_attention = bool(outline_report.get("requires_user_attention", False))
         strict_blocking = bool(outline_report.get("strict_blocking", False))
         overall_status = str(outline_report.get("overall_status") or "UNKNOWN").strip().upper()
@@ -469,24 +479,35 @@ def run_loop(
             _status(summary)
 
         if overall_status not in {"SUCCESS", "SUCCESS_WITH_WARNINGS"}:
-            raise ValueError(
-                "WRITE GATED: latest outline pipeline status is "
-                f"{overall_status}. Resolve outline pipeline issues before writing. "
-                f"Report: {report_path}"
+            if not force_outline_gate_bypass:
+                raise ValueError(
+                    "WRITE GATED: latest outline pipeline status is "
+                    f"{overall_status}. Resolve outline pipeline issues before writing. "
+                    f"Report: {report_path}"
+                )
+            _status(
+                "WRITE GATE BYPASS ENABLED: continuing despite outline pipeline status "
+                f"{overall_status}. Report: {report_path}"
             )
+            _append_run_log(book_root, run_id, f"outline_gate_bypass=true reason=status_{overall_status.lower()}")
 
         if requires_attention:
             if strict_blocking:
-                raise ValueError(
-                    "WRITE GATED: outline report requires strict attention handling; resolve outline issues before writing."
-                )
-            if not ack_outline_attention_items:
+                if not force_outline_gate_bypass:
+                    raise ValueError(
+                        "WRITE GATED: outline report requires strict attention handling; resolve outline issues before writing."
+                    )
+                _status("WRITE GATE BYPASS ENABLED: strict outline attention gate bypassed.")
+                _append_run_log(book_root, run_id, "outline_gate_bypass=true reason=strict_attention")
+            elif not ack_outline_attention_items and not force_outline_gate_bypass:
                 raise ValueError(
                     "WRITE GATED: outline report requires attention. Re-run with --ack-outline-attention-items only after review."
                 )
-            _append_run_log(book_root, run_id, "outline_attention_ack=true")
-        else:
-            _append_run_log(book_root, run_id, "outline_attention_ack=false")
+            outline_attention_ack = bool(ack_outline_attention_items)
+
+    _append_run_log(book_root, run_id, f"outline_attention_ack={'true' if outline_attention_ack else 'false'}")
+    if not force_outline_gate_bypass:
+        _append_run_log(book_root, run_id, "outline_gate_bypass=false")
 
     chapter_order, scene_counts = _outline_summary(outline)
     character_registry = _build_character_registry(outline)

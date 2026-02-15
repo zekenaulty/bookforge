@@ -133,6 +133,7 @@ def _run(args: argparse.Namespace) -> int:
             until=args.until,
             resume=args.resume,
             ack_outline_attention_items=bool(getattr(args, "ack_outline_attention_items", False)),
+            force_outline_gate_bypass=bool(getattr(args, "force_outline_gate_bypass", False)),
         )
     except Exception as exc:
         sys.stderr.write(f"Run failed: {exc}\n")
@@ -406,6 +407,11 @@ def build_parser() -> argparse.ArgumentParser:
         dest="ack_outline_attention_items",
         action="store_true",
         help="Acknowledge non-strict outline attention items and proceed with run.",
+    )
+    run_parser.add_argument(
+        "--force-outline-gate-bypass",
+        action="store_true",
+        help="Bypass outline write-gate checks (missing report, paused/error status, strict attention). Use only for testing/recovery.",
     )
     run_parser.set_defaults(func=_run)
 
