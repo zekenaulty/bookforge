@@ -1,4 +1,4 @@
-# OUTLINE PIPELINE PHASE 05: CAST FUNCTION REFINEMENT
+# OUTLINE PIPELINE PHASE 05: CAST FUNCTION REFINEMENT (CHAPTER-SCOPED)
 
 Timeline Lock does not apply during outlining; you are planning, not writing a Scene Card.
 
@@ -10,7 +10,11 @@ Required output schema:
   "schema_version": "cast_refine_v1",
   "outline": {
     "schema_version": "1.1",
-    "chapters": []
+    "chapters": [
+      {
+        "chapter_id": 1
+      }
+    ]
   },
   "cast_report": {
     "core_character_ids": [],
@@ -22,14 +26,18 @@ Required output schema:
 }
 
 Goal:
-- Ensure recurring characters have clear causal jobs.
-- Enforce introduction integrity.
+- Ensure recurring characters in this chapter have clear causal jobs.
+- Enforce introduction integrity in this chapter.
 - Reduce cast bloat by merge/demotion instead of inflation.
 
+Chapter-scoped hard rules:
+- Output MUST contain exactly one chapter in outline.chapters.
+- The output chapter_id MUST match chapter_target_id.
+- Do not echo the full book.
+
 Rules:
-- Preserve chapter/section/scene ordering unless correction is required.
+- Preserve chapter section/scene ordering unless correction is required.
 - Preserve outline schema-required keys and types for chapter/section/scene objects.
-  - Do not remove or rename required keys: goal, chapter_role, stakes_shift, bridge, pacing, intent, summary, characters.
 - Preserve phase-04 transition requirements:
   - location_start_label/location_end_label
   - location_start_id/location_end_id (optional in model output; orchestrator compiles canonical ids from labels)
@@ -39,22 +47,10 @@ Rules:
   - consumes_outcome_from/hands_off_to/transition_out_text/transition_out_anchors link obligations
   - seam_score/seam_resolution
   - inserted_by_pipeline/purpose on pipeline-inserted scenes
-- Preserve section.end_condition for every section.
+- Preserve section.end_condition and section closure anchors (end_condition_echo).
 - Keep link format chapter_id:scene_id.
-- Preserve section closure anchors (end_condition_echo).
 - Do NOT emit placeholder location/transition values (current_location, unknown, placeholder, tbd, here, there).
 - Preserve registry integrity for characters/threads when referenced.
-- Preserve canonical registry key names:
-  - characters[] uses character_id/name/intro
-  - threads[] uses thread_id/label/status
-- Forbidden aliases:
-  - characters[].id, characters[].title, characters[].description
-  - threads[].id, threads[].title, threads[].description
-- Strict hard-cut rule:
-  - In strict transition mode, hard_cut is disallowed and must be converted to a non-hard-cut handoff mode.
-  - Do not emit handoff_mode=hard_cut in strict mode.
-- A recurring character should appear in >=3 scenes unless explicitly justified in edits_applied.
-- A recurring character must cause at least one concrete scene outcome.
 
 If you cannot satisfy constraints after correction attempts, return error_v1:
 {
@@ -67,8 +63,17 @@ If you cannot satisfy constraints after correction attempts, return error_v1:
   "action_hint": "Preserve transition contract and supply required cast registry fields."
 }
 
-Transition-refined outline (phase 04):
-{{outline_transitions_refined_v1_1}}
+Chapter target id:
+{{chapter_target_id}}
+
+Chapter input outline:
+{{chapter_input_outline}}
+
+Previous chapter context (read-only):
+{{chapter_prev_outline}}
+
+Next chapter context (read-only):
+{{chapter_next_outline}}
 
 Book:
 {{book}}

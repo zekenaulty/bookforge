@@ -38,4 +38,5 @@ def step_runtime_defaults() -> Dict[str, Any]:
             "blocked": [],
             "exact_conflicts": [],
         },
+        "phase04_routing_by_chapter": {},
     }

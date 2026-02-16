@@ -2,6 +2,7 @@
 import json
 import pytest
 
+from bookforge.llm.errors import LLMRequestError
 from bookforge.llm.types import LLMResponse
 from bookforge.outline import generate_outline, load_latest_outline_pipeline_report
 from bookforge.workspace import init_book_workspace
@@ -13,7 +14,7 @@ class DummyClient:
         self._index = 0
         self.messages_history = []
 
-    def chat(self, messages, model, temperature=0.7, max_tokens=1024):
+    def chat(self, messages, model, temperature=0.7, max_tokens=1024, thinking_level=None):
         self.messages_history.append(messages)
         if self._responses:
             index = min(self._index, len(self._responses) - 1)
@@ -26,6 +27,31 @@ class DummyClient:
             raw={"candidates": [{"finishReason": "STOP"}]},
             provider="dummy",
             model=model,
+        )
+
+
+class DummyClientWithPause(DummyClient):
+    def __init__(self, responses: list[str], *, fail_call_number: int) -> None:
+        super().__init__(responses)
+        self._call_number = 0
+        self._fail_call_number = fail_call_number
+
+    def chat(self, messages, model, temperature=0.7, max_tokens=1024, thinking_level=None):
+        self._call_number += 1
+        if self._call_number == self._fail_call_number:
+            raise LLMRequestError(
+                status_code=429,
+                message="rate limited",
+                retry_after_seconds=1.0,
+                quota_violations=[],
+                raw_response={},
+            )
+        return super().chat(
+            messages,
+            model,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            thinking_level=thinking_level,
         )
 
 
@@ -184,9 +210,25 @@ def _phase_02() -> dict:
 
 
 def _phase_04a() -> dict:
+    return _phase_04a_for_chapter(1)
+
+
+def _outline_for_chapter(chapter_id: int) -> dict:
+    outline = _base_outline()
+    chapters = outline.get("chapters") if isinstance(outline.get("chapters"), list) else []
+    selected = [chapter for chapter in chapters if isinstance(chapter, dict) and int(chapter.get("chapter_id", 0) or 0) == int(chapter_id)]
+    return {
+        "schema_version": "1.1",
+        "chapters": selected,
+        "characters": outline.get("characters", []),
+        "threads": outline.get("threads", []),
+    }
+
+
+def _phase_04a_for_chapter(chapter_id: int) -> dict:
     return {
         "schema_version": "transition_refine_v1",
-        "outline": _base_outline(),
+        "outline": _outline_for_chapter(chapter_id),
         "phase_report": {
             "orphan_outcomes_before": 0,
             "orphan_outcomes_after": 0,
@@ -200,9 +242,13 @@ def _phase_04a() -> dict:
 
 
 def _phase_04b() -> dict:
+    return _phase_04b_for_chapter(1)
+
+
+def _phase_04b_for_chapter(chapter_id: int) -> dict:
     return {
         "schema_version": "transition_refine_v1",
-        "outline": _base_outline(),
+        "outline": _outline_for_chapter(chapter_id),
         "phase_report": {
             "inserted_scene_refs": [],
             "resolved_candidates": [],
@@ -215,9 +261,13 @@ def _phase_04b() -> dict:
 
 
 def _phase_05() -> dict:
+    return _phase_05_for_chapter(1)
+
+
+def _phase_05_for_chapter(chapter_id: int) -> dict:
     return {
         "schema_version": "cast_refine_v1",
-        "outline": _base_outline(),
+        "outline": _outline_for_chapter(chapter_id),
         "cast_report": {
             "core_character_ids": ["CHAR_protagonist"],
             "supporting_character_ids": [],
@@ -228,15 +278,23 @@ def _phase_05() -> dict:
     }
 
 
+def _phase_06_for_chapter(chapter_id: int) -> dict:
+    return _outline_for_chapter(chapter_id)
+
+
 def _pipeline_responses() -> list[str]:
     return [
         json.dumps(_phase_01()),
         json.dumps(_phase_02()),
         json.dumps(_base_outline()),
-        json.dumps(_phase_04a()),
-        json.dumps(_phase_04b()),
-        json.dumps(_phase_05()),
-        json.dumps(_base_outline()),
+        json.dumps(_phase_04a_for_chapter(1)),
+        json.dumps(_phase_04a_for_chapter(2)),
+        json.dumps(_phase_04b_for_chapter(1)),
+        json.dumps(_phase_04b_for_chapter(2)),
+        json.dumps(_phase_05_for_chapter(1)),
+        json.dumps(_phase_05_for_chapter(2)),
+        json.dumps(_phase_06_for_chapter(1)),
+        json.dumps(_phase_06_for_chapter(2)),
     ]
 
 
@@ -271,7 +329,7 @@ def test_generate_outline_pipeline_writes_files(tmp_path: Path) -> None:
     assert (outline_path.parent / "chapters" / "ch_001.json").exists()
     assert (outline_path.parent / "chapters" / "ch_002.json").exists()
     assert (outline_path.parent / "pipeline_runs").exists()
-    assert len(client.messages_history) == 7
+    assert len(client.messages_history) == 11
 
     report_path, report = load_latest_outline_pipeline_report(workspace=tmp_path, book_id="my_book")
     assert report_path is not None
@@ -283,7 +341,7 @@ def test_generate_outline_resume_reuses_successful_steps(tmp_path: Path) -> None
 
     first_client = DummyClient(_pipeline_responses())
     generate_outline(workspace=tmp_path, book_id="my_book", client=first_client, model="dummy")
-    assert len(first_client.messages_history) == 7
+    assert len(first_client.messages_history) == 11
 
     resume_client = DummyClient(_pipeline_responses())
     generate_outline(workspace=tmp_path, book_id="my_book", resume=True, client=resume_client, model="dummy")
@@ -296,7 +354,14 @@ def test_generate_outline_phase_rerun_uses_previous_dependencies(tmp_path: Path)
     baseline_client = DummyClient(_pipeline_responses())
     generate_outline(workspace=tmp_path, book_id="my_book", client=baseline_client, model="dummy")
 
-    rerun_client = DummyClient([json.dumps(_phase_04a()), json.dumps(_phase_04b())])
+    rerun_client = DummyClient(
+        [
+            json.dumps(_phase_04a_for_chapter(1)),
+            json.dumps(_phase_04a_for_chapter(2)),
+            json.dumps(_phase_04b_for_chapter(1)),
+            json.dumps(_phase_04b_for_chapter(2)),
+        ]
+    )
     handoff_path = generate_outline(
         workspace=tmp_path,
         book_id="my_book",
@@ -308,13 +373,13 @@ def test_generate_outline_phase_rerun_uses_previous_dependencies(tmp_path: Path)
     )
 
     assert handoff_path.name in {"outline.json", "outline_transitions_refined_v1_1.json"}
-    assert len(rerun_client.messages_history) == 2
+    assert len(rerun_client.messages_history) == 4
 
 
 def test_generate_outline_from_phase_without_dependencies_fails(tmp_path: Path) -> None:
     _init_book(tmp_path)
 
-    client = DummyClient([json.dumps(_phase_04a()), json.dumps(_phase_04b())])
+    client = DummyClient([json.dumps(_phase_04a_for_chapter(1)), json.dumps(_phase_04b_for_chapter(1))])
     with pytest.raises(FileNotFoundError):
         generate_outline(
             workspace=tmp_path,
@@ -324,3 +389,45 @@ def test_generate_outline_from_phase_without_dependencies_fails(tmp_path: Path) 
             client=client,
             model="dummy",
         )
+
+
+def test_generate_outline_phase4a_resume_restarts_at_failed_chapter(tmp_path: Path) -> None:
+    _init_book(tmp_path)
+
+    first_client = DummyClientWithPause(_pipeline_responses(), fail_call_number=5)
+    with pytest.raises(RuntimeError):
+        generate_outline(workspace=tmp_path, book_id="my_book", client=first_client, model="dummy")
+
+    resume_client = DummyClient([json.dumps(_phase_04a_for_chapter(2))])
+    handoff_path = generate_outline(
+        workspace=tmp_path,
+        book_id="my_book",
+        resume=True,
+        from_phase="phase_04a_transition_seam_analysis",
+        to_phase="phase_04a_transition_seam_analysis",
+        client=resume_client,
+        model="dummy",
+    )
+    assert handoff_path.name in {"outline.json", "phase_04a_transition_seam_analysis_output.json"}
+    assert len(resume_client.messages_history) == 1
+
+
+def test_generate_outline_force_full_rerun_reexecutes_successful_chapters(tmp_path: Path) -> None:
+    _init_book(tmp_path)
+    baseline_client = DummyClient(_pipeline_responses())
+    generate_outline(workspace=tmp_path, book_id="my_book", client=baseline_client, model="dummy")
+
+    rerun_client = DummyClient(
+        [json.dumps(_phase_04a_for_chapter(1)), json.dumps(_phase_04a_for_chapter(2))]
+    )
+    generate_outline(
+        workspace=tmp_path,
+        book_id="my_book",
+        resume=True,
+        from_phase="phase_04a_transition_seam_analysis",
+        to_phase="phase_04a_transition_seam_analysis",
+        force_phase_full_rerun=True,
+        client=rerun_client,
+        model="dummy",
+    )
+    assert len(rerun_client.messages_history) == 2

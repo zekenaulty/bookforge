@@ -11,6 +11,10 @@ def test_phase04b_prompt_render_includes_routing_payloads(tmp_path: Path) -> Non
             "book": {"book_id": "b1"},
             "targets": {"chapters": 10},
             "notes": "",
+            "chapter_target_id": 1,
+            "chapter_input_outline": {"schema_version": "1.1", "chapters": [{"chapter_id": 1}]},
+            "chapter_prev_outline": {},
+            "chapter_next_outline": {},
             "outline_phase_04a_output": {"schema_version": "transition_refine_v1", "outline": {}, "phase_report": {}},
             "phase_04_selected_candidates_json": [{"from_scene_ref": "1:1", "to_scene_ref": "1:2", "requested_resolution": "micro_scene"}],
             "phase_04_blocked_candidates_json": [],
@@ -22,3 +26,5 @@ def test_phase04b_prompt_render_includes_routing_payloads(tmp_path: Path) -> Non
     assert "{{phase_04_blocked_candidates_json}}" not in rendered
     assert "{{phase_04_policy_context_json}}" not in rendered
     assert "{{outline_phase_04a_output}}" not in rendered
+    assert "{{chapter_target_id}}" not in rendered
+    assert "{{chapter_input_outline}}" not in rendered

@@ -84,6 +84,7 @@ def _outline_generate(args: argparse.Namespace) -> int:
             force_rerun_with_draft=bool(getattr(args, "force_rerun_with_draft", False)),
             exact_scene_count=bool(getattr(args, "exact_scene_count", False)),
             scene_count_range=getattr(args, "scene_count_range", None),
+            force_phase_full_rerun=bool(getattr(args, "force_phase_full_rerun", False)),
         )
     except Exception as exc:
         sys.stderr.write(f"Outline generation failed: {exc}\n")
@@ -238,6 +239,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--resume",
         action="store_true",
         help="Resume the latest outline pipeline run.",
+    )
+    outline_generate.add_argument(
+        "--force-phase-full-rerun",
+        action="store_true",
+        help="For chapter-scoped phases (4a/4b/5/6), rerun all chapters in selected phase range instead of reusing successful chapter checkpoints.",
     )
     outline_generate.add_argument(
         "--from-phase",

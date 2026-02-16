@@ -17,6 +17,7 @@ Optional parameters
 - --prompt-file: Path to a plain-English outline prompt file used as grounding context (relative to the current working directory).
 - --rerun: Run the phased outline pipeline again on an existing outline.
 - --resume: Resume the latest outline pipeline run for this book.
+- --force-phase-full-rerun: In chapter-scoped phases (4a/4b/5/6), rerun all chapters in selected phase range instead of reusing successful chapter checkpoints.
 - --from-phase / --to-phase: Restrict execution range (supports logical phases and internal step ids, including phase_04a/phase_04b).
 - --phase: Alias for running one phase only.
 - --transition-hints-file: Path to outline transition hints JSON.
@@ -39,6 +40,12 @@ Outputs
 - Writes phased pipeline artifacts under outline/pipeline_runs/<run_id>/.
 - Writes outline pipeline report at outline/pipeline_runs/<run_id>/outline_pipeline_report.json.
 - Updates outline/outline_pipeline_report_latest.json pointer.
+- For chapter-scoped phases 4a/4b/5/6, writes chapter artifacts:
+  - phase_<id>_chapter_<NNN>_input.json
+  - phase_<id>_chapter_<NNN>_attempt_raw_<k>.json
+  - phase_<id>_chapter_<NNN>_output.json
+  - phase_<id>_chapter_<NNN>_validation.json
+  - <step_id>_checkpoint.json (chapter attempts + resume cursor)
 - Writes outline/outline.json and outline/chapters/ch_###.json when a valid final handoff is available.
 - Outline schema v1.1 uses sections and scenes; see prompts/templates/outline.md for shape.
 - If --prompt-file is provided, its content is appended to the outline prompt as user guidance.
@@ -63,5 +70,9 @@ Examples
   bookforge outline generate --book my_novel_v1
 - With optional parameters:
   bookforge --workspace workspace outline generate --book my_novel_v1 --rerun --from-phase phase_04_transition_causality_refinement --to-phase phase_06_thread_payoff_refinement
+- Resume only phase 4a and restart at first non-success chapter:
+  bookforge --workspace workspace outline generate --book my_novel_v1 --resume --from-phase phase_04a_transition_seam_analysis --to-phase phase_04a_transition_seam_analysis
+- Force full rerun of chapter-scoped phases in selected range:
+  bookforge --workspace workspace outline generate --book my_novel_v1 --resume --from-phase phase_04a_transition_seam_analysis --to-phase phase_06_thread_payoff_refinement --force-phase-full-rerun
 - With prompt file:
   bookforge --workspace workspace outline generate --book my_novel_v1 --prompt-file prompts\outline_seed.md

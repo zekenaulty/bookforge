@@ -66,7 +66,11 @@ def handoff_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def prompt_extras(runtime: Dict[str, Any]) -> Dict[str, Any]:
-    routing = runtime.get("phase04_routing") if isinstance(runtime.get("phase04_routing"), dict) else {}
+    current = runtime.get("phase04_current_routing")
+    if isinstance(current, dict):
+        routing = current
+    else:
+        routing = runtime.get("phase04_routing") if isinstance(runtime.get("phase04_routing"), dict) else {}
     return {
         "outline_phase_04a_output": runtime.get("outline_phase_04a_output", {}),
         "phase_04_selected_candidates_json": routing.get("selected", []),
