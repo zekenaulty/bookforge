@@ -188,11 +188,17 @@ REF_PATTERN = re.compile(r"^[1-9][0-9]*:[1-9][0-9]*$")
 LOCATION_ID_PATTERN = re.compile(r"^LOC_[A-Z0-9_]+$")
 PLACEHOLDER_TOKEN_PATTERN = re.compile(r"\b(current_location|unknown|placeholder|tbd|here|there|n/?a)\b", re.IGNORECASE)
 PLACEHOLDER_ANCHOR_PATTERN = re.compile(r"^anchor_[0-9]+$", re.IGNORECASE)
+META_TRANSITION_TEXT_PATTERN = re.compile(
+    r"\b(this beat|realized on page|movement from|the scene opens at|action resumes at|beat carries directly)\b",
+    re.IGNORECASE,
+)
 
 RETRYABLE_REASON_CODES = {
     "json_parse",
     "outline_schema",
     "transition_placeholder",
+    "transition_fields_invalid",
+    "transition_insertion_required",
     "location_registry_missing",
     "phase_contract_invalid",
 }
@@ -1345,6 +1351,35 @@ def _phase04_exact_conflicts(phase_report: Dict[str, Any]) -> List[Dict[str, Any
     return conflicts
 
 
+def _phase04_llm_insert_required(phase_report: Dict[str, Any]) -> List[Dict[str, Any]]:
+    required_items: List[Dict[str, Any]] = []
+    raw = phase_report.get("llm_insert_required")
+    if not isinstance(raw, list):
+        return required_items
+    for item in raw:
+        if isinstance(item, dict):
+            required_items.append(
+                {
+                    "scene_ref": str(item.get("scene_ref") or "").strip(),
+                    "to_scene_ref": str(item.get("to_scene_ref") or "").strip(),
+                    "seam_score": _to_int_or_none(item.get("seam_score")),
+                    "required_resolution": str(item.get("required_resolution") or "").strip(),
+                    "reason": str(item.get("reason") or "llm_insert_required").strip(),
+                }
+            )
+        elif isinstance(item, str):
+            required_items.append(
+                {
+                    "scene_ref": item.strip(),
+                    "to_scene_ref": "",
+                    "seam_score": None,
+                    "required_resolution": "",
+                    "reason": "llm_insert_required",
+                }
+            )
+    return required_items
+
+
 def _normalize_text_token(value: Any) -> str:
     token = re.sub(r"[^a-z0-9]+", "_", str(value or "").strip().lower())
     token = token.strip("_")
@@ -1363,6 +1398,39 @@ def _is_placeholder_anchor(value: Any) -> bool:
     if not text:
         return False
     return bool(PLACEHOLDER_ANCHOR_PATTERN.fullmatch(text) or PLACEHOLDER_TOKEN_PATTERN.search(text))
+
+
+def _is_meta_transition_text(value: Any) -> bool:
+    text = str(value or "").strip()
+    if not text:
+        return False
+    return bool(META_TRANSITION_TEXT_PATTERN.search(text))
+
+
+def _is_machine_anchor(anchor: Any, scene: Dict[str, Any]) -> bool:
+    text = str(anchor or "").strip()
+    if not text:
+        return False
+    lower = text.lower()
+    if lower.startswith("loc_") or text.startswith("LOC_"):
+        return True
+    if lower in HANDOFF_MODE_VALUES or lower in CONSTRAINT_STATE_VALUES:
+        return True
+    normalized = _normalize_text_token(text)
+    if normalized in HANDOFF_MODE_VALUES or normalized in CONSTRAINT_STATE_VALUES:
+        return True
+    location_tokens = {
+        _normalize_text_token(scene.get("location_start_id")),
+        _normalize_text_token(scene.get("location_end_id")),
+        _normalize_text_token(scene.get("location_start")),
+        _normalize_text_token(scene.get("location_end")),
+        _normalize_text_token(scene.get("location_start_label")),
+        _normalize_text_token(scene.get("location_end_label")),
+    }
+    location_tokens = {token for token in location_tokens if token and token != "unknown"}
+    if normalized in location_tokens and "_" in lower:
+        return True
+    return False
 
 
 def _unique_non_empty(values: List[str]) -> List[str]:
@@ -1763,8 +1831,6 @@ def _ensure_transition_contract_for_scene(
         cleaned = _unique_non_empty([str(item).strip() for item in anchors])
     else:
         cleaned = []
-    if not cleaned:
-        cleaned = _fallback_transition_anchors(scene)
     if cleaned:
         scene["transition_in_anchors"] = cleaned[:6]
     else:
@@ -1775,8 +1841,6 @@ def _ensure_transition_contract_for_scene(
         out_cleaned = _unique_non_empty([str(item).strip() for item in out_anchors])
     else:
         out_cleaned = []
-    if not out_cleaned and next_scene is not None:
-        out_cleaned = _fallback_transition_anchors(scene)
     if out_cleaned:
         scene["transition_out_anchors"] = out_cleaned[:6]
     else:
@@ -1910,6 +1974,7 @@ def _apply_phase04_transition_policy(
     blocked_by_budget: List[Dict[str, Any]] = []
     downgraded_resolution: List[Dict[str, Any]] = []
     exact_conflicts: List[Dict[str, Any]] = []
+    llm_insert_required: List[Dict[str, Any]] = []
     edits_applied: List[str] = []
 
     chapters = outline.get("chapters")
@@ -1974,7 +2039,18 @@ def _apply_phase04_transition_policy(
                     required_insertions,
                     key=lambda item: (-int(item["score"]), int(item["idx"]), str(item["scene_ref"]), str(item["to_scene_ref"])),
                 )
-                selected_indexes = {int(item["idx"]) for item in ordered[:budget_per_chapter]}
+                selected = ordered[:budget_per_chapter]
+                selected_indexes = {int(item["idx"]) for item in selected}
+                for item in selected:
+                    llm_insert_required.append(
+                        {
+                            "scene_ref": item["scene_ref"],
+                            "to_scene_ref": item["to_scene_ref"],
+                            "seam_score": item["score"],
+                            "required_resolution": item["required_resolution"],
+                            "reason": "llm_insert_required",
+                        }
+                    )
                 for item in ordered[budget_per_chapter:]:
                     blocked_by_budget.append(
                         {
@@ -2007,34 +2083,12 @@ def _apply_phase04_transition_policy(
                 }
             )
             entries[int(item["idx"])]["scene"]["seam_resolution"] = "inline_bridge"
-
-        if selected_indexes and not exact_scene_count:
-            for idx in sorted(selected_indexes, reverse=True):
-                refreshed = _chapter_scene_entries(chapter)
-                if idx < 0 or idx + 1 >= len(refreshed):
-                    continue
-                current_scene = refreshed[idx]["scene"]
-                next_scene = refreshed[idx + 1]["scene"]
-                next_section = refreshed[idx + 1]["section"]
-                section_scenes = next_section.get("scenes")
-                if not isinstance(section_scenes, list):
-                    continue
-                try:
-                    insert_pos = section_scenes.index(next_scene)
-                except ValueError:
-                    insert_pos = 0
-
-                seam_score = _score_transition_edge(current_scene, next_scene)
-                seam_resolution = _seam_resolution_for_score(seam_score)
-                inserted_scene = _build_inserted_transition_scene(
-                    current_scene=current_scene,
-                    next_scene=next_scene,
-                    seam_score=seam_score,
-                    seam_resolution=seam_resolution,
-                )
-                section_scenes.insert(insert_pos, inserted_scene)
+        if selected_indexes:
+            for idx in sorted(selected_indexes):
+                llm_item = entries[idx]["scene"]
+                llm_item["seam_resolution"] = _seam_resolution_for_score(int(llm_item.get("seam_score") or 0))
                 edits_applied.append(
-                    f"inserted_transition_scene {chapter_id}:{idx + 1}->{chapter_id}:{idx + 2} score={seam_score} resolution={seam_resolution}"
+                    f"llm_insert_required {chapter_id}:{idx + 1}->{chapter_id}:{idx + 2} score={llm_item.get('seam_score')} resolution={llm_item.get('seam_resolution')}"
                 )
 
         refreshed_entries = _chapter_scene_entries(chapter)
@@ -2063,6 +2117,10 @@ def _apply_phase04_transition_policy(
 
             seam_score = _score_transition_edge(scene, next_scene)
             seam_resolution = _seam_resolution_for_score(seam_score)
+            if idx in selected_indexes:
+                scene["seam_score"] = seam_score
+                scene["seam_resolution"] = seam_resolution
+                continue
             if seam_resolution != "inline_bridge" and exact_scene_count:
                 seam_resolution = "inline_bridge"
             if seam_resolution != "inline_bridge" and not allow_transition_scene_insertions:
@@ -2088,6 +2146,14 @@ def _apply_phase04_transition_policy(
 
     if exact_conflicts:
         phase_report["exact_scene_count_transition_conflict"] = exact_conflicts
+
+    existing_llm_required = phase_report.get("llm_insert_required")
+    merged_llm_required: List[Any] = []
+    if isinstance(existing_llm_required, list):
+        merged_llm_required.extend(existing_llm_required)
+    merged_llm_required.extend(llm_insert_required)
+    if merged_llm_required:
+        phase_report["llm_insert_required"] = merged_llm_required
 
     existing_edits = phase_report.get("edits_applied")
     merged_edits: List[str] = []
@@ -2190,6 +2256,7 @@ def _build_transition_summary(
     blocked_items = _phase04_budget_blocked(phase04_report)
     downgraded_items = _phase04_downgraded(phase04_report)
     exact_conflicts = _phase04_exact_conflicts(phase04_report)
+    llm_insert_required = _phase04_llm_insert_required(phase04_report)
     blocked_high = [
         item
         for item in blocked_items
@@ -2233,6 +2300,15 @@ def _build_transition_summary(
                 "severity": "error",
                 "message": f"{len(exact_conflicts)} seam(s) require insertion but exact scene-count mode is enabled.",
                 "items": exact_conflicts,
+            }
+        )
+    if llm_insert_required:
+        attention_items.append(
+            {
+                "code": "transition_insertion_required",
+                "severity": "error",
+                "message": f"{len(llm_insert_required)} seam(s) require LLM transition-scene insertion/regeneration.",
+                "items": llm_insert_required[:20],
             }
         )
     if placeholder_identity_items:
@@ -2668,6 +2744,8 @@ def _validate_outline_payload(
             _normalize_transition_aliases(scene)
             transition_in_text = str(scene.get("transition_in_text") or "").strip()
             transition_out_text = str(scene.get("transition_out_text") or "").strip()
+            cleaned_in_anchors: List[str] = []
+            cleaned_out_anchors: List[str] = []
 
             expected_end = section_end_lookup.get((chapter_id, section_id))
             if expected_end:
@@ -2729,6 +2807,7 @@ def _validate_outline_payload(
                         )
                     else:
                         anchors = [str(item).strip() for item in value if str(item).strip()]
+                        cleaned_in_anchors = anchors
                         if len(anchors) < 3 or len(anchors) > 6:
                             errors.append(
                                 _issue(
@@ -2747,6 +2826,15 @@ def _validate_outline_payload(
                                 errors.append(issue)
                             else:
                                 warnings.append(issue)
+                        machine_anchors = [anchor for anchor in anchors if _is_machine_anchor(anchor, scene)]
+                        if machine_anchors:
+                            errors.append(
+                                _issue(
+                                    "transition_fields_invalid",
+                                    "transition_in_anchors contains machine/id-like tokens and must be rewritten by the model.",
+                                    scene_ref=scene_ref,
+                                )
+                            )
                 else:
                     text = str(value or "").strip()
                     if not text:
@@ -2784,6 +2872,14 @@ def _validate_outline_payload(
                                 errors.append(issue)
                             else:
                                 warnings.append(issue)
+                        if required_field == "transition_in_text" and _is_meta_transition_text(text):
+                            errors.append(
+                                _issue(
+                                    "transition_fields_invalid",
+                                    "transition_in_text appears to be meta/fallback phrasing and must be model-rewritten with concrete connective action.",
+                                    scene_ref=scene_ref,
+                                )
+                            )
 
             handoff_mode = str(scene.get("handoff_mode") or "").strip()
             if handoff_mode and handoff_mode not in HANDOFF_MODE_VALUES:
@@ -2867,6 +2963,14 @@ def _validate_outline_payload(
                         errors.append(issue)
                     else:
                         warnings.append(issue)
+                elif _is_meta_transition_text(transition_out_text):
+                    errors.append(
+                        _issue(
+                            "transition_fields_invalid",
+                            "transition_out_text appears to be meta/fallback phrasing and must be model-rewritten with concrete push condition.",
+                            scene_ref=scene_ref,
+                        )
+                    )
                 out_anchors = scene.get("transition_out_anchors")
                 if not isinstance(out_anchors, list):
                     errors.append(
@@ -2896,6 +3000,28 @@ def _validate_outline_payload(
                             errors.append(issue)
                         else:
                             warnings.append(issue)
+                    machine_out_anchors = [anchor for anchor in cleaned_out_anchors if _is_machine_anchor(anchor, scene)]
+                    if machine_out_anchors:
+                        errors.append(
+                            _issue(
+                                "transition_fields_invalid",
+                                "transition_out_anchors contains machine/id-like tokens and must be rewritten by the model.",
+                                scene_ref=scene_ref,
+                            )
+                        )
+
+                start_token = _normalize_text_token(scene.get("location_start_id") or scene.get("location_start"))
+                end_token = _normalize_text_token(scene.get("location_end_id") or scene.get("location_end"))
+                movement_expected = (handoff_mode and handoff_mode != "direct_continuation") or (start_token and end_token and start_token != end_token)
+                if movement_expected and cleaned_in_anchors and cleaned_out_anchors:
+                    if [item.casefold() for item in cleaned_in_anchors] == [item.casefold() for item in cleaned_out_anchors]:
+                        errors.append(
+                            _issue(
+                                "transition_fields_invalid",
+                                "transition_in_anchors and transition_out_anchors are identical for a movement seam; model must provide distinct in/out anchor sets.",
+                                scene_ref=scene_ref,
+                            )
+                        )
 
             if require_seam_fields:
                 seam_score = scene.get("seam_score")
@@ -3124,6 +3250,14 @@ def _validate_phase_payload(
                         _issue(
                             "exact_scene_count_transition_conflict",
                             f"{len(exact_conflicts)} seam(s) require insertion but exact scene-count mode is enabled.",
+                        )
+                    )
+                llm_required = phase_report.get("llm_insert_required")
+                if isinstance(llm_required, list) and llm_required:
+                    errors.append(
+                        _issue(
+                            "transition_insertion_required",
+                            f"{len(llm_required)} seam(s) require LLM transition-scene insertion/regeneration.",
                         )
                     )
 

@@ -110,7 +110,7 @@ def test_phase04_policy_fills_required_transition_contract() -> None:
     assert isinstance(refined["phase_report"].get("blocked_by_budget"), list)
 
 
-def test_phase04_policy_inserts_transition_scene_when_budget_allows() -> None:
+def test_phase04_policy_routes_transition_scene_insertion_to_llm_when_budget_allows() -> None:
     payload = _phase04_payload_two_scenes()
     refined = _apply_phase04_transition_policy(
         deepcopy(payload),
@@ -120,13 +120,30 @@ def test_phase04_policy_inserts_transition_scene_when_budget_allows() -> None:
     )
 
     scenes = refined["outline"]["chapters"][0]["sections"][0]["scenes"]
-    assert len(scenes) == 3
-    assert any(scene.get("inserted_by_pipeline") is True for scene in scenes)
-    assert [scene.get("scene_id") for scene in scenes] == [1, 2, 3]
+    assert len(scenes) == 2
+    assert not any(scene.get("inserted_by_pipeline") is True for scene in scenes)
+    assert [scene.get("scene_id") for scene in scenes] == [1, 2]
     assert scenes[0]["hands_off_to"] == "1:2"
     assert scenes[1]["consumes_outcome_from"] == "1:1"
-    assert scenes[1]["hands_off_to"] == "1:3"
-    assert scenes[2]["consumes_outcome_from"] == "1:2"
+    llm_required = refined.get("phase_report", {}).get("llm_insert_required")
+    assert isinstance(llm_required, list)
+    assert len(llm_required) == 1
+    assert llm_required[0].get("scene_ref") == "1:1"
+    assert llm_required[0].get("to_scene_ref") == "1:2"
+
+    validation = _validate_phase_payload(
+        phase_id="phase_04_transition_causality_refinement",
+        payload=refined,
+        handoffs={},
+        strict_transition_hints=False,
+        strict_transition_bridges=False,
+        strict_location_identity=True,
+        transition_hint_ids=[],
+        scene_count_range=None,
+        exact_scene_count=False,
+    )
+    assert validation["status"] == "fail"
+    assert any(item.get("code") == "transition_insertion_required" for item in validation["errors"])
 
 
 def test_phase04_policy_exact_mode_conflict_fails_validation() -> None:
@@ -177,6 +194,35 @@ def test_phase04_validation_rejects_placeholder_transition_out_anchors() -> None
     )
     assert validation["status"] == "fail"
     assert any(item.get("code") == "transition_placeholder" for item in validation["errors"])
+
+
+def test_phase04_validation_rejects_fallback_meta_transition_fields() -> None:
+    payload = _phase04_payload_two_scenes()
+    refined = _apply_phase04_transition_policy(
+        deepcopy(payload),
+        exact_scene_count=False,
+        allow_transition_scene_insertions=False,
+        transition_insert_budget_per_chapter=0,
+    )
+    scenes = refined["outline"]["chapters"][0]["sections"][0]["scenes"]
+    scenes[0]["transition_in_text"] = "After a arrival checkpoint, the movement from White Void Center to White Void Center is realized on page."
+    scenes[0]["transition_in_anchors"] = ["loc_white_void_center", "white_void_center", "arrival_checkpoint"]
+    scenes[0]["transition_out_text"] = "This beat pushes into a arrival checkpoint toward the Training Arena."
+    scenes[0]["transition_out_anchors"] = ["loc_white_void_center", "white_void_center", "arrival_checkpoint"]
+
+    validation = _validate_phase_payload(
+        phase_id="phase_04_transition_causality_refinement",
+        payload=refined,
+        handoffs={},
+        strict_transition_hints=False,
+        strict_transition_bridges=False,
+        strict_location_identity=True,
+        transition_hint_ids=[],
+        scene_count_range=None,
+        exact_scene_count=False,
+    )
+    assert validation["status"] == "fail"
+    assert any(item.get("code") == "transition_fields_invalid" for item in validation["errors"])
 
 
 def test_location_registry_does_not_mint_placeholder_labels() -> None:
