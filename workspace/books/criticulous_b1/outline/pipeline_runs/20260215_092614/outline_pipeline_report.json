@@ -1,0 +1,110 @@
+{
+  "book_id": "criticulous_b1",
+  "run_id": "20260215_092614",
+  "timestamp": "2026-02-15T09:33:31.454201+00:00",
+  "overall_status": "ERROR",
+  "phase_failed": "phase_03_scene_draft",
+  "reason_codes": [
+    "transition_placeholder"
+  ],
+  "attempt_usage": {
+    "phase_01_chapter_spine": "1/2",
+    "phase_02_section_architecture": "1/2",
+    "phase_03_scene_draft": "2/2"
+  },
+  "top_errors": [
+    {
+      "code": "transition_placeholder",
+      "message": "transition_in_text must not contain placeholder values.",
+      "scene_ref": "5:11"
+    },
+    {
+      "code": "transition_placeholder",
+      "message": "transition_in_text must not contain placeholder values.",
+      "scene_ref": "7:9"
+    }
+  ],
+  "requested_from_phase": "phase_03_scene_draft",
+  "requested_to_phase": "phase_06_thread_payoff_refinement",
+  "effective_from_phase": "phase_01_chapter_spine",
+  "executed_phases": [
+    "phase_01_chapter_spine",
+    "phase_02_section_architecture"
+  ],
+  "reused_phases": [],
+  "warnings_count": 0,
+  "errors_count": 2,
+  "requires_user_attention": true,
+  "strict_blocking": false,
+  "attention_items": [],
+  "raw_model_output_path": "phase_03_attempt_2.raw.json",
+  "retry_directive": "Your previous phase_03_scene_draft output failed deterministic validation.\nReturn exactly ONE JSON object and nothing else.\nDo not emit markdown, code fences, preambles, or trailing commentary.\nFix these errors:\nTop reason codes:\n- transition_placeholder\n- [transition_placeholder] transition_in_text must not contain placeholder values.\n- [transition_placeholder] transition_in_text must not contain placeholder values.",
+  "mode_values": {
+    "strict_transition_hints": false,
+    "strict_transition_bridges": true,
+    "strict_location_identity": true,
+    "transition_insert_budget_per_chapter": 2,
+    "allow_transition_scene_insertions": true,
+    "exact_scene_count": false,
+    "scene_count_range": "",
+    "scene_count_default_policy": "strong_non_exact"
+  },
+  "seam_outcomes": {
+    "inserted_scenes_count": 0,
+    "inline_bridges_count": 0,
+    "hard_cut_count": 0,
+    "blocked_by_budget_count": 0
+  },
+  "top_seam_decisions": [],
+  "settings": {
+    "from_phase": "phase_03_scene_draft",
+    "to_phase": "phase_06_thread_payoff_refinement",
+    "strict_transition_hints": false,
+    "strict_transition_bridges": true,
+    "strict_location_identity": true,
+    "transition_insert_budget_per_chapter": 2,
+    "allow_transition_scene_insertions": true,
+    "exact_scene_count": false,
+    "scene_count_range": "",
+    "force_rerun_with_draft": true,
+    "location_registry_active_path": "outline/location_registry_active.json",
+    "location_registry_active_sha256": ""
+  },
+  "scene_count_mode": {
+    "exact_scene_count": false,
+    "scene_count_range": "",
+    "default_policy": "strong_non_exact"
+  },
+  "phase_validation_counts": {
+    "phase_01_chapter_spine": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "phase_02_section_architecture": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "phase_03_scene_draft": {
+      "errors": 2,
+      "warnings": 0
+    }
+  },
+  "artifact_paths": {
+    "run_dir": "outline/pipeline_runs/20260215_092614",
+    "phase_history": "phase_history.json",
+    "report": "outline_pipeline_report.json",
+    "decisions": "outline_pipeline_decisions.json"
+  },
+  "location_registry_active": {
+    "path": "outline/location_registry_active.json",
+    "sha256": ""
+  },
+  "template_checksums": {
+    "phase_01_chapter_spine": "fd861b6f4b86bb1744654d2fa7a6e8c478a42d6e3b537751090ff1f3249d4674",
+    "phase_02_section_architecture": "80151abb8a2a17bb44bd944b18bc885d600cbd781fb53b8afe6e6b697aff288c",
+    "phase_03_scene_draft": "21f6cf63f3eb42366d30b30f5ab805620d16c5b07f65396530dae4d45385a567",
+    "phase_04_transition_causality_refinement": "755e434ba3bb0e021a46f2f1067f62efc0d74f89cb71f9ecb88fddacb174b3d3",
+    "phase_05_cast_function_refinement": "150c1c6a40337da941d0235cb513d4c1f83e2661eec0a2d5437ed0ed7267dc97",
+    "phase_06_thread_payoff_refinement": "3087236e6d6b69fe4199dbb6ec0fea0bde612c1868bbb3145f0a3024f9f1fa83"
+  }
+}

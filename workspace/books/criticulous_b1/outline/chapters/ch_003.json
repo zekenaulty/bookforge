@@ -1,292 +1,431 @@
 {
   "chapter_id": 3,
-  "title": "Math-Boss vs. The Glitch",
-  "goal": "Survive the Floor Guardian and secure the first major loot drop.",
-  "chapter_role": "pressure",
-  "stakes_shift": "Artie moves from a lucky survivor to a recognized 'Anomaly' with significant power potential.",
+  "title": "Glass Cannon in a Stone World",
+  "goal": "Cross the treacherous Iron Peaks to reach the trade hub of Oakhaven before his 'Newbie Protection' buff expires.",
+  "chapter_role": "journey",
+  "stakes_shift": "Environmental hazards introduce threats that cannot be 'critically hit' or easily dodged.",
   "bridge": {
-    "from_prev": "The Bone Golem is ready to smash Artie.",
-    "to_next": "Artie leaves the crypts with a legendary-tier item that he can't actually use yet."
+    "from_prev": "Artie leaves the tutorial zone with a unique title and a massive target on his back.",
+    "to_next": "Artie arrives at Oakhaven only to find the gates barred to anyone without a guild voucher."
   },
   "pacing": {
-    "intensity": 5,
-    "tempo": "steady",
-    "expected_scene_count": 10
+    "intensity": 2,
+    "tempo": "slow_burn",
+    "expected_scene_count": 9
   },
   "sections": [
     {
       "section_id": 1,
-      "title": "The Dance of Death",
-      "intent": "A high-stakes combat sequence where Artie must exploit physics to survive a 'Crit-Resist' boss.",
+      "title": "Into the Iron Peaks",
+      "intent": "Transition from the safe tutorial zone to the high-stakes open world.",
+      "end_condition": "Artie crosses the threshold into the Iron Peaks territory.",
       "scenes": [
         {
           "scene_id": 1,
-          "summary": "Artie uses the Crypt environment to kite the Bone Golem, using 'Crit-Punches' to chip away at its armor plating.",
-          "type": "action",
-          "outcome": "The Golem's armor is shattered, but Artie is running out of stamina.",
+          "summary": "Artie travels to the edge of the starter zone.",
+          "type": "transition",
+          "outcome": "Artie leaves the safety of the tutorial area.",
           "characters": [
             "CHAR_ARTIE"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "3:2",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+          "threads": [
+            "THREAD_GLITCH"
           ],
-          "transition_in_text": "The scene opens at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "location_start": "The Whispering Woods",
+          "location_start_id": "LOC_THE_WHISPERING_WOODS",
+          "location_start_label": "The Whispering Woods",
+          "location_end": "The Iron Peaks Border",
+          "location_end_id": "LOC_THE_IRON_PEAKS_BORDER",
+          "location_end_label": "The Iron Peaks Border",
+          "handoff_mode": "time_skip",
+          "constraint_state": "free",
+          "transition_in_text": "The lush greenery of the starter zone gives way to the jagged, rust-colored peaks of the Iron Range.",
+          "transition_in_anchors": [
+            "changing foliage",
+            "colder air",
+            "distant mountain peaks"
+          ],
+          "transition_out_text": "A massive stone archway marks the boundary where the tutorial level ends and the real game begins.",
+          "transition_out_anchors": [
+            "stone archway",
+            "invisible barrier",
+            "scent of iron"
+          ],
+          "hands_off_to": "3:2",
+          "seam_score": 20,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 2,
-          "summary": "Fizz discovers that the Golem has a 'Crit-Resist' buff, making Artie's main offensive tool useless.",
-          "type": "reveal",
-          "outcome": "Artie must find a way to bypass the resistance or die.",
-          "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
-          ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "3:3",
-          "consumes_outcome_from": "3:1",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
-        },
-        {
-          "scene_id": 3,
-          "summary": "Artie attempts to 'Crit' the ground beneath the Golem, hoping to trigger a physics glitch in the floor geometry.",
-          "type": "choice",
-          "outcome": "The floor collapses, trapping the Bone Golem in a hole.",
+          "summary": "Artie encounters a group of high-level players camping the border.",
+          "type": "conflict",
+          "outcome": "Artie uses his new gear to outrun the players.",
           "characters": [
             "CHAR_ARTIE"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "3:4",
-          "consumes_outcome_from": "3:2",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+          "threads": [
+            "THREAD_ANTI_CHEAT"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "end_condition_echo": "The floor collapses, trapping the Bone Golem in a hole.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 20
+          "consumes_outcome_from": "3:1",
+          "location_start": "The Iron Peaks Border",
+          "location_start_id": "LOC_THE_IRON_PEAKS_BORDER",
+          "location_start_label": "The Iron Peaks Border",
+          "location_end": "The Iron Peaks Border",
+          "location_end_id": "LOC_THE_IRON_PEAKS_BORDER",
+          "location_end_label": "The Iron Peaks Border",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "pursued",
+          "transition_in_text": "Three players in heavy plate armor stand across the path, their weapons drawn and eyes fixed on Artie's unique gear.",
+          "transition_in_anchors": [
+            "clanking armor",
+            "drawn swords",
+            "greedy stares"
+          ],
+          "transition_out_text": "Artie blurs into motion, his new boots kicking up a cloud of dust as he zips past the startled warriors.",
+          "transition_out_anchors": [
+            "dust cloud",
+            "shouted curses",
+            "blur of silver"
+          ],
+          "hands_off_to": "3:3",
+          "seam_score": 60,
+          "seam_resolution": "full_scene"
+        },
+        {
+          "scene_id": 3,
+          "summary": "Transition handoff from The Iron Peaks Border to The Iron Peaks Border.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_ANTI_CHEAT"
+          ],
+          "consumes_outcome_from": "3:2",
+          "location_start": "The Iron Peaks Border",
+          "location_start_id": "LOC_THE_IRON_PEAKS_BORDER",
+          "location_start_label": "The Iron Peaks Border",
+          "location_end": "The Iron Peaks Border",
+          "location_end_id": "LOC_THE_IRON_PEAKS_BORDER",
+          "location_end_label": "The Iron Peaks Border",
+          "handoff_mode": "arrival_checkpoint",
+          "constraint_state": "free",
+          "transition_in_text": "After a arrival checkpoint, the movement from The Iron Peaks Border to The Iron Peaks Border is realized on page.",
+          "transition_in_anchors": [
+            "clanking armor",
+            "dusty road",
+            "fading shouts"
+          ],
+          "transition_out_text": "This beat pushes into a arrival checkpoint toward The Iron Peaks Border.",
+          "transition_out_anchors": [
+            "clanking armor",
+            "dusty road",
+            "fading shouts"
+          ],
+          "hands_off_to": "3:4",
+          "seam_score": 25,
+          "seam_resolution": "micro_scene"
+        },
+        {
+          "scene_id": 4,
+          "summary": "Artie crosses into the Iron Peaks.",
+          "type": "climax",
+          "outcome": "Artie successfully enters the new zone.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "3:3",
+          "location_start": "The Iron Peaks Border",
+          "location_start_id": "LOC_THE_IRON_PEAKS_BORDER",
+          "location_start_label": "The Iron Peaks Border",
+          "location_end": "The Iron Peaks",
+          "location_end_id": "LOC_THE_IRON_PEAKS",
+          "location_end_label": "The Iron Peaks",
+          "handoff_mode": "arrival_checkpoint",
+          "constraint_state": "free",
+          "transition_in_text": "The air temperature drops sharply as Artie steps past the stone archway and into the shadow of the mountains.",
+          "transition_in_anchors": [
+            "biting wind",
+            "jagged rocks",
+            "steep incline"
+          ],
+          "transition_out_text": "The notification for the Iron Peaks zone appears, along with a warning about environmental damage.",
+          "transition_out_anchors": [
+            "zone notification",
+            "frost warning",
+            "narrow trail"
+          ],
+          "hands_off_to": "3:5",
+          "end_condition_echo": "Artie crosses the threshold into the Iron Peaks territory.",
+          "seam_score": 20,
+          "seam_resolution": "inline_bridge"
         }
       ]
     },
     {
       "section_id": 2,
-      "title": "The Final Blow",
-      "intent": "Resolve the boss fight through a comedic System exploit and secure massive XP.",
+      "title": "Environmental Hazards",
+      "intent": "Show that the environment is just as deadly as monsters for a 1 HP build.",
+      "end_condition": "Artie survives a scripted rockslide using high-speed kiting.",
       "scenes": [
         {
-          "scene_id": 4,
-          "summary": "While the Golem is stuck, Artie spends five minutes 'charging' a punch, which the System misinterprets as a 'Heavy Attack'.",
-          "type": "setup",
-          "outcome": "Artie prepares his most powerful hit yet.",
-          "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
-          ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "3:5",
-          "consumes_outcome_from": "3:3",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
-        },
-        {
           "scene_id": 5,
-          "summary": "Artie lands the hit, but the System rolls a 'Cosmetic Crit,' turning the Golem into a pile of porcelain teacups.",
-          "type": "action",
-          "outcome": "The boss is defeated, but the loot is unconventional.",
+          "summary": "Artie navigates a narrow ledge during a windstorm.",
+          "type": "setup",
+          "outcome": "Artie realizes the wind can push him off the ledge.",
           "characters": [
             "CHAR_ARTIE"
           ],
           "threads": [
-            "THREAD_CRIT_EXPLOIT"
+            "THREAD_GLITCH"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "3:6",
           "consumes_outcome_from": "3:4",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "The Iron Peaks",
+          "location_start_id": "LOC_THE_IRON_PEAKS",
+          "location_start_label": "The Iron Peaks",
+          "location_end": "The High Pass",
+          "location_end_id": "LOC_THE_HIGH_PASS",
+          "location_end_label": "The High Pass",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "restricted",
+          "transition_in_text": "The wind howls through the canyons, pushing against Artie with enough force to threaten his balance.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "howling wind",
+            "loose stones",
+            "sheer drop"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 20
+          "transition_out_text": "A sudden tremor shakes the mountain, and the sound of cracking stone echoes from above.",
+          "transition_out_anchors": [
+            "vibrating ground",
+            "cracking sound",
+            "falling pebbles"
+          ],
+          "hands_off_to": "3:6",
+          "seam_score": 20,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 6,
-          "summary": "The System panics during XP recalculation, resulting in Artie jumping five levels instantly due to a rounding error.",
-          "type": "aftermath",
-          "outcome": "Artie hits Level 10 instantly after the System panics during XP recalculation.",
+          "summary": "A rockslide begins, and Artie must dodge falling boulders.",
+          "type": "conflict",
+          "outcome": "Artie uses 'Perfect Dodge' to avoid the rocks.",
           "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_ARTIE"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "3:7",
+          "threads": [
+            "THREAD_GLITCH"
+          ],
           "consumes_outcome_from": "3:5",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "The High Pass",
+          "location_start_id": "LOC_THE_HIGH_PASS",
+          "location_start_label": "The High Pass",
+          "location_end": "The High Pass",
+          "location_end_id": "LOC_THE_HIGH_PASS",
+          "location_end_label": "The High Pass",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "engaged_combat",
+          "transition_in_text": "A wall of stone and debris surges down the mountainside, aimed directly at the narrow path.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "thundering boulders",
+            "cloud of dust",
+            "shaking mountain"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "end_condition_echo": "Artie hits Level 10 instantly after the System panics during XP recalculation.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "Artie leaps from rock to rock, his movements a frantic dance of survival against the crushing weight of the mountain.",
+          "transition_out_anchors": [
+            "leaping motion",
+            "shattered rock",
+            "narrow escape"
+          ],
+          "hands_off_to": "3:7",
+          "seam_score": 60,
+          "seam_resolution": "full_scene"
+        },
+        {
+          "scene_id": 7,
+          "summary": "Transition handoff from The High Pass to The High Pass.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "3:6",
+          "location_start": "The High Pass",
+          "location_start_id": "LOC_THE_HIGH_PASS",
+          "location_start_label": "The High Pass",
+          "location_end": "The High Pass",
+          "location_end_id": "LOC_THE_HIGH_PASS",
+          "location_end_label": "The High Pass",
+          "handoff_mode": "arrival_checkpoint",
+          "constraint_state": "sheltered",
+          "transition_in_text": "After a arrival checkpoint, the movement from The High Pass to The High Pass is realized on page.",
+          "transition_in_anchors": [
+            "rumbling stone",
+            "dark cave mouth",
+            "escaping dust"
+          ],
+          "transition_out_text": "This beat pushes into a arrival checkpoint toward The High Pass.",
+          "transition_out_anchors": [
+            "rumbling stone",
+            "dark cave mouth",
+            "escaping dust"
+          ],
+          "hands_off_to": "3:8",
+          "seam_score": 25,
+          "seam_resolution": "micro_scene"
+        },
+        {
+          "scene_id": 8,
+          "summary": "Artie reaches a safe cave as the rockslide settles.",
+          "type": "climax",
+          "outcome": "Artie survives the hazard.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "3:7",
+          "location_start": "The High Pass",
+          "location_start_id": "LOC_THE_HIGH_PASS",
+          "location_start_label": "The High Pass",
+          "location_end": "The Echoing Cave",
+          "location_end_id": "LOC_THE_ECHOING_CAVE",
+          "location_end_label": "The Echoing Cave",
+          "handoff_mode": "arrival_checkpoint",
+          "constraint_state": "sheltered",
+          "transition_in_text": "Artie dives into a dark opening in the cliff face just as a massive boulder obliterates the path he was standing on.",
+          "transition_in_anchors": [
+            "cool cave air",
+            "impact tremor",
+            "settling dust"
+          ],
+          "transition_out_text": "He leans against the damp cave wall, his heart hammering against his ribs in the sudden quiet.",
+          "transition_out_anchors": [
+            "damp stone",
+            "rapid breathing",
+            "fading rumble"
+          ],
+          "hands_off_to": "3:9",
+          "end_condition_echo": "Artie survives a scripted rockslide using high-speed kiting.",
+          "seam_score": 25,
+          "seam_resolution": "micro_scene"
         }
       ]
     },
     {
       "section_id": 3,
-      "title": "Looting the Teacups",
-      "intent": "Establish deeper world-building regarding 'First Glitches' and escape Vane's pursuit.",
+      "title": "The Gates of Oakhaven",
+      "intent": "Establish the next major obstacle: the social and guild-based gatekeeping.",
+      "end_condition": "Artie is refused entry to Oakhaven for lacking a guild voucher.",
       "scenes": [
         {
-          "scene_id": 7,
-          "summary": "Artie finds a 'Ring of the Gambler' among the teacups, which doubles crit damage but introduces a self-crit risk.",
-          "type": "reveal",
-          "outcome": "Artie accepts the double-edged sword.",
+          "scene_id": 9,
+          "summary": "Artie descends from the peaks toward Oakhaven.",
+          "type": "transition",
+          "outcome": "Artie reaches the outskirts of the trade hub.",
           "characters": [
             "CHAR_ARTIE"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "3:8",
-          "consumes_outcome_from": "3:6",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
-        },
-        {
-          "scene_id": 8,
-          "summary": "A hidden door reveals a mural of the 'First Glitch,' a hero who broke the world in a similar fashion.",
-          "type": "reveal",
-          "outcome": "Artie realizes he isn't the first person to break this game.",
-          "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
-          ],
           "threads": [
-            "THREAD_THE_ASCENSION"
+            "THREAD_GLITCH"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "3:9",
-          "consumes_outcome_from": "3:7",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
-        },
-        {
-          "scene_id": 9,
-          "summary": "Artie exits the crypt to find Vane waiting, furious that the boss has been cleared in such an 'unprofessional' manner.",
-          "type": "escalation",
-          "outcome": "Vane realizes Artie stole his kill.",
-          "characters": [
-            "CHAR_ARTIE",
-            "CHAR_VANE"
-          ],
-          "threads": [
-            "THREAD_VANE_RIVALRY"
-          ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "3:10",
           "consumes_outcome_from": "3:8",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "The Echoing Cave",
+          "location_start_id": "LOC_THE_ECHOING_CAVE",
+          "location_start_label": "The Echoing Cave",
+          "location_end": "Oakhaven Outskirts",
+          "location_end_id": "LOC_OAKHAVEN_OUTSKIRTS",
+          "location_end_label": "Oakhaven Outskirts",
+          "handoff_mode": "time_skip",
+          "constraint_state": "free",
+          "transition_in_text": "The rugged mountains finally flatten into rolling hills as the spires of Oakhaven appear on the horizon.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "distant spires",
+            "smell of woodsmoke",
+            "paved road"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "The road becomes crowded with merchants and travelers, all heading toward the massive iron gates.",
+          "transition_out_anchors": [
+            "rumbling wagons",
+            "chattering crowds",
+            "iron gates"
+          ],
+          "hands_off_to": "3:10",
+          "seam_score": 45,
+          "seam_resolution": "micro_scene"
         },
         {
           "scene_id": 10,
-          "summary": "Artie uses his new level-up speed to outrun Vane's party, heading toward the capital city for safety.",
-          "type": "transition",
-          "outcome": "Artie uses his new speed to outrun Vane's party toward the capital city.",
+          "summary": "Artie attempts to enter the city.",
+          "type": "conflict",
+          "outcome": "The guards demand a guild voucher for entry.",
           "characters": [
-            "CHAR_ARTIE",
-            "CHAR_VANE"
+            "CHAR_ARTIE"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
+          "threads": [
+            "THREAD_GLITCH"
+          ],
           "consumes_outcome_from": "3:9",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Oakhaven Outskirts",
+          "location_start_id": "LOC_OAKHAVEN_OUTSKIRTS",
+          "location_start_label": "Oakhaven Outskirts",
+          "location_end": "Oakhaven Gates",
+          "location_end_id": "LOC_OAKHAVEN_GATES",
+          "location_end_label": "Oakhaven Gates",
+          "handoff_mode": "arrival_checkpoint",
+          "constraint_state": "restricted",
+          "transition_in_text": "Artie joins the queue at the main gate, watching as a guard in polished silver armor checks the papers of every traveler.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "silver armor",
+            "stamped papers",
+            "stern expression"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "end_condition_echo": "Artie uses his new speed to outrun Vane's party toward the capital city.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "The guard holds out a gauntleted hand, his eyes scanning Artie's unconventional attire.",
+          "transition_out_anchors": [
+            "gauntleted hand",
+            "suspicious squint",
+            "heavy spear"
+          ],
+          "hands_off_to": "3:11",
+          "seam_score": 50,
+          "seam_resolution": "micro_scene"
+        },
+        {
+          "scene_id": 11,
+          "summary": "Artie is turned away from the gates.",
+          "type": "climax",
+          "outcome": "Artie realizes he must find a way to get a voucher.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "3:10",
+          "location_start": "Oakhaven Gates",
+          "location_start_id": "LOC_OAKHAVEN_GATES",
+          "location_start_label": "Oakhaven Gates",
+          "location_end": "Oakhaven Outskirts",
+          "location_end_id": "LOC_OAKHAVEN_OUTSKIRTS",
+          "location_end_label": "Oakhaven Outskirts",
+          "handoff_mode": "aftermath_relocation",
+          "constraint_state": "free",
+          "transition_in_text": "The guard's voice is flat and uncompromising as he points back toward the road.",
+          "transition_in_anchors": [
+            "harsh rejection",
+            "closing gate",
+            "jeering onlookers"
+          ],
+          "end_condition_echo": "Artie is refused entry to Oakhaven for lacking a guild voucher.",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         }
       ]
     }

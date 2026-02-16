@@ -44,10 +44,11 @@ If you cannot satisfy constraints after correction attempts, return error_v1:
 {
   "result": "ERROR",
   "schema_version": "error_v1",
+  "error_type": "validation_error",
+  "reason_code": "section_architecture_incomplete",
+  "missing_fields": ["chapters[0].sections[0].end_condition"],
   "phase": "phase_02_section_architecture",
-  "reasons": ["..."],
-  "validator_evidence": [{"code": "validation_code", "message": "...", "path": "json.path"}],
-  "retryable": false
+  "action_hint": "Provide sequential section ids and non-empty end_condition for each section."
 }
 
 Outline spine (phase 01):

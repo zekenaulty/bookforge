@@ -1,0 +1,2470 @@
+{
+  "schema_version": "1.1",
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "name": "Artie",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      },
+      "pronouns": "he/him",
+      "role": "Protagonist and accidental glitch-master."
+    },
+    {
+      "character_id": "CHAR_SYSTEM",
+      "name": "The System",
+      "intro": {
+        "chapter": 1,
+        "scene": 3
+      },
+      "role": "The automated voice of the world's mechanics."
+    },
+    {
+      "character_id": "CHAR_VENDOR_SKETCHY",
+      "name": "Silas the Shifty",
+      "intro": {
+        "chapter": 2,
+        "scene": 6
+      },
+      "role": "A black-market merchant specializing in 'broken' gear."
+    },
+    {
+      "character_id": "CHAR_BARNABY",
+      "name": "Barnaby",
+      "intro": {
+        "chapter": 5,
+        "scene": 3
+      },
+      "pronouns": "he/him",
+      "role": "A disgraced tank with an 'Unstoppable' defensive skill."
+    },
+    {
+      "character_id": "CHAR_COMMITTEE_LEAD",
+      "name": "High Auditor Vane",
+      "intro": {
+        "chapter": 4,
+        "scene": 2
+      },
+      "pronouns": "they/them",
+      "role": "Leader of the Balance Committee enforcers."
+    }
+  ],
+  "threads": [
+    {
+      "thread_id": "THREAD_LUCK_EXPLOIT",
+      "label": "The Miss-Crit Glitch",
+      "status": "active"
+    },
+    {
+      "thread_id": "THREAD_COMMITTEE_HUNT",
+      "label": "The Balance Committee Pursuit",
+      "status": "pending"
+    },
+    {
+      "thread_id": "THREAD_BARNABY_REDEMPTION",
+      "label": "Barnaby's Return to Glory",
+      "status": "pending"
+    }
+  ],
+  "chapters": [
+    {
+      "chapter_id": 1,
+      "title": "0% Accuracy, 100% Luck",
+      "goal": "Survive the Isekai tutorial by exploiting a glitch in the 'Luck' stat that guarantees critical hits on missed attacks.",
+      "chapter_role": "hook",
+      "stakes_shift": "From a confused casualty to a high-variance glass cannon with a target on his back.",
+      "bridge": {
+        "from_prev": "Protagonist dies in a mundane accident and wakes up in the System's arrival lounge.",
+        "to_next": "The protagonist realizes his 'broken' build requires specific gear to be viable outside the tutorial zone."
+      },
+      "pacing": {
+        "intensity": 4,
+        "tempo": "steady",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Welcome to the Lobby",
+          "intent": "Introduce the protagonist's death and the absurdity of the System's arrival lounge.",
+          "end_condition": "Protagonist reaches the tutorial kiosk and receives his initial stat allocation.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie wakes up in a void of white light, confused about his death and the floating text in front of him.",
+              "type": "exposition",
+              "outcome": "Artie accepts his death and begins moving toward the only visible structure.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "introduces": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Arrival Void",
+              "location_end_label": "Arrival Void",
+              "location_start": "A dimensionless expanse of shimmering white light.",
+              "location_end": "The edge of a floating platform made of liquid code.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie opens his eyes to a ceiling made of shifting hexagonal tiles.",
+              "transition_in_anchors": [
+                "shifting hexagonal tiles",
+                "white floor light",
+                "distant electronic hum"
+              ],
+              "transition_out_text": "Artie steps onto the liquid code platform, his boots creating ripples in the data.",
+              "transition_out_anchors": [
+                "liquid code platform",
+                "blue data ripples",
+                "floating text boxes"
+              ],
+              "hands_off_to": "1:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie navigates the arrival lounge, observing other confused souls and the bizarre 'amenities' provided by the System.",
+              "type": "exploration",
+              "outcome": "Artie identifies the tutorial kiosk as his next destination.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "1:1",
+              "location_start_label": "Arrival Lounge",
+              "location_end_label": "Arrival Lounge",
+              "location_start": "A surreal waiting room with velvet chairs and floating beverage trays.",
+              "location_end": "The queue leading to a glowing obsidian kiosk.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie pushes through the velvet chairs of the arrival lounge.",
+              "transition_in_anchors": [
+                "velvet chairs",
+                "floating beverage trays",
+                "humming neon signs"
+              ],
+              "transition_out_text": "Artie joins the line of souls waiting before the glowing obsidian kiosk.",
+              "transition_out_anchors": [
+                "obsidian kiosk",
+                "glowing blue interface",
+                "translucent queue barriers"
+              ],
+              "hands_off_to": "1:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie interacts with the kiosk, where a glitch in the stat-rolling process grants him a Luck stat of 999 while tanking his Accuracy to 0.",
+              "type": "development",
+              "outcome": "Artie receives his 'broken' stat allocation and is teleported to the tutorial range.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "introduces": [
+                "CHAR_SYSTEM"
+              ],
+              "consumes_outcome_from": "1:2",
+              "location_start_label": "Tutorial Kiosk",
+              "location_end_label": "Practice Range",
+              "location_start": "A high-tech terminal pulsing with administrative power.",
+              "location_end": "An open-air field filled with straw dummies and wooden targets.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "restricted",
+              "transition_in_text": "Artie places his hand on the obsidian kiosk's cold surface.",
+              "transition_in_anchors": [
+                "cold obsidian surface",
+                "pulsing terminal lights",
+                "scrolling stat numbers"
+              ],
+              "transition_out_text": "A flash of white light pulls Artie from the kiosk and drops him onto the grass of the practice range.",
+              "transition_out_anchors": [
+                "crushed green grass",
+                "straw dummy scent",
+                "wooden target silhouettes"
+              ],
+              "hands_off_to": "1:4",
+              "end_condition_echo": "Protagonist reaches the tutorial kiosk and receives his initial stat allocation."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Glitch in the Machine",
+          "intent": "Establish the 'Luck' stat exploit through experimentation on tutorial dummies.",
+          "end_condition": "Protagonist successfully triggers a guaranteed 'Miss-Crit' on a practice dummy.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie attempts to hit a practice dummy with a basic sword but misses every single swing due to his 0 Accuracy.",
+              "type": "action",
+              "outcome": "Artie realizes he cannot hit anything through normal means.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_LUCK_EXPLOIT"
+              ],
+              "consumes_outcome_from": "1:3",
+              "location_start_label": "Practice Range",
+              "location_end_label": "Practice Range",
+              "location_start": "The center of the tutorial field.",
+              "location_end": "Standing before a heavily dented but unhit straw dummy.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie grips the hilt of the tutorial sword, the leather wrap feeling rough in his palm.",
+              "transition_in_anchors": [
+                "rough leather hilt",
+                "straw dummy torso",
+                "whistling sword swings"
+              ],
+              "transition_out_text": "Artie pants heavily, staring at the dummy that remains completely unscathed despite his efforts.",
+              "transition_out_anchors": [
+                "unscathed straw",
+                "heavy breathing",
+                "dust motes in sunlight"
+              ],
+              "hands_off_to": "1:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Frustrated, Artie throws his sword at a dummy; the System registers a 'Miss', but his Luck triggers a critical hit on the 'missed' calculation.",
+              "type": "discovery",
+              "outcome": "The dummy explodes in a shower of straw and damage numbers.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "consumes_outcome_from": "1:4",
+              "location_start_label": "Practice Range",
+              "location_end_label": "Practice Range",
+              "location_start": "The practice range, ten paces from the dummy.",
+              "location_end": "The scorched patch of earth where the dummy once stood.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie hurls the sword with a desperate shout, watching it spin wildly off-course.",
+              "transition_in_anchors": [
+                "spinning iron blade",
+                "desperate shout",
+                "glitching red text"
+              ],
+              "transition_out_text": "Artie shields his eyes as the dummy detonates into a cloud of golden straw.",
+              "transition_out_anchors": [
+                "golden straw cloud",
+                "floating damage numbers",
+                "scorched earth smell"
+              ],
+              "hands_off_to": "1:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie spends time refining the 'Miss-Crit' technique, learning that the more he misses, the harder the system over-corrects with Luck.",
+              "type": "development",
+              "outcome": "Artie masters the timing of his intentional misses.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "1:5",
+              "location_start_label": "Practice Range",
+              "location_end_label": "Practice Range",
+              "location_start": "A row of practice dummies.",
+              "location_end": "The edge of the practice range, littered with destroyed targets.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie picks up a fresh training sword and eyes the next row of dummies.",
+              "transition_in_anchors": [
+                "fresh training sword",
+                "row of dummies",
+                "setting tutorial sun"
+              ],
+              "transition_out_text": "Artie wipes sweat from his brow, surrounded by the wreckage of the entire training field.",
+              "transition_out_anchors": [
+                "wrecked wooden stands",
+                "torn straw bundles",
+                "dull sword edge"
+              ],
+              "hands_off_to": "1:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "A final test dummy appears, moving at high speed; Artie closes his eyes and swings wildly, triggering a massive 'Miss-Crit'.",
+              "type": "action",
+              "outcome": "The high-speed dummy is vaporized, completing the training segment.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "consumes_outcome_from": "1:6",
+              "location_start_label": "Practice Range",
+              "location_end_label": "Practice Range",
+              "location_start": "The center of the range.",
+              "location_end": "The gateway leading to the boss arena.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "A mechanical dummy clicks into motion, zipping across the grass on a hidden track.",
+              "transition_in_anchors": [
+                "clicking mechanical dummy",
+                "hidden metal track",
+                "closed eyelids"
+              ],
+              "transition_out_text": "The dummy vanishes in a pixelated explosion, and the gate to the boss arena creaks open.",
+              "transition_out_anchors": [
+                "pixelated explosion",
+                "creaking iron gate",
+                "stone archway shadow"
+              ],
+              "hands_off_to": "1:8",
+              "end_condition_echo": "Protagonist successfully triggers a guaranteed 'Miss-Crit' on a practice dummy."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Tutorial Boss Logic",
+          "intent": "Demonstrate the build's viability in a low-stakes boss encounter.",
+          "end_condition": "The tutorial boss is defeated via the 'Miss-Crit' exploit, granting passage to the world.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Artie enters the boss arena and faces the 'Guardian of the Threshold', a massive stone golem.",
+              "type": "action",
+              "outcome": "The boss battle begins, and Artie realizes he needs to dodge to survive.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "1:7",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "A circular stone amphitheater.",
+              "location_end": "The center of the arena, facing the golem.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie steps onto the cracked marble of the boss arena.",
+              "transition_in_anchors": [
+                "cracked marble floor",
+                "massive stone golem",
+                "heavy thudding footsteps"
+              ],
+              "transition_out_text": "The golem raises a fist the size of a boulder, and Artie prepares to dive.",
+              "transition_out_anchors": [
+                "boulder-sized fist",
+                "grinding stone joints",
+                "shadow of the golem"
+              ],
+              "hands_off_to": "1:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Artie kites the golem, intentionally missing his counter-attacks to build up 'Luck-Crit' stacks.",
+              "type": "action",
+              "outcome": "The golem's health bar begins to chunk down as Artie's 'misses' connect with reality-warping force.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "consumes_outcome_from": "1:8",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "The dusty floor of the arena.",
+              "location_end": "The golem's crumbling feet.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie rolls beneath the golem's swing, the wind of the impact ruffling his hair.",
+              "transition_in_anchors": [
+                "impact wind",
+                "dusty arena floor",
+                "glowing blue weakpoints"
+              ],
+              "transition_out_text": "Artie swings his sword at the air behind the golem, triggering a shockwave that cracks the golem's torso.",
+              "transition_out_anchors": [
+                "air-shattering shockwave",
+                "cracked stone torso",
+                "golem's roar of pain"
+              ],
+              "hands_off_to": "1:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Artie delivers the final 'Miss-Crit', shattering the golem and receiving his first loot drop: a bag of gold and a tutorial exit pass.",
+              "type": "action",
+              "outcome": "The golem is defeated, and Artie exits the tutorial zone into the main world.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "consumes_outcome_from": "1:9",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "The Outskirts",
+              "location_start": "The center of the shattered arena.",
+              "location_end": "A grassy hill overlooking a bustling fantasy city.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "Artie throws a punch at a butterfly, and the resulting 'Miss-Crit' sends the golem's head flying.",
+              "transition_in_anchors": [
+                "flying stone head",
+                "shattered golem core",
+                "tutorial completion chime"
+              ],
+              "transition_out_text": "The world fades into a portal of white light, and Artie finds himself standing on a grassy hill.",
+              "transition_out_anchors": [
+                "grassy hill slope",
+                "distant city spires",
+                "tutorial exit pass"
+              ],
+              "end_condition_echo": "The tutorial boss is defeated via the 'Miss-Crit' exploit, granting passage to the world."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 2,
+      "title": "The Math of Murder",
+      "goal": "Acquire the 'Running Shoes of the Coward' to enable the 'Hit & Run' portion of the build.",
+      "chapter_role": "setup",
+      "stakes_shift": "Transition from accidental survival to intentional exploitation of game mechanics.",
+      "bridge": {
+        "from_prev": "Exiting the tutorial with a mountain of 'Missed' critical damage data.",
+        "to_next": "A local dungeon offers the perfect testing ground for high-speed kiting."
+      },
+      "pacing": {
+        "intensity": 2,
+        "tempo": "slow_burn",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Post-Game Analysis",
+          "intent": "Analyze the tutorial loot and identify the need for specialized movement gear.",
+          "end_condition": "Protagonist identifies the 'Running Shoes of the Coward' in a local shop's inventory.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie enters the city of Oakhaven and realizes he is incredibly slow compared to other players.",
+              "type": "exposition",
+              "outcome": "Artie decides he needs to prioritize Agility and movement speed.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "1:10",
+              "location_start_label": "City Gates",
+              "location_end_label": "Main Square",
+              "location_start": "The massive iron-bound gates of Oakhaven.",
+              "location_end": "The bustling center of the city square.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie walks through the iron-bound gates, his footsteps echoing on the cobblestones.",
+              "transition_in_anchors": [
+                "iron-bound gates",
+                "echoing cobblestones",
+                "city guard spears"
+              ],
+              "transition_out_text": "Artie stops in the center of the square, watching a high-level rogue blur past him.",
+              "transition_out_anchors": [
+                "blurring rogue silhouette",
+                "bustling city square",
+                "fountain water spray"
+              ],
+              "hands_off_to": "2:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie checks his inventory and stats, realizing his high Luck makes him a glass cannon that can't afford to get hit.",
+              "type": "development",
+              "outcome": "Artie identifies 'Speed' as his primary defensive stat.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "consumes_outcome_from": "2:1",
+              "location_start_label": "Main Square",
+              "location_end_label": "Equipment Row",
+              "location_start": "Beside the city fountain.",
+              "location_end": "A street lined with armor and weapon shops.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie sits on the edge of the fountain and opens his character sheet.",
+              "transition_in_anchors": [
+                "fountain edge",
+                "translucent character sheet",
+                "glowing stat numbers"
+              ],
+              "transition_out_text": "Artie stands and heads toward the row of equipment shops, his eyes scanning the signs.",
+              "transition_out_anchors": [
+                "equipment shop signs",
+                "iron armor clanking",
+                "leather smell"
+              ],
+              "hands_off_to": "2:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie browses several high-end shops but finds nothing he can afford until he sees a dusty pair of boots in a window.",
+              "type": "exploration",
+              "outcome": "Artie finds the 'Running Shoes of the Coward' in the window of a run-down shop.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:2",
+              "location_start_label": "Equipment Row",
+              "location_end_label": "Dusty Shop Window",
+              "location_start": "The middle of the merchant district.",
+              "location_end": "In front of a shop with a faded sign.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie peers through the grime-streaked window of a small, forgotten shop.",
+              "transition_in_anchors": [
+                "grime-streaked window",
+                "dusty boot display",
+                "faded shop sign"
+              ],
+              "transition_out_text": "Artie stares at the yellowed tag on the boots, his heart racing at the speed bonus listed.",
+              "transition_out_anchors": [
+                "yellowed price tag",
+                "speed bonus text",
+                "worn leather boots"
+              ],
+              "hands_off_to": "2:4",
+              "end_condition_echo": "Protagonist identifies the 'Running Shoes of the Coward' in a local shop's inventory."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Scavenger's Grind",
+          "intent": "Acquire enough currency through minor exploits to afford the gear.",
+          "end_condition": "Protagonist purchases the 'Running Shoes of the Coward' from a sketchy vendor.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie realizes he is short on gold and heads to the local fields to farm low-level pests.",
+              "type": "action",
+              "outcome": "Artie begins the grind, using his 'Miss-Crit' to one-shot field rats.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:3",
+              "location_start_label": "Oakhaven Fields",
+              "location_end_label": "Oakhaven Fields",
+              "location_start": "The open fields outside the city walls.",
+              "location_end": "A patch of tall grass filled with pests.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie walks into the tall grass of the Oakhaven fields, his sword drawn.",
+              "transition_in_anchors": [
+                "tall grass stalks",
+                "rustling field pests",
+                "distant city walls"
+              ],
+              "transition_out_text": "Artie swings at a blade of grass, and the resulting shockwave vaporizes three field rats.",
+              "transition_out_anchors": [
+                "vaporized rat remains",
+                "floating gold coins",
+                "grass-scented air"
+              ],
+              "hands_off_to": "2:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Artie optimizes his farming by pulling massive groups of rats and 'missing' a single wide-area swing.",
+              "type": "action",
+              "outcome": "Artie accumulates a large amount of low-level loot and gold.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:4",
+              "location_start_label": "Oakhaven Fields",
+              "location_end_label": "Oakhaven Fields",
+              "location_start": "The center of the rat-infested field.",
+              "location_end": "A pile of loot bags in the grass.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie runs in a wide circle, drawing the attention of every rat in the vicinity.",
+              "transition_in_anchors": [
+                "rat squeaks",
+                "churned field dirt",
+                "looming swarm of pests"
+              ],
+              "transition_out_text": "Artie stands amidst a sea of loot bags, his gold counter ticking upward.",
+              "transition_out_anchors": [
+                "sea of loot bags",
+                "ticking gold counter",
+                "blood-stained grass"
+              ],
+              "hands_off_to": "2:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie returns to the shop and meets Silas the Shifty, who tries to overcharge him for the boots.",
+              "type": "social",
+              "outcome": "Artie uses his high Luck to 'critically succeed' a social check, lowering the price.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_VENDOR_SKETCHY"
+              ],
+              "introduces": [
+                "CHAR_VENDOR_SKETCHY"
+              ],
+              "consumes_outcome_from": "2:5",
+              "location_start_label": "Silas's Shop",
+              "location_end_label": "Silas's Shop",
+              "location_start": "The cramped interior of the dusty shop.",
+              "location_end": "The wooden counter at the back of the shop.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie enters the shop, the bell above the door ringing with a tinny chime.",
+              "transition_in_anchors": [
+                "tinny door bell",
+                "cramped shop interior",
+                "smell of old leather"
+              ],
+              "transition_out_text": "Silas grumbles as he slides the boots across the counter, defeated by Artie's accidental charm.",
+              "transition_out_anchors": [
+                "wooden shop counter",
+                "sliding leather boots",
+                "Silas's toothy grin"
+              ],
+              "hands_off_to": "2:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Artie equips the 'Running Shoes of the Coward' and feels an immediate surge of speed.",
+              "type": "development",
+              "outcome": "Artie is now significantly faster, though his defense is further reduced.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:6",
+              "location_start_label": "Silas's Shop",
+              "location_end_label": "City Street",
+              "location_start": "The shop floor.",
+              "location_end": "The cobblestone street outside.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie laces up the boots, the yellowed leather tightening around his ankles.",
+              "transition_in_anchors": [
+                "yellowed leather laces",
+                "tightening boot collars",
+                "glowing speed icons"
+              ],
+              "transition_out_text": "Artie steps out of the shop and accidentally sprints halfway down the block in a second.",
+              "transition_out_anchors": [
+                "sprinting boot prints",
+                "blurred street view",
+                "startled city cat"
+              ],
+              "hands_off_to": "2:8",
+              "end_condition_echo": "Protagonist purchases the 'Running Shoes of the Coward' from a sketchy vendor."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Calibration Run",
+          "intent": "Test the new movement speed in conjunction with the luck exploit.",
+          "end_condition": "Protagonist successfully kites a pack of field mobs without taking a hit.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Artie heads to a more dangerous area of the fields to test his speed against 'Swift-Wolves'.",
+              "type": "action",
+              "outcome": "Artie finds that he can now outrun the wolves, but the timing for his 'Miss-Crit' is harder.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:7",
+              "location_start_label": "Highlands Field",
+              "location_end_label": "Highlands Field",
+              "location_start": "A rocky plateau overlooking the city.",
+              "location_end": "The middle of a wolf-infested clearing.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie jogs onto the rocky plateau, his new boots barely touching the ground.",
+              "transition_in_anchors": [
+                "rocky plateau edge",
+                "howling swift-wolves",
+                "low-hanging clouds"
+              ],
+              "transition_out_text": "The wolves lunge, but Artie is already ten feet away, his speed blurring his trail.",
+              "transition_out_anchors": [
+                "wolf lunging shadows",
+                "blurred speed trail",
+                "jagged rock outcrops"
+              ],
+              "hands_off_to": "2:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Artie practices 'The Hit & Run', sprinting past a wolf and 'missing' a swing at the exact moment he passes.",
+              "type": "action",
+              "outcome": "Artie successfully kills a wolf while moving at full speed.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:8",
+              "location_start_label": "Highlands Field",
+              "location_end_label": "Highlands Field",
+              "location_start": "The wolf clearing.",
+              "location_end": "The edge of the woods.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie accelerates, his heart pounding in rhythm with his footsteps.",
+              "transition_in_anchors": [
+                "pounding heart rhythm",
+                "rushing wind sound",
+                "wolf's snarling teeth"
+              ],
+              "transition_out_text": "The wolf explodes as Artie passes, the 'Miss-Crit' shockwave trailing behind him like a jet wake.",
+              "transition_out_anchors": [
+                "jet-wake shockwave",
+                "shattered wolf remains",
+                "cooling highlands air"
+              ],
+              "hands_off_to": "2:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Artie wipes out the entire pack of wolves without a single scratch, proving his build's viability.",
+              "type": "action",
+              "outcome": "Artie is ready for the Wildwood Dungeon.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:9",
+              "location_start_label": "Highlands Field",
+              "location_end_label": "Dungeon Entrance",
+              "location_start": "The blood-spattered clearing.",
+              "location_end": "The dark, vine-choked entrance to the Wildwood.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "Artie skids to a halt, his boots kicking up a cloud of highland dust.",
+              "transition_in_anchors": [
+                "highland dust cloud",
+                "blood-spattered grass",
+                "setting sun glow"
+              ],
+              "transition_out_text": "Artie looks toward the dark entrance of the Wildwood, a grin on his face.",
+              "transition_out_anchors": [
+                "vine-choked entrance",
+                "dungeon mouth shadow",
+                "rustling forest leaves"
+              ],
+              "end_condition_echo": "Protagonist successfully kites a pack of field mobs without taking a hit."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 3,
+      "title": "Aggro Management for Idiots",
+      "goal": "Clear the Wildwood Dungeon solo by kiting the boss into its own traps using superior movement speed.",
+      "chapter_role": "trial",
+      "stakes_shift": "Local fame grows, attracting the attention of both fans and jealous 'balanced' players.",
+      "bridge": {
+        "from_prev": "Equipped with speed-boosting gear and a snarky attitude.",
+        "to_next": "The 'Balance Committee'\u2014a guild of enforcers\u2014decides his build is an illegal exploit."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "steady",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Wildwood Infiltration",
+          "intent": "Navigate the initial layers of the Wildwood Dungeon solo.",
+          "end_condition": "Protagonist reaches the entrance to the Wildwood boss arena.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie enters the Wildwood Dungeon and immediately triggers a swarm of aggressive vines.",
+              "type": "action",
+              "outcome": "Artie uses his speed to dance through the vines without being entangled.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:10",
+              "location_start_label": "Wildwood Entrance",
+              "location_end_label": "Vine Corridor",
+              "location_start": "The mossy stone threshold of the dungeon.",
+              "location_end": "A narrow corridor filled with writhing green vines.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie steps into the damp, mossy air of the Wildwood.",
+              "transition_in_anchors": [
+                "damp mossy air",
+                "writhing green vines",
+                "dripping cave water"
+              ],
+              "transition_out_text": "Artie leaps over a lashing vine, his boots providing the perfect grip on the slippery stone.",
+              "transition_out_anchors": [
+                "lashing vine thorns",
+                "slippery stone floor",
+                "glowing moss light"
+              ],
+              "hands_off_to": "3:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie encounters a group of Wood-Golems and uses the narrow corridor to funnel them into 'Miss-Crit' range.",
+              "type": "action",
+              "outcome": "The golems are destroyed, clearing the path deeper into the dungeon.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "3:1",
+              "location_start_label": "Vine Corridor",
+              "location_end_label": "Dungeon Hub",
+              "location_start": "The vine-filled corridor.",
+              "location_end": "A large, circular chamber with multiple exits.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Three Wood-Golems lumber into the corridor, their bark-like skin creaking.",
+              "transition_in_anchors": [
+                "creaking bark skin",
+                "narrow corridor walls",
+                "heavy wooden footsteps"
+              ],
+              "transition_out_text": "Artie swings at a hanging root, and the resulting shockwave splinters all three golems into kindling.",
+              "transition_out_anchors": [
+                "splintered wooden limbs",
+                "shockwave dust",
+                "shattered golem cores"
+              ],
+              "hands_off_to": "3:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie navigates a series of pressure-plate traps, realizing he can outrun the arrows before they even fire.",
+              "type": "exploration",
+              "outcome": "Artie reaches the massive wooden doors of the boss arena.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "3:2",
+              "location_start_label": "Dungeon Hub",
+              "location_end_label": "Arena Doors",
+              "location_start": "The circular hub chamber.",
+              "location_end": "The entrance to the final boss room.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie sprints across the pressure plates, the clicking of the mechanisms lost in the wind of his passing.",
+              "transition_in_anchors": [
+                "clicking pressure plates",
+                "whistling trap arrows",
+                "rushing wind sound"
+              ],
+              "transition_out_text": "Artie skids to a stop before the massive, vine-covered doors of the arena.",
+              "transition_out_anchors": [
+                "vine-covered doors",
+                "massive iron hinges",
+                "thumping boss heart"
+              ],
+              "hands_off_to": "3:4",
+              "end_condition_echo": "Protagonist reaches the entrance to the Wildwood boss arena."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Kiting Masterclass",
+          "intent": "Engage the boss by using the environment and superior speed to avoid direct combat.",
+          "end_condition": "The boss is lured into a sequence of its own environmental traps.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie enters the arena and faces the 'Elder Treant', who immediately fills the room with poison spores.",
+              "type": "action",
+              "outcome": "Artie uses his speed to stay in the 'clean' air pockets while taunting the boss.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "3:3",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "A massive hollowed-out tree trunk.",
+              "location_end": "The edge of the arena, near a cluster of mushrooms.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie pushes open the doors and is met by a cloud of thick, purple spores.",
+              "transition_in_anchors": [
+                "purple poison spores",
+                "Elder Treant's roar",
+                "hollowed tree walls"
+              ],
+              "transition_out_text": "Artie dashes to a patch of blue mushrooms, where the air is still breathable.",
+              "transition_out_anchors": [
+                "blue mushroom glow",
+                "breathable air pocket",
+                "Treant's sweeping branch"
+              ],
+              "hands_off_to": "3:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "The Treant summons 'Root-Spikes' from the ground; Artie leads the spikes toward the Treant's own support roots.",
+              "type": "action",
+              "outcome": "The Treant accidentally damages itself, losing its stability.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "3:4",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "The arena floor.",
+              "location_end": "Directly under the Treant's main trunk.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie runs in a zigzag pattern, the root-spikes erupting from the ground inches behind him.",
+              "transition_in_anchors": [
+                "zigzag running path",
+                "erupting root-spikes",
+                "shaking arena floor"
+              ],
+              "transition_out_text": "Artie dives between the Treant's legs, and the spikes impale the boss's own support roots.",
+              "transition_out_anchors": [
+                "Treant's support roots",
+                "impaling wooden spikes",
+                "sap-scented air"
+              ],
+              "hands_off_to": "3:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie triggers a sequence of environmental fire-traps by kiting the Treant's heavy attacks into the floor plates.",
+              "type": "action",
+              "outcome": "The arena begins to burn, dealing massive damage to the Treant.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "3:5",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "The burning floor of the arena.",
+              "location_end": "A high ledge overlooking the fight.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie stands on a glowing floor plate, waiting for the Treant's branch to descend.",
+              "transition_in_anchors": [
+                "glowing floor plate",
+                "descending branch shadow",
+                "heat haze"
+              ],
+              "transition_out_text": "Artie leaps to a high ledge as the floor erupts in a pillar of flame.",
+              "transition_out_anchors": [
+                "pillar of flame",
+                "burning bark smell",
+                "high wooden ledge"
+              ],
+              "hands_off_to": "3:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "The Treant is weakened and trapped in its own burning roots, unable to move.",
+              "type": "action",
+              "outcome": "The boss is vulnerable for Artie's final strike.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "3:6",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "The high ledge.",
+              "location_end": "The center of the burning arena.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie looks down at the struggling Treant, his sword glowing with the Luck-Crit charge.",
+              "transition_in_anchors": [
+                "struggling Elder Treant",
+                "glowing sword edge",
+                "smoke-filled air"
+              ],
+              "transition_out_text": "Artie drops from the ledge, his boots whistling through the air.",
+              "transition_out_anchors": [
+                "whistling wind",
+                "burning root tangle",
+                "Treant's dying moan"
+              ],
+              "hands_off_to": "3:8",
+              "end_condition_echo": "The boss is lured into a sequence of its own environmental traps."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Flagged for Review",
+          "intent": "Complete the dungeon and trigger the System's automated exploit detection.",
+          "end_condition": "The boss dies and a System Notification warns of an 'Exploit Flag' on the protagonist's account.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Artie delivers a massive 'Miss-Crit' to the Treant's core, causing the entire dungeon to shake.",
+              "type": "action",
+              "outcome": "The Treant is defeated, and Artie is showered in high-level loot.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "consumes_outcome_from": "3:7",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "The Treant's core.",
+              "location_end": "The loot-covered floor of the arena.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie swings at a floating ember, and the resulting shockwave pierces the Treant's core.",
+              "transition_in_anchors": [
+                "shattered Treant core",
+                "shaking dungeon walls",
+                "golden loot glow"
+              ],
+              "transition_out_text": "Artie stands amidst the pile of loot, his level-up chime ringing repeatedly.",
+              "transition_out_anchors": [
+                "level-up chime",
+                "pile of loot",
+                "settling dust"
+              ],
+              "hands_off_to": "3:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "As Artie picks up a rare item, a red window appears in his vision: 'ANOMALY DETECTED'.",
+              "type": "development",
+              "outcome": "Artie realizes his exploit has been noticed by the System.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "consumes_outcome_from": "3:8",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "The loot pile.",
+              "location_end": "The center of the arena.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "Artie reaches for a glowing green ring, but his hand stops as a red window flashes.",
+              "transition_in_anchors": [
+                "red system window",
+                "flashing anomaly text",
+                "static-laced air"
+              ],
+              "transition_out_text": "Artie reads the warning, his blood turning cold as the System begins a 'verification scan'.",
+              "transition_out_anchors": [
+                "verification scan bar",
+                "humming red light",
+                "silent arena"
+              ],
+              "hands_off_to": "3:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "The System Notification confirms an 'Exploit Flag', and Artie is forced to leave the dungeon as the Balance Committee is alerted.",
+              "type": "climax",
+              "outcome": "Artie exits the dungeon, officially marked as a cheater.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "consumes_outcome_from": "3:9",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Wildwood Entrance",
+              "location_start": "The arena exit.",
+              "location_end": "The forest outside the dungeon.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "pursued",
+              "transition_in_text": "Artie sprints for the exit as the arena begins to de-rez into red cubes.",
+              "transition_in_anchors": [
+                "red de-rezzing cubes",
+                "glitching arena walls",
+                "emergency exit portal"
+              ],
+              "transition_out_text": "Artie bursts out of the dungeon and into the forest, the red flag still pulsing in his vision.",
+              "transition_out_anchors": [
+                "pulsing red flag",
+                "rustling forest leaves",
+                "distant enforcer horns"
+              ],
+              "end_condition_echo": "The boss dies and a System Notification warns of an 'Exploit Flag' on the protagonist's account."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 4,
+      "title": "A Critical Error",
+      "goal": "Escape an ambush by the Balance Committee by leaning into the most absurd physics glitches possible.",
+      "chapter_role": "reversal",
+      "stakes_shift": "The protagonist goes from being a player to a fugitive within the System.",
+      "bridge": {
+        "from_prev": "Winning too much and drawing the wrong kind of administrative eyes.",
+        "to_next": "Realizing he can't outrun a whole guild alone; he needs a meat shield."
+      },
+      "pacing": {
+        "intensity": 5,
+        "tempo": "rush",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Committee's Gavel",
+          "intent": "Show the immediate consequences of being flagged by the Balance Committee.",
+          "end_condition": "Protagonist is cornered by Balance Committee enforcers in a neutral zone.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie returns to Oakhaven to hide, but finds the city guards are already looking for him.",
+              "type": "action",
+              "outcome": "Artie is forced to sneak through the back alleys of the city.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "3:10",
+              "location_start_label": "City Gates",
+              "location_end_label": "Back Alleys",
+              "location_start": "The main road into Oakhaven.",
+              "location_end": "A narrow, trash-filled alleyway.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Artie ducks behind a vegetable cart as a patrol of guards marches past.",
+              "transition_in_anchors": [
+                "vegetable cart shadow",
+                "marching guard boots",
+                "wanted poster texture"
+              ],
+              "transition_out_text": "Artie slips into a narrow alley, the smell of damp stone and refuse filling his nose.",
+              "transition_out_anchors": [
+                "damp stone walls",
+                "trash-filled alley",
+                "distant guard whistles"
+              ],
+              "hands_off_to": "4:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "High Auditor Vane and a squad of Balance Committee enforcers intercept Artie in a quiet courtyard.",
+              "type": "social",
+              "outcome": "Vane explains that Artie's build is 'illegal' and demands his surrender.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_COMMITTEE_LEAD"
+              ],
+              "introduces": [
+                "CHAR_COMMITTEE_LEAD"
+              ],
+              "consumes_outcome_from": "4:1",
+              "location_start_label": "Back Alleys",
+              "location_end_label": "Quiet Courtyard",
+              "location_start": "The end of the alley.",
+              "location_end": "A small courtyard with a dry fountain.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "detained",
+              "transition_in_text": "Artie steps out of the alley and finds Vane waiting by a dry fountain.",
+              "transition_in_anchors": [
+                "dry stone fountain",
+                "Vane's white robes",
+                "shimmering enforcer shields"
+              ],
+              "transition_out_text": "Vane raises a hand, and the enforcers close the circle around Artie.",
+              "transition_out_anchors": [
+                "closing enforcer circle",
+                "shimmering energy barriers",
+                "Vane's cold gaze"
+              ],
+              "hands_off_to": "4:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie realizes he can't talk his way out and prepares to use his speed to break the encounter.",
+              "type": "action",
+              "outcome": "Artie is cornered but finds a potential glitch in the courtyard's geometry.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_COMMITTEE_LEAD"
+              ],
+              "consumes_outcome_from": "4:2",
+              "location_start_label": "Quiet Courtyard",
+              "location_end_label": "Quiet Courtyard",
+              "location_start": "The center of the courtyard.",
+              "location_end": "The corner of the courtyard wall.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Artie's eyes dart around the courtyard, spotting a flickering texture in the corner wall.",
+              "transition_in_anchors": [
+                "flickering wall texture",
+                "enforcer energy spears",
+                "pounding city drums"
+              ],
+              "transition_out_text": "Artie sprints toward the wall, much to the confusion of the enforcers.",
+              "transition_out_anchors": [
+                "sprinting boot scuffs",
+                "confused enforcer shouts",
+                "flickering stone bricks"
+              ],
+              "hands_off_to": "4:4",
+              "end_condition_echo": "Protagonist is cornered by Balance Committee enforcers in a neutral zone."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Breaking the Geometry",
+          "intent": "Escape the enforcers by exploiting a clipping glitch in the city walls.",
+          "end_condition": "Protagonist successfully glitches through the environment to evade capture.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie runs at the flickering wall at full speed, hoping his Luck will trigger a 'clipping' event.",
+              "type": "action",
+              "outcome": "Artie passes through the wall and finds himself in the 'void' between map layers.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "4:3",
+              "location_start_label": "Quiet Courtyard",
+              "location_end_label": "The Void",
+              "location_start": "The courtyard wall.",
+              "location_end": "A gray, unfinished space behind the city geometry.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "Artie hits the wall at a perfect forty-five-degree angle, his vision blurring.",
+              "transition_in_anchors": [
+                "forty-five-degree angle",
+                "blurring vision",
+                "sound of digital tearing"
+              ],
+              "transition_out_text": "Artie falls into a gray expanse where the city buildings are only hollow shells.",
+              "transition_out_anchors": [
+                "gray void expanse",
+                "hollow building shells",
+                "untextured floor planes"
+              ],
+              "hands_off_to": "4:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Vane and the enforcers are baffled as Artie vanishes into the wall, and they begin using 'Admin Scans' to find him.",
+              "type": "exposition",
+              "outcome": "The Committee begins tracking Artie's coordinates through the void.",
+              "characters": [
+                "CHAR_COMMITTEE_LEAD"
+              ],
+              "consumes_outcome_from": "4:4",
+              "location_start_label": "Quiet Courtyard",
+              "location_end_label": "Quiet Courtyard",
+              "location_start": "The courtyard.",
+              "location_end": "The courtyard.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "Vane touches the wall where Artie disappeared, their hand meeting solid stone.",
+              "transition_in_anchors": [
+                "solid stone surface",
+                "Vane's frustrated sigh",
+                "glowing admin scanner"
+              ],
+              "transition_out_text": "The scanner pings, showing a red dot moving beneath the city map.",
+              "transition_out_anchors": [
+                "pinging admin scanner",
+                "red coordinate dot",
+                "enforcer formation change"
+              ],
+              "hands_off_to": "4:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie navigates the void, jumping between untextured platforms while dodging 'Correction Beams' from the sky.",
+              "type": "action",
+              "outcome": "Artie finds a way back into the 'real' world in the city slums.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "consumes_outcome_from": "4:5",
+              "location_start_label": "The Void",
+              "location_end_label": "The Slums",
+              "location_start": "The gray void.",
+              "location_end": "A dark alleyway in the city's poorest district.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "A beam of white light strikes the void beside Artie, erasing the gray floor.",
+              "transition_in_anchors": [
+                "white correction beam",
+                "erased void floor",
+                "static-filled sky"
+              ],
+              "transition_out_text": "Artie dives through a flickering sewer grate and lands in a pile of damp straw.",
+              "transition_out_anchors": [
+                "flickering sewer grate",
+                "damp straw pile",
+                "smell of sewage"
+              ],
+              "hands_off_to": "4:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Artie emerges in the slums, his clothes tattered but his 'Exploit Flag' still active.",
+              "type": "development",
+              "outcome": "Artie realizes he is safe for the moment but cannot return to the main city.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "4:6",
+              "location_start_label": "The Slums",
+              "location_end_label": "The Slums",
+              "location_start": "The sewer exit.",
+              "location_end": "A narrow street lined with shacks.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie climbs out of the straw, shaking the grime from his tattered tunic.",
+              "transition_in_anchors": [
+                "tattered tunic cloth",
+                "grimy slum street",
+                "distant city lights"
+              ],
+              "transition_out_text": "Artie pulls his hood up and vanishes into the shadows of the shacks.",
+              "transition_out_anchors": [
+                "slum shack shadows",
+                "flickering oil lamps",
+                "muffled slum voices"
+              ],
+              "hands_off_to": "4:8",
+              "end_condition_echo": "Protagonist successfully glitches through the environment to evade capture."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Slumming It",
+          "intent": "Find temporary safety in the city's lawless district.",
+          "end_condition": "Protagonist reaches a safehouse in the slums, officially becoming a fugitive.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Artie finds a group of low-level players in the slums who recognize him from the Wildwood clear.",
+              "type": "social",
+              "outcome": "Artie learns that he has become a minor celebrity among 'off-meta' players.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "4:7",
+              "location_start_label": "Slum Market",
+              "location_end_label": "Slum Market",
+              "location_start": "A small clearing with makeshift stalls.",
+              "location_end": "A corner table in a makeshift tavern.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "sheltered",
+              "transition_in_text": "Artie walks past a makeshift stall, and a group of players stops to stare.",
+              "transition_in_anchors": [
+                "makeshift market stalls",
+                "whispering player voices",
+                "smell of roasting meat"
+              ],
+              "transition_out_text": "Artie sits at a scarred wooden table, listening to the players' stories of the Committee's tyranny.",
+              "transition_out_anchors": [
+                "scarred wooden table",
+                "low-quality ale",
+                "flickering torchlight"
+              ],
+              "hands_off_to": "4:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "One of the players offers Artie a place to hide: a hidden basement beneath a local tavern.",
+              "type": "social",
+              "outcome": "Artie gains access to a safehouse.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "4:8",
+              "location_start_label": "Slum Tavern",
+              "location_end_label": "Hidden Basement",
+              "location_start": "The tavern floor.",
+              "location_end": "A cramped basement filled with crates.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "sheltered",
+              "transition_in_text": "The player leads Artie behind the bar and pulls a hidden lever.",
+              "transition_in_anchors": [
+                "hidden bar lever",
+                "creaking floorboards",
+                "dusty basement air"
+              ],
+              "transition_out_text": "Artie descends the ladder into the darkness of the basement.",
+              "transition_out_anchors": [
+                "wooden ladder rungs",
+                "dark basement corners",
+                "smell of old grain"
+              ],
+              "hands_off_to": "4:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Artie settles into the safehouse and begins planning his next move, realizing he needs an ally to survive the Committee.",
+              "type": "development",
+              "outcome": "Artie decides to find a tank who can handle his high-speed chaos.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "4:9",
+              "location_start_label": "Hidden Basement",
+              "location_end_label": "Hidden Basement",
+              "location_start": "The basement floor.",
+              "location_end": "A small cot in the corner.",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "Artie sits on a small cot, the only light coming from a single flickering candle.",
+              "transition_in_anchors": [
+                "flickering candle flame",
+                "rough cot blankets",
+                "damp basement walls"
+              ],
+              "transition_out_text": "Artie closes his eyes, the red 'Wanted' icon still burning in his mind.",
+              "transition_out_anchors": [
+                "red wanted icon",
+                "distant city bells",
+                "cold basement floor"
+              ],
+              "end_condition_echo": "Protagonist reaches a safehouse in the slums, officially becoming a fugitive."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 5,
+      "title": "The Glass Cannon Brigade",
+      "goal": "Recruit a disgraced former tank who has the only 'Unstoppable' skill capable of keeping up with the protagonist.",
+      "chapter_role": "alliance",
+      "stakes_shift": "Individual survival becomes a tactical partnership with shared risks.",
+      "bridge": {
+        "from_prev": "Hiding in the slums of a major trade hub while being hunted.",
+        "to_next": "Taking the fight to the Balance Committee's main resource node."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "steady",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Unstoppable Object",
+          "intent": "Locate a potential ally who can survive the protagonist's chaotic playstyle.",
+          "end_condition": "Protagonist finds Barnaby, the disgraced tank, in a dive bar.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie searches the slums for rumors of a tank named Barnaby, who was supposedly 'too slow' for the current meta.",
+              "type": "exploration",
+              "outcome": "Artie narrows down Barnaby's location to a bar called 'The Rusty Shield'.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "4:10",
+              "location_start_label": "Slum Streets",
+              "location_end_label": "The Rusty Shield",
+              "location_start": "The muddy streets of the slums.",
+              "location_end": "The entrance to a dilapidated bar.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie walks through the muddy streets, his boots squelching in the muck.",
+              "transition_in_anchors": [
+                "muddy street muck",
+                "dilapidated bar sign",
+                "smell of sour ale"
+              ],
+              "transition_out_text": "Artie pushes through the heavy oak doors of The Rusty Shield.",
+              "transition_out_anchors": [
+                "heavy oak doors",
+                "smoke-filled barroom",
+                "clinking glass sounds"
+              ],
+              "hands_off_to": "5:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie scans the bar and sees a massive man sitting alone, surrounded by empty mugs.",
+              "type": "exposition",
+              "outcome": "Artie identifies Barnaby.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "introduces": [
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "5:1",
+              "location_start_label": "The Rusty Shield",
+              "location_end_label": "The Rusty Shield",
+              "location_start": "The bar entrance.",
+              "location_end": "The back corner of the bar.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie's eyes adjust to the dim light, settling on a massive figure in the corner.",
+              "transition_in_anchors": [
+                "massive man silhouette",
+                "empty ale mugs",
+                "flickering wall sconce"
+              ],
+              "transition_out_text": "Artie walks toward the man, his boots silent on the sawdust-covered floor.",
+              "transition_out_anchors": [
+                "sawdust-covered floor",
+                "smell of stale tobacco",
+                "Barnaby's scarred armor"
+              ],
+              "hands_off_to": "5:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie introduces himself to Barnaby, who is cynical about ever joining another party.",
+              "type": "social",
+              "outcome": "Artie begins the conversation to recruit Barnaby.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "5:2",
+              "location_start_label": "The Rusty Shield",
+              "location_end_label": "The Rusty Shield",
+              "location_start": "Barnaby's table.",
+              "location_end": "Barnaby's table.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie pulls out a chair and sits opposite the massive tank.",
+              "transition_in_anchors": [
+                "creaking wooden chair",
+                "Barnaby's deep voice",
+                "scarred table surface"
+              ],
+              "transition_out_text": "Barnaby looks up, his eyes weary and full of distrust.",
+              "transition_out_anchors": [
+                "weary blue eyes",
+                "Barnaby's heavy sigh",
+                "clinking mug handle"
+              ],
+              "hands_off_to": "5:4",
+              "end_condition_echo": "Protagonist finds Barnaby, the disgraced tank, in a dive bar."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Sales Pitch",
+          "intent": "Convince Barnaby that an 'illegal' build is his only path back to relevance.",
+          "end_condition": "Barnaby agrees to a trial run and joins the protagonist's party.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie explains his 'Miss-Crit' build and how Barnaby's 'Unstoppable' skill is the only thing that can protect him.",
+              "type": "social",
+              "outcome": "Barnaby is intrigued but still skeptical of the build's legality.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "5:3",
+              "location_start_label": "The Rusty Shield",
+              "location_end_label": "The Rusty Shield",
+              "location_start": "Barnaby's table.",
+              "location_end": "Barnaby's table.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie leans forward, lowering his voice as he explains the glitch.",
+              "transition_in_anchors": [
+                "lowered voice",
+                "Artie's intense gaze",
+                "Barnaby's furrowed brow"
+              ],
+              "transition_out_text": "Barnaby drums his fingers on the table, the sound like falling hammers.",
+              "transition_out_anchors": [
+                "drumming finger sounds",
+                "falling hammer rhythm",
+                "Barnaby's thoughtful silence"
+              ],
+              "hands_off_to": "5:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Artie shows Barnaby his 'Wanted' flag and explains that the Committee is already after him.",
+              "type": "social",
+              "outcome": "Barnaby realizes that Artie is serious and that they are both outcasts.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "5:4",
+              "location_start_label": "The Rusty Shield",
+              "location_end_label": "The Rusty Shield",
+              "location_start": "Barnaby's table.",
+              "location_end": "Barnaby's table.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie gestures to the red icon pulsing above his head.",
+              "transition_in_anchors": [
+                "pulsing red icon",
+                "Barnaby's grimace",
+                "dim bar light"
+              ],
+              "transition_out_text": "Barnaby stands up, his massive frame towering over the table.",
+              "transition_out_anchors": [
+                "towering man frame",
+                "creaking floorboards",
+                "Barnaby's heavy shield"
+              ],
+              "hands_off_to": "5:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Barnaby agrees to a trial run, provided Artie can prove his build works in a real fight.",
+              "type": "social",
+              "outcome": "Barnaby joins the party.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "5:5",
+              "location_start_label": "The Rusty Shield",
+              "location_end_label": "Slum Exit",
+              "location_start": "The bar floor.",
+              "location_end": "The edge of the slums.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Barnaby grabs his shield and nods toward the door.",
+              "transition_in_anchors": [
+                "heavy iron shield",
+                "Barnaby's firm nod",
+                "clanking armor plates"
+              ],
+              "transition_out_text": "The duo walks out of the bar and toward the outskirts of the slums.",
+              "transition_out_anchors": [
+                "slum exit gate",
+                "setting moon light",
+                "cool night air"
+              ],
+              "hands_off_to": "5:7",
+              "end_condition_echo": "Barnaby agrees to a trial run and joins the protagonist's party."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Field Test",
+          "intent": "Develop a tactical synergy between high-speed kiting and 'Unstoppable' tanking.",
+          "end_condition": "The duo clears a high-level patrol, confirming their synergy is viable.",
+          "scenes": [
+            {
+              "scene_id": 7,
+              "summary": "Artie and Barnaby encounter a high-level 'Iron-Grizzly' in the nearby woods.",
+              "type": "action",
+              "outcome": "Barnaby uses 'Unstoppable' to tank the grizzly's hits while Artie prepares his 'Miss-Crit'.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "5:6",
+              "location_start_label": "Darkwoods",
+              "location_end_label": "Darkwoods",
+              "location_start": "A dense forest clearing.",
+              "location_end": "The center of the clearing.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "A massive Iron-Grizzly bursts from the underbrush, its claws scraping on the stone.",
+              "transition_in_anchors": [
+                "scraping iron claws",
+                "grizzly's guttural roar",
+                "dense forest underbrush"
+              ],
+              "transition_out_text": "Barnaby plants his shield, a golden aura erupting around him as the bear strikes.",
+              "transition_out_anchors": [
+                "golden unstoppable aura",
+                "shuddering shield impact",
+                "flying bear fur"
+              ],
+              "hands_off_to": "5:8"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Artie sprints around the grizzly, missing several swings to build up his Luck-Crit while Barnaby keeps the aggro.",
+              "type": "action",
+              "outcome": "The synergy works perfectly; the grizzly is distracted and Artie is safe.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "5:7",
+              "location_start_label": "Darkwoods",
+              "location_end_label": "Darkwoods",
+              "location_start": "The forest clearing.",
+              "location_end": "The forest clearing.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie blurs past the bear, his sword whistling through the air but hitting nothing.",
+              "transition_in_anchors": [
+                "whistling sword swings",
+                "blurred speed trail",
+                "Barnaby's shouting taunts"
+              ],
+              "transition_out_text": "The bear's focus remains entirely on Barnaby, who stands like a mountain.",
+              "transition_out_anchors": [
+                "Barnaby's mountain-like stance",
+                "bear's snapping jaws",
+                "shaking forest floor"
+              ],
+              "hands_off_to": "5:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Artie delivers the final 'Miss-Crit', vaporizing the grizzly and confirming their synergy.",
+              "type": "action",
+              "outcome": "Barnaby is impressed and fully commits to the partnership.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "5:8",
+              "location_start_label": "Darkwoods",
+              "location_end_label": "Darkwoods",
+              "location_start": "The forest clearing.",
+              "location_end": "The forest clearing.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie swings at a falling leaf, and the resulting shockwave tears through the grizzly.",
+              "transition_in_anchors": [
+                "falling leaf silhouette",
+                "grizzly-shattering shockwave",
+                "settling forest dust"
+              ],
+              "transition_out_text": "Barnaby lowers his shield and looks at Artie with a newfound respect.",
+              "transition_out_anchors": [
+                "lowered iron shield",
+                "Barnaby's respectful nod",
+                "cooling forest air"
+              ],
+              "hands_off_to": "5:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "The duo clears a high-level patrol of Committee scouts who were tracking Artie.",
+              "type": "action",
+              "outcome": "The Committee is now aware of Artie's new ally.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "5:9",
+              "location_start_label": "Darkwoods",
+              "location_end_label": "Darkwoods",
+              "location_start": "The forest clearing.",
+              "location_end": "The edge of the Darkwoods.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "pursued",
+              "transition_in_text": "Three Committee scouts emerge from the shadows, their energy bows drawn.",
+              "transition_in_anchors": [
+                "glowing energy bows",
+                "scout's white armor",
+                "rustling forest leaves"
+              ],
+              "transition_out_text": "Artie and Barnaby stand over the defeated scouts, the path to the Spire now clear.",
+              "transition_out_anchors": [
+                "defeated scout silhouettes",
+                "distant Spire silhouette",
+                "rising morning sun"
+              ],
+              "end_condition_echo": "The duo clears a high-level patrol, confirming their synergy is viable."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 6,
+      "title": "Running the Numbers",
+      "goal": "Infiltrate the Spire of Math to delete the protagonist's 'Exploit' flag before the System auto-bans him.",
+      "chapter_role": "climax",
+      "stakes_shift": "The protagonist's existence in this world is at stake; it's 'fix the flag' or 'get deleted'.",
+      "bridge": {
+        "from_prev": "A high-speed chase across the plains leading to the Spire.",
+        "to_next": "The System's logic is rewritten, but the consequences are unpredictable."
+      },
+      "pacing": {
+        "intensity": 5,
+        "tempo": "rush",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Breaching the Perimeter",
+          "intent": "Infiltrate the outer defenses of the Spire of Math.",
+          "end_condition": "Protagonist and Barnaby bypass the Spire's logic-gates and enter the main tower.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie and Barnaby reach the base of the Spire of Math, which is guarded by a field of 'Logic-Sentinels'.",
+              "type": "action",
+              "outcome": "Artie uses his speed to draw the Sentinels' fire while Barnaby blocks the beams.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "5:10",
+              "location_start_label": "Spire Perimeter",
+              "location_end_label": "Spire Perimeter",
+              "location_start": "The flat, geometric plains surrounding the Spire.",
+              "location_end": "The base of the Spire's outer wall.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie and Barnaby step onto the flat, geometric plains of the Spire perimeter.",
+              "transition_in_anchors": [
+                "geometric plains",
+                "Logic-Sentinel laser beams",
+                "humming energy field"
+              ],
+              "transition_out_text": "Barnaby's shield glows white as he absorbs a direct hit from a Sentinel.",
+              "transition_out_anchors": [
+                "white shield glow",
+                "absorbed laser energy",
+                "Artie's sprinting trail"
+              ],
+              "hands_off_to": "6:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie identifies a sequence in the logic-gates that can be broken by a high-luck 'Miss-Crit'.",
+              "type": "discovery",
+              "outcome": "Artie breaks the logic-gate, allowing them to pass through the perimeter.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "6:1",
+              "location_start_label": "Spire Perimeter",
+              "location_end_label": "Spire Gate",
+              "location_start": "The outer wall.",
+              "location_end": "The main entrance gate of the Spire.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie stares at the flickering logic-gate, his eyes tracking the flow of data.",
+              "transition_in_anchors": [
+                "flickering logic-gate",
+                "flowing data streams",
+                "Barnaby's heavy breathing"
+              ],
+              "transition_out_text": "Artie swings at a floating glyph, and the gate shatters into a thousand digital shards.",
+              "transition_out_anchors": [
+                "shattered digital shards",
+                "collapsing energy field",
+                "Spire entrance shadow"
+              ],
+              "hands_off_to": "6:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "The duo enters the Spire just as the Balance Committee arrives in pursuit.",
+              "type": "action",
+              "outcome": "Artie and Barnaby are inside the tower, but the Committee is right behind them.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY",
+                "CHAR_COMMITTEE_LEAD"
+              ],
+              "consumes_outcome_from": "6:2",
+              "location_start_label": "Spire Gate",
+              "location_end_label": "Spire Lobby",
+              "location_start": "The entrance gate.",
+              "location_end": "The massive, white-marble lobby of the Spire.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Artie and Barnaby duck inside the tower as Vane's voice echoes across the plains.",
+              "transition_in_anchors": [
+                "tower entrance shadow",
+                "Vane's echoing shout",
+                "white marble lobby"
+              ],
+              "transition_out_text": "The heavy doors slam shut, locking the Committee out for the moment.",
+              "transition_out_anchors": [
+                "slamming tower doors",
+                "locking mechanism click",
+                "silent marble lobby"
+              ],
+              "hands_off_to": "6:4",
+              "end_condition_echo": "Protagonist and Barnaby bypass the Spire's logic-gates and enter the main tower."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Vertical Climb",
+          "intent": "Fight through the tower's automated defense systems using physics exploits.",
+          "end_condition": "The party reaches the central processing core at the top of the Spire.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie and Barnaby begin the climb, facing 'Math-Drones' that fire geometric projectiles.",
+              "type": "action",
+              "outcome": "Artie uses the drones' own projectiles to 'Miss-Crit' them into oblivion.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "6:3",
+              "location_start_label": "Spire Lobby",
+              "location_end_label": "Spiral Staircase",
+              "location_start": "The lobby floor.",
+              "location_end": "The lower levels of the spiral staircase.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie and Barnaby charge up the spiral staircase, the Math-Drones descending from the ceiling.",
+              "transition_in_anchors": [
+                "descending Math-Drones",
+                "geometric projectiles",
+                "spiral staircase steps"
+              ],
+              "transition_out_text": "Artie redirects a triangular projectile with a 'Miss-Crit' swing, destroying three drones.",
+              "transition_out_anchors": [
+                "triangular projectile trail",
+                "destroyed drone debris",
+                "echoing staircase clatter"
+              ],
+              "hands_off_to": "6:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "The duo encounters a floor where gravity is inverted; Artie uses his speed to 'run' on the ceiling.",
+              "type": "action",
+              "outcome": "Artie and Barnaby successfully navigate the gravity-glitched floor.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "6:4",
+              "location_start_label": "Gravity Floor",
+              "location_end_label": "Gravity Floor",
+              "location_start": "The entrance to the inverted floor.",
+              "location_end": "The exit of the inverted floor.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie steps onto the floor, but his feet immediately pull toward the ceiling.",
+              "transition_in_anchors": [
+                "inverted gravity pull",
+                "ceiling running path",
+                "Barnaby's heavy landing"
+              ],
+              "transition_out_text": "Artie and Barnaby tumble through the exit, gravity returning to normal with a jarring thud.",
+              "transition_out_anchors": [
+                "jarring gravity thud",
+                "normal floor tiles",
+                "heavy breathing"
+              ],
+              "hands_off_to": "6:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "They reach a high-security elevator, but it requires an admin key; Artie 'misses' a hack on the terminal.",
+              "type": "action",
+              "outcome": "The 'Miss-Crit' hack bypasses the security, and the elevator begins its ascent.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "6:5",
+              "location_start_label": "Elevator Lobby",
+              "location_end_label": "Admin Elevator",
+              "location_start": "A small room with a glowing terminal.",
+              "location_end": "The interior of a high-speed elevator.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Artie punches the terminal with a deliberate miss, his Luck doing the work.",
+              "transition_in_anchors": [
+                "glowing terminal sparks",
+                "elevator door hum",
+                "Barnaby's watchful gaze"
+              ],
+              "transition_out_text": "The elevator doors close, and the car shoots upward toward the Spire's peak.",
+              "transition_out_anchors": [
+                "ascending elevator car",
+                "rushing air sound",
+                "g-force pressure"
+              ],
+              "hands_off_to": "6:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "The elevator stops at the peak, and the duo steps out into the central processing core.",
+              "type": "exploration",
+              "outcome": "They are at the heart of the System.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "6:6",
+              "location_start_label": "Admin Elevator",
+              "location_end_label": "Processing Core",
+              "location_start": "The elevator car.",
+              "location_end": "A massive chamber filled with glowing data spheres.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "The elevator doors slide open, revealing the pulsing heart of the Spire.",
+              "transition_in_anchors": [
+                "pulsing data spheres",
+                "central processing core",
+                "cold digital wind"
+              ],
+              "transition_out_text": "Artie and Barnaby walk toward the central terminal, their footsteps silent on the glass floor.",
+              "transition_out_anchors": [
+                "glass floor tiles",
+                "central terminal glow",
+                "distant deletion timer"
+              ],
+              "hands_off_to": "6:8",
+              "end_condition_echo": "The party reaches the central processing core at the top of the Spire."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Deleting the Evidence",
+          "intent": "Access the System terminal to remove the 'Exploit' flag before deletion occurs.",
+          "end_condition": "The 'Exploit' flag is successfully converted into a 'Unique Title' just as the deletion timer hits zero.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Artie accesses the terminal and finds his 'Exploit Flag' is seconds away from triggering a permanent ban.",
+              "type": "climax",
+              "outcome": "Artie begins the process of 're-coding' the flag using his Luck.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "consumes_outcome_from": "6:7",
+              "location_start_label": "Processing Core",
+              "location_end_label": "Processing Core",
+              "location_start": "The central terminal.",
+              "location_end": "The terminal interface.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "Artie's fingers fly across the holographic keyboard, his eyes fixed on the timer.",
+              "transition_in_anchors": [
+                "holographic keyboard",
+                "ticking deletion timer",
+                "Artie's sweating brow"
+              ],
+              "transition_out_text": "The System warns of 'Unidentified User Input', and red alerts begin to flash.",
+              "transition_out_anchors": [
+                "red alert flashes",
+                "System warning chime",
+                "scrolling code lines"
+              ],
+              "hands_off_to": "6:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Barnaby holds off a wave of 'Deletion-Sentinels' while Artie fights the terminal's security.",
+              "type": "action",
+              "outcome": "Barnaby is pushed to his limit, but Artie is almost finished.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "6:8",
+              "location_start_label": "Processing Core",
+              "location_end_label": "Processing Core",
+              "location_start": "The terminal area.",
+              "location_end": "The terminal area.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Barnaby roars, his shield expanding into a massive wall of golden light.",
+              "transition_in_anchors": [
+                "golden light wall",
+                "Deletion-Sentinel beams",
+                "shaking glass floor"
+              ],
+              "transition_out_text": "Artie slams his hand onto the terminal, a final, desperate 'Miss-Crit' on the delete key.",
+              "transition_out_anchors": [
+                "desperate delete key",
+                "terminal spark explosion",
+                "Barnaby's straining muscles"
+              ],
+              "hands_off_to": "6:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "The 'Exploit Flag' is converted into the 'Unique Title: Glitch-Walker', and the deletion timer stops at 00:01.",
+              "type": "climax",
+              "outcome": "Artie is no longer an exploit; he is a permanent part of the world.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "consumes_outcome_from": "6:9",
+              "location_start_label": "Processing Core",
+              "location_end_label": "Processing Core",
+              "location_start": "The central terminal.",
+              "location_end": "The center of the core.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The red light turns to a soft, golden glow as the System processes the change.",
+              "transition_in_anchors": [
+                "soft golden glow",
+                "Glitch-Walker title text",
+                "stopped deletion timer"
+              ],
+              "transition_out_text": "Artie and Barnaby stand in the sudden silence of the core, the Spire beginning to rumble.",
+              "transition_out_anchors": [
+                "rumbling tower walls",
+                "sudden core silence",
+                "Artie's relieved sigh"
+              ],
+              "end_condition_echo": "The 'Exploit' flag is successfully converted into a 'Unique Title' just as the deletion timer hits zero."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 7,
+      "title": "Looting the Scene",
+      "goal": "Secure the legendary 'Dev-Tool' drop from the Spire's guardian and vanish into the frontier.",
+      "chapter_role": "aftermath",
+      "stakes_shift": "The protagonist is no longer just a glitch; he is now a permanent, powerful anomaly in the world.",
+      "bridge": {
+        "from_prev": "The Spire collapses as the 'Exploit' flag is converted into a 'Unique Title'.",
+        "to_next": "Heading toward the next zone where the rules are even easier to break."
+      },
+      "pacing": {
+        "intensity": 2,
+        "tempo": "slow_burn",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Guardian's Glitch",
+          "intent": "Defeat the Spire's final guardian using the newly acquired Unique Title.",
+          "end_condition": "The Spire Guardian is defeated, dropping the legendary 'Dev-Tool'.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "The 'Spire Guardian', a manifestation of the world's physics, emerges to stop them from leaving.",
+              "type": "action",
+              "outcome": "Artie realizes his new title allows him to 'Miss-Crit' even more effectively.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "6:10",
+              "location_start_label": "Processing Core",
+              "location_end_label": "Processing Core",
+              "location_start": "The terminal area.",
+              "location_end": "The center of the core.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The data spheres coalesce into a massive, faceless entity of pure light.",
+              "transition_in_anchors": [
+                "faceless light entity",
+                "Spire Guardian's hum",
+                "shivering glass floor"
+              ],
+              "transition_out_text": "Artie feels a new power coursing through him, his vision filled with possible 'misses'.",
+              "transition_out_anchors": [
+                "Glitch-Walker power",
+                "possible miss paths",
+                "Guardian's raised hand"
+              ],
+              "hands_off_to": "7:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie and Barnaby fight the Guardian, with Artie 'missing' attacks that now bend the very space around them.",
+              "type": "action",
+              "outcome": "The Guardian is overwhelmed by the sheer variance of Artie's attacks.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "7:1",
+              "location_start_label": "Processing Core",
+              "location_end_label": "Processing Core",
+              "location_start": "The center of the core.",
+              "location_end": "The center of the core.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie swings his sword at a shadow, and the Guardian's arm is severed by a spatial rift.",
+              "transition_in_anchors": [
+                "spatial rift tear",
+                "severed light arm",
+                "Guardian's digital scream"
+              ],
+              "transition_out_text": "Barnaby slams his shield into the Guardian's chest, pinning it for Artie's final blow.",
+              "transition_out_anchors": [
+                "pinned light entity",
+                "Barnaby's shield impact",
+                "glowing core energy"
+              ],
+              "hands_off_to": "7:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie delivers a final 'Miss-Crit' that causes the Guardian to de-rez into a legendary loot drop.",
+              "type": "action",
+              "outcome": "The Guardian is defeated, and the 'Dev-Tool' appears.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "7:2",
+              "location_start_label": "Processing Core",
+              "location_end_label": "Processing Core",
+              "location_start": "The center of the core.",
+              "location_end": "The loot pile.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie closes his eyes and swings at the silence, the Guardian vaporizing instantly.",
+              "transition_in_anchors": [
+                "vaporized Guardian particles",
+                "shattered light fragments",
+                "legendary loot chime"
+              ],
+              "transition_out_text": "Artie picks up a small, glowing hammer that pulses with administrative power.",
+              "transition_out_anchors": [
+                "glowing Dev-Tool hammer",
+                "administrative power pulse",
+                "Barnaby's wide eyes"
+              ],
+              "hands_off_to": "7:4"
+            },
+            {
+              "scene_id": 4,
+              "summary": "Artie identifies the 'Dev-Tool' as an item that can modify small parts of the world's code.",
+              "type": "development",
+              "outcome": "Artie has the ultimate tool for rule-breaking.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "7:3",
+              "location_start_label": "Processing Core",
+              "location_end_label": "Processing Core",
+              "location_start": "The terminal area.",
+              "location_end": "The terminal area.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie holds the Dev-Tool aloft, the item description appearing in a golden window.",
+              "transition_in_anchors": [
+                "golden item description",
+                "Dev-Tool's warm glow",
+                "Artie's triumphant grin"
+              ],
+              "transition_out_text": "The Spire gives a final, violent shudder, and the floor begins to disintegrate.",
+              "transition_out_anchors": [
+                "disintegrating glass floor",
+                "violent tower shudder",
+                "falling data debris"
+              ],
+              "hands_off_to": "7:5",
+              "end_condition_echo": "The Spire Guardian is defeated, dropping the legendary 'Dev-Tool'."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Structural Failure",
+          "intent": "Escape the collapsing Spire as the System attempts to rectify the logic error.",
+          "end_condition": "Protagonist and Barnaby exit the tower as it de-rezzes into raw data.",
+          "scenes": [
+            {
+              "scene_id": 5,
+              "summary": "Artie and Barnaby sprint back toward the elevator, but the tower is de-rezzing around them.",
+              "type": "action",
+              "outcome": "They are forced to jump from the tower using Artie's speed to soften the fall.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "7:4",
+              "location_start_label": "Processing Core",
+              "location_end_label": "Tower Edge",
+              "location_start": "The center of the core.",
+              "location_end": "A gaping hole in the Spire's outer wall.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "Artie grabs Barnaby's arm and sprints toward the gaping hole in the wall.",
+              "transition_in_anchors": [
+                "gaping wall hole",
+                "rushing wind",
+                "disintegrating tower bricks"
+              ],
+              "transition_out_text": "They leap into the open air, the ground a terrifying distance below.",
+              "transition_out_anchors": [
+                "open air fall",
+                "distant geometric plains",
+                "Barnaby's muffled shout"
+              ],
+              "hands_off_to": "7:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "During the fall, Artie uses the Dev-Tool to 'edit' the gravity constant for their specific coordinates.",
+              "type": "action",
+              "outcome": "They land safely on the plains as the Spire collapses behind them.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "7:5",
+              "location_start_label": "The Sky",
+              "location_end_label": "Spire Perimeter",
+              "location_start": "Falling through the air.",
+              "location_end": "The flat plains at the base of the Spire.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "Artie strikes the air with the Dev-Tool, a blue grid appearing beneath them.",
+              "transition_in_anchors": [
+                "blue coordinate grid",
+                "slowing fall speed",
+                "Dev-Tool's hum"
+              ],
+              "transition_out_text": "They touch down gently on the grass as the Spire dissolves into a cloud of raw data.",
+              "transition_out_anchors": [
+                "gentle grass landing",
+                "raw data cloud",
+                "collapsing Spire sound"
+              ],
+              "hands_off_to": "7:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Artie and Barnaby watch the Spire vanish, realizing that the Balance Committee has also been scattered.",
+              "type": "exposition",
+              "outcome": "The immediate threat of the Committee is gone, but the world is changed.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "7:6",
+              "location_start_label": "Spire Perimeter",
+              "location_end_label": "Spire Perimeter",
+              "location_start": "The plains.",
+              "location_end": "The edge of the plains.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie looks back at the empty space where the Spire once stood.",
+              "transition_in_anchors": [
+                "empty Spire space",
+                "drifting data motes",
+                "Barnaby's heavy breathing"
+              ],
+              "transition_out_text": "Barnaby points toward the horizon, where the frontier zones begin.",
+              "transition_out_anchors": [
+                "frontier horizon line",
+                "setting sun glow",
+                "distant mountain peaks"
+              ],
+              "hands_off_to": "7:8",
+              "end_condition_echo": "Protagonist and Barnaby exit the tower as it de-rezzes into raw data."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Into the Frontier",
+          "intent": "Set out for the frontier zones where the System's rules are less rigid.",
+          "end_condition": "The protagonist crosses the border into the frontier, ready to break more rules.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Artie and Barnaby begin their journey toward the frontier, discussing their next exploits.",
+              "type": "social",
+              "outcome": "The partnership is solidified as they plan to break the rules of the next zone.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "7:7",
+              "location_start_label": "The Open Plains",
+              "location_end_label": "The Open Plains",
+              "location_start": "A wide, grassy expanse.",
+              "location_end": "A campfire in the middle of the plains.",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "Artie and Barnaby walk across the open plains, their shadows long in the evening light.",
+              "transition_in_anchors": [
+                "long evening shadows",
+                "rustling prairie grass",
+                "Artie's lighthearted laugh"
+              ],
+              "transition_out_text": "They sit by a small campfire, the Dev-Tool resting on a rock between them.",
+              "transition_out_anchors": [
+                "crackling campfire flames",
+                "Dev-Tool on a rock",
+                "smell of woodsmoke"
+              ],
+              "hands_off_to": "7:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Artie uses the Dev-Tool to 'fix' Barnaby's armor, giving it a speed bonus that removes his movement penalty.",
+              "type": "development",
+              "outcome": "Barnaby is now as fast as Artie, making them a truly terrifying duo.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "7:8",
+              "location_start_label": "Campfire",
+              "location_end_label": "Campfire",
+              "location_start": "The campfire area.",
+              "location_end": "The campfire area.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie taps Barnaby's armor with the glowing hammer, and the metal begins to shimmer.",
+              "transition_in_anchors": [
+                "shimmering iron armor",
+                "Dev-Tool's rhythmic tap",
+                "Barnaby's amazed expression"
+              ],
+              "transition_out_text": "Barnaby stands up and takes a step, moving with a grace he hasn't felt in years.",
+              "transition_out_anchors": [
+                "graceful heavy steps",
+                "glowing armor trim",
+                "Barnaby's wide grin"
+              ],
+              "hands_off_to": "7:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "The duo reaches the frontier border, a line of shimmering energy that marks the edge of the regulated world.",
+              "type": "resolution",
+              "outcome": "They cross the border, ready for their next adventure.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_BARNABY"
+              ],
+              "consumes_outcome_from": "7:9",
+              "location_start_label": "Frontier Border",
+              "location_end_label": "The Frontier",
+              "location_start": "The edge of the civilized world.",
+              "location_end": "A wild, unmapped territory.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "Artie and Barnaby stand before the shimmering energy wall of the frontier border.",
+              "transition_in_anchors": [
+                "shimmering border wall",
+                "wild frontier vistas",
+                "cool morning breeze"
+              ],
+              "transition_out_text": "They step through the barrier together, their figures vanishing into the unmapped wild.",
+              "transition_out_anchors": [
+                "vanishing silhouettes",
+                "unmapped wild territory",
+                "new horizon glow"
+              ],
+              "end_condition_echo": "The protagonist crosses the border into the frontier, ready to break more rules."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

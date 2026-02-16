@@ -1,240 +1,425 @@
 {
   "chapter_id": 7,
-  "title": "Rebooting for the Sequel",
-  "goal": "Set up the long-term quest to fix (or further break) the world.",
+  "title": "Level Up and Get Out",
+  "goal": "Escape the collapsing Keep and the arriving System Moderators while securing the stolen treasury loot.",
   "chapter_role": "aftermath",
-  "stakes_shift": "Artie transitions from a player trying to survive to a virus-entity leading a resistance against the System.",
+  "stakes_shift": "Artie officially becomes Aethelgard's most wanted 'Glitch,' forcing him into the permanent shadows.",
   "bridge": {
-    "from_prev": "Artie is in the Null-Zone.",
-    "to_next": "Artie begins the quest for the Source Code in Book 2."
+    "from_prev": "The World Key activates, signaling the end of the 'Tutorial Era' for the entire server.",
+    "to_next": "Artie and Silna head toward the lawless 'Grey Zones' to hide and plan their next exploit."
   },
   "pacing": {
-    "intensity": 2,
-    "tempo": "slow_burn",
+    "intensity": 3,
+    "tempo": "steady",
     "expected_scene_count": 8
   },
   "sections": [
     {
       "section_id": 1,
-      "title": "The New Normal",
-      "intent": "Show Artie adapting to life as a 'virus' entity within the broken game world.",
+      "title": "The Loot & The Chaos",
+      "intent": "Artie and Silna secure the treasury rewards while the Keep collapses.",
+      "end_condition": "The treasury is emptied and the World Key is secured in Artie's inventory.",
       "scenes": [
         {
           "scene_id": 1,
-          "summary": "Artie learns how to eat 'Data-Packets' instead of food to maintain his existence.",
+          "summary": "Artie and Silna reach the Keep's treasury.",
           "type": "setup",
-          "outcome": "Artie adapts to his new existence.",
+          "outcome": "They find Silna's heirloom and a massive amount of gold.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_SILNA"
           ],
-          "constraint_state": "free",
+          "threads": [
+            "THREAD_SILNA_HEIRLOOM",
+            "THREAD_GLITCH"
+          ],
+          "location_start": "Inner Sanctum",
+          "location_start_id": "LOC_INNER_SANCTUM",
+          "location_start_label": "Inner Sanctum",
+          "location_end": "Keep Treasury",
+          "location_end_id": "LOC_KEEP_TREASURY",
+          "location_end_label": "Keep Treasury",
           "handoff_mode": "direct_continuation",
-          "hands_off_to": "7:2",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "constraint_state": "pursued",
+          "transition_in_text": "The ground shakes as the Red-Tier Keep begins to buckle under the weight of the boss's explosive death.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "shaking ground",
+            "falling masonry",
+            "dust clouds"
           ],
-          "transition_in_text": "The scene opens at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "They burst into the treasury, where piles of gold and jewels glitter in the dying light.",
+          "transition_out_anchors": [
+            "piles of gold",
+            "glittering jewels",
+            "dying light"
+          ],
+          "hands_off_to": "7:2",
+          "seam_score": 20,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 2,
-          "summary": "Fizz explains that the only way to save the world is to reach the 'Server Room' at the world's center.",
-          "type": "reveal",
-          "outcome": "The long-term goal is established.",
+          "summary": "Silna finds her family crest.",
+          "type": "development",
+          "outcome": "Silna's personal quest is resolved.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_SILNA"
           ],
           "threads": [
-            "THREAD_THE_ASCENSION"
+            "THREAD_SILNA_HEIRLOOM",
+            "THREAD_GLITCH"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "7:3",
           "consumes_outcome_from": "7:1",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Keep Treasury",
+          "location_start_id": "LOC_KEEP_TREASURY",
+          "location_start_label": "Keep Treasury",
+          "location_end": "Keep Treasury",
+          "location_end_id": "LOC_KEEP_TREASURY",
+          "location_end_label": "Keep Treasury",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "fleeing",
+          "transition_in_text": "Silna lunges toward a pedestal where a silver crest with a wolf's head sits.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "silver crest",
+            "wolf's head",
+            "pedestal"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "She tucks the crest into her belt, her eyes shining with a mix of relief and fury.",
+          "transition_out_anchors": [
+            "tucked crest",
+            "shining eyes",
+            "determined look"
+          ],
+          "hands_off_to": "7:3",
+          "seam_score": 20,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 3,
-          "summary": "Artie tests his 'NaN' HP by jumping off a cliff, only to clip through the floor and end up back at the top.",
-          "type": "choice",
-          "outcome": "Artie realizes his new immortality is just as annoying as his previous fragility.",
+          "summary": "Artie loots the remaining treasury.",
+          "type": "climax",
+          "outcome": "They are ready to leave.",
           "characters": [
-            "CHAR_ARTIE"
+            "CHAR_ARTIE",
+            "CHAR_SILNA"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "7:4",
+          "threads": [
+            "THREAD_WORLD_KEY",
+            "THREAD_GLITCH"
+          ],
           "consumes_outcome_from": "7:2",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Keep Treasury",
+          "location_start_id": "LOC_KEEP_TREASURY",
+          "location_start_label": "Keep Treasury",
+          "location_end": "Keep Treasury",
+          "location_end_id": "LOC_KEEP_TREASURY",
+          "location_end_label": "Keep Treasury",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "pursued",
+          "transition_in_text": "Artie sweeps the remaining gold into his inventory, the numbers spinning upward with dizzying speed.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "spinning numbers",
+            "empty chests",
+            "rushing gold"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "end_condition_echo": "Artie realizes his new immortality is just as annoying as his previous fragility.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 20
+          "transition_out_text": "A loud crack echoes through the room as the ceiling begins to cave in.",
+          "transition_out_anchors": [
+            "cracking ceiling",
+            "falling debris",
+            "narrow exit"
+          ],
+          "hands_off_to": "7:4",
+          "end_condition_echo": "The treasury is emptied and the World Key is secured in Artie's inventory.",
+          "seam_score": 25,
+          "seam_resolution": "micro_scene"
         }
       ]
     },
     {
       "section_id": 2,
-      "title": "The Resistance",
-      "intent": "Introduce the Beta-Tester faction and set up the series-long pursuit of the Admin.",
+      "title": "The Moderator Arrival",
+      "intent": "Raise the stakes by introducing the physical manifestation of the Anti-Cheat AI.",
+      "end_condition": "The System Moderators arrive at the Keep's ruins to investigate the glitch.",
       "scenes": [
         {
           "scene_id": 4,
-          "summary": "Silas and a group of 'Beta-Testers' find Artie in the Null-Zone and reveals they've been waiting for a glitch like him.",
-          "type": "transition",
-          "outcome": "Artie finds allies who know the world's secrets.",
+          "summary": "Artie and Silna emerge from the collapsing Keep.",
+          "type": "setup",
+          "outcome": "They see the Moderators descending from the sky.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_SILAS"
+            "CHAR_SILNA",
+            "CHAR_MODERATOR"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "7:5",
+          "threads": [
+            "THREAD_ANTI_CHEAT",
+            "THREAD_GLITCH"
+          ],
+          "introduces": [
+            "CHAR_MODERATOR"
+          ],
           "consumes_outcome_from": "7:3",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Keep Treasury",
+          "location_start_id": "LOC_KEEP_TREASURY",
+          "location_start_label": "Keep Treasury",
+          "location_end": "Keep Outskirts",
+          "location_end_id": "LOC_KEEP_OUTSKIRTS",
+          "location_end_label": "Keep Outskirts",
+          "handoff_mode": "hard_cut",
+          "constraint_state": "pursued",
+          "hard_cut_justification": "A sharp cinematic shift from the collapsing interior to the arrival of the Moderators outside.",
+          "intentional_cinematic_cut": true,
+          "transition_in_text": "They dive out of a side window just as the Keep's main tower collapses into a heap of rubble.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "side window",
+            "collapsing tower",
+            "rubble heap"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "A beam of pure white light strikes the ground nearby, and a figure in featureless white armor steps out.",
+          "transition_out_anchors": [
+            "white light",
+            "featureless armor",
+            "Moderator Alpha"
+          ],
+          "hands_off_to": "7:5",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 5,
-          "summary": "The Beta-Testers reveal that Vane has been 'upgraded' by the System to be a 'Patch-Hunter' to track Artie.",
-          "type": "reveal",
-          "outcome": "The rivalry continues with higher stakes.",
+          "summary": "The Moderator begins to scan the area.",
+          "type": "conflict",
+          "outcome": "Artie and Silna must hide to avoid detection.",
           "characters": [
-            "CHAR_ARTIE"
+            "CHAR_ARTIE",
+            "CHAR_SILNA",
+            "CHAR_MODERATOR"
           ],
           "threads": [
-            "THREAD_VANE_RIVALRY"
+            "THREAD_ANTI_CHEAT",
+            "THREAD_GLITCH"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "7:6",
           "consumes_outcome_from": "7:4",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Keep Outskirts",
+          "location_start_id": "LOC_KEEP_OUTSKIRTS",
+          "location_start_label": "Keep Outskirts",
+          "location_end": "Keep Outskirts",
+          "location_end_id": "LOC_KEEP_OUTSKIRTS",
+          "location_end_label": "Keep Outskirts",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "pursued",
+          "transition_in_text": "The Moderator raises a hand, and a blue scanning grid begins to sweep across the ruins.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "scanning grid",
+            "blue light",
+            "mechanical hum"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "Artie and Silna press themselves into a deep shadow beneath a fallen pillar.",
+          "transition_out_anchors": [
+            "deep shadow",
+            "fallen pillar",
+            "held breath"
+          ],
+          "hands_off_to": "7:6",
+          "seam_score": 45,
+          "seam_resolution": "micro_scene"
         },
         {
           "scene_id": 6,
-          "summary": "Artie receives a legendary quest to 'Delete the Admin,' locking in the series arc.",
-          "type": "reveal",
-          "outcome": "Artie accepts the legendary quest to 'Delete the Admin'.",
+          "summary": "Transition handoff from Keep Outskirts to Keep Outskirts.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_MODERATOR",
+            "CHAR_SILNA"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "7:7",
+          "threads": [
+            "THREAD_ANTI_CHEAT"
+          ],
           "consumes_outcome_from": "7:5",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Keep Outskirts",
+          "location_start_id": "LOC_KEEP_OUTSKIRTS",
+          "location_start_label": "Keep Outskirts",
+          "location_end": "Keep Outskirts",
+          "location_end_id": "LOC_KEEP_OUTSKIRTS",
+          "location_end_label": "Keep Outskirts",
+          "handoff_mode": "arrival_checkpoint",
+          "constraint_state": "fleeing",
+          "transition_in_text": "After a arrival checkpoint, the movement from Keep Outskirts to Keep Outskirts is realized on page.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "deep shadows",
+            "blue scanning grid",
+            "held breath"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "end_condition_echo": "Artie accepts the legendary quest to 'Delete the Admin'.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "This beat pushes into a arrival checkpoint toward Keep Outskirts.",
+          "transition_out_anchors": [
+            "deep shadows",
+            "blue scanning grid",
+            "held breath"
+          ],
+          "hands_off_to": "7:7",
+          "seam_score": 25,
+          "seam_resolution": "micro_scene"
+        },
+        {
+          "scene_id": 7,
+          "summary": "The Moderator identifies the 'Glitch' signature.",
+          "type": "climax",
+          "outcome": "The pursuit becomes personal.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_SILNA",
+            "CHAR_MODERATOR"
+          ],
+          "threads": [
+            "THREAD_ANTI_CHEAT",
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "7:6",
+          "location_start": "Keep Outskirts",
+          "location_start_id": "LOC_KEEP_OUTSKIRTS",
+          "location_start_label": "Keep Outskirts",
+          "location_end": "Keep Outskirts",
+          "location_end_id": "LOC_KEEP_OUTSKIRTS",
+          "location_end_label": "Keep Outskirts",
+          "handoff_mode": "arrival_checkpoint",
+          "constraint_state": "fleeing",
+          "transition_in_text": "The Moderator's head snaps toward their hiding spot as the scanning grid turns a violent red.",
+          "transition_in_anchors": [
+            "red scan",
+            "snapping head",
+            "sudden movement"
+          ],
+          "transition_out_text": "Artie and Silna burst from their cover, sprinting toward the border of the Grey Zones.",
+          "transition_out_anchors": [
+            "bursting cover",
+            "sprinting motion",
+            "approaching border"
+          ],
+          "hands_off_to": "7:8",
+          "end_condition_echo": "The System Moderators arrive at the Keep's ruins to investigate the glitch.",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         }
       ]
     },
     {
       "section_id": 3,
-      "title": "The First Step",
-      "intent": "Conclude the book with a transition toward the next adventure and a comedic final beat.",
+      "title": "The Great Escape",
+      "intent": "Artie and Silna flee to the lawless zones to avoid deletion.",
+      "end_condition": "Artie and Silna cross the border into the Grey Zones, vanishing from the System's primary radar.",
       "scenes": [
         {
-          "scene_id": 7,
-          "summary": "Artie and his new allies prepare to leave the Null-Zone and head to the 'Glitch-Woods'.",
-          "type": "transition",
-          "outcome": "The journey begins anew.",
+          "scene_id": 8,
+          "summary": "Artie and Silna use the World Key to open a secret passage.",
+          "type": "conflict",
+          "outcome": "They bypass the Moderator's blockade.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_SILNA"
           ],
-          "constraint_state": "free",
+          "threads": [
+            "THREAD_WORLD_KEY",
+            "THREAD_ANTI_CHEAT",
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "7:7",
+          "location_start": "Keep Outskirts",
+          "location_start_id": "LOC_KEEP_OUTSKIRTS",
+          "location_start_label": "Keep Outskirts",
+          "location_end": "Grey Zone Border",
+          "location_end_id": "LOC_GREY_ZONE_BORDER",
+          "location_end_label": "Grey Zone Border",
           "handoff_mode": "direct_continuation",
-          "hands_off_to": "7:8",
-          "consumes_outcome_from": "7:6",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "constraint_state": "fleeing",
+          "transition_in_text": "Artie holds the World Key aloft, and a shimmering portal opens in the middle of the path.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "shimmering portal",
+            "golden light",
+            "humming key"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "They dive through the portal just as a beam of white light strikes the ground behind them.",
+          "transition_out_anchors": [
+            "diving motion",
+            "white beam",
+            "closing portal"
+          ],
+          "hands_off_to": "7:9",
+          "seam_score": 50,
+          "seam_resolution": "micro_scene"
         },
         {
-          "scene_id": 8,
-          "summary": "Artie steps into a portal to the Glitch-Woods, hoping for better drop rates in the next zone.",
-          "type": "aftermath",
-          "outcome": "Artie steps into a portal to the Glitch-Woods, hoping for better drop rates.",
+          "scene_id": 9,
+          "summary": "Transition handoff from Grey Zone Border to Grey Zone Border.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
           "characters": [
-            "CHAR_ARTIE"
+            "CHAR_ARTIE",
+            "CHAR_SILNA"
           ],
+          "threads": [
+            "THREAD_WORLD_KEY",
+            "THREAD_ANTI_CHEAT",
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "7:8",
+          "location_start": "Grey Zone Border",
+          "location_start_id": "LOC_GREY_ZONE_BORDER",
+          "location_start_label": "Grey Zone Border",
+          "location_end": "Grey Zone Border",
+          "location_end_id": "LOC_GREY_ZONE_BORDER",
+          "location_end_label": "Grey Zone Border",
+          "handoff_mode": "combat_disengage",
           "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "consumes_outcome_from": "7:7",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "transition_in_text": "After a combat disengage, the movement from Grey Zone Border to Grey Zone Border is realized on page.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "golden light",
+            "closing portal",
+            "desolate plain"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "end_condition_echo": "Artie steps into a portal to the Glitch-Woods, hoping for better drop rates.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "This beat pushes into a combat disengage toward Grey Zone Border.",
+          "transition_out_anchors": [
+            "golden light",
+            "closing portal",
+            "desolate plain"
+          ],
+          "hands_off_to": "7:10",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 10,
+          "summary": "Artie and Silna arrive in the Grey Zones.",
+          "type": "resolution",
+          "outcome": "They are safe for now, but the game has changed forever.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_SILNA"
+          ],
+          "threads": [
+            "THREAD_GLITCH",
+            "THREAD_WORLD_KEY"
+          ],
+          "consumes_outcome_from": "7:9",
+          "location_start": "Grey Zone Border",
+          "location_start_id": "LOC_GREY_ZONE_BORDER",
+          "location_start_label": "Grey Zone Border",
+          "location_end": "The Grey Zones",
+          "location_end_id": "LOC_THE_GREY_ZONES",
+          "location_end_label": "The Grey Zones",
+          "handoff_mode": "combat_disengage",
+          "constraint_state": "free",
+          "transition_in_text": "The portal deposits them onto a desolate, untextured plain where the System's rules are weak and flickering.",
+          "transition_in_anchors": [
+            "desolate plain",
+            "untextured ground",
+            "flickering sky"
+          ],
+          "end_condition_echo": "Artie and Silna cross the border into the Grey Zones, vanishing from the System's primary radar.",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         }
       ]
     }

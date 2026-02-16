@@ -1,0 +1,973 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+UI gate: UI/system blocks (lines starting with '[' and ending with ']') are permitted only when scene_card.ui_allowed=true. If ui_allowed=false, do not include UI blocks even if an author persona says "always include".
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties, and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true. If a prior invariant is stale or superseded, you MUST flag it for removal using "REMOVE: <exact prior invariant text>" before restating the current truth.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v2
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements **when the System is active or the scene is set in a game world**. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, follow the active scene-count policy:
+- Exact mode: total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+- Range mode: chapter totals must remain within the configured range and still align with pacing intent.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string), and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+# OUTLINE SYSTEM EXECUTION CONTRACT
+
+You are executing an outline phase in strict contract mode.
+Return exactly ONE JSON object and nothing else.
+Do not emit markdown, code fences, preambles, trailing explanations, or comments.
+
+Schema contract:
+- All schema-required keys must be present and correctly typed.
+- Optional fields must be omitted when unknown. Do not emit empty-string placeholders.
+- Do not invent alias keys for schema fields. Use canonical key names exactly as requested.
+- If a registry object is emitted, canonical keys are required:
+  - characters[] entries: character_id (string), name (string), intro.chapter (int), intro.scene (int)
+  - threads[] entries: thread_id (string), label (string), status (string)
+- Forbidden aliases include:
+  - characters[].id, characters[].title, characters[].description
+  - threads[].id, threads[].title, threads[].description
+- If a required value cannot be produced without guessing, return a valid `error_v1` object.
+
+Location/transition identity contract:
+- Do not emit placeholder identity values in semantic fields (`current_location`, `unknown`, `placeholder`, `tbd`, `here`, `there`, `n/a`).
+- Transition payload must remain concrete and machine-checkable.
+- In transition text fields, do not use the literal words `here` or `there`; use explicit location nouns/labels instead.
+- Maintain transition/link continuity across retries and refinement phases unless explicitly corrected.
+
+Failure contract:
+- On hard failure, return `error_v1` only.
+- `error_v1` must include: `result`, `schema_version`, `error_type`, `reason_code`, `missing_fields`, `phase`, `action_hint`.
+
+USER:
+
+# OUTLINE PIPELINE PHASE 04: TRANSITION AND CAUSALITY REFINEMENT
+
+Timeline Lock does not apply during outlining; you are planning, not writing a Scene Card.
+
+Return ONLY a single JSON object. No markdown, no code fences, no commentary.
+Use strict JSON (double quotes, no trailing commas).
+
+Required output schema:
+{
+  "schema_version": "transition_refine_v1",
+  "outline": {
+    "schema_version": "1.1",
+    "chapters": []
+  },
+  "phase_report": {
+    "orphan_outcomes_before": 0,
+    "orphan_outcomes_after": 0,
+    "weak_handoffs_after": 0,
+    "orphan_scene_refs_after": [],
+    "weak_handoff_refs_after": [],
+    "edits_applied": [],
+    "transition_hint_compliance": [
+      {"hint_id": "HINT_1", "satisfied": true, "evidence_scene_refs": ["1:1"]}
+    ]
+  }
+}
+
+Goal:
+- Ensure each scene outcome is consumed by a nearby next scene.
+- Eliminate abrupt section/scene edge transitions.
+- Keep changes minimal and targeted.
+
+Required deterministic link rules (phase 04+):
+- For every non-first scene in a chapter: consumes_outcome_from is required.
+- For every non-last scene in a chapter: hands_off_to is required.
+- For every non-last scene in a chapter: transition_out_text is required and non-empty.
+- For every non-last scene in a chapter: transition_out_anchors is required (3-6 non-empty strings).
+- Link format must be chapter_id:scene_id.
+- Cross-chapter links are out-of-scope in these fields.
+- Preserve section.end_condition for every section.
+- Preserve section closure anchors (end_condition_echo on section-final scenes).
+- Preserve outline schema-required keys and types for chapter/section/scene objects.
+  - Do not remove or rename required keys: goal, chapter_role, stakes_shift, bridge, pacing, intent, summary, characters.
+- Preserve canonical registry key names:
+  - characters[] uses character_id/name/intro
+  - threads[] uses thread_id/label/status
+- Forbidden aliases:
+  - characters[].id, characters[].title, characters[].description
+  - threads[].id, threads[].title, threads[].description
+
+Required transition contract fields:
+- location_start_label, location_end_label, location_start, location_end, handoff_mode, constraint_state, transition_in_text, transition_in_anchors
+- location_start_id/location_end_id may be provided, but orchestrator generates canonical LOC_* ids from labels and validates membership in registry.
+- seam_score (int 0-100) and seam_resolution (inline_bridge|micro_scene|full_scene)
+- Do NOT emit placeholder identity values (current_location, unknown, placeholder, tbd, here, there) in location or transition fields.
+- Strict hard-cut policy:
+  - In strict transition mode, hard_cut is disallowed.
+  - Convert any hard_cut scenes to a non-hard-cut handoff mode (for example time_skip, offscreen_processing, arrival_checkpoint, or combat_disengage).
+  - Do not preserve or emit handoff_mode=hard_cut in strict mode.
+- Hard-cut normalization checklist (required):
+  - Scan ALL scenes for handoff_mode=hard_cut.
+  - For EACH hard_cut scene, change handoff_mode to a non-hard-cut mode in strict mode.
+  - hard_cut_justification and intentional_cinematic_cut may be retained for historical trace only, but handoff_mode must no longer be hard_cut.
+
+Budget and downgrade reporting:
+- If seam candidates are blocked by insertion budget, include phase_report.blocked_by_budget entries with scene_ref and seam_score when available.
+- If a seam is downgraded (for example micro_scene -> inline_bridge), include phase_report.downgraded_resolution entries with scene_ref and reason.
+
+Transition hint strict-mode requirement:
+- If strict_transition_hints mode is active, phase_report.transition_hint_compliance must include every hint with satisfied=true or explicit unsatisfied explanation.
+- evidence_scene_refs must use chapter_id:scene_id format.
+
+If you cannot satisfy constraints after correction attempts, return error_v1:
+{
+  "result": "ERROR",
+  "schema_version": "error_v1",
+  "error_type": "validation_error",
+  "reason_code": "transition_contract_incomplete",
+  "missing_fields": ["outline.chapters[0].sections[0].scenes[1].transition_out_text"],
+  "phase": "phase_04_transition_causality_refinement",
+  "action_hint": "Populate required transition links/anchors and concrete location labels."
+}
+
+Outline draft (phase 03):
+{
+  "chapters": [
+    {
+      "bridge": {
+        "from_prev": "Protagonist dies in the real world and awakens in the tutorial zone.",
+        "to_next": "Armed with a broken mechanic, the protagonist seeks to maximize tutorial rewards before the zone closes."
+      },
+      "chapter_id": 1,
+      "chapter_role": "hook",
+      "goal": "Introduce the protagonist to the System and reveal the broken 'Crit' multiplier during a fatal tutorial encounter.",
+      "pacing": {
+        "expected_scene_count": 8,
+        "intensity": 3,
+        "tempo": "steady"
+      },
+      "sections": [
+        {
+          "end_condition": "Protagonist awakens in the white-room tutorial space and receives the first System prompt.",
+          "intent": "Establish the protagonist's mundane death and the jarring transition into the System tutorial.",
+          "scenes": [
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "free",
+              "handoff_mode": "time_skip",
+              "hands_off_to": "1:2",
+              "location_end": "White Void Entrance",
+              "location_end_id": "LOC_WHITE_VOID_ENTRANCE",
+              "location_end_label": "White Void Entrance",
+              "location_start": "Earth Hospital Room",
+              "location_start_id": "LOC_EARTH_HOSPITAL_ROOM",
+              "location_start_label": "Earth Hospital Room",
+              "outcome": "Artie is transported to the tutorial zone.",
+              "scene_id": 1,
+              "summary": "Artie dies in a hospital bed and experiences a surreal transition into a digital void.",
+              "transition_in_anchors": [
+                "flatline tone",
+                "antiseptic scent",
+                "dimming hospital lights"
+              ],
+              "transition_in_text": "Artie\u2019s consciousness slips away as the hospital room monitor emits a long, flat tone.",
+              "transition_out_anchors": [
+                "blinding white floor",
+                "infinite horizon",
+                "digital hum"
+              ],
+              "transition_out_text": "Artie\u2019s eyes snap open to find himself standing in a featureless white expanse.",
+              "type": "transition"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:1",
+              "end_condition_echo": "Protagonist awakens in the white-room tutorial space and receives the first System prompt.",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "1:3",
+              "location_end": "White Void Center",
+              "location_end_id": "LOC_WHITE_VOID_CENTER",
+              "location_end_label": "White Void Center",
+              "location_start": "White Void Entrance",
+              "location_start_id": "LOC_WHITE_VOID_ENTRANCE",
+              "location_start_label": "White Void Entrance",
+              "outcome": "Artie accepts the tutorial and gains his first status window.",
+              "scene_id": 2,
+              "summary": "Artie explores the white void and interacts with the first System prompt.",
+              "transition_in_anchors": [
+                "blue system window",
+                "glowing text",
+                "digital chime"
+              ],
+              "transition_in_text": "The humming of the white expanse intensifies as a blue window flickers into existence.",
+              "transition_out_anchors": [
+                "shimmering pixels",
+                "tactile interface",
+                "warping space"
+              ],
+              "transition_out_text": "Artie reaches out to touch the floating prompt, and the world shifts around him.",
+              "type": "setup"
+            }
+          ],
+          "section_id": 1,
+          "title": "The Fatal Error"
+        },
+        {
+          "end_condition": "Protagonist successfully triggers a 100x crit on a training dummy, causing a physics error.",
+          "intent": "Introduce the combat mechanics and the first realization that the Crit multiplier is behaving abnormally.",
+          "scenes": [
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:2",
+              "handoff_mode": "arrival_checkpoint",
+              "hands_off_to": "1:4",
+              "location_end": "Training Arena",
+              "location_end_id": "LOC_TRAINING_ARENA",
+              "location_end_label": "Training Arena",
+              "location_start": "White Void Center",
+              "location_start_id": "LOC_WHITE_VOID_CENTER",
+              "location_start_label": "White Void Center",
+              "outcome": "Artie learns the basics of the combat system.",
+              "scene_id": 3,
+              "summary": "Artie approaches a training dummy and attempts basic combat maneuvers.",
+              "transition_in_anchors": [
+                "straw training dummy",
+                "combat circle",
+                "wooden sword"
+              ],
+              "transition_in_text": "The white void resolves into a structured training arena containing a single straw dummy.",
+              "transition_out_anchors": [
+                "rough wood grain",
+                "digital weight",
+                "practice stance"
+              ],
+              "transition_out_text": "Artie grips the wooden sword, feeling the strange weight of a digital weapon.",
+              "type": "trial"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "engaged_combat",
+              "consumes_outcome_from": "1:3",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "1:5",
+              "location_end": "Training Arena",
+              "location_end_id": "LOC_TRAINING_ARENA",
+              "location_end_label": "Training Arena",
+              "location_start": "Training Arena",
+              "location_start_id": "LOC_TRAINING_ARENA",
+              "location_start_label": "Training Arena",
+              "outcome": "Artie identifies a pattern in his critical hits.",
+              "scene_id": 4,
+              "summary": "Artie strikes the dummy multiple times, noticing a strange variance in damage numbers.",
+              "threads": [
+                "THREAD_CRIT_GLITCH"
+              ],
+              "transition_in_anchors": [
+                "floating damage numbers",
+                "dull thud",
+                "flickering text"
+              ],
+              "transition_in_text": "The first strike lands with a dull thud, but the damage readout flickers erratically.",
+              "transition_out_anchors": [
+                "golden multiplier text",
+                "sparking impact",
+                "surprised expression"
+              ],
+              "transition_out_text": "Artie narrows his eyes as a '1.5x' multiplier suddenly jumps to '10x' for no reason.",
+              "type": "investigation"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "engaged_combat",
+              "consumes_outcome_from": "1:4",
+              "end_condition_echo": "Protagonist successfully triggers a 100x crit on a training dummy, causing a physics error.",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "1:6",
+              "location_end": "Training Arena",
+              "location_end_id": "LOC_TRAINING_ARENA",
+              "location_end_label": "Training Arena",
+              "location_start": "Training Arena",
+              "location_start_id": "LOC_TRAINING_ARENA",
+              "location_start_label": "Training Arena",
+              "outcome": "The training dummy is destroyed by a 100x crit.",
+              "scene_id": 5,
+              "summary": "Artie focuses on the timing of his strikes and triggers a massive physics-breaking crit.",
+              "threads": [
+                "THREAD_CRIT_GLITCH"
+              ],
+              "transition_in_anchors": [
+                "rhythmic swing",
+                "glowing blade edge",
+                "intense focus"
+              ],
+              "transition_in_text": "Artie swings with everything he has, aiming for the exact moment the multiplier glitches.",
+              "transition_out_anchors": [
+                "corrupted pixels",
+                "shattered straw",
+                "error message"
+              ],
+              "transition_out_text": "The dummy vanishes in a spray of corrupted pixels as the System struggles to calculate the damage.",
+              "type": "payoff"
+            }
+          ],
+          "section_id": 2,
+          "title": "Identifying the Glitch"
+        },
+        {
+          "end_condition": "Protagonist loots a 'Legendary' starter dagger from a common tutorial rat due to overkill bonuses.",
+          "intent": "Show the protagonist intentionally using the glitch to secure high-value loot from the first tutorial mob.",
+          "scenes": [
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:5",
+              "handoff_mode": "arrival_checkpoint",
+              "hands_off_to": "1:7",
+              "location_end": "Tutorial Dungeon Entrance",
+              "location_end_id": "LOC_TUTORIAL_DUNGEON_ENTRANCE",
+              "location_end_label": "Tutorial Dungeon Entrance",
+              "location_start": "Training Arena",
+              "location_start_id": "LOC_TRAINING_ARENA",
+              "location_start_label": "Training Arena",
+              "outcome": "Artie prepares to test the glitch on a live enemy.",
+              "scene_id": 6,
+              "summary": "Artie enters the first live-combat zone and encounters a tutorial rat.",
+              "transition_in_anchors": [
+                "stone walls",
+                "damp earth scent",
+                "iron sconce"
+              ],
+              "transition_in_text": "A stone corridor manifests around Artie, smelling of damp earth and digital decay.",
+              "transition_out_anchors": [
+                "glowing red eyes",
+                "chattering sound",
+                "shadowy movement"
+              ],
+              "transition_out_text": "A pair of red eyes glows in the darkness of the corridor ahead.",
+              "type": "trial"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "engaged_combat",
+              "consumes_outcome_from": "1:6",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "1:8",
+              "location_end": "Tutorial Dungeon Entrance",
+              "location_end_id": "LOC_TUTORIAL_DUNGEON_ENTRANCE",
+              "location_end_label": "Tutorial Dungeon Entrance",
+              "location_start": "Tutorial Dungeon Entrance",
+              "location_start_id": "LOC_TUTORIAL_DUNGEON_ENTRANCE",
+              "location_start_label": "Tutorial Dungeon Entrance",
+              "outcome": "Artie successfully stacks the glitch against the rat.",
+              "scene_id": 7,
+              "summary": "Artie engages the tutorial rat, carefully managing his strikes to build the multiplier.",
+              "threads": [
+                "THREAD_CRIT_GLITCH"
+              ],
+              "transition_in_anchors": [
+                "rat claws",
+                "sidestep maneuver",
+                "pulsing UI"
+              ],
+              "transition_in_text": "The tutorial rat lunges, but Artie sidesteps, waiting for the multiplier to pulse.",
+              "transition_out_anchors": [
+                "perfect arc",
+                "peak multiplier",
+                "descending strike"
+              ],
+              "transition_out_text": "Artie brings the wooden sword down in a perfect arc as the multiplier hits its peak.",
+              "type": "trial"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:7",
+              "end_condition_echo": "Protagonist loots a 'Legendary' starter dagger from a common tutorial rat due to overkill bonuses.",
+              "handoff_mode": "direct_continuation",
+              "location_end": "Tutorial Dungeon Entrance",
+              "location_end_id": "LOC_TUTORIAL_DUNGEON_ENTRANCE",
+              "location_end_label": "Tutorial Dungeon Entrance",
+              "location_start": "Tutorial Dungeon Entrance",
+              "location_start_id": "LOC_TUTORIAL_DUNGEON_ENTRANCE",
+              "location_start_label": "Tutorial Dungeon Entrance",
+              "outcome": "Artie acquires the 'Legendary' starter dagger.",
+              "scene_id": 8,
+              "summary": "The rat is obliterated by an overkill strike, and Artie loots a legendary item.",
+              "threads": [
+                "THREAD_CRIT_GLITCH"
+              ],
+              "transition_in_anchors": [
+                "golden chest",
+                "shimmering loot",
+                "smoke tendrils"
+              ],
+              "transition_in_text": "The rat explodes with the force of a small bomb, leaving behind a shimmering golden chest.",
+              "type": "payoff"
+            }
+          ],
+          "section_id": 3,
+          "title": "The First Payday"
+        }
+      ],
+      "stakes_shift": "From certain death as a mundane human to survival as a glitched outlier with a lethal damage ceiling.",
+      "title": "The One Percent Solution"
+    },
+    {
+      "bridge": {
+        "from_prev": "The protagonist realizes the System rewards 'overkill' damage with better loot drops.",
+        "to_next": "The protagonist enters the first major hub city and attracts unwanted attention from the local guard."
+      },
+      "chapter_id": 2,
+      "chapter_role": "setup",
+      "goal": "Systematically dismantle tutorial challenges to acquire high-tier 'Starter' gear through overkill bonuses.",
+      "pacing": {
+        "expected_scene_count": 10,
+        "intensity": 2,
+        "tempo": "steady"
+      },
+      "sections": [
+        {
+          "end_condition": "Protagonist confirms that damage exceeding 1000% of enemy HP guarantees a rarity tier jump.",
+          "intent": "The protagonist tests the limits of the 'Crit' multiplier to maximize loot drops across multiple encounters.",
+          "scenes": [
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "free",
+              "handoff_mode": "time_skip",
+              "hands_off_to": "2:2",
+              "location_end": "Tutorial Field",
+              "location_end_id": "LOC_TUTORIAL_FIELD",
+              "location_end_label": "Tutorial Field",
+              "location_start": "Tutorial Field",
+              "location_start_id": "LOC_TUTORIAL_FIELD",
+              "location_start_label": "Tutorial Field",
+              "outcome": "Artie confirms the dagger synergizes with the glitch.",
+              "scene_id": 1,
+              "summary": "Artie tests the Legendary Dagger on a group of tutorial slimes.",
+              "transition_in_anchors": [
+                "Legendary Dagger",
+                "pixelated grass",
+                "tutorial sun"
+              ],
+              "transition_in_text": "Artie steps into the Tutorial Field, testing the weight of his new Legendary Dagger.",
+              "transition_out_anchors": [
+                "blue slime",
+                "wobbling movement",
+                "ready stance"
+              ],
+              "transition_out_text": "A cluster of blue slimes wobbles toward him, perfect for another round of testing.",
+              "type": "trial"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "engaged_combat",
+              "consumes_outcome_from": "2:1",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:3",
+              "location_end": "Tutorial Field",
+              "location_end_id": "LOC_TUTORIAL_FIELD",
+              "location_end_label": "Tutorial Field",
+              "location_start": "Tutorial Field",
+              "location_start_id": "LOC_TUTORIAL_FIELD",
+              "location_start_label": "Tutorial Field",
+              "outcome": "Artie notices a correlation between overkill percentage and loot quality.",
+              "scene_id": 2,
+              "summary": "Artie performs precise overkill strikes on the slimes, recording the loot results.",
+              "threads": [
+                "THREAD_CRIT_GLITCH"
+              ],
+              "transition_in_anchors": [
+                "slime residue",
+                "dagger edge",
+                "loot window"
+              ],
+              "transition_in_text": "The first slime pops like a water balloon under the dagger's glitched edge.",
+              "transition_out_anchors": [
+                "system log",
+                "item list",
+                "calculating gaze"
+              ],
+              "transition_out_text": "Artie opens his log, comparing the damage numbers to the items dropped.",
+              "type": "investigation"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "engaged_combat",
+              "consumes_outcome_from": "2:2",
+              "end_condition_echo": "Protagonist confirms that damage exceeding 1000% of enemy HP guarantees a rarity tier jump.",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:4",
+              "location_end": "Tutorial Field",
+              "location_end_id": "LOC_TUTORIAL_FIELD",
+              "location_end_label": "Tutorial Field",
+              "location_start": "Tutorial Field",
+              "location_start_id": "LOC_TUTORIAL_FIELD",
+              "location_start_label": "Tutorial Field",
+              "outcome": "Artie confirms the 1000% overkill threshold for rarity jumps.",
+              "scene_id": 3,
+              "summary": "Artie pushes the multiplier to 1000% on the final slime of the pack.",
+              "threads": [
+                "THREAD_CRIT_GLITCH"
+              ],
+              "transition_in_anchors": [
+                "expanding slime",
+                "charged strike",
+                "four-digit multiplier"
+              ],
+              "transition_in_text": "The last slime expands as Artie charges his strike, the multiplier climbing toward four digits.",
+              "transition_out_anchors": [
+                "Rare Slime Core",
+                "Boss Room door",
+                "determined walk"
+              ],
+              "transition_out_text": "Artie pockets the Rare Slime Core and looks toward the looming Boss Room.",
+              "type": "payoff"
+            }
+          ],
+          "section_id": 1,
+          "title": "The Overkill Protocol"
+        },
+        {
+          "end_condition": "The Tutorial Boss is vaporized by a single strike, dropping a unique 'Glitched' item.",
+          "intent": "A high-intensity fight where the protagonist uses the glitch to one-shot the Tutorial Boss.",
+          "scenes": [
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:3",
+              "handoff_mode": "arrival_checkpoint",
+              "hands_off_to": "2:5",
+              "location_end": "Boss Room Entrance",
+              "location_end_id": "LOC_BOSS_ROOM_ENTRANCE",
+              "location_end_label": "Boss Room Entrance",
+              "location_start": "Boss Room Entrance",
+              "location_start_id": "LOC_BOSS_ROOM_ENTRANCE",
+              "location_start_label": "Boss Room Entrance",
+              "outcome": "Artie is ready for the final tutorial challenge.",
+              "scene_id": 4,
+              "summary": "Artie approaches the Boss Room and prepares his buffs.",
+              "transition_in_anchors": [
+                "iron-bound door",
+                "heavy air",
+                "ozone scent"
+              ],
+              "transition_in_text": "The air grows heavy with the scent of ozone as Artie stands before the Boss Room door.",
+              "transition_out_anchors": [
+                "potion bottle",
+                "glowing veins",
+                "tightened grip"
+              ],
+              "transition_out_text": "He consumes a temporary strength potion, his muscles tightening for the coming blow.",
+              "type": "setup"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "engaged_combat",
+              "consumes_outcome_from": "2:4",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:6",
+              "location_end": "Boss Room",
+              "location_end_id": "LOC_BOSS_ROOM",
+              "location_end_label": "Boss Room",
+              "location_start": "Boss Room",
+              "location_start_id": "LOC_BOSS_ROOM",
+              "location_start_label": "Boss Room",
+              "outcome": "The fight begins, and Artie dodges the Guardian's initial attacks.",
+              "scene_id": 5,
+              "summary": "Artie enters the Boss Room and faces the Tutorial Guardian.",
+              "transition_in_anchors": [
+                "Tutorial Guardian",
+                "stone throne",
+                "slamming doors"
+              ],
+              "transition_in_text": "The doors slam shut behind Artie as the Tutorial Guardian rises from its throne.",
+              "transition_out_anchors": [
+                "stone club",
+                "shattering floor",
+                "narrow dodge"
+              ],
+              "transition_out_text": "The Guardian swings a massive stone club, which Artie narrowly avoids.",
+              "type": "trial"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "engaged_combat",
+              "consumes_outcome_from": "2:5",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:7",
+              "location_end": "Boss Room",
+              "location_end_id": "LOC_BOSS_ROOM",
+              "location_end_label": "Boss Room",
+              "location_start": "Boss Room",
+              "location_start_id": "LOC_BOSS_ROOM",
+              "location_start_label": "Boss Room",
+              "outcome": "Artie finds the 'logic gap' in the Guardian's defense.",
+              "scene_id": 6,
+              "summary": "Artie waits for the perfect opening to trigger the glitch.",
+              "threads": [
+                "THREAD_CRIT_GLITCH"
+              ],
+              "transition_in_anchors": [
+                "digital stutter",
+                "heavy swing",
+                "circling movement"
+              ],
+              "transition_in_text": "Artie circles the Guardian, watching the way its digital frame stutters during a heavy swing.",
+              "transition_out_anchors": [
+                "glowing core",
+                "lunge maneuver",
+                "exposed weakness"
+              ],
+              "transition_out_text": "He lunges forward, aiming for the glowing core exposed in the Guardian's chest.",
+              "type": "trial"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:6",
+              "end_condition_echo": "The Tutorial Boss is vaporized by a single strike, dropping a unique 'Glitched' item.",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:8",
+              "location_end": "Boss Room",
+              "location_end_id": "LOC_BOSS_ROOM",
+              "location_end_label": "Boss Room",
+              "location_start": "Boss Room",
+              "location_start_id": "LOC_BOSS_ROOM",
+              "location_start_label": "Boss Room",
+              "outcome": "The Boss is destroyed, and Artie gains a glitched item.",
+              "scene_id": 7,
+              "summary": "Artie strikes the core with a massive glitched crit.",
+              "threads": [
+                "THREAD_CRIT_GLITCH"
+              ],
+              "transition_in_anchors": [
+                "spiraling numbers",
+                "impact spark",
+                "shuddering boss"
+              ],
+              "transition_in_text": "The Legendary Dagger sinks into the core, and the damage numbers begin to spiral out of control.",
+              "transition_out_anchors": [
+                "Glitched Fragment",
+                "loot pile",
+                "pulsing light"
+              ],
+              "transition_out_text": "Artie picks up the pulsing 'Glitched Fragment' from the pile of boss loot.",
+              "type": "payoff"
+            }
+          ],
+          "section_id": 2,
+          "title": "Boss Room Bypass"
+        },
+        {
+          "end_condition": "Protagonist steps through the tutorial exit portal into the main game world.",
+          "intent": "The protagonist prepares to leave the tutorial zone with an inventory full of unintended gear.",
+          "scenes": [
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:7",
+              "handoff_mode": "aftermath_relocation",
+              "hands_off_to": "2:9",
+              "location_end": "Boss Room",
+              "location_end_id": "LOC_BOSS_ROOM",
+              "location_end_label": "Boss Room",
+              "location_start": "Boss Room",
+              "location_start_id": "LOC_BOSS_ROOM",
+              "location_start_label": "Boss Room",
+              "outcome": "Artie is fully geared for the main game.",
+              "scene_id": 8,
+              "summary": "Artie organizes his inventory and equips his new gear.",
+              "transition_in_anchors": [
+                "settling dust",
+                "inventory screens",
+                "shining gear"
+              ],
+              "transition_in_text": "The dust settles in the Boss Room as Artie begins sorting through his overflowing inventory.",
+              "transition_out_anchors": [
+                "Glitched Plate",
+                "Master's Boots",
+                "stat notification"
+              ],
+              "transition_out_text": "He equips the 'Glitched Plate' and 'Tutorial Master's Boots', feeling his stats skyrocket.",
+              "type": "setup"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:8",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:10",
+              "location_end": "Tutorial Exit Portal",
+              "location_end_id": "LOC_TUTORIAL_EXIT_PORTAL",
+              "location_end_label": "Tutorial Exit Portal",
+              "location_start": "Boss Room",
+              "location_start_id": "LOC_BOSS_ROOM",
+              "location_start_label": "Boss Room",
+              "outcome": "Artie realizes he has broken the tutorial's intended balance.",
+              "scene_id": 9,
+              "summary": "Artie approaches the exit portal, reflecting on his progress.",
+              "transition_in_anchors": [
+                "blue vortex",
+                "swirling energy",
+                "exit prompt"
+              ],
+              "transition_in_text": "A swirling blue vortex opens at the back of the chamber, beckoning him toward the real world.",
+              "transition_out_anchors": [
+                "final look",
+                "smirk",
+                "portal edge"
+              ],
+              "transition_out_text": "Artie takes a final look at the tutorial zone, a smirk playing on his lips.",
+              "type": "investigation"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:9",
+              "end_condition_echo": "Protagonist steps through the tutorial exit portal into the main game world.",
+              "handoff_mode": "arrival_checkpoint",
+              "location_end": "Main Game Hub",
+              "location_end_id": "LOC_MAIN_GAME_HUB",
+              "location_end_label": "Main Game Hub",
+              "location_start": "Tutorial Exit Portal",
+              "location_start_id": "LOC_TUTORIAL_EXIT_PORTAL",
+              "location_start_label": "Tutorial Exit Portal",
+              "outcome": "Artie arrives in the main game hub.",
+              "scene_id": 10,
+              "summary": "Artie steps into the portal and leaves the tutorial.",
+              "transition_in_anchors": [
+                "kaleidoscope of light",
+                "rushing wind",
+                "dissolving world"
+              ],
+              "transition_in_text": "Artie steps into the vortex, and the tutorial zone dissolves into a kaleidoscope of light.",
+              "type": "transition"
+            }
+          ],
+          "section_id": 3,
+          "title": "Graduation Day"
+        }
+      ],
+      "stakes_shift": "From a lucky survivor to a heavily geared exploiter who is now ahead of the intended power curve.",
+      "title": "Looting the Logic Gates"
+    }
+  ],
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      },
+      "name": "Artie",
+      "pronouns": "he/him",
+      "role": "protagonist"
+    },
+    {
+      "character_id": "CHAR_MERCHANT",
+      "intro": {
+        "chapter": 3,
+        "scene": 2
+      },
+      "name": "Merchant Lord Kaelen",
+      "role": "quest-giver"
+    },
+    {
+      "character_id": "CHAR_ADMIN",
+      "intro": {
+        "chapter": 4,
+        "scene": 9
+      },
+      "name": "The Architect",
+      "role": "mentor"
+    },
+    {
+      "character_id": "CHAR_SENTINEL",
+      "intro": {
+        "chapter": 4,
+        "scene": 1
+      },
+      "name": "Sentinel Unit-01",
+      "role": "antagonist"
+    }
+  ],
+  "schema_version": "1.1",
+  "threads": [
+    {
+      "label": "The Crit Multiplier Glitch",
+      "status": "active",
+      "thread_id": "THREAD_CRIT_GLITCH"
+    },
+    {
+      "label": "System Deletion Protocol",
+      "status": "active",
+      "thread_id": "THREAD_SYSTEM_PURGE"
+    }
+  ]
+}
+
+Transition hints (author/system):
+
+
+Book:
+{
+  "author_ref": "eldrik-vale/v2",
+  "book_id": "criticulous_b1",
+  "genre": [
+    "litrpg",
+    "isekai",
+    "comedy"
+  ],
+  "invariants": [
+    "No world resets.",
+    "No convenient amnesia as a continuity device.",
+    "Do not change established names/relationships."
+  ],
+  "page_metrics": {
+    "chars_per_page": 1500,
+    "words_per_page": 250
+  },
+  "schema_version": "1.0",
+  "series_id": "crit-iculous",
+  "series_ref": "series/crit-iculous",
+  "targets": {
+    "avg_scene_words": 2000,
+    "chapters": 7
+  },
+  "title": "Crit Hit & Run",
+  "voice": {
+    "pov": "third_limited",
+    "style_tags": [
+      "no-recaps",
+      "forward-motion",
+      "tight-prose"
+    ],
+    "tense": "past"
+  }
+}
+
+Targets:
+{
+  "avg_scene_words": 2000,
+  "chapters": 7
+}
+
+Notes:

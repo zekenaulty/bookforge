@@ -1,0 +1,177 @@
+{
+  "schema_version": "1.0",
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 1,
+      "persona_updates": [
+        "Artie is processing his death with characteristic cynicism and snark."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 1,
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 10,
+            "max": 10
+          }
+        },
+        "titles": [
+          {
+            "active": true,
+            "name": "Disgruntled Employee",
+            "source": "background"
+          }
+        ]
+      },
+      "reason": "System initialization and HP restoration upon entering the tutorial."
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "chapter": 1,
+      "scene": 1,
+      "set": {
+        "tutorial_active": true
+      },
+      "reason": "Tutorial phase initialized."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 1,
+      "set": {
+        "inventory": [
+          {
+            "item_id": "ITEM_DOLLAR_BILL",
+            "container": "hand_right",
+            "status": "carried"
+          },
+          {
+            "item_id": "ITEM_WALLET",
+            "container": "pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item_id": "ITEM_BADGE",
+            "container": "pocket_right",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "hand_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_DOLLAR_BILL"
+            ]
+          },
+          {
+            "container": "pocket_left",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_WALLET"
+            ]
+          },
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_BADGE"
+            ]
+          }
+        ]
+      },
+      "reason": "Normalization of inventory after transition to the tutorial zone."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_DOLLAR_BILL",
+      "chapter": 1,
+      "scene": 1,
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "LOC_WHITE_VOID_ENTRANCE"
+        }
+      },
+      "reason": "Updating last seen location after transition."
+    },
+    {
+      "item_id": "ITEM_WALLET",
+      "chapter": 1,
+      "scene": 1,
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "LOC_WHITE_VOID_ENTRANCE"
+        }
+      },
+      "reason": "Updating last seen location after transition."
+    },
+    {
+      "item_id": "ITEM_BADGE",
+      "chapter": 1,
+      "scene": 1,
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "LOC_WHITE_VOID_ENTRANCE"
+        }
+      },
+      "reason": "Updating last seen location after transition."
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "LOC_WHITE_VOID_ENTRANCE",
+    "open_threads": [
+      "THREAD_CRIT_GLITCH",
+      "THREAD_SYSTEM_PURGE"
+    ],
+    "recent_facts": [
+      "Artie died in a hospital on Earth.",
+      "Artie transitioned into a digital void.",
+      "Artie received his first System notifications."
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "Artie dies in a hospital bed and experiences a surreal transition into a digital void.",
+      "He awakens in a featureless white expanse and receives his first System notifications, identifying him as a Player."
+    ],
+    "key_events": [
+      "Artie experiences biological death on Earth.",
+      "Artie transitions into the White Void Entrance.",
+      "Artie confirms he still possesses his mundane items: a dollar bill, wallet, and ID badge.",
+      "The System initializes Artie's player status and restores his HP to 10/10.",
+      "Artie receives the 'Disgruntled Employee' title and the first tutorial objective: Survive."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie HP is 1/10.",
+      "Artie HP is 10/10.",
+      "inventory: CHAR_ARTIE -> Crinkled Dollar Bill (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=stowed, container=pocket_right)",
+      "location: LOC_WHITE_VOID_ENTRANCE",
+      "milestone: tutorial_entry = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Artie died and was brought into the System tutorial."
+    ]
+  }
+}

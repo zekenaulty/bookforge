@@ -26,6 +26,8 @@ Required keys:
 - ui_allowed (boolean; true only when System/UI is active in this scene)
 - location_start_id (LOC_* canonical location id)
 - location_end_id (LOC_* canonical location id)
+- location_start_label
+- location_end_label
 - location_start
 - location_end
 - handoff_mode
@@ -38,7 +40,8 @@ Required keys:
 Required when present in outline_window.current:
 - consumes_outcome_from
 - hands_off_to
-- transition_out
+- transition_out_text
+- transition_out_anchors
 - hard_cut_justification
 - intentional_cinematic_cut
 
@@ -79,13 +82,16 @@ JSON shape example (fill with real values):
   "ui_allowed": false,
   "location_start_id": "LOC_OAKHAVEN_NORTH_GATE_CHECKPOINT",
   "location_end_id": "LOC_OAKHAVEN_BARNABYS_TAVERN",
+  "location_start_label": "North Gate Checkpoint",
+  "location_end_label": "Barnaby's Tavern",
   "location_start": "North Gate Checkpoint",
   "location_end": "Barnaby's Tavern",
   "handoff_mode": "detained_then_release",
   "constraint_state": "processed",
   "transition_in_text": "After a brief detention and scanner review, the guards release Artie under watch and direct him to Barnaby's Tavern.",
   "transition_in_anchors": ["detention", "scanner", "release", "guards", "tavern"],
-  "transition_out": "Artie enters Barnaby's under scrutiny and without leverage.",
+  "transition_out_text": "Artie enters Barnaby's under scrutiny and without leverage.",
+  "transition_out_anchors": ["barnabys_tavern", "under_watch", "no_leverage"],
   "consumes_outcome_from": "1:6",
   "hands_off_to": "1:8",
   "seam_score": 78,
@@ -121,3 +127,4 @@ Recent lint warnings (prior scene, if any):
 
 Task:
 Create the next scene card.
+

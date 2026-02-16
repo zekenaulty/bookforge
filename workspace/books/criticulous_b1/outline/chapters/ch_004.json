@@ -1,246 +1,507 @@
 {
   "chapter_id": 4,
-  "title": "The Capital of Crits",
-  "goal": "Artie must hide in plain sight while trying to find a way to stabilize his build.",
-  "chapter_role": "investigation",
-  "stakes_shift": "The stakes move from physical survival to social navigation and avoiding the 'System Police'.",
+  "title": "The Math of Murder",
+  "goal": "Enter the 'Infinite Spire' solo to prove his glass-cannon build can outpace the System's scaling difficulty.",
+  "chapter_role": "trial",
+  "stakes_shift": "Artie discovers that the System's 'Anti-Cheat' AI is monitoring his anomalous combat logs.",
   "bridge": {
-    "from_prev": "Artie is a fugitive from Vane's ego.",
-    "to_next": "Artie enters the Grand Arena for a 'Low-Stakes' tournament."
+    "from_prev": "Artie sneaks into the Spire to farm the resources needed for a guild voucher.",
+    "to_next": "The AI deploys a 'Stalker' entity specifically designed to counter high-crit builds."
   },
   "pacing": {
-    "intensity": 2,
-    "tempo": "slow_burn",
-    "expected_scene_count": 8
+    "intensity": 4,
+    "tempo": "steady",
+    "expected_scene_count": 11
   },
   "sections": [
     {
       "section_id": 1,
-      "title": "The City of Gold and Glitches",
-      "intent": "Explore the religious reverence for RNG in the capital and the illegality of stat-wiping.",
+      "title": "The Spire Infiltration",
+      "intent": "Artie sneaks into the solo-challenge dungeon to farm the necessary voucher.",
+      "end_condition": "Artie bypasses the external guards and enters the Infinite Spire instance.",
       "scenes": [
         {
           "scene_id": 1,
-          "summary": "Artie enters the capital and witnesses the 'Temple of the D20,' where priests pray for high rolls.",
+          "summary": "Artie scouts the Infinite Spire's entrance.",
           "type": "setup",
-          "outcome": "Artie realizes he is basically a walking god in this religion.",
-          "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
-          ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "4:2",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The scene opens at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
-        },
-        {
-          "scene_id": 2,
-          "summary": "Artie tries to find a 'Stat-Wiper' to fix his 1 HP, but finds out it's a crime punishable by 'Deletion'.",
-          "type": "reveal",
-          "outcome": "Artie accepts that he is stuck with his 1 HP glass cannon build forever.",
+          "outcome": "Artie identifies the guard rotation.",
           "characters": [
             "CHAR_ARTIE"
           ],
           "threads": [
-            "THREAD_THE_ASCENSION"
+            "THREAD_GLITCH"
           ],
-          "constraint_state": "free",
+          "location_start": "Spire Outskirts",
+          "location_start_id": "LOC_SPIRE_OUTSKIRTS",
+          "location_start_label": "Spire Outskirts",
+          "location_end": "Spire Outskirts",
+          "location_end_id": "LOC_SPIRE_OUTSKIRTS",
+          "location_end_label": "Spire Outskirts",
           "handoff_mode": "direct_continuation",
-          "hands_off_to": "4:3",
-          "consumes_outcome_from": "4:1",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "constraint_state": "pursued",
+          "transition_in_text": "Artie crouches behind a jagged rock, watching the armored guards patrol the base of the Infinite Spire.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "jagged rock",
+            "armored guards",
+            "blue spire glow"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "end_condition_echo": "Artie accepts that he is stuck with his 1 HP glass cannon build forever.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "He waits for the moment when the two sentries turn their backs to each other at the edge of the path.",
+          "transition_out_anchors": [
+            "clanking footsteps",
+            "rotating lanterns",
+            "shadowy alcove"
+          ],
+          "hands_off_to": "4:2",
+          "seam_score": 20,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 2,
+          "summary": "Artie uses his speed to dash between cover.",
+          "type": "development",
+          "outcome": "Artie reaches the side entrance of the Spire.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "4:1",
+          "location_start": "Spire Outskirts",
+          "location_start_id": "LOC_SPIRE_OUTSKIRTS",
+          "location_start_label": "Spire Outskirts",
+          "location_end": "Spire Side Entrance",
+          "location_end_id": "LOC_SPIRE_SIDE_ENTRANCE",
+          "location_end_label": "Spire Side Entrance",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "fleeing",
+          "transition_in_text": "Artie bursts from his hiding spot, a silver streak across the dark grass as he aims for the service door.",
+          "transition_in_anchors": [
+            "silver streak",
+            "damp grass",
+            "service door"
+          ],
+          "transition_out_text": "He slides into the shadows of the doorway just as a searchlight sweeps across the spot he occupied.",
+          "transition_out_anchors": [
+            "sweeping searchlight",
+            "heavy iron handle",
+            "suppressed breath"
+          ],
+          "hands_off_to": "4:3",
+          "seam_score": 45,
+          "seam_resolution": "micro_scene"
+        },
+        {
+          "scene_id": 3,
+          "summary": "Transition handoff from Spire Side Entrance to Spire Side Entrance.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "4:2",
+          "location_start": "Spire Side Entrance",
+          "location_start_id": "LOC_SPIRE_SIDE_ENTRANCE",
+          "location_start_label": "Spire Side Entrance",
+          "location_end": "Spire Side Entrance",
+          "location_end_id": "LOC_SPIRE_SIDE_ENTRANCE",
+          "location_end_label": "Spire Side Entrance",
+          "handoff_mode": "arrival_checkpoint",
+          "constraint_state": "restricted",
+          "transition_in_text": "After a arrival checkpoint, the movement from Spire Side Entrance to Spire Side Entrance is realized on page.",
+          "transition_in_anchors": [
+            "cold iron",
+            "blue portal glow",
+            "sealing door"
+          ],
+          "transition_out_text": "This beat pushes into a arrival checkpoint toward Spire Side Entrance.",
+          "transition_out_anchors": [
+            "cold iron",
+            "blue portal glow",
+            "sealing door"
+          ],
+          "hands_off_to": "4:4",
+          "seam_score": 25,
+          "seam_resolution": "micro_scene"
+        },
+        {
+          "scene_id": 4,
+          "summary": "Artie unlocks the door and enters the instance.",
+          "type": "climax",
+          "outcome": "Artie is inside the Spire.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "4:3",
+          "location_start": "Spire Side Entrance",
+          "location_start_id": "LOC_SPIRE_SIDE_ENTRANCE",
+          "location_start_label": "Spire Side Entrance",
+          "location_end": "Infinite Spire - Floor 1",
+          "location_end_id": "LOC_INFINITE_SPIRE_FLOOR_1",
+          "location_end_label": "Infinite Spire - Floor 1",
+          "handoff_mode": "arrival_checkpoint",
+          "constraint_state": "restricted",
+          "transition_in_text": "The iron door creaks open, revealing a spiraling staircase that glows with an eerie, pulsing light.",
+          "transition_in_anchors": [
+            "creaking iron",
+            "pulsing light",
+            "spiraling staircase"
+          ],
+          "transition_out_text": "A system message confirms his entry into the solo instance, cutting off the sounds of the outside world.",
+          "transition_out_anchors": [
+            "instance message",
+            "sealed door",
+            "humming atmosphere"
+          ],
+          "hands_off_to": "4:5",
+          "end_condition_echo": "Artie bypasses the external guards and enters the Infinite Spire instance.",
+          "seam_score": 35,
+          "seam_resolution": "micro_scene"
         }
       ]
     },
     {
       "section_id": 2,
-      "title": "The Underground Market",
-      "intent": "Introduce the 'Dev-Haters' faction and provide Artie with illegal survival tools.",
+      "title": "Climbing the Floors",
+      "intent": "Demonstrate the scaling difficulty and Artie's reliance on one-shotting enemies.",
+      "end_condition": "Artie clears the tenth floor, triggering a system-wide difficulty spike.",
       "scenes": [
         {
-          "scene_id": 3,
-          "summary": "Fizz leads Artie to a black market run by 'Dev-Haters' who sell items that bypass System rules, including a 'Lag-Switch' potion.",
-          "type": "transition",
-          "outcome": "Artie gains access to a 'Lag-Switch' potion.",
-          "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
-          ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "4:4",
-          "consumes_outcome_from": "4:2",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
-        },
-        {
-          "scene_id": 4,
-          "summary": "Artie meets Silas again, acting as an informant who reveals that Vane is the son of the High Priest of RNG.",
-          "type": "reveal",
-          "outcome": "The rivalry with Vane just became a religious war.",
-          "characters": [
-            "CHAR_ARTIE",
-            "CHAR_SILAS"
-          ],
-          "threads": [
-            "THREAD_VANE_RIVALRY"
-          ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "4:5",
-          "consumes_outcome_from": "4:3",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
-        },
-        {
           "scene_id": 5,
-          "summary": "The market is raided by 'System Sentinels,' and Artie uses his Lag-Switch to escape, though it leaves him speaking in binary.",
-          "type": "action",
-          "outcome": "Artie escapes a sentinel raid but is left speaking in binary for an hour.",
+          "summary": "Artie clears the first few floors with ease.",
+          "type": "setup",
+          "outcome": "Artie gains confidence in his build.",
           "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_ARTIE"
           ],
           "threads": [
-            "THREAD_SYSTEM_GLITCH"
+            "THREAD_GLITCH"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "4:6",
           "consumes_outcome_from": "4:4",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Infinite Spire - Floor 1",
+          "location_start_id": "LOC_INFINITE_SPIRE_FLOOR_1",
+          "location_start_label": "Infinite Spire - Floor 1",
+          "location_end": "Infinite Spire - Floor 7",
+          "location_end_id": "LOC_INFINITE_SPIRE_FLOOR_7",
+          "location_end_label": "Infinite Spire - Floor 7",
+          "handoff_mode": "montage",
+          "constraint_state": "engaged_combat",
+          "transition_in_text": "The first floor's guardians are slow and predictable, falling to a single strike from Artie's dagger.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "shattering enemies",
+            "ascending stairs",
+            "growing loot pile"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "end_condition_echo": "Artie escapes a sentinel raid but is left speaking in binary for an hour.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "By the fifth floor, the enemies are faster, but Artie's reflexes are still superior.",
+          "transition_out_anchors": [
+            "faster attacks",
+            "silver dodge trail",
+            "confident stride"
+          ],
+          "hands_off_to": "4:6",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 6,
+          "summary": "Artie encounters a mid-boss on the seventh floor.",
+          "type": "conflict",
+          "outcome": "Artie one-shots the boss using a critical backstab.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "4:5",
+          "location_start": "Infinite Spire - Floor 7",
+          "location_start_id": "LOC_INFINITE_SPIRE_FLOOR_7",
+          "location_start_label": "Infinite Spire - Floor 7",
+          "location_end": "Infinite Spire - Floor 9",
+          "location_end_id": "LOC_INFINITE_SPIRE_FLOOR_9",
+          "location_end_label": "Infinite Spire - Floor 9",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "engaged_combat",
+          "transition_in_text": "A hulking warrior in black plate armor stands in the center of the seventh floor, wielding a massive greataxe.",
+          "transition_in_anchors": [
+            "black plate armor",
+            "massive greataxe",
+            "heavy breathing"
+          ],
+          "transition_out_text": "Artie blurs behind the giant, his blade finding the gap in the armor with surgical precision.",
+          "transition_out_anchors": [
+            "golden crit flash",
+            "collapsing boss",
+            "exploding loot"
+          ],
+          "hands_off_to": "4:7",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 7,
+          "summary": "The difficulty spikes on the ninth floor.",
+          "type": "development",
+          "outcome": "Artie must use more advanced kiting tactics.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "4:6",
+          "location_start": "Infinite Spire - Floor 9",
+          "location_start_id": "LOC_INFINITE_SPIRE_FLOOR_9",
+          "location_start_label": "Infinite Spire - Floor 9",
+          "location_end": "Infinite Spire - Floor 9",
+          "location_end_id": "LOC_INFINITE_SPIRE_FLOOR_9",
+          "location_end_label": "Infinite Spire - Floor 9",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "engaged_combat",
+          "transition_in_text": "The ninth floor is filled with ranged attackers, forcing Artie to stay in constant motion.",
+          "transition_in_anchors": [
+            "flying arrows",
+            "magic missiles",
+            "constant movement"
+          ],
+          "transition_out_text": "He weaves through the projectiles, his movements a blur of silver silk as he closes the distance.",
+          "transition_out_anchors": [
+            "silver blur",
+            "closing distance",
+            "sweat on brow"
+          ],
+          "hands_off_to": "4:8",
+          "seam_score": 45,
+          "seam_resolution": "micro_scene"
+        },
+        {
+          "scene_id": 8,
+          "summary": "Transition handoff from Infinite Spire - Floor 9 to Infinite Spire - Floor 10.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_GLITCH",
+            "THREAD_ANTI_CHEAT"
+          ],
+          "consumes_outcome_from": "4:7",
+          "location_start": "Infinite Spire - Floor 9",
+          "location_start_id": "LOC_INFINITE_SPIRE_FLOOR_9",
+          "location_start_label": "Infinite Spire - Floor 9",
+          "location_end": "Infinite Spire - Floor 10",
+          "location_end_id": "LOC_INFINITE_SPIRE_FLOOR_10",
+          "location_end_label": "Infinite Spire - Floor 10",
+          "handoff_mode": "arrival_checkpoint",
+          "constraint_state": "restricted",
+          "transition_in_text": "After a arrival checkpoint, the movement from Infinite Spire - Floor 9 to Infinite Spire - Floor 10 is realized on page.",
+          "transition_in_anchors": [
+            "ascending stairs",
+            "flickering light",
+            "heavy air"
+          ],
+          "transition_out_text": "This beat pushes into a arrival checkpoint toward Infinite Spire - Floor 10.",
+          "transition_out_anchors": [
+            "ascending stairs",
+            "flickering light",
+            "heavy air"
+          ],
+          "hands_off_to": "4:9",
+          "seam_score": 25,
+          "seam_resolution": "micro_scene"
+        },
+        {
+          "scene_id": 9,
+          "summary": "Artie clears the tenth floor.",
+          "type": "climax",
+          "outcome": "The Spire reacts to his anomalous speed.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_GLITCH",
+            "THREAD_ANTI_CHEAT"
+          ],
+          "consumes_outcome_from": "4:8",
+          "location_start": "Infinite Spire - Floor 10",
+          "location_start_id": "LOC_INFINITE_SPIRE_FLOOR_10",
+          "location_start_label": "Infinite Spire - Floor 10",
+          "location_end": "Infinite Spire - Floor 10",
+          "location_end_id": "LOC_INFINITE_SPIRE_FLOOR_10",
+          "location_end_label": "Infinite Spire - Floor 10",
+          "handoff_mode": "arrival_checkpoint",
+          "constraint_state": "restricted",
+          "transition_in_text": "The final enemy of the tenth floor shatters into data fragments, and the Spire begins to pulse with a red light.",
+          "transition_in_anchors": [
+            "data fragments",
+            "red pulsing light",
+            "low vibration"
+          ],
+          "transition_out_text": "A system-wide chime echoes through the chamber, signaling a change in the dungeon's state.",
+          "transition_out_anchors": [
+            "system chime",
+            "red warning glow",
+            "heavy atmosphere"
+          ],
+          "hands_off_to": "4:10",
+          "end_condition_echo": "Artie clears the tenth floor, triggering a system-wide difficulty spike.",
+          "seam_score": 45,
+          "seam_resolution": "micro_scene"
         }
       ]
     },
     {
       "section_id": 3,
-      "title": "The Arena Invitation",
-      "intent": "Force Artie into the public spotlight through financial desperation and a high-stakes tournament.",
+      "title": "The Anti-Cheat Shadow",
+      "intent": "Introduce the System's awareness of Artie's anomalous performance.",
+      "end_condition": "Artie receives a 'Suspicious Activity' notification from the System AI.",
       "scenes": [
         {
-          "scene_id": 6,
-          "summary": "Artie sees a flyer for the 'Grand Crit-Off,' where the prize is a 'Shield of Infinite Health'.",
-          "type": "choice",
-          "outcome": "Artie decides to enter, despite the risk of exposure.",
+          "scene_id": 10,
+          "summary": "The environment of the Spire begins to glitch.",
+          "type": "setup",
+          "outcome": "Artie realizes the System is looking for him.",
           "characters": [
             "CHAR_ARTIE"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "4:7",
-          "consumes_outcome_from": "4:5",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+          "threads": [
+            "THREAD_ANTI_CHEAT",
+            "THREAD_GLITCH"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "consumes_outcome_from": "4:9",
+          "location_start": "Infinite Spire - Floor 11",
+          "location_start_id": "LOC_INFINITE_SPIRE_FLOOR_11",
+          "location_start_label": "Infinite Spire - Floor 11",
+          "location_end": "Infinite Spire - Floor 11",
+          "location_end_id": "LOC_INFINITE_SPIRE_FLOOR_11",
+          "location_end_label": "Infinite Spire - Floor 11",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "pursued",
+          "transition_in_text": "The walls of the eleventh floor flicker, revealing the wireframe structure of the Spire for brief moments.",
+          "transition_in_anchors": [
+            "flickering walls",
+            "wireframe glitches",
+            "distorted audio"
+          ],
+          "transition_out_text": "Artie's UI begins to jitter, with red error codes appearing in the corner of his vision.",
+          "transition_out_anchors": [
+            "jittering UI",
+            "red error codes",
+            "static noise"
+          ],
+          "hands_off_to": "4:11",
+          "seam_score": 20,
+          "seam_resolution": "inline_bridge"
         },
         {
-          "scene_id": 7,
-          "summary": "Artie registers under the name 'Crit-iculous' and accidentally sets his entry fee to his entire gold reserve.",
-          "type": "consequence",
-          "outcome": "Artie is now broke and must win the tournament to survive.",
+          "scene_id": 11,
+          "summary": "Artie fights a 'glitched' enemy.",
+          "type": "conflict",
+          "outcome": "Artie defeats an enemy that doesn't follow standard rules.",
           "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
-          ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "4:8",
-          "consumes_outcome_from": "4:6",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
-        },
-        {
-          "scene_id": 8,
-          "summary": "Vane sees Artie's name on the tournament roster and prepares to 'delete' him in front of the public.",
-          "type": "escalation",
-          "outcome": "Vane sees Artie's name on the tournament roster, setting the stage for the final duel.",
-          "characters": [
-            "CHAR_VANE"
+            "CHAR_ARTIE"
           ],
           "threads": [
-            "THREAD_VANE_RIVALRY"
+            "THREAD_GLITCH",
+            "THREAD_ANTI_CHEAT"
           ],
-          "constraint_state": "free",
+          "consumes_outcome_from": "4:10",
+          "location_start": "Infinite Spire - Floor 11",
+          "location_start_id": "LOC_INFINITE_SPIRE_FLOOR_11",
+          "location_start_label": "Infinite Spire - Floor 11",
+          "location_end": "Infinite Spire - Floor 11",
+          "location_end_id": "LOC_INFINITE_SPIRE_FLOOR_11",
+          "location_end_label": "Infinite Spire - Floor 11",
           "handoff_mode": "direct_continuation",
-          "consumes_outcome_from": "4:7",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "constraint_state": "engaged_combat",
+          "transition_in_text": "A guardian shadow lunges at Artie, its movements stuttering as if it were skipping frames.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "stuttering motion",
+            "frame skips",
+            "shadowy form"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "end_condition_echo": "Vane sees Artie's name on the tournament roster, setting the stage for the final duel.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "Artie manages to land a hit, but the enemy explodes into a cloud of unreadable code.",
+          "transition_out_anchors": [
+            "code cloud",
+            "digital explosion",
+            "ringing ears"
+          ],
+          "hands_off_to": "4:12",
+          "seam_score": 20,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 12,
+          "summary": "Artie attempts to exit the Spire.",
+          "type": "development",
+          "outcome": "The exit is temporarily locked by the System.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_ANTI_CHEAT"
+          ],
+          "consumes_outcome_from": "4:11",
+          "location_start": "Infinite Spire - Floor 11",
+          "location_start_id": "LOC_INFINITE_SPIRE_FLOOR_11",
+          "location_start_label": "Infinite Spire - Floor 11",
+          "location_end": "Spire Exit Portal",
+          "location_end_id": "LOC_SPIRE_EXIT_PORTAL",
+          "location_end_label": "Spire Exit Portal",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "detained",
+          "transition_in_text": "Artie sprints toward the glowing exit portal, but the blue light suddenly turns a harsh, solid red.",
+          "transition_in_anchors": [
+            "red portal",
+            "locked gate",
+            "pulsing alarm"
+          ],
+          "transition_out_text": "A massive window fills his vision, blocking his view of the room.",
+          "transition_out_anchors": [
+            "massive window",
+            "scrolling text",
+            "system freeze"
+          ],
+          "hands_off_to": "4:13",
+          "seam_score": 35,
+          "seam_resolution": "micro_scene"
+        },
+        {
+          "scene_id": 13,
+          "summary": "Artie reads the system notification.",
+          "type": "climax",
+          "outcome": "Artie is officially flagged as a suspicious entity.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_ANTI_CHEAT"
+          ],
+          "consumes_outcome_from": "4:12",
+          "location_start": "Spire Exit Portal",
+          "location_start_id": "LOC_SPIRE_EXIT_PORTAL",
+          "location_start_label": "Spire Exit Portal",
+          "location_end": "Spire Exit Portal",
+          "location_end_id": "LOC_SPIRE_EXIT_PORTAL",
+          "location_end_label": "Spire Exit Portal",
+          "handoff_mode": "aftermath_relocation",
+          "constraint_state": "pursued",
+          "transition_in_text": "The text on the screen is clear, written in a font that feels cold and mechanical.",
+          "transition_in_anchors": [
+            "suspicious activity",
+            "audit warning",
+            "red text"
+          ],
+          "end_condition_echo": "Artie receives a 'Suspicious Activity' notification from the System AI.",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         }
       ]
     }

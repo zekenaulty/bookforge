@@ -1,0 +1,2636 @@
+{
+  "schema_version": "1.1",
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "name": "Artie",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      },
+      "pronouns": "he/him",
+      "role": "protagonist"
+    },
+    {
+      "character_id": "CHAR_SILNA",
+      "name": "Silna",
+      "intro": {
+        "chapter": 5,
+        "scene": 1
+      },
+      "pronouns": "she/her",
+      "role": "companion"
+    },
+    {
+      "character_id": "CHAR_GUARDIAN",
+      "name": "Tutorial Guardian",
+      "intro": {
+        "chapter": 1,
+        "scene": 6
+      },
+      "role": "antagonist"
+    },
+    {
+      "character_id": "CHAR_TYRANT",
+      "name": "Lord Vane",
+      "intro": {
+        "chapter": 5,
+        "scene": 4
+      },
+      "pronouns": "he/him",
+      "role": "antagonist"
+    },
+    {
+      "character_id": "CHAR_MODERATOR",
+      "name": "Moderator Alpha",
+      "intro": {
+        "chapter": 7,
+        "scene": 4
+      },
+      "role": "antagonist"
+    }
+  ],
+  "threads": [
+    {
+      "thread_id": "THREAD_GLITCH",
+      "label": "The 1 HP / 100% Crit Glitch",
+      "status": "active"
+    },
+    {
+      "thread_id": "THREAD_ANTI_CHEAT",
+      "label": "System Anti-Cheat Pursuit",
+      "status": "active"
+    },
+    {
+      "thread_id": "THREAD_SILNA_HEIRLOOM",
+      "label": "Silna's Family Crest",
+      "status": "inactive"
+    },
+    {
+      "thread_id": "THREAD_WORLD_KEY",
+      "label": "The World Key Exploit",
+      "status": "inactive"
+    }
+  ],
+  "chapters": [
+    {
+      "chapter_id": 1,
+      "title": "100% Crit Chance, 0% Survival Rate",
+      "goal": "Artie awakens in the world of Aethelgard with a glitched Luck stat that guarantees critical hits but locks his HP at 1.",
+      "chapter_role": "hook",
+      "stakes_shift": "From a confused casualty of reality to a high-stakes gambler where any damage is permadeath.",
+      "bridge": {
+        "from_prev": "Artie's mundane life ends in a freak server-room accident.",
+        "to_next": "Artie must find a way to kill the Tutorial Guardian without taking a single point of chip damage."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "steady",
+        "expected_scene_count": 8
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Server Room Incident",
+          "intent": "Establish Artie's mundane life and the catalyst for his transition to Aethelgard.",
+          "end_condition": "Artie is electrocuted during a server-room surge and loses consciousness.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie performs routine maintenance on a high-density server rack.",
+              "type": "setup",
+              "outcome": "Artie identifies a critical power fluctuation in the main server rack.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "introduces": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Global Data Solutions - Server Hub 4",
+              "location_end_label": "Global Data Solutions - Server Hub 4",
+              "location_start": "Global Data Solutions - Server Hub 4",
+              "location_end": "Global Data Solutions - Server Hub 4",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The hum of cooling fans fills the narrow aisle as Artie checks the diagnostic monitor in Server Hub 4.",
+              "transition_in_anchors": [
+                "blinking server LEDs",
+                "cold air intake",
+                "tangled ethernet cables"
+              ],
+              "transition_out_text": "The diagnostic monitor begins to flicker with strange, unreadable symbols as the power grid fluctuates.",
+              "transition_out_anchors": [
+                "flickering screen",
+                "burnt plastic smell",
+                "static discharge"
+              ],
+              "hands_off_to": "1:2",
+              "location_start_id": "LOC_GLOBAL_DATA_SOLUTIONS_SERVER_HUB_4",
+              "location_end_id": "LOC_GLOBAL_DATA_SOLUTIONS_SERVER_HUB_4"
+            },
+            {
+              "scene_id": 2,
+              "summary": "The server rack explodes in a surge of blue electricity, striking Artie.",
+              "type": "climax",
+              "outcome": "Artie is knocked unconscious by the electrical surge.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Global Data Solutions - Server Hub 4",
+              "location_end_label": "Global Data Solutions - Server Hub 4",
+              "location_start": "Global Data Solutions - Server Hub 4",
+              "location_end": "Global Data Solutions - Server Hub 4",
+              "handoff_mode": "hard_cut",
+              "constraint_state": "detained",
+              "transition_in_text": "The smell of ozone thickens as the server rack begins to vibrate violently against the floor bolts.",
+              "transition_in_anchors": [
+                "ozone smell",
+                "arcing electricity",
+                "shattered monitor glass"
+              ],
+              "consumes_outcome_from": "1:1",
+              "transition_out_text": "The world goes white as a massive surge of power blasts through Artie's chest.",
+              "transition_out_anchors": [
+                "blinding white light",
+                "high-pitched whine",
+                "numbing sensation"
+              ],
+              "hands_off_to": "1:3",
+              "end_condition_echo": "Artie is electrocuted during a server-room surge and loses consciousness.",
+              "location_start_id": "LOC_GLOBAL_DATA_SOLUTIONS_SERVER_HUB_4",
+              "location_end_id": "LOC_GLOBAL_DATA_SOLUTIONS_SERVER_HUB_4"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Glass Cannon Awakening",
+          "intent": "Introduce the glitched status and the immediate danger of the 1 HP constraint.",
+          "end_condition": "Artie confirms his stats show 100% Critical Hit Chance and exactly 1/1 HP.",
+          "scenes": [
+            {
+              "scene_id": 3,
+              "summary": "Artie awakens in a digital void and is forced to initialize a character.",
+              "type": "setup",
+              "outcome": "Artie enters the world of Aethelgard with a glitched character sheet.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "The Void Space",
+              "location_end_label": "The Void Space",
+              "location_start": "The Void Space",
+              "location_end": "The Void Space",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "processed",
+              "transition_in_text": "Artie awakens in a place where gravity feels like a suggestion rather than a law.",
+              "transition_in_anchors": [
+                "weightless sensation",
+                "scrolling green text",
+                "distant digital hum"
+              ],
+              "consumes_outcome_from": "1:2",
+              "transition_out_text": "A floating window appears before Artie, demanding he initialize his character.",
+              "transition_out_anchors": [
+                "blue UI window",
+                "pulsing cursor",
+                "virtual keyboard"
+              ],
+              "hands_off_to": "1:4",
+              "location_start_id": "LOC_THE_VOID_SPACE",
+              "location_end_id": "LOC_THE_VOID_SPACE"
+            },
+            {
+              "scene_id": 4,
+              "summary": "Artie attempts to distribute his stat points but the System freezes.",
+              "type": "conflict",
+              "outcome": "A system error locks Artie's HP at 1 and his Luck at an impossible value.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "The Void Space",
+              "location_end_label": "The Void Space",
+              "location_start": "The Void Space",
+              "location_end": "The Void Space",
+              "handoff_mode": "hard_cut",
+              "constraint_state": "processed",
+              "transition_in_text": "Artie taps the virtual interface, but the numbers begin to spin uncontrollably like a broken slot machine.",
+              "transition_in_anchors": [
+                "spinning stat counters",
+                "red error glow",
+                "distorted system audio"
+              ],
+              "consumes_outcome_from": "1:3",
+              "transition_out_text": "The initialization sequence finishes with a sharp chime that sounds more like a warning.",
+              "transition_out_anchors": [
+                "finalized stat block",
+                "gold notification border",
+                "vanishing void walls"
+              ],
+              "hands_off_to": "1:5",
+              "location_start_id": "LOC_THE_VOID_SPACE",
+              "location_end_id": "LOC_THE_VOID_SPACE"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Artie spawns in the tutorial zone and inspects his finalized stats.",
+              "type": "climax",
+              "outcome": "Artie realizes his character is a permanent glass cannon.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Tutorial Spawn Point",
+              "location_end_label": "Tutorial Spawn Point",
+              "location_start": "Tutorial Spawn Point",
+              "location_end": "Tutorial Spawn Point",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "Artie's boots hit solid stone as the digital void dissolves into a sun-drenched courtyard.",
+              "transition_in_anchors": [
+                "warm sunlight",
+                "rough stone paving",
+                "scent of pine needles"
+              ],
+              "consumes_outcome_from": "1:4",
+              "transition_out_text": "The reality of his 1 HP status sinks in as a nearby butterfly deals 0.1 damage to a flower.",
+              "transition_out_anchors": [
+                "floating health bar",
+                "crimson 1/1 text",
+                "shaking hands"
+              ],
+              "hands_off_to": "1:6",
+              "end_condition_echo": "Artie confirms his stats show 100% Critical Hit Chance and exactly 1/1 HP.",
+              "location_start_id": "LOC_TUTORIAL_SPAWN_POINT",
+              "location_end_id": "LOC_TUTORIAL_SPAWN_POINT"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Tutorial Guardian",
+          "intent": "Demonstrate the 'Hit & Run' combat style against the first major threat.",
+          "end_condition": "The Tutorial Guardian is defeated without Artie taking a single point of damage.",
+          "scenes": [
+            {
+              "scene_id": 6,
+              "summary": "The Tutorial Guardian blocks the exit and initiates combat.",
+              "type": "setup",
+              "outcome": "Artie enters his first life-or-death battle.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_GUARDIAN"
+              ],
+              "introduces": [
+                "CHAR_GUARDIAN"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Tutorial Arena",
+              "location_end_label": "Tutorial Arena",
+              "location_start": "Tutorial Arena",
+              "location_end": "Tutorial Arena",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "A massive stone golem rumbles to life at the far end of the arena, its eyes glowing with a hostile blue light.",
+              "transition_in_anchors": [
+                "grinding stone",
+                "dust clouds",
+                "heavy metallic footsteps"
+              ],
+              "consumes_outcome_from": "1:5",
+              "transition_out_text": "The Guardian raises a massive fist, and Artie realizes he has nowhere to hide.",
+              "transition_out_anchors": [
+                "shadow of the fist",
+                "cracking ground",
+                "battle music swell"
+              ],
+              "hands_off_to": "1:7",
+              "location_start_id": "LOC_TUTORIAL_ARENA",
+              "location_end_id": "LOC_TUTORIAL_ARENA"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Artie discovers that every hit he lands is a massive critical strike.",
+              "type": "conflict",
+              "outcome": "Artie learns to kite the Guardian while dealing massive damage.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_GUARDIAN"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Tutorial Arena",
+              "location_end_label": "Tutorial Arena",
+              "location_start": "Tutorial Arena",
+              "location_end": "Tutorial Arena",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie lunges forward with his starter dagger, the blade catching a sliver of light as it strikes the golem's knee.",
+              "transition_in_anchors": [
+                "golden critical sparks",
+                "shattering stone",
+                "staggering golem"
+              ],
+              "consumes_outcome_from": "1:6",
+              "transition_out_text": "The Guardian roars in frustration, swinging wildly as Artie dances just out of reach.",
+              "transition_out_anchors": [
+                "whistling stone fist",
+                "sweat on the brow",
+                "panting breath"
+              ],
+              "hands_off_to": "1:8",
+              "location_start_id": "LOC_TUTORIAL_ARENA",
+              "location_end_id": "LOC_TUTORIAL_ARENA"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Artie delivers the final blow to the Guardian, shattering it.",
+              "type": "climax",
+              "outcome": "The Guardian is defeated, and Artie earns a 'No-Hit' bonus.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_GUARDIAN"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Tutorial Arena",
+              "location_end_label": "Tutorial Arena",
+              "location_start": "Tutorial Arena",
+              "location_end": "Tutorial Arena",
+              "handoff_mode": "combat_disengage",
+              "constraint_state": "free",
+              "transition_in_text": "The Tutorial Guardian lunges forward, its stone fist whistling through the air where Artie stood a second ago.",
+              "transition_in_anchors": [
+                "cracked stone floor",
+                "whistling wind",
+                "glowing blue runes"
+              ],
+              "consumes_outcome_from": "1:7",
+              "end_condition_echo": "The Tutorial Guardian is defeated without Artie taking a single point of damage.",
+              "location_start_id": "LOC_TUTORIAL_ARENA",
+              "location_end_id": "LOC_TUTORIAL_ARENA"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 2,
+      "title": "The Tutorial is a Speedrun",
+      "goal": "Exploit the 'Perfect Dodge' mechanic to clear the starter zone in record time and trigger a hidden achievement.",
+      "chapter_role": "setup",
+      "stakes_shift": "Acquiring legendary-tier starter gear makes Artie a target for envious high-level players early on.",
+      "bridge": {
+        "from_prev": "Artie survives the initial spawn and realizes the System rewards 'No-Hit' runs.",
+        "to_next": "The achievement grants Artie a map to a forgotten dungeon that requires high movement speed."
+      },
+      "pacing": {
+        "intensity": 4,
+        "tempo": "rush",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Mastering the Perfect Dodge",
+          "intent": "Artie exploits the game's i-frame mechanics to survive low-level mob aggro.",
+          "end_condition": "Artie successfully chains ten 'Perfect Dodges' in a single encounter.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie enters the Whispering Woods and encounters a pack of Shadow Wolves.",
+              "type": "setup",
+              "outcome": "Artie decides to use the wolves to practice his timing.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Whispering Woods",
+              "location_end_label": "Whispering Woods",
+              "location_start": "Whispering Woods",
+              "location_end": "Whispering Woods",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie steps out of the tutorial boss arena and into the sunlight of the Whispering Woods.",
+              "transition_in_anchors": [
+                "rustling leaves",
+                "howling shadows",
+                "snapping twigs"
+              ],
+              "transition_out_text": "Three pairs of glowing yellow eyes emerge from the thicket, locking onto Artie's fragile frame.",
+              "transition_out_anchors": [
+                "low growls",
+                "bared fangs",
+                "tightened grip"
+              ],
+              "hands_off_to": "2:2",
+              "location_start_id": "LOC_WHISPERING_WOODS",
+              "location_end_id": "LOC_WHISPERING_WOODS"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie begins kiting the wolves, focusing on the visual cues for their attacks.",
+              "type": "development",
+              "outcome": "Artie realizes the 'Perfect Dodge' grants a brief moment of invulnerability.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Whispering Woods",
+              "location_end_label": "Whispering Woods",
+              "location_start": "Whispering Woods",
+              "location_end": "Whispering Woods",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The first wolf leaps, a blur of grey fur and sharp teeth aimed directly at Artie's throat.",
+              "transition_in_anchors": [
+                "blur of motion",
+                "clashing teeth",
+                "silver dodge trail"
+              ],
+              "consumes_outcome_from": "2:1",
+              "transition_out_text": "The wolf's claws pass through Artie as if he were made of smoke, triggering a system chime.",
+              "transition_out_anchors": [
+                "blue after-image",
+                "slow-motion effect",
+                "adrenaline surge"
+              ],
+              "hands_off_to": "2:3",
+              "location_start_id": "LOC_WHISPERING_WOODS",
+              "location_end_id": "LOC_WHISPERING_WOODS"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie intentionally pulls more wolves to maximize his dodge chain.",
+              "type": "climax",
+              "outcome": "Artie masters the timing required for the next stage of his plan.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Whispering Woods",
+              "location_end_label": "Whispering Woods",
+              "location_start": "Whispering Woods",
+              "location_end": "Whispering Woods",
+              "handoff_mode": "combat_disengage",
+              "constraint_state": "free",
+              "transition_in_text": "The pack surrounds Artie, their attacks coming in a rhythmic sequence that he begins to predict.",
+              "transition_in_anchors": [
+                "circling shadows",
+                "synchronized lunges",
+                "perfect dodge counter"
+              ],
+              "consumes_outcome_from": "2:2",
+              "transition_out_text": "With the tenth dodge, the wolves' movement slows to a crawl, leaving them wide open.",
+              "transition_out_anchors": [
+                "frozen wolves",
+                "sparking dagger",
+                "triumphant smirk"
+              ],
+              "hands_off_to": "2:4",
+              "end_condition_echo": "Artie successfully chains ten 'Perfect Dodges' in a single encounter.",
+              "location_start_id": "LOC_WHISPERING_WOODS",
+              "location_end_id": "LOC_WHISPERING_WOODS"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Speedrunner's Shortcut",
+          "intent": "Artie uses his knowledge of game geometry to bypass standard tutorial gates.",
+          "end_condition": "Artie reaches the hidden 'Developer's Backdoor' in the starter zone.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie locates a specific rock formation that allows for 'wall-clipping'.",
+              "type": "setup",
+              "outcome": "Artie finds the entry point for the exploit.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Whispering Woods",
+              "location_end_label": "The Jagged Ridge",
+              "location_start": "Whispering Woods",
+              "location_end": "The Jagged Ridge",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie leaves the woods behind, climbing toward the sheer cliffs that mark the edge of the playable map.",
+              "transition_in_anchors": [
+                "loose gravel",
+                "sheer rock face",
+                "glitched texture seam"
+              ],
+              "consumes_outcome_from": "2:3",
+              "transition_out_text": "He spots the corner where two textures overlap, creating a gap just large enough for a player model.",
+              "transition_out_anchors": [
+                "flickering shadows",
+                "invisible ledge",
+                "system warning"
+              ],
+              "hands_off_to": "2:5",
+              "location_start_id": "LOC_WHISPERING_WOODS",
+              "location_end_id": "LOC_THE_JAGGED_RIDGE"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Artie performs a series of precise jumps to bypass the invisible walls.",
+              "type": "development",
+              "outcome": "Artie successfully 'clips' through the environment.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "The Jagged Ridge",
+              "location_end_label": "The Grey Void Edge",
+              "location_start": "The Jagged Ridge",
+              "location_end": "The Grey Void Edge",
+              "handoff_mode": "hard_cut",
+              "constraint_state": "restricted",
+              "transition_in_text": "Artie takes a leap of faith into the flickering corner, his body momentarily stretching into a wireframe mesh.",
+              "transition_in_anchors": [
+                "wireframe view",
+                "missing textures",
+                "wind sound loop"
+              ],
+              "consumes_outcome_from": "2:4",
+              "transition_out_text": "He lands on a narrow strip of land that shouldn't exist, overlooking the back of the world.",
+              "transition_out_anchors": [
+                "unrendered trees",
+                "flat horizon",
+                "echoing silence"
+              ],
+              "hands_off_to": "2:6",
+              "location_start_id": "LOC_THE_JAGGED_RIDGE",
+              "location_end_id": "LOC_THE_GREY_VOID_EDGE"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie navigates the 'out-of-bounds' area to reach the shortcut.",
+              "type": "development",
+              "outcome": "Artie avoids the automated 'out-of-bounds' reset triggers.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH",
+                "THREAD_ANTI_CHEAT"
+              ],
+              "location_start_label": "The Grey Void Edge",
+              "location_end_label": "The Grey Void Edge",
+              "location_start": "The Grey Void Edge",
+              "location_end": "The Grey Void Edge",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Red 'Warning' text begins to scroll across Artie's vision as the System attempts to locate his position.",
+              "transition_in_anchors": [
+                "scrolling red text",
+                "pulsing alarm",
+                "static interference"
+              ],
+              "consumes_outcome_from": "2:5",
+              "transition_out_text": "He sprints along the edge of the abyss, his footsteps making no sound on the untextured ground.",
+              "transition_out_anchors": [
+                "black pit",
+                "floating assets",
+                "rapid heartbeat"
+              ],
+              "hands_off_to": "2:7",
+              "location_start_id": "LOC_THE_GREY_VOID_EDGE",
+              "location_end_id": "LOC_THE_GREY_VOID_EDGE"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Artie finds the 'Developer's Backdoor'\u2014a simple wooden door in the middle of nowhere.",
+              "type": "climax",
+              "outcome": "Artie enters the hidden developer area.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "The Grey Void Edge",
+              "location_end_label": "Developer's Backdoor",
+              "location_start": "The Grey Void Edge",
+              "location_end": "Developer's Backdoor",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "sheltered",
+              "transition_in_text": "In the distance, a single, perfectly rendered oak door stands upright without a frame or a wall.",
+              "transition_in_anchors": [
+                "polished brass knob",
+                "grainy wood texture",
+                "soft golden glow"
+              ],
+              "consumes_outcome_from": "2:6",
+              "transition_out_text": "Artie reaches for the handle, the System alarms suddenly cutting out as he touches the wood.",
+              "transition_out_anchors": [
+                "abrupt silence",
+                "cool brass",
+                "opening door"
+              ],
+              "hands_off_to": "2:8",
+              "end_condition_echo": "Artie reaches the hidden 'Developer's Backdoor' in the starter zone.",
+              "location_start_id": "LOC_THE_GREY_VOID_EDGE",
+              "location_end_id": "LOC_DEVELOPER_S_BACKDOOR"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Hidden Achievement",
+          "intent": "Secure the legendary-tier starter gear through a 'No-Hit' clear achievement.",
+          "end_condition": "The System grants the 'Untouchable Legend' title and the associated gear set.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Artie enters the developer room and finds a console terminal.",
+              "type": "setup",
+              "outcome": "Artie accesses the achievement log.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Developer's Backdoor",
+              "location_end_label": "The Debug Room",
+              "location_start": "Developer's Backdoor",
+              "location_end": "The Debug Room",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The door opens into a small, sterile white room filled with floating monitors and a single glowing terminal.",
+              "transition_in_anchors": [
+                "white light",
+                "humming servers",
+                "glass terminal"
+              ],
+              "consumes_outcome_from": "2:7",
+              "transition_out_text": "Artie begins typing on the holographic keyboard, searching for the 'Untouchable' flag.",
+              "transition_out_anchors": [
+                "holographic keys",
+                "blue data stream",
+                "scrolling logs"
+              ],
+              "hands_off_to": "2:9",
+              "location_start_id": "LOC_DEVELOPER_S_BACKDOOR",
+              "location_end_id": "LOC_THE_DEBUG_ROOM"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Artie triggers the manual achievement check.",
+              "type": "conflict",
+              "outcome": "The System validates Artie's 'No-Hit' run through the entire zone.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH",
+                "THREAD_ANTI_CHEAT"
+              ],
+              "location_start_label": "The Debug Room",
+              "location_end_label": "The Debug Room",
+              "location_start": "The Debug Room",
+              "location_end": "The Debug Room",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "processed",
+              "transition_in_text": "The terminal screen turns yellow as it begins a deep-scan of Artie's combat history.",
+              "transition_in_anchors": [
+                "yellow scan line",
+                "processing icon",
+                "fan noise"
+              ],
+              "consumes_outcome_from": "2:8",
+              "transition_out_text": "A massive notification banner explodes across the room, nearly blinding Artie.",
+              "transition_out_anchors": [
+                "golden light",
+                "triumphant fanfare",
+                "floating loot chest"
+              ],
+              "hands_off_to": "2:10",
+              "location_start_id": "LOC_THE_DEBUG_ROOM",
+              "location_end_id": "LOC_THE_DEBUG_ROOM"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Artie equips the 'Untouchable Legend' gear.",
+              "type": "climax",
+              "outcome": "Artie gains a massive boost to movement speed and a unique title.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "The Debug Room",
+              "location_end_label": "The Debug Room",
+              "location_start": "The Debug Room",
+              "location_end": "The Debug Room",
+              "handoff_mode": "aftermath_relocation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie reaches into the golden chest, pulling out a set of shimmering, weightless silk robes.",
+              "transition_in_anchors": [
+                "shimmering silk",
+                "silver embroidery",
+                "glowing title text"
+              ],
+              "consumes_outcome_from": "2:9",
+              "end_condition_echo": "The System grants the 'Untouchable Legend' title and the associated gear set.",
+              "location_start_id": "LOC_THE_DEBUG_ROOM",
+              "location_end_id": "LOC_THE_DEBUG_ROOM"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 3,
+      "title": "Glass Cannon in a Stone World",
+      "goal": "Cross the treacherous Iron Peaks to reach the trade hub of Oakhaven before his 'Newbie Protection' buff expires.",
+      "chapter_role": "journey",
+      "stakes_shift": "Environmental hazards introduce threats that cannot be 'critically hit' or easily dodged.",
+      "bridge": {
+        "from_prev": "Artie leaves the tutorial zone with a unique title and a massive target on his back.",
+        "to_next": "Artie arrives at Oakhaven only to find the gates barred to anyone without a guild voucher."
+      },
+      "pacing": {
+        "intensity": 2,
+        "tempo": "slow_burn",
+        "expected_scene_count": 9
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Into the Iron Peaks",
+          "intent": "Transition from the safe tutorial zone to the high-stakes open world.",
+          "end_condition": "Artie crosses the threshold into the Iron Peaks territory.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie travels to the edge of the starter zone.",
+              "type": "transition",
+              "outcome": "Artie leaves the safety of the tutorial area.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "The Whispering Woods",
+              "location_end_label": "The Iron Peaks Border",
+              "location_start": "The Whispering Woods",
+              "location_end": "The Iron Peaks Border",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "The lush greenery of the starter zone gives way to the jagged, rust-colored peaks of the Iron Range.",
+              "transition_in_anchors": [
+                "changing foliage",
+                "colder air",
+                "distant mountain peaks"
+              ],
+              "transition_out_text": "A massive stone archway marks the boundary where the tutorial level ends and the real game begins.",
+              "transition_out_anchors": [
+                "stone archway",
+                "invisible barrier",
+                "scent of iron"
+              ],
+              "hands_off_to": "3:2",
+              "location_start_id": "LOC_THE_WHISPERING_WOODS",
+              "location_end_id": "LOC_THE_IRON_PEAKS_BORDER"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie encounters a group of high-level players camping the border.",
+              "type": "conflict",
+              "outcome": "Artie uses his new gear to outrun the players.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_ANTI_CHEAT"
+              ],
+              "location_start_label": "The Iron Peaks Border",
+              "location_end_label": "The Iron Peaks Border",
+              "location_start": "The Iron Peaks Border",
+              "location_end": "The Iron Peaks Border",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Three players in heavy plate armor stand across the path, their weapons drawn and eyes fixed on Artie's unique gear.",
+              "transition_in_anchors": [
+                "clanking armor",
+                "drawn swords",
+                "greedy stares"
+              ],
+              "consumes_outcome_from": "3:1",
+              "transition_out_text": "Artie blurs into motion, his new boots kicking up a cloud of dust as he zips past the startled warriors.",
+              "transition_out_anchors": [
+                "dust cloud",
+                "shouted curses",
+                "blur of silver"
+              ],
+              "hands_off_to": "3:3",
+              "location_start_id": "LOC_THE_IRON_PEAKS_BORDER",
+              "location_end_id": "LOC_THE_IRON_PEAKS_BORDER"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie crosses into the Iron Peaks.",
+              "type": "climax",
+              "outcome": "Artie successfully enters the new zone.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "The Iron Peaks Border",
+              "location_end_label": "The Iron Peaks",
+              "location_start": "The Iron Peaks Border",
+              "location_end": "The Iron Peaks",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "The air temperature drops sharply as Artie steps past the stone archway and into the shadow of the mountains.",
+              "transition_in_anchors": [
+                "biting wind",
+                "jagged rocks",
+                "steep incline"
+              ],
+              "consumes_outcome_from": "3:2",
+              "transition_out_text": "The notification for the Iron Peaks zone appears, along with a warning about environmental damage.",
+              "transition_out_anchors": [
+                "zone notification",
+                "frost warning",
+                "narrow trail"
+              ],
+              "hands_off_to": "3:4",
+              "end_condition_echo": "Artie crosses the threshold into the Iron Peaks territory.",
+              "location_start_id": "LOC_THE_IRON_PEAKS_BORDER",
+              "location_end_id": "LOC_THE_IRON_PEAKS"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Environmental Hazards",
+          "intent": "Show that the environment is just as deadly as monsters for a 1 HP build.",
+          "end_condition": "Artie survives a scripted rockslide using high-speed kiting.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie navigates a narrow ledge during a windstorm.",
+              "type": "setup",
+              "outcome": "Artie realizes the wind can push him off the ledge.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "The Iron Peaks",
+              "location_end_label": "The High Pass",
+              "location_start": "The Iron Peaks",
+              "location_end": "The High Pass",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "The wind howls through the canyons, pushing against Artie with enough force to threaten his balance.",
+              "transition_in_anchors": [
+                "howling wind",
+                "loose stones",
+                "sheer drop"
+              ],
+              "consumes_outcome_from": "3:3",
+              "transition_out_text": "A sudden tremor shakes the mountain, and the sound of cracking stone echoes from above.",
+              "transition_out_anchors": [
+                "vibrating ground",
+                "cracking sound",
+                "falling pebbles"
+              ],
+              "hands_off_to": "3:5",
+              "location_start_id": "LOC_THE_IRON_PEAKS",
+              "location_end_id": "LOC_THE_HIGH_PASS"
+            },
+            {
+              "scene_id": 5,
+              "summary": "A rockslide begins, and Artie must dodge falling boulders.",
+              "type": "conflict",
+              "outcome": "Artie uses 'Perfect Dodge' to avoid the rocks.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "The High Pass",
+              "location_end_label": "The High Pass",
+              "location_start": "The High Pass",
+              "location_end": "The High Pass",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "A wall of stone and debris surges down the mountainside, aimed directly at the narrow path.",
+              "transition_in_anchors": [
+                "thundering boulders",
+                "cloud of dust",
+                "shaking mountain"
+              ],
+              "consumes_outcome_from": "3:4",
+              "transition_out_text": "Artie leaps from rock to rock, his movements a frantic dance of survival against the crushing weight of the mountain.",
+              "transition_out_anchors": [
+                "leaping motion",
+                "shattered rock",
+                "narrow escape"
+              ],
+              "hands_off_to": "3:6",
+              "location_start_id": "LOC_THE_HIGH_PASS",
+              "location_end_id": "LOC_THE_HIGH_PASS"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie reaches a safe cave as the rockslide settles.",
+              "type": "climax",
+              "outcome": "Artie survives the hazard.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "The High Pass",
+              "location_end_label": "The Echoing Cave",
+              "location_start": "The High Pass",
+              "location_end": "The Echoing Cave",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "sheltered",
+              "transition_in_text": "Artie dives into a dark opening in the cliff face just as a massive boulder obliterates the path he was standing on.",
+              "transition_in_anchors": [
+                "cool cave air",
+                "impact tremor",
+                "settling dust"
+              ],
+              "consumes_outcome_from": "3:5",
+              "transition_out_text": "He leans against the damp cave wall, his heart hammering against his ribs in the sudden quiet.",
+              "transition_out_anchors": [
+                "damp stone",
+                "rapid breathing",
+                "fading rumble"
+              ],
+              "hands_off_to": "3:7",
+              "end_condition_echo": "Artie survives a scripted rockslide using high-speed kiting.",
+              "location_start_id": "LOC_THE_HIGH_PASS",
+              "location_end_id": "LOC_THE_ECHOING_CAVE"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Gates of Oakhaven",
+          "intent": "Establish the next major obstacle: the social and guild-based gatekeeping.",
+          "end_condition": "Artie is refused entry to Oakhaven for lacking a guild voucher.",
+          "scenes": [
+            {
+              "scene_id": 7,
+              "summary": "Artie descends from the peaks toward Oakhaven.",
+              "type": "transition",
+              "outcome": "Artie reaches the outskirts of the trade hub.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "The Echoing Cave",
+              "location_end_label": "Oakhaven Outskirts",
+              "location_start": "The Echoing Cave",
+              "location_end": "Oakhaven Outskirts",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "The rugged mountains finally flatten into rolling hills as the spires of Oakhaven appear on the horizon.",
+              "transition_in_anchors": [
+                "distant spires",
+                "smell of woodsmoke",
+                "paved road"
+              ],
+              "consumes_outcome_from": "3:6",
+              "transition_out_text": "The road becomes crowded with merchants and travelers, all heading toward the massive iron gates.",
+              "transition_out_anchors": [
+                "rumbling wagons",
+                "chattering crowds",
+                "iron gates"
+              ],
+              "hands_off_to": "3:8",
+              "location_start_id": "LOC_THE_ECHOING_CAVE",
+              "location_end_id": "LOC_OAKHAVEN_OUTSKIRTS"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Artie attempts to enter the city.",
+              "type": "conflict",
+              "outcome": "The guards demand a guild voucher for entry.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Oakhaven Outskirts",
+              "location_end_label": "Oakhaven Gates",
+              "location_start": "Oakhaven Outskirts",
+              "location_end": "Oakhaven Gates",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "restricted",
+              "transition_in_text": "Artie joins the queue at the main gate, watching as a guard in polished silver armor checks the papers of every traveler.",
+              "transition_in_anchors": [
+                "silver armor",
+                "stamped papers",
+                "stern expression"
+              ],
+              "consumes_outcome_from": "3:7",
+              "transition_out_text": "The guard holds out a gauntleted hand, his eyes scanning Artie's unconventional attire.",
+              "transition_out_anchors": [
+                "gauntleted hand",
+                "suspicious squint",
+                "heavy spear"
+              ],
+              "hands_off_to": "3:9",
+              "location_start_id": "LOC_OAKHAVEN_OUTSKIRTS",
+              "location_end_id": "LOC_OAKHAVEN_GATES"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Artie is turned away from the gates.",
+              "type": "climax",
+              "outcome": "Artie realizes he must find a way to get a voucher.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Oakhaven Gates",
+              "location_end_label": "Oakhaven Outskirts",
+              "location_start": "Oakhaven Gates",
+              "location_end": "Oakhaven Outskirts",
+              "handoff_mode": "aftermath_relocation",
+              "constraint_state": "free",
+              "transition_in_text": "The guard's voice is flat and uncompromising as he points back toward the road.",
+              "transition_in_anchors": [
+                "harsh rejection",
+                "closing gate",
+                "jeering onlookers"
+              ],
+              "consumes_outcome_from": "3:8",
+              "end_condition_echo": "Artie is refused entry to Oakhaven for lacking a guild voucher.",
+              "location_start_id": "LOC_OAKHAVEN_GATES",
+              "location_end_id": "LOC_OAKHAVEN_OUTSKIRTS"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 4,
+      "title": "The Math of Murder",
+      "goal": "Enter the 'Infinite Spire' solo to prove his glass-cannon build can outpace the System's scaling difficulty.",
+      "chapter_role": "trial",
+      "stakes_shift": "Artie discovers that the System's 'Anti-Cheat' AI is monitoring his anomalous combat logs.",
+      "bridge": {
+        "from_prev": "Artie sneaks into the Spire to farm the resources needed for a guild voucher.",
+        "to_next": "The AI deploys a 'Stalker' entity specifically designed to counter high-crit builds."
+      },
+      "pacing": {
+        "intensity": 4,
+        "tempo": "steady",
+        "expected_scene_count": 11
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Spire Infiltration",
+          "intent": "Artie sneaks into the solo-challenge dungeon to farm the necessary voucher.",
+          "end_condition": "Artie bypasses the external guards and enters the Infinite Spire instance.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie scouts the Infinite Spire's entrance.",
+              "type": "setup",
+              "outcome": "Artie identifies the guard rotation.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Spire Outskirts",
+              "location_end_label": "Spire Outskirts",
+              "location_start": "Spire Outskirts",
+              "location_end": "Spire Outskirts",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Artie crouches behind a jagged rock, watching the armored guards patrol the base of the Infinite Spire.",
+              "transition_in_anchors": [
+                "jagged rock",
+                "armored guards",
+                "blue spire glow"
+              ],
+              "transition_out_text": "He waits for the moment when the two sentries turn their backs to each other at the edge of the path.",
+              "transition_out_anchors": [
+                "clanking footsteps",
+                "rotating lanterns",
+                "shadowy alcove"
+              ],
+              "hands_off_to": "4:2",
+              "location_start_id": "LOC_SPIRE_OUTSKIRTS",
+              "location_end_id": "LOC_SPIRE_OUTSKIRTS"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie uses his speed to dash between cover.",
+              "type": "development",
+              "outcome": "Artie reaches the side entrance of the Spire.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Spire Outskirts",
+              "location_end_label": "Spire Side Entrance",
+              "location_start": "Spire Outskirts",
+              "location_end": "Spire Side Entrance",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "Artie bursts from his hiding spot, a silver streak across the dark grass as he aims for the service door.",
+              "transition_in_anchors": [
+                "silver streak",
+                "damp grass",
+                "service door"
+              ],
+              "consumes_outcome_from": "4:1",
+              "transition_out_text": "He slides into the shadows of the doorway just as a searchlight sweeps across the spot he occupied.",
+              "transition_out_anchors": [
+                "sweeping searchlight",
+                "heavy iron handle",
+                "suppressed breath"
+              ],
+              "hands_off_to": "4:3",
+              "location_start_id": "LOC_SPIRE_OUTSKIRTS",
+              "location_end_id": "LOC_SPIRE_SIDE_ENTRANCE"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie unlocks the door and enters the instance.",
+              "type": "climax",
+              "outcome": "Artie is inside the Spire.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Spire Side Entrance",
+              "location_end_label": "Infinite Spire - Floor 1",
+              "location_start": "Spire Side Entrance",
+              "location_end": "Infinite Spire - Floor 1",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "restricted",
+              "transition_in_text": "The iron door creaks open, revealing a spiraling staircase that glows with an eerie, pulsing light.",
+              "transition_in_anchors": [
+                "creaking iron",
+                "pulsing light",
+                "spiraling staircase"
+              ],
+              "consumes_outcome_from": "4:2",
+              "transition_out_text": "A system message confirms his entry into the solo instance, cutting off the sounds of the outside world.",
+              "transition_out_anchors": [
+                "instance message",
+                "sealed door",
+                "humming atmosphere"
+              ],
+              "hands_off_to": "4:4",
+              "end_condition_echo": "Artie bypasses the external guards and enters the Infinite Spire instance.",
+              "location_start_id": "LOC_SPIRE_SIDE_ENTRANCE",
+              "location_end_id": "LOC_INFINITE_SPIRE_FLOOR_1"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Climbing the Floors",
+          "intent": "Demonstrate the scaling difficulty and Artie's reliance on one-shotting enemies.",
+          "end_condition": "Artie clears the tenth floor, triggering a system-wide difficulty spike.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie clears the first few floors with ease.",
+              "type": "setup",
+              "outcome": "Artie gains confidence in his build.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Infinite Spire - Floor 1",
+              "location_end_label": "Infinite Spire - Floor 5",
+              "location_start": "Infinite Spire - Floor 1",
+              "location_end": "Infinite Spire - Floor 5",
+              "handoff_mode": "montage",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The first floor's guardians are slow and predictable, falling to a single strike from Artie's dagger.",
+              "transition_in_anchors": [
+                "shattering enemies",
+                "ascending stairs",
+                "growing loot pile"
+              ],
+              "consumes_outcome_from": "4:3",
+              "transition_out_text": "By the fifth floor, the enemies are faster, but Artie's reflexes are still superior.",
+              "transition_out_anchors": [
+                "faster attacks",
+                "silver dodge trail",
+                "confident stride"
+              ],
+              "hands_off_to": "4:5",
+              "location_start_id": "LOC_INFINITE_SPIRE_FLOOR_1",
+              "location_end_id": "LOC_INFINITE_SPIRE_FLOOR_5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Artie encounters a mid-boss on the seventh floor.",
+              "type": "conflict",
+              "outcome": "Artie one-shots the boss using a critical backstab.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Infinite Spire - Floor 7",
+              "location_end_label": "Infinite Spire - Floor 7",
+              "location_start": "Infinite Spire - Floor 7",
+              "location_end": "Infinite Spire - Floor 7",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "A hulking warrior in black plate armor stands in the center of the seventh floor, wielding a massive greataxe.",
+              "transition_in_anchors": [
+                "black plate armor",
+                "massive greataxe",
+                "heavy breathing"
+              ],
+              "consumes_outcome_from": "4:4",
+              "transition_out_text": "Artie blurs behind the giant, his blade finding the gap in the armor with surgical precision.",
+              "transition_out_anchors": [
+                "golden crit flash",
+                "collapsing boss",
+                "exploding loot"
+              ],
+              "hands_off_to": "4:6",
+              "location_start_id": "LOC_INFINITE_SPIRE_FLOOR_7",
+              "location_end_id": "LOC_INFINITE_SPIRE_FLOOR_7"
+            },
+            {
+              "scene_id": 6,
+              "summary": "The difficulty spikes on the ninth floor.",
+              "type": "development",
+              "outcome": "Artie must use more advanced kiting tactics.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Infinite Spire - Floor 9",
+              "location_end_label": "Infinite Spire - Floor 9",
+              "location_start": "Infinite Spire - Floor 9",
+              "location_end": "Infinite Spire - Floor 9",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The ninth floor is filled with ranged attackers, forcing Artie to stay in constant motion.",
+              "transition_in_anchors": [
+                "flying arrows",
+                "magic missiles",
+                "constant movement"
+              ],
+              "consumes_outcome_from": "4:5",
+              "transition_out_text": "He weaves through the projectiles, his movements a blur of silver silk as he closes the distance.",
+              "transition_out_anchors": [
+                "silver blur",
+                "closing distance",
+                "sweat on brow"
+              ],
+              "hands_off_to": "4:7",
+              "location_start_id": "LOC_INFINITE_SPIRE_FLOOR_9",
+              "location_end_id": "LOC_INFINITE_SPIRE_FLOOR_9"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Artie clears the tenth floor.",
+              "type": "climax",
+              "outcome": "The Spire reacts to his anomalous speed.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH",
+                "THREAD_ANTI_CHEAT"
+              ],
+              "location_start_label": "Infinite Spire - Floor 10",
+              "location_end_label": "Infinite Spire - Floor 10",
+              "location_start": "Infinite Spire - Floor 10",
+              "location_end": "Infinite Spire - Floor 10",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "restricted",
+              "transition_in_text": "The final enemy of the tenth floor shatters into data fragments, and the Spire begins to pulse with a red light.",
+              "transition_in_anchors": [
+                "data fragments",
+                "red pulsing light",
+                "low vibration"
+              ],
+              "consumes_outcome_from": "4:6",
+              "transition_out_text": "A system-wide chime echoes through the chamber, signaling a change in the dungeon's state.",
+              "transition_out_anchors": [
+                "system chime",
+                "red warning glow",
+                "heavy atmosphere"
+              ],
+              "hands_off_to": "4:8",
+              "end_condition_echo": "Artie clears the tenth floor, triggering a system-wide difficulty spike.",
+              "location_start_id": "LOC_INFINITE_SPIRE_FLOOR_10",
+              "location_end_id": "LOC_INFINITE_SPIRE_FLOOR_10"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Anti-Cheat Shadow",
+          "intent": "Introduce the System's awareness of Artie's anomalous performance.",
+          "end_condition": "Artie receives a 'Suspicious Activity' notification from the System AI.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "The environment of the Spire begins to glitch.",
+              "type": "setup",
+              "outcome": "Artie realizes the System is looking for him.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_ANTI_CHEAT"
+              ],
+              "location_start_label": "Infinite Spire - Floor 11",
+              "location_end_label": "Infinite Spire - Floor 11",
+              "location_start": "Infinite Spire - Floor 11",
+              "location_end": "Infinite Spire - Floor 11",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "The walls of the eleventh floor flicker, revealing the wireframe structure of the Spire for brief moments.",
+              "transition_in_anchors": [
+                "flickering walls",
+                "wireframe glitches",
+                "distorted audio"
+              ],
+              "consumes_outcome_from": "4:7",
+              "transition_out_text": "Artie's UI begins to jitter, with red error codes appearing in the corner of his vision.",
+              "transition_out_anchors": [
+                "jittering UI",
+                "red error codes",
+                "static noise"
+              ],
+              "hands_off_to": "4:9",
+              "location_start_id": "LOC_INFINITE_SPIRE_FLOOR_11",
+              "location_end_id": "LOC_INFINITE_SPIRE_FLOOR_11"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Artie fights a 'glitched' enemy.",
+              "type": "conflict",
+              "outcome": "Artie defeats an enemy that doesn't follow standard rules.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH",
+                "THREAD_ANTI_CHEAT"
+              ],
+              "location_start_label": "Infinite Spire - Floor 11",
+              "location_end_label": "Infinite Spire - Floor 11",
+              "location_start": "Infinite Spire - Floor 11",
+              "location_end": "Infinite Spire - Floor 11",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "A guardian shadow lunges at Artie, its movements stuttering as if it were skipping frames.",
+              "transition_in_anchors": [
+                "stuttering motion",
+                "frame skips",
+                "shadowy form"
+              ],
+              "consumes_outcome_from": "4:8",
+              "transition_out_text": "Artie manages to land a hit, but the enemy explodes into a cloud of unreadable code.",
+              "transition_out_anchors": [
+                "code cloud",
+                "digital explosion",
+                "ringing ears"
+              ],
+              "hands_off_to": "4:10",
+              "location_start_id": "LOC_INFINITE_SPIRE_FLOOR_11",
+              "location_end_id": "LOC_INFINITE_SPIRE_FLOOR_11"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Artie attempts to exit the Spire.",
+              "type": "development",
+              "outcome": "The exit is temporarily locked by the System.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_ANTI_CHEAT"
+              ],
+              "location_start_label": "Infinite Spire - Floor 11",
+              "location_end_label": "Spire Exit Portal",
+              "location_start": "Infinite Spire - Floor 11",
+              "location_end": "Spire Exit Portal",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "detained",
+              "transition_in_text": "Artie sprints toward the glowing exit portal, but the blue light suddenly turns a harsh, solid red.",
+              "transition_in_anchors": [
+                "red portal",
+                "locked gate",
+                "pulsing alarm"
+              ],
+              "consumes_outcome_from": "4:9",
+              "transition_out_text": "A massive window fills his vision, blocking his view of the room.",
+              "transition_out_anchors": [
+                "massive window",
+                "scrolling text",
+                "system freeze"
+              ],
+              "hands_off_to": "4:11",
+              "location_start_id": "LOC_INFINITE_SPIRE_FLOOR_11",
+              "location_end_id": "LOC_SPIRE_EXIT_PORTAL"
+            },
+            {
+              "scene_id": 11,
+              "summary": "Artie reads the system notification.",
+              "type": "climax",
+              "outcome": "Artie is officially flagged as a suspicious entity.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_ANTI_CHEAT"
+              ],
+              "location_start_label": "Spire Exit Portal",
+              "location_end_label": "Spire Exit Portal",
+              "location_start": "Spire Exit Portal",
+              "location_end": "Spire Exit Portal",
+              "handoff_mode": "aftermath_relocation",
+              "constraint_state": "pursued",
+              "transition_in_text": "The text on the screen is clear, written in a font that feels cold and mechanical.",
+              "transition_in_anchors": [
+                "suspicious activity",
+                "audit warning",
+                "red text"
+              ],
+              "consumes_outcome_from": "4:10",
+              "end_condition_echo": "Artie receives a 'Suspicious Activity' notification from the System AI.",
+              "location_start_id": "LOC_SPIRE_EXIT_PORTAL",
+              "location_end_id": "LOC_SPIRE_EXIT_PORTAL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 5,
+      "title": "Friends with Benefits (and Buffs)",
+      "goal": "Recruit a disgraced shield-maiden, Silna, to act as a literal meat-shield for Artie's fragile existence.",
+      "chapter_role": "alliance",
+      "stakes_shift": "Artie's solo exploitation becomes a team effort, complicating his 'Hit & Run' tactics with social loyalty.",
+      "bridge": {
+        "from_prev": "Artie barely escapes the Stalker and realizes he needs a tank to survive the next floor.",
+        "to_next": "Silna agrees to help if Artie assists her in reclaiming her stolen family heirloom from a local tyrant."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "steady",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Disgraced Shield-Maiden",
+          "intent": "Introduce Silna and establish her current low status in Oakhaven.",
+          "end_condition": "Artie locates Silna in a back-alley pit-fighting ring.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie searches the slums of Oakhaven for a tank.",
+              "type": "setup",
+              "outcome": "Artie hears rumors of a fallen warrior in the pits.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "introduces": [
+                "CHAR_SILNA"
+              ],
+              "location_start_label": "Oakhaven Slums",
+              "location_end_label": "Oakhaven Slums",
+              "location_start": "Oakhaven Slums",
+              "location_end": "Oakhaven Slums",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "The rain in Oakhaven smells like wet soot and cheap ale as Artie navigates the narrow alleys of the slums.",
+              "transition_in_anchors": [
+                "wet soot",
+                "cheap ale",
+                "narrow alleys"
+              ],
+              "transition_out_text": "A group of beggars points toward a cellar door where the sound of cheering and clashing steel echoes.",
+              "transition_out_anchors": [
+                "cellar door",
+                "clashing steel",
+                "muffled cheers"
+              ],
+              "hands_off_to": "5:2",
+              "location_start_id": "LOC_OAKHAVEN_SLUMS",
+              "location_end_id": "LOC_OAKHAVEN_SLUMS"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie enters the pit-fighting arena.",
+              "type": "development",
+              "outcome": "Artie witnesses Silna's incredible defensive skills.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "location_start_label": "Oakhaven Slums",
+              "location_end_label": "The Pit Arena",
+              "location_start": "Oakhaven Slums",
+              "location_end": "The Pit Arena",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "Artie descends the stairs into a smoke-filled room where a large woman with a scarred shield stands in a circle of sand.",
+              "transition_in_anchors": [
+                "smoke-filled room",
+                "scarred shield",
+                "circle of sand"
+              ],
+              "consumes_outcome_from": "5:1",
+              "transition_out_text": "She blocks a blow that would have shattered a lesser warrior, her expression one of grim determination.",
+              "transition_out_anchors": [
+                "shattered blow",
+                "grim determination",
+                "vibrating shield"
+              ],
+              "hands_off_to": "5:3",
+              "location_start_id": "LOC_OAKHAVEN_SLUMS",
+              "location_end_id": "LOC_THE_PIT_ARENA"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie approaches Silna after her match.",
+              "type": "climax",
+              "outcome": "Artie identifies Silna as the perfect partner.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "location_start_label": "The Pit Arena",
+              "location_end_label": "The Pit Arena",
+              "location_start": "The Pit Arena",
+              "location_end": "The Pit Arena",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The crowd disperses as the match ends, leaving Silna alone in the center of the pit, wiping sweat from her brow.",
+              "transition_in_anchors": [
+                "dispersing crowd",
+                "sweat on brow",
+                "bloodied sand"
+              ],
+              "consumes_outcome_from": "5:2",
+              "transition_out_text": "Artie steps into the sand, his silver robes a stark contrast to the grime of the cellar.",
+              "transition_out_anchors": [
+                "silver robes",
+                "grimy cellar",
+                "outstretched hand"
+              ],
+              "hands_off_to": "5:4",
+              "end_condition_echo": "Artie locates Silna in a back-alley pit-fighting ring.",
+              "location_start_id": "LOC_THE_PIT_ARENA",
+              "location_end_id": "LOC_THE_PIT_ARENA"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Tyrant's Heirloom",
+          "intent": "Provide Silna with a motivation to join Artie's high-risk mission.",
+          "end_condition": "Silna agrees to the partnership in exchange for help reclaiming her family crest.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Silna tells Artie about her history and the stolen crest.",
+              "type": "setup",
+              "outcome": "Artie learns about Lord Vane's theft.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "introduces": [
+                "CHAR_TYRANT"
+              ],
+              "threads": [
+                "THREAD_SILNA_HEIRLOOM"
+              ],
+              "location_start_label": "The Pit Arena",
+              "location_end_label": "A Quiet Tavern",
+              "location_start": "The Pit Arena",
+              "location_end": "A Quiet Tavern",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "sheltered",
+              "transition_in_text": "They sit in a dark corner of a nearby tavern, the flickering candlelight casting long shadows across Silna's face.",
+              "transition_in_anchors": [
+                "flickering candlelight",
+                "dark corner",
+                "wooden table"
+              ],
+              "consumes_outcome_from": "5:3",
+              "transition_out_text": "She speaks of Lord Vane and the heirloom that was taken from her family as a 'tax'.",
+              "transition_out_anchors": [
+                "Lord Vane",
+                "family heirloom",
+                "stolen crest"
+              ],
+              "hands_off_to": "5:5",
+              "location_start_id": "LOC_THE_PIT_ARENA",
+              "location_end_id": "LOC_A_QUIET_TAVERN"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Artie proposes a deal to Silna.",
+              "type": "development",
+              "outcome": "Artie promises to use his 'crit' build to help her.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "threads": [
+                "THREAD_GLITCH",
+                "THREAD_SILNA_HEIRLOOM"
+              ],
+              "location_start_label": "A Quiet Tavern",
+              "location_end_label": "A Quiet Tavern",
+              "location_start": "A Quiet Tavern",
+              "location_end": "A Quiet Tavern",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "sheltered",
+              "transition_in_text": "Artie leans forward, his voice low as he explains the unique nature of his glitched abilities.",
+              "transition_in_anchors": [
+                "low voice",
+                "glitched abilities",
+                "intense gaze"
+              ],
+              "consumes_outcome_from": "5:4",
+              "transition_out_text": "Silna looks at him with a mix of skepticism and desperate hope.",
+              "transition_out_anchors": [
+                "skeptical look",
+                "desperate hope",
+                "clenched fist"
+              ],
+              "hands_off_to": "5:6",
+              "location_start_id": "LOC_A_QUIET_TAVERN",
+              "location_end_id": "LOC_A_QUIET_TAVERN"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie demonstrates his power to Silna.",
+              "type": "development",
+              "outcome": "Silna is impressed by Artie's damage output.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "A Quiet Tavern",
+              "location_end_label": "Tavern Backyard",
+              "location_start": "A Quiet Tavern",
+              "location_end": "Tavern Backyard",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "They step out into the backyard, where Artie strikes a heavy wooden post, shattering it instantly.",
+              "transition_in_anchors": [
+                "wooden post",
+                "shattered wood",
+                "golden crit flash"
+              ],
+              "consumes_outcome_from": "5:5",
+              "transition_out_text": "Silna touches the splintered remains, her eyes wide as she realizes the potential of his power.",
+              "transition_out_anchors": [
+                "splintered remains",
+                "wide eyes",
+                "heavy shield"
+              ],
+              "hands_off_to": "5:7",
+              "location_start_id": "LOC_A_QUIET_TAVERN",
+              "location_end_id": "LOC_TAVERN_BACKYARD"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Silna accepts the partnership.",
+              "type": "climax",
+              "outcome": "The duo is officially formed.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "threads": [
+                "THREAD_SILNA_HEIRLOOM"
+              ],
+              "location_start_label": "Tavern Backyard",
+              "location_end_label": "Tavern Backyard",
+              "location_start": "Tavern Backyard",
+              "location_end": "Tavern Backyard",
+              "handoff_mode": "aftermath_relocation",
+              "constraint_state": "free",
+              "transition_in_text": "Silna offers her hand, her grip like iron as she seals the agreement.",
+              "transition_in_anchors": [
+                "iron grip",
+                "sealed agreement",
+                "determined nod"
+              ],
+              "consumes_outcome_from": "5:6",
+              "transition_out_text": "They begin planning their first move against the Keep.",
+              "transition_out_anchors": [
+                "whispered plans",
+                "gathering gear",
+                "setting sun"
+              ],
+              "hands_off_to": "5:8",
+              "end_condition_echo": "Silna agrees to the partnership in exchange for help reclaiming her family crest.",
+              "location_start_id": "LOC_TAVERN_BACKYARD",
+              "location_end_id": "LOC_TAVERN_BACKYARD"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Unlikely Duo",
+          "intent": "Establish the tactical synergy between a 1 HP crit-machine and a pure tank.",
+          "end_condition": "Artie and Silna successfully complete a practice skirmish together.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Artie and Silna practice their coordination in the woods.",
+              "type": "setup",
+              "outcome": "They learn to time Silna's 'Taunt' with Artie's strikes.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "location_start_label": "Oakhaven Outskirts",
+              "location_end_label": "Training Grounds",
+              "location_start": "Oakhaven Outskirts",
+              "location_end": "Training Grounds",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "The morning sun filters through the trees as Artie and Silna find a secluded clearing to practice.",
+              "transition_in_anchors": [
+                "morning sun",
+                "secluded clearing",
+                "rustling leaves"
+              ],
+              "consumes_outcome_from": "5:7",
+              "transition_out_text": "Silna slams her shield into the ground, drawing the attention of a nearby training dummy.",
+              "transition_out_anchors": [
+                "shield slam",
+                "training dummy",
+                "taunt skill"
+              ],
+              "hands_off_to": "5:9",
+              "location_start_id": "LOC_OAKHAVEN_OUTSKIRTS",
+              "location_end_id": "LOC_TRAINING_GROUNDS"
+            },
+            {
+              "scene_id": 9,
+              "summary": "A real monster interrupts their training.",
+              "type": "conflict",
+              "outcome": "They defeat the monster using their new synergy.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Training Grounds",
+              "location_end_label": "Training Grounds",
+              "location_start": "Training Grounds",
+              "location_end": "Training Grounds",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "A feral boar, twice the size of a normal one, bursts from the undergrowth, charging at Artie's exposed flank.",
+              "transition_in_anchors": [
+                "feral boar",
+                "charging motion",
+                "snorting breath"
+              ],
+              "consumes_outcome_from": "5:8",
+              "transition_out_text": "Silna intercepts the charge with a thunderous impact, leaving the beast stunned for Artie's strike.",
+              "transition_out_anchors": [
+                "thunderous impact",
+                "stunned beast",
+                "silver flash"
+              ],
+              "hands_off_to": "5:10",
+              "location_start_id": "LOC_TRAINING_GROUNDS",
+              "location_end_id": "LOC_TRAINING_GROUNDS"
+            },
+            {
+              "scene_id": 10,
+              "summary": "They celebrate their successful hunt.",
+              "type": "climax",
+              "outcome": "Artie and Silna are ready for the Keep.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "location_start_label": "Training Grounds",
+              "location_end_label": "Training Grounds",
+              "location_start": "Training Grounds",
+              "location_end": "Training Grounds",
+              "handoff_mode": "aftermath_relocation",
+              "constraint_state": "free",
+              "transition_in_text": "The boar collapses into a heap of loot and meat, and the two warriors share a triumphant look.",
+              "transition_in_anchors": [
+                "loot drop",
+                "triumphant look",
+                "panting breath"
+              ],
+              "consumes_outcome_from": "5:9",
+              "end_condition_echo": "Artie and Silna successfully complete a practice skirmish together.",
+              "location_start_id": "LOC_TRAINING_GROUNDS",
+              "location_end_id": "LOC_TRAINING_GROUNDS"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 6,
+      "title": "The Raid on Red-Tier Keep",
+      "goal": "Utilize a 'Damage Overflow' exploit to one-shot a regional boss that usually requires a forty-man raid.",
+      "chapter_role": "confrontation",
+      "stakes_shift": "The boss's death destabilizes the local political power, making Artie a kingmaker (or a criminal).",
+      "bridge": {
+        "from_prev": "Artie and Silna infiltrate the Keep using a combination of stealth and high-speed kiting.",
+        "to_next": "The boss drops a 'World Key' that Artie wasn't supposed to find for another fifty levels."
+      },
+      "pacing": {
+        "intensity": 5,
+        "tempo": "rush",
+        "expected_scene_count": 12
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Infiltrating the Red-Tier Keep",
+          "intent": "The duo enters the highest-level zone in the region using stealth and speed.",
+          "end_condition": "Artie and Silna reach the inner sanctum of the Keep undetected.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie and Silna approach the Keep's outer walls.",
+              "type": "setup",
+              "outcome": "They identify a gap in the searchlight patterns.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "location_start_label": "Keep Outskirts",
+              "location_end_label": "Keep Outer Wall",
+              "location_start": "Keep Outskirts",
+              "location_end": "Keep Outer Wall",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Artie and Silna move through the shadows of the Keep's outer wall, timed perfectly with the rotating searchlights.",
+              "transition_in_anchors": [
+                "rotating searchlights",
+                "shadowy wall",
+                "clanking armor"
+              ],
+              "transition_out_text": "They reach the base of a high tower where the lights never quite touch the ground.",
+              "transition_out_anchors": [
+                "high tower",
+                "dark corner",
+                "climbing rope"
+              ],
+              "hands_off_to": "6:2",
+              "location_start_id": "LOC_KEEP_OUTSKIRTS",
+              "location_end_id": "LOC_KEEP_OUTER_WALL"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie uses his 'Untouchable' speed to scale the wall.",
+              "type": "development",
+              "outcome": "Artie secures a rope for Silna.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "location_start_label": "Keep Outer Wall",
+              "location_end_label": "Keep Ramparts",
+              "location_start": "Keep Outer Wall",
+              "location_end": "Keep Ramparts",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "Artie ascends the stone surface with unnatural speed, his fingers finding purchase in the smallest cracks.",
+              "transition_in_anchors": [
+                "stone surface",
+                "unnatural speed",
+                "climbing motion"
+              ],
+              "consumes_outcome_from": "6:1",
+              "transition_out_text": "He reaches the top and drops a heavy rope for Silna, who begins her slower ascent.",
+              "transition_out_anchors": [
+                "heavy rope",
+                "slower ascent",
+                "guarded ramparts"
+              ],
+              "hands_off_to": "6:3",
+              "location_start_id": "LOC_KEEP_OUTER_WALL",
+              "location_end_id": "LOC_KEEP_RAMPARTS"
+            },
+            {
+              "scene_id": 3,
+              "summary": "They navigate the ramparts, dodging guards.",
+              "type": "conflict",
+              "outcome": "They reach the inner courtyard entrance.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "location_start_label": "Keep Ramparts",
+              "location_end_label": "Keep Inner Courtyard",
+              "location_start": "Keep Ramparts",
+              "location_end": "Keep Inner Courtyard",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "A pair of guards walks past their hiding spot, the sound of their conversation muffled by the wind.",
+              "transition_in_anchors": [
+                "muffled conversation",
+                "passing guards",
+                "beating hearts"
+              ],
+              "consumes_outcome_from": "6:2",
+              "transition_out_text": "They slip through a narrow door leading down into the heart of the fortress.",
+              "transition_out_anchors": [
+                "narrow door",
+                "descending stairs",
+                "dim torchlight"
+              ],
+              "hands_off_to": "6:4",
+              "location_start_id": "LOC_KEEP_RAMPARTS",
+              "location_end_id": "LOC_KEEP_INNER_COURTYARD"
+            },
+            {
+              "scene_id": 4,
+              "summary": "They reach the inner sanctum.",
+              "type": "climax",
+              "outcome": "The duo is ready to face the boss.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "location_start_label": "Keep Inner Courtyard",
+              "location_end_label": "Inner Sanctum",
+              "location_start": "Keep Inner Courtyard",
+              "location_end": "Inner Sanctum",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "restricted",
+              "transition_in_text": "The hallway opens into a massive vaulted chamber where the Regional Boss sits upon a throne of iron.",
+              "transition_in_anchors": [
+                "vaulted chamber",
+                "iron throne",
+                "Regional Boss"
+              ],
+              "consumes_outcome_from": "6:3",
+              "transition_out_text": "Artie and Silna press themselves against the ornate pillars, watching the boss's idle animations.",
+              "transition_out_anchors": [
+                "ornate pillars",
+                "idle animations",
+                "heavy silence"
+              ],
+              "hands_off_to": "6:5",
+              "end_condition_echo": "Artie and Silna reach the inner sanctum of the Keep undetected.",
+              "location_start_id": "LOC_KEEP_INNER_COURTYARD",
+              "location_end_id": "LOC_INNER_SANCTUM"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Setting up the Overflow",
+          "intent": "Artie prepares the mechanical conditions for a massive damage exploit.",
+          "end_condition": "All necessary debuffs are applied to the boss, and Artie's buffs are maxed.",
+          "scenes": [
+            {
+              "scene_id": 5,
+              "summary": "Artie explains the 'Damage Overflow' exploit to Silna.",
+              "type": "setup",
+              "outcome": "Silna understands her role in the setup.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Inner Sanctum",
+              "location_end_label": "Inner Sanctum",
+              "location_start": "Inner Sanctum",
+              "location_end": "Inner Sanctum",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "Artie whispers the final instructions, his eyes fixed on the boss's health bar.",
+              "transition_in_anchors": [
+                "whispered instructions",
+                "health bar",
+                "intense focus"
+              ],
+              "consumes_outcome_from": "6:4",
+              "transition_out_text": "Silna nods, her hand tightening on her shield as she prepares to draw the boss's ire.",
+              "transition_out_anchors": [
+                "determined nod",
+                "tightened grip",
+                "shield ready"
+              ],
+              "hands_off_to": "6:6",
+              "location_start_id": "LOC_INNER_SANCTUM",
+              "location_end_id": "LOC_INNER_SANCTUM"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Silna initiates the fight and applies debuffs.",
+              "type": "conflict",
+              "outcome": "The boss is successfully 'taunted' and debuffed.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "location_start_label": "Inner Sanctum",
+              "location_end_label": "Inner Sanctum",
+              "location_start": "Inner Sanctum",
+              "location_end": "Inner Sanctum",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Silna charges forward with a roar, her shield slamming into the boss's legs and triggering a 'Weakness' debuff.",
+              "transition_in_anchors": [
+                "shield slam",
+                "weakness debuff",
+                "boss roar"
+              ],
+              "consumes_outcome_from": "6:5",
+              "transition_out_text": "The boss swings its massive flail, but Silna blocks the impact, her feet sliding back in the sand.",
+              "transition_out_anchors": [
+                "massive flail",
+                "blocked impact",
+                "sliding feet"
+              ],
+              "hands_off_to": "6:7",
+              "location_start_id": "LOC_INNER_SANCTUM",
+              "location_end_id": "LOC_INNER_SANCTUM"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Artie stacks his own buffs through 'Perfect Dodges'.",
+              "type": "development",
+              "outcome": "Artie's damage multiplier reaches its peak.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Inner Sanctum",
+              "location_end_label": "Inner Sanctum",
+              "location_start": "Inner Sanctum",
+              "location_end": "Inner Sanctum",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie dances through the shockwaves of the boss's attacks, each dodge adding a stack to his 'Untouchable' buff.",
+              "transition_in_anchors": [
+                "shockwaves",
+                "stacking buffs",
+                "silver trail"
+              ],
+              "consumes_outcome_from": "6:6",
+              "transition_out_text": "His dagger begins to glow with an intense, white-hot light as the multiplier hits its cap.",
+              "transition_out_anchors": [
+                "glowing dagger",
+                "white-hot light",
+                "multiplier cap"
+              ],
+              "hands_off_to": "6:8",
+              "location_start_id": "LOC_INNER_SANCTUM",
+              "location_end_id": "LOC_INNER_SANCTUM"
+            },
+            {
+              "scene_id": 8,
+              "summary": "The final debuff is applied.",
+              "type": "climax",
+              "outcome": "The conditions for the overflow are met.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "location_start_label": "Inner Sanctum",
+              "location_end_label": "Inner Sanctum",
+              "location_start": "Inner Sanctum",
+              "location_end": "Inner Sanctum",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Silna uses her ultimate ability, a shield bash that leaves the boss 'Vulnerable' for exactly three seconds.",
+              "transition_in_anchors": [
+                "shield bash",
+                "vulnerable state",
+                "three-second window"
+              ],
+              "consumes_outcome_from": "6:7",
+              "transition_out_text": "Artie prepares to lunge, his entire being focused on the boss's exposed neck.",
+              "transition_out_anchors": [
+                "prepared lunge",
+                "exposed neck",
+                "final breath"
+              ],
+              "hands_off_to": "6:9",
+              "end_condition_echo": "All necessary debuffs are applied to the boss, and Artie's buffs are maxed.",
+              "location_start_id": "LOC_INNER_SANCTUM",
+              "location_end_id": "LOC_INNER_SANCTUM"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The One-Shot Kill",
+          "intent": "The final execution of the exploit and the resulting world-state change.",
+          "end_condition": "The Regional Boss is vaporized by a single hit, dropping the World Key.",
+          "scenes": [
+            {
+              "scene_id": 9,
+              "summary": "Artie strikes the boss.",
+              "type": "climax",
+              "outcome": "The damage calculation exceeds the System's limit.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Inner Sanctum",
+              "location_end_label": "Inner Sanctum",
+              "location_start": "Inner Sanctum",
+              "location_end": "Inner Sanctum",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie lunges, his blade connecting with the boss's neck at the exact moment the buffs and debuffs align.",
+              "transition_in_anchors": [
+                "blade contact",
+                "aligned buffs",
+                "blinding flash"
+              ],
+              "consumes_outcome_from": "6:8",
+              "transition_out_text": "The damage number that appears over the boss's head is so large it begins to flicker and turn into gibberish.",
+              "transition_out_anchors": [
+                "massive number",
+                "flickering text",
+                "gibberish code"
+              ],
+              "hands_off_to": "6:10",
+              "location_start_id": "LOC_INNER_SANCTUM",
+              "location_end_id": "LOC_INNER_SANCTUM"
+            },
+            {
+              "scene_id": 10,
+              "summary": "The boss disintegrates.",
+              "type": "resolution",
+              "outcome": "The boss is dead, and the World Key is revealed.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "threads": [
+                "THREAD_WORLD_KEY"
+              ],
+              "location_start_label": "Inner Sanctum",
+              "location_end_label": "Inner Sanctum",
+              "location_start": "Inner Sanctum",
+              "location_end": "Inner Sanctum",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The Regional Boss lets out a final, distorted roar as its body shatters into a million pieces of glowing data.",
+              "transition_in_anchors": [
+                "distorted roar",
+                "shattering body",
+                "glowing data"
+              ],
+              "consumes_outcome_from": "6:9",
+              "transition_out_text": "A single, golden key remains floating in the center of the room where the boss once stood.",
+              "transition_out_anchors": [
+                "golden key",
+                "floating item",
+                "hushed room"
+              ],
+              "hands_off_to": "6:11",
+              "location_start_id": "LOC_INNER_SANCTUM",
+              "location_end_id": "LOC_INNER_SANCTUM"
+            },
+            {
+              "scene_id": 11,
+              "summary": "Artie picks up the World Key.",
+              "type": "climax",
+              "outcome": "The System announces the boss's death to the entire server.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "threads": [
+                "THREAD_WORLD_KEY"
+              ],
+              "location_start_label": "Inner Sanctum",
+              "location_end_label": "Inner Sanctum",
+              "location_start": "Inner Sanctum",
+              "location_end": "Inner Sanctum",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie reaches out and grasps the golden key, its surface humming with immense power.",
+              "transition_in_anchors": [
+                "golden surface",
+                "humming power",
+                "server message"
+              ],
+              "consumes_outcome_from": "6:10",
+              "transition_out_text": "A server-wide notification appears, announcing that a level 1 player has defeated the Regional Boss.",
+              "transition_out_anchors": [
+                "server notification",
+                "level 1 player",
+                "stunned world"
+              ],
+              "hands_off_to": "6:12",
+              "location_start_id": "LOC_INNER_SANCTUM",
+              "location_end_id": "LOC_INNER_SANCTUM"
+            },
+            {
+              "scene_id": 12,
+              "summary": "The Keep begins to collapse.",
+              "type": "climax",
+              "outcome": "Artie and Silna must escape.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "location_start_label": "Inner Sanctum",
+              "location_end_label": "Inner Sanctum",
+              "location_start": "Inner Sanctum",
+              "location_end": "Inner Sanctum",
+              "handoff_mode": "aftermath_relocation",
+              "constraint_state": "pursued",
+              "transition_in_text": "The ground shakes violently as the Keep's architecture begins to crumble without the boss's power to sustain it.",
+              "transition_in_anchors": [
+                "shaking ground",
+                "crumbling stone",
+                "falling dust"
+              ],
+              "consumes_outcome_from": "6:11",
+              "end_condition_echo": "The Regional Boss is vaporized by a single hit, dropping the World Key.",
+              "location_start_id": "LOC_INNER_SANCTUM",
+              "location_end_id": "LOC_INNER_SANCTUM"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 7,
+      "title": "Level Up and Get Out",
+      "goal": "Escape the collapsing Keep and the arriving System Moderators while securing the stolen treasury loot.",
+      "chapter_role": "aftermath",
+      "stakes_shift": "Artie officially becomes Aethelgard's most wanted 'Glitch,' forcing him into the permanent shadows.",
+      "bridge": {
+        "from_prev": "The World Key activates, signaling the end of the 'Tutorial Era' for the entire server.",
+        "to_next": "Artie and Silna head toward the lawless 'Grey Zones' to hide and plan their next exploit."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "steady",
+        "expected_scene_count": 8
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Loot & The Chaos",
+          "intent": "Artie and Silna secure the treasury rewards while the Keep collapses.",
+          "end_condition": "The treasury is emptied and the World Key is secured in Artie's inventory.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie and Silna reach the Keep's treasury.",
+              "type": "setup",
+              "outcome": "They find Silna's heirloom and a massive amount of gold.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "threads": [
+                "THREAD_SILNA_HEIRLOOM"
+              ],
+              "location_start_label": "Inner Sanctum",
+              "location_end_label": "Keep Treasury",
+              "location_start": "Inner Sanctum",
+              "location_end": "Keep Treasury",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "The ground shakes as the Red-Tier Keep begins to buckle under the weight of the boss's explosive death.",
+              "transition_in_anchors": [
+                "shaking ground",
+                "falling masonry",
+                "dust clouds"
+              ],
+              "transition_out_text": "They burst into the treasury, where piles of gold and jewels glitter in the dying light.",
+              "transition_out_anchors": [
+                "piles of gold",
+                "glittering jewels",
+                "dying light"
+              ],
+              "hands_off_to": "7:2",
+              "location_start_id": "LOC_INNER_SANCTUM",
+              "location_end_id": "LOC_KEEP_TREASURY"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Silna finds her family crest.",
+              "type": "development",
+              "outcome": "Silna's personal quest is resolved.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "threads": [
+                "THREAD_SILNA_HEIRLOOM"
+              ],
+              "location_start_label": "Keep Treasury",
+              "location_end_label": "Keep Treasury",
+              "location_start": "Keep Treasury",
+              "location_end": "Keep Treasury",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "Silna lunges toward a pedestal where a silver crest with a wolf's head sits.",
+              "transition_in_anchors": [
+                "silver crest",
+                "wolf's head",
+                "pedestal"
+              ],
+              "consumes_outcome_from": "7:1",
+              "transition_out_text": "She tucks the crest into her belt, her eyes shining with a mix of relief and fury.",
+              "transition_out_anchors": [
+                "tucked crest",
+                "shining eyes",
+                "determined look"
+              ],
+              "hands_off_to": "7:3",
+              "location_start_id": "LOC_KEEP_TREASURY",
+              "location_end_id": "LOC_KEEP_TREASURY"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie loots the remaining treasury.",
+              "type": "climax",
+              "outcome": "They are ready to leave.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "threads": [
+                "THREAD_WORLD_KEY"
+              ],
+              "location_start_label": "Keep Treasury",
+              "location_end_label": "Keep Treasury",
+              "location_start": "Keep Treasury",
+              "location_end": "Keep Treasury",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Artie sweeps the remaining gold into his inventory, the numbers spinning upward with dizzying speed.",
+              "transition_in_anchors": [
+                "spinning numbers",
+                "empty chests",
+                "rushing gold"
+              ],
+              "consumes_outcome_from": "7:2",
+              "transition_out_text": "A loud crack echoes through the room as the ceiling begins to cave in.",
+              "transition_out_anchors": [
+                "cracking ceiling",
+                "falling debris",
+                "narrow exit"
+              ],
+              "hands_off_to": "7:4",
+              "end_condition_echo": "The treasury is emptied and the World Key is secured in Artie's inventory.",
+              "location_start_id": "LOC_KEEP_TREASURY",
+              "location_end_id": "LOC_KEEP_TREASURY"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Moderator Arrival",
+          "intent": "Raise the stakes by introducing the physical manifestation of the Anti-Cheat AI.",
+          "end_condition": "The System Moderators arrive at the Keep's ruins to investigate the glitch.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie and Silna emerge from the collapsing Keep.",
+              "type": "setup",
+              "outcome": "They see the Moderators descending from the sky.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA",
+                "CHAR_MODERATOR"
+              ],
+              "introduces": [
+                "CHAR_MODERATOR"
+              ],
+              "threads": [
+                "THREAD_ANTI_CHEAT"
+              ],
+              "location_start_label": "Keep Treasury",
+              "location_end_label": "Keep Outskirts",
+              "location_start": "Keep Treasury",
+              "location_end": "Keep Outskirts",
+              "handoff_mode": "hard_cut",
+              "constraint_state": "pursued",
+              "transition_in_text": "They dive out of a side window just as the Keep's main tower collapses into a heap of rubble.",
+              "transition_in_anchors": [
+                "side window",
+                "collapsing tower",
+                "rubble heap"
+              ],
+              "consumes_outcome_from": "7:3",
+              "transition_out_text": "A beam of pure white light strikes the ground nearby, and a figure in featureless white armor steps out.",
+              "transition_out_anchors": [
+                "white light",
+                "featureless armor",
+                "Moderator Alpha"
+              ],
+              "hands_off_to": "7:5",
+              "location_start_id": "LOC_KEEP_TREASURY",
+              "location_end_id": "LOC_KEEP_OUTSKIRTS"
+            },
+            {
+              "scene_id": 5,
+              "summary": "The Moderator begins to scan the area.",
+              "type": "conflict",
+              "outcome": "Artie and Silna must hide to avoid detection.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA",
+                "CHAR_MODERATOR"
+              ],
+              "threads": [
+                "THREAD_ANTI_CHEAT"
+              ],
+              "location_start_label": "Keep Outskirts",
+              "location_end_label": "Keep Outskirts",
+              "location_start": "Keep Outskirts",
+              "location_end": "Keep Outskirts",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "The Moderator raises a hand, and a blue scanning grid begins to sweep across the ruins.",
+              "transition_in_anchors": [
+                "scanning grid",
+                "blue light",
+                "mechanical hum"
+              ],
+              "consumes_outcome_from": "7:4",
+              "transition_out_text": "Artie and Silna press themselves into a deep shadow beneath a fallen pillar.",
+              "transition_out_anchors": [
+                "deep shadow",
+                "fallen pillar",
+                "held breath"
+              ],
+              "hands_off_to": "7:6",
+              "location_start_id": "LOC_KEEP_OUTSKIRTS",
+              "location_end_id": "LOC_KEEP_OUTSKIRTS"
+            },
+            {
+              "scene_id": 6,
+              "summary": "The Moderator identifies the 'Glitch' signature.",
+              "type": "climax",
+              "outcome": "The pursuit becomes personal.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA",
+                "CHAR_MODERATOR"
+              ],
+              "threads": [
+                "THREAD_ANTI_CHEAT"
+              ],
+              "location_start_label": "Keep Outskirts",
+              "location_end_label": "Keep Outskirts",
+              "location_start": "Keep Outskirts",
+              "location_end": "Keep Outskirts",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "fleeing",
+              "transition_in_text": "The Moderator's head snaps toward their hiding spot as the scanning grid turns a violent red.",
+              "transition_in_anchors": [
+                "red scan",
+                "snapping head",
+                "sudden movement"
+              ],
+              "consumes_outcome_from": "7:5",
+              "transition_out_text": "Artie and Silna burst from their cover, sprinting toward the border of the Grey Zones.",
+              "transition_out_anchors": [
+                "bursting cover",
+                "sprinting motion",
+                "approaching border"
+              ],
+              "hands_off_to": "7:7",
+              "end_condition_echo": "The System Moderators arrive at the Keep's ruins to investigate the glitch.",
+              "location_start_id": "LOC_KEEP_OUTSKIRTS",
+              "location_end_id": "LOC_KEEP_OUTSKIRTS"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Great Escape",
+          "intent": "Artie and Silna flee to the lawless zones to avoid deletion.",
+          "end_condition": "Artie and Silna cross the border into the Grey Zones, vanishing from the System's primary radar.",
+          "scenes": [
+            {
+              "scene_id": 7,
+              "summary": "Artie and Silna use the World Key to open a secret passage.",
+              "type": "conflict",
+              "outcome": "They bypass the Moderator's blockade.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "threads": [
+                "THREAD_WORLD_KEY",
+                "THREAD_ANTI_CHEAT"
+              ],
+              "location_start_label": "Keep Outskirts",
+              "location_end_label": "Grey Zone Border",
+              "location_start": "Keep Outskirts",
+              "location_end": "Grey Zone Border",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "Artie holds the World Key aloft, and a shimmering portal opens in the middle of the path.",
+              "transition_in_anchors": [
+                "shimmering portal",
+                "golden light",
+                "humming key"
+              ],
+              "consumes_outcome_from": "7:6",
+              "transition_out_text": "They dive through the portal just as a beam of white light strikes the ground behind them.",
+              "transition_out_anchors": [
+                "diving motion",
+                "white beam",
+                "closing portal"
+              ],
+              "hands_off_to": "7:8",
+              "location_start_id": "LOC_KEEP_OUTSKIRTS",
+              "location_end_id": "LOC_GREY_ZONE_BORDER"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Artie and Silna arrive in the Grey Zones.",
+              "type": "resolution",
+              "outcome": "They are safe for now, but the game has changed forever.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILNA"
+              ],
+              "threads": [
+                "THREAD_GLITCH",
+                "THREAD_WORLD_KEY"
+              ],
+              "location_start_label": "Grey Zone Border",
+              "location_end_label": "The Grey Zones",
+              "location_start": "Grey Zone Border",
+              "location_end": "The Grey Zones",
+              "handoff_mode": "combat_disengage",
+              "constraint_state": "free",
+              "transition_in_text": "The portal deposits them onto a desolate, untextured plain where the System's rules are weak and flickering.",
+              "transition_in_anchors": [
+                "desolate plain",
+                "untextured ground",
+                "flickering sky"
+              ],
+              "consumes_outcome_from": "7:7",
+              "end_condition_echo": "Artie and Silna cross the border into the Grey Zones, vanishing from the System's primary radar.",
+              "location_start_id": "LOC_GREY_ZONE_BORDER",
+              "location_end_id": "LOC_THE_GREY_ZONES"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

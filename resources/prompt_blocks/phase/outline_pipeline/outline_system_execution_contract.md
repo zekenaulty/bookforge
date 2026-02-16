@@ -7,11 +7,19 @@ Do not emit markdown, code fences, preambles, trailing explanations, or comments
 Schema contract:
 - All schema-required keys must be present and correctly typed.
 - Optional fields must be omitted when unknown. Do not emit empty-string placeholders.
+- Do not invent alias keys for schema fields. Use canonical key names exactly as requested.
+- If a registry object is emitted, canonical keys are required:
+  - characters[] entries: character_id (string), name (string), intro.chapter (int), intro.scene (int)
+  - threads[] entries: thread_id (string), label (string), status (string)
+- Forbidden aliases include:
+  - characters[].id, characters[].title, characters[].description
+  - threads[].id, threads[].title, threads[].description
 - If a required value cannot be produced without guessing, return a valid `error_v1` object.
 
 Location/transition identity contract:
 - Do not emit placeholder identity values in semantic fields (`current_location`, `unknown`, `placeholder`, `tbd`, `here`, `there`, `n/a`).
 - Transition payload must remain concrete and machine-checkable.
+- In transition text fields, do not use the literal words `here` or `there`; use explicit location nouns/labels instead.
 - Maintain transition/link continuity across retries and refinement phases unless explicitly corrected.
 
 Failure contract:

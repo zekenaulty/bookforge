@@ -1,0 +1,1962 @@
+{
+  "schema_version": "1.1",
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "display_name": "Artie",
+      "role": "protagonist"
+    },
+    {
+      "character_id": "CHAR_SYSTEM",
+      "display_name": "The System",
+      "role": "antagonist_engine"
+    },
+    {
+      "character_id": "CHAR_SILAS",
+      "display_name": "Silas the Nullifier",
+      "role": "antagonist"
+    }
+  ],
+  "threads": [
+    {
+      "thread_id": "THREAD_GLITCH",
+      "title": "The Glitch Meter",
+      "description": "Artie's class instability and the need for rare resources."
+    },
+    {
+      "thread_id": "THREAD_HUNT",
+      "title": "The Guild Pursuit",
+      "description": "The local and global authorities hunting the anomaly."
+    }
+  ],
+  "chapters": [
+    {
+      "chapter_id": 1,
+      "title": "Critical Failure to Launch",
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Office Space to Outer Space",
+          "end_condition": "Artie completes the character creation process and stands in the world of Aethelgard.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "type": "action",
+              "outcome": "Artie's reality dissolves as the System initiates the isekai process.",
+              "location_start_label": "Cubicle Farm",
+              "location_end_label": "Cubicle Farm",
+              "location_start": "Artie's mundane office cubicle.",
+              "location_end": "Artie's mundane office cubicle.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The hum of the office air conditioning is the only sound as Artie types his tenth report of the day.",
+              "transition_in_anchors": [
+                "humming AC",
+                "fluorescent lights",
+                "spreadsheet rows",
+                "clacking keys"
+              ],
+              "transition_out_text": "The text on the screen begins to bleed into the air, glowing with an eerie blue light.",
+              "transition_out_anchors": [
+                "glowing text",
+                "digital bleed",
+                "distorted air"
+              ],
+              "hands_off_to": "1:2"
+            },
+            {
+              "scene_id": 2,
+              "type": "action",
+              "outcome": "Artie selects the 'Glitch-Crit' class despite the System's warnings.",
+              "location_start_label": "Cubicle Farm",
+              "location_end_label": "The Void",
+              "location_start": "Artie's mundane office cubicle.",
+              "location_end": "The character creation interface.",
+              "handoff_mode": "hard_cut",
+              "constraint_state": "processed",
+              "transition_in_text": "The white light fades, leaving Artie suspended in a pitch-black void filled with floating menus.",
+              "transition_in_anchors": [
+                "pitch-black void",
+                "floating text",
+                "distant digital hum"
+              ],
+              "consumes_outcome_from": "1:1",
+              "transition_out_text": "A massive red 'WARNING' sign flashes before Artie confirms his choice.",
+              "transition_out_anchors": [
+                "red warning",
+                "confirmation button",
+                "haptic feedback"
+              ],
+              "hands_off_to": "1:3"
+            },
+            {
+              "scene_id": 3,
+              "type": "action",
+              "outcome": "Artie arrives in the world of Aethelgard with a broken character sheet.",
+              "location_start_label": "The Void",
+              "location_end_label": "Aethelgard Plains",
+              "location_start": "The character creation interface.",
+              "location_end": "The grassy plains of the starting zone.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "The void collapses into a swirl of colors as Artie's feet hit solid ground.",
+              "transition_in_anchors": [
+                "swirling colors",
+                "grass scent",
+                "solid ground"
+              ],
+              "consumes_outcome_from": "1:2",
+              "transition_out_text": "Artie looks down at his hands, which are occasionally flickering out of existence.",
+              "transition_out_anchors": [
+                "flickering skin",
+                "low-poly grass",
+                "distant tutorial tower"
+              ],
+              "end_condition_echo": "Artie completes the character creation process and stands in the world of Aethelgard.",
+              "hands_off_to": "1:4"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Tutorial Bug",
+          "end_condition": "The tutorial boss is defeated via an unintended mechanical exploit.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "type": "action",
+              "outcome": "Artie enters the tutorial arena and meets the Golem.",
+              "location_start_label": "Aethelgard Plains",
+              "location_end_label": "Tutorial Arena",
+              "location_start": "The grassy plains of the starting zone.",
+              "location_end": "A stone-walled combat arena.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "A stone gate rumbles open, inviting Artie into the tutorial combat zone.",
+              "transition_in_anchors": [
+                "stone gate",
+                "rumbling sound",
+                "dust clouds"
+              ],
+              "consumes_outcome_from": "1:3",
+              "transition_out_text": "The Tutorial Golem rises from the center of the arena, its eyes glowing red.",
+              "transition_out_anchors": [
+                "rising golem",
+                "red eyes",
+                "scraping stone"
+              ],
+              "hands_off_to": "1:5"
+            },
+            {
+              "scene_id": 5,
+              "type": "combat",
+              "outcome": "Artie discovers that his attacks deal zero damage unless he hits a 'glitch point'.",
+              "location_start_label": "Tutorial Arena",
+              "location_end_label": "Tutorial Arena",
+              "location_start": "A stone-walled combat arena.",
+              "location_end": "A stone-walled combat arena.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The Golem swings a massive stone fist, and Artie barely rolls out of the way.",
+              "transition_in_anchors": [
+                "stone fist",
+                "dusty roll",
+                "heavy impact"
+              ],
+              "consumes_outcome_from": "1:4",
+              "transition_out_text": "Artie notices a flickering purple pixel on the Golem's left knee.",
+              "transition_out_anchors": [
+                "purple pixel",
+                "visual artifact",
+                "static sound"
+              ],
+              "hands_off_to": "1:6"
+            },
+            {
+              "scene_id": 6,
+              "type": "combat",
+              "outcome": "Artie strikes the glitch point, triggering a 1,000,000% damage multiplier.",
+              "location_start_label": "Tutorial Arena",
+              "location_end_label": "Tutorial Arena",
+              "location_start": "A stone-walled combat arena.",
+              "location_end": "A stone-walled combat arena.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Lining up his rusty sword, Artie lunges for the flickering purple spot.",
+              "transition_in_anchors": [
+                "rusty sword",
+                "lunge",
+                "focused gaze"
+              ],
+              "consumes_outcome_from": "1:5",
+              "transition_out_text": "The world freezes for a microsecond as the System calculates the impossible damage.",
+              "transition_out_anchors": [
+                "frozen frame",
+                "calculation lag",
+                "white flash"
+              ],
+              "hands_off_to": "1:7"
+            },
+            {
+              "scene_id": 7,
+              "type": "action",
+              "outcome": "The Golem explodes into data fragments, ending the tutorial prematurely.",
+              "location_start_label": "Tutorial Arena",
+              "location_end_label": "Tutorial Arena",
+              "location_start": "A stone-walled combat arena.",
+              "location_end": "A stone-walled combat arena.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The Golem doesn't just fall; it shatters into a million blue cubes that vanish into the air.",
+              "transition_in_anchors": [
+                "blue cubes",
+                "shattering stone",
+                "vanishing data"
+              ],
+              "consumes_outcome_from": "1:6",
+              "transition_out_text": "A notification chime rings out, sounding more like a car alarm than a victory song.",
+              "transition_out_anchors": [
+                "alarm chime",
+                "victory window",
+                "empty arena"
+              ],
+              "end_condition_echo": "The tutorial boss is defeated via an unintended mechanical exploit.",
+              "hands_off_to": "1:8"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Resource Management",
+          "end_condition": "Artie identifies the specific rare resources required to stabilize his class.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "type": "action",
+              "outcome": "Artie loots a 'Corrupted Core' from the Golem's remains.",
+              "location_start_label": "Tutorial Arena",
+              "location_end_label": "Tutorial Arena",
+              "location_start": "A stone-walled combat arena.",
+              "location_end": "A stone-walled combat arena.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie walks to the center of the arena where a single, pulsing object remains.",
+              "transition_in_anchors": [
+                "pulsing object",
+                "arena center",
+                "looting window"
+              ],
+              "consumes_outcome_from": "1:7",
+              "transition_out_text": "The core hums in his hand, vibrating with an unstable energy.",
+              "transition_out_anchors": [
+                "vibrating core",
+                "humming sound",
+                "purple glow"
+              ],
+              "hands_off_to": "1:9"
+            },
+            {
+              "scene_id": 9,
+              "type": "action",
+              "outcome": "The System warns Artie that his 'Stability' is at 15% and falling.",
+              "location_start_label": "Tutorial Arena",
+              "location_end_label": "Forest Edge",
+              "location_start": "A stone-walled combat arena.",
+              "location_end": "The edge of the Whispering Woods.",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "Artie leaves the arena behind, his character sheet flickering more frequently now.",
+              "transition_in_anchors": [
+                "flickering sheet",
+                "arena exit",
+                "warning icon"
+              ],
+              "consumes_outcome_from": "1:8",
+              "transition_out_text": "A scrolling text box informs him that total deletion is imminent without stabilization.",
+              "transition_out_anchors": [
+                "scrolling text",
+                "deletion warning",
+                "unstable meter"
+              ],
+              "hands_off_to": "1:10"
+            },
+            {
+              "scene_id": 10,
+              "type": "action",
+              "outcome": "Artie learns he needs 'Stability Shards' found in the Whispering Woods.",
+              "location_start_label": "Forest Edge",
+              "location_end_label": "Forest Edge",
+              "location_start": "The edge of the Whispering Woods.",
+              "location_end": "The edge of the Whispering Woods.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie opens his quest log, which is mostly garbled code except for one clear objective.",
+              "transition_in_anchors": [
+                "garbled code",
+                "quest log",
+                "clear objective"
+              ],
+              "consumes_outcome_from": "1:9",
+              "transition_out_text": "He looks toward the dark trees of the Whispering Woods, knowing his life depends on what's inside.",
+              "transition_out_anchors": [
+                "dark trees",
+                "forest entrance",
+                "determined look"
+              ],
+              "end_condition_echo": "Artie identifies the specific rare resources required to stabilize his class.",
+              "hands_off_to": "2:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 2,
+      "title": "The Math of Murder-Hoboing",
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Grind is Real",
+          "end_condition": "Artie triggers a recursive loot loop in the Whispering Woods.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "type": "action",
+              "outcome": "Artie enters the Whispering Woods and encounters low-level slimes.",
+              "location_start_label": "Forest Edge",
+              "location_end_label": "Whispering Woods",
+              "location_start": "The edge of the Whispering Woods.",
+              "location_end": "The dense, foggy forest interior.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "The air grows cold and damp as Artie steps under the canopy of the Whispering Woods.",
+              "transition_in_anchors": [
+                "cold air",
+                "damp soil",
+                "whispering leaves"
+              ],
+              "consumes_outcome_from": "1:10",
+              "transition_out_text": "A group of green slimes bounces toward him, their movements rhythmic and predictable.",
+              "transition_out_anchors": [
+                "green slimes",
+                "bouncing sound",
+                "predictable path"
+              ],
+              "hands_off_to": "2:2"
+            },
+            {
+              "scene_id": 2,
+              "type": "combat",
+              "outcome": "Artie tries to fight normally but finds his damage is too inconsistent.",
+              "location_start_label": "Whispering Woods",
+              "location_end_label": "Whispering Woods",
+              "location_start": "The dense, foggy forest interior.",
+              "location_end": "The dense, foggy forest interior.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie swings at the lead slime, his sword passing through it with a pathetic 'thwip' sound.",
+              "transition_in_anchors": [
+                "sword swing",
+                "thwip sound",
+                "zero damage"
+              ],
+              "consumes_outcome_from": "2:1",
+              "transition_out_text": "He realizes he needs to find another glitch point to do any real damage.",
+              "transition_out_anchors": [
+                "glitch point search",
+                "frustrated sigh",
+                "slime bounce"
+              ],
+              "hands_off_to": "2:3"
+            },
+            {
+              "scene_id": 3,
+              "type": "action",
+              "outcome": "Artie kills a slime on a 'loot-boundary' line, causing it to drop infinite items.",
+              "location_start_label": "Whispering Woods",
+              "location_end_label": "Whispering Woods",
+              "location_start": "The dense, foggy forest interior.",
+              "location_end": "The dense, foggy forest interior.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie backs up against a strange shimmering line in the air and strikes the slime just as it crosses it.",
+              "transition_in_anchors": [
+                "shimmering line",
+                "boundary strike",
+                "slime pop"
+              ],
+              "consumes_outcome_from": "2:2",
+              "transition_out_text": "Instead of one pile of loot, a fountain of items begins to erupt from the ground.",
+              "transition_out_anchors": [
+                "loot fountain",
+                "erupting items",
+                "infinite drops"
+              ],
+              "end_condition_echo": "Artie triggers a recursive loot loop in the Whispering Woods.",
+              "hands_off_to": "2:4"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Looting the World Dry",
+          "end_condition": "The Whispering Woods dungeon is rendered completely empty of items and monsters.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "type": "action",
+              "outcome": "The loot loop begins to lag the local area, freezing monsters in place.",
+              "location_start_label": "Whispering Woods",
+              "location_end_label": "Whispering Woods",
+              "location_start": "The dense, foggy forest interior.",
+              "location_end": "The dense, foggy forest interior.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The pile of slime-gel and rusty daggers grows so large that the nearby trees start to flicker.",
+              "transition_in_anchors": [
+                "item pile",
+                "flickering trees",
+                "system lag"
+              ],
+              "consumes_outcome_from": "2:3",
+              "transition_out_text": "A nearby wolf monster freezes mid-leap, suspended in the air by the processing load.",
+              "transition_out_anchors": [
+                "frozen wolf",
+                "mid-leap",
+                "lag spike"
+              ],
+              "hands_off_to": "2:5"
+            },
+            {
+              "scene_id": 5,
+              "type": "action",
+              "outcome": "Artie walks through the frozen forest, 'harvesting' the stationary mobs.",
+              "location_start_label": "Whispering Woods",
+              "location_end_label": "Dungeon Depths",
+              "location_start": "The dense, foggy forest interior.",
+              "location_end": "The heart of the forest dungeon.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie realizes he can just walk up to the frozen monsters and tap them for loot.",
+              "transition_in_anchors": [
+                "frozen monsters",
+                "easy harvest",
+                "loot collection"
+              ],
+              "consumes_outcome_from": "2:4",
+              "transition_out_text": "He reaches the center of the woods, where the dungeon boss is stuck in a T-pose.",
+              "transition_out_anchors": [
+                "dungeon center",
+                "t-posing boss",
+                "silent forest"
+              ],
+              "hands_off_to": "2:6"
+            },
+            {
+              "scene_id": 6,
+              "type": "action",
+              "outcome": "Artie loots the boss and every container in the zone, leaving it a void.",
+              "location_start_label": "Dungeon Depths",
+              "location_end_label": "Dungeon Depths",
+              "location_start": "The heart of the forest dungeon.",
+              "location_end": "The heart of the forest dungeon.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "With a single poke, the T-posing boss shatters, dropping the final shards Artie needs.",
+              "transition_in_anchors": [
+                "boss poke",
+                "shattering data",
+                "final shards"
+              ],
+              "consumes_outcome_from": "2:5",
+              "transition_out_text": "The forest is now eerily empty, not a single blade of grass or pebble remaining.",
+              "transition_out_anchors": [
+                "empty forest",
+                "void-like zone",
+                "total loot"
+              ],
+              "end_condition_echo": "The Whispering Woods dungeon is rendered completely empty of items and monsters.",
+              "hands_off_to": "2:7"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Market Crash",
+          "end_condition": "Artie observes the Adventurers' Guild arriving to investigate the 'looted' dungeon.",
+          "scenes": [
+            {
+              "scene_id": 7,
+              "type": "action",
+              "outcome": "Artie returns to the nearby town and sells his mountain of trash loot.",
+              "location_start_label": "Dungeon Depths",
+              "location_end_label": "Town Square",
+              "location_start": "The heart of the forest dungeon.",
+              "location_end": "The bustling market of the local town.",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "Artie staggers into town, his inventory bags bulging with more items than should be physically possible.",
+              "transition_in_anchors": [
+                "town entrance",
+                "bulging bags",
+                "market noise"
+              ],
+              "consumes_outcome_from": "2:6",
+              "transition_out_text": "The local merchant's eyes widen as Artie dumps a thousand slime-gels onto the counter.",
+              "transition_out_anchors": [
+                "merchant shock",
+                "loot dump",
+                "gold clinking"
+              ],
+              "hands_off_to": "2:8"
+            },
+            {
+              "scene_id": 8,
+              "type": "action",
+              "outcome": "The Guild arrives to find the Whispering Woods 'deleted'.",
+              "location_start_label": "Town Square",
+              "location_end_label": "Town Square",
+              "location_start": "The bustling market of the local town.",
+              "location_end": "The bustling market of the local town.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "A group of high-level adventurers gallops past Artie, heading toward the forest with worried expressions.",
+              "transition_in_anchors": [
+                "galloping horses",
+                "guild capes",
+                "worried faces"
+              ],
+              "consumes_outcome_from": "2:7",
+              "transition_out_text": "Artie watches from the shadows as they realize their primary training ground is gone.",
+              "transition_out_anchors": [
+                "shadowy watch",
+                "guild confusion",
+                "deleted zone"
+              ],
+              "end_condition_echo": "Artie observes the Adventurers' Guild arriving to investigate the 'looted' dungeon.",
+              "hands_off_to": "3:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 3,
+      "title": "Grand Theft Artifact",
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Stability Tax",
+          "end_condition": "Artie locates the 'Cooldown Reset' gem within the city's high-security vault.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "type": "action",
+              "outcome": "Artie's stability drops to 5%, causing his UI to glitch violently.",
+              "location_start_label": "Town Square",
+              "location_end_label": "Town Square",
+              "location_start": "The bustling market of the local town.",
+              "location_end": "The bustling market of the local town.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie tries to check his gold balance, but the numbers turn into screaming skulls.",
+              "transition_in_anchors": [
+                "screaming skulls",
+                "glitched UI",
+                "static noise"
+              ],
+              "consumes_outcome_from": "2:8",
+              "transition_out_text": "He realizes he needs a massive power source to keep his character from deleting itself.",
+              "transition_out_anchors": [
+                "stability warning",
+                "looming deletion",
+                "desperate search"
+              ],
+              "hands_off_to": "3:2"
+            },
+            {
+              "scene_id": 2,
+              "type": "action",
+              "outcome": "Artie bribes a local thief for information on the 'Cooldown Reset' gem.",
+              "location_start_label": "Town Square",
+              "location_end_label": "Shady Alley",
+              "location_start": "The bustling market of the local town.",
+              "location_end": "A dark, narrow alleyway.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie follows a hooded figure into a narrow alley where the sun doesn't reach.",
+              "transition_in_anchors": [
+                "hooded figure",
+                "narrow alley",
+                "shadowy deal"
+              ],
+              "consumes_outcome_from": "3:1",
+              "transition_out_text": "The thief points toward the massive stone citadel in the center of the city.",
+              "transition_out_anchors": [
+                "stone citadel",
+                "thief's finger",
+                "vault location"
+              ],
+              "hands_off_to": "3:3"
+            },
+            {
+              "scene_id": 3,
+              "type": "action",
+              "outcome": "Artie reaches the vault's exterior and identifies the security wards.",
+              "location_start_label": "Shady Alley",
+              "location_end_label": "City Citadel",
+              "location_start": "A dark, narrow alleyway.",
+              "location_end": "The heavily guarded entrance to the city's vault.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "The citadel looms over Artie, its walls covered in glowing blue security runes.",
+              "transition_in_anchors": [
+                "looming citadel",
+                "security runes",
+                "guarded gate"
+              ],
+              "consumes_outcome_from": "3:2",
+              "transition_out_text": "Artie spots a flickering rune that looks exactly like the glitch point on the Golem.",
+              "transition_out_anchors": [
+                "flickering rune",
+                "security flaw",
+                "vault entrance"
+              ],
+              "end_condition_echo": "Artie locates the 'Cooldown Reset' gem within the city's high-security vault.",
+              "hands_off_to": "3:4"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Vault Heist",
+          "end_condition": "Artie successfully acquires the Cooldown Reset gem.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "type": "action",
+              "outcome": "Artie 'clips' through the first security gate by exploiting a collision bug.",
+              "location_start_label": "City Citadel",
+              "location_end_label": "Vault Corridor",
+              "location_start": "The heavily guarded entrance to the city's vault.",
+              "location_end": "A narrow, magically lit corridor.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "Artie walks straight into the corner of the gate, vibrating his character back and forth.",
+              "transition_in_anchors": [
+                "corner vibrating",
+                "collision bug",
+                "gate clipping"
+              ],
+              "consumes_outcome_from": "3:3",
+              "transition_out_text": "With a sickening pop, he lands on the other side of the stone wall.",
+              "transition_out_anchors": [
+                "sickening pop",
+                "other side",
+                "vault interior"
+              ],
+              "hands_off_to": "3:5"
+            },
+            {
+              "scene_id": 5,
+              "type": "action",
+              "outcome": "Artie bypasses the laser grid by turning his graphics settings to 'Low'.",
+              "location_start_label": "Vault Corridor",
+              "location_end_label": "Inner Vault",
+              "location_start": "A narrow, magically lit corridor.",
+              "location_end": "The main treasure chamber.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "A grid of lethal red lasers blocks the path, but Artie opens his settings menu.",
+              "transition_in_anchors": [
+                "laser grid",
+                "settings menu",
+                "low graphics"
+              ],
+              "consumes_outcome_from": "3:4",
+              "transition_out_text": "The lasers disappear as his UI fails to render them, allowing him to walk right through.",
+              "transition_out_anchors": [
+                "invisible lasers",
+                "render failure",
+                "safe passage"
+              ],
+              "hands_off_to": "3:6"
+            },
+            {
+              "scene_id": 6,
+              "type": "combat",
+              "outcome": "Artie fights the Vault Guardian by baiting it into a bottomless pit glitch.",
+              "location_start_label": "Inner Vault",
+              "location_end_label": "Inner Vault",
+              "location_start": "The main treasure chamber.",
+              "location_end": "The main treasure chamber.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "A massive mechanical spider drops from the ceiling, its legs clicking against the gold coins.",
+              "transition_in_anchors": [
+                "mechanical spider",
+                "clicking legs",
+                "gold coins"
+              ],
+              "consumes_outcome_from": "3:5",
+              "transition_out_text": "Artie stands over a hole in the floor that leads to an infinite black void.",
+              "transition_out_anchors": [
+                "infinite void",
+                "floor hole",
+                "guardian bait"
+              ],
+              "hands_off_to": "3:7"
+            },
+            {
+              "scene_id": 7,
+              "type": "action",
+              "outcome": "Artie grabs the gem just as the Guardian falls into the void.",
+              "location_start_label": "Inner Vault",
+              "location_end_label": "Inner Vault",
+              "location_start": "The main treasure chamber.",
+              "location_end": "The main treasure chamber.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The Guardian lunges, misses, and vanishes into the black hole with a digital scream.",
+              "transition_in_anchors": [
+                "guardian lunge",
+                "digital scream",
+                "vanishing enemy"
+              ],
+              "consumes_outcome_from": "3:6",
+              "transition_out_text": "Artie reaches out and snatches the glowing green gem from its pedestal.",
+              "transition_out_anchors": [
+                "green gem",
+                "pedestal snatch",
+                "heist success"
+              ],
+              "end_condition_echo": "Artie successfully acquires the Cooldown Reset gem.",
+              "hands_off_to": "3:8"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Burn the Bridge",
+          "end_condition": "Artie escapes through the city gates with the guard in pursuit.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "type": "action",
+              "outcome": "The vault alarms trigger, alerting the entire city guard.",
+              "location_start_label": "Inner Vault",
+              "location_end_label": "Vault Corridor",
+              "location_start": "The main treasure chamber.",
+              "location_end": "A narrow, magically lit corridor.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "As soon as the gem leaves the pedestal, the walls begin to glow bright red.",
+              "transition_in_anchors": [
+                "glowing red walls",
+                "siren sound",
+                "alarm trigger"
+              ],
+              "consumes_outcome_from": "3:7",
+              "transition_out_text": "The sound of heavy boots echoes from the other side of the vault door.",
+              "transition_out_anchors": [
+                "heavy boots",
+                "vault door",
+                "approaching guards"
+              ],
+              "hands_off_to": "3:9"
+            },
+            {
+              "scene_id": 9,
+              "type": "action",
+              "outcome": "Artie leads the guards on a chaotic chase through the city market.",
+              "location_start_label": "Vault Corridor",
+              "location_end_label": "City Streets",
+              "location_start": "A narrow, magically lit corridor.",
+              "location_end": "The crowded city streets.",
+              "handoff_mode": "hard_cut",
+              "constraint_state": "fleeing",
+              "transition_in_text": "Artie bursts out of the citadel, nearly knocking over a fruit cart as he sprints.",
+              "transition_in_anchors": [
+                "citadel exit",
+                "fruit cart",
+                "sprint"
+              ],
+              "consumes_outcome_from": "3:8",
+              "transition_out_text": "He uses the 'Glitch-Crit' to jump over a building, leaving the guards staring in confusion.",
+              "transition_out_anchors": [
+                "building jump",
+                "confused guards",
+                "rooftop run"
+              ],
+              "hands_off_to": "3:10"
+            },
+            {
+              "scene_id": 10,
+              "type": "action",
+              "outcome": "Artie clears the city gates just as they slam shut.",
+              "location_start_label": "City Streets",
+              "location_end_label": "City Gates",
+              "location_start": "The crowded city streets.",
+              "location_end": "The massive outer gates of the city.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The city gates begin to descend, a massive wall of iron cutting off the exit.",
+              "transition_in_anchors": [
+                "descending gates",
+                "iron wall",
+                "final sprint"
+              ],
+              "consumes_outcome_from": "3:9",
+              "transition_out_text": "Artie slides under the iron bars at the last second, rolling out into the open wilderness.",
+              "transition_out_anchors": [
+                "iron bars",
+                "last second slide",
+                "wilderness escape"
+              ],
+              "end_condition_echo": "Artie escapes through the city gates with the guard in pursuit.",
+              "hands_off_to": "4:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 4,
+      "title": "The Glass Cannon Run",
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Welcome to the Glitch",
+          "end_condition": "Artie enters the heart of a Dead Zone where the System is visibly broken.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "type": "action",
+              "outcome": "Artie enters the Dead Zone to lose his pursuers.",
+              "location_start_label": "City Gates",
+              "location_end_label": "Dead Zone Border",
+              "location_start": "The massive outer gates of the city.",
+              "location_end": "The edge of a distorted landscape.",
+              "handoff_mode": "time_skip",
+              "constraint_state": "pursued",
+              "transition_in_text": "The city guards stop at the edge of the forest, refusing to follow Artie into the gray mist.",
+              "transition_in_anchors": [
+                "gray mist",
+                "guard hesitation",
+                "forest edge"
+              ],
+              "consumes_outcome_from": "3:10",
+              "transition_out_text": "The trees ahead are missing their textures, appearing as solid gray blocks.",
+              "transition_out_anchors": [
+                "gray block trees",
+                "missing textures",
+                "dead zone"
+              ],
+              "hands_off_to": "4:2"
+            },
+            {
+              "scene_id": 2,
+              "type": "action",
+              "outcome": "Artie encounters visual bugs that make navigation difficult.",
+              "location_start_label": "Dead Zone Border",
+              "location_end_label": "Dead Zone Border",
+              "location_start": "The edge of a distorted landscape.",
+              "location_end": "The edge of a distorted landscape.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie steps forward, but his vision splits into three identical overlapping views.",
+              "transition_in_anchors": [
+                "split vision",
+                "overlapping views",
+                "visual bug"
+              ],
+              "consumes_outcome_from": "4:1",
+              "transition_out_text": "He has to close two eyes just to see the path correctly.",
+              "transition_out_anchors": [
+                "closed eyes",
+                "distorted path",
+                "navigation struggle"
+              ],
+              "hands_off_to": "4:3"
+            },
+            {
+              "scene_id": 3,
+              "type": "action",
+              "outcome": "The pursuers are forced to turn back as the reality stability drops.",
+              "location_start_label": "Dead Zone Border",
+              "location_end_label": "Dead Zone Border",
+              "location_start": "The edge of a distorted landscape.",
+              "location_end": "The edge of a distorted landscape.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Behind him, the guards' leader shouts a final warning before retreating.",
+              "transition_in_anchors": [
+                "shouted warning",
+                "guard retreat",
+                "mist barrier"
+              ],
+              "consumes_outcome_from": "4:2",
+              "transition_out_text": "Artie is now truly alone in the broken part of the world.",
+              "transition_out_anchors": [
+                "true solitude",
+                "broken world",
+                "silent mist"
+              ],
+              "hands_off_to": "4:4"
+            },
+            {
+              "scene_id": 4,
+              "type": "action",
+              "outcome": "Artie reaches the center of the Dead Zone where gravity is inverted.",
+              "location_start_label": "Dead Zone Border",
+              "location_end_label": "Corrupted Glens",
+              "location_start": "The edge of a distorted landscape.",
+              "location_end": "A valley where rocks float upward.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The ground begins to slope upward, but Artie feels lighter with every step.",
+              "transition_in_anchors": [
+                "sloping ground",
+                "light steps",
+                "floating rocks"
+              ],
+              "consumes_outcome_from": "4:3",
+              "transition_out_text": "He looks up to see a lake of water hovering in the sky.",
+              "transition_out_anchors": [
+                "sky lake",
+                "inverted gravity",
+                "dead zone heart"
+              ],
+              "end_condition_echo": "Artie enters the heart of a Dead Zone where the System is visibly broken.",
+              "hands_off_to": "4:5"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Logic Errors",
+          "end_condition": "Artie survives a major reality-warping environmental hazard.",
+          "scenes": [
+            {
+              "scene_id": 5,
+              "type": "combat",
+              "outcome": "Artie is attacked by 'Corrupted Stalkers' that teleport randomly.",
+              "location_start_label": "Corrupted Glens",
+              "location_end_label": "Corrupted Glens",
+              "location_start": "A valley where rocks float upward.",
+              "location_end": "A valley where rocks float upward.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "A flicker of static appears to Artie's left, followed by a clawed hand.",
+              "transition_in_anchors": [
+                "static flicker",
+                "clawed hand",
+                "random teleport"
+              ],
+              "consumes_outcome_from": "4:4",
+              "transition_out_text": "The monsters blink in and out of existence, making them impossible to track.",
+              "transition_out_anchors": [
+                "blinking monsters",
+                "tracking failure",
+                "chaotic fight"
+              ],
+              "hands_off_to": "4:6"
+            },
+            {
+              "scene_id": 6,
+              "type": "action",
+              "outcome": "Artie falls into a 'texture-less' pit and must find his way out.",
+              "location_start_label": "Corrupted Glens",
+              "location_end_label": "Texture-less Pit",
+              "location_start": "A valley where rocks float upward.",
+              "location_end": "A perfectly flat, white expanse.",
+              "handoff_mode": "hard_cut",
+              "constraint_state": "free",
+              "transition_in_text": "Artie takes a step onto what looks like solid ground, but his foot passes right through.",
+              "transition_in_anchors": [
+                "missing collision",
+                "falling through",
+                "white expanse"
+              ],
+              "consumes_outcome_from": "4:5",
+              "transition_out_text": "He lands in a place where there is no light, no shadow, only flat white.",
+              "transition_out_anchors": [
+                "no shadow",
+                "flat white",
+                "texture-less pit"
+              ],
+              "hands_off_to": "4:7"
+            },
+            {
+              "scene_id": 7,
+              "type": "combat",
+              "outcome": "Artie fights a 'Null-Boss' that tries to delete his inventory.",
+              "location_start_label": "Texture-less Pit",
+              "location_end_label": "Texture-less Pit",
+              "location_start": "A perfectly flat, white expanse.",
+              "location_end": "A perfectly flat, white expanse.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "A giant eraser-like entity slides across the white floor toward Artie.",
+              "transition_in_anchors": [
+                "eraser entity",
+                "white floor",
+                "inventory threat"
+              ],
+              "consumes_outcome_from": "4:6",
+              "transition_out_text": "Artie watches as his sword turns semi-transparent, its data being wiped.",
+              "transition_out_anchors": [
+                "transparent sword",
+                "data wipe",
+                "desperate defense"
+              ],
+              "hands_off_to": "4:8"
+            },
+            {
+              "scene_id": 8,
+              "type": "action",
+              "outcome": "Artie uses the Cooldown Reset gem to 're-spawn' his deleted items.",
+              "location_start_label": "Texture-less Pit",
+              "location_end_label": "Corrupted Glens",
+              "location_start": "A perfectly flat, white expanse.",
+              "location_end": "A valley where rocks float upward.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie activates the gem, and a wave of green energy restores his gear.",
+              "transition_in_anchors": [
+                "green energy",
+                "gear restoration",
+                "gem activation"
+              ],
+              "consumes_outcome_from": "4:7",
+              "transition_out_text": "The white pit shatters like glass, returning Artie to the corrupted valley.",
+              "transition_out_anchors": [
+                "shattering pit",
+                "valley return",
+                "hazard survival"
+              ],
+              "end_condition_echo": "Artie survives a major reality-warping environmental hazard.",
+              "hands_off_to": "4:9"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Safe Mode",
+          "end_condition": "Artie finds and enters the hidden sanctuary.",
+          "scenes": [
+            {
+              "scene_id": 9,
+              "type": "action",
+              "outcome": "Artie spots a door that shouldn't exist in the middle of a field.",
+              "location_start_label": "Corrupted Glens",
+              "location_end_label": "Corrupted Glens",
+              "location_start": "A valley where rocks float upward.",
+              "location_end": "A valley where rocks float upward.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Amidst the floating rocks, a perfectly normal wooden door stands alone.",
+              "transition_in_anchors": [
+                "wooden door",
+                "isolated door",
+                "strange find"
+              ],
+              "consumes_outcome_from": "4:8",
+              "transition_out_text": "The door has a sign on it that reads 'SAFE MODE - AUTHORIZED ONLY'.",
+              "transition_out_anchors": [
+                "safe mode sign",
+                "authorized only",
+                "mysterious entrance"
+              ],
+              "hands_off_to": "4:10"
+            },
+            {
+              "scene_id": 10,
+              "type": "action",
+              "outcome": "Artie enters the door and finds a cozy library.",
+              "location_start_label": "Corrupted Glens",
+              "location_end_label": "Hidden Sanctuary",
+              "location_start": "A valley where rocks float upward.",
+              "location_end": "A warm, book-filled sanctuary.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "sheltered",
+              "transition_in_text": "Artie turns the handle and steps into a room filled with the smell of old paper.",
+              "transition_in_anchors": [
+                "old paper smell",
+                "warm lighting",
+                "book-filled walls"
+              ],
+              "consumes_outcome_from": "4:9",
+              "transition_out_text": "The chaos of the Dead Zone is instantly silenced as the door clicks shut.",
+              "transition_out_anchors": [
+                "clicking door",
+                "silenced chaos",
+                "safe interior"
+              ],
+              "hands_off_to": "4:11"
+            },
+            {
+              "scene_id": 11,
+              "type": "action",
+              "outcome": "Artie meets the 'Archivist' and learns about his class origins.",
+              "location_start_label": "Hidden Sanctuary",
+              "location_end_label": "Hidden Sanctuary",
+              "location_start": "A warm, book-filled sanctuary.",
+              "location_end": "A warm, book-filled sanctuary.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "sheltered",
+              "transition_in_text": "An elderly man in a digital-patterned robe looks up from a massive tome.",
+              "transition_in_anchors": [
+                "elderly man",
+                "digital robe",
+                "massive tome"
+              ],
+              "consumes_outcome_from": "4:10",
+              "transition_out_text": "The man explains that Artie's class is a leftover from the System's beta phase.",
+              "transition_out_anchors": [
+                "beta phase",
+                "class origin",
+                "archivist talk"
+              ],
+              "hands_off_to": "4:12"
+            },
+            {
+              "scene_id": 12,
+              "type": "action",
+              "outcome": "Artie is given a map to the 'Stability Patch' item.",
+              "location_start_label": "Hidden Sanctuary",
+              "location_end_label": "Hidden Sanctuary",
+              "location_start": "A warm, book-filled sanctuary.",
+              "location_end": "A warm, book-filled sanctuary.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "sheltered",
+              "transition_in_text": "The Archivist hands Artie a parchment that glows with internal data.",
+              "transition_in_anchors": [
+                "glowing parchment",
+                "data map",
+                "final objective"
+              ],
+              "consumes_outcome_from": "4:11",
+              "transition_out_text": "Artie prepares to leave the sanctuary, knowing exactly where he must go.",
+              "transition_out_anchors": [
+                "prepared departure",
+                "map in hand",
+                "sanctuary exit"
+              ],
+              "end_condition_echo": "Artie finds and enters the hidden sanctuary.",
+              "hands_off_to": "5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 5,
+      "title": "Optimization or Extinction",
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Anti-Glitched",
+          "end_condition": "The Bounty Hunter successfully corners Artie and disables his glitch abilities.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "type": "action",
+              "outcome": "Artie is tracked by Silas the Nullifier.",
+              "location_start_label": "Hidden Sanctuary",
+              "location_end_label": "Rocky Canyons",
+              "location_start": "A warm, book-filled sanctuary.",
+              "location_end": "A narrow, winding canyon.",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "Artie walks through the canyons, unaware of the silent figure following him from the ridges.",
+              "transition_in_anchors": [
+                "silent figure",
+                "canyon ridge",
+                "tracking gaze"
+              ],
+              "consumes_outcome_from": "4:12",
+              "transition_out_text": "A blue arrow suddenly appears above Artie's head, marking him as a target.",
+              "transition_out_anchors": [
+                "blue arrow",
+                "target mark",
+                "ambush start"
+              ],
+              "hands_off_to": "5:2"
+            },
+            {
+              "scene_id": 2,
+              "type": "combat",
+              "outcome": "Silas activates a 'Nullification Zone' that stabilizes the area.",
+              "location_start_label": "Rocky Canyons",
+              "location_end_label": "The Hunter's Trap",
+              "location_start": "A narrow, winding canyon.",
+              "location_end": "A flat, circular arena in the canyon.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Silas drops from the ridge, slamming a metallic rod into the ground.",
+              "transition_in_anchors": [
+                "metallic rod",
+                "ground slam",
+                "nullification field"
+              ],
+              "consumes_outcome_from": "5:1",
+              "transition_out_text": "Artie's flickering hands turn solid, and his glitch-crit multiplier vanishes.",
+              "transition_out_anchors": [
+                "solid hands",
+                "vanished multiplier",
+                "stabilized zone"
+              ],
+              "hands_off_to": "5:3"
+            },
+            {
+              "scene_id": 3,
+              "type": "action",
+              "outcome": "Artie is pinned down and realizes he can't use his exploits.",
+              "location_start_label": "The Hunter's Trap",
+              "location_end_label": "The Hunter's Trap",
+              "location_start": "A flat, circular arena in the canyon.",
+              "location_end": "A flat, circular arena in the canyon.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "detained",
+              "transition_in_text": "Silas points a crossbow at Artie's chest, his face completely hidden by a visor.",
+              "transition_in_anchors": [
+                "crossbow point",
+                "hidden face",
+                "pinned down"
+              ],
+              "consumes_outcome_from": "5:2",
+              "transition_out_text": "Artie tries to trigger a glitch, but the System returns a 'Feature Disabled' error.",
+              "transition_out_anchors": [
+                "feature disabled",
+                "system error",
+                "no exploits"
+              ],
+              "end_condition_echo": "The Bounty Hunter successfully corners Artie and disables his glitch abilities.",
+              "hands_off_to": "5:4"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Back to Basics",
+          "end_condition": "Artie defeats the Bounty Hunter using clever use of the environment.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "type": "combat",
+              "outcome": "Artie uses physical combat to survive the initial assault.",
+              "location_start_label": "The Hunter's Trap",
+              "location_end_label": "The Hunter's Trap",
+              "location_start": "A flat, circular arena in the canyon.",
+              "location_end": "A flat, circular arena in the canyon.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie kicks a cloud of dust into Silas's face and dives for cover.",
+              "transition_in_anchors": [
+                "dust cloud",
+                "diving for cover",
+                "physical struggle"
+              ],
+              "consumes_outcome_from": "5:3",
+              "transition_out_text": "He realizes he has to fight like a normal player for the first time.",
+              "transition_out_anchors": [
+                "normal player",
+                "basic combat",
+                "survival instinct"
+              ],
+              "hands_off_to": "5:5"
+            },
+            {
+              "scene_id": 5,
+              "type": "action",
+              "outcome": "Artie notices a loose boulder above the Nullification rod.",
+              "location_start_label": "The Hunter's Trap",
+              "location_end_label": "The Hunter's Trap",
+              "location_start": "A flat, circular arena in the canyon.",
+              "location_end": "A flat, circular arena in the canyon.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "While dodging bolts, Artie's eyes scan the canyon walls for any advantage.",
+              "transition_in_anchors": [
+                "dodging bolts",
+                "scanning walls",
+                "loose boulder"
+              ],
+              "consumes_outcome_from": "5:4",
+              "transition_out_text": "The boulder is held up by a single, thin vine.",
+              "transition_out_anchors": [
+                "thin vine",
+                "precarious rock",
+                "tactical plan"
+              ],
+              "hands_off_to": "5:6"
+            },
+            {
+              "scene_id": 6,
+              "type": "combat",
+              "outcome": "Artie destroys the Nullification rod by dropping the boulder on it.",
+              "location_start_label": "The Hunter's Trap",
+              "location_end_label": "The Hunter's Trap",
+              "location_start": "A flat, circular arena in the canyon.",
+              "location_end": "A flat, circular arena in the canyon.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie throws his sword at the vine, the blade slicing through it perfectly.",
+              "transition_in_anchors": [
+                "sword throw",
+                "vine slice",
+                "boulder fall"
+              ],
+              "consumes_outcome_from": "5:5",
+              "transition_out_text": "The boulder crushes the rod, and the purple field shatters instantly.",
+              "transition_out_anchors": [
+                "crushed rod",
+                "shattered field",
+                "glitch return"
+              ],
+              "hands_off_to": "5:7"
+            },
+            {
+              "scene_id": 7,
+              "type": "combat",
+              "outcome": "Artie uses a single Glitch-Crit to finish Silas.",
+              "location_start_label": "The Hunter's Trap",
+              "location_end_label": "Canyon Exit",
+              "location_start": "A flat, circular arena in the canyon.",
+              "location_end": "The far end of the canyon.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "With his powers restored, Artie hits Silas with a strike that deals infinite damage.",
+              "transition_in_anchors": [
+                "restored powers",
+                "infinite damage",
+                "final strike"
+              ],
+              "consumes_outcome_from": "5:6",
+              "transition_out_text": "Silas is knocked back into the canyon wall, his health bar hitting zero instantly.",
+              "transition_out_anchors": [
+                "zero health",
+                "canyon wall",
+                "hunter defeated"
+              ],
+              "end_condition_echo": "Artie defeats the Bounty Hunter using clever use of the environment.",
+              "hands_off_to": "5:8"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Scout's Warning",
+          "end_condition": "Artie realizes he is being hunted by a major guild.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "type": "action",
+              "outcome": "Artie loots a communication device from Silas.",
+              "location_start_label": "Canyon Exit",
+              "location_end_label": "Canyon Exit",
+              "location_start": "The far end of the canyon.",
+              "location_end": "The far end of the canyon.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie searches the hunter's body and finds a small, humming crystal.",
+              "transition_in_anchors": [
+                "humming crystal",
+                "body search",
+                "looted device"
+              ],
+              "consumes_outcome_from": "5:7",
+              "transition_out_text": "A voice speaks from the crystal, asking for a status report on the 'Anomaly'.",
+              "transition_out_anchors": [
+                "crystal voice",
+                "status report",
+                "anomaly label"
+              ],
+              "hands_off_to": "5:9"
+            },
+            {
+              "scene_id": 9,
+              "type": "action",
+              "outcome": "Artie hears the Guild's plan to send a full raid team after him.",
+              "location_start_label": "Canyon Exit",
+              "location_end_label": "Canyon Exit",
+              "location_start": "The far end of the canyon.",
+              "location_end": "The far end of the canyon.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The voice mentions the 'Iron Vanguard' and their arrival in the next hour.",
+              "transition_in_anchors": [
+                "iron vanguard",
+                "raid team",
+                "guild threat"
+              ],
+              "consumes_outcome_from": "5:8",
+              "transition_out_text": "Artie realizes Silas was just the scout, and the real fight is coming.",
+              "transition_out_anchors": [
+                "scout realization",
+                "real fight",
+                "impending raid"
+              ],
+              "end_condition_echo": "Artie realizes he is being hunted by a major guild.",
+              "hands_off_to": "6:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 6,
+      "title": "The One-Percent Chance",
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Storming the Lair",
+          "end_condition": "Artie reaches the inner sanctum of the regional boss.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "type": "action",
+              "outcome": "Artie reaches the entrance of the Data-Wraith's lair.",
+              "location_start_label": "Canyon Exit",
+              "location_end_label": "Boss Lair Approach",
+              "location_start": "The far end of the canyon.",
+              "location_end": "A massive, obsidian tower.",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "The obsidian tower looms ahead, surrounded by a swirling storm of digital snow.",
+              "transition_in_anchors": [
+                "obsidian tower",
+                "digital snow",
+                "lair entrance"
+              ],
+              "consumes_outcome_from": "5:9",
+              "transition_out_text": "The front gates are guarded by two massive, low-poly dragons.",
+              "transition_out_anchors": [
+                "low-poly dragons",
+                "front gates",
+                "guarded approach"
+              ],
+              "hands_off_to": "6:2"
+            },
+            {
+              "scene_id": 2,
+              "type": "combat",
+              "outcome": "Artie fights the outer guard using his Cooldown Reset gem.",
+              "location_start_label": "Boss Lair Approach",
+              "location_end_label": "Boss Lair Approach",
+              "location_start": "A massive, obsidian tower.",
+              "location_end": "A massive, obsidian tower.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The dragons roar, their voices sounding like grinding metal as they charge.",
+              "transition_in_anchors": [
+                "dragon roar",
+                "grinding metal",
+                "dragon charge"
+              ],
+              "consumes_outcome_from": "6:1",
+              "transition_out_text": "Artie spams his abilities, resetting the cooldowns every second to keep up the pressure.",
+              "transition_out_anchors": [
+                "ability spam",
+                "cooldown reset",
+                "constant pressure"
+              ],
+              "hands_off_to": "6:3"
+            },
+            {
+              "scene_id": 3,
+              "type": "combat",
+              "outcome": "Artie defeats the elite guardians and enters the tower.",
+              "location_start_label": "Boss Lair Approach",
+              "location_end_label": "Inner Sanctum",
+              "location_start": "A massive, obsidian tower.",
+              "location_end": "The dark, echoing halls of the tower.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "With a final blast of green energy, the dragons dissolve into pixels.",
+              "transition_in_anchors": [
+                "green energy blast",
+                "dissolving pixels",
+                "dragon defeat"
+              ],
+              "consumes_outcome_from": "6:2",
+              "transition_out_text": "Artie steps inside the tower, the air growing thick with the smell of ozone.",
+              "transition_out_anchors": [
+                "tower interior",
+                "ozone smell",
+                "echoing halls"
+              ],
+              "hands_off_to": "6:4"
+            },
+            {
+              "scene_id": 4,
+              "type": "action",
+              "outcome": "Artie reaches the elevator leading to the final boss arena.",
+              "location_start_label": "Inner Sanctum",
+              "location_end_label": "Inner Sanctum",
+              "location_start": "The dark, echoing halls of the tower.",
+              "location_end": "The dark, echoing halls of the tower.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "A platform of light waits at the end of the hall, pulsing with a steady rhythm.",
+              "transition_in_anchors": [
+                "light platform",
+                "steady rhythm",
+                "elevator"
+              ],
+              "consumes_outcome_from": "6:3",
+              "transition_out_text": "Artie steps onto the platform, and it begins to ascend rapidly.",
+              "transition_out_anchors": [
+                "platform ascent",
+                "rapid movement",
+                "approaching boss"
+              ],
+              "end_condition_echo": "Artie reaches the inner sanctum of the regional boss.",
+              "hands_off_to": "6:5"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The One-Percent Roll",
+          "end_condition": "The regional boss is defeated and the Stability Patch is dropped.",
+          "scenes": [
+            {
+              "scene_id": 5,
+              "type": "action",
+              "outcome": "Artie meets the Data-Wraith and the fight begins.",
+              "location_start_label": "Inner Sanctum",
+              "location_end_label": "Boss Arena",
+              "location_start": "The dark, echoing halls of the tower.",
+              "location_end": "A platform at the top of the tower.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The elevator stops at the top of the tower, where a massive shadowy figure waits.",
+              "transition_in_anchors": [
+                "tower top",
+                "shadowy figure",
+                "boss intro"
+              ],
+              "consumes_outcome_from": "6:4",
+              "transition_out_text": "The Data-Wraith raises its hand, and the floor begins to disintegrate.",
+              "transition_out_anchors": [
+                "wraith hand",
+                "disintegrating floor",
+                "combat start"
+              ],
+              "hands_off_to": "6:6"
+            },
+            {
+              "scene_id": 6,
+              "type": "combat",
+              "outcome": "Artie struggles against the Wraith's 'Phase-Shift' ability.",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "A platform at the top of the tower.",
+              "location_end": "A platform at the top of the tower.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie swings his sword, but it passes through the Wraith like smoke.",
+              "transition_in_anchors": [
+                "smoke-like body",
+                "phase shift",
+                "missed swing"
+              ],
+              "consumes_outcome_from": "6:5",
+              "transition_out_text": "The Wraith counters with a blast of corruption that nearly knocks Artie off the edge.",
+              "transition_out_anchors": [
+                "corruption blast",
+                "arena edge",
+                "near fall"
+              ],
+              "hands_off_to": "6:7"
+            },
+            {
+              "scene_id": 7,
+              "type": "combat",
+              "outcome": "The Wraith enters Phase 2, summoning dozens of glitch-mobs.",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "A platform at the top of the tower.",
+              "location_end": "A platform at the top of the tower.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The Wraith screams, and the air around it tears open, releasing smaller shadows.",
+              "transition_in_anchors": [
+                "wraith scream",
+                "air tear",
+                "glitch mobs"
+              ],
+              "consumes_outcome_from": "6:6",
+              "transition_out_text": "Artie is surrounded, his health bar flashing red as he takes hit after hit.",
+              "transition_out_anchors": [
+                "red health bar",
+                "surrounded",
+                "hit impact"
+              ],
+              "hands_off_to": "6:8"
+            },
+            {
+              "scene_id": 8,
+              "type": "combat",
+              "outcome": "Artie gambles on a 'Total System Crash' glitch to win.",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "A platform at the top of the tower.",
+              "location_end": "A platform at the top of the tower.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie stops fighting and begins to open every menu, settings, and log file at once.",
+              "transition_in_anchors": [
+                "menu spam",
+                "log files",
+                "system overload"
+              ],
+              "consumes_outcome_from": "6:7",
+              "transition_out_text": "The world begins to stutter, the Wraith's movements slowing to a crawl.",
+              "transition_out_anchors": [
+                "world stutter",
+                "slow motion",
+                "lag exploit"
+              ],
+              "hands_off_to": "6:9"
+            },
+            {
+              "scene_id": 9,
+              "type": "combat",
+              "outcome": "The Wraith is deleted by the lag, dropping the Stability Patch.",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "A platform at the top of the tower.",
+              "location_end": "A platform at the top of the tower.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The Wraith's model stretches and distorts until it simply pops out of existence.",
+              "transition_in_anchors": [
+                "model stretch",
+                "existence pop",
+                "boss deletion"
+              ],
+              "consumes_outcome_from": "6:8",
+              "transition_out_text": "A golden disk falls to the ground, glowing with a stable, white light.",
+              "transition_out_anchors": [
+                "golden disk",
+                "white light",
+                "stability patch"
+              ],
+              "end_condition_echo": "The regional boss is defeated and the Stability Patch is dropped.",
+              "hands_off_to": "6:10"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Critical Exposure",
+          "end_condition": "Artie's exact location is broadcast to the entire world.",
+          "scenes": [
+            {
+              "scene_id": 10,
+              "type": "action",
+              "outcome": "Artie picks up the Stability Patch.",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "A platform at the top of the tower.",
+              "location_end": "A platform at the top of the tower.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie reaches for the golden disk, his hands finally stopping their flickering.",
+              "transition_in_anchors": [
+                "golden disk",
+                "solid hands",
+                "loot pickup"
+              ],
+              "consumes_outcome_from": "6:9",
+              "transition_out_text": "The moment he touches it, a massive pillar of light shoots into the sky.",
+              "transition_out_anchors": [
+                "light pillar",
+                "sky beam",
+                "event trigger"
+              ],
+              "hands_off_to": "6:11"
+            },
+            {
+              "scene_id": 11,
+              "type": "action",
+              "outcome": "A global announcement identifies Artie as the 'World Boss'.",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "A platform at the top of the tower.",
+              "location_end": "A platform at the top of the tower.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "A booming voice echoes across the entire world, audible even to Artie.",
+              "transition_in_anchors": [
+                "booming voice",
+                "global echo",
+                "system announcement"
+              ],
+              "consumes_outcome_from": "6:10",
+              "transition_out_text": "The voice declares that the anomaly has been located and a bounty has been set.",
+              "transition_out_anchors": [
+                "anomaly located",
+                "bounty set",
+                "public target"
+              ],
+              "hands_off_to": "6:12"
+            },
+            {
+              "scene_id": 12,
+              "type": "action",
+              "outcome": "Artie sees his own coordinates appearing in the sky.",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "A platform at the top of the tower.",
+              "location_end": "A platform at the top of the tower.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Artie looks up and sees massive red numbers floating in the clouds above him.",
+              "transition_in_anchors": [
+                "red numbers",
+                "cloud display",
+                "coordinate reveal"
+              ],
+              "consumes_outcome_from": "6:11",
+              "transition_out_text": "He realizes he has no more places to hide.",
+              "transition_out_anchors": [
+                "no hiding",
+                "exposed",
+                "looming threat"
+              ],
+              "end_condition_echo": "Artie's exact location is broadcast to the entire world.",
+              "hands_off_to": "7:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 7,
+      "title": "Outrunning the Patch Notes",
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Patching the Hole",
+          "end_condition": "The 'Stability Patch' is successfully integrated into Artie's character sheet.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "type": "action",
+              "outcome": "Artie retreats to a nearby cave to use the patch.",
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Safe House",
+              "location_start": "A platform at the top of the tower.",
+              "location_end": "A small, hidden cave.",
+              "handoff_mode": "time_skip",
+              "constraint_state": "pursued",
+              "transition_in_text": "Artie dives into a small cave as the first group of players arrives at the tower.",
+              "transition_in_anchors": [
+                "cave entrance",
+                "player arrival",
+                "hiding"
+              ],
+              "consumes_outcome_from": "6:12",
+              "transition_out_text": "He pulls out the golden disk, his heart racing.",
+              "transition_out_anchors": [
+                "golden disk",
+                "racing heart",
+                "desperate moment"
+              ],
+              "hands_off_to": "7:2"
+            },
+            {
+              "scene_id": 2,
+              "type": "action",
+              "outcome": "The patch process begins, causing intense pain.",
+              "location_start_label": "Safe House",
+              "location_end_label": "Safe House",
+              "location_start": "A small, hidden cave.",
+              "location_end": "A small, hidden cave.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie presses the disk to his chest, and a searing heat spreads through his body.",
+              "transition_in_anchors": [
+                "searing heat",
+                "chest press",
+                "patching pain"
+              ],
+              "consumes_outcome_from": "7:1",
+              "transition_out_text": "His character sheet flashes through thousands of lines of code per second.",
+              "transition_out_anchors": [
+                "flashing code",
+                "data stream",
+                "re-writing"
+              ],
+              "hands_off_to": "7:3"
+            },
+            {
+              "scene_id": 3,
+              "type": "action",
+              "outcome": "Artie's stability hits 100%, and his class is permanently modified.",
+              "location_start_label": "Safe House",
+              "location_end_label": "Safe House",
+              "location_start": "A small, hidden cave.",
+              "location_end": "A small, hidden cave.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The heat fades, leaving Artie feeling more 'real' than he ever has in this world.",
+              "transition_in_anchors": [
+                "fading heat",
+                "feeling real",
+                "solid presence"
+              ],
+              "consumes_outcome_from": "7:2",
+              "transition_out_text": "His class name changes from 'Glitch-Crit' to 'System-Breaker'.",
+              "transition_out_anchors": [
+                "class change",
+                "system breaker",
+                "new power"
+              ],
+              "end_condition_echo": "The 'Stability Patch' is successfully integrated into Artie's character sheet.",
+              "hands_off_to": "7:4"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Deletion Event",
+          "end_condition": "Artie narrowly escapes the collapsing zone.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "type": "action",
+              "outcome": "The System begins a 'Zone Reset' to purge Artie.",
+              "location_start_label": "Safe House",
+              "location_end_label": "Collapsing Zone",
+              "location_start": "A small, hidden cave.",
+              "location_end": "The dissolving landscape.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "The walls of the cave begin to turn into white cubes and vanish.",
+              "transition_in_anchors": [
+                "white cubes",
+                "vanishing walls",
+                "zone reset"
+              ],
+              "consumes_outcome_from": "7:3",
+              "transition_out_text": "Artie runs out of the cave to find the entire region dissolving around him.",
+              "transition_out_anchors": [
+                "dissolving region",
+                "fleeing",
+                "world end"
+              ],
+              "hands_off_to": "7:5"
+            },
+            {
+              "scene_id": 5,
+              "type": "action",
+              "outcome": "Artie uses his new abilities to 'bridge' the gaps in reality.",
+              "location_start_label": "Collapsing Zone",
+              "location_end_label": "Collapsing Zone",
+              "location_start": "The dissolving landscape.",
+              "location_end": "The dissolving landscape.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "A massive chasm opens in front of him, but Artie 'manifests' a temporary platform.",
+              "transition_in_anchors": [
+                "massive chasm",
+                "manifested platform",
+                "reality bridge"
+              ],
+              "consumes_outcome_from": "7:4",
+              "transition_out_text": "He leaps across the void, the platform vanishing just as his feet leave it.",
+              "transition_out_anchors": [
+                "void leap",
+                "vanishing platform",
+                "narrow miss"
+              ],
+              "hands_off_to": "7:6"
+            },
+            {
+              "scene_id": 6,
+              "type": "action",
+              "outcome": "Artie reaches the regional border just as the zone is deleted.",
+              "location_start_label": "Collapsing Zone",
+              "location_end_label": "Regional Border",
+              "location_start": "The dissolving landscape.",
+              "location_end": "The shimmering line between regions.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "The white void is inches from his heels as Artie sprints for the shimmering regional line.",
+              "transition_in_anchors": [
+                "white void",
+                "regional line",
+                "final sprint"
+              ],
+              "consumes_outcome_from": "7:5",
+              "transition_out_text": "He dives through the barrier just as the world behind him turns into nothingness.",
+              "transition_out_anchors": [
+                "barrier dive",
+                "nothingness",
+                "narrow escape"
+              ],
+              "end_condition_echo": "Artie narrowly escapes the collapsing zone.",
+              "hands_off_to": "7:7"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "New Region, New Problems",
+          "end_condition": "Artie crosses the border into the next region as a global target.",
+          "scenes": [
+            {
+              "scene_id": 7,
+              "type": "action",
+              "outcome": "Artie arrives in the 'High-Level Wastes' and sees his bounty is now 1,000,000 gold.",
+              "location_start_label": "Regional Border",
+              "location_end_label": "High-Level Wastes",
+              "location_start": "The shimmering line between regions.",
+              "location_end": "A desolate, volcanic landscape.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "Artie rolls to a stop on a patch of black sand, the air smelling of sulfur.",
+              "transition_in_anchors": [
+                "black sand",
+                "sulfur smell",
+                "volcanic landscape"
+              ],
+              "consumes_outcome_from": "7:6",
+              "transition_out_text": "A new bounty poster appears in his UI, with his face and a massive reward.",
+              "transition_out_anchors": [
+                "bounty poster",
+                "massive reward",
+                "public target"
+              ],
+              "hands_off_to": "7:8"
+            },
+            {
+              "scene_id": 8,
+              "type": "action",
+              "outcome": "Artie smiles and prepares for the next phase of his journey.",
+              "location_start_label": "High-Level Wastes",
+              "location_end_label": "High-Level Wastes",
+              "location_start": "A desolate, volcanic landscape.",
+              "location_end": "A desolate, volcanic landscape.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie checks his new stats and sees that he's no longer just a glitch; he's a feature.",
+              "transition_in_anchors": [
+                "new stats",
+                "determined smile",
+                "volcanic horizon"
+              ],
+              "consumes_outcome_from": "7:7",
+              "end_condition_echo": "Artie crosses the border into the next region as a global target."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

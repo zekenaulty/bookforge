@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "LOC_WHITE_VOID_ENTRANCE",
+    "recent_facts": [
+      "Artie died in a hospital on Earth.",
+      "Artie transitioned into a digital void.",
+      "Artie received his first System notifications."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_GLITCH",
+      "THREAD_SYSTEM_PURGE"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "Crinkled Dollar Bill",
+          "item_id": "ITEM_DOLLAR_BILL",
+          "container": "hand_right",
+          "status": "carried"
+        },
+        {
+          "item": "Leather Wallet",
+          "item_id": "ITEM_WALLET",
+          "container": "pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "Employee ID Badge",
+          "item_id": "ITEM_BADGE",
+          "container": "pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_DOLLAR_BILL"
+          ]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_BADGE"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is processing his death with characteristic cynicism and snark."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 1
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 10,
+            "max": 10
+          }
+        },
+        "titles": [
+          {
+            "name": "Disgruntled Employee",
+            "source": "background",
+            "active": true
+          }
+        ],
+        "reason": "System initialization and HP restoration upon entering the tutorial."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 1
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie dies in his hospital bed and awakens in a featureless white void.",
+      "A System interface greets him, identifying him as a candidate for the 'Great Integration' tutorial."
+    ],
+    "key_events": [
+      "Artie experiences biological death on Earth.",
+      "Artie arrives at the White Void Entrance.",
+      "Artie retains his mundane possessions: a dollar bill, a wallet, and an ID badge.",
+      "The System initializes Artie's player status and restores his HP to 10."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie HP is 1/10.",
+      "milestone: tutorial_entry = DONE",
+      "inventory: CHAR_ARTIE -> Crinkled Dollar Bill (status=carried, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_left)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=stowed, container=pocket_right)",
+      "location: LOC_WHITE_VOID_ENTRANCE"
+    ],
+    "chapter_so_far_add": [
+      "Artie died and was brought into the System tutorial."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "lanky",
+      "late-twenties",
+      "mousy",
+      "brown",
+      "hair",
+      "tired",
+      "hazel",
+      "eyes."
+    ]
+  }
+}

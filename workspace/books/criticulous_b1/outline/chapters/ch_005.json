@@ -1,310 +1,485 @@
 {
   "chapter_id": 5,
-  "title": "The Tournament of Tiers",
-  "goal": "Artie must fight through the brackets without taking a single point of damage.",
-  "chapter_role": "trial",
-  "stakes_shift": "Public exposure turns Artie from a hidden glitch into a populist hero and a high-priority System threat.",
+  "title": "Friends with Benefits (and Buffs)",
+  "goal": "Recruit a disgraced shield-maiden, Silna, to act as a literal meat-shield for Artie's fragile existence.",
+  "chapter_role": "alliance",
+  "stakes_shift": "Artie's solo exploitation becomes a team effort, complicating his 'Hit & Run' tactics with social loyalty.",
   "bridge": {
-    "from_prev": "Artie is the underdog in the arena.",
-    "to_next": "Artie reaches the finals against Vane."
+    "from_prev": "Artie barely escapes the Stalker and realizes he needs a tank to survive the next floor.",
+    "to_next": "Silna agrees to help if Artie assists her in reclaiming her stolen family heirloom from a local tyrant."
   },
   "pacing": {
-    "intensity": 4,
+    "intensity": 3,
     "tempo": "steady",
-    "expected_scene_count": 11
+    "expected_scene_count": 10
   },
   "sections": [
     {
       "section_id": 1,
-      "title": "The Round of 32",
-      "intent": "Showcase Artie's growing tactical creativity and the System's attempt to nerf him mid-match.",
+      "title": "The Disgraced Shield-Maiden",
+      "intent": "Introduce Silna and establish her current low status in Oakhaven.",
+      "end_condition": "Artie locates Silna in a back-alley pit-fighting ring.",
       "scenes": [
         {
           "scene_id": 1,
-          "summary": "Artie faces a 'Tank' and wins instantly by critting the Tank's belt buckle, causing a disqualification.",
-          "type": "action",
-          "outcome": "The crowd goes wild; Artie is the 'One-Hit Wonder'.",
+          "summary": "Artie searches the slums of Oakhaven for a tank.",
+          "type": "setup",
+          "outcome": "Artie hears rumors of a fallen warrior in the pits.",
           "characters": [
             "CHAR_ARTIE"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "5:2",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+          "threads": [
+            "THREAD_GLITCH"
           ],
-          "transition_in_text": "The scene opens at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "location_start": "Oakhaven Slums",
+          "location_start_id": "LOC_OAKHAVEN_SLUMS",
+          "location_start_label": "Oakhaven Slums",
+          "location_end": "Oakhaven Slums",
+          "location_end_id": "LOC_OAKHAVEN_SLUMS",
+          "location_end_label": "Oakhaven Slums",
+          "handoff_mode": "time_skip",
+          "constraint_state": "free",
+          "transition_in_text": "The rain in Oakhaven smells like wet soot and cheap ale as Artie navigates the narrow alleys of the slums.",
+          "transition_in_anchors": [
+            "wet soot",
+            "cheap ale",
+            "narrow alleys"
+          ],
+          "transition_out_text": "A group of beggars points toward a cellar door where the sound of cheering and clashing steel echoes.",
+          "transition_out_anchors": [
+            "cellar door",
+            "clashing steel",
+            "muffled cheers"
+          ],
+          "hands_off_to": "5:2",
+          "seam_score": 35,
+          "seam_resolution": "micro_scene"
         },
         {
           "scene_id": 2,
-          "summary": "The System tries to nerf Artie mid-match by introducing 'Wind Resistance' to the arena.",
-          "type": "escalation",
-          "outcome": "Artie has to learn to time his punches with the wind gusts.",
+          "summary": "Artie enters the pit-fighting arena.",
+          "type": "development",
+          "outcome": "Artie witnesses Silna's incredible defensive skills.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_SILNA"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "5:3",
+          "threads": [
+            "THREAD_GLITCH"
+          ],
+          "introduces": [
+            "CHAR_SILNA"
+          ],
           "consumes_outcome_from": "5:1",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Oakhaven Slums",
+          "location_start_id": "LOC_OAKHAVEN_SLUMS",
+          "location_start_label": "Oakhaven Slums",
+          "location_end": "The Pit Arena",
+          "location_end_id": "LOC_THE_PIT_ARENA",
+          "location_end_label": "The Pit Arena",
+          "handoff_mode": "arrival_checkpoint",
+          "constraint_state": "free",
+          "transition_in_text": "Artie descends the stairs into a smoke-filled room where a large woman with a scarred shield stands in a circle of sand.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "smoke-filled room",
+            "scarred shield",
+            "circle of sand"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "She blocks a blow that would have shattered a lesser warrior, her expression one of grim determination.",
+          "transition_out_anchors": [
+            "shattered blow",
+            "grim determination",
+            "vibrating shield"
+          ],
+          "hands_off_to": "5:3",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 3,
-          "summary": "Artie wins the next round by critting the air so hard it creates a vacuum, sucking his opponent out of the ring.",
-          "type": "action",
-          "outcome": "Artie moves to the quarter-finals after vacuum-critting his opponent out of the ring.",
+          "summary": "Artie approaches Silna after her match.",
+          "type": "climax",
+          "outcome": "Artie identifies Silna as the perfect partner.",
           "characters": [
-            "CHAR_ARTIE"
+            "CHAR_ARTIE",
+            "CHAR_SILNA"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "5:4",
+          "threads": [
+            "THREAD_GLITCH"
+          ],
           "consumes_outcome_from": "5:2",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "The Pit Arena",
+          "location_start_id": "LOC_THE_PIT_ARENA",
+          "location_start_label": "The Pit Arena",
+          "location_end": "The Pit Arena",
+          "location_end_id": "LOC_THE_PIT_ARENA",
+          "location_end_label": "The Pit Arena",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "free",
+          "transition_in_text": "The crowd disperses as the match ends, leaving Silna alone in the center of the pit, wiping sweat from her brow.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "dispersing crowd",
+            "sweat on brow",
+            "bloodied sand"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "end_condition_echo": "Artie moves to the quarter-finals after vacuum-critting his opponent out of the ring.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "Artie steps into the sand, his silver robes a stark contrast to the grime of the cellar.",
+          "transition_out_anchors": [
+            "silver robes",
+            "grimy cellar",
+            "outstretched hand"
+          ],
+          "hands_off_to": "5:4",
+          "end_condition_echo": "Artie locates Silna in a back-alley pit-fighting ring.",
+          "seam_score": 35,
+          "seam_resolution": "micro_scene"
         }
       ]
     },
     {
       "section_id": 2,
-      "title": "The Mirror Match",
-      "intent": "Artie faces a high-evasion rogue, forcing him to use unconventional environmental exploits.",
+      "title": "The Tyrant's Heirloom",
+      "intent": "Provide Silna with a motivation to join Artie's high-risk mission.",
+      "end_condition": "Silna agrees to the partnership in exchange for help reclaiming her family crest.",
       "scenes": [
         {
           "scene_id": 4,
-          "summary": "Artie's opponent is a 'Dodge-Build' rogue who also has low HP, leading to a stalemate.",
+          "summary": "Silna tells Artie about her history and the stolen crest.",
           "type": "setup",
-          "outcome": "The fight becomes a high-speed game of tag.",
+          "outcome": "Artie learns about Lord Vane's theft.",
           "characters": [
-            "CHAR_ARTIE"
+            "CHAR_ARTIE",
+            "CHAR_SILNA"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "5:5",
+          "threads": [
+            "THREAD_SILNA_HEIRLOOM"
+          ],
+          "introduces": [
+            "CHAR_TYRANT"
+          ],
           "consumes_outcome_from": "5:3",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "The Pit Arena",
+          "location_start_id": "LOC_THE_PIT_ARENA",
+          "location_start_label": "The Pit Arena",
+          "location_end": "A Quiet Tavern",
+          "location_end_id": "LOC_A_QUIET_TAVERN",
+          "location_end_label": "A Quiet Tavern",
+          "handoff_mode": "arrival_checkpoint",
+          "constraint_state": "sheltered",
+          "transition_in_text": "They sit in a dark corner of a nearby tavern, the flickering candlelight casting long shadows across Silna's face.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "flickering candlelight",
+            "dark corner",
+            "wooden table"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "She speaks of Lord Vane and the heirloom that was taken from her family as a 'tax'.",
+          "transition_out_anchors": [
+            "Lord Vane",
+            "family heirloom",
+            "stolen crest"
+          ],
+          "hands_off_to": "5:5",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 5,
-          "summary": "Neither can land a hit for ten minutes, and the crowd begins to boo the lack of action.",
-          "type": "escalation",
-          "outcome": "Artie realizes he needs to change his strategy.",
+          "summary": "Artie proposes a deal to Silna.",
+          "type": "development",
+          "outcome": "Artie promises to use his 'crit' build to help her.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_SILNA"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "5:6",
+          "threads": [
+            "THREAD_GLITCH",
+            "THREAD_SILNA_HEIRLOOM"
+          ],
           "consumes_outcome_from": "5:4",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "A Quiet Tavern",
+          "location_start_id": "LOC_A_QUIET_TAVERN",
+          "location_start_label": "A Quiet Tavern",
+          "location_end": "A Quiet Tavern",
+          "location_end_id": "LOC_A_QUIET_TAVERN",
+          "location_end_label": "A Quiet Tavern",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "sheltered",
+          "transition_in_text": "Artie leans forward, his voice low as he explains the unique nature of his glitched abilities.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "low voice",
+            "glitched abilities",
+            "intense gaze"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "Silna looks at him with a mix of skepticism and desperate hope.",
+          "transition_out_anchors": [
+            "skeptical look",
+            "desperate hope",
+            "clenched fist"
+          ],
+          "hands_off_to": "5:6",
+          "seam_score": 10,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 6,
-          "summary": "Artie uses his 'Participation Trophy' to lure a swarm of arena-flies, distracting the rogue for a finishing crit.",
-          "type": "choice",
-          "outcome": "Artie wins, but the 'Trophy' is now glowing with dark energy.",
+          "summary": "Artie demonstrates his power to Silna.",
+          "type": "development",
+          "outcome": "Silna is impressed by Artie's damage output.",
           "characters": [
-            "CHAR_ARTIE"
+            "CHAR_ARTIE",
+            "CHAR_SILNA"
           ],
           "threads": [
-            "THREAD_SYSTEM_GLITCH"
+            "THREAD_GLITCH"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "5:7",
           "consumes_outcome_from": "5:5",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "A Quiet Tavern",
+          "location_start_id": "LOC_A_QUIET_TAVERN",
+          "location_start_label": "A Quiet Tavern",
+          "location_end": "Tavern Backyard",
+          "location_end_id": "LOC_TAVERN_BACKYARD",
+          "location_end_label": "Tavern Backyard",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "free",
+          "transition_in_text": "They step out into the backyard, where Artie strikes a heavy wooden post, shattering it instantly.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "wooden post",
+            "shattered wood",
+            "golden crit flash"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "Silna touches the splintered remains, her eyes wide as she realizes the potential of his power.",
+          "transition_out_anchors": [
+            "splintered remains",
+            "wide eyes",
+            "heavy shield"
+          ],
+          "hands_off_to": "5:7",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 7,
-          "summary": "The System issues a 'Warning' to Artie for 'Unsportsmanlike Exploitation' following the fly tactic.",
-          "type": "consequence",
-          "outcome": "Artie wins but receives a System warning for 'Unsportsmanlike Exploitation'.",
+          "summary": "Silna accepts the partnership.",
+          "type": "climax",
+          "outcome": "The duo is officially formed.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_SILNA"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "5:8",
+          "threads": [
+            "THREAD_SILNA_HEIRLOOM"
+          ],
           "consumes_outcome_from": "5:6",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Tavern Backyard",
+          "location_start_id": "LOC_TAVERN_BACKYARD",
+          "location_start_label": "Tavern Backyard",
+          "location_end": "Tavern Backyard",
+          "location_end_id": "LOC_TAVERN_BACKYARD",
+          "location_end_label": "Tavern Backyard",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "free",
+          "transition_in_text": "Silna offers her hand, her grip like iron as she seals the agreement.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "iron grip",
+            "sealed agreement",
+            "determined nod"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "end_condition_echo": "Artie wins but receives a System warning for 'Unsportsmanlike Exploitation'.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "They begin planning their first move against the Keep.",
+          "transition_out_anchors": [
+            "whispered plans",
+            "gathering gear",
+            "setting sun"
+          ],
+          "hands_off_to": "5:8",
+          "end_condition_echo": "Silna agrees to the partnership in exchange for help reclaiming her family crest.",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         }
       ]
     },
     {
       "section_id": 3,
-      "title": "The Semi-Finals",
-      "intent": "Artie overcomes a mechanical handicap ('Inverted Controls') to reach the finals.",
+      "title": "The Unlikely Duo",
+      "intent": "Establish the tactical synergy between a 1 HP crit-machine and a pure tank.",
+      "end_condition": "Artie and Silna successfully complete a practice skirmish together.",
       "scenes": [
         {
           "scene_id": 8,
-          "summary": "Artie's debuff for the semi-finals is 'Inverted Controls,' making every movement erratic.",
-          "type": "setup",
-          "outcome": "Artie looks like he's drunk-fighting.",
+          "summary": "Transition handoff from Tavern Backyard to Oakhaven Outskirts.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
           "characters": [
-            "CHAR_ARTIE"
+            "CHAR_ARTIE",
+            "CHAR_SILNA"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "5:9",
+          "threads": [
+            "THREAD_SILNA_HEIRLOOM"
+          ],
           "consumes_outcome_from": "5:7",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Tavern Backyard",
+          "location_start_id": "LOC_TAVERN_BACKYARD",
+          "location_start_label": "Tavern Backyard",
+          "location_end": "Oakhaven Outskirts",
+          "location_end_id": "LOC_OAKHAVEN_OUTSKIRTS",
+          "location_end_label": "Oakhaven Outskirts",
+          "handoff_mode": "time_skip",
+          "constraint_state": "free",
+          "transition_in_text": "After a time skip, the movement from Tavern Backyard to Oakhaven Outskirts is realized on page.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "setting sun",
+            "distant city walls",
+            "packed gear"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "This beat pushes into a time skip toward Oakhaven Outskirts.",
+          "transition_out_anchors": [
+            "setting sun",
+            "distant city walls",
+            "packed gear"
+          ],
+          "hands_off_to": "5:9",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 9,
-          "summary": "Artie's opponent is a Mage who uses AOE spells, forcing Artie to 'moonwalk' through the fireballs.",
-          "type": "action",
-          "outcome": "Artie manages to reach the Mage and lands a crit that turns the Mage's staff into a rubber chicken.",
+          "summary": "Artie and Silna practice their coordination in the woods.",
+          "type": "setup",
+          "outcome": "They learn to time Silna's 'Taunt' with Artie's strikes.",
           "characters": [
-            "CHAR_ARTIE"
+            "CHAR_ARTIE",
+            "CHAR_SILNA"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "5:10",
+          "threads": [
+            "THREAD_GLITCH"
+          ],
           "consumes_outcome_from": "5:8",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Oakhaven Outskirts",
+          "location_start_id": "LOC_OAKHAVEN_OUTSKIRTS",
+          "location_start_label": "Oakhaven Outskirts",
+          "location_end": "Training Grounds",
+          "location_end_id": "LOC_TRAINING_GROUNDS",
+          "location_end_label": "Training Grounds",
+          "handoff_mode": "time_skip",
+          "constraint_state": "free",
+          "transition_in_text": "The morning sun filters through the trees as Artie and Silna find a secluded clearing to practice.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "morning sun",
+            "secluded clearing",
+            "rustling leaves"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "Silna slams her shield into the ground, drawing the attention of a nearby training dummy.",
+          "transition_out_anchors": [
+            "shield slam",
+            "training dummy",
+            "taunt skill"
+          ],
+          "hands_off_to": "5:10",
+          "seam_score": 20,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 10,
-          "summary": "The Mage surrenders out of pure embarrassment, sending Artie to the finals.",
-          "type": "aftermath",
-          "outcome": "Artie reaches the finals.",
+          "summary": "A real monster interrupts their training.",
+          "type": "conflict",
+          "outcome": "They defeat the monster using their new synergy.",
           "characters": [
-            "CHAR_ARTIE"
+            "CHAR_ARTIE",
+            "CHAR_SILNA"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "5:11",
+          "threads": [
+            "THREAD_GLITCH"
+          ],
           "consumes_outcome_from": "5:9",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Training Grounds",
+          "location_start_id": "LOC_TRAINING_GROUNDS",
+          "location_start_label": "Training Grounds",
+          "location_end": "Training Grounds",
+          "location_end_id": "LOC_TRAINING_GROUNDS",
+          "location_end_label": "Training Grounds",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "engaged_combat",
+          "transition_in_text": "A feral boar, twice the size of a normal one, bursts from the undergrowth, charging at Artie's exposed flank.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "feral boar",
+            "charging motion",
+            "snorting breath"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "Silna intercepts the charge with a thunderous impact, leaving the beast stunned for Artie's strike.",
+          "transition_out_anchors": [
+            "thunderous impact",
+            "stunned beast",
+            "silver flash"
+          ],
+          "hands_off_to": "5:11",
+          "seam_score": 50,
+          "seam_resolution": "micro_scene"
         },
         {
           "scene_id": 11,
-          "summary": "Vane watches from the wings, holding a 'System Override' scroll he bought from the black market to rig the final match.",
-          "type": "reveal",
-          "outcome": "Vane prepares to use a 'System Override' scroll to rig the final fight.",
+          "summary": "Transition handoff from Training Grounds to Training Grounds.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
           "characters": [
-            "CHAR_VANE"
+            "CHAR_ARTIE",
+            "CHAR_SILNA"
           ],
           "threads": [
-            "THREAD_VANE_RIVALRY"
+            "THREAD_GLITCH"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "5:10",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Training Grounds",
+          "location_start_id": "LOC_TRAINING_GROUNDS",
+          "location_start_label": "Training Grounds",
+          "location_end": "Training Grounds",
+          "location_end_id": "LOC_TRAINING_GROUNDS",
+          "location_end_label": "Training Grounds",
+          "handoff_mode": "aftermath_relocation",
+          "constraint_state": "free",
+          "transition_in_text": "After a aftermath relocation, the movement from Training Grounds to Training Grounds is realized on page.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "panting breath",
+            "bloodied sand",
+            "sheathed weapons"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "end_condition_echo": "Vane prepares to use a 'System Override' scroll to rig the final fight.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "This beat pushes into a aftermath relocation toward Training Grounds.",
+          "transition_out_anchors": [
+            "panting breath",
+            "bloodied sand",
+            "sheathed weapons"
+          ],
+          "hands_off_to": "5:12",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 12,
+          "summary": "They celebrate their successful hunt.",
+          "type": "climax",
+          "outcome": "Artie and Silna are ready for the Keep.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_SILNA"
+          ],
+          "threads": [
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "5:11",
+          "location_start": "Training Grounds",
+          "location_start_id": "LOC_TRAINING_GROUNDS",
+          "location_start_label": "Training Grounds",
+          "location_end": "Training Grounds",
+          "location_end_id": "LOC_TRAINING_GROUNDS",
+          "location_end_label": "Training Grounds",
+          "handoff_mode": "aftermath_relocation",
+          "constraint_state": "free",
+          "transition_in_text": "The boar collapses into a heap of loot and meat, and the two warriors share a triumphant look.",
+          "transition_in_anchors": [
+            "loot drop",
+            "triumphant look",
+            "panting breath"
+          ],
+          "end_condition_echo": "Artie and Silna successfully complete a practice skirmish together.",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         }
       ]
     }

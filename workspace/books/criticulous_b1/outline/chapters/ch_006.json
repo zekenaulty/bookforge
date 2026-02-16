@@ -1,12 +1,12 @@
 {
   "chapter_id": 6,
-  "title": "The Final Roll",
-  "goal": "Defeat Vane and survive the System's attempt to delete Artie.",
-  "chapter_role": "climax",
-  "stakes_shift": "The conflict escalates from a personal duel to a reality-breaking crash of the entire game world.",
+  "title": "The Raid on Red-Tier Keep",
+  "goal": "Utilize a 'Damage Overflow' exploit to one-shot a regional boss that usually requires a forty-man raid.",
+  "chapter_role": "confrontation",
+  "stakes_shift": "The boss's death destabilizes the local political power, making Artie a kingmaker (or a criminal).",
   "bridge": {
-    "from_prev": "Artie enters the ring for the final match.",
-    "to_next": "The System crashes, and Artie is left in the wreckage."
+    "from_prev": "Artie and Silna infiltrate the Keep using a combination of stealth and high-speed kiting.",
+    "to_next": "The boss drops a 'World Key' that Artie wasn't supposed to find for another fifty levels."
   },
   "pacing": {
     "intensity": 5,
@@ -16,330 +16,552 @@
   "sections": [
     {
       "section_id": 1,
-      "title": "Vane's Ultimate Build",
-      "intent": "A desperate struggle where Vane's 'Whale' gear and System hacks strip Artie of his defenses.",
+      "title": "Infiltrating the Red-Tier Keep",
+      "intent": "The duo enters the highest-level zone in the region using stealth and speed.",
+      "end_condition": "Artie and Silna reach the inner sanctum of the Keep undetected.",
       "scenes": [
         {
           "scene_id": 1,
-          "summary": "Vane enters with legendary armor that reflects 50% of all damage, making Artie's crits a suicide button.",
+          "summary": "Artie and Silna approach the Keep's outer walls.",
           "type": "setup",
-          "outcome": "Artie's main weapon is now a suicide button.",
+          "outcome": "They identify a gap in the searchlight patterns.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_VANE"
+            "CHAR_SILNA"
           ],
           "threads": [
-            "THREAD_VANE_RIVALRY"
+            "THREAD_GLITCH"
           ],
-          "constraint_state": "free",
+          "location_start": "Keep Outskirts",
+          "location_start_id": "LOC_KEEP_OUTSKIRTS",
+          "location_start_label": "Keep Outskirts",
+          "location_end": "Keep Outer Wall",
+          "location_end_id": "LOC_KEEP_OUTER_WALL",
+          "location_end_label": "Keep Outer Wall",
           "handoff_mode": "direct_continuation",
-          "hands_off_to": "6:2",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "constraint_state": "pursued",
+          "transition_in_text": "Artie and Silna move through the shadows of the Keep's outer wall, timed perfectly with the rotating searchlights.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "rotating searchlights",
+            "shadowy wall",
+            "clanking armor"
           ],
-          "transition_in_text": "The scene opens at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "They reach the base of a high tower where the lights never quite touch the ground.",
+          "transition_out_anchors": [
+            "high tower",
+            "dark corner",
+            "climbing rope"
+          ],
+          "hands_off_to": "6:2",
+          "seam_score": 20,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 2,
-          "summary": "Vane uses the 'System Override' scroll to turn off Artie's Evasion stat entirely.",
-          "type": "escalation",
-          "outcome": "Artie is now a 1 HP character who can't dodge.",
+          "summary": "Artie uses his 'Untouchable' speed to scale the wall.",
+          "type": "development",
+          "outcome": "Artie secures a rope for Silna.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_VANE"
+            "CHAR_SILNA"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "6:3",
+          "threads": [
+            "THREAD_GLITCH"
+          ],
           "consumes_outcome_from": "6:1",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Keep Outer Wall",
+          "location_start_id": "LOC_KEEP_OUTER_WALL",
+          "location_start_label": "Keep Outer Wall",
+          "location_end": "Keep Ramparts",
+          "location_end_id": "LOC_KEEP_RAMPARTS",
+          "location_end_label": "Keep Ramparts",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "restricted",
+          "transition_in_text": "Artie ascends the stone surface with unnatural speed, his fingers finding purchase in the smallest cracks.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "stone surface",
+            "unnatural speed",
+            "climbing motion"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "He reaches the top and drops a heavy rope for Silna, who begins her slower ascent.",
+          "transition_out_anchors": [
+            "heavy rope",
+            "slower ascent",
+            "guarded ramparts"
+          ],
+          "hands_off_to": "6:3",
+          "seam_score": 20,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 3,
-          "summary": "Fizz sacrifices her 'Guide' status to temporarily hack the arena's gravity, giving Artie 3D movement.",
-          "type": "choice",
-          "outcome": "Artie can move in 3D, bypassing the 'No-Evasion' ground rule.",
+          "summary": "They navigate the ramparts, dodging guards.",
+          "type": "conflict",
+          "outcome": "They reach the inner courtyard entrance.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_SILNA"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "6:4",
+          "threads": [
+            "THREAD_GLITCH"
+          ],
           "consumes_outcome_from": "6:2",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Keep Ramparts",
+          "location_start_id": "LOC_KEEP_RAMPARTS",
+          "location_start_label": "Keep Ramparts",
+          "location_end": "Keep Inner Courtyard",
+          "location_end_id": "LOC_KEEP_INNER_COURTYARD",
+          "location_end_label": "Keep Inner Courtyard",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "pursued",
+          "transition_in_text": "A pair of guards walks past their hiding spot, the sound of their conversation muffled by the wind.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "muffled conversation",
+            "passing guards",
+            "beating hearts"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "They slip through a narrow door leading down into the heart of the fortress.",
+          "transition_out_anchors": [
+            "narrow door",
+            "descending stairs",
+            "dim torchlight"
+          ],
+          "hands_off_to": "6:4",
+          "seam_score": 45,
+          "seam_resolution": "micro_scene"
         },
         {
           "scene_id": 4,
-          "summary": "Artie realizes he doesn't need to hit Vane; he needs to hit the 'Reflect' buff itself to break the logic.",
-          "type": "reveal",
-          "outcome": "Artie realizes he must target the magic aura of Vane's 'Reflect' buff directly.",
+          "summary": "Transition handoff from Keep Inner Courtyard to Keep Inner Courtyard.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
           "characters": [
-            "CHAR_ARTIE"
+            "CHAR_ARTIE",
+            "CHAR_SILNA"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "6:5",
+          "threads": [
+            "THREAD_GLITCH"
+          ],
           "consumes_outcome_from": "6:3",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Keep Inner Courtyard",
+          "location_start_id": "LOC_KEEP_INNER_COURTYARD",
+          "location_start_label": "Keep Inner Courtyard",
+          "location_end": "Keep Inner Courtyard",
+          "location_end_id": "LOC_KEEP_INNER_COURTYARD",
+          "location_end_label": "Keep Inner Courtyard",
+          "handoff_mode": "arrival_checkpoint",
+          "constraint_state": "restricted",
+          "transition_in_text": "After a arrival checkpoint, the movement from Keep Inner Courtyard to Keep Inner Courtyard is realized on page.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "dark hallway",
+            "iron-bound door",
+            "muffled chanting"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "end_condition_echo": "Artie realizes he must target the magic aura of Vane's 'Reflect' buff directly.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "This beat pushes into a arrival checkpoint toward Keep Inner Courtyard.",
+          "transition_out_anchors": [
+            "dark hallway",
+            "iron-bound door",
+            "muffled chanting"
+          ],
+          "hands_off_to": "6:5",
+          "seam_score": 25,
+          "seam_resolution": "micro_scene"
+        },
+        {
+          "scene_id": 5,
+          "summary": "They reach the inner sanctum.",
+          "type": "climax",
+          "outcome": "The duo is ready to face the boss.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_SILNA",
+            "CHAR_TYRANT"
+          ],
+          "threads": [
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "6:4",
+          "location_start": "Keep Inner Courtyard",
+          "location_start_id": "LOC_KEEP_INNER_COURTYARD",
+          "location_start_label": "Keep Inner Courtyard",
+          "location_end": "Inner Sanctum",
+          "location_end_id": "LOC_INNER_SANCTUM",
+          "location_end_label": "Inner Sanctum",
+          "handoff_mode": "arrival_checkpoint",
+          "constraint_state": "restricted",
+          "transition_in_text": "The hallway opens into a massive vaulted chamber where the Regional Boss sits upon a throne of iron.",
+          "transition_in_anchors": [
+            "vaulted chamber",
+            "iron throne",
+            "Regional Boss"
+          ],
+          "transition_out_text": "Artie and Silna press themselves against the ornate pillars, watching the boss's idle animations.",
+          "transition_out_anchors": [
+            "ornate pillars",
+            "idle animations",
+            "heavy silence"
+          ],
+          "hands_off_to": "6:6",
+          "end_condition_echo": "Artie and Silna reach the inner sanctum of the Keep undetected.",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         }
       ]
     },
     {
       "section_id": 2,
-      "title": "Breaking the Game",
-      "intent": "The peak climax where Artie's 'Meta-Crit' crashes the game and he faces the System Administrator.",
+      "title": "Setting up the Overflow",
+      "intent": "Artie prepares the mechanical conditions for a massive damage exploit.",
+      "end_condition": "All necessary debuffs are applied to the boss, and Artie's buffs are maxed.",
       "scenes": [
         {
-          "scene_id": 5,
-          "summary": "Artie lands a 'Meta-Crit' on the Reflect buff, causing an infinite loop that dissolves the arena into pixels.",
-          "type": "action",
-          "outcome": "The arena begins to pixelate and dissolve.",
+          "scene_id": 6,
+          "summary": "Artie explains the 'Damage Overflow' exploit to Silna.",
+          "type": "setup",
+          "outcome": "Silna understands her role in the setup.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_VANE"
+            "CHAR_SILNA",
+            "CHAR_TYRANT"
           ],
           "threads": [
-            "THREAD_CRIT_EXPLOIT"
+            "THREAD_GLITCH"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "6:6",
-          "consumes_outcome_from": "6:4",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
-        },
-        {
-          "scene_id": 6,
-          "summary": "Vane panics as his armor turns into a swarm of error messages, leaving him defenseless.",
-          "type": "escalation",
-          "outcome": "Vane is defenseless and terrified.",
-          "characters": [
-            "CHAR_VANE"
-          ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "6:7",
           "consumes_outcome_from": "6:5",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Inner Sanctum",
+          "location_start_id": "LOC_INNER_SANCTUM",
+          "location_start_label": "Inner Sanctum",
+          "location_end": "Inner Sanctum",
+          "location_end_id": "LOC_INNER_SANCTUM",
+          "location_end_label": "Inner Sanctum",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "restricted",
+          "transition_in_text": "Artie whispers the final instructions, his eyes fixed on the boss's health bar.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "whispered instructions",
+            "health bar",
+            "intense focus"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "Silna nods, her hand tightening on her shield as she prepares to draw the boss's ire.",
+          "transition_out_anchors": [
+            "determined nod",
+            "tightened grip",
+            "shield ready"
+          ],
+          "hands_off_to": "6:7",
+          "seam_score": 20,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 7,
-          "summary": "Artie delivers the final blow, a crit so powerful it deletes Vane's character data from the server.",
-          "type": "action",
-          "outcome": "Vane is kicked from the game, and Artie is the champion of a broken world.",
+          "summary": "Silna initiates the fight and applies debuffs.",
+          "type": "conflict",
+          "outcome": "The boss is successfully 'taunted' and debuffed.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_VANE"
+            "CHAR_SILNA",
+            "CHAR_TYRANT"
           ],
           "threads": [
-            "THREAD_VANE_RIVALRY"
+            "THREAD_GLITCH"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "6:8",
           "consumes_outcome_from": "6:6",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Inner Sanctum",
+          "location_start_id": "LOC_INNER_SANCTUM",
+          "location_start_label": "Inner Sanctum",
+          "location_end": "Inner Sanctum",
+          "location_end_id": "LOC_INNER_SANCTUM",
+          "location_end_label": "Inner Sanctum",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "engaged_combat",
+          "transition_in_text": "Silna charges forward with a roar, her shield slamming into the boss's legs and triggering a 'Weakness' debuff.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "shield slam",
+            "weakness debuff",
+            "boss roar"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "The boss swings its massive flail, but Silna blocks the impact, her feet sliding back in the sand.",
+          "transition_out_anchors": [
+            "massive flail",
+            "blocked impact",
+            "sliding feet"
+          ],
+          "hands_off_to": "6:8",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 8,
-          "summary": "The System Administrator appears to manually delete Artie for his reality-breaking actions.",
-          "type": "reveal",
-          "outcome": "The true antagonist is revealed.",
+          "summary": "Artie stacks his own buffs through 'Perfect Dodges'.",
+          "type": "development",
+          "outcome": "Artie's damage multiplier reaches its peak.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_BOSS"
+            "CHAR_SILNA",
+            "CHAR_TYRANT"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "6:9",
+          "threads": [
+            "THREAD_GLITCH"
+          ],
           "consumes_outcome_from": "6:7",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Inner Sanctum",
+          "location_start_id": "LOC_INNER_SANCTUM",
+          "location_start_label": "Inner Sanctum",
+          "location_end": "Inner Sanctum",
+          "location_end_id": "LOC_INNER_SANCTUM",
+          "location_end_label": "Inner Sanctum",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "engaged_combat",
+          "transition_in_text": "Artie dances through the shockwaves of the boss's attacks, each dodge adding a stack to his 'Untouchable' buff.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "shockwaves",
+            "stacking buffs",
+            "silver trail"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "His dagger begins to glow with an intense, white-hot light as the multiplier hits its cap.",
+          "transition_out_anchors": [
+            "glowing dagger",
+            "white-hot light",
+            "multiplier cap"
+          ],
+          "hands_off_to": "6:9",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 9,
-          "summary": "Artie crits the Admin's 'Delete' button, causing the entire world to freeze in a 'Pause' state.",
-          "type": "action",
-          "outcome": "Artie has successfully 'paused' reality.",
-          "characters": [
-            "CHAR_ARTIE"
-          ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "6:10",
-          "consumes_outcome_from": "6:8",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
-        },
-        {
-          "scene_id": 10,
-          "summary": "Fizz uses the pause to rewrite Artie's location data, teleporting them to a Null-Zone safe harbor.",
-          "type": "choice",
-          "outcome": "Artie and Fizz teleport to a 'Null-Zone' as the world enters Safe Mode.",
+          "summary": "The final debuff is applied.",
+          "type": "climax",
+          "outcome": "The conditions for the overflow are met.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_SILNA",
+            "CHAR_TYRANT"
           ],
-          "constraint_state": "free",
+          "threads": [
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "6:8",
+          "location_start": "Inner Sanctum",
+          "location_start_id": "LOC_INNER_SANCTUM",
+          "location_start_label": "Inner Sanctum",
+          "location_end": "Inner Sanctum",
+          "location_end_id": "LOC_INNER_SANCTUM",
+          "location_end_label": "Inner Sanctum",
           "handoff_mode": "direct_continuation",
-          "hands_off_to": "6:11",
-          "consumes_outcome_from": "6:9",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "constraint_state": "engaged_combat",
+          "transition_in_text": "Silna uses her ultimate ability, a shield bash that leaves the boss 'Vulnerable' for exactly three seconds.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "shield bash",
+            "vulnerable state",
+            "three-second window"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "end_condition_echo": "Artie and Fizz teleport to a 'Null-Zone' as the world enters Safe Mode.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "Artie prepares to lunge, his entire being focused on the boss's exposed neck.",
+          "transition_out_anchors": [
+            "prepared lunge",
+            "exposed neck",
+            "final breath"
+          ],
+          "hands_off_to": "6:10",
+          "end_condition_echo": "All necessary debuffs are applied to the boss, and Artie's buffs are maxed.",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         }
       ]
     },
     {
       "section_id": 3,
-      "title": "The Aftermath of the Crash",
-      "intent": "Establish the immediate consequences of the reality-break and Artie's new status.",
+      "title": "The One-Shot Kill",
+      "intent": "The final execution of the exploit and the resulting world-state change.",
+      "end_condition": "The Regional Boss is vaporized by a single hit, dropping the World Key.",
       "scenes": [
         {
-          "scene_id": 11,
-          "summary": "Artie and Fizz wake up in a 'Null-Zone' where the graphics are all wireframes and the world is dying.",
-          "type": "aftermath",
-          "outcome": "They are safe for now, but the world is dying.",
+          "scene_id": 10,
+          "summary": "Artie strikes the boss.",
+          "type": "climax",
+          "outcome": "The damage calculation exceeds the System's limit.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_SILNA",
+            "CHAR_TYRANT"
           ],
-          "constraint_state": "free",
+          "threads": [
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "6:9",
+          "location_start": "Inner Sanctum",
+          "location_start_id": "LOC_INNER_SANCTUM",
+          "location_start_label": "Inner Sanctum",
+          "location_end": "Inner Sanctum",
+          "location_end_id": "LOC_INNER_SANCTUM",
+          "location_end_label": "Inner Sanctum",
           "handoff_mode": "direct_continuation",
-          "hands_off_to": "6:12",
-          "consumes_outcome_from": "6:10",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "constraint_state": "engaged_combat",
+          "transition_in_text": "Artie lunges, his blade connecting with the boss's neck at the exact moment the buffs and debuffs align.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "blade contact",
+            "aligned buffs",
+            "blinding flash"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "The damage number that appears over the boss's head is so large it begins to flicker and turn into gibberish.",
+          "transition_out_anchors": [
+            "massive number",
+            "flickering text",
+            "gibberish code"
+          ],
+          "hands_off_to": "6:11",
+          "seam_score": 60,
+          "seam_resolution": "full_scene"
+        },
+        {
+          "scene_id": 11,
+          "summary": "Transition handoff from Inner Sanctum to Inner Sanctum.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_SILNA",
+            "CHAR_TYRANT"
+          ],
+          "threads": [
+            "THREAD_GLITCH",
+            "THREAD_WORLD_KEY"
+          ],
+          "consumes_outcome_from": "6:10",
+          "location_start": "Inner Sanctum",
+          "location_start_id": "LOC_INNER_SANCTUM",
+          "location_start_label": "Inner Sanctum",
+          "location_end": "Inner Sanctum",
+          "location_end_id": "LOC_INNER_SANCTUM",
+          "location_end_label": "Inner Sanctum",
+          "handoff_mode": "offscreen_processing",
+          "constraint_state": "free",
+          "transition_in_text": "After a offscreen processing, the movement from Inner Sanctum to Inner Sanctum is realized on page.",
+          "transition_in_anchors": [
+            "shattered stone",
+            "floating data",
+            "hushed room"
+          ],
+          "transition_out_text": "This beat carries directly into Inner Sanctum.",
+          "transition_out_anchors": [
+            "shattered stone",
+            "floating data",
+            "hushed room"
+          ],
+          "hands_off_to": "6:12",
+          "seam_score": 25,
+          "seam_resolution": "micro_scene"
         },
         {
           "scene_id": 12,
-          "summary": "Artie looks at his stats and sees his HP is no longer 1, but 'NaN' (Not a Number).",
-          "type": "reveal",
-          "outcome": "Artie realizes his HP is no longer 1, but 'NaN' (Not a Number).",
+          "summary": "The boss disintegrates.",
+          "type": "resolution",
+          "outcome": "The boss is dead, and the World Key is revealed.",
           "characters": [
-            "CHAR_ARTIE"
+            "CHAR_ARTIE",
+            "CHAR_SILNA",
+            "CHAR_TYRANT"
           ],
           "threads": [
-            "THREAD_SYSTEM_GLITCH"
+            "THREAD_WORLD_KEY",
+            "THREAD_GLITCH"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "6:11",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Inner Sanctum",
+          "location_start_id": "LOC_INNER_SANCTUM",
+          "location_start_label": "Inner Sanctum",
+          "location_end": "Inner Sanctum",
+          "location_end_id": "LOC_INNER_SANCTUM",
+          "location_end_label": "Inner Sanctum",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "free",
+          "transition_in_text": "The Regional Boss lets out a final, distorted roar as its body shatters into a million pieces of glowing data.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "distorted roar",
+            "shattering body",
+            "glowing data"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "end_condition_echo": "Artie realizes his HP is no longer 1, but 'NaN' (Not a Number).",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "A single, golden key remains floating in the center of the room where the boss once stood.",
+          "transition_out_anchors": [
+            "golden key",
+            "floating item",
+            "hushed room"
+          ],
+          "hands_off_to": "6:13",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 13,
+          "summary": "Artie picks up the World Key.",
+          "type": "climax",
+          "outcome": "The System announces the boss's death to the entire server.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_SILNA",
+            "CHAR_TYRANT"
+          ],
+          "threads": [
+            "THREAD_WORLD_KEY",
+            "THREAD_GLITCH"
+          ],
+          "consumes_outcome_from": "6:12",
+          "location_start": "Inner Sanctum",
+          "location_start_id": "LOC_INNER_SANCTUM",
+          "location_start_label": "Inner Sanctum",
+          "location_end": "Inner Sanctum",
+          "location_end_id": "LOC_INNER_SANCTUM",
+          "location_end_label": "Inner Sanctum",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "free",
+          "transition_in_text": "Artie reaches out and grasps the golden key, its surface humming with immense power.",
+          "transition_in_anchors": [
+            "golden surface",
+            "humming power",
+            "server message"
+          ],
+          "transition_out_text": "A server-wide notification appears, announcing that a level 1 player has defeated the Regional Boss.",
+          "transition_out_anchors": [
+            "server notification",
+            "level 1 player",
+            "stunned world"
+          ],
+          "hands_off_to": "6:14",
+          "seam_score": 35,
+          "seam_resolution": "micro_scene"
+        },
+        {
+          "scene_id": 14,
+          "summary": "The Keep begins to collapse.",
+          "type": "climax",
+          "outcome": "The Keep begins to collapse as the World Key is secured.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_SILNA",
+            "CHAR_TYRANT"
+          ],
+          "threads": [
+            "THREAD_GLITCH",
+            "THREAD_WORLD_KEY"
+          ],
+          "consumes_outcome_from": "6:13",
+          "location_start": "Inner Sanctum",
+          "location_start_id": "LOC_INNER_SANCTUM",
+          "location_start_label": "Inner Sanctum",
+          "location_end": "Inner Sanctum",
+          "location_end_id": "LOC_INNER_SANCTUM",
+          "location_end_label": "Inner Sanctum",
+          "handoff_mode": "aftermath_relocation",
+          "constraint_state": "pursued",
+          "transition_in_text": "The ground shakes violently as the Keep's architecture begins to crumble without the boss's power to sustain it.",
+          "transition_in_anchors": [
+            "shaking ground",
+            "crumbling stone",
+            "falling dust"
+          ],
+          "end_condition_echo": "The Regional Boss is vaporized by a single hit, dropping the World Key.",
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         }
       ]
     }

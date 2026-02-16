@@ -1,265 +1,542 @@
 {
   "chapter_id": 2,
-  "title": "The Glass Cannon's Guide to Not Dying",
-  "goal": "Artie needs gear that doesn't rely on him being hit, as he can't take a single blow.",
+  "title": "Looting the Logic Gates",
+  "goal": "Systematically dismantle tutorial challenges to acquire high-tier 'Starter' gear through overkill bonuses.",
   "chapter_role": "setup",
-  "stakes_shift": "Survival shifts from pure luck to tactical exploitation of the System's bugs.",
+  "stakes_shift": "From a lucky survivor to a heavily geared exploiter who is now ahead of the intended power curve.",
   "bridge": {
-    "from_prev": "Artie is a marked man in Oakhaven.",
-    "to_next": "Artie heads to the Low-Level Crypts to farm 'Evasion' gear."
+    "from_prev": "The protagonist realizes the System rewards 'overkill' damage with better loot drops.",
+    "to_next": "The protagonist enters the first major hub city and attracts unwanted attention from the local guard."
   },
   "pacing": {
-    "intensity": 3,
-    "tempo": "steady",
-    "expected_scene_count": 9
+    "expected_scene_count": 10,
+    "intensity": 2,
+    "tempo": "steady"
   },
   "sections": [
     {
       "section_id": 1,
-      "title": "Shopping for Scraps",
-      "intent": "Equip Artie with the bare minimum gear required to survive a dungeon without taking damage.",
+      "title": "The Overkill Protocol",
+      "intent": "The protagonist tests the limits of the 'Crit' multiplier to maximize loot drops across multiple encounters.",
+      "end_condition": "Protagonist confirms that damage exceeding 1000% of enemy HP guarantees a rarity tier jump.",
       "scenes": [
         {
           "scene_id": 1,
-          "summary": "Artie tries to sell his 'Participation Trophy' but finds out it's soul-bound and cursed to attract hostility.",
-          "type": "choice",
-          "outcome": "Artie is stuck with a lighthouse-beacon for monsters.",
-          "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
-          ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "2:2",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The scene opens at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
-        },
-        {
-          "scene_id": 2,
-          "summary": "Fizz points out a loophole in the 'Starter Pack' quest that allows Artie to steal a high-tier cloak if he can crit a lock.",
-          "type": "reveal",
-          "outcome": "Artie successfully crits a lock, causing it to explode into gold dust.",
-          "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
-          ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "2:3",
-          "consumes_outcome_from": "2:1",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
-        },
-        {
-          "scene_id": 3,
-          "summary": "Artie acquires the 'Cloak of the Cowardly Lion,' which gives massive Evasion but a ridiculous neon appearance.",
-          "type": "aftermath",
-          "outcome": "Artie acquires the 'Cloak of the Cowardly Lion' and looks like a neon yellow cat.",
+          "summary": "Artie tests the Legendary Dagger on a group of tutorial slimes.",
+          "type": "trial",
+          "outcome": "Artie confirms the dagger synergizes with the glitch.",
           "characters": [
             "CHAR_ARTIE"
           ],
           "constraint_state": "free",
+          "handoff_mode": "time_skip",
+          "hands_off_to": "2:2",
+          "location_start": "Tutorial Field",
+          "location_start_label": "Tutorial Field",
+          "location_start_id": "LOC_TUTORIAL_FIELD",
+          "location_end": "Tutorial Field",
+          "location_end_label": "Tutorial Field",
+          "location_end_id": "LOC_TUTORIAL_FIELD",
+          "transition_in_text": "Artie steps into the Tutorial Field, testing the weight of his new Legendary Dagger.",
+          "transition_in_anchors": [
+            "Legendary Dagger",
+            "pixelated grass",
+            "tutorial sun"
+          ],
+          "transition_out_text": "A cluster of blue slimes wobbles toward him, perfect for another round of testing.",
+          "transition_out_anchors": [
+            "blue slime",
+            "wobbling movement",
+            "ready stance"
+          ],
+          "seam_score": 20,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 2,
+          "summary": "Artie performs precise overkill strikes on the slimes, recording the loot results.",
+          "type": "investigation",
+          "outcome": "Artie notices a correlation between overkill percentage and loot quality.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_CRIT_GLITCH"
+          ],
+          "consumes_outcome_from": "2:1",
+          "constraint_state": "engaged_combat",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "2:3",
+          "location_start": "Tutorial Field",
+          "location_start_label": "Tutorial Field",
+          "location_start_id": "LOC_TUTORIAL_FIELD",
+          "location_end": "Tutorial Field",
+          "location_end_label": "Tutorial Field",
+          "location_end_id": "LOC_TUTORIAL_FIELD",
+          "transition_in_text": "The first slime pops like a water balloon under the dagger's glitched edge.",
+          "transition_in_anchors": [
+            "slime residue",
+            "dagger edge",
+            "loot window"
+          ],
+          "transition_out_text": "Artie opens his log, comparing the damage numbers to the items dropped.",
+          "transition_out_anchors": [
+            "system log",
+            "item list",
+            "calculating gaze"
+          ],
+          "seam_score": 0,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 3,
+          "summary": "Artie pushes the multiplier to 1000% on the final slime of the pack.",
+          "type": "payoff",
+          "outcome": "Artie confirms the 1000% overkill threshold for rarity jumps.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_CRIT_GLITCH"
+          ],
+          "consumes_outcome_from": "2:2",
+          "constraint_state": "engaged_combat",
           "handoff_mode": "direct_continuation",
           "hands_off_to": "2:4",
-          "consumes_outcome_from": "2:2",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Tutorial Field",
+          "location_start_label": "Tutorial Field",
+          "location_start_id": "LOC_TUTORIAL_FIELD",
+          "location_end": "Tutorial Field",
+          "location_end_label": "Tutorial Field",
+          "location_end_id": "LOC_TUTORIAL_FIELD",
+          "transition_in_text": "The last slime expands as Artie charges his strike, the multiplier climbing toward four digits.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "expanding slime",
+            "charged strike",
+            "four-digit multiplier"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "end_condition_echo": "Artie acquires the 'Cloak of the Cowardly Lion' and looks like a neon yellow cat.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "Artie pockets the Rare Slime Core and looks toward the looming Boss Room.",
+          "transition_out_anchors": [
+            "Rare Slime Core",
+            "Boss Room door",
+            "determined walk"
+          ],
+          "seam_score": 60,
+          "seam_resolution": "full_scene",
+          "end_condition_echo": "Protagonist confirms that damage exceeding 1000% of enemy HP guarantees a rarity tier jump."
         }
       ]
     },
     {
       "section_id": 2,
-      "title": "The Crypt of Bad Math",
-      "intent": "Test the Crit-build's resource farming potential in a controlled dungeon crawl.",
+      "title": "Boss Room Bypass",
+      "intent": "A high-intensity fight where the protagonist uses the glitch to one-shot the Tutorial Boss.",
+      "end_condition": "The Tutorial Boss is vaporized by a single strike, dropping a unique 'Glitched' item.",
       "scenes": [
         {
           "scene_id": 4,
-          "summary": "Artie enters the Crypts and finds that the skeletons move in predictable, turn-based patterns he can exploit.",
-          "type": "setup",
-          "outcome": "Artie begins to treat the world like a rhythm game.",
-          "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
-          ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "2:5",
-          "consumes_outcome_from": "2:3",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
-        },
-        {
-          "scene_id": 5,
-          "summary": "A Skeleton Archer fires at Artie; the Cloak's evasion procs, causing Artie to do a physics-defying backflip.",
-          "type": "action",
-          "outcome": "Artie survives his first ranged encounter and gains confidence.",
+          "summary": "Transition handoff from Tutorial Field to Boss Room Entrance.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "threads": [
+            "THREAD_CRIT_GLITCH"
+          ],
+          "consumes_outcome_from": "2:3",
           "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "2:6",
-          "consumes_outcome_from": "2:4",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "handoff_mode": "arrival_checkpoint",
+          "hands_off_to": "2:5",
+          "inserted_by_pipeline": true,
+          "purpose": "handoff_realization",
+          "location_start": "Tutorial Field",
+          "location_start_label": "Tutorial Field",
+          "location_start_id": "LOC_TUTORIAL_FIELD",
+          "location_end": "Boss Room Entrance",
+          "location_end_label": "Boss Room Entrance",
+          "location_end_id": "LOC_BOSS_ROOM_ENTRANCE",
+          "transition_in_text": "After a arrival checkpoint, the movement from Tutorial Field to Boss Room Entrance is realized on page.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
+            "loc_tutorial_field",
+            "loc_boss_room_entrance",
+            "tutorial_field",
+            "boss_room_entrance",
+            "arrival_checkpoint",
             "free"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "This beat pushes into a arrival checkpoint toward the Boss Room Entrance.",
+          "transition_out_anchors": [
+            "loc_tutorial_field",
+            "loc_boss_room_entrance",
+            "tutorial_field",
+            "boss_room_entrance",
+            "arrival_checkpoint",
+            "free"
+          ],
+          "seam_score": 25,
+          "seam_resolution": "micro_scene"
+        },
+        {
+          "scene_id": 5,
+          "summary": "Artie approaches the Boss Room and prepares his buffs.",
+          "type": "setup",
+          "outcome": "Artie is ready for the final tutorial challenge.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "consumes_outcome_from": "2:4",
+          "constraint_state": "free",
+          "handoff_mode": "arrival_checkpoint",
+          "hands_off_to": "2:6",
+          "location_start": "Boss Room Entrance",
+          "location_start_label": "Boss Room Entrance",
+          "location_start_id": "LOC_BOSS_ROOM_ENTRANCE",
+          "location_end": "Boss Room Entrance",
+          "location_end_label": "Boss Room Entrance",
+          "location_end_id": "LOC_BOSS_ROOM_ENTRANCE",
+          "transition_in_text": "The air grows heavy with the scent of ozone as Artie stands before the Boss Room door.",
+          "transition_in_anchors": [
+            "iron-bound door",
+            "heavy air",
+            "ozone scent"
+          ],
+          "transition_out_text": "He consumes a temporary strength potion, his muscles tightening for the coming blow.",
+          "transition_out_anchors": [
+            "potion bottle",
+            "glowing veins",
+            "tightened grip"
+          ],
+          "seam_score": 45,
+          "seam_resolution": "micro_scene"
         },
         {
           "scene_id": 6,
-          "summary": "Artie realizes his crits cause 'System Overload' effects, turning defeated enemies into loot-filled pinatas.",
-          "type": "reveal",
-          "outcome": "Artie discovers he can turn enemies into loot-filled pinatas via System Overload.",
+          "summary": "Transition handoff from Boss Room Entrance to Boss Room.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
           "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_ARTIE"
+          ],
+          "consumes_outcome_from": "2:5",
+          "constraint_state": "engaged_combat",
+          "handoff_mode": "offscreen_processing",
+          "hands_off_to": "2:7",
+          "inserted_by_pipeline": true,
+          "purpose": "handoff_realization",
+          "location_start": "Boss Room Entrance",
+          "location_start_label": "Boss Room Entrance",
+          "location_start_id": "LOC_BOSS_ROOM_ENTRANCE",
+          "location_end": "Boss Room",
+          "location_end_label": "Boss Room",
+          "location_end_id": "LOC_BOSS_ROOM",
+          "transition_in_text": "After a offscreen processing, the movement from Boss Room Entrance to Boss Room is realized on page.",
+          "transition_in_anchors": [
+            "loc_boss_room_entrance",
+            "loc_boss_room",
+            "boss_room_entrance",
+            "boss_room",
+            "offscreen_processing",
+            "engaged_combat"
+          ],
+          "transition_out_text": "This beat carries directly into the Boss Room.",
+          "transition_out_anchors": [
+            "loc_boss_room_entrance",
+            "loc_boss_room",
+            "boss_room_entrance",
+            "boss_room",
+            "offscreen_processing",
+            "engaged_combat"
+          ],
+          "seam_score": 0,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 7,
+          "summary": "Artie enters the Boss Room and faces the Tutorial Guardian.",
+          "type": "trial",
+          "outcome": "The fight begins, and Artie dodges the Guardian's initial attacks.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "consumes_outcome_from": "2:6",
+          "constraint_state": "engaged_combat",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "2:8",
+          "location_start": "Boss Room",
+          "location_start_label": "Boss Room",
+          "location_start_id": "LOC_BOSS_ROOM",
+          "location_end": "Boss Room",
+          "location_end_label": "Boss Room",
+          "location_end_id": "LOC_BOSS_ROOM",
+          "transition_in_text": "The doors slam shut behind Artie as the Tutorial Guardian rises from its throne.",
+          "transition_in_anchors": [
+            "Tutorial Guardian",
+            "stone throne",
+            "slamming doors"
+          ],
+          "transition_out_text": "The Guardian swings a massive stone club, which Artie narrowly avoids.",
+          "transition_out_anchors": [
+            "stone club",
+            "shattering floor",
+            "narrow dodge"
+          ],
+          "seam_score": 0,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 8,
+          "summary": "Artie waits for the perfect opening to trigger the glitch.",
+          "type": "trial",
+          "outcome": "Artie finds the 'logic gap' in the Guardian's defense.",
+          "characters": [
+            "CHAR_ARTIE"
           ],
           "threads": [
-            "THREAD_CRIT_EXPLOIT"
+            "THREAD_CRIT_GLITCH"
           ],
-          "constraint_state": "free",
+          "consumes_outcome_from": "2:7",
+          "constraint_state": "engaged_combat",
           "handoff_mode": "direct_continuation",
-          "hands_off_to": "2:7",
-          "consumes_outcome_from": "2:5",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "hands_off_to": "2:9",
+          "location_start": "Boss Room",
+          "location_start_label": "Boss Room",
+          "location_start_id": "LOC_BOSS_ROOM",
+          "location_end": "Boss Room",
+          "location_end_label": "Boss Room",
+          "location_end_id": "LOC_BOSS_ROOM",
+          "transition_in_text": "Artie circles the Guardian, watching the way its digital frame stutters during a heavy swing.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
+            "digital stutter",
+            "heavy swing",
+            "circling movement"
+          ],
+          "transition_out_text": "He lunges forward, aiming for the glowing core exposed in the Guardian's chest.",
+          "transition_out_anchors": [
+            "glowing core",
+            "lunge maneuver",
+            "exposed weakness"
+          ],
+          "seam_score": 60,
+          "seam_resolution": "full_scene"
+        },
+        {
+          "scene_id": 9,
+          "summary": "Transition handoff from Boss Room to Boss Room.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_CRIT_GLITCH"
+          ],
+          "consumes_outcome_from": "2:8",
+          "constraint_state": "free",
+          "handoff_mode": "offscreen_processing",
+          "hands_off_to": "2:10",
+          "inserted_by_pipeline": true,
+          "purpose": "handoff_realization",
+          "location_start": "Boss Room",
+          "location_start_label": "Boss Room",
+          "location_start_id": "LOC_BOSS_ROOM",
+          "location_end": "Boss Room",
+          "location_end_label": "Boss Room",
+          "location_end_id": "LOC_BOSS_ROOM",
+          "transition_in_text": "After a offscreen processing, the movement from Boss Room to Boss Room is realized on page.",
+          "transition_in_anchors": [
+            "loc_boss_room",
+            "boss_room",
+            "offscreen_processing",
             "free"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "end_condition_echo": "Artie discovers he can turn enemies into loot-filled pinatas via System Overload.",
+          "transition_out_text": "This beat carries directly into the final moments within the Boss Room.",
+          "transition_out_anchors": [
+            "loc_boss_room",
+            "boss_room",
+            "offscreen_processing",
+            "free"
+          ],
+          "seam_score": 0,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 10,
+          "summary": "Artie strikes the core with a massive glitched crit.",
+          "type": "payoff",
+          "outcome": "The Boss is destroyed, and Artie gains a glitched item.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_CRIT_GLITCH"
+          ],
+          "consumes_outcome_from": "2:9",
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "2:11",
+          "location_start": "Boss Room",
+          "location_start_label": "Boss Room",
+          "location_start_id": "LOC_BOSS_ROOM",
+          "location_end": "Boss Room",
+          "location_end_label": "Boss Room",
+          "location_end_id": "LOC_BOSS_ROOM",
+          "transition_in_text": "The Legendary Dagger sinks into the core, and the damage numbers begin to spiral out of control.",
+          "transition_in_anchors": [
+            "spiraling numbers",
+            "impact spark",
+            "shuddering boss"
+          ],
+          "transition_out_text": "Artie picks up the pulsing 'Glitched Fragment' from the pile of boss loot.",
+          "transition_out_anchors": [
+            "Glitched Fragment",
+            "loot pile",
+            "pulsing light"
+          ],
+          "seam_score": 15,
           "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "end_condition_echo": "The Tutorial Boss is vaporized by a single strike, dropping a unique 'Glitched' item."
         }
       ]
     },
     {
       "section_id": 3,
-      "title": "The Rival's Shadow",
-      "intent": "Escalate the tension by showing Vane's power and forcing Artie into a boss encounter.",
+      "title": "Graduation Day",
+      "intent": "The protagonist prepares to leave the tutorial zone with an inventory full of unintended gear.",
+      "end_condition": "Protagonist steps through the tutorial exit portal into the main game world.",
       "scenes": [
         {
-          "scene_id": 7,
-          "summary": "Vane enters the crypts with a full party, clearing rooms with ease while Artie hides in a sarcophagus.",
-          "type": "escalation",
-          "outcome": "Artie sees the gap between a 'proper' build and his own.",
-          "characters": [
-            "CHAR_ARTIE",
-            "CHAR_VANE"
-          ],
-          "threads": [
-            "THREAD_VANE_RIVALRY"
-          ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "2:8",
-          "consumes_outcome_from": "2:6",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
-        },
-        {
-          "scene_id": 8,
-          "summary": "Vane's party leaves behind a 'Boss Trigger' item, which Artie decides to take to secure massive XP.",
-          "type": "choice",
-          "outcome": "Artie decides to take the risk and summon the boss for the massive XP.",
-          "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
-          ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "2:9",
-          "consumes_outcome_from": "2:7",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
-        },
-        {
-          "scene_id": 9,
-          "summary": "The Floor Guardian, a Bone Golem, emerges, and Artie realizes he is woefully unprepared for its minimum damage floor.",
-          "type": "consequence",
-          "outcome": "The Bone Golem emerges, initiating a boss battle where Artie is at a massive disadvantage.",
+          "scene_id": 11,
+          "summary": "Artie organizes his inventory and equips his new gear.",
+          "type": "setup",
+          "outcome": "Artie is fully geared for the main game.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "consumes_outcome_from": "2:10",
+          "constraint_state": "free",
+          "handoff_mode": "aftermath_relocation",
+          "hands_off_to": "2:12",
+          "location_start": "Boss Room",
+          "location_start_label": "Boss Room",
+          "location_start_id": "LOC_BOSS_ROOM",
+          "location_end": "Boss Room",
+          "location_end_label": "Boss Room",
+          "location_end_id": "LOC_BOSS_ROOM",
+          "transition_in_text": "The dust settles in the Boss Room as Artie begins sorting through his overflowing inventory.",
+          "transition_in_anchors": [
+            "settling dust",
+            "inventory screens",
+            "shining gear"
+          ],
+          "transition_out_text": "He equips the 'Glitched Plate' and 'Tutorial Master's Boots', feeling his stats skyrocket as he prepares to leave the chamber.",
+          "transition_out_anchors": [
+            "Glitched Plate",
+            "Master's Boots",
+            "stat notification"
+          ],
+          "seam_score": 0,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 12,
+          "summary": "Artie approaches the exit portal, reflecting on his progress. In the corner of his vision, a system alert regarding 'data integrity' flashes red for a microsecond before the glitch suppresses it.",
+          "type": "investigation",
+          "outcome": "Artie realizes he has broken the tutorial's intended balance.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_SYSTEM_PURGE"
+          ],
+          "consumes_outcome_from": "2:11",
           "constraint_state": "free",
           "handoff_mode": "direct_continuation",
-          "consumes_outcome_from": "2:8",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "hands_off_to": "2:13",
+          "location_start": "Boss Room",
+          "location_start_label": "Boss Room",
+          "location_start_id": "LOC_BOSS_ROOM",
+          "location_end": "Tutorial Exit Portal",
+          "location_end_label": "Tutorial Exit Portal",
+          "location_end_id": "LOC_TUTORIAL_EXIT_PORTAL",
+          "transition_in_text": "A swirling blue vortex opens at the back of the chamber, beckoning him toward the real world.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
+            "blue vortex",
+            "swirling energy",
+            "exit prompt"
+          ],
+          "transition_out_text": "Artie takes a final look at the tutorial zone, a smirk playing on his lips.",
+          "transition_out_anchors": [
+            "final look",
+            "smirk",
+            "portal edge"
+          ],
+          "seam_score": 25,
+          "seam_resolution": "micro_scene"
+        },
+        {
+          "scene_id": 13,
+          "summary": "Transition handoff from Tutorial Exit Portal to Tutorial Exit Portal.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "consumes_outcome_from": "2:12",
+          "constraint_state": "free",
+          "handoff_mode": "arrival_checkpoint",
+          "hands_off_to": "2:14",
+          "inserted_by_pipeline": true,
+          "purpose": "handoff_realization",
+          "location_start": "Tutorial Exit Portal",
+          "location_start_label": "Tutorial Exit Portal",
+          "location_start_id": "LOC_TUTORIAL_EXIT_PORTAL",
+          "location_end": "Tutorial Exit Portal",
+          "location_end_label": "Tutorial Exit Portal",
+          "location_end_id": "LOC_TUTORIAL_EXIT_PORTAL",
+          "transition_in_text": "After a arrival checkpoint, the movement from Tutorial Exit Portal to Tutorial Exit Portal is realized on page.",
+          "transition_in_anchors": [
+            "loc_tutorial_exit_portal",
+            "tutorial_exit_portal",
+            "arrival_checkpoint",
             "free"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "end_condition_echo": "The Bone Golem emerges, initiating a boss battle where Artie is at a massive disadvantage.",
+          "transition_out_text": "This beat pushes into a arrival checkpoint toward the Tutorial Exit Portal.",
+          "transition_out_anchors": [
+            "loc_tutorial_exit_portal",
+            "tutorial_exit_portal",
+            "arrival_checkpoint",
+            "free"
+          ],
+          "seam_score": 25,
+          "seam_resolution": "micro_scene"
+        },
+        {
+          "scene_id": 14,
+          "summary": "Artie steps into the portal and leaves the tutorial.",
+          "type": "transition",
+          "outcome": "Artie arrives in the main game hub.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "consumes_outcome_from": "2:13",
+          "constraint_state": "free",
+          "handoff_mode": "arrival_checkpoint",
+          "location_start": "Tutorial Exit Portal",
+          "location_start_label": "Tutorial Exit Portal",
+          "location_start_id": "LOC_TUTORIAL_EXIT_PORTAL",
+          "location_end": "Main Game Hub",
+          "location_end_label": "Main Game Hub",
+          "location_end_id": "LOC_MAIN_GAME_HUB",
+          "transition_in_text": "Artie steps into the vortex, and the tutorial zone dissolves into a kaleidoscope of light.",
+          "transition_in_anchors": [
+            "kaleidoscope of light",
+            "rushing wind",
+            "dissolving world"
+          ],
+          "seam_score": 0,
           "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "end_condition_echo": "Protagonist steps through the tutorial exit portal into the main game world."
         }
       ]
     }

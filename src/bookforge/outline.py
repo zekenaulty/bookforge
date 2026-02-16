@@ -2120,6 +2120,7 @@ def _build_transition_summary(
     inserted_count = 0
     inline_count = 0
     hard_cut_count = 0
+    hard_cut_items: List[Dict[str, Any]] = []
     top_candidates: List[Dict[str, Any]] = []
     placeholder_identity_items: List[Dict[str, Any]] = []
 
@@ -2133,6 +2134,7 @@ def _build_transition_summary(
             inline_count += 1
         if handoff_mode == "hard_cut":
             hard_cut_count += 1
+            hard_cut_items.append({"scene_ref": entry["scene_ref"]})
 
         seam_score = _to_int_or_none(scene.get("seam_score"))
         hands_to = str(scene.get("hands_off_to") or "").strip()
@@ -2221,7 +2223,7 @@ def _build_transition_summary(
                 "code": "hard_cut_used",
                 "severity": "error" if strict_transition_bridges else "warning",
                 "message": f"{hard_cut_count} scene(s) use handoff_mode=hard_cut.",
-                "items": [],
+                "items": hard_cut_items[:50],
             }
         )
     if exact_conflicts:

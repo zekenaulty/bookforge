@@ -1,0 +1,694 @@
+{
+  "schema_version": "1.1",
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "name": "Artie",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      },
+      "role": "protagonist"
+    },
+    {
+      "character_id": "CHAR_BULWARK",
+      "name": "Bulwark",
+      "intro": {
+        "chapter": 5,
+        "scene": 1
+      },
+      "role": "ally"
+    },
+    {
+      "character_id": "CHAR_MODERATOR",
+      "name": "The Moderator",
+      "intro": {
+        "chapter": 4,
+        "scene": 1
+      },
+      "role": "antagonist"
+    }
+  ],
+  "threads": [
+    {
+      "thread_id": "THREAD_GLITCH",
+      "label": "The 1 HP Glitch",
+      "status": "active"
+    },
+    {
+      "thread_id": "THREAD_BOUNTY",
+      "label": "The Red Name Bounty",
+      "status": "active"
+    },
+    {
+      "thread_id": "THREAD_KEY",
+      "label": "The Key of the Unseen",
+      "status": "active"
+    }
+  ],
+  "chapters": [
+    {
+      "chapter_id": 1,
+      "title": "The 1% Chance",
+      "goal": "Survive the Isekai induction by landing a logic-defying critical hit on the Tutorial Boss.",
+      "chapter_role": "hook",
+      "stakes_shift": "From a confused victim of a summoning accident to a system-flagged anomaly with a bounty.",
+      "bridge": {
+        "from_prev": "N/A",
+        "to_next": "Artie enters the first starter town with a 'Red Name' status and a broken agility stat."
+      },
+      "pacing": {
+        "intensity": 4,
+        "tempo": "rush",
+        "expected_scene_count": 8
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Glass Cannon Glitch",
+          "intent": "Introduce Artie's arrival and the discovery of his broken 1 HP / Max Crit state.",
+          "end_condition": "Artie confirms his stats are glitched and accepts the tutorial challenge.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie wakes up in the summoning circle and discovers his 1 HP / Max Crit status.",
+              "type": "setup",
+              "outcome": "Artie realizes he is a glass cannon anomaly.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "introduces": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Summoning Circle",
+              "location_end_label": "Summoning Circle",
+              "location_start": "LOC_SUMMONING_CIRCLE",
+              "location_end": "LOC_SUMMONING_CIRCLE",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The white light of the summoning ritual fades into the dim blue of the chamber.",
+              "transition_in_anchors": [
+                "white light",
+                "dim blue",
+                "stone floor",
+                "ozone smell"
+              ],
+              "transition_out_text": "He stands up, feeling a strange weightlessness in his limbs.",
+              "transition_out_anchors": [
+                "weightlessness",
+                "stone floor",
+                "blue light",
+                "status window"
+              ],
+              "hands_off_to": "1:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie tests his movement and accidentally dodges a lethal environmental hazard.",
+              "type": "development",
+              "outcome": "Artie learns that his speed is his only defense.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "1:1",
+              "location_start_label": "Summoning Circle",
+              "location_end_label": "Training Hall",
+              "location_start": "LOC_SUMMONING_CIRCLE",
+              "location_end": "LOC_TRAINING_HALL",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "A step forward sends Artie sliding across the floor like he's on ice.",
+              "transition_in_anchors": [
+                "sliding",
+                "stone floor",
+                "momentum",
+                "blur"
+              ],
+              "transition_out_text": "The System chime rings in his ears as a prompt appears.",
+              "transition_out_anchors": [
+                "System chime",
+                "digital prompt",
+                "Training Hall",
+                "iron gate"
+              ],
+              "hands_off_to": "1:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie reviews the tutorial prompt and commits to the challenge despite the risk.",
+              "type": "decision",
+              "outcome": "Artie accepts the tutorial challenge.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "1:2",
+              "location_start_label": "Training Hall",
+              "location_end_label": "Training Hall",
+              "location_start": "LOC_TRAINING_HALL",
+              "location_end": "LOC_TRAINING_HALL",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The floating text hovers before him, glowing with an insistent golden light.",
+              "transition_in_anchors": [
+                "floating text",
+                "golden light",
+                "Tutorial Accept",
+                "iron gate"
+              ],
+              "transition_out_text": "With a mental click, he confirms the choice and the gate grinds open.",
+              "transition_out_anchors": [
+                "mental click",
+                "iron gate",
+                "grinding stone",
+                "dark corridor"
+              ],
+              "hands_off_to": "1:4",
+              "end_condition_echo": "Artie confirms his stats are glitched and accepts the tutorial challenge."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Tutorial Gauntlet",
+          "intent": "Demonstrate the danger of the 1 HP build against minor mobs.",
+          "end_condition": "Artie reaches the Boss Room threshold without taking damage.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie faces his first mob, a slime, and realizes he must never be touched.",
+              "type": "combat",
+              "outcome": "Artie defeats the slime by kiting it at high speed.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "1:3",
+              "location_start_label": "Tutorial Corridor",
+              "location_end_label": "Tutorial Corridor",
+              "location_start": "LOC_TUTORIAL_CORRIDOR",
+              "location_end": "LOC_TUTORIAL_CORRIDOR",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "A wet squelch echoes through the corridor as a green mass slides into view.",
+              "transition_in_anchors": [
+                "wet squelch",
+                "green mass",
+                "corridor",
+                "torchlight"
+              ],
+              "transition_out_text": "He leaves the puddle of slime behind, his heart racing at the speed of his own feet.",
+              "transition_out_anchors": [
+                "slime puddle",
+                "racing heart",
+                "stone walls",
+                "distant door"
+              ],
+              "hands_off_to": "1:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Artie navigates a series of swinging blade traps using his maxed agility.",
+              "type": "action",
+              "outcome": "Artie reaches the Boss Room threshold without taking damage.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "1:4",
+              "location_start_label": "Tutorial Corridor",
+              "location_end_label": "Boss Room Threshold",
+              "location_start": "LOC_TUTORIAL_CORRIDOR",
+              "location_end": "LOC_BOSS_THRESHOLD",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The air whistles as heavy steel blades begin to swing from the ceiling.",
+              "transition_in_anchors": [
+                "whistling air",
+                "steel blades",
+                "ceiling",
+                "rhythmic thud"
+              ],
+              "transition_out_text": "He skids to a halt before the massive double doors of the final chamber.",
+              "transition_out_anchors": [
+                "double doors",
+                "final chamber",
+                "heavy breathing",
+                "threshold"
+              ],
+              "hands_off_to": "1:6",
+              "end_condition_echo": "Artie reaches the Boss Room threshold without taking damage."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Impossible Crit",
+          "intent": "The confrontation with the Tutorial Boss and the logic-defying kill.",
+          "end_condition": "The Tutorial Boss dies in one hit and Artie is flagged as a Red Name anomaly.",
+          "scenes": [
+            {
+              "scene_id": 6,
+              "summary": "Artie enters the Boss Chamber and identifies the Iron Golem's weakness.",
+              "type": "setup",
+              "outcome": "Artie formulates a plan to land a single critical hit.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "1:5",
+              "location_start_label": "Boss Room Threshold",
+              "location_end_label": "Boss Chamber",
+              "location_start": "LOC_BOSS_THRESHOLD",
+              "location_end": "LOC_BOSS_CHAMBER",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The doors groan open, revealing a vast arena of cracked marble.",
+              "transition_in_anchors": [
+                "doors groan",
+                "vast arena",
+                "cracked marble",
+                "dust"
+              ],
+              "transition_out_text": "The Golem stirs, its iron joints screeching as it locks onto the intruder.",
+              "transition_out_anchors": [
+                "iron joints",
+                "screeching",
+                "intruder",
+                "red eyes"
+              ],
+              "hands_off_to": "1:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Artie engages the Golem, kiting it until his 1% crit chance procs.",
+              "type": "combat",
+              "outcome": "Artie survives the Golem's initial onslaught through pure speed.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "1:6",
+              "location_start_label": "Boss Chamber",
+              "location_end_label": "Boss Chamber",
+              "location_start": "LOC_BOSS_CHAMBER",
+              "location_end": "LOC_BOSS_CHAMBER",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The Golem's fist smashes the marble where Artie stood a millisecond before.",
+              "transition_in_anchors": [
+                "fist smash",
+                "marble",
+                "millisecond",
+                "blur"
+              ],
+              "transition_out_text": "He circles the giant, waiting for the one opening that the System promised.",
+              "transition_out_anchors": [
+                "circling",
+                "giant",
+                "System promise",
+                "opening"
+              ],
+              "hands_off_to": "1:8"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Artie lands the critical hit, deleting the Golem and triggering a system alert.",
+              "type": "climax",
+              "outcome": "The Tutorial Boss dies in one hit and Artie is flagged as a Red Name anomaly.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_BOUNTY"
+              ],
+              "consumes_outcome_from": "1:7",
+              "location_start_label": "Boss Chamber",
+              "location_end_label": "Boss Chamber",
+              "location_start": "LOC_BOSS_CHAMBER",
+              "location_end": "LOC_BOSS_CHAMBER",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "A flash of red numbers erupts as Artie's dagger finds the Golem's core.",
+              "transition_in_anchors": [
+                "red numbers",
+                "dagger",
+                "Golem core",
+                "explosion"
+              ],
+              "end_condition_echo": "The Tutorial Boss dies in one hit and Artie is flagged as a Red Name anomaly."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 2,
+      "title": "Min-Maxing for Cowards",
+      "goal": "Identify the 'Hit & Run' passive exploit and acquire the first piece of 'Agility-only' gear.",
+      "chapter_role": "setup",
+      "stakes_shift": "From an accidental killer to an aspiring exploiter looking to turn a glitch into a career.",
+      "bridge": {
+        "from_prev": "Arrival in Oakhaven with a red name and zero survival skills.",
+        "to_next": "A quest for a 'Speedster's Cloak' leads Artie into a high-level dungeon far above his bracket."
+      },
+      "pacing": {
+        "intensity": 2,
+        "tempo": "steady",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Oakhaven Paranoia",
+          "intent": "Artie navigates the first town while hiding his criminal status.",
+          "end_condition": "Artie identifies the 'Hit & Run' passive exploit in his skill tree.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie arrives at the gates of Oakhaven, trying to hide his red name tag.",
+              "type": "setup",
+              "outcome": "Artie successfully enters the town without being arrested.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "1:8",
+              "location_start_label": "Boss Chamber Exit",
+              "location_end_label": "Oakhaven Gates",
+              "location_start": "LOC_BOSS_EXIT",
+              "location_end": "LOC_OAKHAVEN_GATES",
+              "handoff_mode": "time_skip",
+              "constraint_state": "restricted",
+              "transition_in_text": "The bright sunshine of the world outside the tutorial is blinding.",
+              "transition_in_anchors": [
+                "sunshine",
+                "tutorial exit",
+                "blinding",
+                "dusty road"
+              ],
+              "transition_out_text": "He pulls his hood low, hoping the red glow above his head isn't too obvious.",
+              "transition_out_anchors": [
+                "hood",
+                "red glow",
+                "head",
+                "crowd"
+              ],
+              "hands_off_to": "2:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie hides in a dark alley to inspect his updated character sheet.",
+              "type": "development",
+              "outcome": "Artie discovers a new passive skill that rewards his glass-cannon state.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "consumes_outcome_from": "2:1",
+              "location_start_label": "Oakhaven Gates",
+              "location_end_label": "Oakhaven Alley",
+              "location_start": "LOC_OAKHAVEN_GATES",
+              "location_end": "LOC_OAKHAVEN_ALLEY",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "He ducks behind a stack of empty crates as a patrol of guards passes by.",
+              "transition_in_anchors": [
+                "crates",
+                "guards",
+                "patrol",
+                "shadows"
+              ],
+              "transition_out_text": "He swipes his hand through the air, bringing up the skill menu.",
+              "transition_out_anchors": [
+                "swipe",
+                "skill menu",
+                "blue light",
+                "text"
+              ],
+              "hands_off_to": "2:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie reads the description of 'Hit & Run' and realizes its potential for exploitation.",
+              "type": "decision",
+              "outcome": "Artie identifies the 'Hit & Run' passive exploit in his skill tree.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:2",
+              "location_start_label": "Oakhaven Alley",
+              "location_end_label": "Oakhaven Alley",
+              "location_start": "LOC_OAKHAVEN_ALLEY",
+              "location_end": "LOC_OAKHAVEN_ALLEY",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The words 'Hit & Run' glow with a faint, glitchy static in the UI.",
+              "transition_in_anchors": [
+                "Hit & Run",
+                "glitchy static",
+                "UI",
+                "description"
+              ],
+              "transition_out_text": "A grin spreads across his face as he realizes the System just gave him a license to cheat.",
+              "transition_out_anchors": [
+                "grin",
+                "System",
+                "cheat",
+                "alleyway"
+              ],
+              "hands_off_to": "2:4",
+              "end_condition_echo": "Artie identifies the 'Hit & Run' passive exploit in his skill tree."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Agility Grind",
+          "intent": "Artie gathers intel and basic supplies for his glass-cannon build.",
+          "end_condition": "Artie locates the dungeon containing the Speedster's Cloak.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie visits a shady merchant to look for agility-boosting gear.",
+              "type": "action",
+              "outcome": "Artie learns about the Speedster's Cloak.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:3",
+              "location_start_label": "Oakhaven Alley",
+              "location_end_label": "Shady Shop",
+              "location_start": "LOC_OAKHAVEN_ALLEY",
+              "location_end": "LOC_SHADY_SHOP",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "He slips into a shop that smells of old parchment and unwashed adventurers.",
+              "transition_in_anchors": [
+                "parchment",
+                "adventurers",
+                "shop",
+                "dim light"
+              ],
+              "transition_out_text": "The merchant leans in, whispering about a treasure hidden in the catacombs.",
+              "transition_out_anchors": [
+                "merchant",
+                "whispering",
+                "treasure",
+                "catacombs"
+              ],
+              "hands_off_to": "2:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Artie eavesdrops on a group of high-level players at the local tavern.",
+              "type": "development",
+              "outcome": "Artie confirms the location of the Snail-Shell Catacombs.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:4",
+              "location_start_label": "Shady Shop",
+              "location_end_label": "The Rusty Tankard",
+              "location_start": "LOC_SHADY_SHOP",
+              "location_end": "LOC_RUSTY_TANKARD",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "The roar of the tavern hits him like a physical wave of sound and ale.",
+              "transition_in_anchors": [
+                "tavern roar",
+                "sound",
+                "ale",
+                "crowd"
+              ],
+              "transition_out_text": "He catches the name of the dungeon between the boasts of a drunken warrior.",
+              "transition_out_anchors": [
+                "dungeon name",
+                "warrior",
+                "boasts",
+                "ale mug"
+              ],
+              "hands_off_to": "2:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie trades his only valuable item for a map of the catacombs.",
+              "type": "action",
+              "outcome": "Artie acquires the map to the dungeon.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:5",
+              "location_start_label": "The Rusty Tankard",
+              "location_end_label": "Oakhaven Market",
+              "location_start": "LOC_RUSTY_TANKARD",
+              "location_end": "LOC_OAKHAVEN_MARKET",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "He meets a hooded figure near the fountain, the map tucked under their arm.",
+              "transition_in_anchors": [
+                "hooded figure",
+                "fountain",
+                "map",
+                "exchange"
+              ],
+              "transition_out_text": "He clutches the parchment tightly, his next destination clear.",
+              "transition_out_anchors": [
+                "parchment",
+                "destination",
+                "market square",
+                "fountain"
+              ],
+              "hands_off_to": "2:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Artie studies the map and finds the hidden entrance to the catacombs.",
+              "type": "development",
+              "outcome": "Artie locates the dungeon containing the Speedster's Cloak.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:6",
+              "location_start_label": "Oakhaven Market",
+              "location_end_label": "Oakhaven Outskirts",
+              "location_start": "LOC_OAKHAVEN_MARKET",
+              "location_end": "LOC_OAKHAVEN_OUTSKIRTS",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The town walls fall behind him as he follows the trail into the woods.",
+              "transition_in_anchors": [
+                "town walls",
+                "trail",
+                "woods",
+                "map"
+              ],
+              "transition_out_text": "He finds the stone archway buried under a century of ivy and moss.",
+              "transition_out_anchors": [
+                "stone archway",
+                "ivy",
+                "moss",
+                "entrance"
+              ],
+              "hands_off_to": "2:8",
+              "end_condition_echo": "Artie locates the dungeon containing the Speedster's Cloak."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Catacomb Entry",
+          "intent": "Artie commits to the high-level dungeon dive.",
+          "end_condition": "Artie enters the Snail-Shell Catacombs, locking the entrance behind him.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Artie prepares his meager inventory for the dive, realizing he has no room for error.",
+              "type": "setup",
+              "outcome": "Artie accepts that his 1 HP means any mistake is final.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:7",
+              "location_start_label": "Oakhaven Outskirts",
+              "location_end_label": "Snail-Shell Entrance",
+              "location_start": "LOC_OAKHAVEN_OUTSKIRTS",
+              "location_end": "LOC_SNAIL_SHELL_ENTRANCE",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "He sits on a fallen log, checking his boots and his single dagger.",
+              "transition_in_anchors": [
+                "fallen log",
+                "boots",
+                "dagger",
+                "inventory"
+              ],
+              "transition_out_text": "He stands up, looking at the dark maw of the dungeon entrance.",
+              "transition_out_anchors": [
+                "dark maw",
+                "dungeon entrance",
+                "shadows",
+                "determination"
+              ],
+              "hands_off_to": "2:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Artie approaches the entrance and feels the aura of the high-level zone.",
+              "type": "development",
+              "outcome": "Artie enters the dungeon's influence zone.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:8",
+              "location_start_label": "Snail-Shell Entrance",
+              "location_end_label": "Snail-Shell Entrance",
+              "location_start": "LOC_SNAIL_SHELL_ENTRANCE",
+              "location_end": "LOC_SNAIL_SHELL_ENTRANCE",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "A chill wind blows from the depths, carrying the scent of damp earth.",
+              "transition_in_anchors": [
+                "chill wind",
+                "depths",
+                "damp earth",
+                "stone"
+              ],
+              "transition_out_text": "He takes a deep breath and steps across the threshold.",
+              "transition_out_anchors": [
+                "deep breath",
+                "threshold",
+                "darkness",
+                "stone"
+              ],
+              "hands_off_to": "2:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Artie seals the entrance to prevent anyone from following him in.",
+              "type": "action",
+              "outcome": "Artie enters the Snail-Shell Catacombs, locking the entrance behind him.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "consumes_outcome_from": "2:9",
+              "location_start_label": "Snail-Shell Entrance",
+              "location_end_label": "Snail-Shell Interior",
+              "location_start": "LOC_SNAIL_SHELL_ENTRANCE",
+              "location_end": "LOC_SNAIL_SHELL_INTERIOR",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "He pulls the heavy iron lever, and the stone door slides shut with a boom.",
+              "transition_in_anchors": [
+                "iron lever",
+                "stone door",
+                "boom",
+                "sealed"
+              ],
+              "end_condition_echo": "Artie enters the Snail-Shell Catacombs, locking the entrance behind him."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

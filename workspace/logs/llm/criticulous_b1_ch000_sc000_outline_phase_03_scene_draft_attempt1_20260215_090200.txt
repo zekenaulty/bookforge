@@ -1,0 +1,2290 @@
+{
+  "schema_version": "1.1",
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "name": "Artie Penhaligon",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      },
+      "pronouns": "he/him",
+      "role": "protagonist"
+    },
+    {
+      "character_id": "CHAR_SYSTEM",
+      "name": "The System",
+      "intro": {
+        "chapter": 1,
+        "scene": 2
+      },
+      "role": "narrative_engine"
+    },
+    {
+      "character_id": "CHAR_SILAS",
+      "name": "Silas",
+      "intro": {
+        "chapter": 2,
+        "scene": 1
+      },
+      "role": "bureaucrat"
+    },
+    {
+      "character_id": "CHAR_UNIT734",
+      "name": "Unit 734",
+      "intro": {
+        "chapter": 5,
+        "scene": 1
+      },
+      "role": "antagonist"
+    }
+  ],
+  "threads": [
+    {
+      "thread_id": "TH_CRIT_BUG",
+      "label": "The 100% Crit Exploit",
+      "status": "active"
+    },
+    {
+      "thread_id": "TH_CORRECTOR_HUNT",
+      "label": "System Corrector Pursuit",
+      "status": "pending"
+    },
+    {
+      "thread_id": "TH_LUCK_STABILIZER",
+      "label": "The Admin Vault Heist",
+      "status": "pending"
+    }
+  ],
+  "chapters": [
+    {
+      "chapter_id": 1,
+      "title": "The 1% Chance of Survival",
+      "goal": "Survive the initial transition by exploiting a 100% crit-rate bug on a tutorial boss.",
+      "chapter_role": "hook",
+      "stakes_shift": "From certain death to possessing an unintended mechanical advantage.",
+      "bridge": {
+        "from_prev": "Protagonist dies in the real world due to a freak statistical anomaly.",
+        "to_next": "The protagonist enters the first hub city with a bag full of 'impossible' tutorial loot."
+      },
+      "pacing": {
+        "intensity": 4,
+        "tempo": "rush",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Final Calculation",
+          "intent": "Establish the protagonist's death and transition into the system.",
+          "end_condition": "Protagonist stands before the Tutorial Gate.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie dies in a hospital bed after a series of improbable medical errors.",
+              "type": "setup",
+              "outcome": "Artie's consciousness is transferred to the System Void.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "St. Jude's Hospital",
+              "location_end_label": "The Digital Void",
+              "location_start": "LOC_HOSPITAL",
+              "location_end": "LOC_VOID",
+              "handoff_mode": "hard_cut",
+              "constraint_state": "detained",
+              "transition_in_text": "Artie's heart monitor emits a long, steady beep as his vision fades to black.",
+              "transition_in_anchors": [
+                "heart monitor",
+                "steady beep",
+                "vision fading",
+                "blackness"
+              ],
+              "transition_out_text": "The darkness of the hospital room dissolves into a blinding white expanse.",
+              "transition_out_anchors": [
+                "darkness",
+                "dissolving",
+                "white expanse"
+              ],
+              "hands_off_to": "1:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie interacts with the System AI and discovers his 'Luck' stat is mathematically broken.",
+              "type": "development",
+              "outcome": "Artie realizes his Agility stat is feeding into a Crit-Rate multiplier without a cap.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "threads": [
+                "TH_CRIT_BUG"
+              ],
+              "location_start_label": "The Digital Void",
+              "location_end_label": "The Digital Void",
+              "location_start": "LOC_VOID",
+              "location_end": "LOC_VOID",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie blinks against the glare of floating blue notification windows.",
+              "transition_in_anchors": [
+                "glare",
+                "blue windows",
+                "notifications",
+                "blinking"
+              ],
+              "consumes_outcome_from": "1:1",
+              "transition_out_text": "Artie confirms his character build and prepares to spawn into the world.",
+              "transition_out_anchors": [
+                "character build",
+                "confirming",
+                "spawning"
+              ],
+              "hands_off_to": "1:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie spawns at the Tutorial Gate and prepares to enter.",
+              "type": "transition",
+              "outcome": "Artie enters the tutorial zone.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "The Digital Void",
+              "location_end_label": "Tutorial Gate",
+              "location_start": "LOC_VOID",
+              "location_end": "LOC_TUTORIAL_GATE",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "The white void collapses into a massive stone archway standing in a grassy field.",
+              "transition_in_anchors": [
+                "white void",
+                "stone archway",
+                "grassy field"
+              ],
+              "consumes_outcome_from": "1:2",
+              "transition_out_text": "Artie takes a deep breath and steps through the shimmering threshold.",
+              "transition_out_anchors": [
+                "deep breath",
+                "shimmering threshold",
+                "stepping through"
+              ],
+              "hands_off_to": "1:4",
+              "end_condition_echo": "Protagonist stands before the Tutorial Gate."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Debugging the Tutorial",
+          "intent": "Explore the mechanics of the 100% crit bug.",
+          "end_condition": "The tutorial boss spawns in the arena.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie fights a pack of Tutorial Slimes and confirms every hit is a critical strike.",
+              "type": "combat",
+              "outcome": "The 100% crit bug is verified in combat.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "TH_CRIT_BUG"
+              ],
+              "location_start_label": "Tutorial Meadow",
+              "location_end_label": "Tutorial Meadow",
+              "location_start": "LOC_TUTORIAL_MEADOW",
+              "location_end": "LOC_TUTORIAL_MEADOW",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "A cluster of translucent green slimes wobbles toward Artie as he draws his rusted dagger.",
+              "transition_in_anchors": [
+                "green slimes",
+                "wobbling",
+                "rusted dagger"
+              ],
+              "consumes_outcome_from": "1:3",
+              "transition_out_text": "Artie wipes slime residue from his blade and looks toward the distant boss tower.",
+              "transition_out_anchors": [
+                "slime residue",
+                "blade",
+                "boss tower"
+              ],
+              "hands_off_to": "1:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Artie hunts for 'Swift-Leaf' herbs to boost his Agility and further break the crit-rate.",
+              "type": "development",
+              "outcome": "Artie increases his Agility, seeing the crit-multiplier skyrocket.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Tutorial Meadow",
+              "location_end_label": "Tutorial Meadow",
+              "location_start": "LOC_TUTORIAL_MEADOW",
+              "location_end": "LOC_TUTORIAL_MEADOW",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie scours the undergrowth for the glowing blue stems of Swift-Leaf.",
+              "transition_in_anchors": [
+                "undergrowth",
+                "glowing stems",
+                "Swift-Leaf"
+              ],
+              "consumes_outcome_from": "1:4",
+              "transition_out_text": "Artie consumes the herbs and feels a surge of unnatural speed.",
+              "transition_out_anchors": [
+                "consuming herbs",
+                "surge",
+                "speed"
+              ],
+              "hands_off_to": "1:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie finds a clipping error in the boss tower wall, allowing him to bypass the final mobs.",
+              "type": "development",
+              "outcome": "Artie reaches the boss arena early and fully buffed.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Tutorial Meadow",
+              "location_end_label": "Boss Arena Entrance",
+              "location_start": "LOC_TUTORIAL_MEADOW",
+              "location_end": "LOC_BOSS_ENTRANCE",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie notices a flickering texture in the stone wall of the boss tower.",
+              "transition_in_anchors": [
+                "flickering texture",
+                "stone wall",
+                "boss tower"
+              ],
+              "consumes_outcome_from": "1:5",
+              "transition_out_text": "Artie squeezes through the gap in the world's geometry and lands in the arena.",
+              "transition_out_anchors": [
+                "squeezing through",
+                "geometry gap",
+                "arena"
+              ],
+              "hands_off_to": "1:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "The Tutorial Boss, a massive Iron Golem, spawns in the center of the arena.",
+              "type": "transition",
+              "outcome": "The boss battle begins.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "LOC_BOSS_ARENA",
+              "location_end": "LOC_BOSS_ARENA",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The ground shakes as a pile of scrap metal assembles into a hulking golem.",
+              "transition_in_anchors": [
+                "ground shakes",
+                "scrap metal",
+                "iron golem"
+              ],
+              "consumes_outcome_from": "1:6",
+              "transition_out_text": "The golem's eyes glow red as it locks onto Artie's position.",
+              "transition_out_anchors": [
+                "golem's eyes",
+                "glowing red",
+                "locking on"
+              ],
+              "hands_off_to": "1:8",
+              "end_condition_echo": "The tutorial boss spawns in the arena."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "One-Shot Wonder",
+          "intent": "Conclude the tutorial by obliterating the boss.",
+          "end_condition": "The protagonist enters the portal to the hub city.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Artie delivers a single, massive critical hit that overflows the golem's health bar.",
+              "type": "combat",
+              "outcome": "The tutorial boss is defeated instantly.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "TH_CRIT_BUG"
+              ],
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "LOC_BOSS_ARENA",
+              "location_end": "LOC_BOSS_ARENA",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie sprints forward, his movement a blur of broken physics.",
+              "transition_in_anchors": [
+                "sprinting",
+                "blur",
+                "broken physics"
+              ],
+              "consumes_outcome_from": "1:7",
+              "transition_out_text": "The golem explodes into a shower of loot and system errors.",
+              "transition_out_anchors": [
+                "explosion",
+                "shower of loot",
+                "system errors"
+              ],
+              "hands_off_to": "1:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Artie loots the 'Divine' tier chest meant for players who survive the boss for 10 minutes.",
+              "type": "development",
+              "outcome": "Artie gains high-tier gear and a suspicious amount of gold.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Boss Arena",
+              "location_start": "LOC_BOSS_ARENA",
+              "location_end": "LOC_BOSS_ARENA",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "A golden chest materializes where the golem once stood, its lid already creaking open.",
+              "transition_in_anchors": [
+                "golden chest",
+                "materializing",
+                "creaking open"
+              ],
+              "consumes_outcome_from": "1:8",
+              "transition_out_text": "Artie stuffs the impossible loot into his basic inventory bag.",
+              "transition_out_anchors": [
+                "stuffing loot",
+                "impossible loot",
+                "inventory bag"
+              ],
+              "hands_off_to": "1:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Artie walks through the exit portal, leaving the tutorial behind.",
+              "type": "transition",
+              "outcome": "Artie transitions to the Hub City.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Boss Arena",
+              "location_end_label": "Hub City Portal",
+              "location_start": "LOC_BOSS_ARENA",
+              "location_end": "LOC_HUB_PORTAL",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "A swirling blue portal opens at the back of the arena, humming with power.",
+              "transition_in_anchors": [
+                "blue portal",
+                "swirling",
+                "humming"
+              ],
+              "consumes_outcome_from": "1:9",
+              "end_condition_echo": "The protagonist enters the portal to the hub city."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 2,
+      "title": "Looting the Narrative",
+      "goal": "Identify the 'Speed-to-Crit' conversion exploit while navigating the starter city's bureaucracy.",
+      "chapter_role": "setup",
+      "stakes_shift": "From lucky survivor to deliberate exploiter of system physics.",
+      "bridge": {
+        "from_prev": "Arriving at the hub with high-tier loot and suspicious stats.",
+        "to_next": "The protagonist joins a low-stakes dungeon crawl to test his 'Hit & Run' theory."
+      },
+      "pacing": {
+        "intensity": 2,
+        "tempo": "steady",
+        "expected_scene_count": 8
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Iron Gate Bureaucracy",
+          "intent": "Introduce the hub city and the protagonist's initial struggle with registration.",
+          "end_condition": "The protagonist successfully registers at the Adventurer Guild.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie arrives in the Iron Gate hub city and is overwhelmed by the crowd.",
+              "type": "setup",
+              "outcome": "Artie locates the Adventurer Guild.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Hub City Portal",
+              "location_end_label": "Iron Gate Square",
+              "location_start": "LOC_HUB_PORTAL",
+              "location_end": "LOC_IRON_GATE_SQUARE",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "Artie steps out of the portal and into the bustling noise of a medieval metropolis.",
+              "transition_in_anchors": [
+                "portal",
+                "bustling noise",
+                "metropolis"
+              ],
+              "consumes_outcome_from": "1:10",
+              "transition_out_text": "Artie follows the signs toward the massive stone building with the crossed-swords banner.",
+              "transition_out_anchors": [
+                "following signs",
+                "stone building",
+                "crossed-swords"
+              ],
+              "hands_off_to": "2:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie attempts to register but his stats cause a system error at the clerk's desk.",
+              "type": "development",
+              "outcome": "Artie realizes he needs to hide his true stats from public view.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILAS"
+              ],
+              "location_start_label": "Adventurer Guild Hall",
+              "location_end_label": "Adventurer Guild Hall",
+              "location_start": "LOC_GUILD_HALL",
+              "location_end": "LOC_GUILD_HALL",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Silas, the guild clerk, taps a crystal ball that suddenly begins to smoke.",
+              "transition_in_anchors": [
+                "guild clerk",
+                "crystal ball",
+                "smoking"
+              ],
+              "consumes_outcome_from": "2:1",
+              "transition_out_text": "Artie quickly cancels the scan before the crystal shatters.",
+              "transition_out_anchors": [
+                "canceling scan",
+                "crystal",
+                "shatters"
+              ],
+              "hands_off_to": "2:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie bribes Silas with a 'Divine' tutorial item to bypass the standard stat-check.",
+              "type": "development",
+              "outcome": "Artie is registered as a Level 1 'Scout' without a full stat audit.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SILAS"
+              ],
+              "location_start_label": "Adventurer Guild Hall",
+              "location_end_label": "Adventurer Guild Hall",
+              "location_start": "LOC_GUILD_HALL",
+              "location_end": "LOC_GUILD_HALL",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie slides a glowing golden ring across the counter, catching Silas's greedy eye.",
+              "transition_in_anchors": [
+                "golden ring",
+                "counter",
+                "greedy eye"
+              ],
+              "consumes_outcome_from": "2:2",
+              "transition_out_text": "Silas hands over a bronze adventurer's badge with a conspiratorial wink.",
+              "transition_out_anchors": [
+                "bronze badge",
+                "conspiratorial wink",
+                "handing over"
+              ],
+              "hands_off_to": "2:4",
+              "end_condition_echo": "The protagonist successfully registers at the Adventurer Guild."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Agility Loophole",
+          "intent": "Experiment with the Speed-to-Crit conversion in a controlled environment.",
+          "end_condition": "The protagonist achieves a stable 100% crit-rate via Agility stacking.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie visits the local training grounds to test his movement speed vs. crit chance.",
+              "type": "development",
+              "outcome": "Artie discovers that sprinting increases his crit-rate in real-time.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "TH_CRIT_BUG"
+              ],
+              "location_start_label": "Adventurer Guild Hall",
+              "location_end_label": "Training Grounds",
+              "location_start": "LOC_GUILD_HALL",
+              "location_end": "LOC_TRAINING_GROUNDS",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "The afternoon sun beats down on the dirt-packed training field as Artie begins to run laps.",
+              "transition_in_anchors": [
+                "afternoon sun",
+                "training field",
+                "running laps"
+              ],
+              "consumes_outcome_from": "2:3",
+              "transition_out_text": "Artie watches the 'Crit Chance' percentage climb with every yard he covers.",
+              "transition_out_anchors": [
+                "Crit Chance",
+                "percentage",
+                "climbing"
+              ],
+              "hands_off_to": "2:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Artie buys 'Wind-Step' boots from a back-alley merchant to boost his base speed.",
+              "type": "development",
+              "outcome": "Artie's base agility is high enough to trigger the exploit with minimal effort.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Training Grounds",
+              "location_end_label": "Back-Alley Market",
+              "location_start": "LOC_TRAINING_GROUNDS",
+              "location_end": "LOC_BACK_ALLEY",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie ducks into a narrow alleyway where a hooded merchant displays a pair of winged boots.",
+              "transition_in_anchors": [
+                "narrow alleyway",
+                "hooded merchant",
+                "winged boots"
+              ],
+              "consumes_outcome_from": "2:4",
+              "transition_out_text": "Artie laces up the boots and feels his feet barely touching the cobblestones.",
+              "transition_out_anchors": [
+                "lacing up",
+                "feet",
+                "cobblestones"
+              ],
+              "hands_off_to": "2:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie performs a final test run, reaching a permanent 100% crit state while jogging.",
+              "type": "development",
+              "outcome": "The 'Hit & Run' build is finalized.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "TH_CRIT_BUG"
+              ],
+              "location_start_label": "Back-Alley Market",
+              "location_end_label": "Training Grounds",
+              "location_start": "LOC_BACK_ALLEY",
+              "location_end": "LOC_TRAINING_GROUNDS",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie returns to the training grounds to verify the math one last time.",
+              "transition_in_anchors": [
+                "returning",
+                "training grounds",
+                "verify math"
+              ],
+              "consumes_outcome_from": "2:5",
+              "transition_out_text": "The status window locks at 100%\u2014the exploit is now stable.",
+              "transition_out_anchors": [
+                "status window",
+                "100%",
+                "stable"
+              ],
+              "hands_off_to": "2:7",
+              "end_condition_echo": "The protagonist achieves a stable 100% crit-rate via Agility stacking."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Dressed for Success",
+          "intent": "Acquire the necessary gear to leverage the exploit in a real dungeon.",
+          "end_condition": "The protagonist steps into the entrance of the Sunken Crypt.",
+          "scenes": [
+            {
+              "scene_id": 7,
+              "summary": "Artie prepares his inventory, focusing on items that increase evasion and speed.",
+              "type": "development",
+              "outcome": "Artie is fully equipped for a hitless run.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Training Grounds",
+              "location_end_label": "City Gates",
+              "location_start": "LOC_TRAINING_GROUNDS",
+              "location_end": "LOC_CITY_GATES",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "Artie checks his pack by the city gates, ensuring every item serves his zero-hit strategy.",
+              "transition_in_anchors": [
+                "checking pack",
+                "city gates",
+                "zero-hit strategy"
+              ],
+              "consumes_outcome_from": "2:6",
+              "transition_out_text": "Artie heads out toward the swamp where the Sunken Crypt lies.",
+              "transition_out_anchors": [
+                "heading out",
+                "swamp",
+                "Sunken Crypt"
+              ],
+              "hands_off_to": "2:8"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Artie arrives at the Sunken Crypt and prepares to enter.",
+              "type": "transition",
+              "outcome": "Artie enters the dungeon.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "City Gates",
+              "location_end_label": "Sunken Crypt Entrance",
+              "location_start": "LOC_CITY_GATES",
+              "location_end": "LOC_CRYPT_ENTRANCE",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "The damp smell of rot fills the air as Artie stands before the vine-covered stone stairs.",
+              "transition_in_anchors": [
+                "damp smell",
+                "rot",
+                "stone stairs"
+              ],
+              "consumes_outcome_from": "2:7",
+              "end_condition_echo": "The protagonist steps into the entrance of the Sunken Crypt."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 3,
+      "title": "The Glass Cannon Special",
+      "goal": "Clear the Sunken Crypt dungeon using a zero-hit strategy that breaks the local leaderboard.",
+      "chapter_role": "trial",
+      "stakes_shift": "From an unknown player to a target of interest for the 'System Integrity' guild.",
+      "bridge": {
+        "from_prev": "Entering the dungeon with a build that shouldn't work.",
+        "to_next": "The local authorities realize the protagonist is bypassing standard combat cooldowns."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "steady",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The No-Hit Run",
+          "intent": "Begin the Sunken Crypt clear using the zero-hit strategy.",
+          "end_condition": "The protagonist reaches the mid-dungeon checkpoint without taking damage.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie clears the first floor of the crypt by kiting skeletons and never getting touched.",
+              "type": "combat",
+              "outcome": "Artie maintains a 'Flawless' combat bonus.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Sunken Crypt Entrance",
+              "location_end_label": "Crypt First Floor",
+              "location_start": "LOC_CRYPT_ENTRANCE",
+              "location_end": "LOC_CRYPT_F1",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie slides across the mossy floor, dodging a skeleton's clumsy swing with inches to spare.",
+              "transition_in_anchors": [
+                "sliding",
+                "mossy floor",
+                "dodging"
+              ],
+              "consumes_outcome_from": "2:8",
+              "transition_out_text": "The skeletons crumble into dust as Artie's daggers find their mark with lethal precision.",
+              "transition_out_anchors": [
+                "crumbling into dust",
+                "daggers",
+                "lethal precision"
+              ],
+              "hands_off_to": "3:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie navigates a room full of pressure-plate traps using his enhanced agility.",
+              "type": "development",
+              "outcome": "Artie bypasses the traps without triggering a single one.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Crypt First Floor",
+              "location_end_label": "Crypt Trap Room",
+              "location_start": "LOC_CRYPT_F1",
+              "location_end": "LOC_TRAP_ROOM",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie pauses at the threshold of a hallway where the tiles are slightly misaligned.",
+              "transition_in_anchors": [
+                "pausing",
+                "hallway",
+                "misaligned tiles"
+              ],
+              "consumes_outcome_from": "3:1",
+              "transition_out_text": "Artie leaps from tile to tile, his movements as light as a feather.",
+              "transition_out_anchors": [
+                "leaping",
+                "tile to tile",
+                "light movements"
+              ],
+              "hands_off_to": "3:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie reaches the mid-dungeon fountain and sees a notification for his hitless streak.",
+              "type": "transition",
+              "outcome": "Artie reaches the checkpoint hitless.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Crypt Trap Room",
+              "location_end_label": "Crypt Checkpoint",
+              "location_start": "LOC_TRAP_ROOM",
+              "location_end": "LOC_CRYPT_CHECKPOINT",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "A stone fountain carved like a weeping maiden marks the halfway point of the dungeon.",
+              "transition_in_anchors": [
+                "stone fountain",
+                "weeping maiden",
+                "halfway point"
+              ],
+              "consumes_outcome_from": "3:2",
+              "transition_out_text": "A gold notification flashes: 'FLAWLESS STREAK: 50 KILLS'.",
+              "transition_out_anchors": [
+                "gold notification",
+                "flawless streak",
+                "flashing"
+              ],
+              "hands_off_to": "3:4",
+              "end_condition_echo": "The protagonist reaches the mid-dungeon checkpoint without taking damage."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Breaking the Leaderboard",
+          "intent": "Escalate the dungeon difficulty while maintaining the hitless streak.",
+          "end_condition": "The final boss door of the Sunken Crypt opens.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie encounters a mini-boss, a Shadow Stalker, and uses its own speed against it.",
+              "type": "combat",
+              "outcome": "The Shadow Stalker is defeated in seconds.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Crypt Checkpoint",
+              "location_end_label": "Crypt Second Floor",
+              "location_start": "LOC_CRYPT_CHECKPOINT",
+              "location_end": "LOC_CRYPT_F2",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "A blur of darkness detaches itself from the ceiling, its claws reaching for Artie's throat.",
+              "transition_in_anchors": [
+                "blur of darkness",
+                "ceiling",
+                "claws"
+              ],
+              "consumes_outcome_from": "3:3",
+              "transition_out_text": "Artie parries the strike and counters with a critical blow that shatters the shadow.",
+              "transition_out_anchors": [
+                "parrying",
+                "countering",
+                "shattering shadow"
+              ],
+              "hands_off_to": "3:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Artie notices the dungeon's 'Global Leaderboard' projection updating in real-time.",
+              "type": "development",
+              "outcome": "Artie sees his name climbing into the top 10 for clear-speed.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Crypt Second Floor",
+              "location_end_label": "Crypt Second Floor",
+              "location_start": "LOC_CRYPT_F2",
+              "location_end": "LOC_CRYPT_F2",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "A translucent leaderboard menu floats in the corner of Artie's vision, glowing with urgency.",
+              "transition_in_anchors": [
+                "leaderboard menu",
+                "floating",
+                "urgency"
+              ],
+              "consumes_outcome_from": "3:4",
+              "transition_out_text": "Artie's name jumps from Rank 500 to Rank 8 in a single heartbeat.",
+              "transition_out_anchors": [
+                "name jumping",
+                "Rank 8",
+                "heartbeat"
+              ],
+              "hands_off_to": "3:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie performs a 'wall-run' exploit to skip a major combat encounter on the second floor.",
+              "type": "development",
+              "outcome": "Artie saves three minutes on his clear time.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Crypt Second Floor",
+              "location_end_label": "Crypt Boss Hall",
+              "location_start": "LOC_CRYPT_F2",
+              "location_end": "LOC_BOSS_HALL",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie eyes the vertical stone wall and the narrow ledge high above the mob pack.",
+              "transition_in_anchors": [
+                "vertical wall",
+                "narrow ledge",
+                "mob pack"
+              ],
+              "consumes_outcome_from": "3:5",
+              "transition_out_text": "Artie sprints up the wall, defying gravity as he reaches the upper balcony.",
+              "transition_out_anchors": [
+                "sprinting up wall",
+                "defying gravity",
+                "upper balcony"
+              ],
+              "hands_off_to": "3:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Artie arrives at the final boss door, which requires a 'Hitless' key to open early.",
+              "type": "transition",
+              "outcome": "The boss door opens due to Artie's perfect run.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Crypt Boss Hall",
+              "location_end_label": "Boss Door",
+              "location_start": "LOC_BOSS_HALL",
+              "location_end": "LOC_BOSS_DOOR",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "The massive iron doors of the boss chamber pulse with a golden light as Artie approaches.",
+              "transition_in_anchors": [
+                "iron doors",
+                "boss chamber",
+                "golden light"
+              ],
+              "consumes_outcome_from": "3:6",
+              "transition_out_text": "The locks turn of their own accord, sensing Artie's flawless record.",
+              "transition_out_anchors": [
+                "locks turning",
+                "own accord",
+                "flawless record"
+              ],
+              "hands_off_to": "3:8",
+              "end_condition_echo": "The final boss door of the Sunken Crypt opens."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Crypt-ic Victory",
+          "intent": "Defeat the dungeon boss and trigger the server-wide leaderboard alert.",
+          "end_condition": "The protagonist exits the dungeon as the #1 ranked player.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Artie fights the Crypt Lord, using a 'damage-per-second' exploit by stacking crit-bleeds.",
+              "type": "combat",
+              "outcome": "The Crypt Lord is defeated in record time.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "TH_CRIT_BUG"
+              ],
+              "location_start_label": "Boss Chamber",
+              "location_end_label": "Boss Chamber",
+              "location_start": "LOC_BOSS_CHAMBER",
+              "location_end": "LOC_BOSS_CHAMBER",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The Crypt Lord rises from its throne, a skeletal giant wreathed in green necrotic fire.",
+              "transition_in_anchors": [
+                "Crypt Lord",
+                "skeletal giant",
+                "necrotic fire"
+              ],
+              "consumes_outcome_from": "3:7",
+              "transition_out_text": "Artie's daggers become a blur of red numbers as the boss's health bar vanishes.",
+              "transition_out_anchors": [
+                "blur of red",
+                "red numbers",
+                "health bar"
+              ],
+              "hands_off_to": "3:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "A server-wide announcement heralds Artie's new record clear time.",
+              "type": "development",
+              "outcome": "Artie becomes a public figure in the game world.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "location_start_label": "Boss Chamber",
+              "location_end_label": "Boss Chamber",
+              "location_start": "LOC_BOSS_CHAMBER",
+              "location_end": "LOC_BOSS_CHAMBER",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The air vibrates as a booming voice echoes across the entire server.",
+              "transition_in_anchors": [
+                "air vibrates",
+                "booming voice",
+                "server announcement"
+              ],
+              "consumes_outcome_from": "3:8",
+              "transition_out_text": "Artie stares at the message: 'NEW RECORD: ARTIE - 04:12 (RANK 1)'.",
+              "transition_out_anchors": [
+                "staring",
+                "NEW RECORD",
+                "RANK 1"
+              ],
+              "hands_off_to": "3:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Artie exits the dungeon, finding a crowd of curious players waiting at the entrance.",
+              "type": "transition",
+              "outcome": "Artie successfully completes the dungeon clear.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Boss Chamber",
+              "location_end_label": "Sunken Crypt Entrance",
+              "location_start": "LOC_BOSS_CHAMBER",
+              "location_end": "LOC_CRYPT_ENTRANCE",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "Artie steps out of the dark crypt and into the blinding sunlight of the swamp.",
+              "transition_in_anchors": [
+                "stepping out",
+                "dark crypt",
+                "blinding sunlight"
+              ],
+              "consumes_outcome_from": "3:9",
+              "end_condition_echo": "The protagonist exits the dungeon as the #1 ranked player."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 4,
+      "title": "Grand Theft Artifact",
+      "goal": "Infiltrate the high-security 'Admin Vault' to steal a Luck-Stabilizer before the System patches his exploit.",
+      "chapter_role": "reversal",
+      "stakes_shift": "From a high-performing player to a wanted 'glitch' in the world's eyes.",
+      "bridge": {
+        "from_prev": "The realization that a server-side update will soon nerf his crit-build.",
+        "to_next": "The protagonist is forced to flee the city as a bounty is placed on his 'illegal' stats."
+      },
+      "pacing": {
+        "intensity": 5,
+        "tempo": "rush",
+        "expected_scene_count": 12
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Patch is Coming",
+          "intent": "Gather intelligence on the upcoming nerf and locate the Admin Vault.",
+          "end_condition": "The protagonist identifies the exact location of the Luck-Stabilizer.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie receives a 'System Maintenance' warning that specifically mentions 'Crit-Rate normalization'.",
+              "type": "setup",
+              "outcome": "Artie realizes his build is about to be deleted.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "location_start_label": "Iron Gate Inn",
+              "location_end_label": "Iron Gate Inn",
+              "location_start": "LOC_INN",
+              "location_end": "LOC_INN",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie is halfway through a bowl of stew when a red notification window blocks his view.",
+              "transition_in_anchors": [
+                "bowl of stew",
+                "red notification",
+                "blocking view"
+              ],
+              "consumes_outcome_from": "3:10",
+              "transition_out_text": "Artie drops his spoon, his mind racing to find a way to save his stats.",
+              "transition_out_anchors": [
+                "dropping spoon",
+                "mind racing",
+                "saving stats"
+              ],
+              "hands_off_to": "4:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie meets a 'Data Broker' in the city's underbelly to find a way to bypass the patch.",
+              "type": "development",
+              "outcome": "Artie learns about the Luck-Stabilizer artifact in the Admin Vault.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Iron Gate Inn",
+              "location_end_label": "The Underbelly",
+              "location_start": "LOC_INN",
+              "location_end": "LOC_UNDERBELLY",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "The air in the Underbelly is thick with the smell of damp earth and illegal mana-crystals.",
+              "transition_in_anchors": [
+                "Underbelly",
+                "damp earth",
+                "mana-crystals"
+              ],
+              "consumes_outcome_from": "4:1",
+              "transition_out_text": "The broker points a scarred finger at a map of the city's high-security district.",
+              "transition_out_anchors": [
+                "scarred finger",
+                "map",
+                "high-security district"
+              ],
+              "hands_off_to": "4:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie scouts the Admin District, identifying the patrol patterns of the high-level guards.",
+              "type": "development",
+              "outcome": "Artie finds a gap in the security perimeter.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "The Underbelly",
+              "location_end_label": "Admin District",
+              "location_start": "LOC_UNDERBELLY",
+              "location_end": "LOC_ADMIN_DISTRICT",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie watches from the shadows as guards in gleaming silver armor march in perfect unison.",
+              "transition_in_anchors": [
+                "shadows",
+                "silver armor",
+                "perfect unison"
+              ],
+              "consumes_outcome_from": "4:2",
+              "transition_out_text": "Artie notes the three-second delay between the guard rotations.",
+              "transition_out_anchors": [
+                "noting delay",
+                "guard rotations",
+                "three-second"
+              ],
+              "hands_off_to": "4:4"
+            },
+            {
+              "scene_id": 4,
+              "summary": "Artie uses a 'Vision Potion' to locate the Luck-Stabilizer's signature within the vault.",
+              "type": "development",
+              "outcome": "The exact coordinates of the artifact are confirmed.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "TH_LUCK_STABILIZER"
+              ],
+              "location_start_label": "Admin District",
+              "location_end_label": "Admin District",
+              "location_start": "LOC_ADMIN_DISTRICT",
+              "location_end": "LOC_ADMIN_DISTRICT",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie uncorks a vial of shimmering purple liquid and tips it back.",
+              "transition_in_anchors": [
+                "uncorks vial",
+                "purple liquid",
+                "tipping back"
+              ],
+              "consumes_outcome_from": "4:3",
+              "transition_out_text": "The world turns into a wireframe of blue lines, revealing the artifact's golden pulse.",
+              "transition_out_anchors": [
+                "wireframe",
+                "blue lines",
+                "golden pulse"
+              ],
+              "hands_off_to": "4:5",
+              "end_condition_echo": "The protagonist identifies the exact location of the Luck-Stabilizer."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Heist of the Century",
+          "intent": "Navigate the vault's security systems using movement exploits.",
+          "end_condition": "The protagonist enters the vault's inner containment field.",
+          "scenes": [
+            {
+              "scene_id": 5,
+              "summary": "Artie infiltrates the vault using a 'speed-jump' to clear the outer electrified fence.",
+              "type": "combat",
+              "outcome": "Artie enters the vault grounds undetected.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Admin District",
+              "location_end_label": "Vault Outer Grounds",
+              "location_start": "LOC_ADMIN_DISTRICT",
+              "location_end": "LOC_VAULT_OUTER",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Artie takes a running start, his boots sparking as he hits his top speed.",
+              "transition_in_anchors": [
+                "running start",
+                "boots sparking",
+                "top speed"
+              ],
+              "consumes_outcome_from": "4:4",
+              "transition_out_text": "Artie clears the fence by a hair's breadth and rolls into the shadows of the main building.",
+              "transition_out_anchors": [
+                "clearing fence",
+                "hair's breadth",
+                "rolling"
+              ],
+              "hands_off_to": "4:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie navigates a laser-grid hallway by manipulating his hitbox through emotes.",
+              "type": "development",
+              "outcome": "Artie passes through the lasers without triggering the alarm.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Vault Outer Grounds",
+              "location_end_label": "Laser Hallway",
+              "location_start": "LOC_VAULT_OUTER",
+              "location_end": "LOC_LASER_HALL",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "A grid of red light crisscrosses the narrow corridor ahead.",
+              "transition_in_anchors": [
+                "grid of red",
+                "crisscrosses",
+                "narrow corridor"
+              ],
+              "consumes_outcome_from": "4:5",
+              "transition_out_text": "Artie triggers a 'dance' emote, his character model twisting in ways that bypass the beams.",
+              "transition_out_anchors": [
+                "dance emote",
+                "character model",
+                "bypassing beams"
+              ],
+              "hands_off_to": "4:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Artie hacks the vault's door using a 'brute-force' script he bought from the broker.",
+              "type": "development",
+              "outcome": "The vault door opens, but a silent alarm is triggered.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Laser Hallway",
+              "location_end_label": "Inner Vault Door",
+              "location_start": "LOC_LASER_HALL",
+              "location_end": "LOC_VAULT_DOOR",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie plugs a glowing data-spike into the vault's central interface.",
+              "transition_in_anchors": [
+                "data-spike",
+                "central interface",
+                "plugging in"
+              ],
+              "consumes_outcome_from": "4:6",
+              "transition_out_text": "The heavy gears of the vault begin to grind, but a red light begins to pulse overhead.",
+              "transition_out_anchors": [
+                "heavy gears",
+                "grinding",
+                "red light pulsing"
+              ],
+              "hands_off_to": "4:8"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Artie enters the inner containment field where the Luck-Stabilizer is held.",
+              "type": "transition",
+              "outcome": "Artie reaches the artifact.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Inner Vault Door",
+              "location_end_label": "Containment Field",
+              "location_start": "LOC_VAULT_DOOR",
+              "location_end": "LOC_CONTAINMENT_FIELD",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "A shimmering dome of blue energy protects a pedestal in the center of the room.",
+              "transition_in_anchors": [
+                "shimmering dome",
+                "blue energy",
+                "pedestal"
+              ],
+              "consumes_outcome_from": "4:7",
+              "transition_out_text": "Artie steps inside the field, feeling the static electricity make his hair stand on end.",
+              "transition_out_anchors": [
+                "stepping inside",
+                "static electricity",
+                "hair standing"
+              ],
+              "hands_off_to": "4:9",
+              "end_condition_echo": "The protagonist enters the vault's inner containment field."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Great Escape",
+          "intent": "Secure the Luck-Stabilizer and flee the city before the gates lock.",
+          "end_condition": "The protagonist escapes the city walls as the bounty goes live.",
+          "scenes": [
+            {
+              "scene_id": 9,
+              "summary": "Artie grabs the Luck-Stabilizer, causing the vault's security golems to activate.",
+              "type": "combat",
+              "outcome": "Artie secures the artifact but is now in active combat.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "TH_LUCK_STABILIZER"
+              ],
+              "location_start_label": "Containment Field",
+              "location_end_label": "Containment Field",
+              "location_start": "LOC_CONTAINMENT_FIELD",
+              "location_end": "LOC_CONTAINMENT_FIELD",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "As Artie's fingers close around the golden orb, the blue energy dome shatters.",
+              "transition_in_anchors": [
+                "fingers closing",
+                "golden orb",
+                "dome shatters"
+              ],
+              "consumes_outcome_from": "4:8",
+              "transition_out_text": "Four massive security golems detach from the walls, their eyes glowing with lethal intent.",
+              "transition_out_anchors": [
+                "security golems",
+                "detaching",
+                "lethal intent"
+              ],
+              "hands_off_to": "4:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Artie uses the Luck-Stabilizer's passive effect to dodge a lethal strike and escape the vault.",
+              "type": "combat",
+              "outcome": "Artie escapes the vault building.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Containment Field",
+              "location_end_label": "Vault Outer Grounds",
+              "location_start": "LOC_CONTAINMENT_FIELD",
+              "location_end": "LOC_VAULT_OUTER",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "A golem's fist smashes the floor where Artie stood a microsecond ago.",
+              "transition_in_anchors": [
+                "golem's fist",
+                "smashing floor",
+                "microsecond"
+              ],
+              "consumes_outcome_from": "4:9",
+              "transition_out_text": "Artie bursts through the main doors, sprinting toward the city walls.",
+              "transition_out_anchors": [
+                "bursting through",
+                "main doors",
+                "sprinting"
+              ],
+              "hands_off_to": "4:11"
+            },
+            {
+              "scene_id": 11,
+              "summary": "A city-wide alarm sounds and a bounty for 'The Glitch' is broadcast to all players.",
+              "type": "development",
+              "outcome": "Artie is now a wanted criminal.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "location_start_label": "Vault Outer Grounds",
+              "location_end_label": "City Streets",
+              "location_start": "LOC_VAULT_OUTER",
+              "location_end": "LOC_CITY_STREETS",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "The night sky is suddenly filled with glowing red text: 'BOUNTY ISSUED: THE GLITCH'.",
+              "transition_in_anchors": [
+                "night sky",
+                "red text",
+                "BOUNTY ISSUED"
+              ],
+              "consumes_outcome_from": "4:10",
+              "transition_out_text": "Artie sees other players turning their heads, weapons beginning to glow.",
+              "transition_out_anchors": [
+                "players turning",
+                "heads",
+                "weapons glowing"
+              ],
+              "hands_off_to": "4:12"
+            },
+            {
+              "scene_id": 12,
+              "summary": "Artie performs a final 'leap of faith' from the city walls into the dark forest below.",
+              "type": "transition",
+              "outcome": "Artie escapes the city.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "City Streets",
+              "location_end_label": "The Dark Forest",
+              "location_start": "LOC_CITY_STREETS",
+              "location_end": "LOC_DARK_FOREST",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "fleeing",
+              "transition_in_text": "Artie reaches the crenellations of the outer wall, the forest a dark sea below him.",
+              "transition_in_anchors": [
+                "crenellations",
+                "outer wall",
+                "dark sea"
+              ],
+              "consumes_outcome_from": "4:11",
+              "end_condition_echo": "The protagonist escapes the city walls as the bounty goes live."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 5,
+      "title": "Aggro Management for Dummies",
+      "goal": "Evade a relentless System Corrector by manipulating mob pathing and aggro ranges in the Dead-Zone.",
+      "chapter_role": "investigation",
+      "stakes_shift": "From fleeing the system to learning how to rewrite its pursuit logic.",
+      "bridge": {
+        "from_prev": "Escaping the city with a stolen artifact and a world-wide bounty.",
+        "to_next": "The protagonist discovers the source code of the Corrector's AI."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "slow_burn",
+        "expected_scene_count": 8
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Dead-Zone",
+          "intent": "Enter the lawless Dead-Zone and encounter the System Corrector.",
+          "end_condition": "The protagonist loses the Corrector's tail for the first time.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie enters the Dead-Zone, where the system's rules are inconsistently applied.",
+              "type": "setup",
+              "outcome": "Artie realizes the environment can be used as a weapon.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "The Dark Forest",
+              "location_end_label": "The Dead-Zone",
+              "location_start": "LOC_DARK_FOREST",
+              "location_end": "LOC_DEAD_ZONE",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "The trees become twisted and grey, their leaves flickering like static.",
+              "transition_in_anchors": [
+                "twisted trees",
+                "grey",
+                "flickering static"
+              ],
+              "consumes_outcome_from": "4:12",
+              "transition_out_text": "Artie notices a rock floating three feet off the ground\u2014the physics here are broken.",
+              "transition_out_anchors": [
+                "floating rock",
+                "three feet",
+                "broken physics"
+              ],
+              "hands_off_to": "5:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Unit 734, the System Corrector, appears and begins its pursuit of Artie.",
+              "type": "combat",
+              "outcome": "Artie is forced into a high-stakes chase.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_UNIT734"
+              ],
+              "threads": [
+                "TH_CORRECTOR_HUNT"
+              ],
+              "location_start_label": "The Dead-Zone",
+              "location_end_label": "The Dead-Zone",
+              "location_start": "LOC_DEAD_ZONE",
+              "location_end": "LOC_DEAD_ZONE",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "A tear in reality opens, and a figure in sleek, obsidian armor steps through.",
+              "transition_in_anchors": [
+                "tear in reality",
+                "obsidian armor",
+                "stepping through"
+              ],
+              "consumes_outcome_from": "5:1",
+              "transition_out_text": "The Corrector points a digit at Artie, and the ground beneath him begins to delete.",
+              "transition_out_anchors": [
+                "pointing digit",
+                "ground deleting",
+                "pursuit"
+              ],
+              "hands_off_to": "5:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie uses 'Aggro-Leashing' to pull a pack of high-level mobs onto the Corrector.",
+              "type": "combat",
+              "outcome": "The Corrector is temporarily distracted, allowing Artie to hide.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_UNIT734"
+              ],
+              "location_start_label": "The Dead-Zone",
+              "location_end_label": "Hidden Ravine",
+              "location_start": "LOC_DEAD_ZONE",
+              "location_end": "LOC_RAVINE",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "Artie sprints past a nest of sleeping Dire-Wolves, waking them with a well-placed stone.",
+              "transition_in_anchors": [
+                "sprinting past",
+                "Dire-Wolves",
+                "well-placed stone"
+              ],
+              "consumes_outcome_from": "5:2",
+              "transition_out_text": "Artie dives into a ravine as the wolves swarm the obsidian figure.",
+              "transition_out_anchors": [
+                "diving",
+                "ravine",
+                "wolves swarming"
+              ],
+              "hands_off_to": "5:4",
+              "end_condition_echo": "The protagonist loses the Corrector's tail for the first time."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Pathfinding Pranks",
+          "intent": "Use environmental hazards and mob aggro to evade the Corrector.",
+          "end_condition": "The protagonist reaches the entrance of the Source Code Temple.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie discovers that the Corrector's AI follows strict pathfinding logic.",
+              "type": "development",
+              "outcome": "Artie learns how to manipulate the Corrector's movement.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_UNIT734"
+              ],
+              "location_start_label": "Hidden Ravine",
+              "location_end_label": "The Dead-Zone",
+              "location_start": "LOC_RAVINE",
+              "location_end": "LOC_DEAD_ZONE",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "From his hiding spot, Artie watches the Corrector move in perfectly straight lines.",
+              "transition_in_anchors": [
+                "hiding spot",
+                "straight lines",
+                "movement"
+              ],
+              "consumes_outcome_from": "5:3",
+              "transition_out_text": "Artie realizes that the Corrector cannot navigate complex, non-linear terrain.",
+              "transition_out_anchors": [
+                "non-linear terrain",
+                "navigation",
+                "realization"
+              ],
+              "hands_off_to": "5:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Artie lures the Corrector into a 'Pathing Loop' around a series of glitched pillars.",
+              "type": "combat",
+              "outcome": "The Corrector is stuck in a movement loop.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_UNIT734"
+              ],
+              "location_start_label": "The Dead-Zone",
+              "location_end_label": "Glitched Pillar Field",
+              "location_start": "LOC_DEAD_ZONE",
+              "location_end": "LOC_PILLAR_FIELD",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Artie leads the obsidian figure toward a cluster of pillars that strobe with light.",
+              "transition_in_anchors": [
+                "leading",
+                "obsidian figure",
+                "strobing pillars"
+              ],
+              "consumes_outcome_from": "5:4",
+              "transition_out_text": "The Corrector begins to pace back and forth, unable to resolve its path to Artie.",
+              "transition_out_anchors": [
+                "pacing",
+                "back and forth",
+                "unable to resolve"
+              ],
+              "hands_off_to": "5:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie finds the entrance to the Source Code Temple, hidden behind a waterfall of data.",
+              "type": "transition",
+              "outcome": "Artie reaches the temple entrance.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Glitched Pillar Field",
+              "location_end_label": "Temple Entrance",
+              "location_start": "LOC_PILLAR_FIELD",
+              "location_end": "LOC_TEMPLE_ENTRANCE",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "A waterfall of cascading green numbers hides the entrance to a massive stone structure.",
+              "transition_in_anchors": [
+                "waterfall",
+                "green numbers",
+                "stone structure"
+              ],
+              "consumes_outcome_from": "5:5",
+              "transition_out_text": "Artie steps through the data-stream, his body tingling with raw information.",
+              "transition_out_anchors": [
+                "stepping through",
+                "data-stream",
+                "tingling"
+              ],
+              "hands_off_to": "5:7",
+              "end_condition_echo": "The protagonist reaches the entrance of the Source Code Temple."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Source Code Sanctuary",
+          "intent": "Locate the hidden temple where the world's logic is exposed.",
+          "end_condition": "The protagonist interfaces with the world's core logic terminal.",
+          "scenes": [
+            {
+              "scene_id": 7,
+              "summary": "Artie explores the temple, finding records of other 'Glitches' who were deleted.",
+              "type": "development",
+              "outcome": "Artie gains a deeper understanding of the System's history.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Temple Entrance",
+              "location_end_label": "Temple Archives",
+              "location_start": "LOC_TEMPLE_ENTRANCE",
+              "location_end": "LOC_TEMPLE_ARCHIVES",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The walls of the temple are lined with glowing tablets, each containing a player's history.",
+              "transition_in_anchors": [
+                "glowing tablets",
+                "player history",
+                "lined walls"
+              ],
+              "consumes_outcome_from": "5:6",
+              "transition_out_text": "Artie finds a tablet that looks exactly like his own, but it's cracked and grey.",
+              "transition_out_anchors": [
+                "finding tablet",
+                "cracked",
+                "grey"
+              ],
+              "hands_off_to": "5:8"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Artie reaches the central terminal and begins the interface process.",
+              "type": "transition",
+              "outcome": "Artie gains access to the world's core logic.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Temple Archives",
+              "location_end_label": "Core Logic Terminal",
+              "location_start": "LOC_TEMPLE_ARCHIVES",
+              "location_end": "LOC_CORE_TERMINAL",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "A massive floating cube of light pulses in the center of the final chamber.",
+              "transition_in_anchors": [
+                "floating cube",
+                "pulses",
+                "final chamber"
+              ],
+              "consumes_outcome_from": "5:7",
+              "end_condition_echo": "The protagonist interfaces with the world's core logic terminal."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 6,
+      "title": "The Zero-Percent Solution",
+      "goal": "Defeat the System Corrector in a final confrontation by forcing a mathematical overflow error.",
+      "chapter_role": "confrontation",
+      "stakes_shift": "From being hunted by the system to becoming a permanent, unpatchable exception.",
+      "bridge": {
+        "from_prev": "Luring the Corrector into a zone where the physics engine is unstable.",
+        "to_next": "The defeat of the Corrector causes a localized reality shift."
+      },
+      "pacing": {
+        "intensity": 5,
+        "tempo": "rush",
+        "expected_scene_count": 12
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Setting the Trap",
+          "intent": "Prepare the unstable zone for a massive mathematical overflow.",
+          "end_condition": "The Corrector enters the lag-trap zone.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie uses the terminal to identify a 'Lag-Trap' zone near the temple.",
+              "type": "setup",
+              "outcome": "The location for the final battle is chosen.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Core Logic Terminal",
+              "location_end_label": "Core Logic Terminal",
+              "location_start": "LOC_CORE_TERMINAL",
+              "location_end": "LOC_CORE_TERMINAL",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie's hands fly across the holographic interface, searching for a weakness in the map.",
+              "transition_in_anchors": [
+                "hands flying",
+                "holographic interface",
+                "searching weakness"
+              ],
+              "consumes_outcome_from": "5:8",
+              "transition_out_text": "Artie highlights a region where the server response time is nearly a full second.",
+              "transition_out_anchors": [
+                "highlighting",
+                "server response",
+                "full second"
+              ],
+              "hands_off_to": "6:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie gathers 'Overflow Crystals' from the temple to prime the trap.",
+              "type": "development",
+              "outcome": "Artie has the tools to trigger the overflow.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Core Logic Terminal",
+              "location_end_label": "Temple Vault",
+              "location_start": "LOC_CORE_TERMINAL",
+              "location_end": "LOC_TEMPLE_VAULT",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie smashes a containment glass to reach the vibrating purple crystals inside.",
+              "transition_in_anchors": [
+                "smashing glass",
+                "vibrating crystals",
+                "purple"
+              ],
+              "consumes_outcome_from": "6:1",
+              "transition_out_text": "Artie packs the crystals carefully, feeling the air around them warp.",
+              "transition_out_anchors": [
+                "packing crystals",
+                "carefully",
+                "air warping"
+              ],
+              "hands_off_to": "6:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie sets the crystals in a geometric pattern within the Lag-Trap zone.",
+              "type": "development",
+              "outcome": "The trap is set.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Temple Vault",
+              "location_end_label": "Lag-Trap Zone",
+              "location_start": "LOC_TEMPLE_VAULT",
+              "location_end": "LOC_LAG_TRAP",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "Artie kneels in the grey dust, placing the final crystal at the center of the hex.",
+              "transition_in_anchors": [
+                "kneeling",
+                "grey dust",
+                "final crystal"
+              ],
+              "consumes_outcome_from": "6:2",
+              "transition_out_text": "Artie stands and looks back toward the temple, waiting for the obsidian figure.",
+              "transition_out_anchors": [
+                "standing",
+                "looking back",
+                "waiting"
+              ],
+              "hands_off_to": "6:4"
+            },
+            {
+              "scene_id": 4,
+              "summary": "The Corrector arrives, tracking Artie's signature into the heart of the trap.",
+              "type": "transition",
+              "outcome": "The final confrontation begins.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_UNIT734"
+              ],
+              "threads": [
+                "TH_CORRECTOR_HUNT"
+              ],
+              "location_start_label": "Lag-Trap Zone",
+              "location_end_label": "Lag-Trap Zone",
+              "location_start": "LOC_LAG_TRAP",
+              "location_end": "LOC_LAG_TRAP",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The Corrector emerges from the shadows, its obsidian armor humming with power.",
+              "transition_in_anchors": [
+                "emerging",
+                "shadows",
+                "obsidian armor"
+              ],
+              "consumes_outcome_from": "6:3",
+              "transition_out_text": "The Corrector steps over the boundary of the first crystal\u2014the trap is active.",
+              "transition_out_anchors": [
+                "stepping over",
+                "boundary",
+                "trap active"
+              ],
+              "hands_off_to": "6:5",
+              "end_condition_echo": "The Corrector enters the lag-trap zone."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Division by Zero",
+          "intent": "Engage the Corrector in a battle that pushes the physics engine to its limit.",
+          "end_condition": "The environment begins to visually glitch as the overflow starts.",
+          "scenes": [
+            {
+              "scene_id": 5,
+              "summary": "Artie engages the Corrector, using his 100% crit-rate to force the system to calculate massive numbers.",
+              "type": "combat",
+              "outcome": "The server begins to lag.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_UNIT734"
+              ],
+              "threads": [
+                "TH_CRIT_BUG"
+              ],
+              "location_start_label": "Lag-Trap Zone",
+              "location_end_label": "Lag-Trap Zone",
+              "location_start": "LOC_LAG_TRAP",
+              "location_end": "LOC_LAG_TRAP",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie's daggers strike the Corrector's armor, each hit spawning a cascade of red text.",
+              "transition_in_anchors": [
+                "daggers",
+                "striking armor",
+                "cascade of red"
+              ],
+              "consumes_outcome_from": "6:4",
+              "transition_out_text": "The air begins to stutter, Artie's movements jerking in frozen frames.",
+              "transition_out_anchors": [
+                "air stuttering",
+                "movements",
+                "frozen frames"
+              ],
+              "hands_off_to": "6:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "The Corrector attempts to use a 'Deletion' skill, but the lag causes it to target the environment instead.",
+              "type": "combat",
+              "outcome": "The terrain becomes even more unstable.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_UNIT734"
+              ],
+              "location_start_label": "Lag-Trap Zone",
+              "location_end_label": "Lag-Trap Zone",
+              "location_start": "LOC_LAG_TRAP",
+              "location_end": "LOC_LAG_TRAP",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The Corrector's hand glows with a void-like energy, but the beam misses Artie by yards.",
+              "transition_in_anchors": [
+                "void-like energy",
+                "beam",
+                "missing"
+              ],
+              "consumes_outcome_from": "6:5",
+              "transition_out_text": "The ground where the beam hit simply ceases to exist, leaving a hole in the world.",
+              "transition_out_anchors": [
+                "ground",
+                "ceases to exist",
+                "hole in world"
+              ],
+              "hands_off_to": "6:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Artie stacks his speed buffs to the point where his character model begins to duplicate.",
+              "type": "combat",
+              "outcome": "The system cannot track Artie's position.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Lag-Trap Zone",
+              "location_end_label": "Lag-Trap Zone",
+              "location_start": "LOC_LAG_TRAP",
+              "location_end": "LOC_LAG_TRAP",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie's speed reaches a critical threshold, leaving after-images that the Corrector attacks.",
+              "transition_in_anchors": [
+                "critical threshold",
+                "after-images",
+                "attacking"
+              ],
+              "consumes_outcome_from": "6:6",
+              "transition_out_text": "The Corrector spins wildly, unable to distinguish the real Artie from the lag-ghosts.",
+              "transition_out_anchors": [
+                "spinning wildly",
+                "distinguish",
+                "lag-ghosts"
+              ],
+              "hands_off_to": "6:8"
+            },
+            {
+              "scene_id": 8,
+              "summary": "The overflow reaches a tipping point, and the sky begins to turn into raw code.",
+              "type": "transition",
+              "outcome": "The reality shift begins.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_UNIT734"
+              ],
+              "location_start_label": "Lag-Trap Zone",
+              "location_end_label": "Lag-Trap Zone",
+              "location_start": "LOC_LAG_TRAP",
+              "location_end": "LOC_LAG_TRAP",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The blue sky cracks like glass, revealing scrolling lines of white text behind it.",
+              "transition_in_anchors": [
+                "sky cracks",
+                "glass",
+                "white text"
+              ],
+              "consumes_outcome_from": "6:7",
+              "transition_out_text": "The ground begins to vibrate with a high-pitched digital scream.",
+              "transition_out_anchors": [
+                "ground vibrating",
+                "high-pitched",
+                "digital scream"
+              ],
+              "hands_off_to": "6:9",
+              "end_condition_echo": "The environment begins to visually glitch as the overflow starts."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Entity Deleted",
+          "intent": "Trigger the overflow error to remove the Corrector from existence.",
+          "end_condition": "The Corrector is purged from the system registry.",
+          "scenes": [
+            {
+              "scene_id": 9,
+              "summary": "Artie delivers a final 'Overflow-Crit' that forces the Corrector's health to a negative value.",
+              "type": "combat",
+              "outcome": "The Corrector's health bar glitches and breaks.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_UNIT734"
+              ],
+              "threads": [
+                "TH_CRIT_BUG"
+              ],
+              "location_start_label": "Lag-Trap Zone",
+              "location_end_label": "Lag-Trap Zone",
+              "location_start": "LOC_LAG_TRAP",
+              "location_end": "LOC_LAG_TRAP",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie's daggers sink into the Corrector's chest, and a number too large to read appears.",
+              "transition_in_anchors": [
+                "daggers sinking",
+                "chest",
+                "large number"
+              ],
+              "consumes_outcome_from": "6:8",
+              "transition_out_text": "The Corrector's health bar turns into a string of 'NaN' symbols.",
+              "transition_out_anchors": [
+                "health bar",
+                "string",
+                "NaN symbols"
+              ],
+              "hands_off_to": "6:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "The System attempts to resolve the error by deleting the 'offending entity'\u2014the Corrector.",
+              "type": "development",
+              "outcome": "The Corrector begins to dissolve.",
+              "characters": [
+                "CHAR_UNIT734",
+                "CHAR_SYSTEM"
+              ],
+              "location_start_label": "Lag-Trap Zone",
+              "location_end_label": "Lag-Trap Zone",
+              "location_start": "LOC_LAG_TRAP",
+              "location_end": "LOC_LAG_TRAP",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "A massive red 'X' appears over the Corrector as the system attempts to fix the crash.",
+              "transition_in_anchors": [
+                "red X",
+                "system fix",
+                "crash"
+              ],
+              "consumes_outcome_from": "6:9",
+              "transition_out_text": "The obsidian armor flakes away into nothingness, bit by digital bit.",
+              "transition_out_anchors": [
+                "obsidian armor",
+                "nothingness",
+                "digital bit"
+              ],
+              "hands_off_to": "6:11"
+            },
+            {
+              "scene_id": 11,
+              "summary": "Artie watches as the Corrector is completely erased from the game's registry.",
+              "type": "development",
+              "outcome": "The primary antagonist is defeated.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_UNIT734"
+              ],
+              "location_start_label": "Lag-Trap Zone",
+              "location_end_label": "Lag-Trap Zone",
+              "location_start": "LOC_LAG_TRAP",
+              "location_end": "LOC_LAG_TRAP",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The last fragment of the Corrector's helmet vanishes, leaving only silence.",
+              "transition_in_anchors": [
+                "last fragment",
+                "helmet",
+                "silence"
+              ],
+              "consumes_outcome_from": "6:10",
+              "transition_out_text": "Artie collapses to his knees, his own health bar flickering at 1 HP.",
+              "transition_out_anchors": [
+                "collapses",
+                "knees",
+                "1 HP"
+              ],
+              "hands_off_to": "6:12"
+            },
+            {
+              "scene_id": 12,
+              "summary": "The reality shift stabilizes, leaving Artie in a new, glitched landscape.",
+              "type": "transition",
+              "outcome": "The battle concludes and the zone is permanently changed.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Lag-Trap Zone",
+              "location_end_label": "The Glitch Zone",
+              "location_start": "LOC_LAG_TRAP",
+              "location_end": "LOC_GLITCH_ZONE",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "The scrolling code in the sky fades, replaced by a permanent, shimmering aurora.",
+              "transition_in_anchors": [
+                "scrolling code",
+                "fading",
+                "shimmering aurora"
+              ],
+              "consumes_outcome_from": "6:11",
+              "end_condition_echo": "The Corrector is purged from the system registry."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 7,
+      "title": "Running the Numbers",
+      "goal": "Establish a base of operations in the 'Glitch Zone' where the protagonist can dictate the rules.",
+      "chapter_role": "aftermath",
+      "stakes_shift": "From a frantic fugitive to the master of a new, exploited reality.",
+      "bridge": {
+        "from_prev": "Surviving the system's attempt to delete his character.",
+        "to_next": "The protagonist prepares for the next 'Update' with a team of fellow outliers."
+      },
+      "pacing": {
+        "intensity": 2,
+        "tempo": "steady",
+        "expected_scene_count": 6
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Glitch Frontier",
+          "intent": "Claim the unstable zone as a permanent base of operations.",
+          "end_condition": "The Glitch Zone's perimeter is secured against system scans.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie explores the aftermath of the battle, finding that the zone is now invisible to the System.",
+              "type": "setup",
+              "outcome": "Artie realizes he is safe from further pursuit for now.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "The Glitch Zone",
+              "location_end_label": "The Glitch Zone",
+              "location_start": "LOC_GLITCH_ZONE",
+              "location_end": "LOC_GLITCH_ZONE",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie stands and looks at his map, which now shows only a 'NULL' value for his location.",
+              "transition_in_anchors": [
+                "standing",
+                "map",
+                "NULL value"
+              ],
+              "consumes_outcome_from": "6:12",
+              "transition_out_text": "Artie begins to walk the perimeter, testing the boundaries of his new sanctuary.",
+              "transition_out_anchors": [
+                "walking perimeter",
+                "testing boundaries",
+                "sanctuary"
+              ],
+              "hands_off_to": "7:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Artie uses the Luck-Stabilizer to anchor the zone's physics in its current glitched state.",
+              "type": "development",
+              "outcome": "The Glitch Zone becomes a permanent feature.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "TH_LUCK_STABILIZER"
+              ],
+              "location_start_label": "The Glitch Zone",
+              "location_end_label": "The Glitch Zone",
+              "location_start": "LOC_GLITCH_ZONE",
+              "location_end": "LOC_GLITCH_ZONE",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie places the golden orb on a pedestal of glitched stone, and it begins to hum.",
+              "transition_in_anchors": [
+                "golden orb",
+                "pedestal",
+                "glitched stone"
+              ],
+              "consumes_outcome_from": "7:1",
+              "transition_out_text": "A pulse of gold light sweeps across the zone, locking the broken physics in place.",
+              "transition_out_anchors": [
+                "pulse",
+                "gold light",
+                "locking physics"
+              ],
+              "hands_off_to": "7:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie sets up a 'Cloaking Field' using the leftover data from the Corrector's deletion.",
+              "type": "development",
+              "outcome": "The zone is hidden from system scans.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "The Glitch Zone",
+              "location_end_label": "The Glitch Zone",
+              "location_start": "LOC_GLITCH_ZONE",
+              "location_end": "LOC_GLITCH_ZONE",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie gathers the glowing obsidian dust and sprinkles it into the air.",
+              "transition_in_anchors": [
+                "gathering dust",
+                "obsidian",
+                "sprinkling"
+              ],
+              "consumes_outcome_from": "7:2",
+              "transition_out_text": "The zone vanishes from the world's logic, a ghost in the machine.",
+              "transition_out_anchors": [
+                "vanishing",
+                "world's logic",
+                "ghost in machine"
+              ],
+              "hands_off_to": "7:4",
+              "end_condition_echo": "The Glitch Zone's perimeter is secured against system scans."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The New Meta",
+          "intent": "Form a guild of outliers and establish the rules of the new reality.",
+          "end_condition": "The protagonist sits on the 'Throne of Exploits' as the new update begins.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Other 'Outlier' players find their way to the Glitch Zone, drawn by the server errors.",
+              "type": "setup",
+              "outcome": "The first members of Artie's guild arrive.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "The Glitch Zone",
+              "location_end_label": "Zone Entrance",
+              "location_start": "LOC_GLITCH_ZONE",
+              "location_end": "LOC_ZONE_ENTRANCE",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "A group of three players, each with strange, flickering armor, emerges from the forest.",
+              "transition_in_anchors": [
+                "three players",
+                "strange armor",
+                "emerging"
+              ],
+              "consumes_outcome_from": "7:3",
+              "transition_out_text": "Artie welcomes them with a smirk, his daggers sheathed for the first time in days.",
+              "transition_out_anchors": [
+                "welcoming",
+                "smirk",
+                "sheathed daggers"
+              ],
+              "hands_off_to": "7:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Artie explains his 'Hit & Run' philosophy to the new recruits.",
+              "type": "development",
+              "outcome": "The 'Glitch Guild' is officially formed.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "The Glitch Zone",
+              "location_end_label": "The Glitch Zone",
+              "location_start": "LOC_GLITCH_ZONE",
+              "location_end": "LOC_GLITCH_ZONE",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie gestures to the shimmering aurora above, his voice echoing in the silent zone.",
+              "transition_in_anchors": [
+                "gesturing",
+                "shimmering aurora",
+                "echoing voice"
+              ],
+              "consumes_outcome_from": "7:4",
+              "transition_out_text": "The players nod, their own status windows beginning to flicker with new, illegal stats.",
+              "transition_out_anchors": [
+                "nodding",
+                "status windows",
+                "illegal stats"
+              ],
+              "hands_off_to": "7:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie takes his seat on a throne made of glitched code as the next world update begins.",
+              "type": "climax",
+              "outcome": "Artie is prepared for the next phase of the game.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_SYSTEM"
+              ],
+              "location_start_label": "The Glitch Zone",
+              "location_end_label": "Throne of Exploits",
+              "location_start": "LOC_GLITCH_ZONE",
+              "location_end": "LOC_THRONE",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "Artie sits on the shifting, translucent throne as the world outside begins to reset.",
+              "transition_in_anchors": [
+                "sitting",
+                "translucent throne",
+                "world reset"
+              ],
+              "consumes_outcome_from": "7:5",
+              "end_condition_echo": "The protagonist sits on the 'Throne of Exploits' as the new update begins."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,244 +1,428 @@
 {
   "chapter_id": 1,
-  "title": "Welcome to the RNG-Hellscape",
-  "goal": "Introduce Artie and his broken 'Crit-Only' status in a high-stakes environment.",
+  "title": "The One Percent Solution",
+  "goal": "Introduce the protagonist to the System and reveal the broken 'Crit' multiplier during a fatal tutorial encounter.",
   "chapter_role": "hook",
-  "stakes_shift": "Artie goes from an office drone to a level 1 glitch in a lethal game world.",
+  "stakes_shift": "From certain death as a mundane human to survival as a glitched outlier with a lethal damage ceiling.",
   "bridge": {
-    "from_prev": "N/A",
-    "to_next": "Artie must find a way to survive his first night with zero defensive stats."
+    "from_prev": "Protagonist dies in the real world and awakens in the tutorial zone.",
+    "to_next": "Armed with a broken mechanic, the protagonist seeks to maximize tutorial rewards before the zone closes."
   },
   "pacing": {
-    "intensity": 4,
-    "tempo": "rush",
-    "expected_scene_count": 8
+    "expected_scene_count": 8,
+    "intensity": 3,
+    "tempo": "steady"
   },
   "sections": [
     {
       "section_id": 1,
-      "title": "The Exit Interview",
-      "intent": "Establish Artie's mundane life and his transition into the broken 'Crit-Only' mechanics.",
+      "title": "The Fatal Error",
+      "intent": "Establish the protagonist's mundane death and the jarring transition into the System tutorial.",
+      "end_condition": "Protagonist awakens in the white-room tutorial space and receives the first System prompt.",
       "scenes": [
         {
           "scene_id": 1,
-          "summary": "Artie argues with a vending machine over a bag of chips before a freak electrical surge sends him to the character creation void.",
-          "type": "setup",
-          "outcome": "Artie dies and enters the System's character creation void.",
+          "summary": "Artie dies in a hospital bed and experiences a surreal transition into a digital void.",
+          "type": "transition",
+          "outcome": "Artie is transported to the tutorial zone.",
           "characters": [
             "CHAR_ARTIE"
           ],
           "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
+          "handoff_mode": "time_skip",
           "hands_off_to": "1:2",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Earth Hospital Room",
+          "location_start_label": "Earth Hospital Room",
+          "location_start_id": "LOC_EARTH_HOSPITAL_ROOM",
+          "location_end": "White Void Entrance",
+          "location_end_label": "White Void Entrance",
+          "location_end_id": "LOC_WHITE_VOID_ENTRANCE",
+          "transition_in_text": "Artie\u2019s consciousness slips away as the hospital room monitor emits a long, flat tone.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "flatline tone",
+            "antiseptic scent",
+            "dimming hospital lights"
           ],
-          "transition_in_text": "The scene opens at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "Artie\u2019s eyes snap open to find himself standing in a featureless white expanse.",
+          "transition_out_anchors": [
+            "blinding white floor",
+            "infinite horizon",
+            "digital hum"
+          ],
+          "seam_score": 0,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 2,
-          "summary": "The System, personified as a snarky UI named Fizz, mocks Artie's life choices while he accidentally dumps all his points into the 'Crit' stat.",
-          "type": "reveal",
-          "outcome": "Artie is locked into a 'Crit or Quit' build with 1 HP and 100% Critical Hit rate.",
+          "summary": "Artie explores the white void and interacts with the first System prompt.",
+          "type": "setup",
+          "outcome": "Artie accepts the tutorial and gains his first status window.",
           "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_ARTIE"
           ],
-          "threads": [
-            "THREAD_CRIT_EXPLOIT"
-          ],
+          "consumes_outcome_from": "1:1",
           "constraint_state": "free",
           "handoff_mode": "direct_continuation",
           "hands_off_to": "1:3",
-          "consumes_outcome_from": "1:1",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "White Void Entrance",
+          "location_start_label": "White Void Entrance",
+          "location_start_id": "LOC_WHITE_VOID_ENTRANCE",
+          "location_end": "White Void Center",
+          "location_end_label": "White Void Center",
+          "location_end_id": "LOC_WHITE_VOID_CENTER",
+          "transition_in_text": "The humming of the white expanse intensifies as a blue window flickers into existence.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "blue system window",
+            "glowing text",
+            "digital chime"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "end_condition_echo": "Artie is locked into a 'Crit or Quit' build with 1 HP and 100% Critical Hit rate.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "Artie reaches out to touch the floating prompt, and the world shifts around him.",
+          "transition_out_anchors": [
+            "shimmering pixels",
+            "tactile interface",
+            "warping space"
+          ],
+          "seam_score": 25,
+          "seam_resolution": "micro_scene",
+          "end_condition_echo": "Protagonist awakens in the white-room tutorial space and receives the first System prompt."
         }
       ]
     },
     {
       "section_id": 2,
-      "title": "The First Spawn",
-      "intent": "Demonstrate the lethal fragility of the 1 HP build in a hostile environment.",
+      "title": "Identifying the Glitch",
+      "intent": "Introduce the combat mechanics and the first realization that the Crit multiplier is behaving abnormally.",
+      "end_condition": "Protagonist successfully triggers a 100x crit on a training dummy, causing a physics error.",
       "scenes": [
         {
           "scene_id": 3,
-          "summary": "Artie spawns in the tutorial zone and is immediately targeted by a Level 1 Slime that looks suspiciously aggressive.",
-          "type": "escalation",
-          "outcome": "Artie realizes that in this world, '1 HP' means a stiff breeze could kill him.",
+          "summary": "Transition handoff from White Void Center to White Void Center.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
           "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_ARTIE"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "1:4",
           "consumes_outcome_from": "1:2",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "constraint_state": "free",
+          "handoff_mode": "arrival_checkpoint",
+          "hands_off_to": "1:4",
+          "inserted_by_pipeline": true,
+          "purpose": "handoff_realization",
+          "location_start": "White Void Center",
+          "location_start_label": "White Void Center",
+          "location_start_id": "LOC_WHITE_VOID_CENTER",
+          "location_end": "White Void Center",
+          "location_end_label": "White Void Center",
+          "location_end_id": "LOC_WHITE_VOID_CENTER",
+          "transition_in_text": "After a arrival checkpoint, the movement from White Void Center to White Void Center is realized on page.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
+            "loc_white_void_center",
+            "white_void_center",
+            "arrival_checkpoint",
             "free"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "transition_out_text": "This beat pushes into a arrival checkpoint toward the Training Arena.",
+          "transition_out_anchors": [
+            "loc_white_void_center",
+            "white_void_center",
+            "arrival_checkpoint",
+            "free"
+          ],
+          "seam_score": 25,
+          "seam_resolution": "micro_scene"
         },
         {
           "scene_id": 4,
-          "summary": "Artie tries to punch the slime; he misses repeatedly before landing a 'Super-Mega-Ultra-Crit' that vaporizes the monster and the environment behind it.",
-          "type": "action",
-          "outcome": "Artie gains his first level and realizes his power is terrifyingly inconsistent.",
+          "summary": "Artie approaches a training dummy and attempts basic combat maneuvers.",
+          "type": "trial",
+          "outcome": "Artie learns the basics of the combat system.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "consumes_outcome_from": "1:3",
+          "constraint_state": "free",
+          "handoff_mode": "arrival_checkpoint",
+          "hands_off_to": "1:5",
+          "location_start": "White Void Center",
+          "location_start_label": "White Void Center",
+          "location_start_id": "LOC_WHITE_VOID_CENTER",
+          "location_end": "Training Arena",
+          "location_end_label": "Training Arena",
+          "location_end_id": "LOC_TRAINING_ARENA",
+          "transition_in_text": "The white void resolves into a structured training arena containing a single straw dummy.",
+          "transition_in_anchors": [
+            "straw training dummy",
+            "combat circle",
+            "wooden sword"
+          ],
+          "transition_out_text": "Artie grips the wooden sword, feeling the strange weight of a digital weapon.",
+          "transition_out_anchors": [
+            "rough wood grain",
+            "digital weight",
+            "practice stance"
+          ],
+          "seam_score": 20,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 5,
+          "summary": "Artie strikes the dummy multiple times, noticing a strange variance in damage numbers.",
+          "type": "investigation",
+          "outcome": "Artie identifies a pattern in his critical hits.",
           "characters": [
             "CHAR_ARTIE"
           ],
           "threads": [
-            "THREAD_CRIT_EXPLOIT"
+            "THREAD_CRIT_GLITCH"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "1:5",
-          "consumes_outcome_from": "1:3",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
-        },
-        {
-          "scene_id": 5,
-          "summary": "The System awards Artie a 'Participation Trophy' item that actually functions as a beacon for high-level monsters.",
-          "type": "consequence",
-          "outcome": "Artie is forced to flee the tutorial zone as it aggressively aggros on his anomaly status.",
-          "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
-          ],
-          "constraint_state": "free",
+          "consumes_outcome_from": "1:4",
+          "constraint_state": "engaged_combat",
           "handoff_mode": "direct_continuation",
           "hands_off_to": "1:6",
-          "consumes_outcome_from": "1:4",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "location_start": "Training Arena",
+          "location_start_label": "Training Arena",
+          "location_start_id": "LOC_TRAINING_ARENA",
+          "location_end": "Training Arena",
+          "location_end_label": "Training Arena",
+          "location_end_id": "LOC_TRAINING_ARENA",
+          "transition_in_text": "The first strike lands with a dull thud, but the damage readout flickers erratically.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
+            "floating damage numbers",
+            "dull thud",
+            "flickering text"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "end_condition_echo": "Artie is forced to flee the tutorial zone as it aggressively aggros on his anomaly status.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "Artie narrows his eyes as a '1.5x' multiplier suddenly jumps to '10x' for no reason.",
+          "transition_out_anchors": [
+            "golden multiplier text",
+            "sparking impact",
+            "surprised expression"
+          ],
+          "seam_score": 0,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 6,
+          "summary": "Artie focuses on the timing of his strikes and triggers a massive physics-breaking crit.",
+          "type": "payoff",
+          "outcome": "The training dummy is destroyed by a 100x crit.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_CRIT_GLITCH"
+          ],
+          "consumes_outcome_from": "1:5",
+          "constraint_state": "engaged_combat",
+          "handoff_mode": "direct_continuation",
+          "hands_off_to": "1:7",
+          "location_start": "Training Arena",
+          "location_start_label": "Training Arena",
+          "location_start_id": "LOC_TRAINING_ARENA",
+          "location_end": "Training Arena",
+          "location_end_label": "Training Arena",
+          "location_end_id": "LOC_TRAINING_ARENA",
+          "transition_in_text": "Artie swings with everything he has, aiming for the exact moment the multiplier glitches.",
+          "transition_in_anchors": [
+            "rhythmic swing",
+            "glowing blade edge",
+            "intense focus"
+          ],
+          "transition_out_text": "The dummy vanishes in a spray of corrupted pixels as the System struggles to calculate the damage.",
+          "transition_out_anchors": [
+            "corrupted pixels",
+            "shattered straw",
+            "error message"
+          ],
+          "seam_score": 60,
+          "seam_resolution": "full_scene",
+          "end_condition_echo": "Protagonist successfully triggers a 100x crit on a training dummy, causing a physics error."
         }
       ]
     },
     {
       "section_id": 3,
-      "title": "The Safe Zone?",
-      "intent": "Introduce the hub world, its culture of RNG worship, and Artie's first major antagonist.",
+      "title": "The First Payday",
+      "intent": "Show the protagonist intentionally using the glitch to secure high-value loot from the first tutorial mob.",
+      "end_condition": "Protagonist loots a 'Legendary' starter dagger from a common tutorial rat due to overkill bonuses.",
       "scenes": [
         {
-          "scene_id": 6,
-          "summary": "Artie reaches the gates of Oakhaven, where the guards are busy betting on the 'Crit-Rate' of incoming travelers.",
-          "type": "transition",
-          "outcome": "Artie enters the town but is flagged as a 'Statistical Anomaly' by the gate scanners.",
-          "characters": [
-            "CHAR_ARTIE",
-            "CHAR_FIZZ"
-          ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "1:7",
-          "consumes_outcome_from": "1:5",
-          "location_start": "current_location",
-          "location_end": "current_location",
-          "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
-            "free"
-          ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 20
-        },
-        {
           "scene_id": 7,
-          "summary": "Artie meets Silas, the local Tavern Keeper and Mayor, who explains that 'Crits' are the only currency that matters to the local nobility.",
-          "type": "reveal",
-          "outcome": "Artie understands his 'broken' stat makes him a target for the powerful.",
+          "summary": "Transition handoff from Training Arena to Training Arena.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
           "characters": [
-            "CHAR_ARTIE",
-            "CHAR_SILAS"
+            "CHAR_ARTIE"
           ],
-          "constraint_state": "free",
-          "handoff_mode": "direct_continuation",
-          "hands_off_to": "1:8",
+          "threads": [
+            "THREAD_CRIT_GLITCH"
+          ],
           "consumes_outcome_from": "1:6",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "constraint_state": "free",
+          "handoff_mode": "arrival_checkpoint",
+          "hands_off_to": "1:8",
+          "inserted_by_pipeline": true,
+          "purpose": "handoff_realization",
+          "location_start": "Training Arena",
+          "location_start_label": "Training Arena",
+          "location_start_id": "LOC_TRAINING_ARENA",
+          "location_end": "Training Arena",
+          "location_end_label": "Training Arena",
+          "location_end_id": "LOC_TRAINING_ARENA",
+          "transition_in_text": "After a arrival checkpoint, the movement from Training Arena to Training Arena is realized on page.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
+            "loc_training_arena",
+            "training_arena",
+            "arrival_checkpoint",
             "free"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "transition_out": "This beat carries directly into the next location.",
-          "seam_resolution": "inline_bridge",
-          "seam_score": 10
+          "transition_out_text": "This beat pushes into a arrival checkpoint toward the Tutorial Dungeon Entrance.",
+          "transition_out_anchors": [
+            "loc_training_arena",
+            "training_arena",
+            "arrival_checkpoint",
+            "free"
+          ],
+          "seam_score": 25,
+          "seam_resolution": "micro_scene"
         },
         {
           "scene_id": 8,
-          "summary": "A high-level Paladin, Vane, notices Artie's glowing 'Anomaly' aura and attempts to force Artie into a predatory 'mentorship' duel.",
-          "type": "escalation",
-          "outcome": "Artie makes a high-level rival in Vane and barely escapes a forced duel.",
+          "summary": "Artie enters the first live-combat zone and encounters a tutorial rat.",
+          "type": "trial",
+          "outcome": "Artie prepares to test the glitch on a live enemy.",
           "characters": [
-            "CHAR_ARTIE",
-            "CHAR_VANE"
+            "CHAR_ARTIE"
+          ],
+          "consumes_outcome_from": "1:7",
+          "constraint_state": "free",
+          "handoff_mode": "arrival_checkpoint",
+          "hands_off_to": "1:9",
+          "location_start": "Training Arena",
+          "location_start_label": "Training Arena",
+          "location_start_id": "LOC_TRAINING_ARENA",
+          "location_end": "Tutorial Dungeon Entrance",
+          "location_end_label": "Tutorial Dungeon Entrance",
+          "location_end_id": "LOC_TUTORIAL_DUNGEON_ENTRANCE",
+          "transition_in_text": "A stone corridor manifests around Artie, smelling of damp earth and digital decay.",
+          "transition_in_anchors": [
+            "stone walls",
+            "damp earth scent",
+            "iron sconce"
+          ],
+          "transition_out_text": "A pair of red eyes glows in the darkness of the corridor ahead.",
+          "transition_out_anchors": [
+            "glowing red eyes",
+            "chattering sound",
+            "shadowy movement"
+          ],
+          "seam_score": 20,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 9,
+          "summary": "Artie engages the tutorial rat, carefully managing his strikes to build the multiplier.",
+          "type": "trial",
+          "outcome": "Artie successfully stacks the glitch against the rat.",
+          "characters": [
+            "CHAR_ARTIE"
           ],
           "threads": [
-            "THREAD_VANE_RIVALRY"
+            "THREAD_CRIT_GLITCH"
           ],
-          "constraint_state": "free",
+          "consumes_outcome_from": "1:8",
+          "constraint_state": "engaged_combat",
           "handoff_mode": "direct_continuation",
-          "consumes_outcome_from": "1:7",
-          "location_start": "current_location",
-          "location_end": "current_location",
+          "hands_off_to": "1:10",
+          "location_start": "Tutorial Dungeon Entrance",
+          "location_start_label": "Tutorial Dungeon Entrance",
+          "location_start_id": "LOC_TUTORIAL_DUNGEON_ENTRANCE",
+          "location_end": "Tutorial Dungeon Entrance",
+          "location_end_label": "Tutorial Dungeon Entrance",
+          "location_end_id": "LOC_TUTORIAL_DUNGEON_ENTRANCE",
+          "transition_in_text": "The tutorial rat lunges, but Artie sidesteps, waiting for the multiplier to pulse.",
           "transition_in_anchors": [
-            "current_location",
-            "direct_continuation",
+            "rat claws",
+            "sidestep maneuver",
+            "pulsing UI"
+          ],
+          "transition_out_text": "Artie brings the wooden sword down in a perfect arc as the multiplier hits its peak.",
+          "transition_out_anchors": [
+            "perfect arc",
+            "peak multiplier",
+            "descending strike"
+          ],
+          "seam_score": 60,
+          "seam_resolution": "full_scene"
+        },
+        {
+          "scene_id": 10,
+          "summary": "Transition handoff from Tutorial Dungeon Entrance to Tutorial Dungeon Entrance.",
+          "type": "transition",
+          "outcome": "The handoff is concretely realized and constraints are carried forward.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_CRIT_GLITCH"
+          ],
+          "consumes_outcome_from": "1:9",
+          "constraint_state": "free",
+          "handoff_mode": "offscreen_processing",
+          "hands_off_to": "1:11",
+          "inserted_by_pipeline": true,
+          "purpose": "handoff_realization",
+          "location_start": "Tutorial Dungeon Entrance",
+          "location_start_label": "Tutorial Dungeon Entrance",
+          "location_start_id": "LOC_TUTORIAL_DUNGEON_ENTRANCE",
+          "location_end": "Tutorial Dungeon Entrance",
+          "location_end_label": "Tutorial Dungeon Entrance",
+          "location_end_id": "LOC_TUTORIAL_DUNGEON_ENTRANCE",
+          "transition_in_text": "After a offscreen processing, the movement from Tutorial Dungeon Entrance to Tutorial Dungeon Entrance is realized on page.",
+          "transition_in_anchors": [
+            "loc_tutorial_dungeon_entrance",
+            "tutorial_dungeon_entrance",
+            "offscreen_processing",
             "free"
           ],
-          "transition_in_text": "The action continues at current_location.",
-          "end_condition_echo": "Artie makes a high-level rival in Vane and barely escapes a forced duel.",
+          "transition_out_text": "This beat carries directly into the final moments at the Tutorial Dungeon Entrance.",
+          "transition_out_anchors": [
+            "loc_tutorial_dungeon_entrance",
+            "tutorial_dungeon_entrance",
+            "offscreen_processing",
+            "free"
+          ],
+          "seam_score": 0,
+          "seam_resolution": "inline_bridge"
+        },
+        {
+          "scene_id": 11,
+          "summary": "The rat is obliterated by an overkill strike, and Artie loots a legendary item.",
+          "type": "payoff",
+          "outcome": "Artie acquires the 'Legendary' starter dagger.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_CRIT_GLITCH"
+          ],
+          "consumes_outcome_from": "1:10",
+          "constraint_state": "free",
+          "handoff_mode": "direct_continuation",
+          "location_start": "Tutorial Dungeon Entrance",
+          "location_start_label": "Tutorial Dungeon Entrance",
+          "location_start_id": "LOC_TUTORIAL_DUNGEON_ENTRANCE",
+          "location_end": "Tutorial Dungeon Entrance",
+          "location_end_label": "Tutorial Dungeon Entrance",
+          "location_end_id": "LOC_TUTORIAL_DUNGEON_ENTRANCE",
+          "transition_in_text": "The rat explodes with the force of a small bomb, leaving behind a shimmering golden chest.",
+          "transition_in_anchors": [
+            "golden chest",
+            "shimmering loot",
+            "smoke tendrils"
+          ],
+          "seam_score": 0,
           "seam_resolution": "inline_bridge",
-          "seam_score": 0
+          "end_condition_echo": "Protagonist loots a 'Legendary' starter dagger from a common tutorial rat due to overkill bonuses."
         }
       ]
     }

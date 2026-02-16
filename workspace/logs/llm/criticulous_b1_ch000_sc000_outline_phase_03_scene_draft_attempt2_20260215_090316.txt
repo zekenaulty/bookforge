@@ -1,0 +1,680 @@
+{
+  "schema_version": "1.1",
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "name": "Arthur 'Artie' Penhaligon",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      },
+      "pronouns": "he/him",
+      "role": "protagonist"
+    },
+    {
+      "character_id": "CHAR_CLERK",
+      "name": "System Clerk 01",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      },
+      "role": "tutorial_guide"
+    },
+    {
+      "character_id": "CHAR_VANCE",
+      "name": "Guild Master Vance",
+      "intro": {
+        "chapter": 2,
+        "scene": 2
+      },
+      "role": "mentor_antagonist"
+    },
+    {
+      "character_id": "CHAR_CORRECTOR",
+      "name": "System Corrector 734",
+      "intro": {
+        "chapter": 5,
+        "scene": 1
+      },
+      "role": "primary_antagonist"
+    }
+  ],
+  "threads": [
+    {
+      "thread_id": "THREAD_CRIT_BUG",
+      "label": "The 100% Crit Rate Exploit",
+      "status": "active"
+    },
+    {
+      "thread_id": "THREAD_BOUNTY",
+      "label": "The System Integrity Bounty",
+      "status": "pending"
+    },
+    {
+      "thread_id": "THREAD_SOURCE_CODE",
+      "label": "The World Source Code Mystery",
+      "status": "active"
+    }
+  ],
+  "chapters": [
+    {
+      "chapter_id": 1,
+      "title": "The 1% Chance of Survival",
+      "goal": "Survive the initial transition by exploiting a 100% crit-rate bug on a tutorial boss.",
+      "chapter_role": "hook",
+      "stakes_shift": "From certain death to possessing an unintended mechanical advantage.",
+      "bridge": {
+        "from_prev": "Protagonist dies in the real world due to a freak statistical anomaly.",
+        "to_next": "The protagonist enters the first hub city with a bag full of 'impossible' tutorial loot."
+      },
+      "pacing": {
+        "intensity": 4,
+        "tempo": "rush",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Final Calculation",
+          "intent": "Establish the protagonist's death and transition into the system.",
+          "end_condition": "Protagonist stands before the Tutorial Gate.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Arthur dies in a hospital and wakes up in the System's white void.",
+              "type": "transition",
+              "outcome": "Arthur accepts the terms of the isekai contract.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_CLERK"
+              ],
+              "introduces": [
+                "CHAR_ARTIE",
+                "CHAR_CLERK"
+              ],
+              "location_start_label": "Hospital Room",
+              "location_start": "St. Jude's Hospital, Room 402",
+              "location_end_label": "System Void",
+              "location_end": "The White Waiting Room of the System",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "processed",
+              "transition_in_text": "The hospital heart monitor emitted a long, flat beep before the sterile room dissolved into a blinding white expanse.",
+              "transition_in_anchors": [
+                "heart monitor",
+                "flat beep",
+                "sterile room",
+                "blinding white"
+              ],
+              "transition_out_text": "Arthur signed the digital contract, and the Clerk gestured toward a floating interface.",
+              "transition_out_anchors": [
+                "digital contract",
+                "floating interface",
+                "Clerk"
+              ],
+              "hands_off_to": "1:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Arthur navigates the character creation screen and spots a math error in the Agility stat.",
+              "type": "discovery",
+              "outcome": "Arthur discovers the Speed-to-Crit conversion exploit.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_CRIT_BUG"
+              ],
+              "location_start_label": "System Void",
+              "location_start": "The White Waiting Room of the System",
+              "location_end_label": "System Void",
+              "location_end": "The White Waiting Room of the System",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:1",
+              "transition_in_text": "The floating interface flickered to life, displaying a list of stats that didn't quite add up to Arthur's mathematical mind.",
+              "transition_in_anchors": [
+                "floating interface",
+                "stats",
+                "mathematical mind"
+              ],
+              "transition_out_text": "Arthur allocated his points with a smirk, locking in the glitchy build.",
+              "transition_out_anchors": [
+                "points",
+                "glitchy build",
+                "smirk"
+              ],
+              "hands_off_to": "1:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Arthur finishes his build and is transported to the entrance of the tutorial zone.",
+              "type": "transition",
+              "outcome": "Arthur prepares to enter the tutorial with his exploited stats.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "System Void",
+              "location_start": "The White Waiting Room of the System",
+              "location_end_label": "Tutorial Gate",
+              "location_end": "The Archway of the First Trial",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:2",
+              "transition_in_text": "A sudden rush of wind pulled Arthur through the void, depositing him on a stone path facing a massive iron gate.",
+              "transition_in_anchors": [
+                "rush of wind",
+                "stone path",
+                "iron gate"
+              ],
+              "transition_out_text": "Arthur stepped toward the iron gate, feeling the weight of his new reality.",
+              "transition_out_anchors": [
+                "iron gate",
+                "new reality"
+              ],
+              "hands_off_to": "1:4",
+              "end_condition_echo": "Protagonist stands before the Tutorial Gate."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Debugging the Tutorial",
+          "intent": "Explore the mechanics of the 100% crit bug.",
+          "end_condition": "The tutorial boss spawns in the arena.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Arthur enters the Tutorial Forest and encounters his first enemies, the Slimes.",
+              "type": "combat",
+              "outcome": "Arthur confirms that every hit is a critical strike.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_CRIT_BUG"
+              ],
+              "location_start_label": "Tutorial Gate",
+              "location_start": "The Archway of the First Trial",
+              "location_end_label": "Slime Clearing",
+              "location_end": "The Emerald Glade of the Tutorial Forest",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "consumes_outcome_from": "1:3",
+              "transition_in_text": "The iron gate creaked open, revealing a lush forest where green slimes bounced with murderous intent.",
+              "transition_in_anchors": [
+                "iron gate",
+                "lush forest",
+                "green slimes"
+              ],
+              "transition_out_text": "The last slime popped like a balloon, leaving behind a trail of critical hit notifications.",
+              "transition_out_anchors": [
+                "slime",
+                "balloon",
+                "critical hit notifications"
+              ],
+              "hands_off_to": "1:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Arthur experiments with movement speed to see how it affects his crit damage multiplier.",
+              "type": "discovery",
+              "outcome": "Arthur realizes the exploit scales infinitely with movement speed.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Slime Clearing",
+              "location_start": "The Emerald Glade of the Tutorial Forest",
+              "location_end_label": "Slime Clearing",
+              "location_end": "The Emerald Glade of the Tutorial Forest",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:4",
+              "transition_in_text": "Arthur began to sprint in circles, watching the numbers on his HUD climb higher with every step.",
+              "transition_in_anchors": [
+                "sprint",
+                "circles",
+                "HUD"
+              ],
+              "transition_out_text": "Arthur stopped his sprint, his breath hitching as he saw the damage multiplier reach four digits.",
+              "transition_out_anchors": [
+                "sprint",
+                "damage multiplier",
+                "four digits"
+              ],
+              "hands_off_to": "1:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Arthur finds a hidden chest containing the 'Boots of the Swift' which further boosts his speed.",
+              "type": "discovery",
+              "outcome": "Arthur acquires gear that perfectly complements his exploit.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Slime Clearing",
+              "location_start": "The Emerald Glade of the Tutorial Forest",
+              "location_end_label": "Hidden Grotto",
+              "location_end": "A mossy alcove behind the Tutorial Waterfall",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:5",
+              "transition_in_text": "Arthur pushed through a curtain of water, finding a small cave where a wooden chest sat waiting.",
+              "transition_in_anchors": [
+                "curtain of water",
+                "small cave",
+                "wooden chest"
+              ],
+              "transition_out_text": "Arthur laced up the glowing boots, feeling the air rush around his ankles.",
+              "transition_out_anchors": [
+                "glowing boots",
+                "air rush",
+                "ankles"
+              ],
+              "hands_off_to": "1:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Arthur reaches the end of the forest and approaches the Boss Arena.",
+              "type": "transition",
+              "outcome": "Arthur prepares for the final tutorial challenge.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Hidden Grotto",
+              "location_start": "A mossy alcove behind the Tutorial Waterfall",
+              "location_end_label": "Boss Arena Entrance",
+              "location_end": "The Stone Steps of the Tutorial Colosseum",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:6",
+              "transition_in_text": "The forest thinned out, giving way to a massive stone structure that loomed over the landscape.",
+              "transition_in_anchors": [
+                "forest",
+                "stone structure",
+                "landscape"
+              ],
+              "transition_out_text": "The ground shook as the arena doors began to rise, revealing a dark interior.",
+              "transition_out_anchors": [
+                "ground shook",
+                "arena doors",
+                "dark interior"
+              ],
+              "hands_off_to": "1:8",
+              "end_condition_echo": "The tutorial boss spawns in the arena."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "One-Shot Wonder",
+          "intent": "Conclude the tutorial by obliterating the boss.",
+          "end_condition": "The protagonist enters the portal to the hub city.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "The Tutorial Boss, a Giant Golem, spawns and Arthur begins his 'Hit & Run' strategy.",
+              "type": "combat",
+              "outcome": "Arthur successfully dodges the Golem's first massive strike.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Boss Arena Entrance",
+              "location_start": "The Stone Steps of the Tutorial Colosseum",
+              "location_end_label": "Boss Arena",
+              "location_end": "The Sandy Floor of the Tutorial Colosseum",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "consumes_outcome_from": "1:7",
+              "transition_in_text": "Arthur stepped onto the sand, and the Giant Golem pulled itself from the arena floor with a roar of grinding stone.",
+              "transition_in_anchors": [
+                "sand",
+                "Giant Golem",
+                "grinding stone"
+              ],
+              "transition_out_text": "The Golem's fist smashed into the sand, but Arthur was already ten yards away.",
+              "transition_out_anchors": [
+                "Golem's fist",
+                "sand",
+                "ten yards"
+              ],
+              "hands_off_to": "1:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Arthur builds up maximum speed and delivers a single, glitch-powered strike to the Golem.",
+              "type": "combat",
+              "outcome": "The Golem is instantly destroyed by a massive critical hit.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_CRIT_BUG"
+              ],
+              "location_start_label": "Boss Arena",
+              "location_start": "The Sandy Floor of the Tutorial Colosseum",
+              "location_end_label": "Boss Arena",
+              "location_end": "The Sandy Floor of the Tutorial Colosseum",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "consumes_outcome_from": "1:8",
+              "transition_in_text": "Arthur accelerated to a blur, his sword glowing with the purple light of a guaranteed critical strike.",
+              "transition_in_anchors": [
+                "blur",
+                "sword",
+                "purple light"
+              ],
+              "transition_out_text": "The Golem exploded into a million digital shards, leaving only a shimmering blue portal in its wake.",
+              "transition_out_anchors": [
+                "Golem",
+                "digital shards",
+                "shimmering blue portal"
+              ],
+              "hands_off_to": "1:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Arthur collects his legendary tutorial loot and steps into the portal.",
+              "type": "transition",
+              "outcome": "Arthur leaves the tutorial and enters the hub city.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Boss Arena",
+              "location_start": "The Sandy Floor of the Tutorial Colosseum",
+              "location_end_label": "Hub Portal",
+              "location_end": "The Shimmering Gateway to Iron Gate City",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:9",
+              "transition_in_text": "The shimmering blue portal hummed with energy, beckoning Arthur to the world beyond the tutorial.",
+              "transition_in_anchors": [
+                "shimmering blue portal",
+                "energy",
+                "world beyond"
+              ],
+              "end_condition_echo": "The protagonist enters the portal to the hub city."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 2,
+      "title": "Looting the Narrative",
+      "goal": "Identify the 'Speed-to-Crit' conversion exploit while navigating the starter city's bureaucracy.",
+      "chapter_role": "setup",
+      "stakes_shift": "From lucky survivor to deliberate exploiter of system physics.",
+      "bridge": {
+        "from_prev": "Arriving at the hub with high-tier loot and suspicious stats.",
+        "to_next": "The protagonist joins a low-stakes dungeon crawl to test his 'Hit & Run' theory."
+      },
+      "pacing": {
+        "intensity": 2,
+        "tempo": "steady",
+        "expected_scene_count": 8
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Iron Gate Bureaucracy",
+          "intent": "Introduce the hub city and the protagonist's initial struggle with registration.",
+          "end_condition": "The protagonist successfully registers at the Adventurer Guild.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Arthur arrives in Iron Gate City and is overwhelmed by the scale of the hub.",
+              "type": "transition",
+              "outcome": "Arthur finds his way to the Adventurer Guild.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Hub Portal",
+              "location_start": "The Shimmering Gateway to Iron Gate City",
+              "location_end_label": "City Plaza",
+              "location_end": "The Central Square of Iron Gate City",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "The portal spat Arthur out onto the sun-drenched cobblestones of a city that looked like a medieval fever dream.",
+              "transition_in_anchors": [
+                "portal",
+                "cobblestones",
+                "medieval fever dream"
+              ],
+              "transition_out_text": "Arthur followed the signs toward the massive building with the crossed-swords banner.",
+              "transition_out_anchors": [
+                "signs",
+                "massive building",
+                "crossed-swords banner"
+              ],
+              "hands_off_to": "2:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Arthur enters the Adventurer Guild and meets Guild Master Vance, who is suspicious of Arthur's level.",
+              "type": "dialogue",
+              "outcome": "Arthur realizes he needs to hide his true stats.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_VANCE"
+              ],
+              "introduces": [
+                "CHAR_VANCE"
+              ],
+              "location_start_label": "City Plaza",
+              "location_start": "The Central Square of Iron Gate City",
+              "location_end_label": "Guild Lobby",
+              "location_end": "The Oak-Paneled Reception of the Adventurer Guild",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "processed",
+              "consumes_outcome_from": "2:1",
+              "transition_in_text": "The Guild Lobby smelled of old parchment and expensive ale, dominated by a man with a chest like a beer keg.",
+              "transition_in_anchors": [
+                "Guild Lobby",
+                "old parchment",
+                "expensive ale",
+                "beer keg"
+              ],
+              "transition_out_text": "Vance narrowed his eyes at Arthur's registration form, his hand hovering over a detection crystal.",
+              "transition_out_anchors": [
+                "Vance",
+                "registration form",
+                "detection crystal"
+              ],
+              "hands_off_to": "2:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Arthur uses a 'Lesser Illusion' scroll to mask his stats and completes his registration.",
+              "type": "discovery",
+              "outcome": "Arthur is officially registered as a Level 1 Adventurer.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_VANCE"
+              ],
+              "location_start_label": "Guild Lobby",
+              "location_start": "The Oak-Paneled Reception of the Adventurer Guild",
+              "location_end_label": "Guild Lobby",
+              "location_end": "The Oak-Paneled Reception of the Adventurer Guild",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:2",
+              "transition_in_text": "Arthur surreptitiously cracked the illusion scroll beneath the counter, a faint shimmer masking his true power.",
+              "transition_in_anchors": [
+                "illusion scroll",
+                "counter",
+                "faint shimmer"
+              ],
+              "transition_out_text": "Vance grunted and stamped the paperwork, sliding a bronze guild tag across the wood.",
+              "transition_out_anchors": [
+                "Vance",
+                "paperwork",
+                "bronze guild tag"
+              ],
+              "hands_off_to": "2:4",
+              "end_condition_echo": "The protagonist successfully registers at the Adventurer Guild."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Agility Loophole",
+          "intent": "Experiment with the Speed-to-Crit conversion in a controlled environment.",
+          "end_condition": "The protagonist achieves a stable 100% crit-rate via Agility stacking.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Arthur finds a quiet training ground to test his build's limits without being watched.",
+              "type": "transition",
+              "outcome": "Arthur finds a secure location for his experiments.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Guild Lobby",
+              "location_start": "The Oak-Paneled Reception of the Adventurer Guild",
+              "location_end_label": "Training Grounds",
+              "location_end": "An abandoned courtyard in the City's Slums",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:3",
+              "transition_in_text": "Arthur ducked into the shadows of the lower district, finding a courtyard where the training dummies were more rot than straw.",
+              "transition_in_anchors": [
+                "shadows",
+                "lower district",
+                "training dummies"
+              ],
+              "transition_out_text": "Arthur drew his sword, the blade catching a sliver of moonlight through the broken roof.",
+              "transition_out_anchors": [
+                "sword",
+                "blade",
+                "moonlight"
+              ],
+              "hands_off_to": "2:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Arthur equips several pieces of low-tier Agility gear he bought in the market.",
+              "type": "discovery",
+              "outcome": "Arthur observes the crit-rate rising with every point of Agility.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_CRIT_BUG"
+              ],
+              "location_start_label": "Training Grounds",
+              "location_start": "An abandoned courtyard in the City's Slums",
+              "location_end_label": "Training Grounds",
+              "location_end": "An abandoned courtyard in the City's Slums",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:4",
+              "transition_in_text": "Arthur began donning the mismatched leather pieces, his Agility stat ticking upward with each buckle fastened.",
+              "transition_in_anchors": [
+                "leather pieces",
+                "Agility stat",
+                "buckle"
+              ],
+              "transition_out_text": "Arthur swung at the dummy, the air whistling as his speed surpassed the system's intended limits.",
+              "transition_out_anchors": [
+                "dummy",
+                "whistling",
+                "intended limits"
+              ],
+              "hands_off_to": "2:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Arthur reaches the mathematical threshold where his crit-rate locks at 100%.",
+              "type": "discovery",
+              "outcome": "Arthur confirms the exploit is permanent as long as he maintains his Agility.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Training Grounds",
+              "location_start": "An abandoned courtyard in the City's Slums",
+              "location_end_label": "Training Grounds",
+              "location_end": "An abandoned courtyard in the City's Slums",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:5",
+              "transition_in_text": "A golden notification flashed in Arthur's vision: 'CRIT_CHANCE: OVERFLOW'.",
+              "transition_in_anchors": [
+                "golden notification",
+                "CRIT_CHANCE",
+                "OVERFLOW"
+              ],
+              "transition_out_text": "Arthur sheathed his sword, a dangerous confidence settling in his chest.",
+              "transition_out_anchors": [
+                "sword",
+                "dangerous confidence",
+                "chest"
+              ],
+              "hands_off_to": "2:7",
+              "end_condition_echo": "The protagonist achieves a stable 100% crit-rate via Agility stacking."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Dressed for Success",
+          "intent": "Acquire the necessary gear to leverage the exploit in a real dungeon.",
+          "end_condition": "The protagonist steps into the entrance of the Sunken Crypt.",
+          "scenes": [
+            {
+              "scene_id": 7,
+              "summary": "Arthur visits a high-end blacksmith to commission specialized lightweight armor.",
+              "type": "dialogue",
+              "outcome": "Arthur acquires the 'Wind-Runner's Vest'.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Training Grounds",
+              "location_start": "An abandoned courtyard in the City's Slums",
+              "location_end_label": "Blacksmith Shop",
+              "location_end": "Ironheart's Forge in the Market District",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:6",
+              "transition_in_text": "The heat of the forge hit Arthur like a physical wall as he stepped into the district's most famous smithy.",
+              "transition_in_anchors": [
+                "heat",
+                "forge",
+                "smithy"
+              ],
+              "transition_out_text": "Arthur left the shop with a lighter purse and a vest that felt like a second skin.",
+              "transition_out_anchors": [
+                "shop",
+                "lighter purse",
+                "second skin"
+              ],
+              "hands_off_to": "2:8"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Arthur travels to the outskirts of the city to the entrance of the Sunken Crypt.",
+              "type": "transition",
+              "outcome": "Arthur is ready to begin his first real dungeon run.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Blacksmith Shop",
+              "location_start": "Ironheart's Forge in the Market District",
+              "location_end_label": "Sunken Crypt Entrance",
+              "location_end": "The Fog-Drenched Entrance of the Sunken Crypt",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:7",
+              "transition_in_text": "The city walls receded as Arthur walked toward the graveyard where the Sunken Crypt's entrance lay hidden in the fog.",
+              "transition_in_anchors": [
+                "city walls",
+                "graveyard",
+                "fog"
+              ],
+              "end_condition_echo": "The protagonist steps into the entrance of the Sunken Crypt."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

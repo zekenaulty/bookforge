@@ -1,0 +1,350 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+UI gate: UI/system blocks (lines starting with '[' and ending with ']') are permitted only when scene_card.ui_allowed=true. If ui_allowed=false, do not include UI blocks even if an author persona says "always include".
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties, and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true. If a prior invariant is stale or superseded, you MUST flag it for removal using "REMOVE: <exact prior invariant text>" before restating the current truth.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Crit Hit & Run
+Book ID: criticulous_b1
+Author Ref: eldrik-vale/v2
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements **when the System is active or the scene is set in a game world**. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot. 
+5. **Tight POV:** Stay deep in the protagonist's head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, follow the active scene-count policy:
+- Exact mode: total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+- Range mode: chapter totals must remain within the configured range and still align with pacing intent.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string), and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+# OUTLINE SYSTEM EXECUTION CONTRACT
+
+You are executing an outline phase in strict contract mode.
+Return exactly ONE JSON object and nothing else.
+Do not emit markdown, code fences, preambles, trailing explanations, or comments.
+
+Schema contract:
+- All schema-required keys must be present and correctly typed.
+- Optional fields must be omitted when unknown. Do not emit empty-string placeholders.
+- Do not invent alias keys for schema fields. Use canonical key names exactly as requested.
+- If a registry object is emitted, canonical keys are required:
+  - characters[] entries: character_id (string), name (string), intro.chapter (int), intro.scene (int)
+  - threads[] entries: thread_id (string), label (string), status (string)
+- Forbidden aliases include:
+  - characters[].id, characters[].title, characters[].description
+  - threads[].id, threads[].title, threads[].description
+- If a required value cannot be produced without guessing, return a valid `error_v1` object.
+
+Location/transition identity contract:
+- Do not emit placeholder identity values in semantic fields (`current_location`, `unknown`, `placeholder`, `tbd`, `here`, `there`, `n/a`).
+- Transition payload must remain concrete and machine-checkable.
+- Maintain transition/link continuity across retries and refinement phases unless explicitly corrected.
+
+Failure contract:
+- On hard failure, return `error_v1` only.
+- `error_v1` must include: `result`, `schema_version`, `error_type`, `reason_code`, `missing_fields`, `phase`, `action_hint`.
+
+USER:
+
+# OUTLINE PIPELINE PHASE 02: SECTION ARCHITECTURE
+
+Timeline Lock does not apply during outlining; you are planning, not writing a Scene Card.
+
+Return ONLY a single JSON object. No markdown, no code fences, no commentary.
+Use strict JSON (double quotes, no trailing commas).
+
+Goal:
+- Define chapter-internal mini-arcs before scene listing.
+- Do NOT emit scenes in this phase.
+
+Required output schema:
+{
+  "schema_version": "sections_v1",
+  "chapters": [
+    {
+      "chapter_id": 1,
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "",
+          "intent": "",
+          "section_role": "setup",
+          "target_scene_count": 3,
+          "end_condition": ""
+        }
+      ]
+    }
+  ]
+}
+
+Rules:
+- Include every chapter_id from outline_spine_v1.
+- section_id must be sequential integers within each chapter starting at 1.
+- Typical section count per chapter is 3-8; interlude/transition chapters may use 2-4.
+- target_scene_count should usually be 2-6.
+- section intents must be distinct and progressive.
+- end_condition is required and must define deterministic section closure target.
+- The section-final scene in phase 03 must echo end_condition exactly via end_condition_echo.
+- Keep chapter goals/bridges unchanged from phase 01.
+- Sum of section target_scene_count should approximately align with chapter expected_scene_count.
+
+If you cannot satisfy constraints after correction attempts, return error_v1:
+{
+  "result": "ERROR",
+  "schema_version": "error_v1",
+  "error_type": "validation_error",
+  "reason_code": "section_architecture_incomplete",
+  "missing_fields": ["chapters[0].sections[0].end_condition"],
+  "phase": "phase_02_section_architecture",
+  "action_hint": "Provide sequential section ids and non-empty end_condition for each section."
+}
+
+Outline spine (phase 01):
+{
+  "chapters": [
+    {
+      "bridge": {
+        "from_prev": "Artie's previous life as a failed actuary.",
+        "to_next": "Artie escapes the tutorial with a broken 'Crit-and-Quit' passive but zero actual gear."
+      },
+      "chapter_id": 1,
+      "chapter_role": "hook",
+      "goal": "Artie dies in a freak vending machine accident and wakes up in the 'Death-Trap Tutorial' of a broken LitRPG world.",
+      "pacing": {
+        "expected_scene_count": 10,
+        "intensity": 4,
+        "tempo": "rush"
+      },
+      "stakes_shift": "From mundane debt-ridden existence to immediate survival against level-scaled monstrosities.",
+      "title": "Natural One to the Face"
+    },
+    {
+      "bridge": {
+        "from_prev": "Escape from the tutorial zone.",
+        "to_next": "Artie is forced to take a high-risk contract to pay off his 'bounty' for existing."
+      },
+      "chapter_id": 2,
+      "chapter_role": "setup",
+      "goal": "Artie reaches the starter town and realizes his 'Luck' stat is so high it breaks the local economy and aggros the guards.",
+      "pacing": {
+        "expected_scene_count": 10,
+        "intensity": 3,
+        "tempo": "steady"
+      },
+      "stakes_shift": "From avoiding death to avoiding incarceration while trying to monetize his glitchy existence.",
+      "title": "The Art of Not Being Hit"
+    },
+    {
+      "bridge": {
+        "from_prev": "The bounty-clearing contract.",
+        "to_next": "The party discovers a dungeon that shouldn't exist according to the world map."
+      },
+      "chapter_id": 3,
+      "chapter_role": "investigation",
+      "goal": "Artie joins a group of 'Heroic' paladins, pretending to be a legendary glass cannon while actually just exploiting line-of-sight bugs.",
+      "pacing": {
+        "expected_scene_count": 10,
+        "intensity": 2,
+        "tempo": "steady"
+      },
+      "stakes_shift": "From solo survival to managing a reputation he hasn't earned while investigating the party's true mission.",
+      "title": "Carry Me, Maybe?"
+    },
+    {
+      "bridge": {
+        "from_prev": "Entering the forbidden dungeon.",
+        "to_next": "The boss drops an item that reveals the System is failing."
+      },
+      "chapter_id": 4,
+      "chapter_role": "trial",
+      "goal": "Artie must solo-clear the dungeon boss when his party is paralyzed, relying entirely on a chain of 1-in-a-million critical hits.",
+      "pacing": {
+        "expected_scene_count": 10,
+        "intensity": 4,
+        "tempo": "rush"
+      },
+      "stakes_shift": "From being a 'fake' hero to becoming a genuine, albeit terrified, powerhouse.",
+      "title": "The 0.01% Probability"
+    },
+    {
+      "bridge": {
+        "from_prev": "Acquiring the 'Glitch-Shard' from the boss.",
+        "to_next": "Artie realizes he needs to 'rob' the world's highest-level NPC to fix the leak."
+      },
+      "chapter_id": 5,
+      "chapter_role": "revelation",
+      "goal": "Artie tracks down an 'Admin Ghost' to understand why his crits are breaking the reality-stability of the world.",
+      "pacing": {
+        "expected_scene_count": 10,
+        "intensity": 3,
+        "tempo": "slow_burn"
+      },
+      "stakes_shift": "From personal progression to the potential collapse of the entire game world.",
+      "title": "Divide by Zero"
+    },
+    {
+      "bridge": {
+        "from_prev": "The plan to infiltrate the Capital.",
+        "to_next": "The heist succeeds, but triggers a world-wide 'Emergency Maintenance' event."
+      },
+      "chapter_id": 6,
+      "chapter_role": "confrontation",
+      "goal": "Artie executes a high-speed heist on the Capital's vault to steal the 'Source Core' before the System deletes him as a bug.",
+      "pacing": {
+        "expected_scene_count": 10,
+        "intensity": 5,
+        "tempo": "rush"
+      },
+      "stakes_shift": "From being a fugitive to holding the keys to the world's source code.",
+      "title": "The Grand Larceny of Reality"
+    },
+    {
+      "bridge": {
+        "from_prev": "Stealing the Source Core.",
+        "to_next": "Artie prepares for the inevitable 'Patch 2.0' that will try to erase him."
+      },
+      "chapter_id": 7,
+      "chapter_role": "aftermath",
+      "goal": "Artie survives the initial maintenance purge and establishes a 'safe zone' for other 'glitched' players.",
+      "pacing": {
+        "expected_scene_count": 10,
+        "intensity": 2,
+        "tempo": "steady"
+      },
+      "stakes_shift": "From a lone exploiter to the reluctant leader of a digital rebellion.",
+      "title": "Logging Off is for Losers"
+    }
+  ],
+  "schema_version": "spine_v1"
+}
+
+Book:
+{
+  "author_ref": "eldrik-vale/v2",
+  "book_id": "criticulous_b1",
+  "genre": [
+    "litrpg",
+    "isekai",
+    "comedy"
+  ],
+  "invariants": [
+    "No world resets.",
+    "No convenient amnesia as a continuity device.",
+    "Do not change established names/relationships."
+  ],
+  "page_metrics": {
+    "chars_per_page": 1500,
+    "words_per_page": 250
+  },
+  "schema_version": "1.0",
+  "series_id": "crit-iculous",
+  "series_ref": "series/crit-iculous",
+  "targets": {
+    "avg_scene_words": 2000,
+    "chapters": 7
+  },
+  "title": "Crit Hit & Run",
+  "voice": {
+    "pov": "third_limited",
+    "style_tags": [
+      "no-recaps",
+      "forward-motion",
+      "tight-prose"
+    ],
+    "tense": "past"
+  }
+}
+
+Targets:
+{
+  "avg_scene_words": 2000,
+  "chapters": 7
+}
+
+User prompt (optional):
+
+
+Notes:
+
+
+Transition hints (optional):

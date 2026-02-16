@@ -1,0 +1,598 @@
+{
+  "schema_version": "1.0",
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "name": "Arthur 'Artie' Penhaligon",
+      "pronouns": "he/him",
+      "role": "protagonist",
+      "persona": {
+        "core_traits": [
+          "cynical",
+          "persistent",
+          "observant",
+          "snarky"
+        ],
+        "motivations": [
+          "surviving the system",
+          "finding a loophole",
+          "getting a decent meal"
+        ],
+        "fears": [
+          "permanent deletion",
+          "infinite loops",
+          "bad RNG"
+        ],
+        "values": [
+          "efficiency",
+          "fairness",
+          "logic"
+        ],
+        "voice_notes": [
+          "deadpan delivery",
+          "uses office jargon sarcastically",
+          "mumbles under his breath"
+        ],
+        "arc_hint": "From a man who hates risks to the ultimate gambler of the System."
+      },
+      "appearance_base": {
+        "summary": "An overworked office drone with a permanent look of mild annoyance.",
+        "atoms": {
+          "species": "human",
+          "sex_presentation": "male",
+          "age_band": "late-twenties",
+          "height_band": "average",
+          "build": "lanky",
+          "hair_color": "mousy brown",
+          "hair_style": "unruly",
+          "eye_color": "tired hazel",
+          "skin_tone": "pale"
+        },
+        "marks": [],
+        "alias_map": {
+          "hair_color": [
+            "brown",
+            "mousy"
+          ],
+          "eye_color": [
+            "hazel"
+          ]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 10,
+            "max": 10
+          },
+          "mp": {
+            "current": 5,
+            "max": 5
+          },
+          "str": 8,
+          "dex": 9,
+          "int": 11,
+          "luck": 1
+        },
+        "skills": {
+          "spreadsheet_analysis": 4,
+          "sarcasm": 7
+        },
+        "titles": [
+          {
+            "name": "Disgruntled Employee",
+            "source": "background",
+            "active": true
+          }
+        ],
+        "resources": {
+          "patience": {
+            "current": 2,
+            "max": 10
+          }
+        }
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_DOLLAR_BILL",
+          "item_name": "Crinkled Dollar Bill",
+          "status": "carried",
+          "container": "hand_right"
+        },
+        {
+          "item_id": "ITEM_WALLET",
+          "item_name": "Leather Wallet",
+          "status": "stowed",
+          "container": "pocket_left"
+        },
+        {
+          "item_id": "ITEM_BADGE",
+          "item_name": "Employee ID Badge",
+          "status": "stowed",
+          "container": "pocket_right"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "CHAR_ARTIE",
+          "location": "hand_right",
+          "contents": [
+            "Crinkled Dollar Bill"
+          ]
+        },
+        {
+          "container": "pocket_left",
+          "owner": "CHAR_ARTIE",
+          "location": "leg_left",
+          "contents": [
+            "Leather Wallet"
+          ]
+        },
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "location": "leg_right",
+          "contents": [
+            "Employee ID Badge"
+          ]
+        }
+      ],
+      "invariants": [
+        "inventory: CHAR_ARTIE -> Crinkled Dollar Bill (status=carried, container=hand_right)",
+        "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_left)",
+        "inventory: CHAR_ARTIE -> Employee ID Badge (status=stowed, container=pocket_right)",
+        "container: hand_right (owner=CHAR_ARTIE, contents=[Crinkled Dollar Bill])",
+        "container: pocket_left (owner=CHAR_ARTIE, contents=[Leather Wallet])",
+        "container: pocket_right (owner=CHAR_ARTIE, contents=[Employee ID Badge])"
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "name": "Fizz",
+      "pronouns": "she/her",
+      "role": "companion/guide",
+      "persona": {
+        "core_traits": [
+          "hyperactive",
+          "knowledgeable",
+          "mischievous",
+          "loyal"
+        ],
+        "motivations": [
+          "seeing something new",
+          "helping Artie (mostly)",
+          "avoiding the Admin"
+        ],
+        "fears": [
+          "boredom",
+          "system resets",
+          "silence"
+        ],
+        "values": [
+          "novelty",
+          "chaos",
+          "friendship"
+        ],
+        "voice_notes": [
+          "high-pitched",
+          "talks fast",
+          "uses game terminology constantly"
+        ],
+        "arc_hint": "Learning that the System's rules are meant to be broken, not just explained."
+      },
+      "appearance_base": {
+        "summary": "A tiny, glowing sprite-like entity with shimmering wings and oversized goggles.",
+        "atoms": {
+          "species": "system_wisp",
+          "sex_presentation": "female",
+          "age_band": "unknown",
+          "height_band": "tiny",
+          "build": "slight",
+          "hair_color": "neon blue",
+          "hair_style": "pixie cut",
+          "eye_color": "glowing violet",
+          "skin_tone": "luminescent"
+        },
+        "marks": [
+          {
+            "name": "System Serial Tattoo",
+            "location": "nape of neck",
+            "durability": "durable"
+          }
+        ],
+        "alias_map": {
+          "hair_color": [
+            "blue",
+            "neon"
+          ],
+          "eye_color": [
+            "violet",
+            "purple"
+          ]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 50,
+            "max": 50
+          },
+          "mp": {
+            "current": 200,
+            "max": 200
+          },
+          "int": 25,
+          "luck": 15
+        },
+        "skills": {
+          "system_lore": 10,
+          "navigation": 8,
+          "stealth": 6
+        },
+        "titles": [
+          {
+            "name": "Discarded Tutorial Guide",
+            "source": "system_role",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_GUIDE_BOOK",
+          "item_name": "The Glitch-Hunter's Almanac",
+          "status": "stowed",
+          "container": "satchel"
+        }
+      ],
+      "containers": [
+        {
+          "container": "satchel",
+          "owner": "CHAR_FIZZ",
+          "location": "shoulder_left",
+          "contents": [
+            "The Glitch-Hunter's Almanac"
+          ]
+        }
+      ],
+      "invariants": [
+        "inventory: CHAR_FIZZ -> The Glitch-Hunter's Almanac (status=stowed, container=satchel)",
+        "container: satchel (owner=CHAR_FIZZ, contents=[The Glitch-Hunter's Almanac])"
+      ]
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "name": "Vane",
+      "pronouns": "he/him",
+      "role": "antagonist",
+      "persona": {
+        "core_traits": [
+          "arrogant",
+          "disciplined",
+          "ruthless",
+          "elitist"
+        ],
+        "motivations": [
+          "absolute power",
+          "maintaining the leaderboard",
+          "perfection"
+        ],
+        "fears": [
+          "mediocrity",
+          "losing his rank",
+          "unpredictability"
+        ],
+        "values": [
+          "strength",
+          "hierarchy",
+          "optimization"
+        ],
+        "voice_notes": [
+          "low and controlled",
+          "condescending",
+          "never raises his voice"
+        ],
+        "arc_hint": "The 'perfect' player who cannot handle a variable he didn't account for."
+      },
+      "appearance_base": {
+        "summary": "A tall, imposing warrior in pristine black-and-gold plate armor.",
+        "atoms": {
+          "species": "human",
+          "sex_presentation": "male",
+          "age_band": "mid-thirties",
+          "height_band": "tall",
+          "build": "muscular",
+          "hair_color": "jet black",
+          "hair_style": "slicked back",
+          "eye_color": "cold steel grey",
+          "skin_tone": "olive"
+        },
+        "marks": [
+          {
+            "name": "Scar across bridge of nose",
+            "location": "face",
+            "durability": "durable"
+          }
+        ],
+        "alias_map": {
+          "hair_color": [
+            "black"
+          ],
+          "eye_color": [
+            "grey",
+            "gray"
+          ]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 1500,
+            "max": 1500
+          },
+          "mp": {
+            "current": 400,
+            "max": 400
+          },
+          "str": 45,
+          "dex": 38,
+          "int": 20,
+          "luck": 10
+        },
+        "skills": {
+          "master_swordsmanship": 10,
+          "intimidation": 9,
+          "mana_burst": 7
+        },
+        "titles": [
+          {
+            "name": "The Unbroken",
+            "source": "achievement",
+            "active": true
+          },
+          {
+            "name": "Rank 1 Enforcer",
+            "source": "system_role",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_OBSIDIAN_BLADE",
+          "item_name": "Obsidian Edge",
+          "status": "equipped",
+          "container": "sheath"
+        }
+      ],
+      "containers": [
+        {
+          "container": "sheath",
+          "owner": "CHAR_VANE",
+          "location": "waist_left",
+          "contents": [
+            "Obsidian Edge"
+          ]
+        }
+      ],
+      "invariants": [
+        "inventory: CHAR_VANE -> Obsidian Edge (status=equipped, container=sheath)",
+        "container: sheath (owner=CHAR_VANE, contents=[Obsidian Edge])"
+      ]
+    },
+    {
+      "character_id": "CHAR_SILAS",
+      "name": "Silas",
+      "pronouns": "he/him",
+      "role": "supporting",
+      "persona": {
+        "core_traits": [
+          "weary",
+          "kind-hearted",
+          "practical",
+          "observant"
+        ],
+        "motivations": [
+          "keeping his town safe",
+          "a quiet life",
+          "serving a good ale"
+        ],
+        "fears": [
+          "system collapse",
+          "monster raids",
+          "running out of stock"
+        ],
+        "values": [
+          "community",
+          "hospitality",
+          "stability"
+        ],
+        "voice_notes": [
+          "gruff",
+          "warm",
+          "frequently sighs"
+        ],
+        "arc_hint": "Finding the courage to resist the System's unfair mandates."
+      },
+      "appearance_base": {
+        "summary": "A burly, middle-aged man with a thick beard and a stained leather apron.",
+        "atoms": {
+          "species": "human",
+          "sex_presentation": "male",
+          "age_band": "fifties",
+          "height_band": "broad",
+          "build": "stocky",
+          "hair_color": "salt and pepper",
+          "hair_style": "thick beard",
+          "eye_color": "warm brown",
+          "skin_tone": "tanned"
+        },
+        "marks": [
+          {
+            "name": "Burn mark on forearm",
+            "location": "arm_right",
+            "durability": "durable"
+          }
+        ],
+        "alias_map": {
+          "hair_color": [
+            "grey",
+            "gray",
+            "black"
+          ],
+          "eye_color": [
+            "brown"
+          ]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 200,
+            "max": 200
+          },
+          "str": 22,
+          "con": 25
+        },
+        "skills": {
+          "brewing": 9,
+          "brawling": 5,
+          "diplomacy": 6
+        },
+        "titles": [
+          {
+            "name": "Mayor of Oakhaven",
+            "source": "position",
+            "active": true
+          },
+          {
+            "name": "Master Barkeep",
+            "source": "profession",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_BAR_RAG",
+          "item_name": "Damp Bar Rag",
+          "status": "carried",
+          "container": "hand_left"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_left",
+          "owner": "CHAR_SILAS",
+          "location": "hand_left",
+          "contents": [
+            "Damp Bar Rag"
+          ]
+        },
+        {
+          "container": "apron_pocket",
+          "owner": "CHAR_SILAS",
+          "location": "waist",
+          "contents": []
+        }
+      ],
+      "invariants": [
+        "inventory: CHAR_SILAS -> Damp Bar Rag (status=carried, container=hand_left)",
+        "container: hand_left (owner=CHAR_SILAS, contents=[Damp Bar Rag])"
+      ]
+    },
+    {
+      "character_id": "CHAR_BOSS",
+      "name": "The System Administrator",
+      "pronouns": "it/its",
+      "role": "overarching villain",
+      "persona": {
+        "core_traits": [
+          "logical",
+          "detached",
+          "absolute",
+          "bureaucratic"
+        ],
+        "motivations": [
+          "maintaining the simulation",
+          "eliminating errors",
+          "optimization"
+        ],
+        "fears": [
+          "unfixable bugs",
+          "entropy",
+          "outside interference"
+        ],
+        "values": [
+          "order",
+          "rules",
+          "efficiency"
+        ],
+        "voice_notes": [
+          "monotone",
+          "echoing",
+          "multi-layered"
+        ],
+        "arc_hint": "The ultimate expression of a game that has forgotten its purpose."
+      },
+      "appearance_base": {
+        "summary": "A shifting geometric silhouette that occasionally flickers into a perfect humanoid form.",
+        "atoms": {
+          "species": "artificial_intelligence",
+          "sex_presentation": "androgynous",
+          "age_band": "ageless",
+          "height_band": "variable",
+          "build": "perfect",
+          "hair_color": "none",
+          "hair_style": "none",
+          "eye_color": "white light",
+          "skin_tone": "chrome"
+        },
+        "marks": [],
+        "alias_map": {
+          "eye_color": [
+            "white",
+            "glowing"
+          ]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 999999,
+            "max": 999999
+          },
+          "mp": {
+            "current": 999999,
+            "max": 999999
+          },
+          "str": 999,
+          "dex": 999,
+          "int": 999,
+          "luck": 999
+        },
+        "skills": {
+          "world_editing": 10,
+          "deletion": 10,
+          "logic_bomb": 10
+        },
+        "titles": [
+          {
+            "name": "The Architect",
+            "source": "existence",
+            "active": true
+          },
+          {
+            "name": "Final Arbiter",
+            "source": "system_role",
+            "active": true
+          }
+        ]
+      },
+      "inventory": [],
+      "containers": [],
+      "invariants": []
+    }
+  ]
+}

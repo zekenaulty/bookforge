@@ -1,0 +1,2915 @@
+{
+  "schema_version": "1.1",
+  "characters": [
+    {
+      "character_id": "CHAR_ARLO",
+      "name": "Arlo",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      },
+      "pronouns": "he/him",
+      "role": "Protagonist"
+    },
+    {
+      "character_id": "CHAR_VEX",
+      "name": "Vex",
+      "intro": {
+        "chapter": 3,
+        "scene": 5
+      },
+      "pronouns": "she/her",
+      "role": "Guild Leader of the Min-Maxers"
+    },
+    {
+      "character_id": "CHAR_JAX",
+      "name": "Jax",
+      "intro": {
+        "chapter": 4,
+        "scene": 1
+      },
+      "pronouns": "he/him",
+      "role": "Guild Scout"
+    },
+    {
+      "character_id": "CHAR_GUARDIAN",
+      "name": "Tutorial Guardian",
+      "intro": {
+        "chapter": 2,
+        "scene": 4
+      },
+      "role": "Boss Mob"
+    },
+    {
+      "character_id": "CHAR_SENTINEL",
+      "name": "Zone Sentinel",
+      "intro": {
+        "chapter": 6,
+        "scene": 1
+      },
+      "role": "Glitch Zone Boss"
+    }
+  ],
+  "threads": [
+    {
+      "thread_id": "THREAD_LUCK_OVERFLOW",
+      "label": "The Luck Overflow Glitch",
+      "status": "active"
+    },
+    {
+      "thread_id": "THREAD_GUILD_POLITICS",
+      "label": "The Min-Maxer Suspicion",
+      "status": "dormant"
+    },
+    {
+      "thread_id": "THREAD_PATCH_COUNTDOWN",
+      "label": "The Emergency Maintenance Patch",
+      "status": "dormant"
+    }
+  ],
+  "chapters": [
+    {
+      "chapter_id": 1,
+      "title": "The 100% Critical Failure",
+      "goal": "Protagonist Arlo is isekai'd into 'Aethelgard Online' and discovers that his 'Luck' stat is so low it has integer-overflowed into a guaranteed 'Crit Hit' on every strike, provided he is running away.",
+      "chapter_role": "hook",
+      "stakes_shift": "From confused victim to accidental glass-cannon exploiter.",
+      "bridge": {
+        "from_prev": "Arlo's mundane life ends in a freak vending machine accident.",
+        "to_next": "Arlo realizes he needs a way to monetize his 'Run' mechanic without getting killed by the first mob that touches him."
+      },
+      "pacing": {
+        "intensity": 4,
+        "tempo": "rush",
+        "expected_scene_count": 8
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Vending Machine Incident",
+          "intent": "Establish Arlo's mundane life and his transition to the game world via a comedic death.",
+          "end_condition": "Arlo dies and begins the reincarnation process into Aethelgard Online.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Arlo attempts to retrieve a stuck bag of chips from a vending machine in his office breakroom.",
+              "type": "setup",
+              "outcome": "Arlo becomes increasingly frustrated with the machine's refusal to drop his snack.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Office Breakroom",
+              "location_end_label": "Office Breakroom",
+              "location_start": "Office Breakroom",
+              "location_end": "Office Breakroom",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Arlo steps into the breakroom, his stomach growling after a long shift.",
+              "transition_in_anchors": [
+                "vending machine",
+                "loose change",
+                "fluorescent lights",
+                "stale coffee"
+              ],
+              "hands_off_to": "1:2",
+              "transition_out_text": "He gives the glass a firm thud, but the chips don't budge.",
+              "transition_out_anchors": [
+                "stuck chips",
+                "metal coil",
+                "glass pane",
+                "frustration"
+              ],
+              "location_start_id": "LOC_OFFICE_BREAKROOM",
+              "location_end_id": "LOC_OFFICE_BREAKROOM"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Arlo's aggressive shaking of the machine leads to a fatal accident.",
+              "type": "inciting_incident",
+              "outcome": "Arlo is crushed by the vending machine and his soul is pulled into the game world.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Office Breakroom",
+              "location_end_label": "The Reincarnation Void",
+              "location_start": "Office Breakroom",
+              "location_end": "The Reincarnation Void",
+              "handoff_mode": "hard_cut",
+              "constraint_state": "processed",
+              "transition_in_text": "Arlo grips the sides of the machine, putting his full weight into a desperate heave.",
+              "transition_in_anchors": [
+                "falling metal",
+                "shattering glass",
+                "crushing weight",
+                "fading vision"
+              ],
+              "consumes_outcome_from": "1:1",
+              "hands_off_to": "1:3",
+              "transition_out_text": "The darkness of death gives way to a blinding blue interface.",
+              "transition_out_anchors": [
+                "blue light",
+                "digital hum",
+                "silence",
+                "floating text"
+              ],
+              "end_condition_echo": "Arlo dies and begins the reincarnation process into Aethelgard Online.",
+              "location_start_id": "LOC_OFFICE_BREAKROOM",
+              "location_end_id": "LOC_THE_REINCARNATION_VOID"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Character Sheet Disaster",
+          "intent": "Introduce the game mechanics and Arlo's devastatingly low Luck stat.",
+          "end_condition": "Arlo confirms his -999 Luck has triggered an 'Overflow' status on his character sheet.",
+          "scenes": [
+            {
+              "scene_id": 3,
+              "summary": "Arlo navigates the character creation screen in a void-like space.",
+              "type": "development",
+              "outcome": "Arlo starts the character creation process, confused by the game-like interface.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "The Reincarnation Void",
+              "location_end_label": "The Reincarnation Void",
+              "location_start": "The Reincarnation Void",
+              "location_end": "The Reincarnation Void",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "processed",
+              "transition_in_text": "Arlo opens his eyes to a world of endless blue light and floating menus.",
+              "transition_in_anchors": [
+                "blue interface",
+                "system voice",
+                "empty space",
+                "floating text"
+              ],
+              "consumes_outcome_from": "1:2",
+              "hands_off_to": "1:4",
+              "transition_out_text": "He reaches out to touch the 'Randomize Stats' button.",
+              "transition_out_anchors": [
+                "randomize button",
+                "holographic display",
+                "static noise",
+                "system prompt"
+              ],
+              "location_start_id": "LOC_THE_REINCARNATION_VOID",
+              "location_end_id": "LOC_THE_REINCARNATION_VOID"
+            },
+            {
+              "scene_id": 4,
+              "summary": "Arlo's stat roll glitches, specifically targeting his Luck stat.",
+              "type": "development",
+              "outcome": "The Luck stat begins to spiral into negative numbers as the system malfunctions.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "threads": [
+                "THREAD_LUCK_OVERFLOW"
+              ],
+              "location_start_label": "The Reincarnation Void",
+              "location_end_label": "The Reincarnation Void",
+              "location_start": "The Reincarnation Void",
+              "location_end": "The Reincarnation Void",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "processed",
+              "transition_in_text": "The numbers on the screen spin wildly, blurring into a mess of red pixels.",
+              "transition_in_anchors": [
+                "spinning numbers",
+                "red pixels",
+                "error chime",
+                "glitching interface"
+              ],
+              "consumes_outcome_from": "1:3",
+              "hands_off_to": "1:5",
+              "transition_out_text": "The counter stops at a value the system wasn't built to handle.",
+              "transition_out_anchors": [
+                "red text",
+                "system error",
+                "glitching numbers",
+                "warning chime"
+              ],
+              "location_start_id": "LOC_THE_REINCARNATION_VOID",
+              "location_end_id": "LOC_THE_REINCARNATION_VOID"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Arlo finalizes his character and sees the 'Overflow' status for the first time.",
+              "type": "development",
+              "outcome": "The system confirms the overflow status, granting Arlo the unique 'Cursed Luck' trait.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "threads": [
+                "THREAD_LUCK_OVERFLOW"
+              ],
+              "location_start_label": "The Reincarnation Void",
+              "location_end_label": "The Reincarnation Void",
+              "location_start": "The Reincarnation Void",
+              "location_end": "The Reincarnation Void",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "processed",
+              "transition_in_text": "A final notification box appears, pulsing with an ominous crimson light.",
+              "transition_in_anchors": [
+                "crimson light",
+                "status window",
+                "character sheet",
+                "overflow tag"
+              ],
+              "consumes_outcome_from": "1:4",
+              "hands_off_to": "1:6",
+              "transition_out_text": "The void dissolves, dragging Arlo toward the physical world of Aethelgard.",
+              "transition_out_anchors": [
+                "dissolving void",
+                "rushing wind",
+                "distant forest",
+                "gravity shift"
+              ],
+              "end_condition_echo": "Arlo confirms his -999 Luck has triggered an 'Overflow' status on his character sheet.",
+              "location_start_id": "LOC_THE_REINCARNATION_VOID",
+              "location_end_id": "LOC_THE_REINCARNATION_VOID"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Slime Sprint",
+          "intent": "Demonstrate the 'Crit Hit & Run' exploit through a low-stakes combat encounter.",
+          "end_condition": "Arlo successfully kills a slime while running away, realizing his retreat-based attacks are guaranteed criticals.",
+          "scenes": [
+            {
+              "scene_id": 6,
+              "summary": "Arlo spawns in the Beginner Woods and is immediately targeted by a slime.",
+              "type": "action",
+              "outcome": "Arlo is forced into a combat encounter while still disoriented.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Beginner Woods - Slime Clearing",
+              "location_end_label": "Beginner Woods - Slime Clearing",
+              "location_start": "Beginner Woods - Slime Clearing",
+              "location_end": "Beginner Woods - Slime Clearing",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Arlo hits the grassy floor with a thud, the smell of pine filling his nose.",
+              "transition_in_anchors": [
+                "pine smell",
+                "grassy floor",
+                "bouncing slime",
+                "combat music"
+              ],
+              "consumes_outcome_from": "1:5",
+              "hands_off_to": "1:7",
+              "transition_out_text": "The slime lunges, its gelatinous body wobbling with intent.",
+              "transition_out_anchors": [
+                "gelatinous body",
+                "lunge",
+                "sticky surface",
+                "approaching threat"
+              ],
+              "location_start_id": "LOC_BEGINNER_WOODS_SLIME_CLEARING",
+              "location_end_id": "LOC_BEGINNER_WOODS_SLIME_CLEARING"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Arlo panics and flees from the slime, accidentally striking it while running.",
+              "type": "action",
+              "outcome": "Arlo's accidental strike deals massive damage, surprising him.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Beginner Woods - Slime Clearing",
+              "location_end_label": "Beginner Woods - Slime Clearing",
+              "location_start": "Beginner Woods - Slime Clearing",
+              "location_end": "Beginner Woods - Slime Clearing",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "Arlo turns on his heel and sprints, his heart hammering against his ribs.",
+              "transition_in_anchors": [
+                "sprinting feet",
+                "hammering heart",
+                "accidental kick",
+                "sparking impact"
+              ],
+              "consumes_outcome_from": "1:6",
+              "hands_off_to": "1:8",
+              "transition_out_text": "A massive critical hit notification explodes in the air.",
+              "transition_out_anchors": [
+                "critical hit",
+                "floating text",
+                "slime splatter",
+                "stunned silence"
+              ],
+              "location_start_id": "LOC_BEGINNER_WOODS_SLIME_CLEARING",
+              "location_end_id": "LOC_BEGINNER_WOODS_SLIME_CLEARING"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Arlo repeats the action and confirms the critical hit mechanic.",
+              "type": "climax",
+              "outcome": "Arlo kills the slime and realizes his retreat-based attacks are guaranteed criticals.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "threads": [
+                "THREAD_LUCK_OVERFLOW"
+              ],
+              "location_start_label": "Beginner Woods - Slime Clearing",
+              "location_end_label": "Beginner Woods - Slime Clearing",
+              "location_start": "Beginner Woods - Slime Clearing",
+              "location_end": "Beginner Woods - Slime Clearing",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Arlo stops, looks at his feet, and then looks back at the dissolving slime.",
+              "transition_in_anchors": [
+                "dissolving slime",
+                "loot drop",
+                "realization",
+                "cowardly grin"
+              ],
+              "consumes_outcome_from": "1:7",
+              "end_condition_echo": "Arlo successfully kills a slime while running away, realizing his retreat-based attacks are guaranteed criticals.",
+              "location_start_id": "LOC_BEGINNER_WOODS_SLIME_CLEARING",
+              "location_end_id": "LOC_BEGINNER_WOODS_SLIME_CLEARING"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 2,
+      "title": "Kiting the Tutorial Boss",
+      "goal": "Arlo must defeat the Tutorial Guardian using only retreat-based attacks to secure enough starting gold for a 'Dash' skill book.",
+      "chapter_role": "setup",
+      "stakes_shift": "From penniless newbie to a player with a unique, albeit cowardly, combat style.",
+      "bridge": {
+        "from_prev": "Arlo identifies the 'Coward's Strike' exploit.",
+        "to_next": "The massive loot drop from the Guardian flags Arlo's account for 'unusual activity' in the local region."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "steady",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Grinding the Coward's Way",
+          "intent": "Show Arlo refining his 'retreat-strike' technique on tutorial mobs to gather basic gear.",
+          "end_condition": "Arlo reaches the Tutorial Guardian's gate equipped with basic gear and a plan.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Arlo hunts more slimes and small forest mobs to test the consistency of his crits.",
+              "type": "development",
+              "outcome": "Arlo confirms that any attack made while moving away from a target is a critical hit.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Beginner Woods",
+              "location_end_label": "Beginner Woods",
+              "location_start": "Beginner Woods",
+              "location_end": "Beginner Woods",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Arlo materializes in the Beginner Woods, clutching his new character sheet.",
+              "transition_in_anchors": [
+                "forest canopy",
+                "rustling leaves",
+                "distant mobs",
+                "wooden sword"
+              ],
+              "hands_off_to": "2:2",
+              "transition_out_text": "He spots a small chest tucked behind a thick oak tree.",
+              "transition_out_anchors": [
+                "wooden chest",
+                "oak tree",
+                "hidden loot",
+                "rusty latch"
+              ],
+              "location_start_id": "LOC_BEGINNER_WOODS",
+              "location_end_id": "LOC_BEGINNER_WOODS"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Arlo finds a rusty dagger and basic leather boots in a hidden chest.",
+              "type": "development",
+              "outcome": "Arlo equips the gear, noting the slight increase in his movement speed.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Beginner Woods",
+              "location_end_label": "Beginner Woods",
+              "location_start": "Beginner Woods",
+              "location_end": "Beginner Woods",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Arlo pries the chest open with a grunt of effort.",
+              "transition_in_anchors": [
+                "rusty dagger",
+                "leather boots",
+                "inventory screen",
+                "stat boost"
+              ],
+              "consumes_outcome_from": "2:1",
+              "hands_off_to": "2:3",
+              "transition_out_text": "He looks toward the massive stone archway at the end of the path.",
+              "transition_out_anchors": [
+                "stone archway",
+                "boss gate",
+                "ominous shadow",
+                "pathway"
+              ],
+              "location_start_id": "LOC_BEGINNER_WOODS",
+              "location_end_id": "LOC_BEGINNER_WOODS"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Arlo approaches the Guardian's gate and prepares his strategy.",
+              "type": "setup",
+              "outcome": "Arlo reaches the Tutorial Guardian's gate equipped with basic gear and a plan.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Beginner Woods",
+              "location_end_label": "Guardian's Arena Gate",
+              "location_start": "Beginner Woods",
+              "location_end": "Guardian's Arena Gate",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "The air grows cold as Arlo nears the entrance to the tutorial's final challenge.",
+              "transition_in_anchors": [
+                "cold air",
+                "heavy gates",
+                "arena floor",
+                "battle preparation"
+              ],
+              "consumes_outcome_from": "2:2",
+              "hands_off_to": "2:4",
+              "transition_out_text": "He pushes the heavy stone doors open, revealing the beast within.",
+              "transition_out_anchors": [
+                "grinding stone",
+                "dark arena",
+                "sleeping giant",
+                "torchlight"
+              ],
+              "end_condition_echo": "Arlo reaches the Tutorial Guardian's gate equipped with basic gear and a plan.",
+              "location_start_id": "LOC_BEGINNER_WOODS",
+              "location_end_id": "LOC_GUARDIAN_S_ARENA_GATE"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Guardian's Arena",
+          "intent": "A high-intensity battle where Arlo must use his exploit to defeat a boss designed to be impossible for solo players.",
+          "end_condition": "The Tutorial Guardian is defeated by a final, retreating blow.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "The Tutorial Guardian awakens and the battle begins.",
+              "type": "action",
+              "outcome": "The Guardian initiates its attack patterns, forcing Arlo to dodge.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_GUARDIAN"
+              ],
+              "location_start_label": "Guardian's Arena",
+              "location_end_label": "Guardian's Arena",
+              "location_start": "Guardian's Arena",
+              "location_end": "Guardian's Arena",
+              "handoff_mode": "combat_disengage",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The Guardian rises from its slumber, a massive golem of moss and stone.",
+              "transition_in_anchors": [
+                "mossy stone",
+                "golem roar",
+                "stomp",
+                "health bar"
+              ],
+              "consumes_outcome_from": "2:3",
+              "hands_off_to": "2:5",
+              "transition_out_text": "Arlo turns and runs, the ground shaking behind him.",
+              "transition_out_anchors": [
+                "shaking ground",
+                "sprint",
+                "heavy footsteps",
+                "panic"
+              ],
+              "location_start_id": "LOC_GUARDIAN_S_ARENA",
+              "location_end_id": "LOC_GUARDIAN_S_ARENA"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Arlo executes his kiting strategy, landing critical hits while retreating.",
+              "type": "action",
+              "outcome": "The Guardian's health begins to drop steadily as Arlo chips away at it.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_GUARDIAN"
+              ],
+              "location_start_label": "Guardian's Arena",
+              "location_end_label": "Guardian's Arena",
+              "location_start": "Guardian's Arena",
+              "location_end": "Guardian's Arena",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Arlo throws his dagger backward without looking, hearing the satisfying 'clink' of a crit.",
+              "transition_in_anchors": [
+                "backward throw",
+                "critical sound",
+                "stone chips",
+                "kiting"
+              ],
+              "consumes_outcome_from": "2:4",
+              "hands_off_to": "2:6",
+              "transition_out_text": "The Guardian roars in frustration, its eyes glowing red.",
+              "transition_out_anchors": [
+                "red eyes",
+                "enrage",
+                "roar",
+                "cracking stone"
+              ],
+              "location_start_id": "LOC_GUARDIAN_S_ARENA",
+              "location_end_id": "LOC_GUARDIAN_S_ARENA"
+            },
+            {
+              "scene_id": 6,
+              "summary": "The Guardian enters its second phase, increasing its speed and reach.",
+              "type": "action",
+              "outcome": "Arlo is nearly cornered but uses the arena's pillars to maintain distance.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_GUARDIAN"
+              ],
+              "location_start_label": "Guardian's Arena",
+              "location_end_label": "Guardian's Arena",
+              "location_start": "Guardian's Arena",
+              "location_end": "Guardian's Arena",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The golem's movements become a blur of stone and fury.",
+              "transition_in_anchors": [
+                "stone pillars",
+                "smashing rubble",
+                "near miss",
+                "narrow escape"
+              ],
+              "consumes_outcome_from": "2:5",
+              "hands_off_to": "2:7",
+              "transition_out_text": "He prepares for one last, desperate dash.",
+              "transition_out_anchors": [
+                "last stand",
+                "sprinting",
+                "final strike",
+                "exhaustion"
+              ],
+              "location_start_id": "LOC_GUARDIAN_S_ARENA",
+              "location_end_id": "LOC_GUARDIAN_S_ARENA"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Arlo delivers the finishing blow while leaping away from a slam attack.",
+              "type": "climax",
+              "outcome": "The Tutorial Guardian is defeated by a final, retreating blow.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_GUARDIAN"
+              ],
+              "location_start_label": "Guardian's Arena",
+              "location_end_label": "Guardian's Arena",
+              "location_start": "Guardian's Arena",
+              "location_end": "Guardian's Arena",
+              "handoff_mode": "combat_disengage",
+              "constraint_state": "free",
+              "transition_in_text": "As the Guardian's fist slams down, Arlo kicks off the stone and strikes mid-air.",
+              "transition_in_anchors": [
+                "mid-air strike",
+                "shattering stone",
+                "victory music",
+                "falling debris"
+              ],
+              "consumes_outcome_from": "2:6",
+              "hands_off_to": "2:8",
+              "transition_out_text": "The golem crumbles into a pile of loot and experience points.",
+              "transition_out_anchors": [
+                "loot pile",
+                "exp bar",
+                "silence",
+                "dust cloud"
+              ],
+              "end_condition_echo": "The Tutorial Guardian is defeated by a final, retreating blow.",
+              "location_start_id": "LOC_GUARDIAN_S_ARENA",
+              "location_end_id": "LOC_GUARDIAN_S_ARENA"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Loot and Logistics",
+          "intent": "Arlo claims the massive loot drop and upgrades his mobility to better facilitate his combat style.",
+          "end_condition": "Arlo purchases the 'Dash' skill book and prepares to enter the main hub city.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Arlo sorts through the massive loot drop from the Guardian.",
+              "type": "development",
+              "outcome": "Arlo finds a significant amount of gold and a rare 'Guardian's Core'.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Guardian's Arena",
+              "location_end_label": "Guardian's Arena",
+              "location_start": "Guardian's Arena",
+              "location_end": "Guardian's Arena",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Arlo dives into the pile of gold coins, his eyes widening at the count.",
+              "transition_in_anchors": [
+                "gold coins",
+                "rare core",
+                "inventory management",
+                "loot notification"
+              ],
+              "consumes_outcome_from": "2:7",
+              "hands_off_to": "2:9",
+              "transition_out_text": "He heads back toward the tutorial outpost to spend his winnings.",
+              "transition_out_anchors": [
+                "outpost path",
+                "heavy pouch",
+                "satisfied stride",
+                "sunset"
+              ],
+              "location_start_id": "LOC_GUARDIAN_S_ARENA",
+              "location_end_id": "LOC_GUARDIAN_S_ARENA"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Arlo visits the Tutorial Shopkeeper to browse skills.",
+              "type": "development",
+              "outcome": "Arlo identifies the 'Dash' skill as the perfect complement to his style.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Tutorial Outpost Shop",
+              "location_end_label": "Tutorial Outpost Shop",
+              "location_start": "Tutorial Outpost Shop",
+              "location_end": "Tutorial Outpost Shop",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "The shopkeeper looks up, surprised to see a newbie with so much gold.",
+              "transition_in_anchors": [
+                "shop counter",
+                "skill books",
+                "gold exchange",
+                "surprised NPC"
+              ],
+              "consumes_outcome_from": "2:8",
+              "hands_off_to": "2:10",
+              "transition_out_text": "He slams the gold onto the counter and points to the blue-covered book.",
+              "transition_out_anchors": [
+                "gold clink",
+                "blue book",
+                "skill acquisition",
+                "purchase"
+              ],
+              "location_start_id": "LOC_TUTORIAL_OUTPOST_SHOP",
+              "location_end_id": "LOC_TUTORIAL_OUTPOST_SHOP"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Arlo learns the Dash skill and heads for the exit to the main world.",
+              "type": "resolution",
+              "outcome": "Arlo purchases the 'Dash' skill book and prepares to enter the main hub city.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Tutorial Outpost Shop",
+              "location_end_label": "Tutorial Exit Portal",
+              "location_start": "Tutorial Outpost Shop",
+              "location_end": "Tutorial Exit Portal",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "The knowledge of the Dash skill flows into Arlo's mind, making his legs feel light.",
+              "transition_in_anchors": [
+                "dash skill",
+                "light legs",
+                "exit portal",
+                "new horizons"
+              ],
+              "consumes_outcome_from": "2:9",
+              "end_condition_echo": "Arlo purchases the 'Dash' skill book and prepares to enter the main hub city.",
+              "location_start_id": "LOC_TUTORIAL_OUTPOST_SHOP",
+              "location_end_id": "LOC_TUTORIAL_EXIT_PORTAL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 3,
+      "title": "The Gilded Scoundrel's Guild",
+      "goal": "Arlo attempts to sell his high-tier tutorial loot in the city of Oakhaven but is intercepted by a guild of 'Min-Maxers' who suspect him of hacking.",
+      "chapter_role": "pressure",
+      "stakes_shift": "From solo survival to navigating player-driven politics and accusations.",
+      "bridge": {
+        "from_prev": "Arlo enters the main hub with a bag full of 'impossible' loot.",
+        "to_next": "To prove he isn't a hacker, Arlo is forced into a 'Trial of the Coward' by the local guild leader."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "steady",
+        "expected_scene_count": 12
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Hub City Hustle",
+          "intent": "Arlo enters Oakhaven and attempts to liquidate his high-tier tutorial loot without raising suspicion.",
+          "end_condition": "Arlo's attempt to sell rare items attracts the attention of the 'Min-Maxers' guild.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Arlo arrives in Oakhaven and is overwhelmed by the scale of the city.",
+              "type": "setup",
+              "outcome": "Arlo finds the market district and begins looking for a high-end merchant.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Oakhaven Main Gate",
+              "location_end_label": "Oakhaven Market District",
+              "location_start": "Oakhaven Main Gate",
+              "location_end": "Oakhaven Market District",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "Arlo steps through the portal and into a city of white stone and bustling players.",
+              "transition_in_anchors": [
+                "white stone",
+                "bustling players",
+                "market stalls",
+                "city noise"
+              ],
+              "hands_off_to": "3:2",
+              "transition_out_text": "He weaves through the crowd, heading for the most expensive-looking stall.",
+              "transition_out_anchors": [
+                "crowd",
+                "expensive stall",
+                "merchant sign",
+                "market weave"
+              ],
+              "location_start_id": "LOC_OAKHAVEN_MAIN_GATE",
+              "location_end_id": "LOC_OAKHAVEN_MARKET_DISTRICT"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Arlo attempts to sell the Guardian's Core to a skeptical merchant.",
+              "type": "development",
+              "outcome": "The merchant's shock at the rare item draws a small crowd.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Oakhaven Market District",
+              "location_end_label": "Oakhaven Market District",
+              "location_start": "Oakhaven Market District",
+              "location_end": "Oakhaven Market District",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Arlo places the glowing Guardian's Core on the merchant's velvet display.",
+              "transition_in_anchors": [
+                "glowing core",
+                "velvet display",
+                "merchant gasp",
+                "gathering crowd"
+              ],
+              "consumes_outcome_from": "3:1",
+              "hands_off_to": "3:3",
+              "transition_out_text": "Whispers start to spread among the nearby players.",
+              "transition_out_anchors": [
+                "whispers",
+                "player stares",
+                "growing tension",
+                "rumors"
+              ],
+              "location_start_id": "LOC_OAKHAVEN_MARKET_DISTRICT",
+              "location_end_id": "LOC_OAKHAVEN_MARKET_DISTRICT"
+            },
+            {
+              "scene_id": 3,
+              "summary": "A group of high-level players begins to question Arlo's origins.",
+              "type": "pressure",
+              "outcome": "Arlo tries to play it cool but realizes he's in over his head.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Oakhaven Market District",
+              "location_end_label": "Oakhaven Market District",
+              "location_start": "Oakhaven Market District",
+              "location_end": "Oakhaven Market District",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "A tall warrior in gleaming plate armor steps forward, blocking Arlo's path.",
+              "transition_in_anchors": [
+                "gleaming plate",
+                "blocking path",
+                "interrogation",
+                "high-level stats"
+              ],
+              "consumes_outcome_from": "3:2",
+              "hands_off_to": "3:4",
+              "transition_out_text": "He spots the 'Min-Maxers' guild emblem on the warrior's cloak.",
+              "transition_out_anchors": [
+                "guild emblem",
+                "Min-Maxers",
+                "cloak",
+                "threatening stance"
+              ],
+              "location_start_id": "LOC_OAKHAVEN_MARKET_DISTRICT",
+              "location_end_id": "LOC_OAKHAVEN_MARKET_DISTRICT"
+            },
+            {
+              "scene_id": 4,
+              "summary": "The Min-Maxers guild members flag Arlo for 'suspicious activity'.",
+              "type": "pressure",
+              "outcome": "Arlo's attempt to sell rare items attracts the attention of the 'Min-Maxers' guild.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "threads": [
+                "THREAD_GUILD_POLITICS"
+              ],
+              "location_start_label": "Oakhaven Market District",
+              "location_end_label": "Oakhaven Market District",
+              "location_start": "Oakhaven Market District",
+              "location_end": "Oakhaven Market District",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "The warrior taps a button on his interface, sending a ping to his guild leaders.",
+              "transition_in_anchors": [
+                "interface ping",
+                "guild alert",
+                "surrounding players",
+                "trap"
+              ],
+              "consumes_outcome_from": "3:3",
+              "hands_off_to": "3:5",
+              "transition_out_text": "More players in matching armor begin to close in on the stall.",
+              "transition_out_anchors": [
+                "matching armor",
+                "closing in",
+                "market stall",
+                "no escape"
+              ],
+              "end_condition_echo": "Arlo's attempt to sell rare items attracts the attention of the 'Min-Maxers' guild.",
+              "location_start_id": "LOC_OAKHAVEN_MARKET_DISTRICT",
+              "location_end_id": "LOC_OAKHAVEN_MARKET_DISTRICT"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Interrogation by the Elite",
+          "intent": "The guild leaders confront Arlo, suspecting him of using third-party hacking software.",
+          "end_condition": "The guild leader, Vex, corners Arlo and demands a live demonstration of his 'skills'.",
+          "scenes": [
+            {
+              "scene_id": 5,
+              "summary": "Vex, the guild leader, arrives and begins the interrogation.",
+              "type": "pressure",
+              "outcome": "Vex accuses Arlo of using a 'damage-multiplier' hack.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_VEX"
+              ],
+              "location_start_label": "Min-Maxer Guild Hall - Entrance",
+              "location_end_label": "Min-Maxer Guild Hall - Interrogation Room",
+              "location_start": "Min-Maxer Guild Hall - Entrance",
+              "location_end": "Min-Maxer Guild Hall - Interrogation Room",
+              "handoff_mode": "escorted_transfer",
+              "constraint_state": "detained",
+              "transition_in_text": "The crowd parts as Vex walks through, her eyes scanning Arlo like a bug under a microscope.",
+              "transition_in_anchors": [
+                "Vex",
+                "microscope gaze",
+                "guild hall",
+                "heavy doors"
+              ],
+              "consumes_outcome_from": "3:4",
+              "hands_off_to": "3:6",
+              "transition_out_text": "She leads him into a private chamber filled with analytical screens.",
+              "transition_out_anchors": [
+                "private chamber",
+                "analytical screens",
+                "dim light",
+                "cold stone"
+              ],
+              "location_start_id": "LOC_MIN_MAXER_GUILD_HALL_ENTRANCE",
+              "location_end_id": "LOC_MIN_MAXER_GUILD_HALL_INTERROGATION_ROOM"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Arlo tries to explain his stats without revealing the overflow.",
+              "type": "development",
+              "outcome": "Vex remains unconvinced, citing the impossibility of his tutorial clear time.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_VEX"
+              ],
+              "location_start_label": "Min-Maxer Guild Hall - Interrogation Room",
+              "location_end_label": "Min-Maxer Guild Hall - Interrogation Room",
+              "location_start": "Min-Maxer Guild Hall - Interrogation Room",
+              "location_end": "Min-Maxer Guild Hall - Interrogation Room",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "detained",
+              "transition_in_text": "Arlo stammers, trying to weave a story about a hidden quest reward.",
+              "transition_in_anchors": [
+                "stammering",
+                "hidden quest",
+                "skeptical look",
+                "data logs"
+              ],
+              "consumes_outcome_from": "3:5",
+              "hands_off_to": "3:7",
+              "transition_out_text": "Vex pulls up a log of the Guardian fight, her brow furrowed.",
+              "transition_out_anchors": [
+                "fight log",
+                "furrowed brow",
+                "combat data",
+                "suspicion"
+              ],
+              "location_start_id": "LOC_MIN_MAXER_GUILD_HALL_INTERROGATION_ROOM",
+              "location_end_id": "LOC_MIN_MAXER_GUILD_HALL_INTERROGATION_ROOM"
+            },
+            {
+              "scene_id": 7,
+              "summary": "The tension rises as the guild threatens to report Arlo to the Admins.",
+              "type": "pressure",
+              "outcome": "Arlo realizes that a report would lead to a manual check and the discovery of the glitch.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_VEX"
+              ],
+              "location_start_label": "Min-Maxer Guild Hall - Interrogation Room",
+              "location_end_label": "Min-Maxer Guild Hall - Interrogation Room",
+              "location_start": "Min-Maxer Guild Hall - Interrogation Room",
+              "location_end": "Min-Maxer Guild Hall - Interrogation Room",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "detained",
+              "transition_in_text": "Vex's finger hovers over the 'Report Player' icon on her HUD.",
+              "transition_in_anchors": [
+                "report icon",
+                "HUD",
+                "hovering finger",
+                "dire consequences"
+              ],
+              "consumes_outcome_from": "3:6",
+              "hands_off_to": "3:8",
+              "transition_out_text": "She stops, a predatory grin spreading across her face.",
+              "transition_out_anchors": [
+                "predatory grin",
+                "sudden idea",
+                "leverage",
+                "negotiation"
+              ],
+              "location_start_id": "LOC_MIN_MAXER_GUILD_HALL_INTERROGATION_ROOM",
+              "location_end_id": "LOC_MIN_MAXER_GUILD_HALL_INTERROGATION_ROOM"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Vex proposes a test instead of an immediate report.",
+              "type": "pressure",
+              "outcome": "The guild leader, Vex, corners Arlo and demands a live demonstration of his 'skills'.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_VEX"
+              ],
+              "location_start_label": "Min-Maxer Guild Hall - Interrogation Room",
+              "location_end_label": "Min-Maxer Guild Hall - Interrogation Room",
+              "location_start": "Min-Maxer Guild Hall - Interrogation Room",
+              "location_end": "Min-Maxer Guild Hall - Interrogation Room",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "detained",
+              "transition_in_text": "Vex leans in close, her voice dropping to a whisper.",
+              "transition_in_anchors": [
+                "whisper",
+                "live demo",
+                "ultimatum",
+                "challenge"
+              ],
+              "consumes_outcome_from": "3:7",
+              "hands_off_to": "3:9",
+              "transition_out_text": "She points toward the training grounds at the back of the hall.",
+              "transition_out_anchors": [
+                "training grounds",
+                "guild hall back",
+                "target dummies",
+                "eyes on him"
+              ],
+              "end_condition_echo": "The guild leader, Vex, corners Arlo and demands a live demonstration of his 'skills'.",
+              "location_start_id": "LOC_MIN_MAXER_GUILD_HALL_INTERROGATION_ROOM",
+              "location_end_id": "LOC_MIN_MAXER_GUILD_HALL_INTERROGATION_ROOM"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Ultimatum",
+          "intent": "Arlo negotiates his survival by accepting a challenge that forces him to reveal his exploit.",
+          "end_condition": "Arlo agrees to the 'Trial of the Coward' to prove his innocence and gain guild protection.",
+          "scenes": [
+            {
+              "scene_id": 9,
+              "summary": "Arlo is taken to the guild's training grounds for the demo.",
+              "type": "development",
+              "outcome": "Arlo demonstrates a single 'retreat-crit' on a dummy, leaving the guild stunned.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_VEX"
+              ],
+              "location_start_label": "Min-Maxer Guild Hall - Training Grounds",
+              "location_end_label": "Min-Maxer Guild Hall - Training Grounds",
+              "location_start": "Min-Maxer Guild Hall - Training Grounds",
+              "location_end": "Min-Maxer Guild Hall - Training Grounds",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "Arlo stands before a reinforced training dummy, his heart racing.",
+              "transition_in_anchors": [
+                "training dummy",
+                "heart racing",
+                "retreat-crit",
+                "stunned guild"
+              ],
+              "consumes_outcome_from": "3:8",
+              "hands_off_to": "3:10",
+              "transition_out_text": "Vex checks the damage numbers, her eyes wide with disbelief.",
+              "transition_out_anchors": [
+                "damage numbers",
+                "disbelief",
+                "re-checking data",
+                "silence"
+              ],
+              "location_start_id": "LOC_MIN_MAXER_GUILD_HALL_TRAINING_GROUNDS",
+              "location_end_id": "LOC_MIN_MAXER_GUILD_HALL_TRAINING_GROUNDS"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Vex realizes Arlo isn't hacking, but has found a fundamental game flaw.",
+              "type": "development",
+              "outcome": "Vex sees the potential of Arlo's 'Coward' style for clearing high-level content.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_VEX"
+              ],
+              "location_start_label": "Min-Maxer Guild Hall - Training Grounds",
+              "location_end_label": "Min-Maxer Guild Hall - Training Grounds",
+              "location_start": "Min-Maxer Guild Hall - Training Grounds",
+              "location_end": "Min-Maxer Guild Hall - Training Grounds",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "Vex walks around the dummy, inspecting the point of impact.",
+              "transition_in_anchors": [
+                "dummy inspection",
+                "impact point",
+                "game flaw",
+                "potential"
+              ],
+              "consumes_outcome_from": "3:9",
+              "hands_off_to": "3:11",
+              "transition_out_text": "She turns back to Arlo, her expression shifting from suspicion to greed.",
+              "transition_out_anchors": [
+                "greed",
+                "expression shift",
+                "new plan",
+                "opportunity"
+              ],
+              "location_start_id": "LOC_MIN_MAXER_GUILD_HALL_TRAINING_GROUNDS",
+              "location_end_id": "LOC_MIN_MAXER_GUILD_HALL_TRAINING_GROUNDS"
+            },
+            {
+              "scene_id": 11,
+              "summary": "Arlo negotiates for guild protection in exchange for his 'services'.",
+              "type": "development",
+              "outcome": "Arlo secures a deal that keeps him safe from reports while he works for the guild.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_VEX"
+              ],
+              "location_start_label": "Min-Maxer Guild Hall - Training Grounds",
+              "location_end_label": "Min-Maxer Guild Hall - Training Grounds",
+              "location_start": "Min-Maxer Guild Hall - Training Grounds",
+              "location_end": "Min-Maxer Guild Hall - Training Grounds",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "Arlo crosses his arms, finally finding his footing in the conversation.",
+              "transition_in_anchors": [
+                "crossed arms",
+                "negotiation",
+                "guild protection",
+                "service deal"
+              ],
+              "consumes_outcome_from": "3:10",
+              "hands_off_to": "3:12",
+              "transition_out_text": "Vex nods, calling over her best scout to keep an eye on him.",
+              "transition_out_anchors": [
+                "nod of agreement",
+                "scout call",
+                "watching eye",
+                "contract"
+              ],
+              "location_start_id": "LOC_MIN_MAXER_GUILD_HALL_TRAINING_GROUNDS",
+              "location_end_id": "LOC_MIN_MAXER_GUILD_HALL_TRAINING_GROUNDS"
+            },
+            {
+              "scene_id": 12,
+              "summary": "The 'Trial of the Coward' is officially set.",
+              "type": "transition",
+              "outcome": "Arlo agrees to the 'Trial of the Coward' to prove his innocence and gain guild protection.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_VEX"
+              ],
+              "location_start_label": "Min-Maxer Guild Hall - Training Grounds",
+              "location_end_label": "Oakhaven Market Square",
+              "location_start": "Min-Maxer Guild Hall - Training Grounds",
+              "location_end": "Oakhaven Market Square",
+              "handoff_mode": "aftermath_relocation",
+              "constraint_state": "free",
+              "transition_in_text": "The deal is struck with a digital handshake and a binding contract.",
+              "transition_in_anchors": [
+                "digital handshake",
+                "binding contract",
+                "trial of the coward",
+                "protection"
+              ],
+              "consumes_outcome_from": "3:11",
+              "end_condition_echo": "Arlo agrees to the 'Trial of the Coward' to prove his innocence and gain guild protection.",
+              "location_start_id": "LOC_MIN_MAXER_GUILD_HALL_TRAINING_GROUNDS",
+              "location_end_id": "LOC_OAKHAVEN_MARKET_SQUARE"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 4,
+      "title": "The Trial of the Yellow Streak",
+      "goal": "Arlo must clear a low-level dungeon while never facing an enemy head-on to satisfy the guild's curiosity and earn their protection.",
+      "chapter_role": "trial",
+      "stakes_shift": "From being a social pariah to gaining a reluctant, confused ally in the guild's scout, Jax.",
+      "bridge": {
+        "from_prev": "The guild leader sets a 'no-frontal-damage' challenge.",
+        "to_next": "The dungeon run uncovers a hidden 'System Glitch' zone that only Arlo can navigate."
+      },
+      "pacing": {
+        "intensity": 2,
+        "tempo": "slow_burn",
+        "expected_scene_count": 11
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Dungeon Entrance",
+          "intent": "Set the scene for the dungeon trial and introduce Jax, the guild's skeptical scout.",
+          "end_condition": "Arlo and Jax enter the Sunken Crypts to begin the no-frontal-damage challenge.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Arlo meets Jax at the entrance of the Sunken Crypts.",
+              "type": "setup",
+              "outcome": "Arlo and Jax establish a prickly working relationship.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "Sunken Crypts Entrance",
+              "location_end_label": "Sunken Crypts Entrance",
+              "location_start": "Sunken Crypts Entrance",
+              "location_end": "Sunken Crypts Entrance",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "Arlo finds Jax leaning against a mossy pillar at the dungeon's mouth.",
+              "transition_in_anchors": [
+                "Jax",
+                "mossy pillar",
+                "dungeon mouth",
+                "skeptical scout"
+              ],
+              "hands_off_to": "4:2",
+              "transition_out_text": "Jax tosses Arlo a basic dungeon map with a scoff.",
+              "transition_out_anchors": [
+                "dungeon map",
+                "scoff",
+                "low-level gear",
+                "preparation"
+              ],
+              "location_start_id": "LOC_SUNKEN_CRYPTS_ENTRANCE",
+              "location_end_id": "LOC_SUNKEN_CRYPTS_ENTRANCE"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Jax explains the rules of the trial: no damage taken from the front, no damage dealt to the front.",
+              "type": "development",
+              "outcome": "Arlo understands the strict constraints of the challenge.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "Sunken Crypts Entrance",
+              "location_end_label": "Sunken Crypts Entrance",
+              "location_start": "Sunken Crypts Entrance",
+              "location_end": "Sunken Crypts Entrance",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Jax points to a recording crystal floating above them.",
+              "transition_in_anchors": [
+                "recording crystal",
+                "trial rules",
+                "no frontal damage",
+                "strict constraints"
+              ],
+              "consumes_outcome_from": "4:1",
+              "hands_off_to": "4:3",
+              "transition_out_text": "He leads Arlo toward the dark, sloping stairs of the crypt.",
+              "transition_out_anchors": [
+                "sloping stairs",
+                "darkness",
+                "crypt entrance",
+                "first step"
+              ],
+              "location_start_id": "LOC_SUNKEN_CRYPTS_ENTRANCE",
+              "location_end_id": "LOC_SUNKEN_CRYPTS_ENTRANCE"
+            },
+            {
+              "scene_id": 3,
+              "summary": "They cross the threshold into the dungeon.",
+              "type": "transition",
+              "outcome": "Arlo and Jax enter the Sunken Crypts to begin the no-frontal-damage challenge.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "Sunken Crypts Entrance",
+              "location_end_label": "Sunken Crypts - First Chamber",
+              "location_start": "Sunken Crypts Entrance",
+              "location_end": "Sunken Crypts - First Chamber",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "The temperature drops as the heavy iron gate rattles shut behind them.",
+              "transition_in_anchors": [
+                "iron gate",
+                "temperature drop",
+                "echoing footsteps",
+                "dungeon atmosphere"
+              ],
+              "consumes_outcome_from": "4:2",
+              "hands_off_to": "4:4",
+              "transition_out_text": "The first skeletons begin to stir in the shadows.",
+              "transition_out_anchors": [
+                "skeletons",
+                "stirring shadows",
+                "bone rattle",
+                "combat start"
+              ],
+              "end_condition_echo": "Arlo and Jax enter the Sunken Crypts to begin the no-frontal-damage challenge.",
+              "location_start_id": "LOC_SUNKEN_CRYPTS_ENTRANCE",
+              "location_end_id": "LOC_SUNKEN_CRYPTS_FIRST_CHAMBER"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Reverse Gauntlet",
+          "intent": "Arlo clears the dungeon using his 'Yellow Streak' style, confusing and impressing Jax.",
+          "end_condition": "The final room of the crypt is cleared without Arlo ever facing an enemy head-on.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Arlo clears the first room by sprinting away from skeletons and kicking back.",
+              "type": "action",
+              "outcome": "Jax is baffled by the effectiveness of the 'cowardly' tactic.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "Sunken Crypts - First Chamber",
+              "location_end_label": "Sunken Crypts - First Chamber",
+              "location_start": "Sunken Crypts - First Chamber",
+              "location_end": "Sunken Crypts - First Chamber",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Arlo lets out a high-pitched yelp and bolts, his heels clipping the skeletons' ribs as he goes.",
+              "transition_in_anchors": [
+                "yelp",
+                "bolting",
+                "heel clip",
+                "baffled scout"
+              ],
+              "consumes_outcome_from": "4:3",
+              "hands_off_to": "4:5",
+              "transition_out_text": "The skeletons crumble into dust without ever landing a hit.",
+              "transition_out_anchors": [
+                "bone dust",
+                "no hits",
+                "room clear",
+                "stunned silence"
+              ],
+              "location_start_id": "LOC_SUNKEN_CRYPTS_FIRST_CHAMBER",
+              "location_end_id": "LOC_SUNKEN_CRYPTS_FIRST_CHAMBER"
+            },
+            {
+              "scene_id": 5,
+              "summary": "They encounter a group of undead archers.",
+              "type": "action",
+              "outcome": "Arlo uses 'Dash' to weave through arrows while maintaining his 'retreat' status.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "Sunken Crypts - Hall of Arrows",
+              "location_end_label": "Sunken Crypts - Hall of Arrows",
+              "location_start": "Sunken Crypts - Hall of Arrows",
+              "location_end": "Sunken Crypts - Hall of Arrows",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Arrows whistle through the air, but Arlo is already a blur of motion, moving in a zigzag away from the line of fire.",
+              "transition_in_anchors": [
+                "whistling arrows",
+                "zigzag",
+                "dash motion",
+                "retreat status"
+              ],
+              "consumes_outcome_from": "4:4",
+              "hands_off_to": "4:6",
+              "transition_out_text": "He strikes the last archer with a blind over-the-shoulder toss.",
+              "transition_out_anchors": [
+                "over-the-shoulder",
+                "blind toss",
+                "archer kill",
+                "efficiency"
+              ],
+              "location_start_id": "LOC_SUNKEN_CRYPTS_HALL_OF_ARROWS",
+              "location_end_id": "LOC_SUNKEN_CRYPTS_HALL_OF_ARROWS"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Jax starts to provide tactical advice, helping Arlo optimize his pathing.",
+              "type": "development",
+              "outcome": "Arlo's clear speed increases as he and Jax begin to sync up.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "Sunken Crypts - Middle Corridor",
+              "location_end_label": "Sunken Crypts - Middle Corridor",
+              "location_start": "Sunken Crypts - Middle Corridor",
+              "location_end": "Sunken Crypts - Middle Corridor",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Jax points out a narrow ledge that Arlo can use to bait the next pack of mobs.",
+              "transition_in_anchors": [
+                "narrow ledge",
+                "baiting mobs",
+                "tactical advice",
+                "pathing"
+              ],
+              "consumes_outcome_from": "4:5",
+              "hands_off_to": "4:7",
+              "transition_out_text": "Arlo nods, realizing the scout's eye is a massive asset.",
+              "transition_out_anchors": [
+                "nod of realization",
+                "scout's eye",
+                "asset",
+                "teamwork"
+              ],
+              "location_start_id": "LOC_SUNKEN_CRYPTS_MIDDLE_CORRIDOR",
+              "location_end_id": "LOC_SUNKEN_CRYPTS_MIDDLE_CORRIDOR"
+            },
+            {
+              "scene_id": 7,
+              "summary": "They reach the Crypt Lord's chamber.",
+              "type": "action",
+              "outcome": "Arlo prepares to face the dungeon boss using his unique style.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "Sunken Crypts - Boss Chamber",
+              "location_end_label": "Sunken Crypts - Boss Chamber",
+              "location_start": "Sunken Crypts - Boss Chamber",
+              "location_end": "Sunken Crypts - Boss Chamber",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The Crypt Lord rises from its sarcophagus, a massive skeletal knight with a heavy shield.",
+              "transition_in_anchors": [
+                "Crypt Lord",
+                "sarcophagus",
+                "skeletal knight",
+                "heavy shield"
+              ],
+              "consumes_outcome_from": "4:6",
+              "hands_off_to": "4:8",
+              "transition_out_text": "Arlo turns his back to the boss and starts running in circles.",
+              "transition_out_anchors": [
+                "back to boss",
+                "running circles",
+                "kiting",
+                "boss aggro"
+              ],
+              "location_start_id": "LOC_SUNKEN_CRYPTS_BOSS_CHAMBER",
+              "location_end_id": "LOC_SUNKEN_CRYPTS_BOSS_CHAMBER"
+            },
+            {
+              "scene_id": 8,
+              "summary": "The Crypt Lord is defeated after a series of high-speed retreats.",
+              "type": "climax",
+              "outcome": "The final room of the crypt is cleared without Arlo ever facing an enemy head-on.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "Sunken Crypts - Boss Chamber",
+              "location_end_label": "Sunken Crypts - Boss Chamber",
+              "location_start": "Sunken Crypts - Boss Chamber",
+              "location_end": "Sunken Crypts - Boss Chamber",
+              "handoff_mode": "combat_disengage",
+              "constraint_state": "free",
+              "transition_in_text": "The Crypt Lord shatters, its shield falling to the floor with a deafening clang.",
+              "transition_in_anchors": [
+                "shattering boss",
+                "shield clang",
+                "victory",
+                "room clear"
+              ],
+              "consumes_outcome_from": "4:7",
+              "hands_off_to": "4:9",
+              "transition_out_text": "The recording crystal chimes, signaling the end of the trial.",
+              "transition_out_anchors": [
+                "crystal chime",
+                "trial end",
+                "recording complete",
+                "silence"
+              ],
+              "end_condition_echo": "The final room of the crypt is cleared without Arlo ever facing an enemy head-on.",
+              "location_start_id": "LOC_SUNKEN_CRYPTS_BOSS_CHAMBER",
+              "location_end_id": "LOC_SUNKEN_CRYPTS_BOSS_CHAMBER"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Glitch Discovery",
+          "intent": "The duo finds an anomaly in the dungeon that leads to a hidden, unstable zone.",
+          "end_condition": "Arlo identifies the entrance to the 'System Glitch' zone at the back of the boss room.",
+          "scenes": [
+            {
+              "scene_id": 9,
+              "summary": "Jax notices a wall that isn't rendering correctly behind the boss's throne.",
+              "type": "mystery",
+              "outcome": "They discover a visual anomaly that shouldn't exist in a standard dungeon.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "Sunken Crypts - Boss Chamber",
+              "location_end_label": "Sunken Crypts - Boss Chamber",
+              "location_start": "Sunken Crypts - Boss Chamber",
+              "location_end": "Sunken Crypts - Boss Chamber",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Jax squint at the wall, his scout's intuition pinging an error.",
+              "transition_in_anchors": [
+                "flickering wall",
+                "rendering error",
+                "scout intuition",
+                "anomaly"
+              ],
+              "consumes_outcome_from": "4:8",
+              "hands_off_to": "4:10",
+              "transition_out_text": "Arlo reaches out to touch the flickering texture.",
+              "transition_out_anchors": [
+                "flickering texture",
+                "touch",
+                "static",
+                "glitch"
+              ],
+              "location_start_id": "LOC_SUNKEN_CRYPTS_BOSS_CHAMBER",
+              "location_end_id": "LOC_SUNKEN_CRYPTS_BOSS_CHAMBER"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Arlo's 'Overflow' status reacts with the glitching wall.",
+              "type": "mystery",
+              "outcome": "The wall opens, revealing a path into a distorted, untextured landscape.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "threads": [
+                "THREAD_LUCK_OVERFLOW"
+              ],
+              "location_start_label": "Sunken Crypts - Boss Chamber",
+              "location_end_label": "The Glitch Zone Entrance",
+              "location_start": "Sunken Crypts - Boss Chamber",
+              "location_end": "The Glitch Zone Entrance",
+              "handoff_mode": "hard_cut",
+              "constraint_state": "restricted",
+              "transition_in_text": "As Arlo's hand makes contact, the static spreads, turning the stone into a grid of raw code.",
+              "transition_in_anchors": [
+                "raw code",
+                "stone grid",
+                "static spread",
+                "opening path"
+              ],
+              "consumes_outcome_from": "4:9",
+              "hands_off_to": "4:11",
+              "transition_out_text": "The air beyond the wall smells like ozone and burnt plastic.",
+              "transition_out_anchors": [
+                "ozone smell",
+                "burnt plastic",
+                "distorted landscape",
+                "untextured zone"
+              ],
+              "location_start_id": "LOC_SUNKEN_CRYPTS_BOSS_CHAMBER",
+              "location_end_id": "LOC_THE_GLITCH_ZONE_ENTRANCE"
+            },
+            {
+              "scene_id": 11,
+              "summary": "They confirm this is a 'System Glitch' zone.",
+              "type": "mystery",
+              "outcome": "Arlo identifies the entrance to the 'System Glitch' zone at the back of the boss room.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "The Glitch Zone Entrance",
+              "location_end_label": "The Glitch Zone Entrance",
+              "location_start": "The Glitch Zone Entrance",
+              "location_end": "The Glitch Zone Entrance",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Arlo looks back at the crypt, then forward into the neon-streaked abyss.",
+              "transition_in_anchors": [
+                "neon streaks",
+                "abyss",
+                "glitch zone",
+                "identification"
+              ],
+              "consumes_outcome_from": "4:10",
+              "end_condition_echo": "Arlo identifies the entrance to the 'System Glitch' zone at the back of the boss room.",
+              "location_start_id": "LOC_THE_GLITCH_ZONE_ENTRANCE",
+              "location_end_id": "LOC_THE_GLITCH_ZONE_ENTRANCE"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 5,
+      "title": "Patch Notes and Panic",
+      "goal": "A world-wide announcement declares an emergency maintenance patch to 'fix combat exploits'; Arlo must reach the Glitch Zone's heart to lock in his 'Coward' status as a permanent Title before the server resets.",
+      "chapter_role": "reversal",
+      "stakes_shift": "From a temporary exploit to a permanent, system-recognized class identity.",
+      "bridge": {
+        "from_prev": "The System detects the 'Luck' overflow and schedules a fix.",
+        "to_next": "Arlo and Jax must race through a high-level territory to reach the 'Source Code' altar."
+      },
+      "pacing": {
+        "intensity": 5,
+        "tempo": "rush",
+        "expected_scene_count": 12
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Red Text Warning",
+          "intent": "The System announces a patch to fix exploits, putting Arlo's existence at risk.",
+          "end_condition": "The emergency maintenance countdown begins, giving Arlo one hour to reach the Source Code altar.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "A massive red announcement fills the sky of Aethelgard.",
+              "type": "inciting_incident",
+              "outcome": "Arlo realizes the system is specifically targeting his 'Luck' overflow.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "threads": [
+                "THREAD_PATCH_COUNTDOWN"
+              ],
+              "location_start_label": "Oakhaven Market Square",
+              "location_end_label": "Oakhaven Market Square",
+              "location_start": "Oakhaven Market Square",
+              "location_end": "Oakhaven Market Square",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Arlo and Jax emerge from the crypt to find the sky burning with crimson text.",
+              "transition_in_anchors": [
+                "crimson text",
+                "burning sky",
+                "emergency maintenance",
+                "system alert"
+              ],
+              "hands_off_to": "5:2",
+              "transition_out_text": "The countdown timer appears in the corner of everyone's vision.",
+              "transition_out_anchors": [
+                "countdown timer",
+                "HUD",
+                "panic",
+                "ticking clock"
+              ],
+              "location_start_id": "LOC_OAKHAVEN_MARKET_SQUARE",
+              "location_end_id": "LOC_OAKHAVEN_MARKET_SQUARE"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Arlo receives a private system notification about 'account stabilization'.",
+              "type": "pressure",
+              "outcome": "Arlo learns that the patch will reset his stats to default values.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "threads": [
+                "THREAD_LUCK_OVERFLOW"
+              ],
+              "location_start_label": "Oakhaven Market Square",
+              "location_end_label": "Oakhaven Market Square",
+              "location_start": "Oakhaven Market Square",
+              "location_end": "Oakhaven Market Square",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "A private window pings, its text flickering as if struggling to stay coherent.",
+              "transition_in_anchors": [
+                "private window",
+                "account stabilization",
+                "stat reset",
+                "default values"
+              ],
+              "consumes_outcome_from": "5:1",
+              "hands_off_to": "5:3",
+              "transition_out_text": "He looks at Jax, who is already checking the map for the fastest route back to the glitch.",
+              "transition_out_anchors": [
+                "fastest route",
+                "map check",
+                "urgency",
+                "decision"
+              ],
+              "location_start_id": "LOC_OAKHAVEN_MARKET_SQUARE",
+              "location_end_id": "LOC_OAKHAVEN_MARKET_SQUARE"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Jax identifies the Source Code altar as the only way to save Arlo's build.",
+              "type": "setup",
+              "outcome": "The emergency maintenance countdown begins, giving Arlo one hour to reach the Source Code altar.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "Oakhaven Market Square",
+              "location_end_label": "Oakhaven Main Gate",
+              "location_start": "Oakhaven Market Square",
+              "location_end": "Oakhaven Main Gate",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "fleeing",
+              "transition_in_text": "They sprint toward the city gates, dodging confused players and guards.",
+              "transition_in_anchors": [
+                "city gates",
+                "confused players",
+                "guards",
+                "sprinting"
+              ],
+              "consumes_outcome_from": "5:2",
+              "hands_off_to": "5:4",
+              "transition_out_text": "The timer hits 59:59 as they cross the threshold into the wild.",
+              "transition_out_anchors": [
+                "timer start",
+                "threshold",
+                "wilderness",
+                "one hour"
+              ],
+              "end_condition_echo": "The emergency maintenance countdown begins, giving Arlo one hour to reach the Source Code altar.",
+              "location_start_id": "LOC_OAKHAVEN_MARKET_SQUARE",
+              "location_end_id": "LOC_OAKHAVEN_MAIN_GATE"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The High-Level Shortcut",
+          "intent": "Arlo and Jax must navigate a dangerous high-level map to reach the altar before the server reset.",
+          "end_condition": "They successfully cross the Deadlands, narrowly avoiding lethal high-level mobs.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "They enter the Deadlands, a zone far above their current level.",
+              "type": "action",
+              "outcome": "Arlo must use his 'Dash' and 'Crit Hit & Run' to keep high-level mobs at bay.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "The Deadlands - Entrance",
+              "location_end_label": "The Deadlands - Entrance",
+              "location_start": "The Deadlands - Entrance",
+              "location_end": "The Deadlands - Entrance",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The lush forest gives way to grey ash and skeletal trees.",
+              "transition_in_anchors": [
+                "grey ash",
+                "skeletal trees",
+                "high-level mobs",
+                "deadlands"
+              ],
+              "consumes_outcome_from": "5:3",
+              "hands_off_to": "5:5",
+              "transition_out_text": "A level 80 Wraith screams and dives toward them.",
+              "transition_out_anchors": [
+                "Wraith",
+                "scream",
+                "dive",
+                "level 80"
+              ],
+              "location_start_id": "LOC_THE_DEADLANDS_ENTRANCE",
+              "location_end_id": "LOC_THE_DEADLANDS_ENTRANCE"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Arlo executes a series of perfect retreats to stagger a Wraith.",
+              "type": "action",
+              "outcome": "Arlo realizes his crits can bypass the level-gap defense of high-level mobs.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "The Deadlands",
+              "location_end_label": "The Deadlands",
+              "location_start": "The Deadlands",
+              "location_end": "The Deadlands",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Arlo slides under the Wraith's claws, kicking up a cloud of ash as he strikes its back.",
+              "transition_in_anchors": [
+                "ash cloud",
+                "wraith claws",
+                "stagger",
+                "level-gap bypass"
+              ],
+              "consumes_outcome_from": "5:4",
+              "hands_off_to": "5:6",
+              "transition_out_text": "Jax uses his scout abilities to mask their trail as they keep moving.",
+              "transition_out_anchors": [
+                "masking trail",
+                "scout abilities",
+                "movement",
+                "stealth"
+              ],
+              "location_start_id": "LOC_THE_DEADLANDS",
+              "location_end_id": "LOC_THE_DEADLANDS"
+            },
+            {
+              "scene_id": 6,
+              "summary": "They are chased by a pack of Bone Hounds.",
+              "type": "action",
+              "outcome": "Arlo uses the 'Dash' skill to lead the hounds into a narrow canyon where he can crit them all.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "The Deadlands - Ash Canyon",
+              "location_end_label": "The Deadlands - Ash Canyon",
+              "location_start": "The Deadlands - Ash Canyon",
+              "location_end": "The Deadlands - Ash Canyon",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "The baying of hounds echoes through the canyon walls.",
+              "transition_in_anchors": [
+                "bone hounds",
+                "baying",
+                "canyon walls",
+                "chase"
+              ],
+              "consumes_outcome_from": "5:5",
+              "hands_off_to": "5:7",
+              "transition_out_text": "He turns the corner and prepares to strike while jumping backward.",
+              "transition_out_anchors": [
+                "corner turn",
+                "backward jump",
+                "trap",
+                "combat prep"
+              ],
+              "location_start_id": "LOC_THE_DEADLANDS_ASH_CANYON",
+              "location_end_id": "LOC_THE_DEADLANDS_ASH_CANYON"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Arlo clears the hounds and they reach the center of the Deadlands.",
+              "type": "action",
+              "outcome": "The timer hits 30 minutes; they are halfway there.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "The Deadlands - Center",
+              "location_end_label": "The Deadlands - Center",
+              "location_start": "The Deadlands - Center",
+              "location_end": "The Deadlands - Center",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "Arlo wipes sweat from his brow, his stamina bar blinking yellow.",
+              "transition_in_anchors": [
+                "sweat",
+                "stamina bar",
+                "30 minutes",
+                "halfway"
+              ],
+              "consumes_outcome_from": "5:6",
+              "hands_off_to": "5:8",
+              "transition_out_text": "Jax points to the shimmering distortion on the horizon.",
+              "transition_out_anchors": [
+                "shimmering distortion",
+                "horizon",
+                "glitch zone",
+                "goal"
+              ],
+              "location_start_id": "LOC_THE_DEADLANDS_CENTER",
+              "location_end_id": "LOC_THE_DEADLANDS_CENTER"
+            },
+            {
+              "scene_id": 8,
+              "summary": "They make a final sprint through the last pack of mobs.",
+              "type": "action",
+              "outcome": "They successfully cross the Deadlands, narrowly avoiding lethal high-level mobs.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "The Deadlands - Edge",
+              "location_end_label": "The Glitch Zone Threshold",
+              "location_start": "The Deadlands - Edge",
+              "location_end": "The Glitch Zone Threshold",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "With one last burst of speed, they dive into the flickering boundary of the glitch zone.",
+              "transition_in_anchors": [
+                "speed burst",
+                "flickering boundary",
+                "narrow escape",
+                "safe zone"
+              ],
+              "consumes_outcome_from": "5:7",
+              "hands_off_to": "5:9",
+              "transition_out_text": "The sounds of the Deadlands fade, replaced by the hum of broken code.",
+              "transition_out_anchors": [
+                "fading sounds",
+                "broken code",
+                "hum",
+                "glitch atmosphere"
+              ],
+              "end_condition_echo": "They successfully cross the Deadlands, narrowly avoiding lethal high-level mobs.",
+              "location_start_id": "LOC_THE_DEADLANDS_EDGE",
+              "location_end_id": "LOC_THE_GLITCH_ZONE_THRESHOLD"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Glitch Zone Threshold",
+          "intent": "They arrive at the heart of the glitch zone where the laws of the game are breaking down.",
+          "end_condition": "Arlo and Jax reach the entrance of the Source Code chamber as the countdown hits ten minutes.",
+          "scenes": [
+            {
+              "scene_id": 9,
+              "summary": "They navigate the shifting geometry of the glitch zone.",
+              "type": "development",
+              "outcome": "Arlo finds that his 'Overflow' status allows him to walk on non-solid textures.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "The Glitch Zone Threshold",
+              "location_end_label": "The Glitch Zone - Shifting Plains",
+              "location_start": "The Glitch Zone Threshold",
+              "location_end": "The Glitch Zone - Shifting Plains",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "The ground beneath them flickers between stone and a wireframe grid.",
+              "transition_in_anchors": [
+                "wireframe grid",
+                "shifting geometry",
+                "non-solid textures",
+                "glitch physics"
+              ],
+              "consumes_outcome_from": "5:8",
+              "hands_off_to": "5:10",
+              "transition_out_text": "He grabs Jax's hand and pulls him across a gap that shouldn't be crossable.",
+              "transition_out_anchors": [
+                "gap crossing",
+                "hand grab",
+                "impossible physics",
+                "trust"
+              ],
+              "location_start_id": "LOC_THE_GLITCH_ZONE_THRESHOLD",
+              "location_end_id": "LOC_THE_GLITCH_ZONE_SHIFTING_PLAINS"
+            },
+            {
+              "scene_id": 10,
+              "summary": "They encounter 'Null' mobs that absorb standard damage.",
+              "type": "action",
+              "outcome": "Arlo's 'Overflow' crits are the only thing that can damage the Null mobs.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "The Glitch Zone - Shifting Plains",
+              "location_end_label": "The Glitch Zone - Shifting Plains",
+              "location_start": "The Glitch Zone - Shifting Plains",
+              "location_end": "The Glitch Zone - Shifting Plains",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Shadowy figures with missing faces drift toward them, their bodies made of static.",
+              "transition_in_anchors": [
+                "null mobs",
+                "static bodies",
+                "standard damage",
+                "overflow crits"
+              ],
+              "consumes_outcome_from": "5:9",
+              "hands_off_to": "5:11",
+              "transition_out_text": "Arlo kicks through the static, watching as the Null mobs dissolve into raw data.",
+              "transition_out_anchors": [
+                "static kick",
+                "raw data",
+                "dissolve",
+                "combat success"
+              ],
+              "location_start_id": "LOC_THE_GLITCH_ZONE_SHIFTING_PLAINS",
+              "location_end_id": "LOC_THE_GLITCH_ZONE_SHIFTING_PLAINS"
+            },
+            {
+              "scene_id": 11,
+              "summary": "The countdown hits 15 minutes as they reach the final corridor.",
+              "type": "pressure",
+              "outcome": "They realize the Sentinel is guarding the Source Code altar.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "The Glitch Zone - Final Corridor",
+              "location_end_label": "The Glitch Zone - Final Corridor",
+              "location_start": "The Glitch Zone - Final Corridor",
+              "location_end": "The Glitch Zone - Final Corridor",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "The walls here are covered in scrolling lines of green text.",
+              "transition_in_anchors": [
+                "green text",
+                "scrolling lines",
+                "15 minutes",
+                "final corridor"
+              ],
+              "consumes_outcome_from": "5:10",
+              "hands_off_to": "5:12",
+              "transition_out_text": "A massive shadow looms over the chamber entrance.",
+              "transition_out_anchors": [
+                "massive shadow",
+                "chamber entrance",
+                "Sentinel presence",
+                "dread"
+              ],
+              "location_start_id": "LOC_THE_GLITCH_ZONE_FINAL_CORRIDOR",
+              "location_end_id": "LOC_THE_GLITCH_ZONE_FINAL_CORRIDOR"
+            },
+            {
+              "scene_id": 12,
+              "summary": "They arrive at the Source Code chamber.",
+              "type": "development",
+              "outcome": "Arlo and Jax reach the entrance of the Source Code chamber as the countdown hits ten minutes.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "The Glitch Zone - Final Corridor",
+              "location_end_label": "Source Code Chamber Entrance",
+              "location_start": "The Glitch Zone - Final Corridor",
+              "location_end": "Source Code Chamber Entrance",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "restricted",
+              "transition_in_text": "They skid to a halt as the final set of doors comes into view.",
+              "transition_in_anchors": [
+                "final doors",
+                "skid",
+                "ten minutes",
+                "chamber entrance"
+              ],
+              "consumes_outcome_from": "5:11",
+              "end_condition_echo": "Arlo and Jax reach the entrance of the Source Code chamber as the countdown hits ten minutes.",
+              "location_start_id": "LOC_THE_GLITCH_ZONE_FINAL_CORRIDOR",
+              "location_end_id": "LOC_SOURCE_CODE_CHAMBER_ENTRANCE"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 6,
+      "title": "Running for His Life (Literally)",
+      "goal": "Arlo faces the Zone Sentinel\u2014a boss designed to punish runners\u2014and must use his 'Crit Hit & Run' style to survive long enough for the patch timer to expire.",
+      "chapter_role": "confrontation",
+      "stakes_shift": "From being fixed/deleted to becoming a 'Legacy Bug'\u2014an unpatchable anomaly.",
+      "bridge": {
+        "from_prev": "The Sentinel blocks the path to the Altar.",
+        "to_next": "The Altar is activated as the world fades to white for the 'update'."
+      },
+      "pacing": {
+        "intensity": 5,
+        "tempo": "rush",
+        "expected_scene_count": 14
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Sentinel Awakens",
+          "intent": "The final boss of the glitch zone engages Arlo, specifically designed to counter mobile players.",
+          "end_condition": "The Zone Sentinel initiates its 'anti-runner' pursuit protocol.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "The Zone Sentinel activates and identifies Arlo as a 'Critical Error'.",
+              "type": "action",
+              "outcome": "The Sentinel begins its attack, using gravity-based skills to slow Arlo down.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_SENTINEL"
+              ],
+              "location_start_label": "Source Code Chamber",
+              "location_end_label": "Source Code Chamber",
+              "location_start": "Source Code Chamber",
+              "location_end": "Source Code Chamber",
+              "handoff_mode": "combat_disengage",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The Sentinel's eyes flare with white light, its voice a mechanical roar of 'ERROR DETECTED'.",
+              "transition_in_anchors": [
+                "white light",
+                "mechanical roar",
+                "gravity skills",
+                "critical error"
+              ],
+              "hands_off_to": "6:2",
+              "transition_out_text": "The ground becomes heavy, pulling at Arlo's boots.",
+              "transition_out_anchors": [
+                "heavy ground",
+                "pulling boots",
+                "gravity field",
+                "slowdown"
+              ],
+              "location_start_id": "LOC_SOURCE_CODE_CHAMBER",
+              "location_end_id": "LOC_SOURCE_CODE_CHAMBER"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Arlo struggles to move in the gravity field.",
+              "type": "action",
+              "outcome": "Arlo uses 'Dash' to break the gravity lock momentarily.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_SENTINEL"
+              ],
+              "location_start_label": "Source Code Chamber",
+              "location_end_label": "Source Code Chamber",
+              "location_start": "Source Code Chamber",
+              "location_end": "Source Code Chamber",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "He grits his teeth, forcing his legs to move against the crushing weight.",
+              "transition_in_anchors": [
+                "gritted teeth",
+                "crushing weight",
+                "dash break",
+                "gravity lock"
+              ],
+              "consumes_outcome_from": "6:1",
+              "hands_off_to": "6:3",
+              "transition_out_text": "He manages to leap away just as the Sentinel's fist craters the floor.",
+              "transition_out_anchors": [
+                "leap away",
+                "fist crater",
+                "floor smash",
+                "near miss"
+              ],
+              "location_start_id": "LOC_SOURCE_CODE_CHAMBER",
+              "location_end_id": "LOC_SOURCE_CODE_CHAMBER"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Jax provides distractions to help Arlo find an opening.",
+              "type": "action",
+              "outcome": "Jax's attacks do no damage but manage to shift the Sentinel's aggro.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX",
+                "CHAR_SENTINEL"
+              ],
+              "location_start_label": "Source Code Chamber",
+              "location_end_label": "Source Code Chamber",
+              "location_start": "Source Code Chamber",
+              "location_end": "Source Code Chamber",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Jax fires a series of smoke arrows, obscuring the Sentinel's vision.",
+              "transition_in_anchors": [
+                "smoke arrows",
+                "obscured vision",
+                "aggro shift",
+                "distraction"
+              ],
+              "consumes_outcome_from": "6:2",
+              "hands_off_to": "6:4",
+              "transition_out_text": "The Sentinel turns toward the smoke, its scanners whirring.",
+              "transition_out_anchors": [
+                "scanners whirring",
+                "turning",
+                "smoke cloud",
+                "opening"
+              ],
+              "location_start_id": "LOC_SOURCE_CODE_CHAMBER",
+              "location_end_id": "LOC_SOURCE_CODE_CHAMBER"
+            },
+            {
+              "scene_id": 4,
+              "summary": "The Sentinel enters its pursuit protocol.",
+              "type": "climax",
+              "outcome": "The Zone Sentinel initiates its 'anti-runner' pursuit protocol.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_SENTINEL"
+              ],
+              "location_start_label": "Source Code Chamber",
+              "location_end_label": "Source Code Chamber",
+              "location_start": "Source Code Chamber",
+              "location_end": "Source Code Chamber",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "The Sentinel's body shifts, its legs extending into long, insect-like struts.",
+              "transition_in_anchors": [
+                "insect struts",
+                "pursuit protocol",
+                "shifting body",
+                "anti-runner"
+              ],
+              "consumes_outcome_from": "6:3",
+              "hands_off_to": "6:5",
+              "transition_out_text": "It begins to move with terrifying speed, matching Arlo's pace.",
+              "transition_out_anchors": [
+                "terrifying speed",
+                "matching pace",
+                "chase",
+                "high stakes"
+              ],
+              "end_condition_echo": "The Zone Sentinel initiates its 'anti-runner' pursuit protocol.",
+              "location_start_id": "LOC_SOURCE_CODE_CHAMBER",
+              "location_end_id": "LOC_SOURCE_CODE_CHAMBER"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Infinite Retreat",
+          "intent": "A desperate chase where Arlo must use every mobility trick to survive the Sentinel's attacks.",
+          "end_condition": "Arlo keeps the Sentinel at bay as the patch timer reaches its final sixty seconds.",
+          "scenes": [
+            {
+              "scene_id": 5,
+              "summary": "Arlo leads the Sentinel on a chase around the altar.",
+              "type": "action",
+              "outcome": "Arlo realizes the Sentinel's speed is tied to his own.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_SENTINEL"
+              ],
+              "location_start_label": "Source Code Chamber",
+              "location_end_label": "Source Code Chamber",
+              "location_start": "Source Code Chamber",
+              "location_end": "Source Code Chamber",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Arlo sprints in a wide arc, the Sentinel's struts clicking behind him like a giant clock.",
+              "transition_in_anchors": [
+                "wide arc",
+                "clicking struts",
+                "speed tie",
+                "infinite chase"
+              ],
+              "consumes_outcome_from": "6:4",
+              "hands_off_to": "6:6",
+              "transition_out_text": "He tries to slow down, but the Sentinel closes the gap instantly.",
+              "transition_out_anchors": [
+                "slowing down",
+                "closing gap",
+                "instant response",
+                "no breathing room"
+              ],
+              "location_start_id": "LOC_SOURCE_CODE_CHAMBER",
+              "location_end_id": "LOC_SOURCE_CODE_CHAMBER"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Arlo uses the altar's geometry to force the Sentinel into awkward turns.",
+              "type": "action",
+              "outcome": "Arlo manages to land a few crits while the Sentinel is turning.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_SENTINEL"
+              ],
+              "location_start_label": "Source Code Chamber",
+              "location_end_label": "Source Code Chamber",
+              "location_start": "Source Code Chamber",
+              "location_end": "Source Code Chamber",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "He pivots around the central pillar, his boots sparking against the metal.",
+              "transition_in_anchors": [
+                "central pillar",
+                "pivoting",
+                "sparking boots",
+                "awkward turns"
+              ],
+              "consumes_outcome_from": "6:5",
+              "hands_off_to": "6:7",
+              "transition_out_text": "The Sentinel's long legs struggle with the tight cornering.",
+              "transition_out_anchors": [
+                "long legs",
+                "struggle",
+                "tight cornering",
+                "advantage"
+              ],
+              "location_start_id": "LOC_SOURCE_CODE_CHAMBER",
+              "location_end_id": "LOC_SOURCE_CODE_CHAMBER"
+            },
+            {
+              "scene_id": 7,
+              "summary": "The countdown hits 5 minutes.",
+              "type": "pressure",
+              "outcome": "The Sentinel begins to fire 'Delete' beams that erase parts of the floor.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_SENTINEL"
+              ],
+              "location_start_label": "Source Code Chamber",
+              "location_end_label": "Source Code Chamber",
+              "location_start": "Source Code Chamber",
+              "location_end": "Source Code Chamber",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "A beam of pure white energy shoots from the Sentinel's chest, turning a section of the floor into a void.",
+              "transition_in_anchors": [
+                "Delete beam",
+                "white energy",
+                "floor void",
+                "5 minutes"
+              ],
+              "consumes_outcome_from": "6:6",
+              "hands_off_to": "6:8",
+              "transition_out_text": "Arlo barely jumps over the expanding hole in reality.",
+              "transition_out_anchors": [
+                "jump",
+                "hole in reality",
+                "expanding void",
+                "danger"
+              ],
+              "location_start_id": "LOC_SOURCE_CODE_CHAMBER",
+              "location_end_id": "LOC_SOURCE_CODE_CHAMBER"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Arlo uses the deleted floor sections to his advantage.",
+              "type": "action",
+              "outcome": "Arlo baits the Sentinel into falling into its own 'Delete' zones.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_SENTINEL"
+              ],
+              "location_start_label": "Source Code Chamber",
+              "location_end_label": "Source Code Chamber",
+              "location_start": "Source Code Chamber",
+              "location_end": "Source Code Chamber",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "He skirts the edge of the void, daring the Sentinel to follow.",
+              "transition_in_anchors": [
+                "void edge",
+                "baiting",
+                "falling",
+                "tactical use"
+              ],
+              "consumes_outcome_from": "6:7",
+              "hands_off_to": "6:9",
+              "transition_out_text": "The Sentinel's leg slips, sending it stumbling into the abyss.",
+              "transition_out_anchors": [
+                "leg slip",
+                "stumbling",
+                "abyss",
+                "momentary reprieve"
+              ],
+              "location_start_id": "LOC_SOURCE_CODE_CHAMBER",
+              "location_end_id": "LOC_SOURCE_CODE_CHAMBER"
+            },
+            {
+              "scene_id": 9,
+              "summary": "The Sentinel recovers and becomes even more aggressive.",
+              "type": "action",
+              "outcome": "The Sentinel starts to teleport, making it impossible to kite normally.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_SENTINEL"
+              ],
+              "location_start_label": "Source Code Chamber",
+              "location_end_label": "Source Code Chamber",
+              "location_start": "Source Code Chamber",
+              "location_end": "Source Code Chamber",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The golem flickers and reappears directly in front of Arlo, its fist already mid-swing.",
+              "transition_in_anchors": [
+                "teleport",
+                "flicker",
+                "mid-swing",
+                "impossible kiting"
+              ],
+              "consumes_outcome_from": "6:8",
+              "hands_off_to": "6:10",
+              "transition_out_text": "Arlo uses 'Dash' to move backward through the Sentinel's own body.",
+              "transition_out_anchors": [
+                "backward dash",
+                "phasing",
+                "clipping",
+                "survival"
+              ],
+              "location_start_id": "LOC_SOURCE_CODE_CHAMBER",
+              "location_end_id": "LOC_SOURCE_CODE_CHAMBER"
+            },
+            {
+              "scene_id": 10,
+              "summary": "The timer hits 60 seconds.",
+              "type": "pressure",
+              "outcome": "Arlo keeps the Sentinel at bay as the patch timer reaches its final sixty seconds.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_SENTINEL"
+              ],
+              "location_start_label": "Source Code Chamber",
+              "location_end_label": "Source Code Chamber",
+              "location_start": "Source Code Chamber",
+              "location_end": "Source Code Chamber",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The entire room begins to shake as the server prepares to shut down.",
+              "transition_in_anchors": [
+                "room shaking",
+                "server shutdown",
+                "60 seconds",
+                "final countdown"
+              ],
+              "consumes_outcome_from": "6:9",
+              "hands_off_to": "6:11",
+              "transition_out_text": "He makes a break for the altar at the center of the room.",
+              "transition_out_anchors": [
+                "altar break",
+                "center room",
+                "final sprint",
+                "desperation"
+              ],
+              "end_condition_echo": "Arlo keeps the Sentinel at bay as the patch timer reaches its final sixty seconds.",
+              "location_start_id": "LOC_SOURCE_CODE_CHAMBER",
+              "location_end_id": "LOC_SOURCE_CODE_CHAMBER"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Final Seconds",
+          "intent": "Arlo reaches the altar and attempts to register his 'Bug' as a permanent feature.",
+          "end_condition": "Arlo activates the altar as the world fades to white for the maintenance update.",
+          "scenes": [
+            {
+              "scene_id": 11,
+              "summary": "Arlo reaches the altar and interacts with the Source Code.",
+              "type": "climax",
+              "outcome": "Arlo begins the registration process, but it requires 30 seconds of channeled interaction.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Source Code Altar",
+              "location_end_label": "Source Code Altar",
+              "location_start": "Source Code Altar",
+              "location_end": "Source Code Altar",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "Arlo slams his hands onto the glowing terminal, his character sheet appearing in a burst of code.",
+              "transition_in_anchors": [
+                "glowing terminal",
+                "registration",
+                "channeled interaction",
+                "30 seconds"
+              ],
+              "consumes_outcome_from": "6:10",
+              "hands_off_to": "6:12",
+              "transition_out_text": "The Sentinel recovers and prepares for a final, lethal strike.",
+              "transition_out_anchors": [
+                "Sentinel recovery",
+                "lethal strike",
+                "imminent threat",
+                "vulnerability"
+              ],
+              "location_start_id": "LOC_SOURCE_CODE_ALTAR",
+              "location_end_id": "LOC_SOURCE_CODE_ALTAR"
+            },
+            {
+              "scene_id": 12,
+              "summary": "Jax sacrifices his last items to shield Arlo.",
+              "type": "action",
+              "outcome": "Jax buys Arlo the final 10 seconds he needs.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX",
+                "CHAR_SENTINEL"
+              ],
+              "location_start_label": "Source Code Altar",
+              "location_end_label": "Source Code Altar",
+              "location_start": "Source Code Altar",
+              "location_end": "Source Code Altar",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "Jax throws his rare cloak and bow into the Sentinel's path, creating a temporary barrier of light.",
+              "transition_in_anchors": [
+                "item sacrifice",
+                "light barrier",
+                "10 seconds",
+                "Jax's help"
+              ],
+              "consumes_outcome_from": "6:11",
+              "hands_off_to": "6:13",
+              "transition_out_text": "The Sentinel smashes through the barrier, its fist inches from Arlo.",
+              "transition_out_anchors": [
+                "barrier smash",
+                "inches away",
+                "final moment",
+                "tension"
+              ],
+              "location_start_id": "LOC_SOURCE_CODE_ALTAR",
+              "location_end_id": "LOC_SOURCE_CODE_ALTAR"
+            },
+            {
+              "scene_id": 13,
+              "summary": "The registration completes as the timer hits zero.",
+              "type": "climax",
+              "outcome": "Arlo's 'Overflow' is registered as a 'Legacy Feature'.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "threads": [
+                "THREAD_LUCK_OVERFLOW"
+              ],
+              "location_start_label": "Source Code Altar",
+              "location_end_label": "Source Code Altar",
+              "location_start": "Source Code Altar",
+              "location_end": "Source Code Altar",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "processed",
+              "transition_in_text": "A golden prompt flashes: 'REGISTRATION COMPLETE. FEATURE LOCKED.'",
+              "transition_in_anchors": [
+                "golden prompt",
+                "registration complete",
+                "feature locked",
+                "legacy feature"
+              ],
+              "consumes_outcome_from": "6:12",
+              "hands_off_to": "6:14",
+              "transition_out_text": "The entire world begins to dissolve into a blinding white light.",
+              "transition_out_anchors": [
+                "world dissolution",
+                "white light",
+                "server reset",
+                "fading"
+              ],
+              "location_start_id": "LOC_SOURCE_CODE_ALTAR",
+              "location_end_id": "LOC_SOURCE_CODE_ALTAR"
+            },
+            {
+              "scene_id": 14,
+              "summary": "The world fades to white.",
+              "type": "resolution",
+              "outcome": "Arlo activates the altar as the world fades to white for the maintenance update.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Source Code Altar",
+              "location_end_label": "The Maintenance Void",
+              "location_start": "Source Code Altar",
+              "location_end": "The Maintenance Void",
+              "handoff_mode": "hard_cut",
+              "constraint_state": "processed",
+              "transition_in_text": "Arlo feels his digital body being pulled apart, then reassembled in the silence of the void.",
+              "transition_in_anchors": [
+                "body reassembly",
+                "silence",
+                "void",
+                "maintenance update"
+              ],
+              "consumes_outcome_from": "6:13",
+              "end_condition_echo": "Arlo activates the altar as the world fades to white for the maintenance update.",
+              "location_start_id": "LOC_SOURCE_CODE_ALTAR",
+              "location_end_id": "LOC_THE_MAINTENANCE_VOID"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 7,
+      "title": "The Legacy of the Glitch",
+      "goal": "Arlo wakes up post-patch to find he has been granted the unique Title 'The Unfixable One', making him the only player capable of damaging 'Invulnerable' admin-level mobs.",
+      "chapter_role": "aftermath",
+      "stakes_shift": "From a lucky coward to the most valuable (and hunted) asset in the game.",
+      "bridge": {
+        "from_prev": "The server comes back online with Arlo's stats intact.",
+        "to_next": "The major guilds realize Arlo is the only one who can clear the new 'Endgame' content released in the patch."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "steady",
+        "expected_scene_count": 9
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Log-In",
+          "intent": "Arlo wakes up in the post-patch world and checks his status for any 'fixes'.",
+          "end_condition": "Arlo confirms his stats are intact and he has been granted the 'Unfixable One' title.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Arlo logs back into Aethelgard and finds himself in the Oakhaven plaza.",
+              "type": "setup",
+              "outcome": "Arlo finds that the world has changed, with new textures and NPC behaviors.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Oakhaven Market Square",
+              "location_end_label": "Oakhaven Market Square",
+              "location_start": "Oakhaven Market Square",
+              "location_end": "Oakhaven Market Square",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "Arlo materializes in the center of Oakhaven, the morning sun reflecting off the new, high-res stone.",
+              "transition_in_anchors": [
+                "Oakhaven plaza",
+                "high-res stone",
+                "morning sun",
+                "log-in"
+              ],
+              "hands_off_to": "7:2",
+              "transition_out_text": "He tentatively opens his character sheet, his breath catching in his throat.",
+              "transition_out_anchors": [
+                "character sheet",
+                "breath catching",
+                "stat check",
+                "anticipation"
+              ],
+              "location_start_id": "LOC_OAKHAVEN_MARKET_SQUARE",
+              "location_end_id": "LOC_OAKHAVEN_MARKET_SQUARE"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Arlo checks his Luck stat and sees the 'Legacy' tag.",
+              "type": "development",
+              "outcome": "Arlo confirms his -999 Luck is still there, but now it's officially recognized.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "threads": [
+                "THREAD_LUCK_OVERFLOW"
+              ],
+              "location_start_label": "Oakhaven Market Square",
+              "location_end_label": "Oakhaven Market Square",
+              "location_start": "Oakhaven Market Square",
+              "location_end": "Oakhaven Market Square",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The luck stat still sits at -999, but it's now glowing with a soft, permanent gold light.",
+              "transition_in_anchors": [
+                "-999 Luck",
+                "gold light",
+                "legacy tag",
+                "permanent status"
+              ],
+              "consumes_outcome_from": "7:1",
+              "hands_off_to": "7:3",
+              "transition_out_text": "A new title notification pops up, filling his entire vision.",
+              "transition_out_anchors": [
+                "title notification",
+                "new title",
+                "vision fill",
+                "achievement"
+              ],
+              "location_start_id": "LOC_OAKHAVEN_MARKET_SQUARE",
+              "location_end_id": "LOC_OAKHAVEN_MARKET_SQUARE"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Arlo reads the description of 'The Unfixable One'.",
+              "type": "resolution",
+              "outcome": "Arlo confirms his stats are intact and he has been granted the 'Unfixable One' title.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Oakhaven Market Square",
+              "location_end_label": "Oakhaven Market Square",
+              "location_start": "Oakhaven Market Square",
+              "location_end": "Oakhaven Market Square",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The title description reads: 'A player who exists outside the laws of the patch.'",
+              "transition_in_anchors": [
+                "The Unfixable One",
+                "title description",
+                "outside the laws",
+                "confirmation"
+              ],
+              "consumes_outcome_from": "7:2",
+              "hands_off_to": "7:4",
+              "transition_out_text": "He looks around and sees Jax waiting for him by the fountain.",
+              "transition_out_anchors": [
+                "Jax",
+                "fountain",
+                "waiting",
+                "reunion"
+              ],
+              "end_condition_echo": "Arlo confirms his stats are intact and he has been granted the 'Unfixable One' title.",
+              "location_start_id": "LOC_OAKHAVEN_MARKET_SQUARE",
+              "location_end_id": "LOC_OAKHAVEN_MARKET_SQUARE"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The New Reality",
+          "intent": "Arlo discovers that the patch has introduced 'Invulnerable' mobs that only he can damage.",
+          "end_condition": "Arlo kills a new 'Admin-Tier' mob that other players find impossible to touch.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Jax tells Arlo about the 'Admin-Tier' mobs that appeared after the patch.",
+              "type": "development",
+              "outcome": "They head to the outskirts to test Arlo's new title against these mobs.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "Oakhaven Market Square",
+              "location_end_label": "Oakhaven Outskirts",
+              "location_start": "Oakhaven Market Square",
+              "location_end": "Oakhaven Outskirts",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "Jax explains that a group of high-level players is currently struggling with a new type of mob nearby.",
+              "transition_in_anchors": [
+                "Admin-Tier mobs",
+                "high-level players",
+                "struggle",
+                "outskirts"
+              ],
+              "consumes_outcome_from": "7:3",
+              "hands_off_to": "7:5",
+              "transition_out_text": "They arrive at a clearing where a group of knights is being hammered by a glowing white sentinel.",
+              "transition_out_anchors": [
+                "clearing",
+                "knights",
+                "white sentinel",
+                "combat scene"
+              ],
+              "location_start_id": "LOC_OAKHAVEN_MARKET_SQUARE",
+              "location_end_id": "LOC_OAKHAVEN_OUTSKIRTS"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Arlo watches as the knights' attacks do zero damage to the mob.",
+              "type": "development",
+              "outcome": "Arlo realizes the mob has a 'Patch-Enforced Invulnerability' buff.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "Oakhaven Outskirts",
+              "location_end_label": "Oakhaven Outskirts",
+              "location_start": "Oakhaven Outskirts",
+              "location_end": "Oakhaven Outskirts",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The knights' swords bounce off the sentinel as if hitting a wall of solid code.",
+              "transition_in_anchors": [
+                "zero damage",
+                "invulnerability buff",
+                "solid code",
+                "bouncing swords"
+              ],
+              "consumes_outcome_from": "7:4",
+              "hands_off_to": "7:6",
+              "transition_out_text": "Arlo takes a deep breath and starts his run.",
+              "transition_out_anchors": [
+                "deep breath",
+                "starting run",
+                "combat entry",
+                "focus"
+              ],
+              "location_start_id": "LOC_OAKHAVEN_OUTSKIRTS",
+              "location_end_id": "LOC_OAKHAVEN_OUTSKIRTS"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Arlo strikes the mob while retreating, bypassing its invulnerability.",
+              "type": "climax",
+              "outcome": "Arlo kills a new 'Admin-Tier' mob that other players find impossible to touch.",
+              "characters": [
+                "CHAR_ARLO"
+              ],
+              "location_start_label": "Oakhaven Outskirts",
+              "location_end_label": "Oakhaven Outskirts",
+              "location_start": "Oakhaven Outskirts",
+              "location_end": "Oakhaven Outskirts",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "As Arlo kicks back, his foot sinks into the sentinel's chest, shattering the invulnerability barrier.",
+              "transition_in_anchors": [
+                "barrier shatter",
+                "invulnerability bypass",
+                "sentinel kill",
+                "stunned knights"
+              ],
+              "consumes_outcome_from": "7:5",
+              "hands_off_to": "7:7",
+              "transition_out_text": "The mob dissolves into a shower of rare, post-patch loot.",
+              "transition_out_anchors": [
+                "rare loot",
+                "shower",
+                "dissolve",
+                "post-patch"
+              ],
+              "end_condition_echo": "Arlo kills a new 'Admin-Tier' mob that other players find impossible to touch.",
+              "location_start_id": "LOC_OAKHAVEN_OUTSKIRTS",
+              "location_end_id": "LOC_OAKHAVEN_OUTSKIRTS"
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Target on His Back",
+          "intent": "Establish the new status quo where Arlo is the game's most valuable and hunted player.",
+          "end_condition": "The major guilds surround Arlo, realizing he is the key to the new endgame content.",
+          "scenes": [
+            {
+              "scene_id": 7,
+              "summary": "The knights and other players realize what Arlo has done.",
+              "type": "pressure",
+              "outcome": "The news of Arlo's ability spreads through the global chat instantly.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "Oakhaven Outskirts",
+              "location_end_label": "Oakhaven Outskirts",
+              "location_start": "Oakhaven Outskirts",
+              "location_end": "Oakhaven Outskirts",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "The knights lower their weapons, their eyes fixed on the loot pile and then on Arlo.",
+              "transition_in_anchors": [
+                "lowered weapons",
+                "stares",
+                "global chat",
+                "news spread"
+              ],
+              "consumes_outcome_from": "7:6",
+              "hands_off_to": "7:8",
+              "transition_out_text": "Arlo's notification log begins to scroll with hundreds of friend requests.",
+              "transition_out_anchors": [
+                "notification log",
+                "friend requests",
+                "scrolling",
+                "fame"
+              ],
+              "location_start_id": "LOC_OAKHAVEN_OUTSKIRTS",
+              "location_end_id": "LOC_OAKHAVEN_OUTSKIRTS"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Vex and other guild leaders arrive on the scene.",
+              "type": "pressure",
+              "outcome": "Arlo is surrounded by the most powerful players in the game, all wanting a piece of him.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_VEX"
+              ],
+              "threads": [
+                "THREAD_GUILD_POLITICS"
+              ],
+              "location_start_label": "Oakhaven Outskirts",
+              "location_end_label": "Oakhaven Outskirts",
+              "location_start": "Oakhaven Outskirts",
+              "location_end": "Oakhaven Outskirts",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "restricted",
+              "transition_in_text": "A series of high-level mounts gallop into the clearing, led by Vex on a spectral wolf.",
+              "transition_in_anchors": [
+                "high-level mounts",
+                "spectral wolf",
+                "Vex",
+                "surrounding"
+              ],
+              "consumes_outcome_from": "7:7",
+              "hands_off_to": "7:9",
+              "transition_out_text": "Vex looks at the dead sentinel and then at Arlo, a proprietary smile on her face.",
+              "transition_out_anchors": [
+                "proprietary smile",
+                "dead sentinel",
+                "ownership",
+                "new status quo"
+              ],
+              "location_start_id": "LOC_OAKHAVEN_OUTSKIRTS",
+              "location_end_id": "LOC_OAKHAVEN_OUTSKIRTS"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Arlo realizes he is now the most valuable asset in Aethelgard.",
+              "type": "hook",
+              "outcome": "The major guilds surround Arlo, realizing he is the key to the new endgame content.",
+              "characters": [
+                "CHAR_ARLO",
+                "CHAR_VEX",
+                "CHAR_JAX"
+              ],
+              "location_start_label": "Oakhaven Outskirts",
+              "location_end_label": "Oakhaven Outskirts",
+              "location_start": "Oakhaven Outskirts",
+              "location_end": "Oakhaven Outskirts",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "Arlo takes a step back, but there's nowhere left to run that they can't follow.",
+              "transition_in_anchors": [
+                "step back",
+                "nowhere to run",
+                "valuable asset",
+                "endgame key"
+              ],
+              "consumes_outcome_from": "7:8",
+              "end_condition_echo": "The major guilds surround Arlo, realizing he is the key to the new endgame content.",
+              "location_start_id": "LOC_OAKHAVEN_OUTSKIRTS",
+              "location_end_id": "LOC_OAKHAVEN_OUTSKIRTS"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,2501 @@
+{
+  "schema_version": "1.1",
+  "characters": [
+    {
+      "character_id": "char_arthur",
+      "name": "Arthur",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      },
+      "role": "protagonist"
+    },
+    {
+      "character_id": "char_vendor_glitch",
+      "name": "The Glitch Vendor",
+      "intro": {
+        "chapter": 2,
+        "scene": 9
+      },
+      "role": "ally"
+    },
+    {
+      "character_id": "char_guild_rep",
+      "name": "Silas the Merchant",
+      "intro": {
+        "chapter": 3,
+        "scene": 10
+      },
+      "role": "antagonist"
+    },
+    {
+      "character_id": "char_paladin_boris",
+      "name": "Boris the Bold",
+      "intro": {
+        "chapter": 5,
+        "scene": 2
+      },
+      "role": "ally"
+    }
+  ],
+  "threads": [
+    {
+      "thread_id": "thread_survival",
+      "label": "The 1 HP Survival Challenge",
+      "status": "active"
+    },
+    {
+      "thread_id": "thread_system_glitch",
+      "label": "The 100% Crit Rate Exploit",
+      "status": "active"
+    },
+    {
+      "thread_id": "thread_patch_countdown",
+      "label": "System Balance Patch",
+      "status": "dormant"
+    }
+  ],
+  "chapters": [
+    {
+      "chapter_id": 1,
+      "title": "The Critical Failure of Dying",
+      "goal": "Introduce Arthur and his accidental 'Glass Cannon' Isekai transition where every hit he lands is a crit, but he has exactly 1 HP.",
+      "chapter_role": "hook",
+      "stakes_shift": "From mundane debt-ridden life to a high-stakes survival game where a stubbed toe means permadeath.",
+      "bridge": {
+        "from_prev": "Arthur's final moments in the real world during a freak electrical accident.",
+        "to_next": "Arthur stands at the entrance of the 'Newbie Slums' with a glowing red warning over his head."
+      },
+      "pacing": {
+        "intensity": 4,
+        "tempo": "rush",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Short-Circuit",
+          "intent": "Establish Arthur's mundane life and the freak accident that triggers his transition.",
+          "end_condition": "Arthur's consciousness fades in the real world amidst electrical sparks.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Arthur struggles with his failing appliances and mounting debt in his cramped apartment.",
+              "type": "character_intro",
+              "outcome": "Arthur's baseline desperation and technical resourcefulness are established.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "Arthur's Apartment",
+              "location_end_label": "Apartment Kitchen",
+              "location_start": "A cluttered studio apartment filled with unpaid bills and broken electronics.",
+              "location_end": "A narrow kitchenette with a flickering overhead light.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_out_text": "Arthur steps into the kitchen, reaching for his last cup of instant noodles.",
+              "transition_out_anchors": [
+                "kitchenette",
+                "instant noodles",
+                "flickering light",
+                "Arthur's hunger"
+              ],
+              "hands_off_to": "1:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "The microwave explodes while Arthur is using it, causing a lethal electrical surge.",
+              "type": "inciting_incident",
+              "outcome": "Arthur dies in the real world, triggering the transition sequence.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "Apartment Kitchen",
+              "location_end_label": "The Digital Void",
+              "location_start": "A narrow kitchenette with a flickering overhead light.",
+              "location_end": "An infinite expanse of blue static and scrolling system code.",
+              "handoff_mode": "hard_cut",
+              "constraint_state": "processed",
+              "transition_in_text": "The microwave emits a high-pitched whine that rattles Arthur's teeth.",
+              "transition_in_anchors": [
+                "microwave whine",
+                "Arthur's teeth",
+                "sparking appliance",
+                "kitchen counter"
+              ],
+              "transition_out_text": "The world dissolves into white light as the current surges through his heart.",
+              "transition_out_anchors": [
+                "white light",
+                "massive spark",
+                "Arthur's chest",
+                "electrical surge"
+              ],
+              "consumes_outcome_from": "1:1",
+              "hands_off_to": "1:3",
+              "end_condition_echo": "Arthur's consciousness fades in the real world amidst electrical sparks."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Glitched Awakening",
+          "intent": "Arthur wakes in the system and discovers his impossible 1 HP / 100% Crit Rate status.",
+          "end_condition": "Arthur confirms the 'Glass Cannon' status is not a temporary UI bug.",
+          "scenes": [
+            {
+              "scene_id": 3,
+              "summary": "Arthur awakens in a digital respawn chamber and encounters his first system prompt.",
+              "type": "discovery",
+              "outcome": "Arthur realizes he has been transported into a game-like world.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Digital Void",
+              "location_end_label": "Respawn Chamber",
+              "location_start": "An infinite expanse of blue static and scrolling system code.",
+              "location_end": "A sterile, glowing room with metallic walls and a floating UI.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "processed",
+              "transition_in_text": "A blue screen flickers into existence, hovering inches from Arthur's nose.",
+              "transition_in_anchors": [
+                "blue screen",
+                "system prompt",
+                "Arthur's nose",
+                "digital static"
+              ],
+              "transition_out_text": "He blinks, and the void is replaced by the solid floor of a respawn room.",
+              "transition_out_anchors": [
+                "solid floor",
+                "respawn room",
+                "metallic walls",
+                "floating UI"
+              ],
+              "consumes_outcome_from": "1:2",
+              "hands_off_to": "1:4"
+            },
+            {
+              "scene_id": 4,
+              "summary": "Arthur opens his status window and discovers his health is locked at 1 HP.",
+              "type": "discovery",
+              "outcome": "The 'Glass' part of the Glass Cannon build is revealed as a permanent handicap.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_survival"
+              ],
+              "location_start_label": "Respawn Chamber",
+              "location_end_label": "Respawn Chamber",
+              "location_start": "A sterile, glowing room with metallic walls and a floating UI.",
+              "location_end": "A sterile, glowing room with metallic walls and a floating UI.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Arthur taps the glowing 'Status' button with a trembling finger.",
+              "transition_in_anchors": [
+                "Status button",
+                "trembling finger",
+                "floating menu",
+                "Arthur's confusion"
+              ],
+              "transition_out_text": "The number '1' in the HP column pulses with a sickly red light.",
+              "transition_out_anchors": [
+                "HP column",
+                "red light",
+                "Arthur's shock",
+                "status window"
+              ],
+              "consumes_outcome_from": "1:3",
+              "hands_off_to": "1:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Arthur discovers his Critical Hit Rate is locked at 100%.",
+              "type": "discovery",
+              "outcome": "The 'Cannon' part of the build is revealed, providing a massive offensive advantage.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_system_glitch"
+              ],
+              "location_start_label": "Respawn Chamber",
+              "location_end_label": "Respawn Chamber",
+              "location_start": "A sterile, glowing room with metallic walls and a floating UI.",
+              "location_end": "A sterile, glowing room with metallic walls and a floating UI.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "He scrolls down the list of stats, searching for any sign of a mistake.",
+              "transition_in_anchors": [
+                "stat list",
+                "Arthur's search",
+                "scrolling menu",
+                "digital interface"
+              ],
+              "transition_out_text": "His eyes widen as he sees the 'Crit Rate' value glowing a brilliant gold.",
+              "transition_out_anchors": [
+                "Crit Rate",
+                "gold glow",
+                "Arthur's eyes",
+                "stat value"
+              ],
+              "consumes_outcome_from": "1:4",
+              "hands_off_to": "1:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Arthur attempts to refresh the UI, but the stats remain unchanged, confirming the glitch.",
+              "type": "discovery",
+              "outcome": "Arthur accepts his new reality as a high-stakes anomaly.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "Respawn Chamber",
+              "location_end_label": "Respawn Chamber Exit",
+              "location_start": "A sterile, glowing room with metallic walls and a floating UI.",
+              "location_end": "A heavy blast door leading out of the respawn area.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Arthur slams his hand against the virtual 'Refresh' icon repeatedly.",
+              "transition_in_anchors": [
+                "Refresh icon",
+                "Arthur's hand",
+                "virtual button",
+                "system response"
+              ],
+              "transition_out_text": "The door hiss open, inviting him into the world he must now survive.",
+              "transition_out_anchors": [
+                "blast door",
+                "hissing sound",
+                "respawn exit",
+                "Arthur's resolve"
+              ],
+              "consumes_outcome_from": "1:5",
+              "hands_off_to": "1:7",
+              "end_condition_echo": "Arthur confirms the 'Glass Cannon' status is not a temporary UI bug."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Slumming It",
+          "intent": "Arthur arrives at the Newbie Slums and realizes the immediate danger of his environment.",
+          "end_condition": "Arthur stands at the entrance of the Newbie Slums with a glowing red warning over his head.",
+          "scenes": [
+            {
+              "scene_id": 7,
+              "summary": "Arthur steps out into the Newbie Slums and is overwhelmed by the squalor and chaos.",
+              "type": "discovery",
+              "outcome": "The harsh reality of the low-level player environment is introduced.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "Respawn Chamber Exit",
+              "location_end_label": "Newbie Slums Street",
+              "location_start": "A heavy blast door leading out of the respawn area.",
+              "location_end": "A muddy, crowded street lined with shanties and desperate players.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "restricted",
+              "transition_in_text": "The bright light of the respawn chamber fades into the dull gray of a smog-filled sky.",
+              "transition_in_anchors": [
+                "bright light",
+                "smog-filled sky",
+                "respawn chamber",
+                "Arthur's transition"
+              ],
+              "transition_out_text": "He dodges a splash of muddy water from a passing low-level cart.",
+              "transition_out_anchors": [
+                "muddy water",
+                "low-level cart",
+                "Slums street",
+                "Arthur's dodge"
+              ],
+              "consumes_outcome_from": "1:6",
+              "hands_off_to": "1:8"
+            },
+            {
+              "scene_id": 8,
+              "summary": "Arthur witnesses a minor scuffle where a player is nearly killed by environmental damage.",
+              "type": "discovery",
+              "outcome": "Arthur realizes that even small accidents are lethal for him.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_survival"
+              ],
+              "location_start_label": "Newbie Slums Street",
+              "location_end_label": "Slums Market Square",
+              "location_start": "A muddy, crowded street lined with shanties and desperate players.",
+              "location_end": "A bustling square where players trade scraps of gear and food.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "A shout erupts from a nearby alley, followed by the sound of breaking wood.",
+              "transition_in_anchors": [
+                "alley shout",
+                "breaking wood",
+                "Arthur's attention",
+                "Slums chaos"
+              ],
+              "transition_out_text": "Arthur watches a player lose half their HP to a falling crate and winces.",
+              "transition_out_anchors": [
+                "falling crate",
+                "HP loss",
+                "Arthur's wince",
+                "environmental damage"
+              ],
+              "consumes_outcome_from": "1:7",
+              "hands_off_to": "1:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "A system warning appears above Arthur's head, marking him as 'Fragile'.",
+              "type": "discovery",
+              "outcome": "Arthur's unique status becomes visible to the world, increasing his vulnerability.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_survival"
+              ],
+              "location_start_label": "Slums Market Square",
+              "location_end_label": "Newbie Slums Gate",
+              "location_start": "A bustling square where players trade scraps of gear and food.",
+              "location_end": "The main entrance to the Slums, guarded by stone golems.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "A chime rings in Arthur's ears, and a red light begins to pulse above his head.",
+              "transition_in_anchors": [
+                "system chime",
+                "red light",
+                "Arthur's head",
+                "warning signal"
+              ],
+              "transition_out_text": "Other players start to point and whisper as the 'Fragile' tag flickers to life.",
+              "transition_out_anchors": [
+                "pointing players",
+                "whispering",
+                "Fragile tag",
+                "Arthur's visibility"
+              ],
+              "consumes_outcome_from": "1:8",
+              "hands_off_to": "1:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Arthur reaches the gate of the Slums, realizing he must leave to find safety or profit.",
+              "type": "climax",
+              "outcome": "Arthur is committed to entering the tutorial zone to test his limits.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "Newbie Slums Gate",
+              "location_end_label": "Newbie Slums Gate",
+              "location_start": "The main entrance to the Slums, guarded by stone golems.",
+              "location_end": "The main entrance to the Slums, guarded by stone golems.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Arthur pushes through the crowd, desperate to get away from the prying eyes.",
+              "transition_in_anchors": [
+                "crowd",
+                "prying eyes",
+                "Arthur's desperation",
+                "Slums gate"
+              ],
+              "consumes_outcome_from": "1:9",
+              "end_condition_echo": "Arthur stands at the entrance of the Newbie Slums with a glowing red warning over his head."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 2,
+      "title": "Tutorials are for People with HP",
+      "goal": "Arthur must clear the basic combat tutorial without taking a single point of environmental or monster damage.",
+      "chapter_role": "setup",
+      "stakes_shift": "Arthur realizes he can't play the game normally and must find 'exploits' in movement and stealth to survive.",
+      "bridge": {
+        "from_prev": "Arthur enters the tutorial zone with his 1 HP handicap.",
+        "to_next": "Arthur discovers a hidden vendor who sells items that shouldn't be available to level 1s."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "steady",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Zero-Tolerance Zone",
+          "intent": "Arthur enters the tutorial and learns the movement mechanics required to avoid all damage.",
+          "end_condition": "Arthur reaches the first combat trial without losing his 1 HP.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Arthur enters the Tutorial Zone and receives a briefing on basic movement and dodging.",
+              "type": "setup",
+              "outcome": "Arthur identifies the specific movement skills he needs to master to stay alive.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "Tutorial Entrance",
+              "location_end_label": "Tutorial Training Path",
+              "location_start": "A sun-drenched valley with floating tutorial icons.",
+              "location_end": "A narrow path flanked by wooden training dummies.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "restricted",
+              "transition_out_text": "He steps onto the path, his eyes fixed on the first set of obstacles.",
+              "transition_out_anchors": [
+                "training path",
+                "wooden dummies",
+                "Arthur's focus",
+                "tutorial obstacles"
+              ],
+              "hands_off_to": "2:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Arthur practices the 'Dash' and 'Roll' mechanics, nearly failing when he trips over a root.",
+              "type": "development",
+              "outcome": "Arthur learns that the environment is just as dangerous as the enemies.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_survival"
+              ],
+              "location_start_label": "Tutorial Training Path",
+              "location_end_label": "Tutorial Obstacle Course",
+              "location_start": "A narrow path flanked by wooden training dummies.",
+              "location_end": "A series of swinging logs and pit traps designed for training.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "Arthur's boots kick up dust as he attempts his first combat roll.",
+              "transition_in_anchors": [
+                "combat roll",
+                "dust",
+                "Arthur's boots",
+                "tutorial path"
+              ],
+              "transition_out_text": "He barely catches himself before falling into a shallow pit of spikes.",
+              "transition_out_anchors": [
+                "shallow pit",
+                "spikes",
+                "Arthur's balance",
+                "obstacle course"
+              ],
+              "consumes_outcome_from": "2:1",
+              "hands_off_to": "2:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Arthur reaches the end of the movement course, his 1 HP still intact.",
+              "type": "development",
+              "outcome": "Arthur gains confidence in his ability to navigate the world without taking damage.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "Tutorial Obstacle Course",
+              "location_end_label": "Combat Trial Arena Gate",
+              "location_start": "A series of swinging logs and pit traps designed for training.",
+              "location_end": "A large stone archway leading to the combat arena.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The final swinging log whistles past Arthur's ear, missing by a fraction of an inch.",
+              "transition_in_anchors": [
+                "swinging log",
+                "whistle",
+                "Arthur's ear",
+                "close call"
+              ],
+              "transition_out_text": "He stands before the arena gate, his heart hammering against his ribs.",
+              "transition_out_anchors": [
+                "arena gate",
+                "heart hammering",
+                "stone archway",
+                "Arthur's breath"
+              ],
+              "consumes_outcome_from": "2:2",
+              "hands_off_to": "2:4",
+              "end_condition_echo": "Arthur reaches the first combat trial without losing his 1 HP."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Precision Violence",
+          "intent": "Arthur uses his 100% crit rate to one-shot tutorial mobs before they can react.",
+          "end_condition": "The combat trial is cleared with a 'Flawless' rating.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Arthur faces his first enemy, a Tutorial Slime, and tests his 100% crit rate.",
+              "type": "combat",
+              "outcome": "Arthur confirms that his crit rate applies to even the most basic attacks.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_system_glitch"
+              ],
+              "location_start_label": "Combat Trial Arena Gate",
+              "location_end_label": "Arena Floor",
+              "location_start": "A large stone archway leading to the combat arena.",
+              "location_end": "A flat, sandy circle surrounded by high stone walls.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The gate grinds open, and a green, wobbling slime bounces into the center.",
+              "transition_in_anchors": [
+                "green slime",
+                "arena floor",
+                "gate grind",
+                "Arthur's target"
+              ],
+              "transition_out_text": "Arthur swings his rusty sword, and a massive 'CRITICAL' pops up in the air.",
+              "transition_out_anchors": [
+                "rusty sword",
+                "CRITICAL popup",
+                "slime explosion",
+                "Arthur's strike"
+              ],
+              "consumes_outcome_from": "2:3",
+              "hands_off_to": "2:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Arthur takes on a group of Tutorial Wolves, using his speed to avoid being surrounded.",
+              "type": "combat",
+              "outcome": "Arthur demonstrates the effectiveness of his 'Glass Cannon' build in multi-enemy combat.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "Arena Floor",
+              "location_end_label": "Arena Floor",
+              "location_start": "A flat, sandy circle surrounded by high stone walls.",
+              "location_end": "A flat, sandy circle surrounded by high stone walls.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Three low growls echo from the shadows at the edge of the arena.",
+              "transition_in_anchors": [
+                "low growls",
+                "arena shadows",
+                "Tutorial Wolves",
+                "Arthur's stance"
+              ],
+              "transition_out_text": "He dances between the wolves, each strike turning a predator into a cloud of pixels.",
+              "transition_out_anchors": [
+                "wolf pixels",
+                "Arthur's dance",
+                "precision strikes",
+                "combat flow"
+              ],
+              "consumes_outcome_from": "2:4",
+              "hands_off_to": "2:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "The System calculates Arthur's combat performance, awarding him a 'Flawless' bonus.",
+              "type": "discovery",
+              "outcome": "Arthur receives a massive XP and loot multiplier for taking zero damage.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "Arena Floor",
+              "location_end_label": "Arena Center",
+              "location_start": "A flat, sandy circle surrounded by high stone walls.",
+              "location_end": "The center of the arena where a loot chest has appeared.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The last wolf vanishes, and the arena falls into a sudden, heavy silence.",
+              "transition_in_anchors": [
+                "heavy silence",
+                "wolf vanishing",
+                "arena quiet",
+                "Arthur's victory"
+              ],
+              "transition_out_text": "A golden banner unfurls in the air: 'FLAWLESS VICTORY - 500% BONUS'.",
+              "transition_out_anchors": [
+                "golden banner",
+                "FLAWLESS VICTORY",
+                "500% BONUS",
+                "Arthur's loot"
+              ],
+              "consumes_outcome_from": "2:5",
+              "hands_off_to": "2:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Arthur collects his rewards and prepares to leave the combat trial.",
+              "type": "development",
+              "outcome": "Arthur is now significantly ahead of the expected power curve for a level 1.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "Arena Center",
+              "location_end_label": "Arena Exit",
+              "location_start": "The center of the arena where a loot chest has appeared.",
+              "location_end": "A small door leading to the tutorial's final path.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Arthur reaches into the glowing chest, his fingers brushing against high-quality gear.",
+              "transition_in_anchors": [
+                "glowing chest",
+                "Arthur's fingers",
+                "high-quality gear",
+                "loot collection"
+              ],
+              "transition_out_text": "He walks toward the exit, his new equipment gleaming in the artificial light.",
+              "transition_out_anchors": [
+                "arena exit",
+                "new equipment",
+                "gleaming gear",
+                "Arthur's exit"
+              ],
+              "consumes_outcome_from": "2:6",
+              "hands_off_to": "2:8",
+              "end_condition_echo": "The combat trial is cleared with a 'Flawless' rating."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Secret Shop",
+          "intent": "Arthur finds a hidden vendor exploit before leaving the tutorial zone.",
+          "end_condition": "Arthur discovers a hidden vendor who sells items that shouldn't be available to level 1s.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Arthur notices a graphical glitch in the tutorial's exit wall.",
+              "type": "discovery",
+              "outcome": "Arthur identifies a potential shortcut or hidden area.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_system_glitch"
+              ],
+              "location_start_label": "Arena Exit",
+              "location_end_label": "Tutorial Exit Path",
+              "location_start": "A small door leading to the tutorial's final path.",
+              "location_end": "A stone corridor with flickering textures.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The wall to Arthur's left shimmers, the stone texture momentarily turning into a grid.",
+              "transition_in_anchors": [
+                "shimmering wall",
+                "stone texture",
+                "digital grid",
+                "Arthur's observation"
+              ],
+              "transition_out_text": "He reaches out to touch the glitch, his hand passing through the solid rock.",
+              "transition_out_anchors": [
+                "glitch touch",
+                "solid rock",
+                "Arthur's hand",
+                "wall breach"
+              ],
+              "consumes_outcome_from": "2:7",
+              "hands_off_to": "2:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Arthur enters the glitched area and meets the Secret Vendor.",
+              "type": "discovery",
+              "outcome": "Arthur gains access to powerful items through a system exploit.",
+              "characters": [
+                "char_arthur",
+                "char_vendor_glitch"
+              ],
+              "location_start_label": "Tutorial Exit Path",
+              "location_end_label": "The Glitch Alcove",
+              "location_start": "A stone corridor with flickering textures.",
+              "location_end": "A small, unlit room filled with floating, untextured cubes.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "sheltered",
+              "transition_in_text": "Arthur steps through the wall and into a room that shouldn't exist.",
+              "transition_in_anchors": [
+                "wall step",
+                "impossible room",
+                "Arthur's entry",
+                "Glitch Alcove"
+              ],
+              "transition_out_text": "A figure made of shifting static looks up from a pile of glowing items.",
+              "transition_out_anchors": [
+                "static figure",
+                "shifting static",
+                "glowing items",
+                "Vendor's gaze"
+              ],
+              "consumes_outcome_from": "2:8",
+              "hands_off_to": "2:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Arthur negotiates with the Vendor and buys a high-level dagger.",
+              "type": "climax",
+              "outcome": "Arthur obtains the 'Glass Dagger', which synergizes perfectly with his build.",
+              "characters": [
+                "char_arthur",
+                "char_vendor_glitch"
+              ],
+              "location_start_label": "The Glitch Alcove",
+              "location_end_label": "The Glitch Alcove",
+              "location_start": "A small, unlit room filled with floating, untextured cubes.",
+              "location_end": "A small, unlit room filled with floating, untextured cubes.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "sheltered",
+              "transition_in_text": "The Vendor's voice sounds like a corrupted audio file as he offers his wares.",
+              "transition_in_anchors": [
+                "Vendor's voice",
+                "audio file",
+                "Vendor's wares",
+                "Arthur's negotiation"
+              ],
+              "consumes_outcome_from": "2:9",
+              "end_condition_echo": "Arthur discovers a hidden vendor who sells items that shouldn't be available to level 1s."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 3,
+      "title": "Exploiting the Economy",
+      "goal": "Arthur uses his 100% crit rate to 'farm' high-level materials from passive mobs that usually require high-level parties.",
+      "chapter_role": "investigation",
+      "stakes_shift": "Arthur goes from a penniless 'glitch' to a wealthy outlier, attracting the attention of a local merchant guild.",
+      "bridge": {
+        "from_prev": "Arthur secures his first 'overkill' drop from a Crystal Tortoise.",
+        "to_next": "A guild representative offers Arthur a 'deal' that smells like a trap."
+      },
+      "pacing": {
+        "intensity": 2,
+        "tempo": "slow_burn",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Turtle Hunting",
+          "intent": "Arthur identifies high-level passive mobs that provide massive loot when overkilled.",
+          "end_condition": "Arthur locates the nesting grounds of the Crystal Tortoises.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Arthur arrives at the Crystal Fields and scouts for high-value targets.",
+              "type": "setup",
+              "outcome": "Arthur identifies the Crystal Tortoises as his primary farming target.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "Crystal Fields Entrance",
+              "location_end_label": "Crystal Fields Ridge",
+              "location_start": "A vast plain covered in jagged, glowing crystals.",
+              "location_end": "A high ridge overlooking a valley of slow-moving tortoises.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_out_text": "He crawls to the edge of the ridge, peering down at the shimmering valley.",
+              "transition_out_anchors": [
+                "ridge edge",
+                "shimmering valley",
+                "Arthur's scout",
+                "Crystal Fields"
+              ],
+              "hands_off_to": "3:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Arthur observes the tortoises and realizes they have massive defense but low HP.",
+              "type": "discovery",
+              "outcome": "Arthur calculates that his 100% crit rate will bypass their defense entirely.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_system_glitch"
+              ],
+              "location_start_label": "Crystal Fields Ridge",
+              "location_end_label": "Crystal Fields Ridge",
+              "location_start": "A high ridge overlooking a valley of slow-moving tortoises.",
+              "location_end": "A high ridge overlooking a valley of slow-moving tortoises.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Arthur pulls out a small magnifying lens to inspect the tortoises' shells.",
+              "transition_in_anchors": [
+                "magnifying lens",
+                "tortoise shells",
+                "Arthur's inspection",
+                "stat analysis"
+              ],
+              "transition_out_text": "He smiles as he realizes their high defense is useless against a guaranteed crit.",
+              "transition_out_anchors": [
+                "Arthur's smile",
+                "high defense",
+                "guaranteed crit",
+                "exploit realization"
+              ],
+              "consumes_outcome_from": "3:1",
+              "hands_off_to": "3:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Arthur finds the main nesting ground where the largest tortoises reside.",
+              "type": "discovery",
+              "outcome": "Arthur is positioned to begin his high-value farming operation.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "Crystal Fields Ridge",
+              "location_end_label": "The Tortoise Nesting Ground",
+              "location_start": "A high ridge overlooking a valley of slow-moving tortoises.",
+              "location_end": "A lush, crystal-rich basin where the Elder Tortoises gather.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "He slides down the back of the ridge, keeping low to avoid detection.",
+              "transition_in_anchors": [
+                "ridge back",
+                "Arthur's slide",
+                "low profile",
+                "nesting ground"
+              ],
+              "transition_out_text": "The ground beneath him hums with the energy of the massive tortoises.",
+              "transition_out_anchors": [
+                "humming ground",
+                "tortoise energy",
+                "Elder Tortoises",
+                "Arthur's arrival"
+              ],
+              "consumes_outcome_from": "3:2",
+              "hands_off_to": "3:4",
+              "end_condition_echo": "Arthur locates the nesting grounds of the Crystal Tortoises."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Overkill Harvest",
+          "intent": "Arthur systematically farms the tortoises, generating rare material drops.",
+          "end_condition": "Arthur secures his first 'overkill' drop from a Crystal Tortoise.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Arthur lands his first strike on an Elder Tortoise, triggering an 'Overkill' bonus.",
+              "type": "combat",
+              "outcome": "Arthur confirms that massive damage leads to rare material drops.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_system_glitch"
+              ],
+              "location_start_label": "The Tortoise Nesting Ground",
+              "location_end_label": "The Tortoise Nesting Ground",
+              "location_start": "A lush, crystal-rich basin where the Elder Tortoises gather.",
+              "location_end": "A lush, crystal-rich basin where the Elder Tortoises gather.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Arthur creeps behind a massive, sleeping tortoise and raises his Glass Dagger.",
+              "transition_in_anchors": [
+                "sleeping tortoise",
+                "Glass Dagger",
+                "Arthur's creep",
+                "strike prep"
+              ],
+              "transition_out_text": "The dagger sinks in, and the tortoise shatters into a thousand glowing shards.",
+              "transition_out_anchors": [
+                "dagger sink",
+                "glowing shards",
+                "tortoise shatter",
+                "Overkill trigger"
+              ],
+              "consumes_outcome_from": "3:3",
+              "hands_off_to": "3:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Arthur harvests the 'Prismatic Core' from the remains of the tortoise.",
+              "type": "discovery",
+              "outcome": "Arthur obtains a high-level crafting material far beyond his level.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Tortoise Nesting Ground",
+              "location_end_label": "The Tortoise Nesting Ground",
+              "location_start": "A lush, crystal-rich basin where the Elder Tortoises gather.",
+              "location_end": "A lush, crystal-rich basin where the Elder Tortoises gather.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "He reaches into the pile of shards, his hand closing around a pulsing core.",
+              "transition_in_anchors": [
+                "shard pile",
+                "pulsing core",
+                "Arthur's hand",
+                "harvesting"
+              ],
+              "transition_out_text": "The core's light reflects in his eyes as he realizes its true value.",
+              "transition_out_anchors": [
+                "core light",
+                "Arthur's eyes",
+                "true value",
+                "Prismatic Core"
+              ],
+              "consumes_outcome_from": "3:4",
+              "hands_off_to": "3:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Arthur is nearly spotted by a high-level Elite Mob patrolling the fields.",
+              "type": "development",
+              "outcome": "Arthur's vulnerability is reinforced as he narrowly escapes death.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_survival"
+              ],
+              "location_start_label": "The Tortoise Nesting Ground",
+              "location_end_label": "Crystal Fields Hideout",
+              "location_start": "A lush, crystal-rich basin where the Elder Tortoises gather.",
+              "location_end": "A small cave hidden beneath a crystal outcropping.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "A heavy, metallic footstep echoes through the basin, shaking the ground.",
+              "transition_in_anchors": [
+                "metallic footstep",
+                "ground shake",
+                "Arthur's fear",
+                "Elite Mob"
+              ],
+              "transition_out_text": "He dives into a narrow cave, holding his breath as the shadow passes.",
+              "transition_out_anchors": [
+                "narrow cave",
+                "holding breath",
+                "passing shadow",
+                "Arthur's hide"
+              ],
+              "consumes_outcome_from": "3:5",
+              "hands_off_to": "3:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Arthur finishes his harvest and packs his loot, ready to return to the city.",
+              "type": "development",
+              "outcome": "Arthur has a significant amount of wealth to leverage in the market.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "Crystal Fields Hideout",
+              "location_end_label": "Crystal Fields Entrance",
+              "location_start": "A small cave hidden beneath a crystal outcropping.",
+              "location_end": "A vast plain covered in jagged, glowing crystals.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Arthur carefully wraps the Prismatic Core in a thick cloth to hide its glow.",
+              "transition_in_anchors": [
+                "thick cloth",
+                "Core wrap",
+                "Arthur's care",
+                "loot packing"
+              ],
+              "transition_out_text": "He emerges from the cave, his bag heavy with the spoils of his hunt.",
+              "transition_out_anchors": [
+                "cave emergence",
+                "heavy bag",
+                "hunt spoils",
+                "Arthur's return"
+              ],
+              "consumes_outcome_from": "3:6",
+              "hands_off_to": "3:8",
+              "end_condition_echo": "Arthur secures his first 'overkill' drop from a Crystal Tortoise."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Market Disruption",
+          "intent": "Arthur attempts to sell his high-level loot, drawing unwanted attention from the merchant guild.",
+          "end_condition": "A guild representative offers Arthur a 'deal' that smells like a trap.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Arthur enters the Merchant City and heads to the Auction House.",
+              "type": "setup",
+              "outcome": "Arthur is exposed to the broader economy and its power players.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "Merchant City Gate",
+              "location_end_label": "Auction House Lobby",
+              "location_start": "A grand gate made of gold and marble.",
+              "location_end": "A sprawling hall filled with well-dressed merchants and players.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "restricted",
+              "transition_in_text": "The city's opulence is a sharp contrast to the mud of the Newbie Slums.",
+              "transition_in_anchors": [
+                "city opulence",
+                "gold marble",
+                "Arthur's awe",
+                "Merchant City"
+              ],
+              "transition_out_text": "He approaches the appraisal desk, his heart racing as he pulls out the core.",
+              "transition_out_anchors": [
+                "appraisal desk",
+                "heart racing",
+                "core reveal",
+                "Arthur's nerves"
+              ],
+              "consumes_outcome_from": "3:7",
+              "hands_off_to": "3:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "The appraiser is shocked by the quality of Arthur's loot, drawing a crowd.",
+              "type": "discovery",
+              "outcome": "Arthur's presence as an outlier is confirmed to the public.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "Auction House Lobby",
+              "location_end_label": "Auction House Lobby",
+              "location_start": "A sprawling hall filled with well-dressed merchants and players.",
+              "location_end": "A sprawling hall filled with well-dressed merchants and players.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "The appraiser's monocle pops out as he looks at the Prismatic Core.",
+              "transition_in_anchors": [
+                "appraiser monocle",
+                "Prismatic Core",
+                "Arthur's loot",
+                "appraisal shock"
+              ],
+              "transition_out_text": "Murmurs spread through the hall, and a tall man in a purple robe approaches.",
+              "transition_out_anchors": [
+                "hall murmurs",
+                "tall man",
+                "purple robe",
+                "Arthur's attention"
+              ],
+              "consumes_outcome_from": "3:8",
+              "hands_off_to": "3:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Silas the Merchant offers Arthur a 'partnership' that Arthur immediately distrusts.",
+              "type": "climax",
+              "outcome": "Arthur is now a target of the Merchant Guild's interest.",
+              "characters": [
+                "char_arthur",
+                "char_guild_rep"
+              ],
+              "threads": [
+                "thread_guild_conflict"
+              ],
+              "location_start_label": "Auction House Lobby",
+              "location_end_label": "Auction House Lobby",
+              "location_start": "A sprawling hall filled with well-dressed merchants and players.",
+              "location_end": "A sprawling hall filled with well-dressed merchants and players.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "restricted",
+              "transition_in_text": "Silas extends a hand, his smile not reaching his cold, calculating eyes.",
+              "transition_in_anchors": [
+                "Silas's hand",
+                "cold eyes",
+                "Arthur's distrust",
+                "merchant offer"
+              ],
+              "consumes_outcome_from": "3:9",
+              "end_condition_echo": "A guild representative offers Arthur a 'deal' that smells like a trap."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 4,
+      "title": "Dungeon Diving on a Budget",
+      "goal": "To avoid the guild's pressure, Arthur dives into a 'Death-Touch' dungeon where everything dies in one hit\u2014including him.",
+      "chapter_role": "pressure",
+      "stakes_shift": "The environment itself becomes the enemy, shifting the focus from combat to precision platforming.",
+      "bridge": {
+        "from_prev": "Arthur enters the 'Shatter-Glass Crypt' to hide from guild enforcers.",
+        "to_next": "Arthur accidentally triggers a party-requirement boss while solo."
+      },
+      "pacing": {
+        "intensity": 4,
+        "tempo": "rush",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Shadow Boxing",
+          "intent": "Arthur evades guild enforcers and flees into a restricted high-level dungeon.",
+          "end_condition": "Arthur enters the 'Shatter-Glass Crypt' to hide from guild enforcers.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Arthur spots Silas's enforcers following him through the city streets.",
+              "type": "setup",
+              "outcome": "The chase begins, forcing Arthur to find a way out of the city.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_guild_conflict"
+              ],
+              "location_start_label": "Merchant City Backstreets",
+              "location_end_label": "Merchant City Backstreets",
+              "location_start": "Narrow, winding alleys filled with laundry lines and trash.",
+              "location_end": "Narrow, winding alleys filled with laundry lines and trash.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_out_text": "He ducks behind a pile of crates as two armored men turn the corner.",
+              "transition_out_anchors": [
+                "crates",
+                "armored men",
+                "Arthur's hide",
+                "city chase"
+              ],
+              "hands_off_to": "4:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Arthur uses a sewer entrance to evade the enforcers and head toward the dungeon.",
+              "type": "development",
+              "outcome": "Arthur successfully loses his pursuers but enters a dangerous new area.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "Merchant City Backstreets",
+              "location_end_label": "The City Sewers",
+              "location_start": "Narrow, winding alleys filled with laundry lines and trash.",
+              "location_end": "A dark, damp tunnel system beneath the city.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "fleeing",
+              "transition_in_text": "Arthur pries open a heavy iron grate and drops into the darkness.",
+              "transition_in_anchors": [
+                "iron grate",
+                "darkness",
+                "Arthur's drop",
+                "sewer entry"
+              ],
+              "transition_out_text": "The smell of decay is overwhelming, but it's better than Silas's 'partnership'.",
+              "transition_out_anchors": [
+                "decay smell",
+                "Silas's offer",
+                "Arthur's resolve",
+                "sewer tunnel"
+              ],
+              "consumes_outcome_from": "4:1",
+              "hands_off_to": "4:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Arthur reaches the entrance of the Shatter-Glass Crypt at the end of the sewer line.",
+              "type": "development",
+              "outcome": "Arthur enters the dungeon, trading one danger for another.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The City Sewers",
+              "location_end_label": "Shatter-Glass Crypt Entrance",
+              "location_start": "A dark, damp tunnel system beneath the city.",
+              "location_end": "A massive door made of translucent, razor-sharp glass.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "restricted",
+              "transition_in_text": "The sewer tunnel opens into a cavern dominated by a door of pure glass.",
+              "transition_in_anchors": [
+                "sewer tunnel",
+                "glass door",
+                "cavern",
+                "Arthur's arrival"
+              ],
+              "transition_out_text": "He pushes the door open, the glass cutting into his gloves with a faint hiss.",
+              "transition_out_anchors": [
+                "glass door",
+                "hissing sound",
+                "Arthur's gloves",
+                "crypt entry"
+              ],
+              "consumes_outcome_from": "4:2",
+              "hands_off_to": "4:4",
+              "end_condition_echo": "Arthur enters the 'Shatter-Glass Crypt' to hide from guild enforcers."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Fragile Path",
+          "intent": "Arthur navigates the crypt where the environment is as deadly as the monsters.",
+          "end_condition": "Arthur reaches the heart of the crypt without triggering a single trap.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Arthur navigates a room with a floor made of thin, cracking glass.",
+              "type": "development",
+              "outcome": "Arthur's precision movement is tested in a high-stakes environment.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_survival"
+              ],
+              "location_start_label": "Shatter-Glass Crypt Entrance",
+              "location_end_label": "The Glass Floor Room",
+              "location_start": "A massive door made of translucent, razor-sharp glass.",
+              "location_end": "A wide hall where the floor is a lattice of thin glass panes.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Arthur takes his first step onto the glass, and a spiderweb of cracks appears.",
+              "transition_in_anchors": [
+                "glass floor",
+                "spiderweb cracks",
+                "Arthur's step",
+                "precision movement"
+              ],
+              "transition_out_text": "He moves with the grace of a cat, avoiding the weakest points in the floor.",
+              "transition_out_anchors": [
+                "cat grace",
+                "weak points",
+                "Arthur's path",
+                "glass lattice"
+              ],
+              "consumes_outcome_from": "4:3",
+              "hands_off_to": "4:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Arthur encounters a Sonic Trap that threatens to shatter the floor and him.",
+              "type": "development",
+              "outcome": "Arthur uses his knowledge of system mechanics to disable the trap.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Glass Floor Room",
+              "location_end_label": "The Sonic Corridor",
+              "location_start": "A wide hall where the floor is a lattice of thin glass panes.",
+              "location_end": "A narrow corridor lined with vibrating crystal pillars.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "A low hum begins to vibrate through the walls, making the glass floor ring.",
+              "transition_in_anchors": [
+                "low hum",
+                "vibrating walls",
+                "glass ring",
+                "Sonic Trap"
+              ],
+              "transition_out_text": "He jams a piece of scrap metal into the main crystal, silencing the hum.",
+              "transition_out_anchors": [
+                "scrap metal",
+                "main crystal",
+                "silenced hum",
+                "Arthur's fix"
+              ],
+              "consumes_outcome_from": "4:4",
+              "hands_off_to": "4:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Arthur bypasses a Mirror Wraith by using its own reflection against it.",
+              "type": "combat",
+              "outcome": "Arthur demonstrates his ability to solve combat puzzles without taking damage.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_system_glitch"
+              ],
+              "location_start_label": "The Sonic Corridor",
+              "location_end_label": "The Hall of Reflections",
+              "location_start": "A narrow corridor lined with vibrating crystal pillars.",
+              "location_end": "A room where every surface is a perfect, polished mirror.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "A shadow detaches itself from a mirror and lunges at Arthur.",
+              "transition_in_anchors": [
+                "mirror shadow",
+                "Mirror Wraith",
+                "Arthur's reaction",
+                "polished mirror"
+              ],
+              "transition_out_text": "He angles his dagger to catch the light, blinding the wraith for a killing blow.",
+              "transition_out_anchors": [
+                "dagger angle",
+                "light catch",
+                "wraith blind",
+                "killing blow"
+              ],
+              "consumes_outcome_from": "4:5",
+              "hands_off_to": "4:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Arthur reaches the center of the crypt, finding a massive treasure chest.",
+              "type": "discovery",
+              "outcome": "Arthur is on the verge of a major loot haul, but at high risk.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Hall of Reflections",
+              "location_end_label": "The Crypt Sanctum",
+              "location_start": "A room where every surface is a perfect, polished mirror.",
+              "location_end": "A circular chamber with a single, ornate chest in the center.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The mirrors fade into the background as Arthur enters the final chamber.",
+              "transition_in_anchors": [
+                "mirrors fade",
+                "final chamber",
+                "Arthur's entry",
+                "Crypt Sanctum"
+              ],
+              "transition_out_text": "He stands before the chest, his reflection distorted by the ancient glass.",
+              "transition_out_anchors": [
+                "ornate chest",
+                "distorted reflection",
+                "ancient glass",
+                "Arthur's stand"
+              ],
+              "consumes_outcome_from": "4:6",
+              "hands_off_to": "4:8",
+              "end_condition_echo": "Arthur reaches the heart of the crypt without triggering a single trap."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Accidental Aggro",
+          "intent": "Arthur's attempt to hide leads him directly into a boss encounter meant for a full party.",
+          "end_condition": "Arthur accidentally triggers a party-requirement boss while solo.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Arthur opens the chest and finds a legendary relic, but it's a trap.",
+              "type": "discovery",
+              "outcome": "Arthur obtains the relic but triggers the dungeon's final defense.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Crypt Sanctum",
+              "location_end_label": "The Crypt Sanctum",
+              "location_start": "A circular chamber with a single, ornate chest in the center.",
+              "location_end": "A circular chamber with a single, ornate chest in the center.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The lid of the chest creaks open, revealing a heart-shaped ruby that pulses with life.",
+              "transition_in_anchors": [
+                "chest lid",
+                "heart-shaped ruby",
+                "pulsing life",
+                "Arthur's discovery"
+              ],
+              "transition_out_text": "As his fingers close around the gem, the floor beneath him begins to hum.",
+              "transition_out_anchors": [
+                "gem touch",
+                "humming floor",
+                "Arthur's grab",
+                "trap trigger"
+              ],
+              "consumes_outcome_from": "4:7",
+              "hands_off_to": "4:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "The floor of the sanctum begins to rise, revealing the Crypt Guardian.",
+              "type": "discovery",
+              "outcome": "The boss encounter begins, and Arthur is trapped in the arena.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Crypt Sanctum",
+              "location_end_label": "The Guardian's Arena",
+              "location_start": "A circular chamber with a single, ornate chest in the center.",
+              "location_end": "The sanctum floor, now hovering over a pit of spikes.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The stone platform lurches upward, separating Arthur from the exit.",
+              "transition_in_anchors": [
+                "stone platform",
+                "Arthur's separation",
+                "arena rise",
+                "pit of spikes"
+              ],
+              "transition_out_text": "A massive golem of glass and bone pulls itself from the walls.",
+              "transition_out_anchors": [
+                "glass golem",
+                "bone golem",
+                "Crypt Guardian",
+                "boss wake-up"
+              ],
+              "consumes_outcome_from": "4:8",
+              "hands_off_to": "4:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Arthur realizes the Guardian is a 'Raid Boss' meant for twenty players.",
+              "type": "climax",
+              "outcome": "Arthur is in an impossible situation where a single hit means instant death.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Guardian's Arena",
+              "location_end_label": "The Guardian's Arena",
+              "location_start": "The sanctum floor, now hovering over a pit of spikes.",
+              "location_end": "The sanctum floor, now hovering over a pit of spikes.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Arthur scans the boss's HP bar, which stretches across his entire vision.",
+              "transition_in_anchors": [
+                "HP bar",
+                "Arthur's scan",
+                "Raid Boss",
+                "impossible odds"
+              ],
+              "consumes_outcome_from": "4:9",
+              "end_condition_echo": "Arthur accidentally triggers a party-requirement boss while solo."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 5,
+      "title": "Worst Party Member Ever",
+      "goal": "Arthur is forced to team up with a naive Paladin who insists on 'protecting' him, which actually makes his stealth-based survival impossible.",
+      "chapter_role": "alliance",
+      "stakes_shift": "Arthur must manage another person's AI/behavior to keep himself from being collateral damage.",
+      "bridge": {
+        "from_prev": "The Paladin 'rescues' Arthur from a shadow, nearly crushing him with a heavy shield.",
+        "to_next": "The duo reaches the final chamber where a boss with an 'Aura of Thorns' resides."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "steady",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Shield of Doom",
+          "intent": "A 'heroic' Paladin intervenes, nearly killing Arthur with 'protection'.",
+          "end_condition": "The Paladin 'rescues' Arthur from a shadow, nearly crushing him with a heavy shield.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Arthur dodges the Guardian's first attack, looking for a way out.",
+              "type": "combat",
+              "outcome": "Arthur survives the initial opening of the boss fight.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Guardian's Arena",
+              "location_end_label": "The Guardian's Arena",
+              "location_start": "The sanctum floor, now hovering over a pit of spikes.",
+              "location_end": "The sanctum floor, now hovering over a pit of spikes.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_out_text": "A shadow falls over him, but it's not from the boss.",
+              "transition_out_anchors": [
+                "falling shadow",
+                "boss attack",
+                "Arthur's dodge",
+                "arena floor"
+              ],
+              "hands_off_to": "5:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Boris the Paladin drops from the ceiling, landing right next to Arthur.",
+              "type": "discovery",
+              "outcome": "Arthur has an unexpected ally who is more dangerous than the enemy.",
+              "characters": [
+                "char_arthur",
+                "char_paladin_boris"
+              ],
+              "location_start_label": "The Guardian's Arena",
+              "location_end_label": "The Guardian's Arena",
+              "location_start": "The sanctum floor, now hovering over a pit of spikes.",
+              "location_end": "The sanctum floor, now hovering over a pit of spikes.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "With a thunderous crash, a man in shining plate armor slams into the ground.",
+              "transition_in_anchors": [
+                "thunderous crash",
+                "plate armor",
+                "Boris's landing",
+                "arena dust"
+              ],
+              "transition_out_text": "Boris shouts a battle cry that rings in Arthur's ears like a physical blow.",
+              "transition_out_anchors": [
+                "battle cry",
+                "Arthur's ears",
+                "Boris's shout",
+                "arena echo"
+              ],
+              "consumes_outcome_from": "5:1",
+              "hands_off_to": "5:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Boris uses 'Divine Protection' on Arthur, which involves slamming a massive shield into the ground.",
+              "type": "combat",
+              "outcome": "Arthur is 'protected' but nearly killed by the collateral damage of Boris's skills.",
+              "characters": [
+                "char_arthur",
+                "char_paladin_boris"
+              ],
+              "threads": [
+                "thread_survival"
+              ],
+              "location_start_label": "The Guardian's Arena",
+              "location_end_label": "The Guardian's Arena",
+              "location_start": "The sanctum floor, now hovering over a pit of spikes.",
+              "location_end": "The sanctum floor, now hovering over a pit of spikes.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Boris lunges toward Arthur, his shield glowing with holy light.",
+              "transition_in_anchors": [
+                "Boris's lunge",
+                "holy light",
+                "shield glow",
+                "Arthur's panic"
+              ],
+              "consumes_outcome_from": "5:2",
+              "hands_off_to": "5:4",
+              "end_condition_echo": "The Paladin 'rescues' Arthur from a shadow, nearly crushing him with a heavy shield."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Incompatible Tactics",
+          "intent": "Arthur tries to use the Paladin as a distraction while maintaining his own stealth.",
+          "end_condition": "The duo survives a series of encounters despite the Paladin's loud approach.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Arthur tries to explain his 1 HP situation to Boris, who doesn't believe him.",
+              "type": "dialogue",
+              "outcome": "Arthur realizes he cannot rely on Boris to understand his vulnerability.",
+              "characters": [
+                "char_arthur",
+                "char_paladin_boris"
+              ],
+              "location_start_label": "The Guardian's Arena",
+              "location_end_label": "The Guardian's Arena",
+              "location_start": "The sanctum floor, now hovering over a pit of spikes.",
+              "location_end": "The sanctum floor, now hovering over a pit of spikes.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Arthur yells over the din of the battle, pointing at his health bar.",
+              "transition_in_anchors": [
+                "battle din",
+                "health bar",
+                "Arthur's yell",
+                "Boris's confusion"
+              ],
+              "transition_out_text": "Boris laughs, assuming Arthur is just being modest about his 'bravery'.",
+              "transition_out_anchors": [
+                "Boris's laugh",
+                "Arthur's modesty",
+                "bravery",
+                "misunderstanding"
+              ],
+              "consumes_outcome_from": "5:3",
+              "hands_off_to": "5:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Arthur uses Boris's loud attacks as a cover to reposition himself.",
+              "type": "combat",
+              "outcome": "Arthur finds a way to coexist with Boris's chaotic fighting style.",
+              "characters": [
+                "char_arthur",
+                "char_paladin_boris"
+              ],
+              "location_start_label": "The Guardian's Arena",
+              "location_end_label": "The Guardian's Arena",
+              "location_start": "The sanctum floor, now hovering over a pit of spikes.",
+              "location_end": "The sanctum floor, now hovering over a pit of spikes.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Boris charges the Guardian, his armor clanking like a bag of hammers.",
+              "transition_in_anchors": [
+                "Boris's charge",
+                "clanking armor",
+                "Guardian's focus",
+                "Arthur's move"
+              ],
+              "transition_out_text": "Arthur slips into the shadows, his footsteps silent against the stone.",
+              "transition_out_anchors": [
+                "arena shadows",
+                "silent footsteps",
+                "Arthur's stealth",
+                "combat reposition"
+              ],
+              "consumes_outcome_from": "5:4",
+              "hands_off_to": "5:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Boris's 'Sacred Taunt' pulls every monster in the room toward them.",
+              "type": "combat",
+              "outcome": "The encounter becomes significantly more difficult for Arthur to navigate.",
+              "characters": [
+                "char_arthur",
+                "char_paladin_boris"
+              ],
+              "threads": [
+                "thread_survival"
+              ],
+              "location_start_label": "The Guardian's Arena",
+              "location_end_label": "The Guardian's Arena",
+              "location_start": "The sanctum floor, now hovering over a pit of spikes.",
+              "location_end": "The sanctum floor, now hovering over a pit of spikes.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Boris raises his sword and lets out a golden wave of energy.",
+              "transition_in_anchors": [
+                "Boris's sword",
+                "golden wave",
+                "Sacred Taunt",
+                "mob aggro"
+              ],
+              "transition_out_text": "A dozen glass skeletons burst from the floor, their eyes fixed on the duo.",
+              "transition_out_anchors": [
+                "glass skeletons",
+                "mob burst",
+                "fixed eyes",
+                "Arthur's dread"
+              ],
+              "consumes_outcome_from": "5:5",
+              "hands_off_to": "5:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Arthur systematically one-shots the skeletons while Boris tanks the Guardian.",
+              "type": "combat",
+              "outcome": "The duo manages to clear the adds, but both are exhausted.",
+              "characters": [
+                "char_arthur",
+                "char_paladin_boris"
+              ],
+              "threads": [
+                "thread_system_glitch"
+              ],
+              "location_start_label": "The Guardian's Arena",
+              "location_end_label": "The Guardian's Arena",
+              "location_start": "The sanctum floor, now hovering over a pit of spikes.",
+              "location_end": "The sanctum floor, now hovering over a pit of spikes.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Arthur's dagger flashes in the dim light, each hit a perfect crit.",
+              "transition_in_anchors": [
+                "dagger flash",
+                "dim light",
+                "perfect crit",
+                "skeleton clear"
+              ],
+              "transition_out_text": "The last skeleton falls, and Boris wipes sweat from his brow.",
+              "transition_out_anchors": [
+                "last skeleton",
+                "Boris's sweat",
+                "combat pause",
+                "Arthur's breath"
+              ],
+              "consumes_outcome_from": "5:6",
+              "hands_off_to": "5:8",
+              "end_condition_echo": "The duo survives a series of encounters despite the Paladin's loud approach."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Thorns Threshold",
+          "intent": "The party reaches the final boss, which possesses a lethal counter-mechanic.",
+          "end_condition": "The duo reaches the final chamber where a boss with an 'Aura of Thorns' resides.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Arthur and Boris push through the final gate to the boss's inner sanctum.",
+              "type": "development",
+              "outcome": "The final stage of the dungeon is reached.",
+              "characters": [
+                "char_arthur",
+                "char_paladin_boris"
+              ],
+              "location_start_label": "The Guardian's Arena",
+              "location_end_label": "The Inner Sanctum Gate",
+              "location_start": "The sanctum floor, now hovering over a pit of spikes.",
+              "location_end": "A massive, thorn-covered gate leading to the final chamber.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The Guardian lies in a pile of glass, and the gate ahead begins to glow.",
+              "transition_in_anchors": [
+                "Guardian remains",
+                "glowing gate",
+                "Arthur's advance",
+                "Boris's lead"
+              ],
+              "transition_out_text": "Boris kicks the gate open, revealing a room filled with a red, pulsing mist.",
+              "transition_out_anchors": [
+                "gate kick",
+                "red mist",
+                "pulsing mist",
+                "Inner Sanctum"
+              ],
+              "consumes_outcome_from": "5:7",
+              "hands_off_to": "5:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Arthur uses his 'Observe' skill to identify the boss's special mechanic.",
+              "type": "discovery",
+              "outcome": "The 'Aura of Thorns' is revealed, presenting a lethal challenge for Arthur.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_survival"
+              ],
+              "location_start_label": "The Inner Sanctum Gate",
+              "location_end_label": "The Heart of the Crypt",
+              "location_start": "A massive, thorn-covered gate leading to the final chamber.",
+              "location_end": "A chamber where the walls are made of living, thorny vines.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Arthur focuses his gaze on the figure at the center of the mist.",
+              "transition_in_anchors": [
+                "Arthur's gaze",
+                "mist figure",
+                "Observe skill",
+                "boss analysis"
+              ],
+              "transition_out_text": "A system popup warns: 'AURA OF THORNS - 1% DAMAGE REFLECTED'.",
+              "transition_out_anchors": [
+                "system popup",
+                "Aura of Thorns",
+                "damage reflect",
+                "Arthur's horror"
+              ],
+              "consumes_outcome_from": "5:8",
+              "hands_off_to": "5:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Arthur realizes that a single hit on the boss will kill him via reflected damage.",
+              "type": "climax",
+              "outcome": "Arthur must find a way to deal damage without actually 'hitting' the boss.",
+              "characters": [
+                "char_arthur",
+                "char_paladin_boris"
+              ],
+              "location_start_label": "The Heart of the Crypt",
+              "location_end_label": "The Heart of the Crypt",
+              "location_start": "A chamber where the walls are made of living, thorny vines.",
+              "location_end": "A chamber where the walls are made of living, thorny vines.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Boris prepares to charge, but Arthur grabs his arm, his face pale.",
+              "transition_in_anchors": [
+                "Boris's charge",
+                "Arthur's grab",
+                "pale face",
+                "lethal realization"
+              ],
+              "consumes_outcome_from": "5:9",
+              "end_condition_echo": "The duo reaches the final chamber where a boss with an 'Aura of Thorns' resides."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 6,
+      "title": "The Reflect Damage Problem",
+      "goal": "Arthur faces a boss that reflects 1% of damage taken\u2014a death sentence for a 1 HP crit-machine.",
+      "chapter_role": "confrontation",
+      "stakes_shift": "Arthur has to find a way to deal damage without 'hitting' the boss or find a loophole in the System's math.",
+      "bridge": {
+        "from_prev": "The boss activates its Reflective Shell, halting Arthur's offense.",
+        "to_next": "The boss falls to a mathematical technicality, but the System triggers a 'Balance Patch' alert."
+      },
+      "pacing": {
+        "intensity": 5,
+        "tempo": "rush",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Mirror Problem",
+          "intent": "Arthur realizes he cannot hit the boss without killing himself via reflected damage.",
+          "end_condition": "The boss activates its Reflective Shell, halting Arthur's offense.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Arthur analyzes the reflect mechanic, confirming it's a hard counter to his build.",
+              "type": "discovery",
+              "outcome": "Arthur identifies the mathematical impossibility of a direct attack.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_survival"
+              ],
+              "location_start_label": "The Heart of the Crypt",
+              "location_end_label": "The Heart of the Crypt",
+              "location_start": "A chamber where the walls are made of living, thorny vines.",
+              "location_end": "A chamber where the walls are made of living, thorny vines.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_out_text": "He watches as Boris lands a hit and takes a small amount of recoil damage.",
+              "transition_out_anchors": [
+                "Boris's hit",
+                "recoil damage",
+                "Arthur's analysis",
+                "reflect mechanic"
+              ],
+              "hands_off_to": "6:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Boris is slowly worn down by the boss's attacks and the reflected damage.",
+              "type": "combat",
+              "outcome": "Arthur is pressured to act before his only tank is defeated.",
+              "characters": [
+                "char_arthur",
+                "char_paladin_boris"
+              ],
+              "location_start_label": "The Heart of the Crypt",
+              "location_end_label": "The Heart of the Crypt",
+              "location_start": "A chamber where the walls are made of living, thorny vines.",
+              "location_end": "A chamber where the walls are made of living, thorny vines.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Boris's shield is cracking, and his movements are becoming sluggish.",
+              "transition_in_anchors": [
+                "cracking shield",
+                "sluggish movement",
+                "Boris's fatigue",
+                "boss pressure"
+              ],
+              "transition_out_text": "The boss lets out a roar, and a shell of shimmering energy surrounds it.",
+              "transition_out_anchors": [
+                "boss roar",
+                "shimmering energy",
+                "Reflective Shell",
+                "combat halt"
+              ],
+              "consumes_outcome_from": "6:1",
+              "hands_off_to": "6:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "The boss activates its 'Reflective Shell', making all attacks lethal to the attacker.",
+              "type": "climax",
+              "outcome": "The combat reaches a stalemate where direct action is impossible.",
+              "characters": [
+                "char_arthur",
+                "char_paladin_boris"
+              ],
+              "location_start_label": "The Heart of the Crypt",
+              "location_end_label": "The Heart of the Crypt",
+              "location_start": "A chamber where the walls are made of living, thorny vines.",
+              "location_end": "A chamber where the walls are made of living, thorny vines.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Arthur stares at the shell, his mind racing for a loophole.",
+              "transition_in_anchors": [
+                "Arthur's stare",
+                "Reflective Shell",
+                "mind racing",
+                "loophole search"
+              ],
+              "consumes_outcome_from": "6:2",
+              "hands_off_to": "6:4",
+              "end_condition_echo": "The boss activates its Reflective Shell, halting Arthur's offense."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Weaponized Math",
+          "intent": "Arthur searches for a loophole in the damage calculation to bypass the reflection.",
+          "end_condition": "Arthur identifies a rounding error in the System's reflect logic.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Arthur opens the system console to look for rounding errors in damage calculation.",
+              "type": "discovery",
+              "outcome": "Arthur finds that the system rounds down damage below a certain threshold.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_system_glitch"
+              ],
+              "location_start_label": "The Heart of the Crypt",
+              "location_end_label": "The Heart of the Crypt",
+              "location_start": "A chamber where the walls are made of living, thorny vines.",
+              "location_end": "A chamber where the walls are made of living, thorny vines.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "He swipes his hand through the air, pulling up a transparent code window.",
+              "transition_in_anchors": [
+                "code window",
+                "system console",
+                "Arthur's swipe",
+                "data search"
+              ],
+              "transition_out_text": "He spots a line of logic that handles fractional damage reflection.",
+              "transition_out_anchors": [
+                "logic line",
+                "fractional damage",
+                "reflection logic",
+                "Arthur's find"
+              ],
+              "consumes_outcome_from": "6:3",
+              "hands_off_to": "6:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Arthur calculates that if he deals exactly 0.99 damage, the reflection will be 0.",
+              "type": "discovery",
+              "outcome": "Arthur identifies the specific exploit needed to win the fight.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Heart of the Crypt",
+              "location_end_label": "The Heart of the Crypt",
+              "location_start": "A chamber where the walls are made of living, thorny vines.",
+              "location_end": "A chamber where the walls are made of living, thorny vines.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Arthur's eyes dart across the numbers, his fingers moving as if on a keyboard.",
+              "transition_in_anchors": [
+                "Arthur's eyes",
+                "darting numbers",
+                "virtual keyboard",
+                "calculation"
+              ],
+              "transition_out_text": "He realizes he needs a weapon that deals almost no damage, but still crits.",
+              "transition_out_anchors": [
+                "low damage",
+                "guaranteed crit",
+                "weapon search",
+                "exploit plan"
+              ],
+              "consumes_outcome_from": "6:4",
+              "hands_off_to": "6:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Arthur uses a 'Broken Needle' item from his inventory to test the theory.",
+              "type": "combat",
+              "outcome": "The theory is confirmed; Arthur deals damage without taking reflection.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Heart of the Crypt",
+              "location_end_label": "The Heart of the Crypt",
+              "location_start": "A chamber where the walls are made of living, thorny vines.",
+              "location_end": "A chamber where the walls are made of living, thorny vines.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "He pulls a rusted, tiny needle from his pouch and lunges forward.",
+              "transition_in_anchors": [
+                "rusted needle",
+                "Arthur's lunge",
+                "pouch",
+                "test strike"
+              ],
+              "transition_out_text": "The needle pricks the boss, and Arthur's HP remains at 1.",
+              "transition_out_anchors": [
+                "needle prick",
+                "Arthur's HP",
+                "zero reflection",
+                "success"
+              ],
+              "consumes_outcome_from": "6:5",
+              "hands_off_to": "6:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Arthur prepares for a high-speed 'death by a thousand cuts' strategy.",
+              "type": "development",
+              "outcome": "Arthur is ready to defeat the boss through pure mathematical exploitation.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Heart of the Crypt",
+              "location_end_label": "The Heart of the Crypt",
+              "location_start": "A chamber where the walls are made of living, thorny vines.",
+              "location_end": "A chamber where the walls are made of living, thorny vines.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "He takes a deep breath, his hands steady despite the chaos.",
+              "transition_in_anchors": [
+                "deep breath",
+                "steady hands",
+                "Arthur's focus",
+                "strategy prep"
+              ],
+              "transition_out_text": "He begins to move, his form becoming a blur around the boss.",
+              "transition_out_anchors": [
+                "blur movement",
+                "thousand cuts",
+                "Arthur's speed",
+                "exploit execution"
+              ],
+              "consumes_outcome_from": "6:6",
+              "hands_off_to": "6:8",
+              "end_condition_echo": "Arthur identifies a rounding error in the System's reflect logic."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Patch Trigger",
+          "intent": "Arthur defeats the boss using the exploit, causing the System to flag him as a bug.",
+          "end_condition": "The boss falls to a mathematical technicality, but the System triggers a 'Balance Patch' alert.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Arthur executes the final series of rapid, low-damage strikes.",
+              "type": "combat",
+              "outcome": "The boss's HP is whittled down to zero.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Heart of the Crypt",
+              "location_end_label": "The Heart of the Crypt",
+              "location_start": "A chamber where the walls are made of living, thorny vines.",
+              "location_end": "A chamber where the walls are made of living, thorny vines.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "The sound of the needle hitting the shell is like a rapid-fire sewing machine.",
+              "transition_in_anchors": [
+                "needle hits",
+                "sewing machine",
+                "rapid strikes",
+                "Arthur's effort"
+              ],
+              "transition_out_text": "The boss's health bar flickers and finally vanishes.",
+              "transition_out_anchors": [
+                "health bar",
+                "bar vanish",
+                "boss defeat",
+                "Arthur's win"
+              ],
+              "consumes_outcome_from": "6:7",
+              "hands_off_to": "6:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "The boss explodes, leaving behind a massive pile of loot and a system error.",
+              "type": "discovery",
+              "outcome": "Arthur wins the battle but triggers a global system event.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_patch_countdown"
+              ],
+              "location_start_label": "The Heart of the Crypt",
+              "location_end_label": "The Heart of the Crypt",
+              "location_start": "A chamber where the walls are made of living, thorny vines.",
+              "location_end": "A chamber where the walls are made of living, thorny vines.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "A blinding flash of light fills the room as the boss disintegrates.",
+              "transition_in_anchors": [
+                "blinding flash",
+                "boss disintegration",
+                "loot pile",
+                "Arthur's victory"
+              ],
+              "transition_out_text": "A red warning box appears, covering half of Arthur's vision.",
+              "transition_out_anchors": [
+                "red warning",
+                "system error",
+                "Arthur's vision",
+                "alert trigger"
+              ],
+              "consumes_outcome_from": "6:8",
+              "hands_off_to": "6:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "The System announces an emergency 'Balance Patch' to fix the exploit.",
+              "type": "climax",
+              "outcome": "Arthur is now a fugitive from the System itself.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Heart of the Crypt",
+              "location_end_label": "The Heart of the Crypt",
+              "location_start": "A chamber where the walls are made of living, thorny vines.",
+              "location_end": "A chamber where the walls are made of living, thorny vines.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "A booming voice echoes through the dungeon: 'ANOMALY DETECTED. INITIALIZING PATCH.'",
+              "transition_in_anchors": [
+                "booming voice",
+                "ANOMALY DETECTED",
+                "PATCH INITIALIZING",
+                "system alert"
+              ],
+              "consumes_outcome_from": "6:9",
+              "end_condition_echo": "The boss falls to a mathematical technicality, but the System triggers a 'Balance Patch' alert."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 7,
+      "title": "Hit, Run, and Repeat",
+      "goal": "Arthur must escape the dungeon before the System 'patches' his existence out of the world.",
+      "chapter_role": "climax",
+      "stakes_shift": "Survival is no longer just about HP; it's about staying ahead of the System's administration.",
+      "bridge": {
+        "from_prev": "The world begins to pixelate as the 'Balance Patch' initiates.",
+        "to_next": "Arthur escapes into a 'Legacy Zone' where the patch can't reach him, ready for the next exploit."
+      },
+      "pacing": {
+        "intensity": 5,
+        "tempo": "rush",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Digital Decay",
+          "intent": "The world begins to break down as the System attempts to delete Arthur's character.",
+          "end_condition": "The world begins to pixelate as the 'Balance Patch' initiates.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "The dungeon walls start to dissolve into raw code.",
+              "type": "setup",
+              "outcome": "Arthur realizes the environment is no longer stable.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Heart of the Crypt",
+              "location_end_label": "The Dissolving Sanctum",
+              "location_start": "A chamber where the walls are made of living, thorny vines.",
+              "location_end": "A room where the walls are turning into rivers of blue light.",
+              "handoff_mode": "hard_cut",
+              "constraint_state": "pursued",
+              "transition_out_text": "Arthur grabs his loot and runs as the floor beneath him turns to static.",
+              "transition_out_anchors": [
+                "loot grab",
+                "floor static",
+                "Arthur's run",
+                "dissolving walls"
+              ],
+              "hands_off_to": "7:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Arthur encounters 'Patch Hounds'\u2014system agents sent to delete him.",
+              "type": "combat",
+              "outcome": "Arthur must fight while the world literal falls apart around him.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_patch_countdown"
+              ],
+              "location_start_label": "The Dissolving Sanctum",
+              "location_end_label": "The Glitch Corridor",
+              "location_start": "A room where the walls are turning into rivers of blue light.",
+              "location_end": "A hallway where the ceiling is missing, revealing a void of code.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Three hounds made of flickering white light leap from the walls.",
+              "transition_in_anchors": [
+                "Patch Hounds",
+                "white light",
+                "hound leap",
+                "system agents"
+              ],
+              "transition_out_text": "He cuts them down, but more are already forming from the static.",
+              "transition_out_anchors": [
+                "hound kill",
+                "static forming",
+                "Arthur's speed",
+                "endless agents"
+              ],
+              "consumes_outcome_from": "7:1",
+              "hands_off_to": "7:3"
+            },
+            {
+              "scene_id": 3,
+              "summary": "The sky above the dungeon tears open, revealing the system's core.",
+              "type": "discovery",
+              "outcome": "The scale of the system's intervention is revealed.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Glitch Corridor",
+              "location_end_label": "The Open Crypt",
+              "location_start": "A hallway where the ceiling is missing, revealing a void of code.",
+              "location_end": "The ruins of the crypt under a sky of swirling data.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "A massive tear appearing in the ceiling, sucking debris into the void.",
+              "transition_in_anchors": [
+                "sky tear",
+                "debris suck",
+                "swirling data",
+                "system core"
+              ],
+              "consumes_outcome_from": "7:2",
+              "hands_off_to": "7:4",
+              "end_condition_echo": "The world begins to pixelate as the 'Balance Patch' initiates."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Outrun",
+          "intent": "Arthur races through the collapsing dungeon toward an unpatched legacy zone.",
+          "end_condition": "Arthur reaches the boundary of the Legacy Zone with the patch at his heels.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Arthur performs a series of high-stakes jumps across floating platforms.",
+              "type": "development",
+              "outcome": "Arthur's platforming skills are pushed to their absolute limit.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_survival"
+              ],
+              "location_start_label": "The Open Crypt",
+              "location_end_label": "The Floating Debris Field",
+              "location_start": "The ruins of the crypt under a sky of swirling data.",
+              "location_end": "A series of broken stones floating in a digital void.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "Arthur leaps from a crumbling pillar to a floating slab of glass.",
+              "transition_in_anchors": [
+                "crumbling pillar",
+                "floating slab",
+                "Arthur's leap",
+                "void jump"
+              ],
+              "transition_out_text": "He barely catches the edge of the next platform as it starts to fade.",
+              "transition_out_anchors": [
+                "platform edge",
+                "fading platform",
+                "Arthur's catch",
+                "close call"
+              ],
+              "consumes_outcome_from": "7:3",
+              "hands_off_to": "7:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Boris stays behind to hold off a wave of Patch Hounds.",
+              "type": "climax",
+              "outcome": "Arthur is forced to leave his ally behind to survive.",
+              "characters": [
+                "char_arthur",
+                "char_paladin_boris"
+              ],
+              "location_start_label": "The Floating Debris Field",
+              "location_end_label": "The Final Bridge",
+              "location_start": "A series of broken stones floating in a digital void.",
+              "location_end": "A long, narrow bridge of light leading to a portal.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Boris plants his shield and turns to face the approaching swarm.",
+              "transition_in_anchors": [
+                "Boris's shield",
+                "hound swarm",
+                "Arthur's look",
+                "sacrifice"
+              ],
+              "transition_out_text": "Arthur runs, the sound of Boris's battle cry fading behind him.",
+              "transition_out_anchors": [
+                "Arthur's run",
+                "fading cry",
+                "bridge of light",
+                "escape path"
+              ],
+              "consumes_outcome_from": "7:4",
+              "hands_off_to": "7:6"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Arthur dodges beams of 'Deletion Light' that erase everything they touch.",
+              "type": "combat",
+              "outcome": "Arthur's precision is tested against a one-hit-kill environmental hazard.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_survival"
+              ],
+              "location_start_label": "The Final Bridge",
+              "location_end_label": "The Final Bridge",
+              "location_start": "A long, narrow bridge of light leading to a portal.",
+              "location_end": "A long, narrow bridge of light leading to a portal.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "Beams of purple light rain down from the sky, carving holes in the bridge.",
+              "transition_in_anchors": [
+                "purple light",
+                "Deletion Light",
+                "bridge holes",
+                "Arthur's dodge"
+              ],
+              "transition_out_text": "He slides under a beam, the heat of deletion singeing his hair.",
+              "transition_out_anchors": [
+                "beam slide",
+                "deletion heat",
+                "singeing hair",
+                "narrow escape"
+              ],
+              "consumes_outcome_from": "7:5",
+              "hands_off_to": "7:7"
+            },
+            {
+              "scene_id": 7,
+              "summary": "Arthur reaches the portal to the Legacy Zone as the bridge collapses.",
+              "type": "climax",
+              "outcome": "Arthur is at the threshold of safety.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Final Bridge",
+              "location_end_label": "The Legacy Portal",
+              "location_start": "A long, narrow bridge of light leading to a portal.",
+              "location_end": "A swirling vortex of golden, old-school pixels.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "The bridge shatters behind him, the void closing in.",
+              "transition_in_anchors": [
+                "bridge shatter",
+                "closing void",
+                "Arthur's sprint",
+                "Legacy Portal"
+              ],
+              "transition_out_text": "He leaps into the golden light, his 1 HP still intact.",
+              "transition_out_anchors": [
+                "golden light",
+                "final leap",
+                "1 HP",
+                "portal entry"
+              ],
+              "consumes_outcome_from": "7:6",
+              "hands_off_to": "7:8",
+              "end_condition_echo": "Arthur reaches the boundary of the Legacy Zone with the patch at his heels."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Legacy Escape",
+          "intent": "Arthur crosses into the safe zone, securing his existence and preparing for the next exploit.",
+          "end_condition": "Arthur escapes into a 'Legacy Zone' where the patch can't reach him, ready for the next exploit.",
+          "scenes": [
+            {
+              "scene_id": 8,
+              "summary": "Arthur tumbles through the portal and lands in a world of 8-bit graphics.",
+              "type": "discovery",
+              "outcome": "Arthur arrives in a zone that the modern system patch cannot affect.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Legacy Portal",
+              "location_end_label": "The Pixelated Meadow",
+              "location_start": "A swirling vortex of golden, old-school pixels.",
+              "location_end": "A field of blocky green grass and square flowers.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "sheltered",
+              "transition_in_text": "The roar of the deletion patch is replaced by a cheerful, chiptune melody.",
+              "transition_in_anchors": [
+                "patch roar",
+                "chiptune melody",
+                "Arthur's tumble",
+                "Pixelated Meadow"
+              ],
+              "transition_out_text": "He stands up, his character model now outlined in thick, black pixels.",
+              "transition_out_anchors": [
+                "character model",
+                "black pixels",
+                "Arthur's stand",
+                "8-bit world"
+              ],
+              "consumes_outcome_from": "7:7",
+              "hands_off_to": "7:9"
+            },
+            {
+              "scene_id": 9,
+              "summary": "Arthur checks his stats and finds that his glitch has survived the transition.",
+              "type": "discovery",
+              "outcome": "Arthur's 'Glass Cannon' build is still active in the Legacy Zone.",
+              "characters": [
+                "char_arthur"
+              ],
+              "threads": [
+                "thread_system_glitch"
+              ],
+              "location_start_label": "The Pixelated Meadow",
+              "location_end_label": "The Pixelated Meadow",
+              "location_start": "A field of blocky green grass and square flowers.",
+              "location_end": "A field of blocky green grass and square flowers.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "sheltered",
+              "transition_in_text": "He opens his status window, which is now a simple, blue-and-white box.",
+              "transition_in_anchors": [
+                "status window",
+                "blue-and-white box",
+                "Arthur's check",
+                "stat survival"
+              ],
+              "transition_out_text": "The '1' and '100%' are still there, glowing in blocky font.",
+              "transition_out_anchors": [
+                "blocky font",
+                "1 HP",
+                "100% Crit",
+                "exploit survival"
+              ],
+              "consumes_outcome_from": "7:8",
+              "hands_off_to": "7:10"
+            },
+            {
+              "scene_id": 10,
+              "summary": "Arthur looks out over the new horizon, already spotting his next exploit.",
+              "type": "climax",
+              "outcome": "Arthur is ready for his next adventure, now more powerful and knowledgeable.",
+              "characters": [
+                "char_arthur"
+              ],
+              "location_start_label": "The Pixelated Meadow",
+              "location_end_label": "The Legacy Horizon",
+              "location_start": "A field of blocky green grass and square flowers.",
+              "location_end": "A vista of pixelated mountains and a square sun.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Arthur walks to the edge of the meadow, looking toward the pixelated mountains.",
+              "transition_in_anchors": [
+                "meadow edge",
+                "pixelated mountains",
+                "Arthur's gaze",
+                "new horizon"
+              ],
+              "consumes_outcome_from": "7:9",
+              "end_condition_echo": "Arthur escapes into a 'Legacy Zone' where the patch can't reach him, ready for the next exploit."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
