@@ -3,6 +3,13 @@
 ## Objective
 Implement a deterministic, auditable, multi-phase outline pipeline that improves transition quality, section coherence, and cast/thread structure while preserving runtime stability and schema compatibility.
 
+## Doctrine Anchor
+This plan is governed by:
+1. `resources/plans/proposed/outline_pipeline_doctrine_manifesto_20260216_0205.md`
+
+Locked doctrine statement:
+1. LLM authors and lints; orchestrator never authors or discards; orchestrator only enforces validated state and deterministic invariants.
+
 ## Locked User Scope
 1. Re-run the full outline cycle on an existing outline via `outline generate`.
 2. Re-run specific outline phases via `outline generate`.
