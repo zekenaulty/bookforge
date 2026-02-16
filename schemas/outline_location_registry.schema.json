@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Outline Location Registry v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "locations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "location_registry_v1"
+    },
+    "locations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "location_id",
+          "display_name",
+          "stability_key"
+        ],
+        "properties": {
+          "location_id": {
+            "type": "string",
+            "pattern": "^LOC_[A-Z0-9_]+$"
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "parent_location_id": {
+            "type": "string",
+            "pattern": "^LOC_[A-Z0-9_]+$"
+          },
+          "introduced_in": {
+            "type": "string"
+          },
+          "stability_key": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}
