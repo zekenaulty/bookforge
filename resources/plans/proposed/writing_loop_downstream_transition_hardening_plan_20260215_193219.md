@@ -421,6 +421,236 @@ Gate C - Runtime behavior:
 Gate D - Audit output:
 1. No unresolved high-risk findings remain in transition/location downstream path.
 
+## Detailed Task Execution Contracts (Handling, Changes, Why, Ramifications)
+This section hardens execution by defining exactly how each workstream is implemented, what changes are expected, why they are required, and what downstream effects to expect.
+
+### WS0 - Guardrails, Sequencing, and Change Control
+Handling:
+1. Execute WS0 as a pre-implementation lock step before code changes.
+2. Freeze canonical field ownership and strictness precedence in writing.
+3. Publish a dependency map so no downstream WS starts with ambiguous assumptions.
+
+What will change:
+1. This plan will be treated as execution authority for scope and sequencing.
+2. Cross-plan references will be updated to prevent contradictory behavior between outline and writing loop plans.
+
+Why:
+1. Prevents parallel edits from reintroducing model-first canonical drift.
+2. Reduces rework from mid-stream policy reversals.
+
+Ramifications:
+1. Slight front-loaded planning overhead.
+2. Faster implementation velocity after WS0 because decision churn is reduced.
+3. Lower regression risk in WS3, WS4, and WS5 where coupling is highest.
+
+### WS1 - Deterministic Transition Seam Lint Checker
+Handling:
+1. Implement seam detection in deterministic tripwire code, not prompt-only analysis.
+2. Evaluate opening-span realization against `transition_in_text` or complete anchor set.
+3. Drive severity from explicit strictness input in code.
+
+What will change:
+1. `src/bookforge/pipeline/lint/tripwires.py` gains transition seam checker logic.
+2. `src/bookforge/phases/lint_phase.py` merges deterministic transition issues into combined lint issues.
+3. `resources/prompt_templates/lint.md` and lint blocks are aligned to code behavior to avoid contract drift.
+4. New tests validate strict and non-strict issue behavior.
+
+Why:
+1. Current seam enforcement is not deterministic and can silently miss teleport seams.
+2. Transition gating must be reproducible and auditable across runs.
+
+Ramifications:
+1. More seam violations will surface initially (expected).
+2. Repair cycle volume may rise until prompt compliance stabilizes.
+3. Risk of false positives in stylized openings; mitigated by anchor fallback and tunable opening-span window.
+
+### WS2 - Strictness Policy Wiring (Lint and Repair)
+Handling:
+1. Wire strictness flags explicitly into prompt render payloads.
+2. Stop relying on prompt prose that references unnamed strict modes.
+3. Keep strictness resolution deterministic and documented.
+
+What will change:
+1. `src/bookforge/phases/lint_phase.py` and `src/bookforge/phases/repair_phase.py` pass transition strictness fields.
+2. `src/bookforge/runner.py` and config helpers resolve strictness precedence.
+3. `resources/prompt_templates/lint.md` and `resources/prompt_templates/repair.md` consume explicit mode variables.
+4. Help docs are updated with strictness behavior and override semantics.
+
+Why:
+1. Prevents mode ambiguity that causes inconsistent severity outcomes.
+2. Aligns runtime behavior with plan and operator expectations.
+
+Ramifications:
+1. Stronger policy consistency across lint and repair.
+2. Existing workflows that assumed implicit defaults may need flag updates.
+3. Reduced “why did lint mark this warning here but error there” ambiguity.
+
+### WS3 - Planner Canonical Field Lock
+Handling:
+1. Enforce outline-first canonical keys in plan normalization.
+2. Permit model freedom only on non-canonical narrative scaffolding fields.
+3. Log mismatches when model output diverges from outline canonical values.
+
+What will change:
+1. `src/bookforge/phases/plan.py` canonical key normalization shifts from model-first to outline-first.
+2. Planning prompt contract clarifies that canonical fields are locked by outline.
+3. Schema validation remains post-normalization to catch malformed values.
+
+Why:
+1. Eliminates primary drift path where model reshapes transition/location identity.
+2. Ensures outline transition commitments survive into scene cards.
+
+Ramifications:
+1. Lower semantic drift and fewer cross-phase contradictions.
+2. Possible initial increase in plan-phase hard failures if outline canonical fields are incomplete.
+3. Better deterministic debugging because source of truth is explicit.
+
+### WS4 - Resume Reuse Provenance Invalidation
+Handling:
+1. Stamp scene cards with provenance.
+2. Require provenance match before reuse on resume.
+3. Force replan automatically when provenance mismatches.
+
+What will change:
+1. `src/bookforge/phases/plan.py` writes provenance metadata into scene cards.
+2. `src/bookforge/runner.py` validates outline/template/schema provenance in reuse path.
+3. Scene card schema is updated if provenance fields are schema-governed.
+4. New tests validate reuse accept/reject logic.
+
+Why:
+1. Prevents stale scene-card reuse after outline reruns or prompt updates.
+2. Restores safety guarantees for iterative refine-and-resume workflows.
+
+Ramifications:
+1. More replanning after outline changes (correct behavior).
+2. Slight runtime cost increase on resume due to provenance checks.
+3. Major reduction in hidden stale-artifact bugs.
+
+### WS5 - Canonical Location Identity Through Preflight and State
+Handling:
+1. Shift world-location authority to canonical location IDs.
+2. Preserve human-readable labels as display metadata only.
+3. Add migration-safe fallback for legacy states.
+
+What will change:
+1. `resources/prompt_templates/preflight.md` updates world alignment to `scene_card.location_end_id` semantics.
+2. `src/bookforge/pipeline/state_apply.py` and `src/bookforge/pipeline/durable.py` prefer canonical IDs for location logic.
+3. `schemas/state.schema.json` introduces or formalizes canonical location identity fields.
+4. Supporting code in preflight/state patch paths is adjusted for compatibility.
+
+Why:
+1. Current label-based location normalization conflicts with ID-driven transition contracts.
+2. Durable filtering must key from stable identity, not mutable labels.
+
+Ramifications:
+1. Migration complexity for existing state snapshots.
+2. Short-term compatibility branch logic until full transition completes.
+3. Long-term consistency gain across preflight, durable, lint, and repair.
+
+### WS6 - Repair Prompt Transition Contract Parity
+Handling:
+1. Mirror write-phase transition obligations in repair instructions.
+2. Require targeted fixes when `transition_bridge_missing` is present.
+3. Keep repair JSON/state patch constraints unchanged.
+
+What will change:
+1. `resources/prompt_templates/repair.md` gains explicit transition realization contract.
+2. Repair prompt blocks are updated to include anchor/text compliance rules.
+3. `src/bookforge/phases/repair_phase.py` passes strictness context as needed.
+4. New repair transition tests verify compliance path.
+
+Why:
+1. Lint findings are ineffective if repair is not instructed with matching contracts.
+2. Transition defects must be repairable without manual intervention.
+
+Ramifications:
+1. Higher repair effectiveness for seam issues.
+2. Potential increase in repair output constraints causing early failures until tuned.
+3. Lower recurrence of repeated seam violations across cycles.
+
+### WS7 - Scene Card Schema Tightening
+Handling:
+1. Tighten schema where fields drive deterministic behavior.
+2. Reject malformed link/reference payloads early.
+3. Keep regeneration path for legacy cards.
+
+What will change:
+1. `schemas/scene_card.schema.json` gets:
+   - enum constraints for `handoff_mode` and `constraint_state`,
+   - reference pattern constraints for `consumes_outcome_from` and `hands_off_to`,
+   - bounds for `transition_out_anchors`.
+2. Plan/runtime validation path is updated for stricter schema behavior.
+3. Schema tests are expanded for invalid payload rejection.
+
+Why:
+1. Permissive schema currently allows invalid-but-accepted transition payloads.
+2. Strict schema reduces downstream corrective complexity.
+
+Ramifications:
+1. Legacy scene cards may fail validation and require regeneration.
+2. Early failure rate may rise initially, then drop as prompts align.
+3. Improved determinism and reduced ambiguous downstream behavior.
+
+### WS8 - State World Update Guardrails
+Handling:
+1. Add explicit allowlist for `world_updates` keys.
+2. Deterministically reject or ignore unknown keys per policy.
+3. Log all unknown key encounters for audit.
+
+What will change:
+1. `src/bookforge/pipeline/state_apply.py` enforces allowed-key handling.
+2. `src/bookforge/pipeline/state_patch.py` and related schemas align with allowed key model.
+3. New tests cover unknown-key injection and safe merge behavior.
+
+Why:
+1. Blind merge is a state-corruption and bloat risk.
+2. Guardrails prevent silent persistence of malformed world fields.
+
+Ramifications:
+1. Some previously accepted patches will now error or warn.
+2. Better state integrity and lower latent corruption risk.
+3. Clearer debugging because invalid keys are surfaced immediately.
+
+### WS9 - Runtime Prompt Sync Guardrail
+Handling:
+1. Add a prompt hash integrity check before critical runs.
+2. Compare source and runtime template hashes for protected templates.
+3. Expose policy as warn-only or hard-block mode.
+
+What will change:
+1. `src/bookforge/pipeline/prompts.py` and `src/bookforge/runner.py` add sync validation.
+2. Optional CLI/config wiring exposes strict sync behavior.
+3. Help docs describe how to interpret and resolve mismatches.
+
+Why:
+1. Prevents runtime from quietly using stale prompt templates.
+2. Strengthens compiler-as-source-of-truth discipline.
+
+Ramifications:
+1. Additional pre-run checks may block some runs until prompts are synced.
+2. Reduced drift risk between intended contracts and executed contracts.
+3. Better auditability of prompt provenance.
+
+### WS10 - Test Plan, Audit Gates, and Signoff
+Handling:
+1. Add targeted deterministic tests first, then run full suite.
+2. Run an end-to-end outline -> planning -> lint/repair audit sample before signoff.
+3. Block release if any high-risk acceptance gate fails.
+
+What will change:
+1. New tests for transition tripwires, provenance invalidation, and location identity.
+2. Existing tests are updated for stricter schema and strictness policy behavior.
+3. Audit report expectations are formalized as release gate evidence.
+
+Why:
+1. This work is highly coupled; unit-only confidence is insufficient.
+2. Regression-resistant delivery requires reproducible gate evidence.
+
+Ramifications:
+1. CI/runtime may get slower due to additional coverage.
+2. Defect discovery shifts earlier (desirable).
+3. Higher confidence that transition/location hardening survives future prompt/code iterations.
+
 ## Execution Order
 Recommended implementation sequence:
 1. WS0 guardrails.
@@ -469,4 +699,3 @@ This plan is complete when:
 2. High-risk items are reduced to medium-low or lower.
 3. Test suite includes deterministic seam/transition coverage and provenance invalidation coverage.
 4. Docs reflect strictness and location identity behavior as implemented.
-
