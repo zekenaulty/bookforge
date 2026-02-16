@@ -41,6 +41,14 @@ DEFAULT_BUDGETS = {
 
 PROMPT_TEMPLATE_FILES = [
     "outline.md",
+    "outline_phase_01_chapter_spine.md",
+    "outline_phase_02_section_architecture.md",
+    "outline_phase_03_scene_draft.md",
+    "outline_phase_04_transition_causality_refinement.md",
+    "outline_phase_04a_transition_seam_analysis.md",
+    "outline_phase_04b_transition_execution.md",
+    "outline_phase_05_cast_function_refinement.md",
+    "outline_phase_06_thread_payoff_refinement.md",
     "plan.md",
     "preflight.md",
     "write.md",

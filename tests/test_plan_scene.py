@@ -80,6 +80,16 @@ def test_plan_scene_writes_scene_card(tmp_path: Path) -> None:
         "required_callbacks": [],
         "constraints": [],
         "end_condition": "The hero commits.",
+        "location_start_id": "LOC_CITY_GATE_A1B2C3",
+        "location_end_id": "LOC_CITY_GATE_A1B2C3",
+        "location_start": "City Gate",
+        "location_end": "City Gate",
+        "handoff_mode": "direct_continuation",
+        "constraint_state": "free",
+        "transition_in_text": "At the city gate, the summons is delivered without warning.",
+        "transition_in_anchors": ["city gate", "summons", "warning bell"],
+        "seam_score": 10,
+        "seam_resolution": "inline_bridge",
     }
 
     client = DummyClient(json.dumps(scene_card))
@@ -103,4 +113,3 @@ def test_plan_scene_writes_scene_card(tmp_path: Path) -> None:
     assert planned["required_visible_on_page"] == []
     assert planned["forbidden_visible"] == []
     assert planned["device_presence"] == []
-

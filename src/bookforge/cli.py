@@ -3,7 +3,11 @@ from pathlib import Path
 import sys
 
 from bookforge.author import generate_author
-from bookforge.outline import generate_outline
+from bookforge.outline import (
+    generate_outline,
+    load_latest_outline_pipeline_report,
+    format_outline_pipeline_summary,
+)
 from bookforge.runner import run_loop
 from bookforge.characters import generate_characters
 from bookforge.workspace import init_book_workspace, parse_genre, parse_targets, reset_book_workspace_detailed, update_book_templates
@@ -51,17 +55,43 @@ def _author_generate(args: argparse.Namespace) -> int:
 def _outline_generate(args: argparse.Namespace) -> int:
     workspace = Path(args.workspace)
     prompt_file = Path(args.prompt_file) if args.prompt_file else None
+    transition_hints_file = (
+        Path(args.transition_hints_file)
+        if getattr(args, "transition_hints_file", None)
+        else None
+    )
     try:
         outline_path = generate_outline(
             workspace=workspace,
             book_id=args.book,
             new_version=args.new_version,
             prompt_file=prompt_file,
+            rerun=bool(getattr(args, "rerun", False)),
+            resume=bool(getattr(args, "resume", False)),
+            from_phase=getattr(args, "from_phase", None),
+            to_phase=getattr(args, "to_phase", None),
+            phase=getattr(args, "phase", None),
+            transition_hints_file=transition_hints_file,
+            strict_transition_hints=bool(getattr(args, "strict_transition_hints", False)),
+            strict_transition_bridges=bool(getattr(args, "strict_transition_bridges", True)),
+            strict_location_identity=bool(getattr(args, "strict_location_identity", True)),
+            transition_insert_budget_per_chapter=int(
+                getattr(args, "transition_insert_budget_per_chapter", 2) or 2
+            ),
+            allow_transition_scene_insertions=bool(
+                getattr(args, "allow_transition_scene_insertions", True)
+            ),
+            force_rerun_with_draft=bool(getattr(args, "force_rerun_with_draft", False)),
+            exact_scene_count=bool(getattr(args, "exact_scene_count", False)),
+            scene_count_range=getattr(args, "scene_count_range", None),
         )
     except Exception as exc:
         sys.stderr.write(f"Outline generation failed: {exc}\n")
         return 1
     sys.stdout.write(f"Outline created at {outline_path}\n")
+    report_path, report = load_latest_outline_pipeline_report(workspace=workspace, book_id=args.book)
+    if report:
+        sys.stdout.write(format_outline_pipeline_summary(report, report_path=report_path))
     return 0
 
 
@@ -76,6 +106,12 @@ def _run(args: argparse.Namespace) -> int:
             steps=args.steps,
             until=args.until,
             resume=args.resume,
+            ack_outline_attention_items=bool(
+                getattr(args, "ack_outline_attention_items", False)
+            ),
+            force_outline_gate_bypass=bool(
+                getattr(args, "force_outline_gate_bypass", False)
+            ),
         )
     except Exception as exc:
         sys.stderr.write(f"Run failed: {exc}\n")
@@ -193,6 +229,96 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Create a new outline version.",
     )
+    outline_generate.add_argument(
+        "--rerun",
+        action="store_true",
+        help="Rerun the outline pipeline on an existing outline.",
+    )
+    outline_generate.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume the latest outline pipeline run.",
+    )
+    outline_generate.add_argument(
+        "--from-phase",
+        help="Start execution from phase id or step id.",
+    )
+    outline_generate.add_argument(
+        "--to-phase",
+        help="Stop execution at phase id or step id.",
+    )
+    outline_generate.add_argument(
+        "--phase",
+        help="Run a single phase (alias for --from-phase X --to-phase X).",
+    )
+    outline_generate.add_argument(
+        "--transition-hints-file",
+        help="Path to transition hints JSON file.",
+    )
+    outline_generate.add_argument(
+        "--strict-transition-hints",
+        action="store_true",
+        help="Require strict transition-hint compliance.",
+    )
+    outline_generate.add_argument(
+        "--strict-transition-bridges",
+        dest="strict_transition_bridges",
+        action="store_true",
+        default=True,
+        help="Enable strict transition bridge policy (default: enabled).",
+    )
+    outline_generate.add_argument(
+        "--relaxed-transition-bridges",
+        dest="strict_transition_bridges",
+        action="store_false",
+        help="Relax strict transition bridge policy.",
+    )
+    outline_generate.add_argument(
+        "--strict-location-identity",
+        dest="strict_location_identity",
+        action="store_true",
+        default=True,
+        help="Enable strict location identity policy (default: enabled).",
+    )
+    outline_generate.add_argument(
+        "--relaxed-location-identity",
+        dest="strict_location_identity",
+        action="store_false",
+        help="Relax strict location identity placeholder policy.",
+    )
+    outline_generate.add_argument(
+        "--transition-insert-budget-per-chapter",
+        type=int,
+        default=2,
+        help="Maximum transition scene insertions selected per chapter (default: 2).",
+    )
+    outline_generate.add_argument(
+        "--allow-transition-scene-insertions",
+        dest="allow_transition_scene_insertions",
+        action="store_true",
+        default=True,
+        help="Allow transition scene insertion routing (default: enabled).",
+    )
+    outline_generate.add_argument(
+        "--disallow-transition-scene-insertions",
+        dest="allow_transition_scene_insertions",
+        action="store_false",
+        help="Disable transition scene insertion routing.",
+    )
+    outline_generate.add_argument(
+        "--force-rerun-with-draft",
+        action="store_true",
+        help="Allow outline rerun even when drafted chapter markdown exists.",
+    )
+    outline_generate.add_argument(
+        "--exact-scene-count",
+        action="store_true",
+        help="Enable exact chapter scene-count mode (strict).",
+    )
+    outline_generate.add_argument(
+        "--scene-count-range",
+        help="Optional chapter scene count range, format MIN-MAX.",
+    )
     outline_generate.set_defaults(func=_outline_generate)
 
     characters_parser = subparsers.add_parser("characters", help="Character commands.")
@@ -211,6 +337,18 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--steps", type=int, help="Number of steps to run.")
     run_parser.add_argument("--until", help="Stop condition, e.g. chapter:5.")
     run_parser.add_argument("--resume", action="store_true", help="Resume prior run.")
+    run_parser.add_argument(
+        "--ack-outline-attention-items",
+        "--ack-outline-issues",
+        dest="ack_outline_attention_items",
+        action="store_true",
+        help="Acknowledge outline attention items and continue writing when status permits.",
+    )
+    run_parser.add_argument(
+        "--force-outline-gate-bypass",
+        action="store_true",
+        help="Bypass outline write gate checks (testing only).",
+    )
     run_parser.set_defaults(func=_run)
 
     compile_parser = subparsers.add_parser("compile", help="Compile a manuscript.")

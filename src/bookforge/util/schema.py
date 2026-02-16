@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -23,6 +23,10 @@ _SCHEMA_MAP = {
     "lint_report": "lint_report.schema.json",
     "item_registry": "item_registry.schema.json",
     "plot_devices": "plot_devices.schema.json",
+    "error_v1": "error_v1.schema.json",
+    "outline_location_registry": "outline_location_registry.schema.json",
+    "outline_pipeline_report": "outline_pipeline_report.schema.json",
+    "outline_transition_hints": "outline_transition_hints.schema.json",
 }
 
 

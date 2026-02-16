@@ -51,6 +51,10 @@ from bookforge.pipeline.durable import _durable_state_context
 from bookforge.pipeline.parse import _extract_prose_and_patch
 from bookforge.pipeline.log import _status, _now_iso, set_run_log_path
 from bookforge.util.schema import validate_json
+from bookforge.outline import (
+    load_latest_outline_pipeline_report,
+    format_outline_pipeline_summary,
+)
 
 PAUSE_EXIT_CODE = 75
 
@@ -427,6 +431,8 @@ def run_loop(
     steps: Optional[int] = None,
     until: Optional[str] = None,
     resume: bool = False,
+    ack_outline_attention_items: bool = False,
+    force_outline_gate_bypass: bool = False,
 ) -> None:
     book_root = workspace / "books" / book_id
     if not book_root.exists():
@@ -456,6 +462,78 @@ def run_loop(
     book = _load_json(book_path)
     outline = _load_json(outline_path)
     validate_json(outline, "outline")
+
+    report_path, outline_report = load_latest_outline_pipeline_report(
+        workspace=workspace,
+        book_id=book_id,
+    )
+    outline_attention_ack = False
+    if not outline_report:
+        if not force_outline_gate_bypass:
+            raise ValueError(
+                "WRITE GATED: outline pipeline report is missing or unreadable. "
+                "Run outline generation first, or use --force-outline-gate-bypass for testing."
+            )
+        _status(
+            "WRITE GATE BYPASS ENABLED: continuing without a readable outline pipeline report."
+        )
+        _append_run_log(book_root, run_id, "outline_gate_bypass=true reason=missing_report")
+    else:
+        overall_status = str(outline_report.get("overall_status") or "UNKNOWN").strip().upper()
+        requires_attention = bool(outline_report.get("requires_user_attention", False))
+        attention_items = (
+            outline_report.get("attention_items")
+            if isinstance(outline_report.get("attention_items"), list)
+            else []
+        )
+        strict_blocking = any(
+            isinstance(item, dict) and str(item.get("severity") or "").strip().lower() == "error"
+            for item in attention_items
+        )
+        summary = format_outline_pipeline_summary(outline_report, report_path=report_path).rstrip()
+        if summary:
+            _status(summary)
+
+        if overall_status not in {"SUCCESS", "SUCCESS_WITH_WARNINGS"}:
+            if not force_outline_gate_bypass:
+                raise ValueError(
+                    "WRITE GATED: latest outline pipeline status is "
+                    f"{overall_status}. Resolve outline pipeline issues before writing. "
+                    f"Report: {report_path}"
+                )
+            _status(
+                "WRITE GATE BYPASS ENABLED: continuing despite outline pipeline status "
+                f"{overall_status}. Report: {report_path}"
+            )
+            _append_run_log(
+                book_root,
+                run_id,
+                f"outline_gate_bypass=true reason=status_{overall_status.lower()}",
+            )
+
+        if requires_attention:
+            if strict_blocking:
+                if not force_outline_gate_bypass:
+                    raise ValueError(
+                        "WRITE GATED: outline report requires strict attention handling; "
+                        "resolve outline issues before writing."
+                    )
+                _status("WRITE GATE BYPASS ENABLED: strict outline attention gate bypassed.")
+                _append_run_log(book_root, run_id, "outline_gate_bypass=true reason=strict_attention")
+            elif not ack_outline_attention_items and not force_outline_gate_bypass:
+                raise ValueError(
+                    "WRITE GATED: outline report requires attention. "
+                    "Re-run with --ack-outline-attention-items only after review."
+                )
+            outline_attention_ack = bool(ack_outline_attention_items)
+
+    _append_run_log(
+        book_root,
+        run_id,
+        f"outline_attention_ack={'true' if outline_attention_ack else 'false'}",
+    )
+    if not force_outline_gate_bypass:
+        _append_run_log(book_root, run_id, "outline_gate_bypass=false")
 
     chapter_order, scene_counts = _outline_summary(outline)
     character_registry = _build_character_registry(outline)
@@ -1028,7 +1106,6 @@ def run_loop(
 
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
-
 
 
 

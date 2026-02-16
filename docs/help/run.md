@@ -4,7 +4,7 @@ Purpose
 - Run the scene generation loop (plan -> preflight -> write -> repair -> state_repair -> lint -> commit).
 
 Usage
-- bookforge run --book <id> [--steps <n>] [--until chapter:N | chapter:N:scene:M] [--resume]
+- bookforge run --book <id> [--steps <n>] [--until chapter:N | chapter:N:scene:M] [--resume] [--ack-outline-attention-items] [--force-outline-gate-bypass]
 
 Scope
 - Requires explicit --book (current-book selection is not implemented).
@@ -16,6 +16,8 @@ Optional parameters
 - --steps: Number of loop iterations to run.
 - --until: Stop condition. Formats: chapter:N or chapter:N:scene:M.
 - --resume: Resume a prior run.
+- --ack-outline-attention-items (alias: --ack-outline-issues): Acknowledge non-blocking outline attention items so writing can proceed.
+- --force-outline-gate-bypass: Bypass outline write gate checks (testing/debug only).
 - --workspace: Override workspace root (global option).
 
 
@@ -24,6 +26,13 @@ Defaults
 
 Resume notes
 - --resume reuses phase history and scene artifacts in draft/context/phase_history to continue without re-running completed phases.
+
+Outline write gate
+- `bookforge run` checks the latest outline pipeline report before writing.
+- Writing is blocked when outline status is `ERROR` or `PAUSED`.
+- Writing is blocked when strict attention items are present unless `--force-outline-gate-bypass` is set.
+- Non-strict attention items require explicit acknowledgement via `--ack-outline-attention-items`.
+- `--force-outline-gate-bypass` is intended for controlled testing only.
 
 Outputs
 - draft/chapters/ch_###/scene_###.md (scene prose)
