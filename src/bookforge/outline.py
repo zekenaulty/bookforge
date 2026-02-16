@@ -9,7 +9,7 @@ import logging
 import re
 import shutil
 
-from bookforge.config.env import load_config, read_int_env
+from bookforge.config.env import load_config, read_env_value, read_int_env
 from bookforge.llm.client import LLMClient
 from bookforge.llm.errors import LLMRequestError
 from bookforge.llm.factory import get_llm_client, resolve_model
@@ -30,6 +30,24 @@ OUTLINE_SCHEMA_VERSION = "1.1"
 OUTLINE_MAX_ATTEMPTS = 2
 OUTLINE_DEFAULT_MAX_TOKENS = 58982400
 SUCCESSFUL_OUTLINE_STATUSES = {"SUCCESS", "SUCCESS_WITH_WARNINGS"}
+
+
+def _resolve_outline_thinking_level(client: LLMClient, model: str) -> Optional[str]:
+    if str(getattr(client, "provider", "")).lower() != "gemini":
+        return None
+
+    explicit = str(read_env_value("OUTLINE_THINKING_LEVEL") or "").strip().lower()
+    if explicit in {"minimal", "low", "medium", "high"}:
+        return explicit
+
+    generic = str(read_env_value("GEMINI_THINKING_LEVEL") or "").strip().lower()
+    if generic in {"minimal", "low", "medium", "high"}:
+        return generic
+
+    model_lower = str(model or "").strip().lower()
+    if "gemini-3-flash" in model_lower:
+        return "minimal"
+    return "low"
 
 
 @dataclass
@@ -454,6 +472,7 @@ def _execute_step(
     client: LLMClient,
     model: str,
     max_tokens: int,
+    thinking_level: Optional[str],
     handoffs: Dict[str, Any],
     settings: Dict[str, Any],
     runtime: Dict[str, Any],
@@ -472,6 +491,8 @@ def _execute_step(
     _write_json(run_dir / outline_artifacts.step_artifact_name(step_id, "input"), input_payload)
 
     request = {"model": model, "temperature": 0.2, "max_tokens": max_tokens}
+    if thinking_level:
+        request["thinking_config"] = {"thinkingLevel": thinking_level}
     attempt = 0
     retry_message: Optional[str] = None
     last_output: Dict[str, Any] = {}
@@ -497,7 +518,13 @@ def _execute_step(
             extra["key_slot"] = key_slot
 
         try:
-            response = client.chat(messages, model=model, temperature=0.2, max_tokens=max_tokens)
+            response = client.chat(
+                messages,
+                model=model,
+                temperature=0.2,
+                max_tokens=max_tokens,
+                thinking_level=thinking_level,
+            )
         except LLMRequestError as exc:
             if should_log_llm():
                 log_llm_error(
@@ -668,6 +695,7 @@ def generate_outline(
         model = "default"
 
     max_tokens = max(4096, read_int_env("BOOKFORGE_OUTLINE_MAX_TOKENS", OUTLINE_DEFAULT_MAX_TOKENS))
+    thinking_level = _resolve_outline_thinking_level(client, model)
     outline_root = book_root / "outline"
     outline_root.mkdir(parents=True, exist_ok=True)
 
@@ -826,6 +854,7 @@ def generate_outline(
                 client=client,
                 model=model,
                 max_tokens=max_tokens,
+                thinking_level=thinking_level,
                 handoffs=handoffs,
                 settings=settings,
                 runtime=runtime,

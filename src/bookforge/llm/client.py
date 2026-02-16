@@ -23,5 +23,6 @@ class LLMClient(ABC):
         model: str,
         temperature: float = 0.7,
         max_tokens: int = 1024,
+        thinking_level: Optional[str] = None,
     ) -> LLMResponse:
         raise NotImplementedError

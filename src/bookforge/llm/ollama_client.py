@@ -20,6 +20,7 @@ class OllamaClient(LLMClient):
         model: str,
         temperature: float = 0.7,
         max_tokens: int = 1024,
+        thinking_level: Optional[str] = None,
     ) -> LLMResponse:
         self._throttle()
         payload = {

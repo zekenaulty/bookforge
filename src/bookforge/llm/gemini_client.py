@@ -21,6 +21,7 @@ class GeminiClient(LLMClient):
         model: str,
         temperature: float = 0.7,
         max_tokens: int = 1024,
+        thinking_level: Optional[str] = None,
     ) -> LLMResponse:
         self._throttle()
         system_text, non_system = split_system_messages(messages)
@@ -37,6 +38,11 @@ class GeminiClient(LLMClient):
                 "maxOutputTokens": max_tokens,
             },
         }
+        normalized_level = str(thinking_level or "").strip().lower()
+        if normalized_level in {"minimal", "low", "medium", "high"}:
+            payload["generationConfig"]["thinkingConfig"] = {
+                "thinkingLevel": normalized_level
+            }
         if system_text:
             payload["system_instruction"] = {"parts": [{"text": system_text}]}
 
