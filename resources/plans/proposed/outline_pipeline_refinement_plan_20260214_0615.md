@@ -22,6 +22,12 @@ Locked doctrine statement:
 - No direct ad hoc prompt strings in phase code.
 - Outline pipeline prompts must be compiler-managed blocks + manifests.
 
+## Modular Execution Constraint (Added)
+Outline execution should follow the same runner-style phase pattern:
+1. `src/bookforge/outline.py` acts as thin orchestrator.
+2. Phase-specific business logic lives in dedicated phase modules, not in a single monolithic outline file.
+3. Any growth pattern that centralizes phase logic back into `outline.py` should be treated as design regression and refactored before merge.
+
 ## Current-State Cross-Reference (Code Coupling)
 ### Outline generation and CLI
 - `src/bookforge/cli.py`
@@ -73,6 +79,14 @@ This plan adds new outline-phase templates as compiler-managed assets, but keeps
 - `resources/prompt_blocks/phase/outline_pipeline/phase_04_transition_causality_refinement_prompt_contract.md`
 - `resources/prompt_blocks/phase/outline_pipeline/phase_05_cast_function_refinement_prompt_contract.md`
 - `resources/prompt_blocks/phase/outline_pipeline/phase_06_thread_payoff_refinement_prompt_contract.md`
+
+Phase-04 split extension (required by rebuild plans):
+- existing file above is treated as phase 04A seam-analysis contract source.
+- new file required for phase 04B execution contract:
+  - `resources/prompt_blocks/phase/outline_pipeline/phase_04b_transition_execution_prompt_contract.md`
+- see:
+  - `resources/plans/proposed/outline_phase4_two_step_llm_transition_plan_20260216_0145.md`
+  - `resources/plans/proposed/outline_pipeline_rebuild_implementation_checklist_20260216_0145.md`
 
 ### Draft manifests (non-active, created)
 - `resources/prompt_composition/manifests/proposed/outline_phase_01_chapter_spine.composition.manifest.json`

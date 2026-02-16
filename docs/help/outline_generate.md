@@ -17,6 +17,11 @@ Optional parameters
 - --prompt-file: Path to a plain-English outline prompt file used as grounding context (relative to the current working directory).
 - --workspace: Override workspace root (global option).
 
+Model and API key selection
+- Outline generation resolves model from `OUTLINE_MODEL` first, then `DEFAULT_MODEL`.
+- Outline generation resolves API key from `OUTLINE_API_KEY` first, then provider default (`OPENAI_API_KEY` or `GEMINI_API_KEY`).
+- Planner uses `PLANNER_MODEL` / `PLANNER_API_KEY`; outline now has its own independent env knobs.
+
 Outputs
 - Writes outline/outline.json and outline/chapters/ch_###.json.
 - Outline schema v1.1 uses sections and scenes; see prompts/templates/outline.md for shape.

@@ -23,3 +23,19 @@ def test_gemini_requires_key():
 def test_ollama_does_not_require_key():
     config = load_config(env={"LLM_PROVIDER": "ollama"}, env_path=None)
     validate_provider_config(config)
+
+
+def test_openai_accepts_outline_phase_key_without_default():
+    config = load_config(
+        env={"LLM_PROVIDER": "openai", "OUTLINE_API_KEY": "x"},
+        env_path=None,
+    )
+    validate_provider_config(config)
+
+
+def test_gemini_accepts_outline_phase_key_without_default():
+    config = load_config(
+        env={"LLM_PROVIDER": "gemini", "OUTLINE_API_KEY": "x"},
+        env_path=None,
+    )
+    validate_provider_config(config)

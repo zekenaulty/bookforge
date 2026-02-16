@@ -427,9 +427,9 @@ def generate_outline(
 
     if client is None:
         config = load_config()
-        client = get_llm_client(config, phase="planner")
+        client = get_llm_client(config, phase="outline")
         if model is None:
-            model = resolve_model("planner", config)
+            model = resolve_model("outline", config)
     elif model is None:
         model = "default"
 

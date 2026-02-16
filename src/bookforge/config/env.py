@@ -12,6 +12,7 @@ class AppConfig:
     provider: str
     openai_api_key: Optional[str]
     gemini_api_key: Optional[str]
+    outline_api_key: Optional[str]
     planner_api_key: Optional[str]
     preflight_api_key: Optional[str]
     writer_api_key: Optional[str]
@@ -24,6 +25,7 @@ class AppConfig:
     openai_api_url: str
     gemini_api_url: str
     request_timeout_seconds: int
+    outline_model: Optional[str]
     planner_model: Optional[str]
     preflight_model: Optional[str]
     writer_model: Optional[str]
@@ -114,6 +116,7 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
         provider=provider,
         openai_api_key=merged.get("OPENAI_API_KEY"),
         gemini_api_key=merged.get("GEMINI_API_KEY"),
+        outline_api_key=merged.get("OUTLINE_API_KEY"),
         planner_api_key=merged.get("PLANNER_API_KEY"),
         preflight_api_key=merged.get("PREFLIGHT_API_KEY") or merged.get("SCENE_PREFLIGHT_API_KEY"),
         writer_api_key=merged.get("WRITER_API_KEY"),
@@ -126,6 +129,7 @@ def load_config(env: Optional[Dict[str, str]] = None, env_path: Optional[str] = 
         openai_api_url=openai_url,
         gemini_api_url=gemini_url,
         request_timeout_seconds=timeout_val,
+        outline_model=merged.get("OUTLINE_MODEL"),
         planner_model=merged.get("PLANNER_MODEL"),
         preflight_model=merged.get("PREFLIGHT_MODEL") or merged.get("SCENE_PREFLIGHT_MODEL"),
         writer_model=merged.get("WRITER_MODEL"),
@@ -167,6 +171,7 @@ def read_int_env(name: str, default: int) -> int:
 
 def _has_phase_api_keys(config: AppConfig) -> bool:
     return any([
+        config.outline_api_key,
         config.planner_api_key,
         config.preflight_api_key,
         config.writer_api_key,

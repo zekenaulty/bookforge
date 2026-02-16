@@ -34,6 +34,26 @@ Reference only (extract good constraints, not implementation shape):
 6. Code must never paper over missing/invalid semantic fields with generated prose placeholders.
 7. All failures, downgrades, and policy constraints must be visible in console and report artifacts.
 
+## Code Architecture Lock (Runner-Style Phase Modules)
+To prevent monolithic drift:
+1. `src/bookforge/outline.py` is orchestration shell only.
+2. Outline phase execution logic must live in phase-specific modules, mirroring runner phase style.
+3. Recommended module root:
+   - `src/bookforge/phases/outline/`
+4. Required phase modules:
+   - `src/bookforge/phases/outline/phase_01_chapter_spine.py`
+   - `src/bookforge/phases/outline/phase_02_section_architecture.py`
+   - `src/bookforge/phases/outline/phase_03_scene_draft.py`
+   - `src/bookforge/phases/outline/phase_04a_transition_seam_analysis.py`
+   - `src/bookforge/phases/outline/phase_04b_transition_execution.py`
+   - `src/bookforge/phases/outline/phase_05_cast_function_refinement.py`
+   - `src/bookforge/phases/outline/phase_06_thread_payoff_refinement.py`
+5. Shared cross-phase helpers belong in dedicated modules, not `outline.py`:
+   - `src/bookforge/phases/outline/validators.py`
+   - `src/bookforge/phases/outline/artifacts.py`
+   - `src/bookforge/phases/outline/context.py`
+6. Any growth pattern that trends `outline.py` toward monolith size is a design failure and must be refactored before merge.
+
 ## Corrected Pipeline Shape
 The top-level pipeline remains six phases, but phase 04 is internally split into two LLM steps.
 
@@ -48,6 +68,40 @@ The top-level pipeline remains six phases, but phase 04 is internally split into
 Note:
 1. Phase 04A and 04B are one logical phase to the CLI (`phase_04_transition_causality_refinement`) but two explicit internal attempts/steps for orchestration and artifacting.
 2. Code may select candidate edges deterministically only for routing; code may not inject semantic scene text.
+
+## Prompt Asset Delta (Explicit)
+Current prompt-block directory already contains:
+1. `resources/prompt_blocks/phase/outline_pipeline/phase_04_transition_causality_refinement_prompt_contract.md`
+
+Required additions/changes:
+1. Treat existing file as phase 04A contract source (seam analysis contract).
+2. Add new phase 04B contract file:
+   - `resources/prompt_blocks/phase/outline_pipeline/phase_04b_transition_execution_prompt_contract.md`
+3. Add or split composed prompt templates:
+   - `resources/prompt_templates/outline_phase_04a_transition_seam_analysis.md`
+   - `resources/prompt_templates/outline_phase_04b_transition_execution.md`
+4. Add new composition manifests:
+   - `resources/prompt_composition/manifests/outline_phase_04a_transition_seam_analysis.composition.manifest.json`
+   - `resources/prompt_composition/manifests/outline_phase_04b_transition_execution.composition.manifest.json`
+5. Keep legacy template compatibility for operator-facing phase naming:
+   - `outline_phase_04_transition_causality_refinement` remains CLI logical phase ID.
+   - Runtime can map this to internal steps `04A` and `04B`.
+
+## Prompt Input Wiring (04B)
+Phase 04B prompt must receive explicit deterministic routing payload from orchestrator:
+1. selected seam candidates,
+2. blocked candidates and reasons,
+3. scene-count policy mode,
+4. insertion budget context,
+5. exact-mode conflict markers.
+
+Recommended placeholder payload blocks:
+1. `{{outline_phase_04a_output}}`
+2. `{{phase_04_selected_candidates_json}}`
+3. `{{phase_04_blocked_candidates_json}}`
+4. `{{phase_04_policy_context_json}}`
+
+Compiler allowlist must be updated for whichever placeholders are adopted.
 
 ## Role Separation Contract
 ### LLM responsibilities
@@ -148,6 +202,12 @@ Required phase 04 artifacts:
 8. `phase_04b_validation.json`
 9. `outline_transitions_refined_v1_1.json` (handoff artifact)
 
+Phase 04 step-split trace artifacts:
+1. `phase_04_selected_candidates.json`
+2. `phase_04_blocked_candidates.json`
+3. `phase_04_policy_context.json`
+4. `phase_04_transition_decision_trace.json`
+
 Run-level:
 1. `outline_pipeline_report.json`
 2. `outline_pipeline_decisions.json`
@@ -165,6 +225,65 @@ Phase 04B prompt must additionally include:
 2. explicit instruction to author inserted scenes for selected candidates,
 3. explicit prohibition against leaving selected insertions unresolved.
 
+## Implementation Touchpoint Matrix (Formalized)
+1. `src/bookforge/outline.py`
+   - keep as thin orchestrator only,
+   - dispatch phases to `src/bookforge/phases/outline/*`,
+   - no embedded per-phase business logic.
+2. `src/bookforge/cli.py`
+   - preserve logical phase naming, expose docs/help for internal 04A/04B split behavior.
+3. `src/bookforge/phases/outline/phase_01_chapter_spine.py` (new)
+   - phase 01 execution logic.
+4. `src/bookforge/phases/outline/phase_02_section_architecture.py` (new)
+   - phase 02 execution logic.
+5. `src/bookforge/phases/outline/phase_03_scene_draft.py` (new)
+   - phase 03 execution logic.
+6. `src/bookforge/phases/outline/phase_04a_transition_seam_analysis.py` (new)
+   - phase 04A execution logic.
+7. `src/bookforge/phases/outline/phase_04b_transition_execution.py` (new)
+   - phase 04B execution logic and insertion-resolution validation handoff.
+8. `src/bookforge/phases/outline/phase_05_cast_function_refinement.py` (new)
+   - phase 05 execution logic.
+9. `src/bookforge/phases/outline/phase_06_thread_payoff_refinement.py` (new)
+   - phase 06 execution logic.
+10. `src/bookforge/phases/outline/validators.py` (new)
+   - shared deterministic validators.
+11. `src/bookforge/phases/outline/artifacts.py` (new)
+   - artifact read/write and step report helpers.
+12. `src/bookforge/phases/outline/context.py` (new)
+   - shared render input/context assembly.
+13. `resources/prompt_blocks/phase/outline_pipeline/phase_04_transition_causality_refinement_prompt_contract.md`
+   - treat as 04A contract source.
+14. `resources/prompt_blocks/phase/outline_pipeline/phase_04b_transition_execution_prompt_contract.md` (new)
+   - define 04B insertion execution and inserted-scene authoring contract.
+15. `resources/prompt_templates/outline_phase_04a_transition_seam_analysis.md` (new/split)
+   - compiled 04A template.
+16. `resources/prompt_templates/outline_phase_04b_transition_execution.md` (new)
+   - compiled 04B template.
+17. `resources/prompt_composition/manifests/outline_phase_04a_transition_seam_analysis.composition.manifest.json` (new)
+   - compose 04A template from blocks.
+18. `resources/prompt_composition/manifests/outline_phase_04b_transition_execution.composition.manifest.json` (new)
+   - compose 04B template from blocks.
+19. `resources/prompt_composition/prompt_tokens_allowlist.json`
+   - allowlist 04B routing payload placeholders.
+20. `resources/prompt_composition/source_of_truth_checksums.json`
+   - refresh checksums after prompt asset changes.
+21. `src/bookforge/workspace.py`
+   - include new templates in workspace distribution.
+22. `schemas/outline.schema.json`, `schemas/error_v1.schema.json`, `schemas/outline_pipeline_report.schema.json`
+   - ensure step outputs and error/report contracts are schema-valid and testable.
+23. `tests/test_outline_generate.py`, `tests/test_outline_transition_policy.py`, `tests/test_prompt_composition.py`, `tests/test_runner_outline_gate.py`
+   - add regression coverage for 04A/04B split and no-fallback guarantees.
+24. `docs/help/outline_generate.md`, `docs/help/run.md`
+   - operator behavior, gating semantics, and 04A/04B visibility.
+
+## Formalization Gate
+No implementation should begin until reviewers sign off on:
+1. phase 04A/04B prompt asset names and locations,
+2. 04B routing payload placeholders,
+3. failure/gating behavior for unresolved required insertions,
+4. exact-mode conflict behavior.
+
 ## Acceptance Criteria
 1. No phase code creates transition prose or anchor text.
 2. No phase code inserts semantic transition scenes with generated placeholder content.
@@ -176,8 +295,10 @@ Phase 04B prompt must additionally include:
 
 ## Rollout Sequence
 1. Rebuild plans and prompt contracts first.
-2. Implement orchestration changes for split phase 04 (`04A`, `04B`).
-3. Add validator/routing updates and remove semantic fallback code.
-4. Add tests for insertion-required and conflict/failure paths.
-5. Run end-to-end outline audits on test books.
-6. Promote only after passing acceptance criteria.
+2. Scaffold runner-style outline phase module package and move phase business logic out of `outline.py`.
+3. Implement prompt asset split for phase 04A/04B (blocks/templates/manifests/checksums).
+4. Implement orchestration changes for split phase 04 (`04A`, `04B`).
+5. Add validator/routing updates and remove semantic fallback code.
+6. Add tests for insertion-required, module dispatch, and conflict/failure paths.
+7. Run end-to-end outline audits on test books.
+8. Promote only after passing acceptance criteria.

@@ -60,3 +60,31 @@ def test_resolve_model_falls_back_to_default():
         env_path=None,
     )
     assert resolve_model("writer", config) == "base"
+
+
+def test_resolve_model_outline_phase_specific_over_default():
+    config = load_config(
+        env={
+            "LLM_PROVIDER": "openai",
+            "OPENAI_API_KEY": "x",
+            "DEFAULT_MODEL": "base",
+            "OUTLINE_MODEL": "outline-model",
+        },
+        env_path=None,
+    )
+    assert resolve_model("outline", config) == "outline-model"
+
+
+def test_factory_outline_phase_uses_outline_api_key():
+    config = load_config(
+        env={
+            "LLM_PROVIDER": "openai",
+            "OPENAI_API_KEY": "default-key",
+            "OUTLINE_API_KEY": "outline-key",
+        },
+        env_path=None,
+    )
+    client = get_llm_client(config, phase="outline")
+    assert isinstance(client, OpenAIClient)
+    assert client.api_key == "outline-key"
+    assert client.key_slot == "outline"

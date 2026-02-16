@@ -16,7 +16,9 @@ _RATE_LIMITERS: dict[tuple[str, str], RateLimiter] = {}
 def _select_api_key(config: AppConfig, phase: Optional[str], default_key: Optional[str]) -> tuple[Optional[str], str]:
     phase_key = (phase or "").lower()
     override = None
-    if phase_key == "planner":
+    if phase_key == "outline":
+        override = config.outline_api_key
+    elif phase_key == "planner":
         override = config.planner_api_key
     elif phase_key == "preflight":
         override = config.preflight_api_key
@@ -71,7 +73,9 @@ def get_llm_client(config: AppConfig, phase: Optional[str] = None) -> LLMClient:
 def resolve_model(phase: str, config: AppConfig) -> str:
     phase_key = phase.lower()
     model: Optional[str] = None
-    if phase_key == "planner":
+    if phase_key == "outline":
+        model = config.outline_model
+    elif phase_key == "planner":
         model = config.planner_model
     elif phase_key == "preflight":
         model = config.preflight_model

@@ -22,6 +22,14 @@ If a seam requires a transition scene:
 3. Deterministic code may not synthesize replacement semantic content.
 
 ## Phase 04 Decomposition
+Prompt contract sources:
+1. 04A source (existing): `resources/prompt_blocks/phase/outline_pipeline/phase_04_transition_causality_refinement_prompt_contract.md`
+2. 04B source (new): `resources/prompt_blocks/phase/outline_pipeline/phase_04b_transition_execution_prompt_contract.md`
+
+Composed templates:
+1. `resources/prompt_templates/outline_phase_04a_transition_seam_analysis.md`
+2. `resources/prompt_templates/outline_phase_04b_transition_execution.md`
+
 ### 04A: Seam Analysis LLM Step
 Objective:
 1. analyze adjacent scene edges,
@@ -64,6 +72,7 @@ Input payload:
    - `blocked_candidates[]` with reasons,
    - `downgrade_constraints[]`,
    - exact-mode conflict markers if relevant.
+3. 04A-to-04B handoff block (`outline_phase_04a_output`).
 
 Output payload:
 1. full outline object,
@@ -73,6 +82,7 @@ Output payload:
    - `downgraded_resolution[]`,
    - `unresolved_required_insertions[]`,
    - `edits_applied[]`.
+3. Scene additions fully authored by LLM for each selected insertion candidate.
 
 Validation gates:
 1. all selected insertion candidates are resolved by authored scene insertion or explicit terminal error,
@@ -134,12 +144,47 @@ Critical retry cap:
 1. request candidate seam extraction and resolution recommendations,
 2. require explicit candidate list with refs/scores/reasons,
 3. forbid commentary outside JSON.
+4. output a stable candidate list for deterministic routing (no hidden candidate derivation in code).
 
 ### 04B prompt must
 1. include selected candidate list from routing layer,
 2. explicitly instruct LLM to author inserted scenes for each selected candidate,
 3. prohibit leaving selected candidates unresolved,
 4. include strict invalid-output fallback: return `error_v1` if constraints cannot be met.
+5. explicitly state: "Do not leave selected insertion candidates unresolved."
+6. explicitly state: "All inserted scene semantic fields must be authored prose, not meta placeholders."
+
+## Compiler/Manifest Touchpoints (Explicit)
+Required files to add/update:
+1. `resources/prompt_blocks/phase/outline_pipeline/phase_04b_transition_execution_prompt_contract.md` (new)
+2. `resources/prompt_templates/outline_phase_04a_transition_seam_analysis.md` (new or split output)
+3. `resources/prompt_templates/outline_phase_04b_transition_execution.md` (new)
+4. `resources/prompt_composition/manifests/outline_phase_04a_transition_seam_analysis.composition.manifest.json` (new)
+5. `resources/prompt_composition/manifests/outline_phase_04b_transition_execution.composition.manifest.json` (new)
+6. `resources/prompt_composition/prompt_tokens_allowlist.json` (add phase-04 step placeholders)
+7. `resources/prompt_composition/source_of_truth_checksums.json` (refresh)
+8. `src/bookforge/workspace.py` (`PROMPT_TEMPLATE_FILES` update)
+
+## 04B Placeholder Contract (Proposed Lock)
+To avoid runtime/render drift, 04B should use explicit JSON blob placeholders:
+1. `{{outline_phase_04a_output}}`
+2. `{{phase_04_selected_candidates_json}}`
+3. `{{phase_04_blocked_candidates_json}}`
+4. `{{phase_04_policy_context_json}}`
+
+Renderer requirements:
+1. Values are injected as raw JSON text blocks in prompt context.
+2. Missing placeholder data is a hard render failure for 04B.
+3. 04B execution must not continue with missing routing payload.
+
+## Runtime Wiring Touchpoints (Explicit)
+1. `src/bookforge/outline.py` remains orchestration shell and dispatches to phase modules.
+2. `src/bookforge/phases/outline/phase_04a_transition_seam_analysis.py` handles 04A render/execute/validate flow.
+3. `src/bookforge/phases/outline/phase_04b_transition_execution.py` handles 04B render/execute/validate flow.
+4. 04B render context must include selected/blocked/policy JSON payload blocks.
+5. Routing payload artifacts must be persisted before rendering 04B.
+6. 04B validation must assert selected insertions were resolved by LLM output, not post-hoc code mutation.
+7. 04B retry directives must include failing selected candidate refs and unresolved insertion reasons.
 
 ## Field Semantics for Inserted Scenes
 Inserted scene minimum required fields:
