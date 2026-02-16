@@ -1,0 +1,203 @@
+```json
+{
+  "schema_version": "1.1",
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "name": "Arthur 'Artie' Penhaligon",
+      "pronouns": "he/him",
+      "role": "protagonist",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      }
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "name": "Fizz",
+      "pronouns": "she/her",
+      "role": "companion/guide",
+      "intro": {
+        "chapter": 1,
+        "scene": 2
+      }
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "name": "Vane",
+      "pronouns": "he/him",
+      "role": "antagonist",
+      "intro": {
+        "chapter": 1,
+        "scene": 8
+      }
+    },
+    {
+      "character_id": "CHAR_MAYOR",
+      "name": "Mayor of Oakhaven",
+      "pronouns": "he/him",
+      "role": "npc",
+      "intro": {
+        "chapter": 1,
+        "scene": 7
+      }
+    },
+    {
+      "character_id": "CHAR_BOSS",
+      "name": "The System Administrator",
+      "pronouns": "it/its",
+      "role": "overarching villain",
+      "intro": {
+        "chapter": 6,
+        "scene": 8
+      }
+    }
+  ],
+  "threads": [
+    {
+      "thread_id": "THREAD_CRIT_EXPLOIT",
+      "label": "The 100% Crit Glitch",
+      "status": "open"
+    },
+    {
+      "thread_id": "THREAD_VANE_RIVALRY",
+      "label": "The Vane Vendetta",
+      "status": "open"
+    },
+    {
+      "thread_id": "THREAD_SYSTEM_GLITCH",
+      "label": "The System's Stability",
+      "status": "open"
+    },
+    {
+      "thread_id": "THREAD_THE_ASCENSION",
+      "label": "The Path of the First Glitch",
+      "status": "open"
+    }
+  ],
+  "chapters": [
+    {
+      "chapter_id": 1,
+      "title": "Welcome to the RNG-Hellscape",
+      "goal": "Introduce Artie and his broken 'Crit-Only' status in a high-stakes environment.",
+      "chapter_role": "hook",
+      "stakes_shift": "Artie goes from an office drone to a level 1 glitch in a lethal game world.",
+      "bridge": {
+        "from_prev": "N/A",
+        "to_next": "Artie must find a way to survive his first night with zero defensive stats."
+      },
+      "pacing": {
+        "intensity": 4,
+        "tempo": "rush",
+        "expected_scene_count": 8
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Exit Interview",
+          "intent": "Establish Artie's mundane life and sudden, absurd death.",
+          "end_condition": "Artie is locked into a 'Crit or Quit' build with 1 HP and 100% Critical Hit rate.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie argues with a vending machine over a bag of chips before a freak electrical surge sends him to the great login screen in the sky.",
+              "type": "setup",
+              "outcome": "Artie dies and enters the System's character creation void.",
+              "characters": ["CHAR_ARTIE"],
+              "introduces": ["CHAR_ARTIE"],
+              "location_start_label": "Office Breakroom",
+              "location_end_label": "Character Creation Void",
+              "location_start": "A cramped breakroom with a flickering fluorescent light and a stubborn vending machine.",
+              "location_end": "A vast, featureless white expanse filled with floating digital menus.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie stands before the humming vending machine, clutching a crumpled dollar bill and contemplating the nutritional value of a bag of stale chips.",
+              "transition_in_anchors": ["humming vending machine", "crumpled dollar bill", "fluorescent office lights"],
+              "transition_out_text": "The vending machine explodes in a shower of sparks and blue light, pulling Artie's consciousness into the digital ether.",
+              "transition_out_anchors": ["exploding vending machine", "shower of sparks", "blue light"],
+              "hands_off_to": "1:2"
+            },
+            {
+              "scene_id": 2,
+              "summary": "The System, personified as a snarky UI, mocks Artie's life choices while he accidentally dumps all his points into the 'Crit' stat.",
+              "type": "reveal",
+              "outcome": "Artie is locked into a 'Crit or Quit' build with 1 HP and 100% Critical Hit rate.",
+              "characters": ["CHAR_ARTIE", "CHAR_FIZZ"],
+              "introduces": ["CHAR_FIZZ"],
+              "threads": ["THREAD_CRIT_EXPLOIT"],
+              "consumes_outcome_from": "1:1",
+              "location_start_label": "Character Creation Void",
+              "location_end_label": "Character Creation Void",
+              "location_start": "A vast, featureless white expanse filled with floating digital menus.",
+              "location_end": "A vast, featureless white expanse filled with floating digital menus.",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "The white light of the surge fades into a digital abyss where a floating UI window blinks expectantly, waiting for Artie to acknowledge his new reality.",
+              "transition_in_anchors": ["digital abyss", "floating UI window", "blinking cursor"],
+              "end_condition_echo": "Artie is locked into a 'Crit or Quit' build with 1 HP and 100% Critical Hit rate.",
+              "transition_out_text": "Artie confirms his final stat allocation, and the white void begins to dissolve into the colors of a forest.",
+              "transition_out_anchors": ["final stat allocation", "white void", "forest colors"],
+              "hands_off_to": "1:3"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The First Spawn",
+          "intent": "Show the immediate danger of a 1 HP build.",
+          "end_condition": "Artie is forced to run for his life as the tutorial zone aggros on him.",
+          "scenes": [
+            {
+              "scene_id": 3,
+              "summary": "Artie spawns in the middle of a tutorial zone and is immediately targeted by a Level 1 Slime that looks suspiciously aggressive.",
+              "type": "escalation",
+              "outcome": "Artie realizes that in this world, '1 HP' means a stiff breeze could kill him.",
+              "characters": ["CHAR_ARTIE", "CHAR_FIZZ"],
+              "consumes_outcome_from": "1:2",
+              "location_start_label": "Tutorial Zone - Slime Meadow",
+              "location_end_label": "Tutorial Zone - Slime Meadow",
+              "location_start": "A vibrant green meadow populated by bouncing, translucent slimes.",
+              "location_end": "A vibrant green meadow populated by bouncing, translucent slimes.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie's feet hit the lush grass of the meadow as the smell of ozone and wet earth fills the air, signaling his arrival in the tutorial zone.",
+              "transition_in_anchors": ["lush meadow grass", "ozone smell", "wet earth"],
+              "transition_out_text": "The slime bounces forward, its translucent body wobbling with aggressive intent as Artie raises his fists.",
+              "transition_out_anchors": ["translucent slime body", "wobbling movement", "aggressive intent"],
+              "hands_off_to": "1:4"
+            },
+            {
+              "scene_id": 4,
+              "summary": "Artie tries to punch the slime; he misses five times before landing a 'Super-Mega-Ultra-Crit' that vaporizes the slime and the tree behind it.",
+              "type": "action",
+              "outcome": "Artie gains his first level and realizes his power is terrifyingly inconsistent.",
+              "characters": ["CHAR_ARTIE"],
+              "threads": ["THREAD_CRIT_EXPLOIT"],
+              "consumes_outcome_from": "1:3",
+              "location_start_label": "Tutorial Zone - Slime Meadow",
+              "location_end_label": "Tutorial Zone - Slime Meadow",
+              "location_start": "A vibrant green meadow populated by bouncing, translucent slimes.",
+              "location_end": "A vibrant green meadow populated by bouncing, translucent slimes.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie takes a deep breath, focusing on the slime's rhythmic movements as he prepares to land his first attack.",
+              "transition_in_anchors": ["rhythmic slime movements", "deep breath", "focused gaze"],
+              "transition_out_text": "The explosion of the slime leaves behind a single, glowing participation trophy that hums with a faint, annoying frequency.",
+              "transition_out_anchors": ["glowing participation trophy", "humming frequency", "slime remains"],
+              "hands_off_to": "1:5"
+            },
+            {
+              "scene_id": 5,
+              "summary": "The System awards Artie a 'Participation Trophy' item that actually attracts monsters.",
+              "type": "consequence",
+              "outcome": "Artie is forced to run for his life as the tutorial zone aggros on him.",
+              "characters": ["CHAR_ARTIE", "CHAR_FIZZ"],
+              "consumes_outcome_from": "1:4",
+              "location_start_label": "Tutorial Zone - Slime Meadow",
+              "location_end_label": "Tutorial Zone - Slime Meadow",
+              "location_start": "A vibrant green meadow populated by bouncing, translucent slimes.",
+              "location_end": "A vibrant green meadow populated by bouncing, translucent slimes.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "pursued",
+              "transition_in_text": "Artie picks up the trophy, and a loud, synthesized fanfare blares from the sky, drawing the attention of every monster in the vicinity.",
+              "transition_in_anch

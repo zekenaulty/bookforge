@@ -9,7 +9,7 @@ import logging
 import re
 import shutil
 
-from bookforge.config.env import load_config
+from bookforge.config.env import load_config, read_int_env
 from bookforge.llm.client import LLMClient
 from bookforge.llm.errors import LLMRequestError
 from bookforge.llm.factory import get_llm_client, resolve_model
@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 OUTLINE_SCHEMA_VERSION = "1.1"
 OUTLINE_MAX_ATTEMPTS = 2
+OUTLINE_DEFAULT_MAX_TOKENS = 589824
 SUCCESSFUL_OUTLINE_STATUSES = {"SUCCESS", "SUCCESS_WITH_WARNINGS"}
 
 
@@ -666,7 +667,7 @@ def generate_outline(
     elif model is None:
         model = "default"
 
-    max_tokens = 98304
+    max_tokens = max(4096, read_int_env("BOOKFORGE_OUTLINE_MAX_TOKENS", OUTLINE_DEFAULT_MAX_TOKENS))
     outline_root = book_root / "outline"
     outline_root.mkdir(parents=True, exist_ok=True)
 
