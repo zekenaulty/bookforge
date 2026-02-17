@@ -9,6 +9,8 @@ Commands
 - init: docs/help/init.md
 - author generate: docs/help/author_generate.md
 - outline generate: docs/help/outline_generate.md
+- outline backup: docs/help/outline_backup.md
+- outline restore: docs/help/outline_restore.md
 - characters generate: docs/help/characters_generate.md
 - run: docs/help/run.md
 - compile (stub): docs/help/compile.md

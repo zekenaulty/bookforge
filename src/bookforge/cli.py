@@ -4,6 +4,8 @@ import sys
 
 from bookforge.author import generate_author
 from bookforge.outline import (
+    backup_outline_run,
+    restore_outline_state,
     generate_outline,
     load_latest_outline_pipeline_report,
     format_outline_pipeline_summary,
@@ -93,6 +95,46 @@ def _outline_generate(args: argparse.Namespace) -> int:
     report_path, report = load_latest_outline_pipeline_report(workspace=workspace, book_id=args.book)
     if report:
         sys.stdout.write(format_outline_pipeline_summary(report, report_path=report_path))
+    return 0
+
+
+def _outline_backup(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    output_dir = Path(args.output_dir) if getattr(args, "output_dir", None) else None
+    if output_dir is not None and not output_dir.is_absolute():
+        output_dir = workspace / output_dir
+    try:
+        backup_dir = backup_outline_run(
+            workspace=workspace,
+            book_id=args.book,
+            run_id=getattr(args, "run_id", None),
+            output_dir=output_dir,
+            require_success=not bool(getattr(args, "allow_non_success", False)),
+            copy_run_artifacts=not bool(getattr(args, "skip_run_artifacts", False)),
+        )
+    except Exception as exc:
+        sys.stderr.write(f"Outline backup failed: {exc}\n")
+        return 1
+    sys.stdout.write(f"Outline backup created at {backup_dir}\n")
+    return 0
+
+
+def _outline_restore(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    backup_path = Path(args.backup_path) if getattr(args, "backup_path", None) else None
+    try:
+        outline_path = restore_outline_state(
+            workspace=workspace,
+            book_id=args.book,
+            run_id=getattr(args, "run_id", None),
+            backup_path=backup_path,
+            overwrite_current=bool(getattr(args, "overwrite_current", False)),
+            set_latest_run_pointer=bool(getattr(args, "set_latest_run_pointer", False)),
+        )
+    except Exception as exc:
+        sys.stderr.write(f"Outline restore failed: {exc}\n")
+        return 1
+    sys.stdout.write(f"Outline restored at {outline_path}\n")
     return 0
 
 
@@ -326,6 +368,41 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional chapter scene count range, format MIN-MAX.",
     )
     outline_generate.set_defaults(func=_outline_generate)
+
+    outline_backup = outline_sub.add_parser("backup", help="Back up a completed outline state and run artifacts.")
+    outline_backup.add_argument("--book", required=True, help="Book id.")
+    outline_backup.add_argument("--run-id", help="Optional source run id. Defaults to latest run pointer.")
+    outline_backup.add_argument(
+        "--output-dir",
+        help="Optional output root directory for backups (default: workspace/backups/outline_completed/<book>).",
+    )
+    outline_backup.add_argument(
+        "--allow-non-success",
+        action="store_true",
+        help="Allow backup even if the source run status is not SUCCESS/SUCCESS_WITH_WARNINGS.",
+    )
+    outline_backup.add_argument(
+        "--skip-run-artifacts",
+        action="store_true",
+        help="Skip copying pipeline_run artifacts into the backup snapshot.",
+    )
+    outline_backup.set_defaults(func=_outline_backup)
+
+    outline_restore = outline_sub.add_parser("restore", help="Restore outline.json from a run or backup snapshot.")
+    outline_restore.add_argument("--book", required=True, help="Book id.")
+    outline_restore.add_argument("--run-id", help="Restore from this outline run id.")
+    outline_restore.add_argument("--backup-path", help="Restore from this backup directory path.")
+    outline_restore.add_argument(
+        "--overwrite-current",
+        action="store_true",
+        help="Overwrite current outline.json in place (default archives current outline first).",
+    )
+    outline_restore.add_argument(
+        "--set-latest-run-pointer",
+        action="store_true",
+        help="When source includes run id, update latest run/report pointers to that run.",
+    )
+    outline_restore.set_defaults(func=_outline_restore)
 
     characters_parser = subparsers.add_parser("characters", help="Character commands.")
     characters_sub = characters_parser.add_subparsers(dest="characters_command", required=True)

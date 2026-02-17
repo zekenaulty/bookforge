@@ -1,21 +1,37 @@
 ﻿from pathlib import Path
 import json
+import shutil
 import pytest
 
 from bookforge.llm.errors import LLMRequestError
 from bookforge.llm.types import LLMResponse
-from bookforge.outline import generate_outline, load_latest_outline_pipeline_report
+from bookforge.outline import (
+    backup_outline_run,
+    generate_outline,
+    load_latest_outline_pipeline_report,
+    restore_outline_state,
+)
 from bookforge.workspace import init_book_workspace
 
 
 class DummyClient:
-    def __init__(self, responses: list[str]) -> None:
+    def __init__(self, responses: list[str], *, provider: str = "dummy") -> None:
         self._responses = list(responses)
         self._index = 0
         self.messages_history = []
+        self.calls = []
+        self.provider = provider
 
     def chat(self, messages, model, temperature=0.7, max_tokens=1024, thinking_level=None):
         self.messages_history.append(messages)
+        self.calls.append(
+            {
+                "model": model,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+                "thinking_level": thinking_level,
+            }
+        )
         if self._responses:
             index = min(self._index, len(self._responses) - 1)
             text = self._responses[index]
@@ -543,3 +559,101 @@ def test_generate_outline_chapter_scoped_phase_requires_chapter_template_tokens(
             model="dummy",
         )
     assert len(rerun_client.messages_history) == 0
+
+
+def test_outline_backup_run_creates_manifest_and_snapshot(tmp_path: Path) -> None:
+    _init_book(tmp_path)
+    client = DummyClient(_pipeline_responses())
+    generate_outline(workspace=tmp_path, book_id="my_book", client=client, model="dummy")
+
+    backup_dir = backup_outline_run(workspace=tmp_path, book_id="my_book")
+    manifest_path = backup_dir / "backup_manifest.json"
+    snapshot_outline = backup_dir / "outline_snapshot" / "outline.json"
+    snapshot_chapter = backup_dir / "outline_snapshot" / "chapters" / "ch_001.json"
+    pipeline_report = backup_dir / "pipeline_run" / "outline_pipeline_report.json"
+
+    assert manifest_path.exists()
+    assert snapshot_outline.exists()
+    assert snapshot_chapter.exists()
+    assert pipeline_report.exists()
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest.get("schema_version") == "outline_backup_manifest_v1"
+    assert manifest.get("source_run_id")
+    assert manifest.get("outline_hash")
+
+
+def test_outline_restore_state_from_run_id(tmp_path: Path) -> None:
+    _init_book(tmp_path)
+    client = DummyClient(_pipeline_responses())
+    generate_outline(workspace=tmp_path, book_id="my_book", client=client, model="dummy")
+
+    outline_root = tmp_path / "books" / "my_book" / "outline"
+    latest = json.loads((outline_root / "pipeline_latest.json").read_text(encoding="utf-8"))
+    run_id = str(latest.get("run_id"))
+
+    (outline_root / "outline.json").unlink()
+    shutil.rmtree(outline_root / "chapters")
+
+    restored = restore_outline_state(
+        workspace=tmp_path,
+        book_id="my_book",
+        run_id=run_id,
+    )
+    assert restored.exists()
+    assert (outline_root / "chapters" / "ch_001.json").exists()
+
+
+def test_outline_restore_state_from_backup_path(tmp_path: Path) -> None:
+    _init_book(tmp_path)
+    client = DummyClient(_pipeline_responses())
+    generate_outline(workspace=tmp_path, book_id="my_book", client=client, model="dummy")
+    backup_dir = backup_outline_run(workspace=tmp_path, book_id="my_book")
+
+    outline_root = tmp_path / "books" / "my_book" / "outline"
+    (outline_root / "outline.json").unlink()
+    shutil.rmtree(outline_root / "chapters")
+
+    restored = restore_outline_state(
+        workspace=tmp_path,
+        book_id="my_book",
+        backup_path=backup_dir,
+    )
+    assert restored.exists()
+    assert (outline_root / "chapters" / "ch_001.json").exists()
+
+
+def test_generate_outline_phase_thinking_env_overrides(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _init_book(tmp_path)
+    env_values = {
+        "OUTLINE_PHASE_01_THINKING_LEVEL": "low",
+        "OUTLINE_PHASE_02_THINKING_LEVEL": "medium",
+        "OUTLINE_PHASE_03_THINKING_LEVEL": "high",
+        "OUTLINE_PHASE_04A_THINKING_LEVEL": "minimal",
+        "OUTLINE_PHASE_04B_THINKING_LEVEL": "low",
+        "OUTLINE_PHASE_05_THINKING_LEVEL": "medium",
+        "OUTLINE_PHASE_06_THINKING_LEVEL": "high",
+    }
+    monkeypatch.setattr("bookforge.outline.read_env_value", lambda key: env_values.get(key))
+
+    client = DummyClient(_pipeline_responses(), provider="gemini")
+    generate_outline(
+        workspace=tmp_path,
+        book_id="my_book",
+        client=client,
+        model="gemini-3-flash-preview",
+    )
+    levels = [str(call.get("thinking_level")) for call in client.calls]
+    assert levels == [
+        "low",
+        "medium",
+        "high",
+        "minimal",
+        "minimal",
+        "low",
+        "low",
+        "medium",
+        "medium",
+        "high",
+        "high",
+    ]

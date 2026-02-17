@@ -31,6 +31,8 @@ OUTLINE_SCHEMA_VERSION = "1.1"
 OUTLINE_MAX_ATTEMPTS = 2
 OUTLINE_DEFAULT_MAX_TOKENS = 58982400
 SUCCESSFUL_OUTLINE_STATUSES = {"SUCCESS", "SUCCESS_WITH_WARNINGS"}
+OUTLINE_BACKUP_LATEST_FILE = "outline_backup_latest.json"
+OUTLINE_BACKUP_INDEX_FILE = "outline_backups_index.json"
 CHAPTER_SCOPED_STEPS = {
     outline_context.STEP_04A,
     outline_context.STEP_04B,
@@ -58,6 +60,10 @@ def _resolve_step_thinking_level(client: LLMClient, model: str, step_id: str) ->
         return None
 
     step_key = {
+        outline_context.PHASE_01: "OUTLINE_PHASE_01_THINKING_LEVEL",
+        outline_context.PHASE_02: "OUTLINE_PHASE_02_THINKING_LEVEL",
+        outline_context.PHASE_03: "OUTLINE_PHASE_03_THINKING_LEVEL",
+        outline_context.PHASE_04: "OUTLINE_PHASE_04_THINKING_LEVEL",
         outline_context.STEP_04A: "OUTLINE_PHASE_04A_THINKING_LEVEL",
         outline_context.STEP_04B: "OUTLINE_PHASE_04B_THINKING_LEVEL",
         outline_context.PHASE_05: "OUTLINE_PHASE_05_THINKING_LEVEL",
@@ -67,6 +73,20 @@ def _resolve_step_thinking_level(client: LLMClient, model: str, step_id: str) ->
         explicit = str(read_env_value(step_key) or "").strip().lower()
         if explicit in {"minimal", "low", "medium", "high"}:
             return explicit
+
+    logical_phase = outline_context.STEP_TO_LOGICAL.get(step_id, step_id)
+    logical_key = {
+        outline_context.PHASE_01: "OUTLINE_PHASE_01_THINKING_LEVEL",
+        outline_context.PHASE_02: "OUTLINE_PHASE_02_THINKING_LEVEL",
+        outline_context.PHASE_03: "OUTLINE_PHASE_03_THINKING_LEVEL",
+        outline_context.PHASE_04: "OUTLINE_PHASE_04_THINKING_LEVEL",
+        outline_context.PHASE_05: "OUTLINE_PHASE_05_THINKING_LEVEL",
+        outline_context.PHASE_06: "OUTLINE_PHASE_06_THINKING_LEVEL",
+    }.get(logical_phase)
+    if logical_key:
+        explicit_logical = str(read_env_value(logical_key) or "").strip().lower()
+        if explicit_logical in {"minimal", "low", "medium", "high"}:
+            return explicit_logical
 
     shared = _resolve_outline_thinking_level(client, model)
     if shared:
@@ -402,6 +422,279 @@ def format_outline_pipeline_summary(
     if report_path is not None:
         lines.append(f"- Report: {report_path}")
     return "\n".join(lines) + "\n"
+
+
+def _resolve_outline_payload_from_run(run_dir: Path) -> Tuple[Dict[str, Any], str]:
+    candidates: List[Tuple[str, str]] = [
+        ("outline_final_v1_1.json", "outline"),
+        ("outline_cast_refined_v1_1.json", "outline"),
+        ("outline_transitions_refined_v1_1.json", "outline"),
+        ("phase_04a_output.json", "wrapper"),
+        ("outline_draft_v1_1.json", "outline"),
+    ]
+    for filename, mode in candidates:
+        path = run_dir / filename
+        if not path.exists():
+            continue
+        try:
+            payload = _read_json(path)
+        except Exception:
+            continue
+        outline_payload: Dict[str, Any]
+        if mode == "wrapper":
+            if not isinstance(payload.get("outline"), dict):
+                continue
+            outline_payload = payload.get("outline")
+        else:
+            if not isinstance(payload, dict):
+                continue
+            outline_payload = payload
+        chapters = outline_payload.get("chapters")
+        if not isinstance(chapters, list) or not chapters:
+            continue
+        return deepcopy(outline_payload), filename
+    raise FileNotFoundError(
+        f"Could not resolve recoverable outline payload in run: {run_dir}"
+    )
+
+
+def _normalize_and_validate_outline_for_snapshot(payload: Dict[str, Any]) -> Dict[str, Any]:
+    normalized = outline_validators.normalize_outline_for_write(payload)
+    validate_json(normalized, "outline")
+    return normalized
+
+
+def _load_backup_index(outline_root: Path) -> Dict[str, Any]:
+    path = outline_root / OUTLINE_BACKUP_INDEX_FILE
+    if not path.exists():
+        return {
+            "schema_version": "outline_backup_index_v1",
+            "updated_at": outline_artifacts.utc_now_iso(),
+            "backups": [],
+        }
+    try:
+        payload = _read_json(path)
+    except Exception:
+        return {
+            "schema_version": "outline_backup_index_v1",
+            "updated_at": outline_artifacts.utc_now_iso(),
+            "backups": [],
+        }
+    if not isinstance(payload, dict):
+        return {
+            "schema_version": "outline_backup_index_v1",
+            "updated_at": outline_artifacts.utc_now_iso(),
+            "backups": [],
+        }
+    if not isinstance(payload.get("backups"), list):
+        payload["backups"] = []
+    return payload
+
+
+def _write_backup_index(outline_root: Path, payload: Dict[str, Any]) -> None:
+    payload["updated_at"] = outline_artifacts.utc_now_iso()
+    _write_json(outline_root / OUTLINE_BACKUP_INDEX_FILE, payload)
+
+
+def backup_outline_run(
+    *,
+    workspace: Path,
+    book_id: str,
+    run_id: Optional[str] = None,
+    output_dir: Optional[Path] = None,
+    require_success: bool = True,
+    copy_run_artifacts: bool = True,
+) -> Path:
+    book_root = workspace / "books" / book_id
+    outline_root = book_root / "outline"
+    if not outline_root.exists():
+        raise FileNotFoundError(f"Missing outline directory: {outline_root}")
+
+    resolved_run_id = str(run_id or "").strip()
+    if not resolved_run_id:
+        resolved_run_id = str(outline_artifacts.read_latest_run_id(outline_root) or "").strip()
+    if not resolved_run_id:
+        raise FileNotFoundError("No outline run available to back up.")
+
+    run_dir = outline_root / "pipeline_runs" / resolved_run_id
+    if not run_dir.exists():
+        raise FileNotFoundError(f"Run not found: {run_dir}")
+
+    report_path = run_dir / outline_artifacts.PIPELINE_REPORT_FILE
+    report: Dict[str, Any] = {}
+    if report_path.exists():
+        try:
+            report = _read_json(report_path)
+        except Exception:
+            report = {}
+
+    status = str(report.get("overall_status") or "").strip().upper()
+    if require_success and status not in SUCCESSFUL_OUTLINE_STATUSES:
+        raise ValueError(
+            f"Run {resolved_run_id} has status {status or 'UNKNOWN'}; use --allow-non-success to back up anyway."
+        )
+
+    outline_payload, source_artifact = _resolve_outline_payload_from_run(run_dir)
+    final_outline = _normalize_and_validate_outline_for_snapshot(outline_payload)
+    outline_hash = _sha256_text(json.dumps(final_outline, ensure_ascii=True, sort_keys=True))
+
+    stamp = outline_artifacts.utc_now_iso().replace(":", "").replace("-", "").replace("T", "_").replace("Z", "")
+    root = output_dir if output_dir is not None else (workspace / "backups" / "outline_completed" / book_id)
+    backup_dir = root / f"{resolved_run_id}_{stamp}"
+    outline_snapshot_dir = backup_dir / "outline_snapshot"
+    pipeline_snapshot_dir = backup_dir / "pipeline_run"
+    outline_snapshot_dir.mkdir(parents=True, exist_ok=True)
+    if copy_run_artifacts:
+        pipeline_snapshot_dir.mkdir(parents=True, exist_ok=True)
+
+    # Write canonical snapshot from run-derived payload.
+    _write_json(outline_snapshot_dir / "outline.json", final_outline)
+    _write_outline_chapters(outline_snapshot_dir / "chapters", final_outline.get("chapters", []))
+    _write_json(
+        outline_snapshot_dir / "characters.json",
+        final_outline.get("characters") if isinstance(final_outline.get("characters"), list) else [],
+    )
+    _write_json(
+        outline_snapshot_dir / "threads.json",
+        final_outline.get("threads") if isinstance(final_outline.get("threads"), list) else [],
+    )
+
+    # Carry through draft prompt and location registry pointers if present.
+    for rel_name in ("outline.draft.user.json", "location_registry_active.json"):
+        source = outline_root / rel_name
+        if source.exists():
+            shutil.copy2(source, outline_snapshot_dir / rel_name)
+
+    if copy_run_artifacts:
+        shutil.copytree(run_dir, pipeline_snapshot_dir, dirs_exist_ok=True)
+
+    manifest = {
+        "schema_version": "outline_backup_manifest_v1",
+        "created_at": outline_artifacts.utc_now_iso(),
+        "book_id": book_id,
+        "source_run_id": resolved_run_id,
+        "source_run_path": outline_artifacts.relpath(workspace, run_dir),
+        "source_report_path": outline_artifacts.relpath(workspace, report_path) if report_path.exists() else "",
+        "source_status": status or "UNKNOWN",
+        "source_outline_artifact": source_artifact,
+        "outline_hash": outline_hash,
+        "backup_root": outline_artifacts.relpath(workspace, backup_dir),
+        "copy_run_artifacts": bool(copy_run_artifacts),
+        "files": {
+            "outline": "outline_snapshot/outline.json",
+            "chapters": "outline_snapshot/chapters",
+            "characters": "outline_snapshot/characters.json",
+            "threads": "outline_snapshot/threads.json",
+            "pipeline_run": "pipeline_run" if copy_run_artifacts else "",
+        },
+    }
+    _write_json(backup_dir / "backup_manifest.json", manifest)
+
+    # Update backup pointers for quick discovery.
+    index = _load_backup_index(outline_root)
+    backups = index.get("backups") if isinstance(index.get("backups"), list) else []
+    backups.append(
+        {
+            "created_at": manifest["created_at"],
+            "run_id": resolved_run_id,
+            "status": manifest["source_status"],
+            "outline_hash": outline_hash,
+            "path": outline_artifacts.relpath(workspace, backup_dir),
+            "source_outline_artifact": source_artifact,
+        }
+    )
+    index["backups"] = backups[-200:]
+    _write_backup_index(outline_root, index)
+    _write_json(
+        outline_root / OUTLINE_BACKUP_LATEST_FILE,
+        {
+            "schema_version": "outline_backup_latest_v1",
+            "updated_at": outline_artifacts.utc_now_iso(),
+            "path": outline_artifacts.relpath(workspace, backup_dir),
+            "run_id": resolved_run_id,
+            "outline_hash": outline_hash,
+        },
+    )
+    return backup_dir
+
+
+def _resolve_backup_path(workspace: Path, book_root: Path, backup_path: Optional[Path]) -> Path:
+    if backup_path is not None:
+        if backup_path.is_absolute():
+            resolved = backup_path
+        else:
+            resolved = (workspace / backup_path).resolve()
+        if not resolved.exists():
+            raise FileNotFoundError(f"Backup path not found: {resolved}")
+        return resolved
+
+    outline_root = book_root / "outline"
+    latest = outline_root / OUTLINE_BACKUP_LATEST_FILE
+    if latest.exists():
+        payload = _read_json(latest)
+        rel = str(payload.get("path") or "").strip()
+        if rel:
+            candidate = workspace / rel
+            if candidate.exists():
+                return candidate
+    raise FileNotFoundError("No outline backup found. Create one with `bookforge outline backup`.")
+
+
+def restore_outline_state(
+    *,
+    workspace: Path,
+    book_id: str,
+    run_id: Optional[str] = None,
+    backup_path: Optional[Path] = None,
+    overwrite_current: bool = False,
+    set_latest_run_pointer: bool = False,
+) -> Path:
+    if run_id and backup_path is not None:
+        raise ValueError("Provide either run_id or backup_path, not both.")
+
+    book_root = workspace / "books" / book_id
+    outline_root = book_root / "outline"
+    if not outline_root.exists():
+        raise FileNotFoundError(f"Missing outline directory: {outline_root}")
+
+    final_outline: Dict[str, Any]
+    resolved_run_id = str(run_id or "").strip()
+
+    if resolved_run_id:
+        run_dir = outline_root / "pipeline_runs" / resolved_run_id
+        if not run_dir.exists():
+            raise FileNotFoundError(f"Run not found: {run_dir}")
+        payload, _source_artifact = _resolve_outline_payload_from_run(run_dir)
+        final_outline = _normalize_and_validate_outline_for_snapshot(payload)
+        if set_latest_run_pointer:
+            outline_artifacts.write_latest_pointer(outline_root, resolved_run_id)
+            report_path = run_dir / outline_artifacts.PIPELINE_REPORT_FILE
+            if report_path.exists():
+                outline_artifacts.write_latest_report_pointer(outline_root, resolved_run_id)
+    else:
+        source = _resolve_backup_path(workspace, book_root, backup_path)
+        snapshot_outline = source / "outline_snapshot" / "outline.json"
+        if not snapshot_outline.exists():
+            raise FileNotFoundError(f"Backup outline snapshot missing: {snapshot_outline}")
+        payload = _read_json(snapshot_outline)
+        if not isinstance(payload, dict):
+            raise ValueError(f"Backup outline payload is invalid: {snapshot_outline}")
+        final_outline = _normalize_and_validate_outline_for_snapshot(payload)
+
+        if set_latest_run_pointer:
+            manifest_path = source / "backup_manifest.json"
+            if manifest_path.exists():
+                manifest = _read_json(manifest_path)
+                maybe_run_id = str(manifest.get("source_run_id") or "").strip()
+                if maybe_run_id and (outline_root / "pipeline_runs" / maybe_run_id).exists():
+                    outline_artifacts.write_latest_pointer(outline_root, maybe_run_id)
+                    run_report = (
+                        outline_root / "pipeline_runs" / maybe_run_id / outline_artifacts.PIPELINE_REPORT_FILE
+                    )
+                    if run_report.exists():
+                        outline_artifacts.write_latest_report_pointer(outline_root, maybe_run_id)
+
+    return _save_final_outline(book_root, final_outline, new_version=not overwrite_current)
 
 
 def _load_prior_handoffs_for_start(
