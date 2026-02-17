@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 OUTLINE_SCHEMA_VERSION = "1.1"
 OUTLINE_MAX_ATTEMPTS = 2
-OUTLINE_DEFAULT_MAX_TOKENS = 58982400
+OUTLINE_DEFAULT_MAX_TOKENS = 67000
 SUCCESSFUL_OUTLINE_STATUSES = {"SUCCESS", "SUCCESS_WITH_WARNINGS"}
 OUTLINE_BACKUP_LATEST_FILE = "outline_backup_latest.json"
 OUTLINE_BACKUP_INDEX_FILE = "outline_backups_index.json"
@@ -295,6 +295,24 @@ def _seam_outcomes(history: Dict[str, Any], runtime: Dict[str, Any]) -> Dict[str
         "inserted": int(metrics.get("inserted_scene_count", 0) or 0),
         "unresolved_required_insertions": int(metrics.get("unresolved_required_insertions", 0) or 0),
     }
+
+
+def _clear_pause_marker(run_dir: Path) -> None:
+    marker = run_dir / "pipeline_run_paused.json"
+    if marker.exists():
+        marker.unlink()
+
+
+def _prune_stale_unknown_step(history: Dict[str, Any]) -> None:
+    steps = history.get("steps") if isinstance(history.get("steps"), dict) else None
+    if not isinstance(steps, dict):
+        return
+    unknown_entry = steps.get("unknown")
+    if not isinstance(unknown_entry, dict):
+        return
+    status = str(unknown_entry.get("status") or "").strip().lower()
+    if status in {"paused", "error"}:
+        steps.pop("unknown", None)
 
 
 def _build_pipeline_report(
@@ -1004,6 +1022,19 @@ def _restore_phase04_routing_from_handoff(
     payload = handoffs.get("outline_phase_04a_output")
     if not isinstance(payload, dict):
         return
+    routing_by_chapter, aggregate = _derive_phase04_routing_from_phase04a_payload(
+        payload=payload,
+        settings=settings,
+    )
+    runtime["phase04_routing_by_chapter"] = routing_by_chapter
+    runtime["phase04_routing"] = aggregate
+
+
+def _derive_phase04_routing_from_phase04a_payload(
+    *,
+    payload: Dict[str, Any],
+    settings: Dict[str, Any],
+) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, Any]]:
     report = payload.get("phase_report") if isinstance(payload.get("phase_report"), dict) else {}
     candidates = report.get("candidate_seams") if isinstance(report.get("candidate_seams"), list) else []
     grouped: Dict[int, List[Dict[str, Any]]] = {}
@@ -1029,8 +1060,73 @@ def _restore_phase04_routing_from_handoff(
                 settings.get("transition_insert_budget_per_chapter", 2) or 2
             ),
         )
-    runtime["phase04_routing_by_chapter"] = routing_by_chapter
-    runtime["phase04_routing"] = _aggregate_phase04_routing(routing_by_chapter)
+    aggregate = _aggregate_phase04_routing(routing_by_chapter)
+    return routing_by_chapter, aggregate
+
+
+def _scene_ref_chapter(value: Any) -> Optional[int]:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    if "->" in text:
+        text = text.split("->", 1)[0].strip()
+    if ":" not in text:
+        return None
+    try:
+        return int(text.split(":", 1)[0])
+    except ValueError:
+        return None
+
+
+def _phase_report_item_matches_chapter(item: Any, chapter_id: int) -> bool:
+    if isinstance(item, dict):
+        for key in ("from_scene_ref", "scene_ref", "candidate_ref", "ref", "to_scene_ref"):
+            ref_chapter = _scene_ref_chapter(item.get(key))
+            if ref_chapter is not None:
+                return ref_chapter == chapter_id
+        return False
+    ref_chapter = _scene_ref_chapter(item)
+    return ref_chapter == chapter_id if ref_chapter is not None else False
+
+
+def _chapter_scoped_phase_report(
+    *,
+    step_id: str,
+    chapter_id: int,
+    chapter_report: Dict[str, Any],
+) -> Dict[str, Any]:
+    if not isinstance(chapter_report, dict):
+        return {}
+    scoped = deepcopy(chapter_report)
+    scoped.pop("chapter_reports", None)
+
+    if step_id == outline_context.STEP_04A:
+        candidates = scoped.get("candidate_seams") if isinstance(scoped.get("candidate_seams"), list) else []
+        scoped["candidate_seams"] = [
+            item
+            for item in candidates
+            if _phase_report_item_matches_chapter(item, chapter_id)
+        ]
+        return scoped
+
+    if step_id == outline_context.STEP_04B:
+        for key in (
+            "candidate_seams",
+            "resolved_candidates",
+            "inserted_scene_refs",
+            "blocked_by_budget",
+            "downgraded_resolution",
+            "unresolved_required_insertions",
+        ):
+            values = scoped.get(key) if isinstance(scoped.get(key), list) else []
+            scoped[key] = [
+                item
+                for item in values
+                if _phase_report_item_matches_chapter(item, chapter_id)
+            ]
+        return scoped
+
+    return scoped
 
 
 def _aggregate_phase04_routing(routing_by_chapter: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
@@ -1126,6 +1222,12 @@ def _extract_chapter_patch_from_response(
         "characters": outline_payload.get("characters"),
         "threads": outline_payload.get("threads"),
     }
+    if step_id in {outline_context.STEP_04A, outline_context.STEP_04B}:
+        chapter_report = _chapter_scoped_phase_report(
+            step_id=step_id,
+            chapter_id=chapter_id,
+            chapter_report=chapter_report,
+        )
     return chapter_patch, chapter_report, registry_updates
 
 
@@ -1298,9 +1400,14 @@ def _execute_chapter_scoped_step(
                     chapter_id=chapter_id,
                 )
                 if step_id == outline_context.STEP_04A:
+                    chapter_specific_report = _chapter_scoped_phase_report(
+                        step_id=step_id,
+                        chapter_id=chapter_id,
+                        chapter_report=chapter_report,
+                    )
                     chapter_routing = outline_validators.route_phase04_candidates(
-                        candidate_seams=chapter_report.get("candidate_seams")
-                        if isinstance(chapter_report.get("candidate_seams"), list)
+                        candidate_seams=chapter_specific_report.get("candidate_seams")
+                        if isinstance(chapter_specific_report.get("candidate_seams"), list)
                         else [],
                         exact_scene_count=bool(settings.get("exact_scene_count", False)),
                         allow_transition_scene_insertions=bool(
@@ -1665,11 +1772,14 @@ def _execute_chapter_scoped_step(
     _save_phase_checkpoint(checkpoint_path, checkpoint)
 
     if step_id == outline_context.STEP_04A:
-        runtime["phase04_routing"] = _aggregate_phase04_routing(
-            runtime.get("phase04_routing_by_chapter")
-            if isinstance(runtime.get("phase04_routing_by_chapter"), dict)
-            else {}
+        routing_by_chapter, aggregate_routing = _derive_phase04_routing_from_phase04a_payload(
+            payload={
+                "phase_report": aggregate_report,
+            },
+            settings=settings,
         )
+        runtime["phase04_routing_by_chapter"] = routing_by_chapter
+        runtime["phase04_routing"] = aggregate_routing
         output_payload = {
             "schema_version": "transition_refine_v1",
             "outline": working_outline,
@@ -2049,6 +2159,12 @@ def generate_outline(
 
     outline_artifacts.write_latest_pointer(outline_root, run_id)
 
+    _restore_phase04_routing_from_handoff(
+        runtime=runtime,
+        handoffs=handoffs,
+        settings=settings,
+    )
+
     requires_attention = False
 
     active_step_id: Optional[str] = None
@@ -2246,12 +2362,14 @@ def generate_outline(
         history["steps"][exc.step_id] = history_entry
         requires_attention = True
     except LLMRequestError as exc:
-        failed_step = active_step_id or "unknown"
+        failed_step = active_step_id or ""
         if isinstance(history.get("steps"), dict):
             for sid in planned_steps:
                 if sid not in history["steps"]:
                     failed_step = sid
                     break
+        if not failed_step:
+            failed_step = planned_steps[-1] if planned_steps else "unknown"
         checkpoint_payload: Dict[str, Any] = {}
         if failed_step in CHAPTER_SCOPED_STEPS:
             checkpoint_file = _phase_checkpoint_path(run_dir, failed_step)
@@ -2294,6 +2412,9 @@ def generate_outline(
             )
         requires_attention = True
 
+    if not _phase_failed(history):
+        _prune_stale_unknown_step(history)
+
     outline_artifacts.write_history(history_path, history)
 
     report = _build_pipeline_report(
@@ -2312,6 +2433,8 @@ def generate_outline(
         raise RuntimeError(
             f"Outline pipeline ended with status {report.get('overall_status')}. See {report_path}"
         )
+
+    _clear_pause_marker(run_dir)
 
     final_outline: Optional[Dict[str, Any]] = None
     if isinstance(handoffs.get("outline_final_v1_1"), dict):

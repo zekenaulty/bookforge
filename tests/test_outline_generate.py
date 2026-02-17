@@ -276,6 +276,27 @@ def _phase_04b_for_chapter(chapter_id: int) -> dict:
     }
 
 
+def _phase_04a_for_chapter_with_candidates(
+    chapter_id: int,
+    candidate_seams: list[dict],
+) -> dict:
+    payload = _phase_04a_for_chapter(chapter_id)
+    payload["phase_report"]["candidate_seams"] = candidate_seams
+    return payload
+
+
+def _phase_04b_for_chapter_with_report(
+    chapter_id: int,
+    *,
+    resolved_candidates: list[dict] | None = None,
+    inserted_scene_refs: list[str] | None = None,
+) -> dict:
+    payload = _phase_04b_for_chapter(chapter_id)
+    payload["phase_report"]["resolved_candidates"] = resolved_candidates or []
+    payload["phase_report"]["inserted_scene_refs"] = inserted_scene_refs or []
+    return payload
+
+
 def _phase_05() -> dict:
     return _phase_05_for_chapter(1)
 
@@ -328,6 +349,11 @@ def _init_book(tmp_path: Path) -> None:
         targets={"chapters": 2},
         series_id=None,
     )
+
+
+def _latest_run_dir(tmp_path: Path) -> Path:
+    run_root = tmp_path / "books" / "my_book" / "outline" / "pipeline_runs"
+    return sorted(run_root.iterdir())[-1]
 
 
 def test_generate_outline_pipeline_writes_files(tmp_path: Path) -> None:
@@ -657,3 +683,191 @@ def test_generate_outline_phase_thinking_env_overrides(tmp_path: Path, monkeypat
         "high",
         "high",
     ]
+
+
+def test_generate_outline_phase04b_input_uses_phase04a_selected_insertions(tmp_path: Path) -> None:
+    _init_book(tmp_path)
+    client = DummyClient(_pipeline_responses())
+    generate_outline(workspace=tmp_path, book_id="my_book", client=client, model="dummy")
+
+    latest_run = _latest_run_dir(tmp_path)
+    phase04a_path = latest_run / "phase_04a_output.json"
+    phase04a = json.loads(phase04a_path.read_text(encoding="utf-8"))
+    phase04a["phase_report"] = {
+        "candidate_seams": [
+            {
+                "from_scene_ref": "1:1",
+                "to_scene_ref": "1:2",
+                "seam_score": 90,
+                "requested_resolution": "full_scene",
+                "reason": "forced test insertion",
+            }
+        ]
+    }
+    phase04a_path.write_text(json.dumps(phase04a, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    rerun_client = DummyClient(
+        [
+            json.dumps(
+                _phase_04b_for_chapter_with_report(
+                    1,
+                    resolved_candidates=[
+                        {
+                            "from_scene_ref": "1:1",
+                            "to_scene_ref": "1:2",
+                        }
+                    ],
+                    inserted_scene_refs=["1:2"],
+                )
+            ),
+            json.dumps(_phase_04b_for_chapter_with_report(2)),
+        ]
+    )
+    generate_outline(
+        workspace=tmp_path,
+        book_id="my_book",
+        rerun=True,
+        from_phase="phase_04b_transition_execution",
+        to_phase="phase_04b_transition_execution",
+        client=rerun_client,
+        model="dummy",
+    )
+
+    rerun_dir = _latest_run_dir(tmp_path)
+    chapter_input = json.loads(
+        (rerun_dir / "phase_04b_transition_execution_chapter_001_input.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    selected = (
+        chapter_input.get("render_values", {}).get("phase_04_selected_candidates_json")
+        if isinstance(chapter_input.get("render_values"), dict)
+        else []
+    )
+    assert isinstance(selected, list)
+    assert any(
+        isinstance(item, dict)
+        and item.get("from_scene_ref") == "1:1"
+        and item.get("to_scene_ref") == "1:2"
+        and item.get("requested_resolution") == "full_scene"
+        for item in selected
+    )
+
+
+def test_generate_outline_resume_phase5_reports_existing_phase04_seam_metrics(tmp_path: Path) -> None:
+    _init_book(tmp_path)
+    phase04_candidates_ch1 = [
+        {
+            "from_scene_ref": "1:1",
+            "to_scene_ref": "1:2",
+            "seam_score": 90,
+            "requested_resolution": "full_scene",
+            "reason": "phase04 metric test",
+        }
+    ]
+    phase04_candidates_ch2 = [
+        {
+            "from_scene_ref": "2:1",
+            "to_scene_ref": "2:2",
+            "seam_score": 40,
+            "requested_resolution": "inline_bridge",
+            "reason": "phase04 metric test",
+        }
+    ]
+
+    first_client = DummyClient(
+        [
+            json.dumps(_phase_01()),
+            json.dumps(_phase_02()),
+            json.dumps(_base_outline()),
+            json.dumps(_phase_04a_for_chapter_with_candidates(1, phase04_candidates_ch1)),
+            json.dumps(_phase_04a_for_chapter_with_candidates(2, phase04_candidates_ch2)),
+            json.dumps(
+                _phase_04b_for_chapter_with_report(
+                    1,
+                    resolved_candidates=[
+                        {"from_scene_ref": "1:1", "to_scene_ref": "1:2"}
+                    ],
+                    inserted_scene_refs=["1:2"],
+                )
+            ),
+            json.dumps(_phase_04b_for_chapter_with_report(2)),
+            json.dumps(_phase_05_for_chapter(1)),
+            json.dumps(_phase_05_for_chapter(2)),
+            json.dumps(_phase_06_for_chapter(1)),
+            json.dumps(_phase_06_for_chapter(2)),
+        ]
+    )
+    generate_outline(workspace=tmp_path, book_id="my_book", client=first_client, model="dummy")
+
+    resume_client = DummyClient(
+        [
+            json.dumps(_phase_05_for_chapter(1)),
+            json.dumps(_phase_05_for_chapter(2)),
+            json.dumps(_phase_06_for_chapter(1)),
+            json.dumps(_phase_06_for_chapter(2)),
+        ]
+    )
+    generate_outline(
+        workspace=tmp_path,
+        book_id="my_book",
+        resume=True,
+        from_phase="phase_05_cast_function_refinement",
+        to_phase="phase_06_thread_payoff_refinement",
+        client=resume_client,
+        model="dummy",
+    )
+
+    report_path, report = load_latest_outline_pipeline_report(workspace=tmp_path, book_id="my_book")
+    assert report_path is not None
+    seam = report.get("seam_outcomes", {}) if isinstance(report, dict) else {}
+    assert int(seam.get("candidates", 0) or 0) > 0
+    assert int(seam.get("selected", 0) or 0) > 0
+
+
+def test_generate_outline_success_clears_pause_marker_and_unknown_step(tmp_path: Path) -> None:
+    _init_book(tmp_path)
+    client = DummyClient(_pipeline_responses())
+    generate_outline(workspace=tmp_path, book_id="my_book", client=client, model="dummy")
+
+    run_dir = _latest_run_dir(tmp_path)
+    history_path = run_dir / "phase_history.json"
+    history = json.loads(history_path.read_text(encoding="utf-8"))
+    history.setdefault("steps", {})["unknown"] = {
+        "status": "paused",
+        "attempts": 1,
+        "logical_phase": "unknown",
+        "validation": {"status": "fail", "errors": [], "warnings": [], "metrics": {}},
+    }
+    history_path.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
+    (run_dir / "pipeline_run_paused.json").write_text(
+        json.dumps({"step_id": "unknown"}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+    resume_client = DummyClient(
+        [
+            json.dumps(_phase_05_for_chapter(1)),
+            json.dumps(_phase_05_for_chapter(2)),
+            json.dumps(_phase_06_for_chapter(1)),
+            json.dumps(_phase_06_for_chapter(2)),
+        ]
+    )
+    generate_outline(
+        workspace=tmp_path,
+        book_id="my_book",
+        resume=True,
+        from_phase="phase_05_cast_function_refinement",
+        to_phase="phase_06_thread_payoff_refinement",
+        client=resume_client,
+        model="dummy",
+    )
+
+    updated_history = json.loads(history_path.read_text(encoding="utf-8"))
+    updated_steps = (
+        updated_history.get("steps", {})
+        if isinstance(updated_history.get("steps"), dict)
+        else {}
+    )
+    assert "unknown" not in updated_steps
+    assert not (run_dir / "pipeline_run_paused.json").exists()
