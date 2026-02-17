@@ -24,16 +24,20 @@
           "scene_id": 1,
           "type": "setup",
           "summary": "Artie enters the city and sees the 'Temple of the D20,' where priests pray for high rolls.",
+          "outcome": "Artie realizes he is basically a walking god in this religion.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "threads": [
+            "THREAD_THE_ASCENSION"
+          ],
           "location_start_label": "Capital City - Main Gate",
-          "location_start_id": "LOC_CAPITAL_CITY_MAIN_GATE_9A5850",
           "location_start": "Capital City - Main Gate",
+          "location_start_id": "LOC_CAPITAL_CITY_MAIN_GATE_9A5850",
           "location_end_label": "Capital City - Main Gate",
-          "location_end_id": "LOC_CAPITAL_CITY_MAIN_GATE_9A5850",
           "location_end": "Capital City - Main Gate",
+          "location_end_id": "LOC_CAPITAL_CITY_MAIN_GATE_9A5850",
           "handoff_mode": "arrival_checkpoint",
           "constraint_state": "free",
           "transition_in_text": "The golden spires of the capital loom over the horizon as Artie approaches the gate.",
@@ -50,28 +54,29 @@
             "ink-stained scrolls",
             "stern librarians"
           ],
-          "hands_off_to": "4:2",
-          "outcome": "Artie realizes he is basically a walking god in this religion.",
-          "threads": [
-            "THREAD_THE_ASCENSION"
-          ]
+          "hands_off_to": "4:2"
         },
         {
           "scene_id": 2,
           "type": "reveal",
           "summary": "Artie tries to find a 'Stat-Wiper' to fix his 1 HP, but finds out it's a crime punishable by 'Deletion'.",
+          "outcome": "Artie is stuck with his glass cannon build forever.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "threads": [
+            "THREAD_SYSTEM_GLITCH"
+          ],
           "location_start_label": "Capital City - Hall of Records",
-          "location_start_id": "LOC_CAPITAL_CITY_HALL_OF_RECORDS_203BDC",
           "location_start": "Capital City - Hall of Records",
+          "location_start_id": "LOC_CAPITAL_CITY_HALL_OF_RECORDS_203BDC",
           "location_end_label": "Capital City - Hall of Records",
-          "location_end_id": "LOC_CAPITAL_CITY_HALL_OF_RECORDS_203BDC",
           "location_end": "Capital City - Hall of Records",
+          "location_end_id": "LOC_CAPITAL_CITY_HALL_OF_RECORDS_203BDC",
           "handoff_mode": "direct_continuation",
           "constraint_state": "restricted",
           "consumes_outcome_from": "4:1",
+          "end_condition_echo": "Artie is stuck with his glass cannon build forever.",
           "transition_in_text": "Artie searches the dusty archives for any mention of a stat reset.",
           "transition_in_anchors": [
             "towering bookshelves",
@@ -86,14 +91,7 @@
             "hooded merchants",
             "binary whispers"
           ],
-          "hands_off_to": "4:3",
-          "outcome": "Artie is stuck with his glass cannon build forever.",
-          "end_condition_echo": "Artie is stuck with his glass cannon build forever.",
-          "seam_score": 85,
-          "seam_resolution": "inline_bridge",
-          "threads": [
-            "THREAD_SYSTEM_GLITCH"
-          ]
+          "hands_off_to": "4:3"
         }
       ]
     },
@@ -107,16 +105,20 @@
           "scene_id": 3,
           "type": "transition",
           "summary": "Fizz leads Artie to a black market run by a group of 'Dev-Haters' who sell items that bypass System rules.",
+          "outcome": "Artie gains access to a 'Lag-Switch' potion.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "threads": [
+            "THREAD_SYSTEM_GLITCH"
+          ],
           "location_start_label": "Capital City - Undercity Market",
-          "location_start_id": "LOC_CAPITAL_CITY_UNDERCITY_MARKET_BAD635",
           "location_start": "Capital City - Undercity Market",
+          "location_start_id": "LOC_CAPITAL_CITY_UNDERCITY_MARKET_BAD635",
           "location_end_label": "Capital City - Undercity Market",
-          "location_end_id": "LOC_CAPITAL_CITY_UNDERCITY_MARKET_BAD635",
           "location_end": "Capital City - Undercity Market",
+          "location_end_id": "LOC_CAPITAL_CITY_UNDERCITY_MARKET_BAD635",
           "handoff_mode": "arrival_checkpoint",
           "constraint_state": "free",
           "consumes_outcome_from": "4:2",
@@ -134,26 +136,25 @@
             "rng priest sigil",
             "spilled ale"
           ],
-          "hands_off_to": "4:4",
-          "outcome": "Artie gains access to a 'Lag-Switch' potion.",
-          "threads": [
-            "THREAD_SYSTEM_GLITCH"
-          ]
+          "hands_off_to": "4:4"
         },
         {
           "scene_id": 4,
           "type": "reveal",
-          "summary": "Artie meets Kai, a black-market informant, who reveals that Vane is the son of the High Priest of RNG.",
+          "summary": "Artie meets an informant who tells him that Vane is the son of the High Priest of RNG.",
+          "outcome": "The rivalry with Vane just became a religious war.",
           "characters": [
-            "CHAR_ARTIE",
-            "CHAR_INFORMANT_KAI"
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_VANE_RIVALRY"
           ],
           "location_start_label": "Capital City - Shady Tavern",
-          "location_start_id": "LOC_CAPITAL_CITY_SHADY_TAVERN_20D6D8",
           "location_start": "Capital City - Shady Tavern",
+          "location_start_id": "LOC_CAPITAL_CITY_SHADY_TAVERN_20D6D8",
           "location_end_label": "Capital City - Shady Tavern",
-          "location_end_id": "LOC_CAPITAL_CITY_SHADY_TAVERN_20D6D8",
           "location_end": "Capital City - Shady Tavern",
+          "location_end_id": "LOC_CAPITAL_CITY_SHADY_TAVERN_20D6D8",
           "handoff_mode": "direct_continuation",
           "constraint_state": "sheltered",
           "consumes_outcome_from": "4:3",
@@ -171,29 +172,30 @@
             "lag-switch stutter",
             "binary speech bubbles"
           ],
-          "hands_off_to": "4:5",
-          "outcome": "The rivalry with Vane just became a religious war.",
-          "threads": [
-            "THREAD_VANE_RIVALRY"
-          ]
+          "hands_off_to": "4:5"
         },
         {
           "scene_id": 5,
           "type": "action",
           "summary": "The black market is raided by the 'System Sentinels,' and Artie has to use his first 'Lag-Switch' to escape.",
+          "outcome": "Artie escapes, but the potion has a side effect: he speaks in binary for an hour.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "threads": [
+            "THREAD_SYSTEM_GLITCH"
+          ],
           "location_start_label": "Capital City - Undercity Alleys",
-          "location_start_id": "LOC_CAPITAL_CITY_UNDERCITY_ALLEYS_BC4F38",
           "location_start": "Capital City - Undercity Alleys",
+          "location_start_id": "LOC_CAPITAL_CITY_UNDERCITY_ALLEYS_BC4F38",
           "location_end_label": "Capital City - Undercity Alleys",
-          "location_end_id": "LOC_CAPITAL_CITY_UNDERCITY_ALLEYS_BC4F38",
           "location_end": "Capital City - Undercity Alleys",
+          "location_end_id": "LOC_CAPITAL_CITY_UNDERCITY_ALLEYS_BC4F38",
           "handoff_mode": "combat_disengage",
           "constraint_state": "fleeing",
           "consumes_outcome_from": "4:4",
+          "end_condition_echo": "Artie escapes the raid, but the potion has a side effect: he speaks in binary for an hour.",
           "transition_in_text": "Artie uncorks the lag-switch potion as the Sentinels close in.",
           "transition_in_anchors": [
             "sentinel iron masks",
@@ -208,14 +210,7 @@
             "arena crowd noise",
             "colorful banners"
           ],
-          "hands_off_to": "4:6",
-          "outcome": "Artie escapes, but the potion has a side effect: he speaks in binary for an hour.",
-          "end_condition_echo": "Artie escapes the raid, but the potion has a side effect: he speaks in binary for an hour.",
-          "seam_score": 90,
-          "seam_resolution": "inline_bridge",
-          "threads": [
-            "THREAD_SYSTEM_GLITCH"
-          ]
+          "hands_off_to": "4:6"
         }
       ]
     },
@@ -229,15 +224,19 @@
           "scene_id": 6,
           "type": "choice",
           "summary": "Artie sees a flyer for the 'Grand Crit-Off,' where the prize is a 'Shield of Infinite Health'.",
+          "outcome": "Artie decides to enter, despite the risk of exposure.",
           "characters": [
             "CHAR_ARTIE"
           ],
+          "threads": [
+            "THREAD_CRIT_EXPLOIT"
+          ],
           "location_start_label": "Capital City - Arena Plaza",
-          "location_start_id": "LOC_CAPITAL_CITY_ARENA_PLAZA_D37DD7",
           "location_start": "Capital City - Arena Plaza",
+          "location_start_id": "LOC_CAPITAL_CITY_ARENA_PLAZA_D37DD7",
           "location_end_label": "Capital City - Arena Plaza",
-          "location_end_id": "LOC_CAPITAL_CITY_ARENA_PLAZA_D37DD7",
           "location_end": "Capital City - Arena Plaza",
+          "location_end_id": "LOC_CAPITAL_CITY_ARENA_PLAZA_D37DD7",
           "handoff_mode": "arrival_checkpoint",
           "constraint_state": "free",
           "consumes_outcome_from": "4:5",
@@ -255,27 +254,26 @@
             "registration quill",
             "crit-iculous signature"
           ],
-          "hands_off_to": "4:7",
-          "outcome": "Artie decides to enter, despite the risk of exposure.",
-          "threads": [
-            "THREAD_CRIT_EXPLOIT"
-          ]
+          "hands_off_to": "4:7"
         },
         {
           "scene_id": 7,
           "type": "consequence",
-          "summary": "Artie registers under the name 'Crit-iculous' with a bored Arena Clerk and accidentally sets his entry fee to 'All My Gold'.",
+          "summary": "Artie registers under the name 'Crit-iculous' and accidentally sets his entry fee to 'All My Gold'.",
+          "outcome": "Artie is now broke and must win the tournament to survive.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_FIZZ",
-            "CHAR_CLERK_ARENA"
+            "CHAR_FIZZ"
+          ],
+          "threads": [
+            "THREAD_CRIT_EXPLOIT"
           ],
           "location_start_label": "Capital City - Registration Booth",
-          "location_start_id": "LOC_CAPITAL_CITY_REGISTRATION_BOOTH_8A04F7",
           "location_start": "Capital City - Registration Booth",
+          "location_start_id": "LOC_CAPITAL_CITY_REGISTRATION_BOOTH_8A04F7",
           "location_end_label": "Capital City - Registration Booth",
-          "location_end_id": "LOC_CAPITAL_CITY_REGISTRATION_BOOTH_8A04F7",
           "location_end": "Capital City - Registration Booth",
+          "location_end_id": "LOC_CAPITAL_CITY_REGISTRATION_BOOTH_8A04F7",
           "handoff_mode": "direct_continuation",
           "constraint_state": "processed",
           "consumes_outcome_from": "4:6",
@@ -293,39 +291,35 @@
             "cruel smile",
             "arena sand"
           ],
-          "hands_off_to": "4:8",
-          "outcome": "Artie is now broke and must win the tournament to survive.",
-          "threads": [
-            "THREAD_CRIT_EXPLOIT"
-          ]
+          "hands_off_to": "4:8"
         },
         {
           "scene_id": 8,
           "type": "escalation",
           "summary": "Vane sees the name on the roster and smiles, knowing he can finally 'delete' Artie in front of a crowd.",
+          "outcome": "The stage is set for the final confrontation.",
           "characters": [
             "CHAR_VANE"
           ],
+          "threads": [
+            "THREAD_VANE_RIVALRY"
+          ],
           "location_start_label": "Capital City - Arena Balcony",
-          "location_start_id": "LOC_CAPITAL_CITY_ARENA_BALCONY_DFA09A",
           "location_start": "Capital City - Arena Balcony",
+          "location_start_id": "LOC_CAPITAL_CITY_ARENA_BALCONY_DFA09A",
           "location_end_label": "Capital City - Arena Balcony",
-          "location_end_id": "LOC_CAPITAL_CITY_ARENA_BALCONY_DFA09A",
           "location_end": "Capital City - Arena Balcony",
+          "location_end_id": "LOC_CAPITAL_CITY_ARENA_BALCONY_DFA09A",
           "handoff_mode": "direct_continuation",
           "constraint_state": "free",
           "consumes_outcome_from": "4:7",
+          "end_condition_echo": "The stage is set for the final confrontation.",
           "transition_in_text": "Vane's fingers trace the name 'Crit-iculous' on the parchment.",
           "transition_in_anchors": [
             "golden balcony rail",
             "system override scroll",
             "cruel smile",
             "arena sand"
-          ],
-          "outcome": "The stage is set for the final confrontation.",
-          "end_condition_echo": "The stage is set for the final confrontation.",
-          "threads": [
-            "THREAD_VANE_RIVALRY"
           ]
         }
       ]

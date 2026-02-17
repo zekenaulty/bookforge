@@ -49,7 +49,12 @@ def validate(
     runtime: Dict[str, Any],
 ) -> ValidationResult:
     sections = handoffs.get("outline_sections_v1") if isinstance(handoffs.get("outline_sections_v1"), dict) else None
-    selected = runtime.get("phase04_routing", {}).get("selected") if isinstance(runtime.get("phase04_routing"), dict) else []
+    current = runtime.get("phase04_current_routing")
+    if isinstance(current, dict):
+        routing = current
+    else:
+        routing = runtime.get("phase04_routing") if isinstance(runtime.get("phase04_routing"), dict) else {}
+    selected = routing.get("selected") if isinstance(routing, dict) else []
     if not isinstance(selected, list):
         selected = []
     return validate_phase_04b(
