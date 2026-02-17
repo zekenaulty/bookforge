@@ -878,33 +878,113 @@ def validate_phase_04b(
     warnings.extend(base.warnings)
     metrics.update(base.metrics)
 
-    selected_refs = {
-        f"{_norm_text(item.get('from_scene_ref'))}->{_norm_text(item.get('to_scene_ref'))}"
-        for item in selected_candidates
-        if _norm_text(item.get("requested_resolution")) in {"micro_scene", "full_scene"}
-    }
+    selected_insertions: Dict[str, str] = {}
+    for item in selected_candidates:
+        if not isinstance(item, dict):
+            continue
+        requested = _norm_text(item.get("requested_resolution"))
+        if requested not in {"micro_scene", "full_scene"}:
+            continue
+        from_ref = _norm_text(item.get("from_scene_ref"))
+        to_ref = _norm_text(item.get("to_scene_ref"))
+        if not from_ref or not to_ref:
+            continue
+        selected_insertions[f"{from_ref}->{to_ref}"] = requested
 
     phase_report = (
         payload.get("phase_report") if isinstance(payload.get("phase_report"), dict) else {}
     )
+    downgraded = (
+        phase_report.get("downgraded_resolution")
+        if isinstance(phase_report.get("downgraded_resolution"), list)
+        else []
+    )
+    if downgraded:
+        errors.append(
+            issue(
+                "transition_downgrade_forbidden",
+                "downgraded_resolution must be empty; selected insertion downgrades are forbidden",
+                path="phase_report.downgraded_resolution",
+            )
+        )
+
+    inserted_scene_refs = (
+        phase_report.get("inserted_scene_refs")
+        if isinstance(phase_report.get("inserted_scene_refs"), list)
+        else []
+    )
+    inserted_ref_set = {
+        _norm_text(item) for item in inserted_scene_refs if _norm_text(item)
+    }
+
     resolved = (
         phase_report.get("resolved_candidates")
         if isinstance(phase_report.get("resolved_candidates"), list)
         else []
     )
-    resolved_refs = {
-        f"{_norm_text(item.get('from_scene_ref'))}->{_norm_text(item.get('to_scene_ref'))}"
-        for item in resolved
-        if isinstance(item, dict)
-    }
+    resolved_by_ref: Dict[str, tuple[int, Dict[str, Any]]] = {}
+    for idx, item in enumerate(resolved):
+        if not isinstance(item, dict):
+            continue
+        from_ref = _norm_text(item.get("from_scene_ref"))
+        to_ref = _norm_text(item.get("to_scene_ref"))
+        if not from_ref or not to_ref:
+            continue
+        resolved_by_ref[f"{from_ref}->{to_ref}"] = (idx, item)
 
-    unresolved = sorted(selected_refs - resolved_refs)
+    unresolved = sorted(set(selected_insertions.keys()) - set(resolved_by_ref.keys()))
     if unresolved:
         errors.append(
             issue(
                 "transition_insertion_required",
                 "Selected insertion candidates were not resolved by LLM output",
                 path="phase_report.resolved_candidates",
+            )
+        )
+
+    required_inserted_refs: set[str] = set()
+    for ref, expected_resolution in selected_insertions.items():
+        matched = resolved_by_ref.get(ref)
+        if not matched:
+            continue
+        idx, item = matched
+        item_requested = _norm_text(item.get("requested_resolution"))
+        if item_requested != expected_resolution:
+            errors.append(
+                issue(
+                    "transition_insertion_resolution_mismatch",
+                    f"resolved_candidates[{idx}] requested_resolution must be {expected_resolution}",
+                    path=f"phase_report.resolved_candidates[{idx}].requested_resolution",
+                )
+            )
+        item_resolution = _norm_text(item.get("resolution"))
+        if item_resolution != expected_resolution:
+            errors.append(
+                issue(
+                    "transition_insertion_resolution_mismatch",
+                    f"resolved_candidates[{idx}] resolution must be {expected_resolution}",
+                    path=f"phase_report.resolved_candidates[{idx}].resolution",
+                )
+            )
+        inserted_ref = _norm_text(item.get("inserted_scene_ref"))
+        if not inserted_ref:
+            errors.append(
+                issue(
+                    "transition_insertion_missing_scene_ref",
+                    "resolved insertion candidate must provide inserted_scene_ref",
+                    path=f"phase_report.resolved_candidates[{idx}].inserted_scene_ref",
+                )
+            )
+        else:
+            required_inserted_refs.add(inserted_ref)
+
+    missing_inserted_refs = sorted(required_inserted_refs - inserted_ref_set)
+    if missing_inserted_refs:
+        errors.append(
+            issue(
+                "transition_insertion_missing_scene_ref",
+                "phase_report.inserted_scene_refs must include every resolved inserted_scene_ref",
+                path="phase_report.inserted_scene_refs",
             )
         )
 

@@ -20,7 +20,6 @@ Required output schema:
     "inserted_scene_refs": [],
     "resolved_candidates": [],
     "blocked_by_budget": [],
-    "downgraded_resolution": [],
     "unresolved_required_insertions": [],
     "edits_applied": []
   }
@@ -51,7 +50,9 @@ Inputs for deterministic routing context (chapter-scoped):
 
 Hard execution rules:
 - Every selected candidate with requested_resolution micro_scene/full_scene must be resolved in this output.
+- For requested_resolution micro_scene/full_scene, resolved means an inserted scene object exists between from_scene_ref and to_scene_ref.
 - If a selected insertion cannot be satisfied, return error_v1 (do not emit partial success).
+- Downgrading selected insertion candidates to inline_bridge is forbidden.
 - Inserted scenes must be authored prose semantics; do not emit meta/fallback phrasing.
 - Do not synthesize placeholder identity values (current_location, unknown, placeholder, tbd, here, there).
 - Preserve required transition/link contracts and chapter-local scene sequencing.
@@ -59,7 +60,13 @@ Hard execution rules:
 Resolved candidate reporting:
 - phase_report.resolved_candidates must contain one entry for each selected insertion candidate in this chapter.
 - Use chapter_id:scene_id refs.
-- If you downgraded a selected candidate, record in downgraded_resolution with reason.
+- Each resolved insertion entry must include:
+  - from_scene_ref
+  - to_scene_ref
+  - requested_resolution
+  - resolution (must equal requested_resolution for selected insertion candidates)
+  - inserted_scene_ref (chapter_id:scene_id of the inserted scene)
+- Every inserted_scene_ref listed in resolved_candidates must also appear in phase_report.inserted_scene_refs.
 
 If you cannot satisfy constraints after correction attempts, return error_v1:
 {

@@ -55,10 +55,37 @@ Required transition contract fields:
 - Do NOT emit placeholder identity values (current_location, unknown, placeholder, tbd, here, there) in location or transition fields.
 
 Hard requirements for candidate_seams:
+- You must evaluate every adjacent scene edge in each chapter before deciding candidate_seams.
 - candidate_seams must include every seam that requires non-trivial handling.
 - requested_resolution must be one of: inline_bridge, micro_scene, full_scene.
 - from_scene_ref and to_scene_ref must use chapter_id:scene_id format.
 - If no seam candidates are needed, emit candidate_seams as an empty array.
+
+Non-trivial seam triggers (ANY trigger means candidate consideration is required):
+- meaningful location change (not just a camera-angle change in the same place)
+- time jump (even minutes) without an on-page bridge beat
+- focal attention or objective snaps to a new target
+- prior scene ends high tension and next scene begins already elsewhere/settled
+- continuity dependency (gear, injury, knowledge, social state) must carry visibly
+- opening of next scene would read as teleportation or missing content
+
+Resolution preference ladder:
+- Prefer micro_scene by default when there is any meaningful gap.
+- Use inline_bridge ONLY when all are true:
+  - bridge can be realized in 1-2 sentences
+  - no new beat is needed
+  - no missing causal step exists
+  - no continuity state can be misread without a new scene
+- Use full_scene when a new beat is required (decision, conflict pivot, reveal, failure, bargain, chase, arrival with consequence) or when the seam is emotionally/causally important.
+
+Seam-score mapping guidance:
+- 0-25: smooth transition, usually no candidate required
+- 26-50: candidate likely; inline_bridge or micro_scene depending on triggers
+- 51-75: micro_scene strongly preferred
+- 76-100: full_scene strongly preferred
+
+Insertion expectation:
+- If you find ANY seam_score >= 60 in a chapter, propose at least one micro_scene or full_scene candidate unless the chapter is truly continuous.
 
 Strict hard-cut policy:
 - In strict transition mode, hard_cut is disallowed.

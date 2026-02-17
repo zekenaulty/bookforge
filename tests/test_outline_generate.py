@@ -269,7 +269,6 @@ def _phase_04b_for_chapter(chapter_id: int) -> dict:
             "inserted_scene_refs": [],
             "resolved_candidates": [],
             "blocked_by_budget": [],
-            "downgraded_resolution": [],
             "unresolved_required_insertions": [],
             "edits_applied": [],
         },
@@ -715,6 +714,9 @@ def test_generate_outline_phase04b_input_uses_phase04a_selected_insertions(tmp_p
                         {
                             "from_scene_ref": "1:1",
                             "to_scene_ref": "1:2",
+                            "requested_resolution": "full_scene",
+                            "resolution": "full_scene",
+                            "inserted_scene_ref": "1:2",
                         }
                     ],
                     inserted_scene_refs=["1:2"],
@@ -786,7 +788,13 @@ def test_generate_outline_resume_phase5_reports_existing_phase04_seam_metrics(tm
                 _phase_04b_for_chapter_with_report(
                     1,
                     resolved_candidates=[
-                        {"from_scene_ref": "1:1", "to_scene_ref": "1:2"}
+                        {
+                            "from_scene_ref": "1:1",
+                            "to_scene_ref": "1:2",
+                            "requested_resolution": "full_scene",
+                            "resolution": "full_scene",
+                            "inserted_scene_ref": "1:2",
+                        }
                     ],
                     inserted_scene_refs=["1:2"],
                 )

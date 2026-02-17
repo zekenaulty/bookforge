@@ -91,7 +91,9 @@ def _outline_wrapper() -> dict:
                 {
                     "from_scene_ref": "1:1",
                     "to_scene_ref": "1:2",
+                    "requested_resolution": "micro_scene",
                     "resolution": "micro_scene",
+                    "inserted_scene_ref": "1:2",
                 }
             ],
             "inserted_scene_refs": ["1:2"],
@@ -169,3 +171,83 @@ def test_phase04b_validation_requires_selected_resolution() -> None:
     )
     assert result_broken.status == "fail"
     assert any(item.get("code") == "transition_insertion_required" for item in result_broken.errors)
+
+
+def test_phase04b_validation_rejects_downgraded_resolution() -> None:
+    payload = _outline_wrapper()
+    payload["phase_report"]["downgraded_resolution"] = [
+        {
+            "from_scene_ref": "1:1",
+            "to_scene_ref": "1:2",
+            "requested_resolution": "micro_scene",
+            "resolution": "inline_bridge",
+            "reason": "not allowed",
+        }
+    ]
+    selected = [
+        {
+            "from_scene_ref": "1:1",
+            "to_scene_ref": "1:2",
+            "requested_resolution": "micro_scene",
+        }
+    ]
+    result = validate_phase_04b(
+        payload,
+        sections_payload={
+            "chapters": [
+                {
+                    "chapter_id": 1,
+                    "sections": [
+                        {
+                            "section_id": 1,
+                            "end_condition": "Release under watch pushes him into local politics.",
+                        }
+                    ],
+                }
+            ]
+        },
+        strict_transition_bridges=True,
+        selected_candidates=selected,
+    )
+    assert result.status == "fail"
+    assert any(item.get("code") == "transition_downgrade_forbidden" for item in result.errors)
+
+
+def test_phase04b_validation_requires_inserted_scene_ref_on_selected_insertions() -> None:
+    payload = _outline_wrapper()
+    payload["phase_report"]["resolved_candidates"] = [
+        {
+            "from_scene_ref": "1:1",
+            "to_scene_ref": "1:2",
+            "requested_resolution": "micro_scene",
+            "resolution": "micro_scene",
+        }
+    ]
+    payload["phase_report"]["inserted_scene_refs"] = []
+    selected = [
+        {
+            "from_scene_ref": "1:1",
+            "to_scene_ref": "1:2",
+            "requested_resolution": "micro_scene",
+        }
+    ]
+    result = validate_phase_04b(
+        payload,
+        sections_payload={
+            "chapters": [
+                {
+                    "chapter_id": 1,
+                    "sections": [
+                        {
+                            "section_id": 1,
+                            "end_condition": "Release under watch pushes him into local politics.",
+                        }
+                    ],
+                }
+            ]
+        },
+        strict_transition_bridges=True,
+        selected_candidates=selected,
+    )
+    assert result.status == "fail"
+    assert any(item.get("code") == "transition_insertion_missing_scene_ref" for item in result.errors)
