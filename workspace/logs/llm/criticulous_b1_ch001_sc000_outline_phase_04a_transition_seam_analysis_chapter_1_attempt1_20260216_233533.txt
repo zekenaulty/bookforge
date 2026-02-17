@@ -1,0 +1,113 @@
+{
+  "schema_version": "transition_refine_v1",
+  "outline": {
+    "schema_version": "1.1",
+    "chapters": [
+      {
+        "chapter_id": "1",
+        "title": "The Natural One",
+        "pacing": {
+          "expected_scene_count": 3,
+          "intensity": "high"
+        },
+        "sections": [
+          {
+            "section_id": "1.1",
+            "title": "The Glitch",
+            "end_condition": "Artie realizes he is not in the starting zone.",
+            "scenes": [
+              {
+                "scene_id": "1",
+                "chapter_id": "1",
+                "title": "Character Creation Chaos",
+                "location_start_label": "Artie's Apartment - VR Pod",
+                "location_end_label": "Artie's Apartment - VR Pod",
+                "handoff_mode": "seamless",
+                "hands_off_to": "1:2",
+                "transition_out_text": "The pod hissed, the smell of ozone filling the small space before the world inverted into a kaleidoscope of error codes.",
+                "transition_out_anchors": [
+                  "hissed",
+                  "ozone",
+                  "inverted",
+                  "error codes"
+                ],
+                "summary": "Artie attempts to min-max his character in 'Aetheria Online' but rolls a natural 1 on his luck stat, triggering a system-wide glitch."
+              },
+              {
+                "scene_id": "2",
+                "chapter_id": "1",
+                "title": "The Great Slop-Heap",
+                "consumes_outcome_from": "1:1",
+                "location_start_label": "The Great Slop-Heap",
+                "location_end_label": "The Great Slop-Heap",
+                "handoff_mode": "seamless",
+                "hands_off_to": "1:3",
+                "transition_in_text": "The smell of rotting cabbage and digital decay was the first thing to hit Artie as he face-planted into the muck.",
+                "transition_in_anchors": [
+                  "rotting cabbage",
+                  "digital decay",
+                  "face-planted"
+                ],
+                "transition_out_text": "He wiped the slime from his eyes and looked toward the jagged treeline where the first mob awaited.",
+                "transition_out_anchors": [
+                  "slime",
+                  "eyes",
+                  "jagged treeline"
+                ],
+                "summary": "Artie wakes up in a literal trash heap. He discovers he has the 'Cursed' title and his starting equipment is a 'Broken Spatula'.",
+                "end_condition_echo": "Artie realizes he is not in the starting zone."
+              }
+            ]
+          },
+          {
+            "section_id": "1.2",
+            "title": "First Contact",
+            "end_condition": "Artie kills his first slime with a critical hit.",
+            "scenes": [
+              {
+                "scene_id": "3",
+                "chapter_id": "1",
+                "title": "Crit Hit and Run",
+                "consumes_outcome_from": "1:2",
+                "location_start_label": "The Slop-Heap Perimeter",
+                "location_end_label": "The Slop-Heap Perimeter",
+                "handoff_mode": "seamless",
+                "transition_in_text": "The mud gave way to hard-packed dirt as he reached the edge of the clearing, coming face-to-face with a wobbling Slime.",
+                "transition_in_anchors": [
+                  "mud",
+                  "hard-packed dirt",
+                  "wobbling Slime"
+                ],
+                "summary": "Artie fights a level 1 slime. He discovers that while his luck is abysmal, his 'Cursed' status forces every hit to be a critical hit as long as he is moving at full speed.",
+                "end_condition_echo": "Artie kills his first slime with a critical hit."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "phase_report": {
+    "orphan_outcomes_before": 0,
+    "orphan_outcomes_after": 0,
+    "weak_handoffs_after": 0,
+    "orphan_scene_refs_after": [],
+    "weak_handoff_refs_after": [],
+    "edits_applied": [
+      "Established deterministic links for Chapter 1",
+      "Converted potential hard-cuts to seamless handoffs",
+      "Added transition anchors for sensory continuity",
+      "Mapped location labels to specific scene boundaries"
+    ],
+    "candidate_seams": [
+      {
+        "from_scene_ref": "1:1",
+        "to_scene_ref": "1:2",
+        "seam_score": 90,
+        "requested_resolution": "micro_scene",
+        "reason": "Reality jump from VR pod to game world requires a sensory bridge to handle the disorientation."
+      }
+    ],
+    "transition_hint_compliance": []
+  }
+}

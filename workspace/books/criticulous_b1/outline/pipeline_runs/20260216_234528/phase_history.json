@@ -1,0 +1,191 @@
+{
+  "schema_version": "outline_phase_history_v1",
+  "created_at": "2026-02-16T23:45:28Z",
+  "updated_at": "2026-02-17T00:18:02Z",
+  "steps": {
+    "phase_04a_transition_seam_analysis": {
+      "status": "success",
+      "attempts": 6,
+      "logical_phase": "phase_04_transition_causality_refinement",
+      "output_path": "phase_04a_transition_seam_analysis_output.json",
+      "validation": {
+        "status": "pass",
+        "errors": [],
+        "warnings": [],
+        "metrics": {
+          "chapter_count": 7
+        }
+      },
+      "handoff_path": "phase_04a_output.json",
+      "chapter_attempts": {
+        "1": {
+          "status": "success",
+          "attempts": 1,
+          "validation_summary": {
+            "status": "pass",
+            "errors": [],
+            "warnings": [],
+            "metrics": {
+              "chapter_count": 7
+            }
+          }
+        },
+        "2": {
+          "status": "success",
+          "attempts": 2,
+          "validation_summary": {
+            "status": "pass",
+            "errors": [],
+            "warnings": [],
+            "metrics": {
+              "chapter_count": 7
+            }
+          }
+        },
+        "3": {
+          "status": "success",
+          "attempts": 1,
+          "validation_summary": {
+            "status": "pass",
+            "errors": [],
+            "warnings": [],
+            "metrics": {
+              "chapter_count": 7
+            }
+          }
+        },
+        "4": {
+          "status": "success",
+          "attempts": 1,
+          "validation_summary": {
+            "status": "pass",
+            "errors": [],
+            "warnings": [],
+            "metrics": {
+              "chapter_count": 7
+            }
+          }
+        },
+        "5": {
+          "status": "success",
+          "attempts": 1,
+          "validation_summary": {
+            "status": "pass",
+            "errors": [],
+            "warnings": [],
+            "metrics": {
+              "chapter_count": 7
+            }
+          }
+        },
+        "6": {
+          "status": "success",
+          "attempts": 1,
+          "validation_summary": {
+            "status": "pass",
+            "errors": [],
+            "warnings": [],
+            "metrics": {
+              "chapter_count": 7
+            }
+          }
+        },
+        "7": {
+          "status": "success",
+          "attempts": 2,
+          "validation_summary": {
+            "status": "pass",
+            "errors": [],
+            "warnings": [],
+            "metrics": {
+              "chapter_count": 7
+            }
+          }
+        }
+      },
+      "phase_run_mode": "resume_incremental",
+      "checkpoint_path": "phase_04a_transition_seam_analysis_checkpoint.json"
+    },
+    "phase_04b_transition_execution": {
+      "status": "paused",
+      "attempts": 1,
+      "logical_phase": "phase_04_transition_causality_refinement",
+      "validation": {
+        "status": "fail",
+        "errors": [
+          {
+            "code": "llm_request_error",
+            "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 58.925649696s.",
+            "path": "<request>"
+          }
+        ],
+        "warnings": [],
+        "metrics": {}
+      },
+      "chapter_attempts": {
+        "1": {
+          "status": "paused",
+          "attempts": 1,
+          "validation_summary": {
+            "status": "fail",
+            "errors": [
+              {
+                "code": "llm_request_error",
+                "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 58.925649696s.",
+                "path": "<request>"
+              }
+            ],
+            "warnings": [],
+            "metrics": {}
+          }
+        }
+      },
+      "resume_cursor": {
+        "phase_id": "phase_04b_transition_execution",
+        "next_chapter_id": 1,
+        "reason_code": "rate_limited_retry_exhausted",
+        "updated_at": "2026-02-17T00:12:01Z"
+      },
+      "phase_run_mode": "resume_incremental",
+      "checkpoint_path": "phase_04b_transition_execution_checkpoint.json"
+    },
+    "unknown": {
+      "status": "paused",
+      "attempts": 1,
+      "logical_phase": "unknown",
+      "validation": {
+        "status": "fail",
+        "errors": [
+          {
+            "code": "llm_request_error",
+            "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 57.113565615s.",
+            "path": "<request>"
+          }
+        ],
+        "warnings": [],
+        "metrics": {}
+      }
+    }
+  },
+  "book_id": "criticulous_b1",
+  "run_id": "20260216_234528",
+  "settings": {
+    "strict_transition_hints": false,
+    "strict_transition_bridges": true,
+    "strict_location_identity": true,
+    "transition_insert_budget_per_chapter": 2,
+    "allow_transition_scene_insertions": true,
+    "exact_scene_count": false,
+    "scene_count_range": null,
+    "scene_count_policy": {
+      "mode": "strong_non_exact",
+      "expected_scene_count_enforcement": "strong_non_exact",
+      "chapter_scene_count_exact_mode": false,
+      "notes": []
+    },
+    "force_phase_full_rerun": false
+  },
+  "requested_from_step": "phase_04b_transition_execution",
+  "requested_to_step": "phase_04b_transition_execution",
+  "fingerprint": "5FAA701EE0154E8366795ED5A6CDAC76FA1A72347EF667B16A21A8B952493EEE"
+}

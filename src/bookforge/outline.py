@@ -792,6 +792,18 @@ def _chapter_render_values(
     return values
 
 
+def _assert_chapter_scoped_template_contract(step_id: str, template_path: Path) -> None:
+    text = template_path.read_text(encoding="utf-8")
+    required_tokens = ["{{chapter_target_id}}", "{{chapter_input_outline}}"]
+    missing = [token for token in required_tokens if token not in text]
+    if missing:
+        missing_str = ", ".join(missing)
+        raise ValueError(
+            f"{step_id} template is not chapter-scoped (missing {missing_str}) at {template_path}. "
+            "Run `book update-templates` for the book workspace."
+        )
+
+
 def _extract_chapter_patch_from_response(
     *,
     step_id: str,
@@ -912,6 +924,7 @@ def _execute_chapter_scoped_step(
 ) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any], int, Dict[str, Any], str]:
     spec = outline_context.step_spec(step_id)
     handler = get_handler(step_id)
+    _assert_chapter_scoped_template_contract(step_id, template_path)
     checkpoint_path = _phase_checkpoint_path(run_dir, step_id)
     run_mode = "force_full_rerun" if force_phase_full_rerun else "resume_incremental"
     checkpoint = _load_phase_checkpoint(run_dir, step_id, run_mode)
@@ -1020,6 +1033,10 @@ def _execute_chapter_scoped_step(
             continue
 
         chapter_attempt_count = int(chapter_entry.get("attempts") or 0)
+        # Resume should be able to retry a failed/paused chapter even if prior attempts
+        # were exhausted in the previous invocation.
+        if resume and not force_phase_full_rerun and chapter_status in {"error", "paused"}:
+            chapter_attempt_count = 0
         retry_message: Optional[str] = None
         chapter_output_payload: Dict[str, Any] = {}
         chapter_validation_payload: Dict[str, Any] = {
@@ -1741,8 +1758,10 @@ def generate_outline(
 
     requires_attention = False
 
+    active_step_id: Optional[str] = None
     try:
         for step_id in planned_steps:
+            active_step_id = step_id
             spec = outline_context.step_spec(step_id)
             step_entry = history.get("steps", {}).get(step_id) if isinstance(history.get("steps"), dict) else None
             if (
@@ -1934,7 +1953,7 @@ def generate_outline(
         history["steps"][exc.step_id] = history_entry
         requires_attention = True
     except LLMRequestError as exc:
-        failed_step = "unknown"
+        failed_step = active_step_id or "unknown"
         if isinstance(history.get("steps"), dict):
             for sid in planned_steps:
                 if sid not in history["steps"]:

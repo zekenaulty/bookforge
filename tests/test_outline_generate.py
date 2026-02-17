@@ -412,6 +412,50 @@ def test_generate_outline_phase4a_resume_restarts_at_failed_chapter(tmp_path: Pa
     assert len(resume_client.messages_history) == 1
 
 
+def test_generate_outline_resume_pause_does_not_create_unknown_step(tmp_path: Path) -> None:
+    _init_book(tmp_path)
+    baseline_client = DummyClient(_pipeline_responses())
+    generate_outline(workspace=tmp_path, book_id="my_book", client=baseline_client, model="dummy")
+
+    pause_client_first = DummyClientWithPause(
+        [json.dumps(_phase_04b_for_chapter(1))], fail_call_number=1
+    )
+    with pytest.raises(RuntimeError):
+        generate_outline(
+            workspace=tmp_path,
+            book_id="my_book",
+            rerun=True,
+            from_phase="phase_04b_transition_execution",
+            to_phase="phase_04b_transition_execution",
+            client=pause_client_first,
+            model="dummy",
+        )
+
+    pause_client_resume = DummyClientWithPause(
+        [json.dumps(_phase_04b_for_chapter(1))], fail_call_number=1
+    )
+    with pytest.raises(RuntimeError):
+        generate_outline(
+            workspace=tmp_path,
+            book_id="my_book",
+            resume=True,
+            from_phase="phase_04b_transition_execution",
+            to_phase="phase_04b_transition_execution",
+            client=pause_client_resume,
+            model="dummy",
+        )
+
+    run_root = tmp_path / "books" / "my_book" / "outline" / "pipeline_runs"
+    latest_run = sorted(run_root.iterdir())[-1]
+    history = json.loads((latest_run / "phase_history.json").read_text(encoding="utf-8"))
+    steps = history.get("steps", {}) if isinstance(history.get("steps"), dict) else {}
+    assert "unknown" not in steps
+    assert (
+        steps.get("phase_04b_transition_execution", {}).get("status")
+        == "paused"
+    )
+
+
 def test_generate_outline_force_full_rerun_reexecutes_successful_chapters(tmp_path: Path) -> None:
     _init_book(tmp_path)
     baseline_client = DummyClient(_pipeline_responses())
@@ -431,3 +475,71 @@ def test_generate_outline_force_full_rerun_reexecutes_successful_chapters(tmp_pa
         model="dummy",
     )
     assert len(rerun_client.messages_history) == 2
+
+
+def test_generate_outline_phase4a_resume_retries_exhausted_failed_chapter(tmp_path: Path) -> None:
+    _init_book(tmp_path)
+    baseline_client = DummyClient(_pipeline_responses())
+    generate_outline(workspace=tmp_path, book_id="my_book", client=baseline_client, model="dummy")
+
+    failing_rerun_client = DummyClient(
+        [
+            json.dumps(_phase_04a_for_chapter(1)),
+            "not-json",
+            "still-not-json",
+        ]
+    )
+    with pytest.raises(Exception):
+        generate_outline(
+            workspace=tmp_path,
+            book_id="my_book",
+            rerun=True,
+            from_phase="phase_04a_transition_seam_analysis",
+            to_phase="phase_04a_transition_seam_analysis",
+            client=failing_rerun_client,
+            model="dummy",
+        )
+
+    resume_client = DummyClient([json.dumps(_phase_04a_for_chapter(2))])
+    handoff_path = generate_outline(
+        workspace=tmp_path,
+        book_id="my_book",
+        resume=True,
+        from_phase="phase_04a_transition_seam_analysis",
+        to_phase="phase_04a_transition_seam_analysis",
+        client=resume_client,
+        model="dummy",
+    )
+    assert handoff_path.name in {"outline.json", "phase_04a_transition_seam_analysis_output.json"}
+    assert len(resume_client.messages_history) == 1
+
+
+def test_generate_outline_chapter_scoped_phase_requires_chapter_template_tokens(tmp_path: Path) -> None:
+    _init_book(tmp_path)
+    baseline_client = DummyClient(_pipeline_responses())
+    generate_outline(workspace=tmp_path, book_id="my_book", client=baseline_client, model="dummy")
+
+    template_path = (
+        tmp_path
+        / "books"
+        / "my_book"
+        / "prompts"
+        / "templates"
+        / "outline_phase_04a_transition_seam_analysis.md"
+    )
+    text = template_path.read_text(encoding="utf-8")
+    text = text.replace("{{chapter_target_id}}", "")
+    template_path.write_text(text, encoding="utf-8")
+
+    rerun_client = DummyClient([json.dumps(_phase_04a_for_chapter(1))])
+    with pytest.raises(ValueError):
+        generate_outline(
+            workspace=tmp_path,
+            book_id="my_book",
+            rerun=True,
+            from_phase="phase_04a_transition_seam_analysis",
+            to_phase="phase_04a_transition_seam_analysis",
+            client=rerun_client,
+            model="dummy",
+        )
+    assert len(rerun_client.messages_history) == 0
