@@ -1,0 +1,365 @@
+{
+  "schema_version": "1.1",
+  "chapters": [
+    {
+      "chapter_id": 2,
+      "title": "The Glass Cannon's Guide to Not Dying",
+      "chapter_role": "setup",
+      "goal": "Artie needs gear that doesn't rely on him being hit, as he can't take a single blow.",
+      "bridge": {
+        "from_prev": "Artie is a marked man in Oakhaven.",
+        "to_next": "Artie heads to the Low-Level Crypts to farm 'Evasion' gear."
+      },
+      "pacing": {
+        "expected_scene_count": 9,
+        "intensity": 3,
+        "tempo": "steady"
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Shopping for Scraps",
+          "intent": "Equip Artie with the bare minimum to survive a dungeon.",
+          "end_condition": "Artie is now slightly harder to hit but looks like a neon yellow cat.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "type": "choice",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "location_start_label": "Oakhaven Pawn Shop",
+              "location_start_id": "LOC_OAKHAVEN_PAWN_SHOP_CBBF48",
+              "location_end_label": "Oakhaven Pawn Shop",
+              "location_end_id": "LOC_OAKHAVEN_PAWN_SHOP_CBBF48",
+              "summary": "Artie tries to sell his 'Participation Trophy' at the pawn shop; Fizz explains the item is soul-bound and cursed, preventing the sale and mocking his attempt to offload the aggro-magnet.",
+              "outcome": "Artie is stuck with a lighthouse-beacon for monsters.",
+              "transition_in_text": "The bell above the pawn shop door jingles as Artie enters.",
+              "transition_in_anchors": [
+                "dusty glass counter",
+                "cursed artifacts",
+                "brass scales",
+                "soul-bound tag"
+              ],
+              "transition_out_text": "Artie leaves the shop, the trophy still glowing brightly in his pack.",
+              "transition_out_anchors": [
+                "damp brick walls",
+                "rusted iron lock",
+                "glowing lockpick",
+                "gold dust residue"
+              ],
+              "handoff_mode": "arrival_checkpoint",
+              "hands_off_to": "2:2",
+              "constraint_state": "free",
+              "seam_score": 20,
+              "seam_resolution": "inline_bridge",
+              "threads": [
+                "THREAD_SYSTEM_GLITCH"
+              ]
+            },
+            {
+              "scene_id": 2,
+              "type": "reveal",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "location_start_label": "Oakhaven Back Alley",
+              "location_start_id": "LOC_OAKHAVEN_BACK_ALLEY_6F3EBA",
+              "location_end_label": "Oakhaven Back Alley",
+              "location_end_id": "LOC_OAKHAVEN_BACK_ALLEY_6F3EBA",
+              "summary": "Fizz points out a loophole in the 'Starter Pack' quest that allows Artie to steal a high-tier cloak if he can crit a lock, acting as his tactical enabler.",
+              "outcome": "Artie successfully crits a lock, causing it to explode into gold dust.",
+              "transition_in_text": "Fizz leads Artie into the shadows behind the general store.",
+              "transition_in_anchors": [
+                "damp brick walls",
+                "rusted iron lock",
+                "glowing lockpick",
+                "gold dust residue"
+              ],
+              "transition_out_text": "The explosion of the lock leaves a single item floating in the air.",
+              "transition_out_anchors": [
+                "neon yellow fabric",
+                "cat-ear hood",
+                "shimmering evasion aura",
+                "embarrassing tail"
+              ],
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:3",
+              "consumes_outcome_from": "2:1",
+              "constraint_state": "restricted",
+              "seam_score": 10,
+              "seam_resolution": "inline_bridge",
+              "threads": [
+                "THREAD_CRIT_EXPLOIT"
+              ]
+            },
+            {
+              "scene_id": 3,
+              "type": "aftermath",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Oakhaven Back Alley",
+              "location_start_id": "LOC_OAKHAVEN_BACK_ALLEY_6F3EBA",
+              "location_end_label": "Oakhaven Back Alley",
+              "location_end_id": "LOC_OAKHAVEN_BACK_ALLEY_6F3EBA",
+              "summary": "Artie acquires the 'Cloak of the Cowardly Lion,' which gives +50 Evasion but -100 Dignity.",
+              "outcome": "Artie is now slightly harder to hit but looks like a neon yellow cat.",
+              "transition_in_text": "Artie pulls the neon yellow cloak over his shoulders.",
+              "transition_in_anchors": [
+                "neon yellow fabric",
+                "cat-ear hood",
+                "shimmering evasion aura",
+                "embarrassing tail"
+              ],
+              "transition_out_text": "Artie heads toward the outskirts of town, avoiding eye contact with everyone.",
+              "transition_out_anchors": [
+                "mossy stone steps",
+                "flickering torchlight",
+                "rhythmic bone clicking",
+                "iron portcullis"
+              ],
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:4",
+              "consumes_outcome_from": "2:2",
+              "end_condition_echo": "Artie is now slightly harder to hit but looks like a neon yellow cat.",
+              "constraint_state": "free",
+              "seam_score": 70,
+              "seam_resolution": "inline_bridge"
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Crypt of Bad Math",
+          "intent": "Test the new gear and the Crit-build in a controlled environment.",
+          "end_condition": "Artie discovers he can farm resources much faster than anyone else.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "type": "setup",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "location_start_label": "Low-Level Crypts Entrance",
+              "location_start_id": "LOC_LOW_LEVEL_CRYPTS_ENTRANCE_494A25",
+              "location_end_label": "Low-Level Crypts Entrance",
+              "location_end_id": "LOC_LOW_LEVEL_CRYPTS_ENTRANCE_494A25",
+              "summary": "Artie enters the Crypts and finds that the skeletons move in predictable, turn-based patterns; Fizz helps him calibrate his timing to the System's internal clock.",
+              "outcome": "Artie begins to treat the world like a rhythm game.",
+              "transition_in_text": "The air turns cold as Artie descends the stone stairs.",
+              "transition_in_anchors": [
+                "mossy stone steps",
+                "flickering torchlight",
+                "rhythmic bone clicking",
+                "iron portcullis"
+              ],
+              "transition_out_text": "Artie steps into the first large hall, his cloak glowing in the dark.",
+              "transition_out_anchors": [
+                "notched bone arrow",
+                "stone pillar cover",
+                "neon yellow blur",
+                "backflip animation"
+              ],
+              "handoff_mode": "arrival_checkpoint",
+              "hands_off_to": "2:5",
+              "consumes_outcome_from": "2:3",
+              "constraint_state": "free",
+              "seam_score": 30,
+              "seam_resolution": "inline_bridge",
+              "threads": [
+                "THREAD_SYSTEM_GLITCH"
+              ]
+            },
+            {
+              "scene_id": 5,
+              "type": "action",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Crypts - Hall of Echoes",
+              "location_start_id": "LOC_CRYPTS_HALL_OF_ECHOES_601EBE",
+              "location_end_label": "Crypts - Hall of Echoes",
+              "location_end_id": "LOC_CRYPTS_HALL_OF_ECHOES_601EBE",
+              "summary": "A Skeleton Archer fires at Artie; the Cloak's evasion procs, causing Artie to do an accidental backflip.",
+              "outcome": "Artie survives his first ranged encounter and gains confidence.",
+              "transition_in_text": "A skeletal archer notches a notched arrow in the distance.",
+              "transition_in_anchors": [
+                "notched bone arrow",
+                "stone pillar cover",
+                "neon yellow blur",
+                "backflip animation"
+              ],
+              "transition_out_text": "Artie moves deeper into the crypt, toward a room filled with treasure chests.",
+              "transition_out_anchors": [
+                "porcelain pinata shards",
+                "floating loot icons",
+                "system overload sparks",
+                "gold coin fountain"
+              ],
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:6",
+              "consumes_outcome_from": "2:4",
+              "constraint_state": "engaged_combat",
+              "seam_score": 20,
+              "seam_resolution": "inline_bridge"
+            },
+            {
+              "scene_id": 6,
+              "type": "reveal",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "location_start_label": "Crypts - Treasure Room",
+              "location_start_id": "LOC_CRYPTS_TREASURE_ROOM_21F1E8",
+              "location_end_label": "Crypts - Treasure Room",
+              "location_end_id": "LOC_CRYPTS_TREASURE_ROOM_21F1E8",
+              "summary": "Artie realizes his crits don't just do damage; they cause 'System Overload' effects like turning enemies into loot-filled pinatas. Fizz catalogs these glitches for future use.",
+              "outcome": "Artie discovers he can farm resources much faster than anyone else.",
+              "transition_in_text": "Artie corners a group of skeletons near a large chest.",
+              "transition_in_anchors": [
+                "porcelain pinata shards",
+                "floating loot icons",
+                "system overload sparks",
+                "gold coin fountain"
+              ],
+              "transition_out_text": "Artie hears the sound of heavy boots echoing from the balcony above.",
+              "transition_out_anchors": [
+                "heavy stone lid",
+                "white cape trail",
+                "holy light explosion",
+                "shattered bone piles"
+              ],
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:7",
+              "consumes_outcome_from": "2:5",
+              "end_condition_echo": "Artie discovers he can farm resources much faster than anyone else.",
+              "constraint_state": "free",
+              "seam_score": 50,
+              "seam_resolution": "inline_bridge",
+              "threads": [
+                "THREAD_CRIT_EXPLOIT"
+              ]
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "The Rival's Shadow",
+          "intent": "Reintroduce Vane as a persistent threat.",
+          "end_condition": "The boss battle begins with Artie at a massive disadvantage.",
+          "scenes": [
+            {
+              "scene_id": 7,
+              "type": "escalation",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_VANE"
+              ],
+              "location_start_label": "Crypts - Observation Balcony",
+              "location_start_id": "LOC_CRYPTS_OBSERVATION_BALCONY_819FB9",
+              "location_end_label": "Crypts - Observation Balcony",
+              "location_end_id": "LOC_CRYPTS_OBSERVATION_BALCONY_819FB9",
+              "summary": "Vane enters the crypts with a full party, clearing rooms with ease while Artie hides in a sarcophagus, serving as a benchmark for the power Artie lacks.",
+              "outcome": "Artie sees the gap between a 'proper' build and his own.",
+              "transition_in_text": "Artie peers over the edge of a stone sarcophagus.",
+              "transition_in_anchors": [
+                "heavy stone lid",
+                "white_cape_trail",
+                "holy light explosion",
+                "shattered bone piles"
+              ],
+              "transition_out_text": "Vane's party leaves the room, leaving a glowing orb on a pedestal.",
+              "transition_out_anchors": [
+                "obsidian pedestal",
+                "pulsing red orb",
+                "boss trigger glyphs",
+                "cold stone floor"
+              ],
+              "handoff_mode": "arrival_checkpoint",
+              "hands_off_to": "2:8",
+              "consumes_outcome_from": "2:6",
+              "constraint_state": "restricted",
+              "seam_score": 30,
+              "seam_resolution": "inline_bridge",
+              "threads": [
+                "THREAD_VANE_RIVALRY"
+              ]
+            },
+            {
+              "scene_id": 8,
+              "type": "choice",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "location_start_label": "Crypts - Guardian Chamber",
+              "location_start_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
+              "location_end_label": "Crypts - Guardian Chamber",
+              "location_end_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
+              "summary": "Vane's party leaves behind a 'Boss Trigger'\u2014a rare item that summons a Floor Guardian. Fizz calculates the risk-reward ratio, encouraging Artie's greed.",
+              "outcome": "Artie decides to take the risk and summon the boss for the massive XP.",
+              "transition_in_text": "Artie approaches the obsidian pedestal with a mix of fear and greed.",
+              "transition_in_anchors": [
+                "obsidian pedestal",
+                "pulsing red orb",
+                "boss trigger glyphs",
+                "cold stone floor"
+              ],
+              "transition_out_text": "The red orb shatters, and the floor begins to shake violently.",
+              "transition_out_anchors": [
+                "massive ribcage",
+                "glowing blue eyes",
+                "minimum damage readout",
+                "bone golem fist"
+              ],
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:9",
+              "consumes_outcome_from": "2:7",
+              "constraint_state": "free",
+              "seam_score": 40,
+              "seam_resolution": "inline_bridge",
+              "threads": [
+                "THREAD_THE_ASCENSION"
+              ]
+            },
+            {
+              "scene_id": 9,
+              "type": "consequence",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Crypts - Guardian Chamber",
+              "location_start_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
+              "location_end_label": "Crypts - Guardian Chamber",
+              "location_end_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
+              "summary": "The Floor Guardian, a Bone Golem, emerges, and Artie realizes he forgot to check its 'Minimum Damage' stat.",
+              "outcome": "The boss battle begins with Artie at a massive disadvantage.",
+              "transition_in_text": "The Bone Golem fully forms, its massive shadow engulfing Artie.",
+              "transition_in_anchors": [
+                "massive ribcage",
+                "glowing blue eyes",
+                "minimum damage readout",
+                "bone golem fist"
+              ],
+              "handoff_mode": "direct_continuation",
+              "consumes_outcome_from": "2:8",
+              "end_condition_echo": "The boss battle begins with Artie at a massive disadvantage.",
+              "constraint_state": "engaged_combat",
+              "seam_score": 0,
+              "seam_resolution": "inline_bridge",
+              "threads": [
+                "THREAD_SYSTEM_GLITCH"
+              ]
+            }
+          ]
+        }
+      ],
+      "stakes_shift": "Survival shifts from luck to tactical exploitation of the System's bugs."
+    }
+  ]
+}

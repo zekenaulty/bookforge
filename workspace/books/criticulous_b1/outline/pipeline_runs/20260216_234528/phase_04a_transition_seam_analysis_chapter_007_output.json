@@ -138,7 +138,7 @@
                 "constraint_state": "processed",
                 "consumes_outcome_from": "1:1",
                 "end_condition_echo": "Artie is locked into a 'Crit or Quit' build with 1 HP and 100% Critical Hit rate.",
-                "handoff_mode": "arrival_checkpoint",
+                "handoff_mode": "direct_continuation",
                 "hands_off_to": "1:3",
                 "introduces": [
                   "CHAR_FIZZ"
@@ -257,7 +257,7 @@
                 "constraint_state": "fleeing",
                 "consumes_outcome_from": "1:4",
                 "end_condition_echo": "Artie is forced to run for his life as the tutorial zone aggros on him.",
-                "handoff_mode": "arrival_checkpoint",
+                "handoff_mode": "direct_continuation",
                 "hands_off_to": "1:6",
                 "location_end": "Tutorial Zone - Slime Meadow",
                 "location_end_id": "LOC_TUTORIAL_ZONE_SLIME_MEADOW_76A722",
@@ -438,8 +438,6 @@
                 "location_start_label": "Oakhaven Pawn Shop",
                 "outcome": "Artie is stuck with a lighthouse-beacon for monsters.",
                 "scene_id": 1,
-                "seam_resolution": "inline_bridge",
-                "seam_score": 20,
                 "summary": "Artie tries to sell his 'Participation Trophy' but finds out it's soul-bound and cursed.",
                 "transition_in_anchors": [
                   "dusty glass counter",
@@ -474,8 +472,6 @@
                 "location_start_label": "Oakhaven Back Alley",
                 "outcome": "Artie successfully crits a lock, causing it to explode into gold dust.",
                 "scene_id": 2,
-                "seam_resolution": "inline_bridge",
-                "seam_score": 10,
                 "summary": "Fizz points out a loophole in the 'Starter Pack' quest that allows Artie to steal a high-tier cloak if he can crit a lock.",
                 "transition_in_anchors": [
                   "damp brick walls",
@@ -510,8 +506,6 @@
                 "location_start_label": "Oakhaven Back Alley",
                 "outcome": "Artie is now slightly harder to hit but looks like a neon yellow cat.",
                 "scene_id": 3,
-                "seam_resolution": "inline_bridge",
-                "seam_score": 70,
                 "summary": "Artie acquires the 'Cloak of the Cowardly Lion,' which gives +50 Evasion but -100 Dignity.",
                 "transition_in_anchors": [
                   "neon yellow fabric",
@@ -554,8 +548,6 @@
                 "location_start_label": "Low-Level Crypts Entrance",
                 "outcome": "Artie begins to treat the world like a rhythm game.",
                 "scene_id": 4,
-                "seam_resolution": "inline_bridge",
-                "seam_score": 30,
                 "summary": "Artie enters the Crypts and finds that the skeletons move in predictable, turn-based patterns.",
                 "transition_in_anchors": [
                   "mossy stone steps",
@@ -589,8 +581,6 @@
                 "location_start_label": "Crypts - Hall of Echoes",
                 "outcome": "Artie survives his first ranged encounter and gains confidence.",
                 "scene_id": 5,
-                "seam_resolution": "inline_bridge",
-                "seam_score": 20,
                 "summary": "A Skeleton Archer fires at Artie; the Cloak's evasion procs, causing Artie to do an accidental backflip.",
                 "transition_in_anchors": [
                   "notched bone arrow",
@@ -626,8 +616,6 @@
                 "location_start_label": "Crypts - Treasure Room",
                 "outcome": "Artie discovers he can farm resources much faster than anyone else.",
                 "scene_id": 6,
-                "seam_resolution": "inline_bridge",
-                "seam_score": 50,
                 "summary": "Artie realizes his crits don't just do damage; they cause 'System Overload' effects like turning enemies into loot-filled pinatas.",
                 "threads": [
                   "THREAD_CRIT_EXPLOIT"
@@ -673,12 +661,10 @@
                 "location_start_label": "Crypts - Observation Balcony",
                 "outcome": "Artie sees the gap between a 'proper' build and his own.",
                 "scene_id": 7,
-                "seam_resolution": "inline_bridge",
-                "seam_score": 30,
                 "summary": "Vane enters the crypts with a full party, clearing rooms with ease while Artie hides in a sarcophagus.",
                 "transition_in_anchors": [
                   "heavy stone lid",
-                  "white cape trail",
+                  "white_cape_trail",
                   "holy light explosion",
                   "shattered bone piles"
                 ],
@@ -709,8 +695,6 @@
                 "location_start_label": "Crypts - Guardian Chamber",
                 "outcome": "Artie decides to take the risk and summon the boss for the massive XP.",
                 "scene_id": 8,
-                "seam_resolution": "inline_bridge",
-                "seam_score": 40,
                 "summary": "Vane's party leaves behind a 'Boss Trigger'\u2014a rare item that summons a Floor Guardian.",
                 "transition_in_anchors": [
                   "obsidian pedestal",
@@ -744,8 +728,6 @@
                 "location_start_label": "Crypts - Guardian Chamber",
                 "outcome": "The boss battle begins with Artie at a massive disadvantage.",
                 "scene_id": 9,
-                "seam_resolution": "inline_bridge",
-                "seam_score": 0,
                 "summary": "The Floor Guardian, a Bone Golem, emerges, and Artie realizes he forgot to check its 'Minimum Damage' stat.",
                 "transition_in_anchors": [
                   "massive ribcage",
@@ -941,9 +923,6 @@
                 "outcome": "The boss is defeated, but the loot is... unconventional.",
                 "scene_id": 5,
                 "summary": "Artie lands the hit, but instead of damage, the System rolls a 'Cosmetic Crit,' turning the Golem into a pile of very expensive porcelain teacups.",
-                "threads": [
-                  "THREAD_CRIT_EXPLOIT"
-                ],
                 "transition_in_anchors": [
                   "porcelain teacup pile",
                   "floral patterns",
@@ -1011,9 +990,6 @@
                 "consumes_outcome_from": "3:6",
                 "handoff_mode": "direct_continuation",
                 "hands_off_to": "3:8",
-                "introduces": [
-                  "CHAR_BOSS"
-                ],
                 "location_end": "Crypts - Guardian Chamber",
                 "location_end_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
                 "location_end_label": "Crypts - Guardian Chamber",
@@ -1057,9 +1033,6 @@
                 "outcome": "Artie realizes he isn't the first person to break this game.",
                 "scene_id": 8,
                 "summary": "A hidden door opens, revealing a mural of the 'First Glitch'\u2014a hero who looked suspiciously like Artie's high school gym teacher.",
-                "threads": [
-                  "THREAD_THE_ASCENSION"
-                ],
                 "transition_in_anchors": [
                   "faded wall paint",
                   "gym teacher likeness",
@@ -2312,10 +2285,6 @@
           "intensity": 2,
           "tempo": "slow_burn"
         },
-        "bridge": {
-          "from_prev": "Artie is in the Null-Zone.",
-          "to_next": "Book 2: The Quest for the Source Code."
-        },
         "sections": [
           {
             "section_id": 1,
@@ -2331,11 +2300,11 @@
                   "CHAR_ARTIE",
                   "CHAR_FIZZ"
                 ],
-                "location_start": "Null-Zone - Data Stream",
                 "location_start_label": "Null-Zone - Data Stream",
+                "location_start": "Null-Zone - Data Stream",
                 "location_start_id": "LOC_NULL_ZONE_DATA_STREAM_F4D57D",
-                "location_end": "Null-Zone - Data Stream",
                 "location_end_label": "Null-Zone - Data Stream",
+                "location_end": "Null-Zone - Data Stream",
                 "location_end_id": "LOC_NULL_ZONE_DATA_STREAM_F4D57D",
                 "handoff_mode": "arrival_checkpoint",
                 "hands_off_to": "7:2",
@@ -2364,11 +2333,11 @@
                   "CHAR_ARTIE",
                   "CHAR_FIZZ"
                 ],
-                "location_start": "Null-Zone - Data Stream",
                 "location_start_label": "Null-Zone - Data Stream",
+                "location_start": "Null-Zone - Data Stream",
                 "location_start_id": "LOC_NULL_ZONE_DATA_STREAM_F4D57D",
-                "location_end": "Null-Zone - Data Stream",
                 "location_end_label": "Null-Zone - Data Stream",
+                "location_end": "Null-Zone - Data Stream",
                 "location_end_id": "LOC_NULL_ZONE_DATA_STREAM_F4D57D",
                 "handoff_mode": "direct_continuation",
                 "consumes_outcome_from": "7:1",
@@ -2400,11 +2369,11 @@
                 "characters": [
                   "CHAR_ARTIE"
                 ],
-                "location_start": "Null-Zone - The Cliffside",
                 "location_start_label": "Null-Zone - The Cliffside",
+                "location_start": "Null-Zone - The Cliffside",
                 "location_start_id": "LOC_NULL_ZONE_THE_CLIFFSIDE_D844EF",
-                "location_end": "Null-Zone - The Cliffside",
                 "location_end_label": "Null-Zone - The Cliffside",
+                "location_end": "Null-Zone - The Cliffside",
                 "location_end_id": "LOC_NULL_ZONE_THE_CLIFFSIDE_D844EF",
                 "handoff_mode": "direct_continuation",
                 "consumes_outcome_from": "7:2",
@@ -2445,11 +2414,11 @@
                 "introduces": [
                   "CHAR_MAYOR"
                 ],
-                "location_start": "Null-Zone - Hidden Camp",
                 "location_start_label": "Null-Zone - Hidden Camp",
+                "location_start": "Null-Zone - Hidden Camp",
                 "location_start_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2",
-                "location_end": "Null-Zone - Hidden Camp",
                 "location_end_label": "Null-Zone - Hidden Camp",
+                "location_end": "Null-Zone - Hidden Camp",
                 "location_end_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2",
                 "handoff_mode": "arrival_checkpoint",
                 "consumes_outcome_from": "7:3",
@@ -2478,11 +2447,11 @@
                 "characters": [
                   "CHAR_ARTIE"
                 ],
-                "location_start": "Null-Zone - Hidden Camp",
                 "location_start_label": "Null-Zone - Hidden Camp",
+                "location_start": "Null-Zone - Hidden Camp",
                 "location_start_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2",
-                "location_end": "Null-Zone - Hidden Camp",
                 "location_end_label": "Null-Zone - Hidden Camp",
+                "location_end": "Null-Zone - Hidden Camp",
                 "location_end_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2",
                 "handoff_mode": "direct_continuation",
                 "consumes_outcome_from": "7:4",
@@ -2515,11 +2484,11 @@
                   "CHAR_ARTIE",
                   "CHAR_FIZZ"
                 ],
-                "location_start": "Null-Zone - Hidden Camp",
                 "location_start_label": "Null-Zone - Hidden Camp",
+                "location_start": "Null-Zone - Hidden Camp",
                 "location_start_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2",
-                "location_end": "Null-Zone - Hidden Camp",
                 "location_end_label": "Null-Zone - Hidden Camp",
+                "location_end": "Null-Zone - Hidden Camp",
                 "location_end_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2",
                 "handoff_mode": "direct_continuation",
                 "consumes_outcome_from": "7:5",
@@ -2558,11 +2527,11 @@
                   "CHAR_ARTIE",
                   "CHAR_FIZZ"
                 ],
-                "location_start": "Null-Zone - Portal Gate",
                 "location_start_label": "Null-Zone - Portal Gate",
+                "location_start": "Null-Zone - Portal Gate",
                 "location_start_id": "LOC_NULL_ZONE_PORTAL_GATE_D3FA54",
-                "location_end": "Null-Zone - Portal Gate",
                 "location_end_label": "Null-Zone - Portal Gate",
+                "location_end": "Null-Zone - Portal Gate",
                 "location_end_id": "LOC_NULL_ZONE_PORTAL_GATE_D3FA54",
                 "handoff_mode": "arrival_checkpoint",
                 "consumes_outcome_from": "7:6",
@@ -2591,11 +2560,11 @@
                 "characters": [
                   "CHAR_ARTIE"
                 ],
-                "location_start": "Null-Zone - Portal Gate",
                 "location_start_label": "Null-Zone - Portal Gate",
+                "location_start": "Null-Zone - Portal Gate",
                 "location_start_id": "LOC_NULL_ZONE_PORTAL_GATE_D3FA54",
-                "location_end": "Null-Zone - Portal Gate",
                 "location_end_label": "Null-Zone - Portal Gate",
+                "location_end": "Null-Zone - Portal Gate",
                 "location_end_id": "LOC_NULL_ZONE_PORTAL_GATE_D3FA54",
                 "handoff_mode": "time_skip",
                 "consumes_outcome_from": "7:7",
@@ -2614,182 +2583,76 @@
           }
         ],
         "stakes_shift": "Artie is now the most wanted entity in the multiverse.",
-        "title": "Rebooting for the Sequel"
+        "title": "Rebooting for the Sequel",
+        "bridge": {
+          "from_prev": "Artie is in the Null-Zone.",
+          "to_next": "Book 2: The Quest for the Source Code."
+        }
       }
     ]
   },
   "phase_report": {
     "chapter_reports": {
       "1": {
-        "chapter_reports": {
-          "1": {
-            "candidate_seams": [
-              {
-                "from_scene_ref": "1:1",
-                "to_scene_ref": "1:2",
-                "seam_score": 85,
-                "requested_resolution": "inline_bridge"
-              },
-              {
-                "from_scene_ref": "1:2",
-                "to_scene_ref": "1:3",
-                "seam_score": 90,
-                "requested_resolution": "inline_bridge"
-              },
-              {
-                "from_scene_ref": "1:5",
-                "to_scene_ref": "1:6",
-                "seam_score": 75,
-                "requested_resolution": "inline_bridge"
-              }
-            ],
-            "edits_applied": [
-              "Populated consumes_outcome_from for all non-first scenes.",
-              "Populated hands_off_to for all non-last scenes.",
-              "Populated transition_out_text and transition_out_anchors for all non-last scenes.",
-              "Adjusted handoff_mode for scenes 2, 5, and 6 to arrival_checkpoint to better reflect spatial transitions.",
-              "Verified all location labels and IDs for consistency across scene boundaries."
-            ],
-            "transition_hint_compliance": []
-          }
-        },
         "candidate_seams": [
           {
             "from_scene_ref": "1:1",
             "to_scene_ref": "1:2",
             "seam_score": 85,
-            "requested_resolution": "inline_bridge"
+            "requested_resolution": "inline_bridge",
+            "reason": "Transition from physical world death to digital void requires sensory anchoring."
           },
           {
             "from_scene_ref": "1:2",
             "to_scene_ref": "1:3",
             "seam_score": 90,
-            "requested_resolution": "inline_bridge"
+            "requested_resolution": "inline_bridge",
+            "reason": "Arrival in the tutorial zone from the void is a major spatial shift."
           },
           {
             "from_scene_ref": "1:5",
             "to_scene_ref": "1:6",
             "seam_score": 75,
-            "requested_resolution": "inline_bridge"
+            "requested_resolution": "inline_bridge",
+            "reason": "Travel from the meadow to the town gates involves a change in safety level."
           }
         ],
         "edits_applied": [
-          "Populated consumes_outcome_from for all non-first scenes.",
-          "Populated hands_off_to for all non-last scenes.",
-          "Populated transition_out_text and transition_out_anchors for all non-last scenes.",
-          "Adjusted handoff_mode for scenes 2, 5, and 6 to arrival_checkpoint to better reflect spatial transitions.",
-          "Verified all location labels and IDs for consistency across scene boundaries."
+          "Ensured all non-first scenes have consumes_outcome_from.",
+          "Ensured all non-last scenes have hands_off_to and transition_out_text.",
+          "Validated all location labels are non-placeholder."
         ],
         "transition_hint_compliance": []
       },
       "2": {
-        "chapter_reports": {
-          "1": {
-            "candidate_seams": [
-              {
-                "from_scene_ref": "1:1",
-                "to_scene_ref": "1:2",
-                "seam_score": 85,
-                "requested_resolution": "inline_bridge"
-              },
-              {
-                "from_scene_ref": "1:2",
-                "to_scene_ref": "1:3",
-                "seam_score": 90,
-                "requested_resolution": "inline_bridge"
-              },
-              {
-                "from_scene_ref": "1:5",
-                "to_scene_ref": "1:6",
-                "seam_score": 75,
-                "requested_resolution": "inline_bridge"
-              }
-            ],
-            "edits_applied": [
-              "Populated consumes_outcome_from for all non-first scenes.",
-              "Populated hands_off_to for all non-last scenes.",
-              "Populated transition_out_text and transition_out_anchors for all non-last scenes.",
-              "Adjusted handoff_mode for scenes 2, 5, and 6 to arrival_checkpoint to better reflect spatial transitions.",
-              "Verified all location labels and IDs for consistency across scene boundaries."
-            ],
-            "transition_hint_compliance": []
-          },
-          "2": {
-            "candidate_seams": [
-              {
-                "from_scene_ref": "2:1",
-                "requested_resolution": "inline_bridge",
-                "seam_score": 45,
-                "to_scene_ref": "2:2"
-              },
-              {
-                "from_scene_ref": "2:3",
-                "requested_resolution": "inline_bridge",
-                "seam_score": 70,
-                "to_scene_ref": "2:4"
-              },
-              {
-                "from_scene_ref": "2:6",
-                "requested_resolution": "inline_bridge",
-                "seam_score": 50,
-                "to_scene_ref": "2:7"
-              }
-            ],
-            "edits_applied": [
-              "Added deterministic link fields (consumes_outcome_from, hands_off_to, transition_out_text, transition_out_anchors) to all scenes in Chapter 2.",
-              "Ensured no hard_cut handoff modes are present.",
-              "Populated seam_score and seam_resolution for all scenes."
-            ],
-            "transition_hint_compliance": []
-          }
-        },
         "candidate_seams": [
           {
-            "from_scene_ref": "1:1",
-            "to_scene_ref": "1:2",
-            "seam_score": 85,
-            "requested_resolution": "inline_bridge"
-          },
-          {
-            "from_scene_ref": "1:2",
-            "to_scene_ref": "1:3",
-            "seam_score": 90,
-            "requested_resolution": "inline_bridge"
-          },
-          {
-            "from_scene_ref": "1:5",
-            "to_scene_ref": "1:6",
-            "seam_score": 75,
-            "requested_resolution": "inline_bridge"
-          },
-          {
             "from_scene_ref": "2:1",
-            "requested_resolution": "inline_bridge",
-            "seam_score": 45,
-            "to_scene_ref": "2:2"
+            "to_scene_ref": "2:2",
+            "seam_score": 40,
+            "seam_resolution": "inline_bridge",
+            "requested_resolution": "inline_bridge"
           },
           {
             "from_scene_ref": "2:3",
-            "requested_resolution": "inline_bridge",
-            "seam_score": 70,
-            "to_scene_ref": "2:4"
+            "to_scene_ref": "2:4",
+            "seam_score": 75,
+            "seam_resolution": "inline_bridge",
+            "requested_resolution": "inline_bridge"
           },
           {
             "from_scene_ref": "2:6",
-            "requested_resolution": "inline_bridge",
-            "seam_score": 50,
-            "to_scene_ref": "2:7"
+            "to_scene_ref": "2:7",
+            "seam_score": 60,
+            "seam_resolution": "inline_bridge",
+            "requested_resolution": "inline_bridge"
           }
         ],
         "edits_applied": [
-          "Populated consumes_outcome_from for all non-first scenes.",
-          "Populated hands_off_to for all non-last scenes.",
-          "Populated transition_out_text and transition_out_anchors for all non-last scenes.",
-          "Adjusted handoff_mode for scenes 2, 5, and 6 to arrival_checkpoint to better reflect spatial transitions.",
-          "Verified all location labels and IDs for consistency across scene boundaries.",
-          "Added deterministic link fields (consumes_outcome_from, hands_off_to, transition_out_text, transition_out_anchors) to all scenes in Chapter 2.",
-          "Ensured no hard_cut handoff modes are present.",
-          "Populated seam_score and seam_resolution for all scenes."
+          "Verified all non-first scenes have consumes_outcome_from.",
+          "Verified all non-last scenes have hands_off_to and transition_out_text.",
+          "Ensured transition_out_anchors count is 3-6 for all non-last scenes.",
+          "Confirmed location labels and IDs are consistent and non-placeholder."
         ],
         "transition_hint_compliance": []
       },
@@ -2798,58 +2661,64 @@
           {
             "from_scene_ref": "3:3",
             "to_scene_ref": "3:4",
-            "seam_score": 65,
+            "seam_score": 85,
             "requested_resolution": "inline_bridge",
-            "reason": "Transition between high-action combat and the 'charging' setup requires a clear shift in pacing."
-          },
-          {
-            "from_scene_ref": "3:6",
-            "to_scene_ref": "3:7",
-            "seam_score": 40,
-            "requested_resolution": "inline_bridge",
-            "reason": "Shift from level-up aftermath to loot discovery."
+            "reason": "Transition from combat action to a five-minute 'charging' setup requires a temporal bridge."
           },
           {
             "from_scene_ref": "3:8",
             "to_scene_ref": "3:9",
-            "seam_score": 80,
+            "seam_score": 70,
             "requested_resolution": "inline_bridge",
-            "reason": "Exiting the crypt to face Vane is a major spatial and tension shift."
+            "reason": "Spatial transition from the secret mural room back to the crypt entrance."
+          },
+          {
+            "from_scene_ref": "3:9",
+            "to_scene_ref": "3:10",
+            "seam_score": 90,
+            "requested_resolution": "inline_bridge",
+            "reason": "Transition from immediate confrontation to a sustained chase sequence."
           }
         ],
         "edits_applied": [
           "Ensured all non-first scenes have consumes_outcome_from.",
           "Ensured all non-last scenes have hands_off_to and transition_out_text.",
-          "Validated transition anchors count (3-6) for all scenes.",
-          "Confirmed location labels are descriptive and consistent."
+          "Validated transition_out_anchors count (3-6) for all applicable scenes.",
+          "Verified location labels and IDs are consistent and non-placeholder."
         ],
-        "transition_hint_compliance": []
+        "transition_hint_compliance": [
+          "No specific hints provided; followed standard deterministic link rules."
+        ]
       },
       "4": {
         "candidate_seams": [
           {
+            "from_scene_ref": "4:1",
+            "to_scene_ref": "4:2",
+            "seam_score": 45,
+            "requested_resolution": "inline_bridge"
+          },
+          {
             "from_scene_ref": "4:2",
             "to_scene_ref": "4:3",
-            "seam_score": 85,
-            "requested_resolution": "inline_bridge",
-            "reason": "Transition from the high-society Hall of Records to the damp Undercity requires a clear spatial shift."
+            "seam_score": 70,
+            "requested_resolution": "inline_bridge"
           },
           {
             "from_scene_ref": "4:5",
             "to_scene_ref": "4:6",
-            "seam_score": 90,
-            "requested_resolution": "inline_bridge",
-            "reason": "Transition from the chaos of a raid/fleeing state to the public Arena Plaza requires a shift in tension and environment."
+            "seam_score": 85,
+            "requested_resolution": "inline_bridge"
           }
         ],
         "edits_applied": [
-          "Ensured all non-first scenes have consumes_outcome_from.",
-          "Ensured all non-last scenes have hands_off_to and transition_out_text.",
-          "Validated transition_out_anchors counts (3-6) for all non-last scenes.",
-          "Verified location labels and IDs are consistent and non-placeholder."
+          "Verified all non-first scenes have consumes_outcome_from.",
+          "Verified all non-last scenes have hands_off_to.",
+          "Ensured transition_out_text and anchors are present for all handoffs.",
+          "Confirmed location labels and IDs are consistent and non-placeholder."
         ],
         "transition_hint_compliance": [
-          "No specific hints provided; followed deterministic link rules for Chapter 4."
+          "No specific hints provided; followed standard deterministic link rules."
         ]
       },
       "5": {
@@ -2858,24 +2727,26 @@
             "from_scene_ref": "5:3",
             "to_scene_ref": "5:4",
             "seam_score": 85,
-            "seam_resolution": "inline_bridge",
-            "requested_resolution": "inline_bridge"
+            "requested_resolution": "inline_bridge",
+            "reason": "Transition between tournament rounds with a shift in opponent archetype and section boundary."
           },
           {
             "from_scene_ref": "5:7",
             "to_scene_ref": "5:8",
             "seam_score": 90,
-            "seam_resolution": "inline_bridge",
-            "requested_resolution": "inline_bridge"
+            "requested_resolution": "inline_bridge",
+            "reason": "Movement from the preparation room back to the arena pit for the semi-finals."
           }
         ],
         "edits_applied": [
-          "Ensured all non-first scenes have consumes_outcome_from.",
-          "Ensured all non-last scenes have hands_off_to and transition_out_text.",
-          "Validated transition_out_anchors counts (3-6).",
+          "Verified all non-first scenes have consumes_outcome_from.",
+          "Verified all non-last scenes have hands_off_to and transition_out_text.",
+          "Ensured all transition_out_anchors meet the 3-6 string count requirement.",
           "Confirmed no hard_cut handoff modes are present."
         ],
-        "transition_hint_compliance": []
+        "transition_hint_compliance": [
+          "No specific hints provided; followed standard deterministic link rules."
+        ]
       },
       "6": {
         "candidate_seams": [
@@ -2884,27 +2755,27 @@
             "to_scene_ref": "6:5",
             "seam_score": 85,
             "requested_resolution": "inline_bridge",
-            "reason": "Transition from standard arena combat to reality-warping meta-crit requires a smooth bridge to maintain momentum."
+            "reason": "Transition from standard arena combat to reality-warping meta-crit requires a strong mechanical bridge."
           },
           {
             "from_scene_ref": "6:7",
             "to_scene_ref": "6:8",
             "seam_score": 90,
             "requested_resolution": "inline_bridge",
-            "reason": "The shift from Vane's defeat to the Admin's arrival is a major escalation in stakes and scale."
+            "reason": "The shift from Vane's deletion to the Admin's arrival is a major escalation in stakes and scale."
           },
           {
             "from_scene_ref": "6:10",
             "to_scene_ref": "6:11",
             "seam_score": 95,
-            "requested_resolution": "inline_bridge",
-            "reason": "The teleportation from the Void to the Null-Zone marks a significant change in environment and tone."
+            "requested_resolution": "full_scene",
+            "reason": "The teleportation from the Void to the Null-Zone represents a total change in environment and visual style (wireframe)."
           }
         ],
         "edits_applied": [
           "Verified all non-first scenes have consumes_outcome_from.",
           "Verified all non-last scenes have hands_off_to and transition_out_text.",
-          "Ensured all transition_out_anchors meet the 3-6 count requirement.",
+          "Ensured all transition_out_anchors meet the 3-6 string requirement.",
           "Confirmed no hard_cut handoff modes are present."
         ],
         "transition_hint_compliance": [
@@ -2917,7 +2788,7 @@
             "from_scene_ref": "7:3",
             "to_scene_ref": "7:4",
             "seam_score": 85,
-            "requested_resolution": "inline_bridge"
+            "requested_resolution": "full_scene"
           },
           {
             "from_scene_ref": "7:6",
@@ -2928,8 +2799,9 @@
         ],
         "edits_applied": [
           "Ensured all non-first scenes have consumes_outcome_from.",
-          "Ensured all non-last scenes have hands_off_to and transition_out_text/anchors.",
-          "Verified location labels and IDs are consistent and non-placeholder."
+          "Ensured all non-last scenes have hands_off_to and transition_out_text.",
+          "Verified transition_out_anchors count (3-6) for all applicable scenes.",
+          "Confirmed location labels and IDs are consistent and non-placeholder."
         ],
         "transition_hint_compliance": []
       }
@@ -2939,131 +2811,123 @@
         "from_scene_ref": "1:1",
         "to_scene_ref": "1:2",
         "seam_score": 85,
-        "requested_resolution": "inline_bridge"
+        "requested_resolution": "inline_bridge",
+        "reason": "Transition from physical world death to digital void requires sensory anchoring."
       },
       {
         "from_scene_ref": "1:2",
         "to_scene_ref": "1:3",
         "seam_score": 90,
-        "requested_resolution": "inline_bridge"
+        "requested_resolution": "inline_bridge",
+        "reason": "Arrival in the tutorial zone from the void is a major spatial shift."
       },
       {
         "from_scene_ref": "1:5",
         "to_scene_ref": "1:6",
         "seam_score": 75,
-        "requested_resolution": "inline_bridge"
-      },
-      {
-        "from_scene_ref": "1:1",
-        "to_scene_ref": "1:2",
-        "seam_score": 85,
-        "requested_resolution": "inline_bridge"
-      },
-      {
-        "from_scene_ref": "1:2",
-        "to_scene_ref": "1:3",
-        "seam_score": 90,
-        "requested_resolution": "inline_bridge"
-      },
-      {
-        "from_scene_ref": "1:5",
-        "to_scene_ref": "1:6",
-        "seam_score": 75,
-        "requested_resolution": "inline_bridge"
+        "requested_resolution": "inline_bridge",
+        "reason": "Travel from the meadow to the town gates involves a change in safety level."
       },
       {
         "from_scene_ref": "2:1",
-        "requested_resolution": "inline_bridge",
-        "seam_score": 45,
-        "to_scene_ref": "2:2"
+        "to_scene_ref": "2:2",
+        "seam_score": 40,
+        "seam_resolution": "inline_bridge",
+        "requested_resolution": "inline_bridge"
       },
       {
         "from_scene_ref": "2:3",
-        "requested_resolution": "inline_bridge",
-        "seam_score": 70,
-        "to_scene_ref": "2:4"
+        "to_scene_ref": "2:4",
+        "seam_score": 75,
+        "seam_resolution": "inline_bridge",
+        "requested_resolution": "inline_bridge"
       },
       {
         "from_scene_ref": "2:6",
-        "requested_resolution": "inline_bridge",
-        "seam_score": 50,
-        "to_scene_ref": "2:7"
+        "to_scene_ref": "2:7",
+        "seam_score": 60,
+        "seam_resolution": "inline_bridge",
+        "requested_resolution": "inline_bridge"
       },
       {
         "from_scene_ref": "3:3",
         "to_scene_ref": "3:4",
-        "seam_score": 65,
+        "seam_score": 85,
         "requested_resolution": "inline_bridge",
-        "reason": "Transition between high-action combat and the 'charging' setup requires a clear shift in pacing."
-      },
-      {
-        "from_scene_ref": "3:6",
-        "to_scene_ref": "3:7",
-        "seam_score": 40,
-        "requested_resolution": "inline_bridge",
-        "reason": "Shift from level-up aftermath to loot discovery."
+        "reason": "Transition from combat action to a five-minute 'charging' setup requires a temporal bridge."
       },
       {
         "from_scene_ref": "3:8",
         "to_scene_ref": "3:9",
-        "seam_score": 80,
+        "seam_score": 70,
         "requested_resolution": "inline_bridge",
-        "reason": "Exiting the crypt to face Vane is a major spatial and tension shift."
+        "reason": "Spatial transition from the secret mural room back to the crypt entrance."
+      },
+      {
+        "from_scene_ref": "3:9",
+        "to_scene_ref": "3:10",
+        "seam_score": 90,
+        "requested_resolution": "inline_bridge",
+        "reason": "Transition from immediate confrontation to a sustained chase sequence."
+      },
+      {
+        "from_scene_ref": "4:1",
+        "to_scene_ref": "4:2",
+        "seam_score": 45,
+        "requested_resolution": "inline_bridge"
       },
       {
         "from_scene_ref": "4:2",
         "to_scene_ref": "4:3",
-        "seam_score": 85,
-        "requested_resolution": "inline_bridge",
-        "reason": "Transition from the high-society Hall of Records to the damp Undercity requires a clear spatial shift."
+        "seam_score": 70,
+        "requested_resolution": "inline_bridge"
       },
       {
         "from_scene_ref": "4:5",
         "to_scene_ref": "4:6",
-        "seam_score": 90,
-        "requested_resolution": "inline_bridge",
-        "reason": "Transition from the chaos of a raid/fleeing state to the public Arena Plaza requires a shift in tension and environment."
+        "seam_score": 85,
+        "requested_resolution": "inline_bridge"
       },
       {
         "from_scene_ref": "5:3",
         "to_scene_ref": "5:4",
         "seam_score": 85,
-        "seam_resolution": "inline_bridge",
-        "requested_resolution": "inline_bridge"
+        "requested_resolution": "inline_bridge",
+        "reason": "Transition between tournament rounds with a shift in opponent archetype and section boundary."
       },
       {
         "from_scene_ref": "5:7",
         "to_scene_ref": "5:8",
         "seam_score": 90,
-        "seam_resolution": "inline_bridge",
-        "requested_resolution": "inline_bridge"
+        "requested_resolution": "inline_bridge",
+        "reason": "Movement from the preparation room back to the arena pit for the semi-finals."
       },
       {
         "from_scene_ref": "6:4",
         "to_scene_ref": "6:5",
         "seam_score": 85,
         "requested_resolution": "inline_bridge",
-        "reason": "Transition from standard arena combat to reality-warping meta-crit requires a smooth bridge to maintain momentum."
+        "reason": "Transition from standard arena combat to reality-warping meta-crit requires a strong mechanical bridge."
       },
       {
         "from_scene_ref": "6:7",
         "to_scene_ref": "6:8",
         "seam_score": 90,
         "requested_resolution": "inline_bridge",
-        "reason": "The shift from Vane's defeat to the Admin's arrival is a major escalation in stakes and scale."
+        "reason": "The shift from Vane's deletion to the Admin's arrival is a major escalation in stakes and scale."
       },
       {
         "from_scene_ref": "6:10",
         "to_scene_ref": "6:11",
         "seam_score": 95,
-        "requested_resolution": "inline_bridge",
-        "reason": "The teleportation from the Void to the Null-Zone marks a significant change in environment and tone."
+        "requested_resolution": "full_scene",
+        "reason": "The teleportation from the Void to the Null-Zone represents a total change in environment and visual style (wireframe)."
       },
       {
         "from_scene_ref": "7:3",
         "to_scene_ref": "7:4",
         "seam_score": 85,
-        "requested_resolution": "inline_bridge"
+        "requested_resolution": "full_scene"
       },
       {
         "from_scene_ref": "7:6",
@@ -3073,41 +2937,38 @@
       }
     ],
     "edits_applied": [
-      "Populated consumes_outcome_from for all non-first scenes.",
-      "Populated hands_off_to for all non-last scenes.",
-      "Populated transition_out_text and transition_out_anchors for all non-last scenes.",
-      "Adjusted handoff_mode for scenes 2, 5, and 6 to arrival_checkpoint to better reflect spatial transitions.",
-      "Verified all location labels and IDs for consistency across scene boundaries.",
-      "Populated consumes_outcome_from for all non-first scenes.",
-      "Populated hands_off_to for all non-last scenes.",
-      "Populated transition_out_text and transition_out_anchors for all non-last scenes.",
-      "Adjusted handoff_mode for scenes 2, 5, and 6 to arrival_checkpoint to better reflect spatial transitions.",
-      "Verified all location labels and IDs for consistency across scene boundaries.",
-      "Added deterministic link fields (consumes_outcome_from, hands_off_to, transition_out_text, transition_out_anchors) to all scenes in Chapter 2.",
-      "Ensured no hard_cut handoff modes are present.",
-      "Populated seam_score and seam_resolution for all scenes.",
       "Ensured all non-first scenes have consumes_outcome_from.",
       "Ensured all non-last scenes have hands_off_to and transition_out_text.",
-      "Validated transition anchors count (3-6) for all scenes.",
-      "Confirmed location labels are descriptive and consistent.",
+      "Validated all location labels are non-placeholder.",
+      "Verified all non-first scenes have consumes_outcome_from.",
+      "Verified all non-last scenes have hands_off_to and transition_out_text.",
+      "Ensured transition_out_anchors count is 3-6 for all non-last scenes.",
+      "Confirmed location labels and IDs are consistent and non-placeholder.",
       "Ensured all non-first scenes have consumes_outcome_from.",
       "Ensured all non-last scenes have hands_off_to and transition_out_text.",
-      "Validated transition_out_anchors counts (3-6) for all non-last scenes.",
+      "Validated transition_out_anchors count (3-6) for all applicable scenes.",
       "Verified location labels and IDs are consistent and non-placeholder.",
-      "Ensured all non-first scenes have consumes_outcome_from.",
-      "Ensured all non-last scenes have hands_off_to and transition_out_text.",
-      "Validated transition_out_anchors counts (3-6).",
+      "Verified all non-first scenes have consumes_outcome_from.",
+      "Verified all non-last scenes have hands_off_to.",
+      "Ensured transition_out_text and anchors are present for all handoffs.",
+      "Confirmed location labels and IDs are consistent and non-placeholder.",
+      "Verified all non-first scenes have consumes_outcome_from.",
+      "Verified all non-last scenes have hands_off_to and transition_out_text.",
+      "Ensured all transition_out_anchors meet the 3-6 string count requirement.",
       "Confirmed no hard_cut handoff modes are present.",
       "Verified all non-first scenes have consumes_outcome_from.",
       "Verified all non-last scenes have hands_off_to and transition_out_text.",
-      "Ensured all transition_out_anchors meet the 3-6 count requirement.",
+      "Ensured all transition_out_anchors meet the 3-6 string requirement.",
       "Confirmed no hard_cut handoff modes are present.",
       "Ensured all non-first scenes have consumes_outcome_from.",
-      "Ensured all non-last scenes have hands_off_to and transition_out_text/anchors.",
-      "Verified location labels and IDs are consistent and non-placeholder."
+      "Ensured all non-last scenes have hands_off_to and transition_out_text.",
+      "Verified transition_out_anchors count (3-6) for all applicable scenes.",
+      "Confirmed location labels and IDs are consistent and non-placeholder."
     ],
     "transition_hint_compliance": [
-      "No specific hints provided; followed deterministic link rules for Chapter 4.",
+      "No specific hints provided; followed standard deterministic link rules.",
+      "No specific hints provided; followed standard deterministic link rules.",
+      "No specific hints provided; followed standard deterministic link rules.",
       "No specific hints provided; followed standard deterministic link rules."
     ]
   }
