@@ -130,6 +130,15 @@ Story 8: Tests + Docs
 - Coverage for durable registry updates, preflight, DCAS, and lint coherence.
 - Update docs/help to reflect durable systems + schema contracts.
 
+Story 9: Thought Signature Ledger + Replay + “Current Thoughts”
+- Track thought signatures per request with phase/turn/chapter scope.
+- Preserve assistant parts losslessly for immediate continuity replay.
+- Add a console command to summarize “current thoughts” without chain-of-thought.
+
+Story 10: Perspective Replay Surfaces
+- Allow selecting prior signatures to seed structured “perspective” blocks for prompts.
+- Ensure replay is opt-in and never required for correctness.
+
 
 Story Details (v3)
 
@@ -351,6 +360,70 @@ Implementation Tasks
 
 Acceptance Criteria
 - Tests pass; docs reflect actual CLI behavior.
+
+Story 9: Thought Signature Ledger + Replay + “Current Thoughts”
+Purpose
+- Capture and index thought signatures per request to enable phase/turn continuity, replay, and safe introspection.
+
+Scope and Constraints
+- Track signatures as opaque artifacts only; never decode or expose chain-of-thought.
+- Must not alter model output content or author semantics.
+- Any replay must use the original assistant parts exactly as returned.
+
+Implementation Tasks
+- Extend LLM response types to retain assistant `parts` and thought signature metadata.
+- Persist per-request signature records with scope fields:
+  - request_id, phase_id, turn_id, chapter_id, model, thinking_level, prompt_hash, timestamp.
+- Write a run-level `thought_signature_ledger.jsonl` and `thought_signature_index.json`.
+- Add CLI command to list and select signatures by scope.
+- Add a console command: “tell me your current thoughts,” which returns a structured summary.
+
+Inputs
+- LLM responses (raw + parsed parts).
+- Run metadata (phase, turn, chapter, prompt hash).
+
+Outputs
+- Signature ledger + index files.
+- `assistant_parts.json` artifacts for replay.
+- Structured “current thoughts” response artifact.
+
+Edge Cases to Address
+- Multiple signatures in a single response (parallel or sequential tool steps).
+- Missing signature at minimal thinking level (best-effort handling).
+- Long-pause resume where continuity is not trusted.
+
+Acceptance Criteria
+- Every LLM call logs signatures (when present) with correct scope metadata.
+- CLI can list and select a signature for a targeted replay attempt.
+- “Current thoughts” command returns schema-compliant summary without chain-of-thought.
+- Replay uses lossless assistant parts and is explicitly marked as best-effort.
+
+Story 10: Perspective Replay Surfaces
+Purpose
+- Provide optional, structured “perspective” context derived from prior signature-linked summaries to seed other prompts.
+
+Scope and Constraints
+- Perspectives are summaries, not hidden reasoning.
+- Must be opt-in per prompt and never required for correctness.
+
+Implementation Tasks
+- Add a perspective selection mechanism to prompt assembly (manual or CLI flag).
+- Define a small “perspective summary” schema (objectives, constraints, decisions, risks).
+- Persist selected perspective in run artifacts and prompt hash log.
+
+Inputs
+- Signature ledger and stored “current thoughts” summaries.
+
+Outputs
+- Optional perspective block injected into prompt templates.
+
+Edge Cases to Address
+- Stale perspective conflicting with current outline or state.
+- Multiple perspectives selected; enforce priority order.
+
+Acceptance Criteria
+- Perspective selection is explicit and logged.
+- Prompts remain valid when perspective is absent.
 Definition of Done by Story (condensed)
 - Story 0: Shared JSON Contract Block exists in all phase prompts + book overrides.
 - Story 1: Preflight emits valid patches and passes scope policy in non‑real scenes.
@@ -361,6 +434,8 @@ Definition of Done by Story (condensed)
 - Story 6: Compile/export commands produce artifacts from scene files.
 - Story 7: Logs include prompt hashes, budgets, registry snapshots.
 - Story 8: Tests pass and docs match actual CLI behavior.
+- Story 9: Signature ledger + replay + current-thoughts command are live and safe.
+- Story 10: Perspective replay is available as an opt-in prompt block with audit trail.
 
 Rerun and Override Semantics
 - Each phase declares mutation behavior (immutable, append‑only, rewrite‑with‑archive).

@@ -33,6 +33,7 @@ Preferred continuity mechanism:
 
 Reliability mechanism:
 1. Explicit compact planning artifact persisted between turns
+2. Thought-signature ledger persisted per request with phase/turn scope
 
 Operational rule:
 1. Thought signature is optimization, not sole source of truth.
@@ -277,6 +278,69 @@ Thought signature is supported but treated as ephemeral.
    2. or drive `T2` from explicit plan artifact if sufficient by contract
 5. Never parse/decode thought signature fields; treat as opaque bytes.
 
+## Thought Signature Tracking and Replay
+Thought signatures are required for continuity and must be tracked as first-class artifacts.
+
+### Tracking requirements
+1. Every model response must be inspected for thought signatures in assistant `parts`.
+2. Each signature is stored with mandatory metadata:
+   1. `request_id`
+   2. `phase_id`
+   3. `turn_id` (`T1` or `T2`)
+   4. `chapter_id` (if chapter-scoped)
+   5. `model`
+   6. `thinking_level`
+   7. `prompt_hash`
+   8. `timestamp`
+3. If multiple signatures appear in a single response:
+   1. preserve their ordering and part association
+   2. store each with `part_index` + `step_index` where applicable
+4. Signature storage must be lossless; do not reformat or truncate.
+
+### Signature ledger
+Maintain a single append-only ledger per run:
+1. `thought_signature_ledger.jsonl` (one record per signature)
+2. `thought_signature_index.json` (latest-by-scope lookup)
+
+Index requirements:
+1. lookup by `phase_id + turn_id + chapter_id`
+2. lookup by `request_id`
+3. lookup for "global author signature" (see below)
+
+### Global author signature (most recent action)
+We will store the most recent author-phase signature as a global continuity handle:
+1. record `scope = "global_author"`
+2. update on each author action
+3. optional usage as continuity seed in downstream prompts when explicitly enabled
+4. never required for correctness; always best-effort
+
+### Signature selection and replay
+Provide a selectable replay mechanism:
+1. CLI should list signatures by scope (phase/turn/chapter, or global author).
+2. CLI should allow choosing a specific signature for a targeted replay attempt.
+3. Replay always includes the original assistant parts, not just the signature.
+4. Replay is immediate continuity only; long-pause reuse is opt-in and logged.
+
+## "Tell Me Your Current Thoughts" Console Command
+We need a console command that asks the model to reconstruct its active context without leaking chain-of-thought.
+
+### Command behavior
+1. Uses system + user prompt pairing.
+2. Uses the most recent signature (or selected signature) as continuity input when possible.
+3. Output is a structured "context summary," not hidden reasoning.
+
+### Output schema (suggested)
+1. `current_objectives[]`
+2. `active_constraints[]`
+3. `recent_decisions[]`
+4. `assumptions[]`
+5. `open_questions[]`
+6. `recommended_next_steps[]`
+
+### Safety rule
+1. Do not request chain-of-thought or hidden reasoning.
+2. Require concise, inspectable summary only.
+
 ## Resume and Checkpoint Contract
 Turn pair is the checkpoint unit.
 
@@ -303,6 +367,9 @@ For each chapter-phase pair:
 4. `phase_04a_t2_chapter_patch.json` or `phase_04b_t2_chapter_patch.json`
 5. chapter validation artifact
 6. merged phase snapshot artifact
+7. `thought_signature_ledger.jsonl`
+8. `thought_signature_index.json`
+9. `thought_signature_latest.json` (optional convenience pointer)
 
 Reporting clarity requirement:
 1. Keep chapter patch artifact and merged artifact side-by-side.
@@ -344,6 +411,7 @@ Adoption gate:
 1. Phase has high planning complexity and structured output risk.
 2. Deterministic fallback artifact can be defined.
 3. Added turn cost is acceptable.
+4. Phase is compatible with signature tracking and replay without revealing hidden reasoning.
 
 Extension template:
 1. `P-T1`: plan-only minimal response + compact plan artifact.

@@ -121,6 +121,7 @@ Failure handling:
 ## Thinking-Level Policy (Gemini)
 Goal:
 1. Constrain reasoning overhead to prevent completion truncation while retaining quality where needed.
+2. Log thought signatures per request to enable phase/turn continuity diagnostics.
 
 Policy defaults:
 1. Phase 4a: `high`
@@ -140,6 +141,7 @@ Env override hierarchy:
 Notes:
 1. Do not send legacy `thinking_budget` with `thinkingLevel`.
 2. Keep request logging explicit for effective thinking level per attempt.
+3. Persist thought signature metadata per request (phase, chapter, attempt).
 
 ## Resume and Turn-Budget Behavior
 Required behavior:
@@ -172,11 +174,14 @@ For each chapter-scoped phase:
 2. `phase_<id>_chapter_<NNN>_attempt_raw_<k>.json`
 3. `phase_<id>_chapter_<NNN>_output.json`
 4. `phase_<id>_chapter_<NNN>_validation.json`
+5. `phase_<id>_chapter_<NNN>_assistant_parts.json` (lossless replay object when present)
+6. `phase_<id>_chapter_<NNN>_thought_signatures.json` (per-attempt signature metadata)
 
 Aggregated per-phase:
 1. `phase_<id>_merged_output.json`
 2. `phase_<id>_summary.json`
 3. `phase_<id>_checkpoint.json` (chapter statuses + resume cursor + run mode)
+4. `phase_<id>_thought_signature_index.json` (latest signature per chapter/turn)
 
 Handoffs:
 1. Phase 4 -> `outline_transitions_refined_v1_1.json`
@@ -213,6 +218,8 @@ LLM client and config:
 1. `src/bookforge/llm/gemini_client.py`
 2. `src/bookforge/llm/client.py`
 3. `src/bookforge/config/env.py` (if adding phase-specific thinking env docs/reads there later)
+4. `src/bookforge/llm/logging.py` (signature logging + assistant parts persistence)
+5. `src/bookforge/llm/types.py` (structured response parts for signatures)
 
 Docs/help:
 1. `docs/help/outline_generate.md`
