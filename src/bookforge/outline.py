@@ -36,6 +36,7 @@ OUTLINE_BACKUP_INDEX_FILE = "outline_backups_index.json"
 CHAPTER_SCOPED_STEPS = {
     outline_context.STEP_04A,
     outline_context.STEP_04B,
+    outline_context.PHASE_03,
     outline_context.PHASE_05,
     outline_context.PHASE_06,
 }
@@ -1326,7 +1327,10 @@ def _execute_chapter_scoped_step(
     if force_phase_full_rerun:
         checkpoint = _initial_phase_checkpoint(step_id, run_mode)
 
-    if step_id == outline_context.STEP_04A:
+    if step_id == outline_context.PHASE_03:
+        base_outline = handoffs.get("outline_sections_v1")
+        aggregate_report = {}
+    elif step_id == outline_context.STEP_04A:
         base_outline = handoffs.get("outline_draft_v1_1")
         aggregate_report = {}
     elif step_id == outline_context.STEP_04B:

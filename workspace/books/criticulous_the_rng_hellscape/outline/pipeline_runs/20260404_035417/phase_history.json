@@ -1,0 +1,75 @@
+{
+  "schema_version": "outline_phase_history_v1",
+  "created_at": "2026-04-04T03:54:17Z",
+  "updated_at": "2026-04-04T04:03:21Z",
+  "steps": {
+    "phase_01_chapter_spine": {
+      "status": "success",
+      "attempts": 1,
+      "logical_phase": "phase_01_chapter_spine",
+      "output_path": "phase_01_chapter_spine_output.json",
+      "validation": {
+        "status": "pass",
+        "errors": [],
+        "warnings": [],
+        "metrics": {
+          "chapter_count": 7
+        }
+      },
+      "handoff_path": "outline_spine_v1.json"
+    },
+    "phase_02_section_architecture": {
+      "status": "success",
+      "attempts": 1,
+      "logical_phase": "phase_02_section_architecture",
+      "output_path": "phase_02_section_architecture_output.json",
+      "validation": {
+        "status": "pass",
+        "errors": [],
+        "warnings": [],
+        "metrics": {
+          "chapter_count": 7
+        }
+      },
+      "handoff_path": "outline_sections_v1.json"
+    },
+    "phase_03_scene_draft": {
+      "status": "error",
+      "attempts": 2,
+      "logical_phase": "phase_03_scene_draft",
+      "validation": {
+        "status": "fail",
+        "errors": [
+          {
+            "code": "json_parse",
+            "message": "Invalid JSON in response.",
+            "path": "<root>"
+          }
+        ],
+        "warnings": [],
+        "metrics": {}
+      }
+    }
+  },
+  "book_id": "criticulous_the_rng_hellscape",
+  "run_id": "20260404_035417",
+  "settings": {
+    "strict_transition_hints": false,
+    "strict_transition_bridges": true,
+    "strict_location_identity": true,
+    "transition_insert_budget_per_chapter": 2,
+    "allow_transition_scene_insertions": true,
+    "exact_scene_count": false,
+    "scene_count_range": null,
+    "scene_count_policy": {
+      "mode": "strong_non_exact",
+      "expected_scene_count_enforcement": "strong_non_exact",
+      "chapter_scene_count_exact_mode": false,
+      "notes": []
+    },
+    "force_phase_full_rerun": false
+  },
+  "requested_from_step": "phase_01_chapter_spine",
+  "requested_to_step": "phase_06_thread_payoff_refinement",
+  "fingerprint": "0E98C5D40FA9F756FC2F9397562506AE3F6B26D798918A0DD96BC6D66BC1EAAA"
+}

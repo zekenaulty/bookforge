@@ -1,0 +1,276 @@
+{
+  "schema_version": "1.1",
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "name": "Artie",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      },
+      "pronouns": "he/him",
+      "role": "protagonist"
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "name": "Fizz",
+      "intro": {
+        "chapter": 1,
+        "scene": 6
+      },
+      "pronouns": "she/her",
+      "role": "sidekick"
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "name": "Vane",
+      "intro": {
+        "chapter": 1,
+        "scene": 10
+      },
+      "pronouns": "he/him",
+      "role": "antagonist"
+    },
+    {
+      "character_id": "CHAR_MAYOR",
+      "name": "Mayor of Oakhaven",
+      "intro": {
+        "chapter": 1,
+        "scene": 9
+      },
+      "pronouns": "he/him",
+      "role": "npc"
+    },
+    {
+      "character_id": "CHAR_ADMIN",
+      "name": "System Administrator",
+      "intro": {
+        "chapter": 6,
+        "scene": 9
+      },
+      "pronouns": "they/them",
+      "role": "villain"
+    }
+  ],
+  "threads": [
+    {
+      "thread_id": "THREAD_CRIT_EXPLOIT",
+      "label": "The 100% Crit Glitch",
+      "status": "active"
+    },
+    {
+      "thread_id": "THREAD_VANE_RIVALRY",
+      "label": "Vane's Rivalry",
+      "status": "active"
+    },
+    {
+      "thread_id": "THREAD_SYSTEM_GLITCH",
+      "label": "System Stability",
+      "status": "active"
+    },
+    {
+      "thread_id": "THREAD_THE_ASCENSION",
+      "label": "The Ascension / First Glitch Myth",
+      "status": "active"
+    }
+  ],
+  "chapters": [
+    {
+      "chapter_id": 1,
+      "title": "Welcome to the RNG-Hellscape",
+      "goal": "Artie survives his first encounter and establishes his 1 HP / 100% Crit anomaly status in Oakhaven.",
+      "chapter_role": "hook",
+      "stakes_shift": "From mundane office drone to a high-value system anomaly targeted by a powerful rival.",
+      "bridge": {
+        "from_prev": "Artie dies in a vending machine accident and enters the character creation void.",
+        "to_next": "Artie must find a way to survive his fragility by acquiring gear that compensates for his 1 HP."
+      },
+      "pacing": {
+        "intensity": 5,
+        "tempo": "rush",
+        "expected_scene_count": 10
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "Death by Snacking",
+          "intent": "Establish Artie's mundane life and his absurd death via vending machine.",
+          "end_condition": "Artie dies from electrocution and enters the Character Creation Void.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie fights a vending machine for a bag of chips in his office breakroom.",
+              "type": "action",
+              "outcome": "Artie is frustrated and desperate for a snack.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Office Breakroom",
+              "location_end_label": "Office Breakroom",
+              "location_start": "LOC_OFFICE_BREAKROOM",
+              "location_end": "LOC_OFFICE_BREAKROOM",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie stands before the breakroom vending machine, his last dollar crumpled in his sweaty palm.",
+              "transition_in_anchors": [
+                "crumpled dollar bill",
+                "vending machine glass",
+                "breakroom linoleum",
+                "stuck bag of chips"
+              ],
+              "hands_off_to": "1:2",
+              "transition_out_text": "The machine groans as Artie delivers a desperate kick to the base.",
+              "transition_out_anchors": [
+                "vending machine base",
+                "scuffed shoe",
+                "rattling snack coils"
+              ]
+            },
+            {
+              "scene_id": 2,
+              "summary": "The vending machine malfunctions and electrocutes Artie.",
+              "type": "action",
+              "outcome": "Artie dies from electrocution.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Office Breakroom",
+              "location_end_label": "Office Breakroom",
+              "location_start": "LOC_OFFICE_BREAKROOM",
+              "location_end": "LOC_OFFICE_BREAKROOM",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:1",
+              "transition_in_text": "A shower of sparks erupts from the machine's internal wiring as Artie's foot makes contact.",
+              "transition_in_anchors": [
+                "exposed copper wire",
+                "blue electrical arc",
+                "smell of ozone"
+              ],
+              "hands_off_to": "1:3",
+              "transition_out_text": "The world fades to white as the current surges through Artie's body.",
+              "transition_out_anchors": [
+                "white light",
+                "numb fingertips",
+                "humming electricity"
+              ]
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie wakes up in the Character Creation Void.",
+              "type": "discovery",
+              "outcome": "Artie realizes he is in a game-like afterlife.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Character Creation Void",
+              "location_end_label": "Character Creation Void",
+              "location_start": "LOC_VOID",
+              "location_end": "LOC_VOID",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:2",
+              "transition_in_text": "Artie blinks as the blinding white light resolves into a vast, grid-lined expanse.",
+              "transition_in_anchors": [
+                "glowing grid lines",
+                "infinite horizon",
+                "floating UI windows"
+              ],
+              "end_condition_echo": "Artie dies from electrocution and enters the Character Creation Void.",
+              "hands_off_to": "1:4",
+              "transition_out_text": "The System UI flickers to life, bathing the void in a harsh blue glow.",
+              "transition_out_anchors": [
+                "blue UI glow",
+                "floating text boxes",
+                "system chime"
+              ]
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "The Grease-Fire Build",
+          "intent": "Introduce Fizz and the UI glitch that locks Artie into the 1 HP / 100% Crit build.",
+          "end_condition": "Artie spawns in the tutorial forest with his glitched stats locked.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie attempts to allocate his stat points, but a grease smudge on the UI causes a glitch.",
+              "type": "action",
+              "outcome": "Artie's stats are mis-allocated into 100% Crit Rate.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "threads": [
+                "THREAD_CRIT_EXPLOIT"
+              ],
+              "location_start_label": "Character Creation Void",
+              "location_end_label": "Character Creation Void",
+              "location_start": "LOC_VOID",
+              "location_end": "LOC_VOID",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:3",
+              "transition_in_text": "Artie reaches out to the floating stat menu, his fingers still slick with vending machine grease.",
+              "transition_in_anchors": [
+                "greasy fingerprint",
+                "stat allocation slider",
+                "critical hit rate label"
+              ],
+              "hands_off_to": "1:5",
+              "transition_out_text": "The UI screen flashes red as the System locks in the impossible values.",
+              "transition_out_anchors": [
+                "red warning text",
+                "stat lock icon",
+                "glitching numbers"
+              ]
+            },
+            {
+              "scene_id": 5,
+              "summary": "Artie spawns into the Tutorial Forest and realizes his 1 HP fragility.",
+              "type": "discovery",
+              "outcome": "Artie understands the danger of his new build.",
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "location_start_label": "Tutorial Forest",
+              "location_end_label": "Tutorial Forest",
+              "location_start": "LOC_TUTORIAL_FOREST",
+              "location_end": "LOC_TUTORIAL_FOREST",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:4",
+              "transition_in_text": "The void dissolves, replaced by the rustling leaves and damp earth of the Tutorial Forest.",
+              "transition_in_anchors": [
+                "mossy tree trunk",
+                "damp forest floor",
+                "floating health bar"
+              ],
+              "hands_off_to": "1:6",
+              "transition_out_text": "A small, glowing sprite zips out from behind a fern, startling Artie.",
+              "transition_out_anchors": [
+                "glowing sprite wings",
+                "green fern frond",
+                "startled gasp"
+              ]
+            },
+            {
+              "scene_id": 6,
+              "summary": "Artie meets Fizz, his snarky System Guide.",
+              "type": "dialogue",
+              "outcome": "Fizz explains the glitched build and becomes Artie's ally.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "introduces": [
+                "CHAR_FIZZ"
+              ],
+              "location_start_label": "Tutorial Forest",
+              "location_end_label": "Tutorial Forest",
+              "location_start": "LOC_TUTORIAL_FOREST",
+              "location_end": "LOC_TUTORIAL_FOREST",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:5",
+              "transition_in_text": "The sprite hovers at eye level, her tiny

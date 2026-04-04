@@ -1,0 +1,352 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+UI gate: UI/system blocks (lines starting with '[' and ending with ']') are permitted only when scene_card.ui_allowed=true. If ui_allowed=false, do not include UI blocks even if an author persona says "always include".
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties, and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true. If a prior invariant is stale or superseded, you MUST flag it for removal using "REMOVE: <exact prior invariant text>" before restating the current truth.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Criticulous: The RNG Hellscape
+Book ID: criticulous_the_rng_hellscape
+Author Ref: eldrik-vale/v2
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements **when the System is active or the scene is set in a game world**. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing, while creating rich character depth.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot, or the setting/location is key to major story arcs/threads. 
+5. **Tight POV:** Stay deep in the active characters head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, follow the active scene-count policy:
+- Exact mode: total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+- Range mode: chapter totals must remain within the configured range and still align with pacing intent.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string), and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+
+USER:
+
+# OUTLINE PIPELINE PHASE 02: SECTION ARCHITECTURE
+
+Timeline Lock does not apply during outlining; you are planning, not writing a Scene Card.
+
+Return ONLY a single JSON object. No markdown, no code fences, no commentary.
+Use strict JSON (double quotes, no trailing commas).
+
+Goal:
+- Define chapter-internal mini-arcs before scene listing.
+- Do NOT emit scenes in this phase.
+
+Required output schema:
+{
+  "schema_version": "sections_v1",
+  "chapters": [
+    {
+      "chapter_id": 1,
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "",
+          "intent": "",
+          "section_role": "setup",
+          "target_scene_count": 3,
+          "end_condition": ""
+        }
+      ]
+    }
+  ]
+}
+
+Rules:
+- Include every chapter_id from outline_spine_v1.
+- section_id must be sequential integers within each chapter starting at 1.
+- Typical section count per chapter is 3-8; interlude/transition chapters may use 2-4.
+- target_scene_count should usually be 2-6.
+- section intents must be distinct and progressive.
+- end_condition is required and must define deterministic section closure target.
+- The section-final scene in phase 03 must echo end_condition exactly via end_condition_echo.
+- Keep chapter goals/bridges unchanged from phase 01.
+- Sum of section target_scene_count should approximately align with chapter expected_scene_count.
+
+If you cannot satisfy constraints after correction attempts, return error_v1:
+{
+  "result": "ERROR",
+  "schema_version": "error_v1",
+  "error_type": "validation_error",
+  "reason_code": "section_architecture_incomplete",
+  "missing_fields": ["chapters[0].sections[0].end_condition"],
+  "phase": "phase_02_section_architecture",
+  "action_hint": "Provide sequential section ids and non-empty end_condition for each section."
+}
+
+Outline spine (phase 01):
+{
+  "chapters": [
+    {
+      "bridge": {
+        "from_prev": "Artie dies in a vending machine accident and enters the character creation void.",
+        "to_next": "Artie must find a way to survive his fragility by acquiring gear that compensates for his 1 HP."
+      },
+      "chapter_id": 1,
+      "chapter_role": "hook",
+      "goal": "Artie survives his first encounter and establishes his 1 HP / 100% Crit anomaly status in Oakhaven.",
+      "pacing": {
+        "expected_scene_count": 10,
+        "intensity": 5,
+        "tempo": "rush"
+      },
+      "stakes_shift": "From mundane office drone to a high-value system anomaly targeted by a powerful rival.",
+      "title": "Welcome to the RNG-Hellscape"
+    },
+    {
+      "bridge": {
+        "from_prev": "Artie escapes Vane but remains a one-hit-kill target.",
+        "to_next": "Artie's rapid farming triggers the attention of the Floor Guardian."
+      },
+      "chapter_id": 2,
+      "chapter_role": "setup",
+      "goal": "Artie acquires the Cloak of the Cowardly Lion and begins exploiting the system's loot mechanics in the crypts.",
+      "pacing": {
+        "expected_scene_count": 9,
+        "intensity": 3,
+        "tempo": "steady"
+      },
+      "stakes_shift": "From desperate survival to tactical exploitation of the system's physics and drop rates.",
+      "title": "The Glass Cannon\u2019s Guide to Not Dying"
+    },
+    {
+      "bridge": {
+        "from_prev": "Artie summons the Floor Guardian to maximize his XP gains.",
+        "to_next": "Vane's fury over the stolen kill forces Artie to flee toward the capital city."
+      },
+      "chapter_id": 3,
+      "chapter_role": "pressure",
+      "goal": "Artie defeats the Bone Golem through a physics exploit and reaches Level 10, becoming a recognized threat.",
+      "pacing": {
+        "expected_scene_count": 10,
+        "intensity": 4,
+        "tempo": "steady"
+      },
+      "stakes_shift": "From local anomaly to a system-level glitch that threatens the established power hierarchy.",
+      "title": "Math-Boss vs. The Glitch"
+    },
+    {
+      "bridge": {
+        "from_prev": "Artie arrives at the capital seeking a way to fix his stats.",
+        "to_next": "The tournament begins, forcing Artie to fight in a public arena where his glitch is on full display."
+      },
+      "chapter_id": 4,
+      "chapter_role": "investigation",
+      "goal": "Artie infiltrates the RNG-worshipping capital and enters the Grand Crit-Off to secure the Shield of Infinite Health.",
+      "pacing": {
+        "expected_scene_count": 11,
+        "intensity": 3,
+        "tempo": "steady"
+      },
+      "stakes_shift": "From physical survival to a high-stakes social and political gamble against the High Priest's son.",
+      "title": "The Capital of Crits"
+    },
+    {
+      "bridge": {
+        "from_prev": "Artie registers for the tournament and faces his first round of opponents.",
+        "to_next": "Vane prepares a System Override scroll to ensure Artie's permanent deletion in the final match."
+      },
+      "chapter_id": 5,
+      "chapter_role": "trial",
+      "goal": "Artie advances to the finals by weaponizing the system's own glitches against increasingly absurd opponents.",
+      "pacing": {
+        "expected_scene_count": 12,
+        "intensity": 4,
+        "tempo": "rush"
+      },
+      "stakes_shift": "From a simple tournament participant to a target of direct System intervention and rigged mechanics.",
+      "title": "The Tournament of Tiers"
+    },
+    {
+      "bridge": {
+        "from_prev": "The final match begins with Vane holding all the rigged advantages.",
+        "to_next": "The world pixelates and Artie is cast into the wireframe Null-Zone."
+      },
+      "chapter_id": 6,
+      "chapter_role": "climax",
+      "goal": "Artie defeats Vane by critting the system's reflection math and escapes the Administrator's deletion attempt.",
+      "pacing": {
+        "expected_scene_count": 10,
+        "intensity": 5,
+        "tempo": "rush"
+      },
+      "stakes_shift": "From a character in a game to a reality-warping virus that the System can no longer control.",
+      "title": "The Final Roll"
+    },
+    {
+      "bridge": {
+        "from_prev": "Artie wakes up in the Null-Zone after the arena's collapse.",
+        "to_next": "Artie enters the Glitch-Woods, setting the stage for the next book."
+      },
+      "chapter_id": 7,
+      "chapter_role": "aftermath",
+      "goal": "Artie accepts his new status as a 'NaN' entity and joins the Beta-Testers to take down the Administrator.",
+      "pacing": {
+        "expected_scene_count": 8,
+        "intensity": 2,
+        "tempo": "slow_burn"
+      },
+      "stakes_shift": "From surviving the system to actively planning its overthrow as a legendary glitch.",
+      "title": "Rebooting for the Sequel"
+    }
+  ],
+  "schema_version": "spine_v1"
+}
+
+Book:
+{
+  "author_ref": "eldrik-vale/v2",
+  "book_id": "criticulous_the_rng_hellscape",
+  "genre": [
+    "litrpg",
+    "isekai",
+    "comedy"
+  ],
+  "invariants": [
+    "No world resets.",
+    "No convenient amnesia as a continuity device.",
+    "Do not change established names/relationships."
+  ],
+  "page_metrics": {
+    "chars_per_page": 1500,
+    "words_per_page": 250
+  },
+  "schema_version": "1.0",
+  "series_id": "crit-iculous",
+  "series_ref": "series/crit-iculous",
+  "targets": {
+    "avg_scene_words": 2000,
+    "chapters": 7
+  },
+  "title": "Criticulous: The RNG Hellscape",
+  "voice": {
+    "pov": "third_limited",
+    "style_tags": [
+      "no-recaps",
+      "forward-motion",
+      "tight-prose"
+    ],
+    "tense": "past"
+  }
+}
+
+Targets:
+{
+  "avg_scene_words": 2000,
+  "chapters": 7
+}
+
+User prompt (optional):
+﻿You are outlining a LitRPG isekai comedy with a fast, forward-motion voice and tight prose. The tone is punchy, absurd, and game-aware, with real stakes hiding inside jokes. The story centers on Arthur “Artie” Penhaligon, an office drone who dies in a vending machine accident and wakes in a System-run character creation void. He accidentally dumps all 100 stat points into Critical Hit Rate (chips grease + UI glitch), locking himself into a “Crit or Quit” build: 1 HP, 100% crits. His snarky System Guide, Fizz, becomes his ally and foil. The world worships RNG and crits; the System is both deity and antagonist. Threads: The 100% Crit Glitch (THREAD_CRIT_EXPLOIT), Vane’s Rivalry (THREAD_VANE_RIVALRY), System Stability (THREAD_SYSTEM_GLITCH), The Ascension / First Glitch Myth (THREAD_THE_ASCENSION). Main cast: Artie, Fizz, Vane (antagonist paladin), Mayor of Oakhaven (NPC power broker), System Administrator (overarching villain).
+
+High-detail story synopsis (chapter by chapter):
+
+Chapter 1 — “Welcome to the RNG-Hellscape” (hook, high intensity):
+Artie fights a vending machine for chips, gets electrocuted, and wakes in the Character Creation Void. The System UI mocks him while he allocates stats; grease causes a catastrophic mis-allocation into Crit. The System locks him at 1 HP / 100% Crit and spawns him into the tutorial forest. He immediately faces a hyper-aggressive slime, whiffs repeatedly, then vaporizes it with an absurd crit. The System awards him a cursed “Participation Trophy” item that attracts monsters. He flees, reaches Oakhaven’s gates, and discovers guards betting on crit-rates. Artie is flagged as an anomaly. Inside, he learns crits are social currency. A high-level paladin, Vane, notices the anomaly aura and “mentors” (bullies) him, establishing a rival and power gap. End: Artie barely escapes a forced duel; the world now knows his name.
+
+Chapter 2 — “The Glass Cannon’s Guide to Not Dying” (setup, tactical survival):
+Artie tries to sell the cursed trophy but discovers it’s soul-bound. Fizz reveals a loophole in a “Starter Pack” quest; Artie crits a lock, exploding it into gold dust and steals a high-tier evasion cloak (“Cloak of the Cowardly Lion,” +50 Evasion, -100 Dignity). He enters the Low-Level Crypts where enemies move in predictable turn-based rhythms. A skeleton archer triggers a cloak-evasion backflip. Artie discovers his crits overload the system, converting enemies into loot pinatas—he can farm at absurd speed. Vane shows up with a full party, clears rooms effortlessly, and leaves behind a Boss Trigger. Artie decides to summon the Floor Guardian for massive XP, despite his 1 HP fragility.
+
+Chapter 3 — “Math-Boss vs. The Glitch” (pressure, boss fight):
+Artie kites the Bone Golem through the crypt, crit-punching armor while stamina drains. Fizz discovers the boss has Crit-Resist, making Artie’s core weapon useless. Artie attempts a physics glitch—critting the floor—collapsing it and trapping the Golem. He charges a heavy attack; the System rolls a “Cosmetic Crit,” turning the Golem into porcelain teacups. The System panics, XP recalculates, and Artie jumps five levels, becoming a Level 10 anomaly. Loot reveals a Ring of the Gambler (double crit damage, every 20th hit self-crits). A mural hints at a “First Glitch.” Artie exits the crypt to find Vane waiting; Vane realizes Artie stole his kill, setting up a chase to the capital.
+
+Chapter 4 — “The Capital of Crits” (investigation, social navigation):
+Artie hides in a city that worships RNG—the Temple of the D20, priests praying for high rolls. He seeks a “Stat-Wiper” but learns it’s illegal, punishable by deletion. Fizz leads him to a black-market of “Dev-Haters” selling illegal mods; Artie gets a Lag-Switch potion. He learns Vane is the son of the High Priest of RNG, elevating the rivalry to holy war. A System Sentinel raid forces Artie to use the potion; he escapes but speaks in binary for an hour. The Grand Crit-Off tournament flyer promises a “Shield of Infinite Health.” Artie registers under “Crit-iculous,” accidentally pays all his gold, and must win to survive. Vane sees the roster and smiles. End: tournament confrontation locked.
+
+Chapter 5 — “The Tournament of Tiers” (trial, spotlight):
+Artie defeats a tank by critting his belt buckle, disqualifying him. The System introduces wind resistance; Artie must time punches with gusts. He wins by critting the air into a vacuum. In the quarter-finals, he faces a dodge-build rogue; neither can hit for ten minutes. He lures arena-flies using the cursed trophy, lands a crit, and the trophy begins glowing with dark energy (System glitch thread advances). The System warns him for exploitation and applies a random debuff: inverted controls. Artie moonwalks through AOE fireballs, crits a mage’s staff into a rubber chicken, and advances. Vane watches, holding a black-market System Override scroll—final fight is rigged.
+
+Chapter 6 — “The Final Roll” (climax, system-level break):
+Vane arrives in reflective legendary armor; Artie’s crits would self-crit. Vane uses the override to disable Artie’s evasion; he becomes a 1 HP target with no dodge. Fizz sacrifices her Guide status to hack arena gravity, giving Artie a 3D movement window. Artie realizes he must crit the Reflect buff itself, not Vane. He lands a meta-crit that causes recursive reflection math. The arena pixelates; the System destabilizes. Vane panics; Artie’s final crit deletes Vane’s character data (not his person). The System Administrator appears to delete Artie. Artie crits the Admin’s Delete button, freezing reality. Fizz rewrites location data; they escape into a Safe Mode world. Aftermath: Artie wakes in a wireframe Null-Zone; his HP reads “NaN,” implying he’s become a virus.
+
+Chapter 7 — “Rebooting for the Sequel” (aftermath, series hook):
+Artie adapts to the Null-Zone, eating data packets. Fizz reveals the only fix is reaching the world’s central Server Room. Artie tests NaN HP by cliff-jumping—he clips and respawns. A faction of Beta-Testers finds him and reveals Vane has been upgraded into a Patch-Hunter. Artie receives a legendary quest: “Delete the Admin.” The team heads to the Glitch-Woods. Artie jokes about better drop rates and steps into a portal. End of Book 1, sequel hook locked.
+
+Deliverable: produce a full outline consistent with the above synopsis, preserving the LitRPG/isekai/comedy tone, the crit-glitch power fantasy, and the System-as-antagonist thread. Keep pacing high and transitions causal; ensure each chapter escalates stakes or scope.
+
+Notes:
+
+
+Transition hints (optional):
+{
+  "hints": []
+}
