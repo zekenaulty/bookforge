@@ -13,6 +13,7 @@ Commands
 - outline restore: docs/help/outline_restore.md
 - characters generate: docs/help/characters_generate.md
 - run: docs/help/run.md
+- llm utilities: docs/help/llm.md
 - compile (stub): docs/help/compile.md
 - export synopsis (stub): docs/help/export_synopsis.md
 - book set-current (stub): docs/help/book_set_current.md

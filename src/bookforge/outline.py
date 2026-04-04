@@ -1521,9 +1521,13 @@ def _execute_chapter_scoped_step(
             extra = {
                 "book_id": book_id,
                 "step": step_id,
+                "phase_id": step_id,
                 "chapter": chapter_id,
                 "attempt": chapter_attempt_count,
             }
+            turn_id = runtime.get("turn_id") or runtime.get("phase_turn_id") or runtime.get("turn")
+            if step_id in {outline_context.STEP_04A, outline_context.STEP_04B} and turn_id:
+                extra["turn_id"] = str(turn_id)
             key_slot = getattr(client, "key_slot", None)
             if key_slot:
                 extra["key_slot"] = key_slot
@@ -1895,7 +1899,7 @@ def _execute_step(
         if retry_message:
             messages.append({"role": "user", "content": retry_message})
 
-        extra = {"book_id": book_id, "step": step_id, "attempt": attempt}
+        extra = {"book_id": book_id, "step": step_id, "phase_id": step_id, "attempt": attempt}
         key_slot = getattr(client, "key_slot", None)
         if key_slot:
             extra["key_slot"] = key_slot

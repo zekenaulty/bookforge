@@ -36,6 +36,7 @@ class OllamaClient(LLMClient):
         raw = post_json(self.api_url, payload, headers, timeout=self.timeout_seconds, max_retries=3)
         message = raw.get("message", {})
         text = message.get("content", "")
+        assistant_parts = [{"text": text}] if isinstance(text, str) else None
         prompt_tokens = raw.get("prompt_eval_count")
         completion_tokens = raw.get("eval_count")
         total_tokens = None
@@ -49,4 +50,5 @@ class OllamaClient(LLMClient):
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
             total_tokens=total_tokens,
+            assistant_parts=assistant_parts,
         )

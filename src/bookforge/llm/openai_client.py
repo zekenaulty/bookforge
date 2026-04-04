@@ -38,6 +38,11 @@ class OpenAIClient(LLMClient):
         choice = raw.get("choices", [{}])[0]
         message = choice.get("message", {})
         text = message.get("content", "")
+        assistant_parts = None
+        if isinstance(text, str):
+            assistant_parts = [{"text": text}]
+        elif isinstance(text, list):
+            assistant_parts = text
         usage = raw.get("usage") or {}
         return LLMResponse(
             text=text,
@@ -47,4 +52,5 @@ class OpenAIClient(LLMClient):
             prompt_tokens=usage.get("prompt_tokens"),
             completion_tokens=usage.get("completion_tokens"),
             total_tokens=usage.get("total_tokens"),
+            assistant_parts=assistant_parts,
         )

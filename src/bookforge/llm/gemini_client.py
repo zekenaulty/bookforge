@@ -29,7 +29,11 @@ class GeminiClient(LLMClient):
         for msg in non_system:
             role = msg.get("role", "user")
             gemini_role = "model" if role == "assistant" else "user"
-            contents.append({"role": gemini_role, "parts": [{"text": msg.get("content", "")} ]})
+            parts = msg.get("parts")
+            if isinstance(parts, list) and parts:
+                contents.append({"role": gemini_role, "parts": parts})
+            else:
+                contents.append({"role": gemini_role, "parts": [{"text": msg.get("content", "")} ]})
 
         payload = {
             "contents": contents,
@@ -51,12 +55,14 @@ class GeminiClient(LLMClient):
         raw = post_json(url, payload, headers, timeout=self.timeout_seconds, max_retries=3)
         candidates = raw.get("candidates", [])
         text = ""
+        assistant_parts = []
         if candidates:
-            parts = candidates[0].get("content", {}).get("parts", [])
-            text = "".join([part.get("text", "") for part in parts])
+            assistant_parts = candidates[0].get("content", {}).get("parts", [])
+            text = "".join([part.get("text", "") for part in assistant_parts if isinstance(part, dict)])
         return LLMResponse(
             text=text,
             raw=raw,
             provider=self.provider,
             model=model,
+            assistant_parts=assistant_parts if isinstance(assistant_parts, list) else None,
         )

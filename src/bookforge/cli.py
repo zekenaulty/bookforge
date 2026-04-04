@@ -13,6 +13,8 @@ from bookforge.outline import (
 from bookforge.runner import run_loop
 from bookforge.characters import generate_characters
 from bookforge.workspace import init_book_workspace, parse_genre, parse_targets, reset_book_workspace_detailed, update_book_templates
+from bookforge.llm.thoughts import list_signatures, run_current_thoughts
+from bookforge.llm.signatures import select_signature, set_active_signature
 
 
 def _init(args: argparse.Namespace) -> int:
@@ -220,6 +222,89 @@ def _characters_generate(args: argparse.Namespace) -> int:
 
 def _not_implemented(args: argparse.Namespace) -> int:
     sys.stderr.write("Not implemented yet.\n")
+    return 0
+
+
+def _llm_signatures(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    records = list_signatures(
+        workspace,
+        book_id=getattr(args, "book", None),
+        phase_id=getattr(args, "phase", None),
+        turn_id=getattr(args, "turn", None),
+        chapter_id=getattr(args, "chapter", None),
+        limit=int(getattr(args, "limit", 50) or 50),
+    )
+    if not records:
+        sys.stdout.write("No thought signatures found.\n")
+        return 0
+    lines = []
+    for record in records:
+        lines.append(
+            f"{record.get('signature_id')} "
+            f"phase={record.get('phase_id')} turn={record.get('turn_id')} "
+            f"chapter={record.get('chapter_id')} "
+            f"book={record.get('book_id')} "
+            f"label={record.get('label')}"
+        )
+    sys.stdout.write("\n".join(lines) + "\n")
+    return 0
+
+
+def _llm_current_thoughts(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        output_path = run_current_thoughts(
+            workspace,
+            model_phase=str(getattr(args, "model_phase", "planner") or "planner"),
+            signature_id=getattr(args, "signature_id", None),
+            phase_id=getattr(args, "phase", None),
+            turn_id=getattr(args, "turn", None),
+            chapter_id=getattr(args, "chapter", None),
+            book_id=getattr(args, "book", None),
+            use_global_author=bool(getattr(args, "global_author", False)),
+            max_tokens=int(getattr(args, "max_tokens", 2048) or 2048),
+            temperature=float(getattr(args, "temperature", 0.2) or 0.2),
+            thinking_level=getattr(args, "thinking_level", None),
+        )
+    except Exception as exc:
+        sys.stderr.write(f"Current thoughts failed: {exc}\n")
+        return 1
+    sys.stdout.write(f"Current thoughts saved to {output_path}\n")
+    return 0
+
+
+def _llm_show_active(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    active_path = (workspace / "logs" / "llm" / "thought_signature_active.json")
+    if active_path.exists():
+        sys.stdout.write(active_path.read_text(encoding="utf-8") + "\n")
+        return 0
+    sys.stdout.write("No active signature file found.\n")
+    return 0
+
+
+def _llm_set_active(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    record = select_signature(
+        workspace,
+        signature_id=getattr(args, "signature_id", None),
+        phase_id=getattr(args, "phase", None),
+        turn_id=getattr(args, "turn", None),
+        chapter_id=getattr(args, "chapter", None),
+        book_id=getattr(args, "book", None),
+        global_author=bool(getattr(args, "global_author", False)),
+    )
+    if not record:
+        sys.stderr.write("No matching signature found.\n")
+        return 1
+    set_active_signature(
+        workspace,
+        record,
+        intent=not bool(getattr(args, "outcome", False)),
+        outcome=bool(getattr(args, "outcome", False)),
+    )
+    sys.stdout.write(f"Active signature set to {record.get('signature_id')}\n")
     return 0
 
 
@@ -433,6 +518,63 @@ def build_parser() -> argparse.ArgumentParser:
         help="Bypass outline write gate checks (testing only).",
     )
     run_parser.set_defaults(func=_run)
+
+    llm_parser = subparsers.add_parser("llm", help="LLM utilities.")
+    llm_sub = llm_parser.add_subparsers(dest="llm_command", required=True)
+
+    llm_signatures = llm_sub.add_parser("signatures", help="List recorded thought signatures.")
+    llm_signatures.add_argument("--book", help="Optional book id filter.")
+    llm_signatures.add_argument("--phase", help="Optional phase id filter.")
+    llm_signatures.add_argument("--turn", help="Optional turn id filter (T1/T2).")
+    llm_signatures.add_argument("--chapter", help="Optional chapter id filter.")
+    llm_signatures.add_argument("--limit", type=int, default=50, help="Max signatures to list.")
+    llm_signatures.set_defaults(func=_llm_signatures)
+
+    llm_current = llm_sub.add_parser("current-thoughts", help="Summarize model's current context.")
+    llm_current.add_argument("--book", help="Optional book id filter for signature selection.")
+    llm_current.add_argument("--phase", help="Optional phase id filter for signature selection.")
+    llm_current.add_argument("--turn", help="Optional turn id filter for signature selection.")
+    llm_current.add_argument("--chapter", help="Optional chapter id filter for signature selection.")
+    llm_current.add_argument("--signature-id", help="Explicit signature id to use.")
+    llm_current.add_argument(
+        "--global-author",
+        action="store_true",
+        help="Use latest global author signature if available.",
+    )
+    llm_current.add_argument(
+        "--model-phase",
+        default="planner",
+        help="Model phase selector for the current thoughts request (default: planner).",
+    )
+    llm_current.add_argument("--max-tokens", type=int, default=2048, help="Max tokens for summary.")
+    llm_current.add_argument("--temperature", type=float, default=0.2, help="Temperature for summary.")
+    llm_current.add_argument(
+        "--thinking-level",
+        choices=["minimal", "low", "medium", "high"],
+        help="Optional thinking level override (Gemini only).",
+    )
+    llm_current.set_defaults(func=_llm_current_thoughts)
+
+    llm_active = llm_sub.add_parser("active", help="Show active thought signature pointer.")
+    llm_active.set_defaults(func=_llm_show_active)
+
+    llm_set_active = llm_sub.add_parser("set-active", help="Set active signature pointer.")
+    llm_set_active.add_argument("--book", help="Optional book id filter.")
+    llm_set_active.add_argument("--phase", help="Optional phase id filter.")
+    llm_set_active.add_argument("--turn", help="Optional turn id filter.")
+    llm_set_active.add_argument("--chapter", help="Optional chapter id filter.")
+    llm_set_active.add_argument("--signature-id", help="Explicit signature id to use.")
+    llm_set_active.add_argument(
+        "--global-author",
+        action="store_true",
+        help="Use latest global author signature if available.",
+    )
+    llm_set_active.add_argument(
+        "--outcome",
+        action="store_true",
+        help="Set this signature as the outcome pointer instead of intent.",
+    )
+    llm_set_active.set_defaults(func=_llm_set_active)
 
     compile_parser = subparsers.add_parser("compile", help="Compile a manuscript.")
     compile_parser.add_argument("--book", required=True, help="Book id.")

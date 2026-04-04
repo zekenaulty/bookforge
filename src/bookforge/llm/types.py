@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
-Message = Dict[str, str]
+Message = Dict[str, Any]
 
 
 @dataclass
@@ -15,3 +15,4 @@ class LLMResponse:
     prompt_tokens: Optional[int] = None
     completion_tokens: Optional[int] = None
     total_tokens: Optional[int] = None
+    assistant_parts: Optional[List[Dict[str, Any]]] = None

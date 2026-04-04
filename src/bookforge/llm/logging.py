@@ -2,13 +2,15 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 import json
 import re
+import uuid
 
 from .errors import LLMRequestError
 from .types import LLMResponse, Message
 from bookforge.config.env import read_env_value
+from .signatures import append_signature_records, update_active_signatures
 
 
 def _extract_text_payload(text: str) -> str:
@@ -178,6 +180,80 @@ def llm_log_dir(workspace: Path) -> Path:
     return workspace / "logs" / "llm"
 
 
+def _relpath(workspace: Path, path: Path) -> str:
+    try:
+        return str(path.relative_to(workspace))
+    except ValueError:
+        return str(path)
+
+
+def _assistant_parts_path(log_path: Path) -> Path:
+    return log_path.with_suffix(".assistant_parts.json")
+
+
+def _extract_assistant_parts(response: LLMResponse) -> List[Dict[str, Any]]:
+    if isinstance(response.assistant_parts, list):
+        return response.assistant_parts
+    raw = response.raw
+    if not isinstance(raw, dict):
+        return []
+    if response.provider == "gemini":
+        candidates = raw.get("candidates", [])
+        if not candidates:
+            return []
+        parts = candidates[0].get("content", {}).get("parts", [])
+        return parts if isinstance(parts, list) else []
+    if response.provider == "openai":
+        choice = raw.get("choices", [{}])[0]
+        message = choice.get("message", {})
+        content = message.get("content", "")
+        if isinstance(content, list):
+            return content
+        if isinstance(content, str):
+            return [{"text": content}]
+    return []
+
+
+def _extract_thought_signatures(parts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    signatures: List[Dict[str, Any]] = []
+    for idx, part in enumerate(parts):
+        if not isinstance(part, dict):
+            continue
+        signature = None
+        for key in ("thoughtSignature", "thought_signature", "thoughtsignature"):
+            if key in part:
+                signature = part.get(key)
+                break
+        if signature is None:
+            func_call = part.get("functionCall")
+            if isinstance(func_call, dict):
+                for key in ("thoughtSignature", "thought_signature", "thoughtsignature"):
+                    if key in func_call:
+                        signature = func_call.get(key)
+                        break
+        if signature:
+            signatures.append({
+                "part_index": idx,
+                "signature": signature,
+            })
+    return signatures
+
+
+def _infer_phase_id(label: str) -> str:
+    if label.startswith("author_"):
+        return "author"
+    if label.startswith("plan_"):
+        return "plan"
+    if label.startswith("characters_"):
+        return "characters"
+    if label.startswith("appearance_"):
+        return "appearance"
+    match = re.search(r"outline_(phase_[0-9a-z_]+)", label)
+    if match:
+        return match.group(1)
+    return ""
+
+
 
 
 def _format_error_payload(error: LLMRequestError) -> Dict[str, Any]:
@@ -239,6 +315,9 @@ def log_llm_response(
             "system": system_text,
             "messages": non_system,
         }
+    assistant_parts = _extract_assistant_parts(response)
+    if assistant_parts:
+        payload["assistant_parts"] = assistant_parts
     log_path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
     try:
         _write_pretty_text_log(log_path, response.text)
@@ -248,6 +327,58 @@ def log_llm_response(
         _write_prompt_log(log_path, system_text, non_system)
     except OSError:
         pass
+    if assistant_parts:
+        try:
+            _assistant_parts_path(log_path).write_text(
+                json.dumps(assistant_parts, ensure_ascii=True, indent=2),
+                encoding="utf-8",
+            )
+        except OSError:
+            pass
+        signatures = _extract_thought_signatures(assistant_parts)
+        if signatures:
+            phase_id = ""
+            turn_id = ""
+            if isinstance(extra, dict):
+                phase_id = str(extra.get("phase_id") or extra.get("phase") or extra.get("step_id") or extra.get("step") or "")
+                turn_id = str(extra.get("turn_id") or extra.get("turn") or "")
+            if not phase_id:
+                phase_id = _infer_phase_id(label)
+            book_id = extra.get("book_id") if isinstance(extra, dict) else None
+            chapter_id = (
+                extra.get("chapter") if isinstance(extra, dict) else None
+            )
+            scene_id = extra.get("scene") if isinstance(extra, dict) else None
+            signature_records = []
+            for entry in signatures:
+                signature_records.append({
+                    "schema_version": "thought_signature_v1",
+                    "signature_id": str(uuid.uuid4()),
+                    "created_at": payload["created_at"],
+                    "label": label,
+                    "log_path": _relpath(workspace, log_path),
+                    "assistant_parts_path": _relpath(workspace, _assistant_parts_path(log_path)),
+                    "provider": response.provider,
+                    "model": response.model,
+                    "phase_id": phase_id,
+                    "turn_id": turn_id,
+                    "book_id": book_id,
+                    "chapter_id": chapter_id,
+                    "scene_id": scene_id,
+                    "part_index": entry.get("part_index"),
+                    "signature": entry.get("signature"),
+                    "scope": "global_author" if phase_id == "author" else "",
+                    "request": request or {},
+                    "extra": extra or {},
+                })
+            try:
+                append_signature_records(workspace, signature_records)
+            except OSError:
+                pass
+            try:
+                update_active_signatures(workspace, signature_records)
+            except OSError:
+                pass
     return log_path
 
 def log_llm_error(
