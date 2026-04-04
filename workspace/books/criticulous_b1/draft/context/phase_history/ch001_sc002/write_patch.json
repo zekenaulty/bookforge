@@ -1,0 +1,271 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "LOC_SYSTEM_VOID",
+    "recent_facts": [
+      "Artie met his system guide, Fizz.",
+      "Artie accidentally allocated all 100 stat points into Critical Hit Rate due to grease on the UI.",
+      "Artie is locked into a 1 HP, 100% Crit build.",
+      "The Character Creation phase has ended, and the world is loading the Tutorial Zone."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item_id": "ITEM_CHIPS",
+          "status": "held",
+          "container": "hand_right",
+          "item": "ITEM_CHIPS"
+        },
+        {
+          "item_id": "ITEM_WALLET",
+          "status": "stowed",
+          "container": "pockets",
+          "item": "ITEM_WALLET"
+        },
+        {
+          "item_id": "ITEM_SMARTPHONE",
+          "status": "stowed",
+          "container": "pockets",
+          "item": "ITEM_SMARTPHONE"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pockets",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET",
+            "ITEM_SMARTPHONE"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is horrified by his accidental 'Crit or Quit' build but is forced to accept his new reality as a glass cannon."
+      ],
+      "appearance_updates": {
+        "set": {
+          "atoms": {
+            "age_band": "late-twenties",
+            "build": "slender",
+            "eye_color": "hazel",
+            "hair_color": "mousy brown",
+            "hair_style": "unruly and uncombed",
+            "height_band": "average",
+            "sex_presentation": "male",
+            "skin_tone": "pale",
+            "species": "human"
+          },
+          "marks": [
+            {
+              "name": "faint keyboard callus",
+              "location": "right palm",
+              "durability": "durable"
+            }
+          ]
+        },
+        "reason": "Initial appearance in the Character Creation Void."
+      },
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 2
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "persona_updates": [
+        "Fizz finds Artie's statistical misfortune incredibly entertaining and is eager to watch him fail in the tutorial."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100,
+          "strength": 0,
+          "dexterity": 0,
+          "intelligence": 0,
+          "luck": 0
+        },
+        "statuses": [
+          {
+            "name": "Crit or Quit",
+            "type": "trait",
+            "description": "1 HP, 100% Critical Hit Rate. The ultimate glass cannon."
+          }
+        ],
+        "resources": {
+          "stat_points": 0
+        },
+        "reason": "Accidental stat allocation during character creation."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "system_mode": "Tutorial"
+      },
+      "reason": "Character creation finalized."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie Penhaligon met his snarky system guide, Fizz, in the Character Creation Void.",
+      "Due to a grease-induced UI glitch involving his salt-and-vinegar chips, Artie accidentally allocated all his stat points into Critical Hit Rate.",
+      "Artie is now locked into a 'Crit or Quit' build with 1 HP and 100% Crit as he spawns into the world."
+    ],
+    "key_events": [
+      "Artie interacts with the character creation UI.",
+      "Fizz mocks Artie's death and his choice of snacks.",
+      "Artie's greasy fingers cause a glitch in the stat allocation screen.",
+      "Artie's stats are finalized: 1 HP and 100% Critical Hit Rate.",
+      "The 'Crit or Quit' trait is acquired.",
+      "The Character Creation Void dissolves as Artie spawns into the Tutorial Zone."
+    ],
+    "must_stay_true": [
+      "milestone: death_transition = DONE",
+      "milestone: character_creation_complete = DONE",
+      "inventory: CHAR_ARTIE -> Bag of Salt-and-Vinegar Chips (status=held, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pockets)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pockets)",
+      "container: pockets (owner=CHAR_ARTIE, contents=[Leather Wallet, Cracked Smartphone])",
+      "location: LOC_SYSTEM_VOID",
+      "Artie build: 1 HP, 100% Critical Hit Rate (Crit or Quit trait active)"
+    ],
+    "chapter_so_far_add": [
+      "Artie has glitched his way into a lethal, high-stakes build before even entering the game world."
+    ]
+  },
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_CHIPS",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "LOC_SYSTEM_VOID"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_WALLET",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "LOC_SYSTEM_VOID"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_SMARTPHONE",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "LOC_SYSTEM_VOID"
+        }
+      }
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "set": {
+        "activation_state": "active",
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "LOC_SYSTEM_VOID"
+        }
+      }
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item_id": "ITEM_CHIPS",
+            "status": "held",
+            "container": "hand_right"
+          },
+          {
+            "item_id": "ITEM_WALLET",
+            "status": "stowed",
+            "container": "pockets"
+          },
+          {
+            "item_id": "ITEM_SMARTPHONE",
+            "status": "stowed",
+            "container": "pockets"
+          }
+        ],
+        "containers": [
+          {
+            "container": "pockets",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_WALLET",
+              "ITEM_SMARTPHONE"
+            ]
+          }
+        ]
+      },
+      "reason": "Maintaining posture through character creation."
+    }
+  ],
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "late-twenties",
+      "slender",
+      "hazel",
+      "mousy",
+      "brown",
+      "unruly",
+      "pale",
+      "keyboard",
+      "callus"
+    ],
+    "CHAR_FIZZ": [
+      "ageless",
+      "slight",
+      "glowing",
+      "white",
+      "eyes",
+      "neon",
+      "blue",
+      "hair",
+      "bob",
+      "cut",
+      "tiny",
+      "translucent",
+      "blue",
+      "pixelated",
+      "tattoo"
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {
+      "code": "spatial_boundary_violation",
+      "message": "The scene_card.location_end_id is set to 'LOC_SYSTEM_VOID', but the post-state candidate and must_stay_true invariants have already updated the location to 'LOC_TUTORIAL_ZONE_SLIME_MEADOW_76A722'. The state update to the destination forest should occur at the start of the subsequent scene (SC_001_003) or as a result of the transition in that scene's patch, not within the scope of the current scene which is constrained to the Void.",
+      "severity": "error"
+    },
+    {
+      "code": "invariant_removal_missing",
+      "message": "The post-state candidate must_stay_true contains superseded invariants without the required REMOVE directives. Specifically, 'location: LOC_SYSTEM_VOID' was replaced by 'location: LOC_TUTORIAL_ZONE_SLIME_MEADOW_76A722', and several inventory items/milestones had casing changes (e.g., 'bag of salt-and-vinegar chips' to 'Bag of Salt-and-Vinegar Chips') that require explicit removal of the exact prior text.",
+      "severity": "error"
+    },
+    {
+      "code": "appearance_check_missing",
+      "message": "APPEARANCE_CHECK is missing for cast members CHAR_ARTIE and CHAR_FIZZ. Authoritative appearance tokens must be provided for all present cast members to ensure continuity with appearance_current atoms and marks.",
+      "severity": "warning"
+    },
+    {
+      "code": "inventory_location_ambiguity",
+      "message": "Prose at line 39 explicitly moves the Bag of Salt-and-Vinegar Chips to Artie's 'left armpit' to free his hands for the UI. While later prose (line 83) describes him 'gripping' the bag, implying it returned to a hand, the post-state candidate's specific assignment to 'hand_right' is not explicitly confirmed in narrative and contradicts the last explicit placement in the armpit.",
+      "severity": "warning",
+      "evidence": {
+        "line": 39,
+        "excerpt": "Artie grumbled, shifting the Bag of Salt-and-Vinegar Chips to his left armpit so he could use both hands."
+      }
+    }
+  ]
+}

@@ -1,0 +1,245 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "location": "LOC_SYSTEM_VOID",
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 2,
+      "inventory": [
+        {
+          "item_id": "ITEM_CHIPS",
+          "container": "hand_right",
+          "status": "held",
+          "item": "ITEM_CHIPS"
+        },
+        {
+          "item_id": "ITEM_WALLET",
+          "container": "pockets",
+          "status": "stowed",
+          "item": "ITEM_WALLET"
+        },
+        {
+          "item_id": "ITEM_SMARTPHONE",
+          "container": "pockets",
+          "status": "stowed",
+          "item": "ITEM_SMARTPHONE"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pockets",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET",
+            "ITEM_SMARTPHONE"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is processing the absurdity of his own death with characteristic snark while navigating a glitched UI."
+      ],
+      "scope_override": true,
+      "reason_category": "timeline_override",
+      "invariants_add": []
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "chapter": 1,
+      "scene": 2,
+      "inventory": [
+        {
+          "item_id": "ITEM_GUIDEBOOK",
+          "container": "digital_pouch",
+          "status": "stowed",
+          "item": "ITEM_GUIDEBOOK"
+        }
+      ],
+      "containers": [
+        {
+          "container": "digital_pouch",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_GUIDEBOOK"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Fizz is a snarky, unhelpful system guide who enjoys mocking Artie's confusion."
+      ],
+      "scope_override": true,
+      "reason_category": "timeline_override",
+      "invariants_add": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": 100,
+          "strength": 0,
+          "dexterity": 0,
+          "intelligence": 0,
+          "luck": 0
+        },
+        "statuses": [
+          {
+            "name": "Crit or Quit",
+            "type": "trait",
+            "description": "1 HP, 100% Critical Hit Rate. The ultimate glass cannon."
+          }
+        ],
+        "reason": "Initializing glitched character creation stats.",
+        "scope_override": true,
+        "reason_category": "timeline_override"
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "system_mode": "Character Creation",
+        "reality_stability": 100
+      },
+      "reason": "Entering the System's character creation interface.",
+      "scope_override": true,
+      "reason_category": "timeline_override"
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item_id": "ITEM_CHIPS",
+            "container": "hand_right",
+            "status": "held"
+          },
+          {
+            "item_id": "ITEM_WALLET",
+            "container": "pockets",
+            "status": "stowed"
+          },
+          {
+            "item_id": "ITEM_SMARTPHONE",
+            "container": "pockets",
+            "status": "stowed"
+          }
+        ]
+      },
+      "reason": "Artie is holding his chips in the void while his other belongings remain in his pockets.",
+      "reason_category": "timeline_override",
+      "scope_override": true
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_CHIPS",
+      "set": {
+        "name": "bag of salt-and-vinegar chips",
+        "display_name": "Bag of Salt-and-Vinegar Chips",
+        "type": "consumable",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [
+          "THREAD_SYSTEM_GLITCH"
+        ],
+        "state_tags": [
+          "salty",
+          "vinegary"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "LOC_SYSTEM_VOID"
+        }
+      },
+      "reason": "Registering the catalyst of Artie's demise.",
+      "scope_override": true,
+      "reason_category": "timeline_override"
+    },
+    {
+      "item_id": "ITEM_WALLET",
+      "set": {
+        "name": "leather wallet",
+        "display_name": "Leather Wallet",
+        "type": "personal_item",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [],
+        "state_tags": [
+          "mundane"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "LOC_SYSTEM_VOID"
+        }
+      },
+      "reason": "Registering Artie's mundane belongings.",
+      "scope_override": true,
+      "reason_category": "timeline_override"
+    },
+    {
+      "item_id": "ITEM_SMARTPHONE",
+      "set": {
+        "name": "cracked smartphone",
+        "display_name": "Cracked Smartphone",
+        "type": "electronic",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [],
+        "state_tags": [
+          "broken"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "LOC_SYSTEM_VOID"
+        }
+      },
+      "reason": "Registering Artie's mundane belongings.",
+      "scope_override": true,
+      "reason_category": "timeline_override"
+    },
+    {
+      "item_id": "ITEM_GUIDEBOOK",
+      "set": {
+        "name": "The Glitch-Seeker's Almanac",
+        "display_name": "The Glitch-Seeker's Almanac",
+        "type": "book",
+        "owner_scope": "character",
+        "custodian": "CHAR_FIZZ",
+        "linked_threads": [
+          "THREAD_SYSTEM_GLITCH"
+        ],
+        "state_tags": [
+          "guide"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "LOC_SYSTEM_VOID"
+        }
+      },
+      "reason": "Registering Fizz's guide materials.",
+      "scope_override": true,
+      "reason_category": "timeline_override"
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "Artie attempted to retrieve a bag of salt-and-vinegar chips from a malfunctioning vending machine in his office breakroom.",
+      "A massive electrical surge struck him during the retrieval, resulting in his death and immediate transition to the Character Creation Void."
+    ],
+    "key_events": [
+      "Artie argues with a vending machine over a bag of chips.",
+      "Artie successfully retrieves the bag of salt-and-vinegar chips from the machine's coil.",
+      "A blue electrical surge from a frayed wire and spilled soda electrocutes Artie.",
+      "Artie dies and wakes up in the Character Creation Void.",
+      "Artie realizes he is still holding the pixelated bag of chips in the void."
+    ],
+    "must_stay_true": [
+      "REMOVE: location: LOC_OFFICE_BREAKROOM",
+      "REMOVE: inventory: CHAR_ARTIE -> bag of salt-and-vinegar chips (status=carried, container=hand_right)",
+      "milestone: artie_death = DONE",
+      "location: LOC_SYSTEM_VOID",
+      "inventory: CHAR_ARTIE -> bag of salt-and-vinegar chips (status=held, container=hand_right)",
+      "inventory: CHAR_ARTIE -> leather wallet (status=stowed, container=pockets)",
+      "inventory: CHAR_ARTIE -> cracked smartphone (status=stowed, container=pockets)"
+    ],
+    "chapter_so_far_add": [
+      "Artie died in a freak vending machine accident and entered the System's void."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "persona_updates": [
+        "Artie is processing the absurdity of his own death with characteristic snark."
+      ],
+      "invariants_add": [
+        "milestone: artie_death = DONE"
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 0,
+            "max": 10
+          }
+        },
+        "statuses": [
+          {
+            "name": "Deceased",
+            "type": "debuff",
+            "description": "You are currently dead. Don't worry, it's a common side effect of being the protagonist."
+          }
+        ]
+      },
+      "reason": "Character death via electrocution in the breakroom."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_WALLET",
+            "status": "stowed",
+            "container": "pockets"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "status": "stowed",
+            "container": "pockets"
+          },
+          {
+            "item": "ITEM_CHIPS",
+            "status": "held",
+            "container": "hand_right"
+          }
+        ],
+        "containers": [
+          {
+            "container": "pockets",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_WALLET",
+              "ITEM_SMARTPHONE"
+            ]
+          }
+        ]
+      },
+      "reason_category": "location_jump_normalize",
+      "reason": "Post-death inventory state normalization and posture alignment."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_CHIPS",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "LOC_SYSTEM_VOID"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_WALLET",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "LOC_SYSTEM_VOID"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_SMARTPHONE",
+      "set": {
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "LOC_SYSTEM_VOID"
+        }
+      }
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "LOC_SYSTEM_VOID",
+    "open_threads": [],
+    "recent_facts": [
+      "Artie died due to an electrical surge from a vending machine.",
+      "Artie has arrived in the Character Creation Void."
+    ]
+  }
+}

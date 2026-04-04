@@ -1,0 +1,248 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "LOC_SYSTEM_VOID",
+    "recent_facts": [
+      "Artie accidentally allocated all 100 stat points into Critical Hit Rate due to chip grease on the UI.",
+      "Artie unlocked the 'Crit or Quit' trait, locking him at 1 HP with 100% Crit Rate.",
+      "Fizz is introduced as Artie's snarky System Guide.",
+      "The Character Creation phase is complete, and the world is transitioning to Oakhaven."
+    ],
+    "open_threads": [
+      "THREAD_CRIT_EXPLOIT",
+      "THREAD_SYSTEM_GLITCH"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_CHIPS",
+          "container": "hand_right",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_WALLET",
+          "container": "pockets",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_SMARTPHONE",
+          "container": "pockets",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pockets",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_WALLET",
+            "ITEM_SMARTPHONE"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is now a 'Crit or Quit' pioneer, feeling the weight of his 1 HP mortality while clutching his chips."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 2
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "appearance_updates": {
+        "set": {
+          "atoms": {
+            "age_band": "ageless",
+            "build": "slight",
+            "eye_color": "glowing white",
+            "hair_color": "neon blue",
+            "hair_style": "bob cut",
+            "height_band": "tiny",
+            "sex_presentation": "female",
+            "skin_tone": "translucent blue",
+            "species": "system_sprite"
+          },
+          "marks_add": [
+            {
+              "name": "pixelated tattoo",
+              "location": "left forearm",
+              "durability": "durable"
+            }
+          ]
+        },
+        "reason": "Initial introduction as System Guide."
+      },
+      "inventory": [
+        {
+          "item": "ITEM_GUIDEBOOK",
+          "container": "digital_pouch",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "digital_pouch",
+          "owner": "CHAR_FIZZ",
+          "contents": [
+            "ITEM_GUIDEBOOK"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Fizz is a snarky, unhelpful system guide who enjoys mocking Artie's confusion and his 'Crit or Quit' build."
+      ],
+      "invariants_add": [],
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "resources": {
+          "stat_points": 0
+        },
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "strength": 0,
+          "dexterity": 0,
+          "intelligence": 0,
+          "luck": 0,
+          "crit_rate": 100
+        },
+        "statuses": [
+          {
+            "name": "Crit or Quit",
+            "type": "trait",
+            "description": "1 HP, 100% Critical Hit Rate. The ultimate glass cannon. Don't trip over a pebble."
+          }
+        ],
+        "reason": "Accidental stat allocation during character creation."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "system_mode": "Tutorial Spawn"
+      },
+      "reason": "Character creation complete."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_CHIPS",
+            "container": "hand_right",
+            "status": "held"
+          },
+          {
+            "item": "ITEM_WALLET",
+            "container": "pockets",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_SMARTPHONE",
+            "container": "pockets",
+            "status": "stowed"
+          }
+        ]
+      },
+      "reason": "Posture normalization after waving chips at the screen."
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "DEVICE_the_100_crit_glitch_2e72f7a4",
+      "set": {
+        "activation_state": "active",
+        "last_seen": {
+          "chapter": 1,
+          "scene": 2,
+          "location": "LOC_SYSTEM_VOID"
+        }
+      },
+      "reason": "The 100% Crit build is locked in."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie meets his System Guide, Fizz, in the Character Creation Void.",
+      "Due to grease from his Bag of Salt-and-Vinegar Chips, Artie accidentally dumps all 100 bonus stat points into Critical Hit Rate.",
+      "The System locks Artie into a 'Crit or Quit' build with 1 HP and 100% Crit Rate before spawning him into the world."
+    ],
+    "key_events": [
+      "Artie meets Fizz, a snarky system sprite.",
+      "Artie shifts his Bag of Salt-and-Vinegar Chips to his armpit to navigate the UI.",
+      "Grease on Artie's finger causes a UI glitch during stat allocation.",
+      "Artie's Critical Hit Rate is set to 100%, and his HP is locked at 1.",
+      "Artie unlocks the 'Crit or Quit' trait.",
+      "The Character Creation Void dissolves as Artie spawns into Oakhaven."
+    ],
+    "must_stay_true": [
+      "milestone: death_transition = DONE",
+      "milestone: character_creation = DONE",
+      "milestone: crit_or_quit_unlocked = DONE",
+      "REMOVE: inventory: CHAR_ARTIE -> bag of salt-and-vinegar chips (status=held, container=hand_right)",
+      "inventory: CHAR_ARTIE -> Bag of Salt-and-Vinegar Chips (status=held, container=hand_right)",
+      "REMOVE: inventory: CHAR_ARTIE -> leather wallet (status=stowed, container=pockets)",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pockets)",
+      "REMOVE: inventory: CHAR_ARTIE -> cracked smartphone (status=stowed, container=pockets)",
+      "inventory: CHAR_ARTIE -> Cracked Smartphone (status=stowed, container=pockets)",
+      "REMOVE: container: pockets (owner=CHAR_ARTIE, contents=[leather wallet, cracked smartphone])",
+      "container: pockets (owner=CHAR_ARTIE, contents=[Leather Wallet, Cracked Smartphone])",
+      "location: LOC_SYSTEM_VOID"
+    ],
+    "chapter_so_far_add": [
+      "Artie has completed character creation with a glitched 1 HP / 100% Crit build.",
+      "Fizz has been introduced as Artie's guide."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "hazel",
+      "eyes",
+      "mousy",
+      "brown",
+      "hair",
+      "slender",
+      "build",
+      "pale",
+      "skin",
+      "crooked",
+      "glasses."
+    ],
+    "CHAR_FIZZ": [
+      "glowing",
+      "white",
+      "eyes",
+      "neon",
+      "blue",
+      "hair",
+      "tiny",
+      "height",
+      "translucent",
+      "blue",
+      "skin",
+      "pixelated",
+      "tattoo."
+    ]
+  }
+}

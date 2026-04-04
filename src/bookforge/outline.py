@@ -2363,7 +2363,7 @@ def generate_outline(
         requires_attention = True
     except LLMRequestError as exc:
         failed_step = active_step_id or ""
-        if isinstance(history.get("steps"), dict):
+        if not failed_step and isinstance(history.get("steps"), dict):
             for sid in planned_steps:
                 if sid not in history["steps"]:
                     failed_step = sid

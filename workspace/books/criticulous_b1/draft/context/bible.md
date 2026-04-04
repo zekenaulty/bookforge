@@ -1,0 +1,2 @@
+- Artie has died and entered the System Void.
+- Artie successfully retrieved his chips before dying.

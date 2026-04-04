@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "location": "LOC_OFFICE_BREAKROOM",
+    "cast_present": [
+      "CHAR_ARTIE"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 1,
+      "inventory": [
+        {
+          "item_id": "ITEM_WALLET",
+          "item_name": "leather wallet",
+          "container": "pockets",
+          "status": "stowed"
+        },
+        {
+          "item_id": "ITEM_SMARTPHONE",
+          "item_name": "cracked smartphone",
+          "container": "pockets",
+          "status": "stowed"
+        },
+        {
+          "item_id": "ITEM_CHIPS",
+          "item_name": "bag of salt-and-vinegar chips",
+          "container": "hand_right",
+          "status": "carried"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pockets",
+          "owner": "CHAR_ARTIE",
+          "location": "trousers",
+          "contents": [
+            "ITEM_WALLET",
+            "ITEM_SMARTPHONE"
+          ]
+        }
+      ],
+      "invariants_add": [
+        "inventory: CHAR_ARTIE -> bag of salt-and-vinegar chips (status=carried, container=hand_right)",
+        "inventory: CHAR_ARTIE -> leather wallet (status=stowed, container=pockets)",
+        "inventory: CHAR_ARTIE -> cracked smartphone (status=stowed, container=pockets)",
+        "container: pockets (owner=CHAR_ARTIE, contents=[leather wallet, cracked smartphone])"
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 10,
+            "max": 10
+          },
+          "str": 5,
+          "dex": 8,
+          "int": 12,
+          "luck": 1,
+          "mp": {
+            "current": 0,
+            "max": 0
+          }
+        },
+        "resources": {
+          "stamina": {
+            "current": 10,
+            "max": 10
+          }
+        }
+      },
+      "reason": "Initialize starting stats for the first scene"
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "inventory": [
+          {
+            "item_id": "ITEM_WALLET",
+            "container": "pockets",
+            "status": "stowed"
+          },
+          {
+            "item_id": "ITEM_SMARTPHONE",
+            "container": "pockets",
+            "status": "stowed"
+          },
+          {
+            "item_id": "ITEM_CHIPS",
+            "container": "hand_right",
+            "status": "held"
+          }
+        ]
+      },
+      "reason": "Initial scene setup and posture alignment",
+      "reason_category": "location_transition"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_WALLET",
+      "set": {
+        "name": "leather wallet",
+        "display_name": "leather wallet",
+        "type": "personal",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [],
+        "state_tags": [
+          "mundane"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "LOC_OFFICE_BREAKROOM"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_SMARTPHONE",
+      "set": {
+        "name": "cracked smartphone",
+        "display_name": "cracked smartphone",
+        "type": "personal",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [],
+        "state_tags": [
+          "mundane"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "LOC_OFFICE_BREAKROOM"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_CHIPS",
+      "set": {
+        "name": "bag of salt-and-vinegar chips",
+        "display_name": "bag of salt-and-vinegar chips",
+        "type": "consumable",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [],
+        "state_tags": [
+          "mundane"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 1,
+          "location": "LOC_OFFICE_BREAKROOM"
+        }
+      }
+    }
+  ]
+}

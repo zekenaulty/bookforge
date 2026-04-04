@@ -358,6 +358,14 @@ def _validate_scene_transition_fields(
     errors: List[Dict[str, Any]] = []
     warnings: List[Dict[str, Any]] = []
 
+    # Keep legacy location_start/location_end populated when labels are present.
+    # This is deterministic alias normalization, not semantic autofill.
+    for prefix in ("location_start", "location_end"):
+        if not _norm_text(scene.get(prefix)):
+            label = _norm_text(scene.get(f"{prefix}_label"))
+            if label:
+                scene[prefix] = label
+
     required_common = [
         "location_start_label",
         "location_end_label",
@@ -878,7 +886,8 @@ def validate_phase_04b(
     warnings.extend(base.warnings)
     metrics.update(base.metrics)
 
-    selected_insertions: Dict[str, str] = {}
+    selected_insertions: List[Dict[str, str]] = []
+    selected_keys: set[str] = set()
     for item in selected_candidates:
         if not isinstance(item, dict):
             continue
@@ -889,7 +898,17 @@ def validate_phase_04b(
         to_ref = _norm_text(item.get("to_scene_ref"))
         if not from_ref or not to_ref:
             continue
-        selected_insertions[f"{from_ref}->{to_ref}"] = requested
+        key = f"{from_ref}->{to_ref}->{requested}"
+        if key in selected_keys:
+            continue
+        selected_keys.add(key)
+        selected_insertions.append(
+            {
+                "from_scene_ref": from_ref,
+                "to_scene_ref": to_ref,
+                "requested_resolution": requested,
+            }
+        )
 
     phase_report = (
         payload.get("phase_report") if isinstance(payload.get("phase_report"), dict) else {}
@@ -922,7 +941,7 @@ def validate_phase_04b(
         if isinstance(phase_report.get("resolved_candidates"), list)
         else []
     )
-    resolved_by_ref: Dict[str, tuple[int, Dict[str, Any]]] = {}
+    resolved_items: List[Dict[str, Any]] = []
     for idx, item in enumerate(resolved):
         if not isinstance(item, dict):
             continue
@@ -930,24 +949,48 @@ def validate_phase_04b(
         to_ref = _norm_text(item.get("to_scene_ref"))
         if not from_ref or not to_ref:
             continue
-        resolved_by_ref[f"{from_ref}->{to_ref}"] = (idx, item)
-
-    unresolved = sorted(set(selected_insertions.keys()) - set(resolved_by_ref.keys()))
-    if unresolved:
-        errors.append(
-            issue(
-                "transition_insertion_required",
-                "Selected insertion candidates were not resolved by LLM output",
-                path="phase_report.resolved_candidates",
-            )
+        resolved_items.append(
+            {
+                "idx": idx,
+                "item": item,
+                "from_scene_ref": from_ref,
+                "to_scene_ref": to_ref,
+                "requested_resolution": _norm_text(item.get("requested_resolution")),
+                "resolution": _norm_text(item.get("resolution")),
+                "inserted_scene_ref": _norm_text(item.get("inserted_scene_ref")),
+            }
         )
 
     required_inserted_refs: set[str] = set()
-    for ref, expected_resolution in selected_insertions.items():
-        matched = resolved_by_ref.get(ref)
-        if not matched:
+    unresolved_selected: List[str] = []
+    for selected in selected_insertions:
+        selected_from_ref = selected["from_scene_ref"]
+        selected_to_ref = selected["to_scene_ref"]
+        expected_resolution = selected["requested_resolution"]
+
+        matched: Optional[Dict[str, Any]] = None
+        for resolved_item in resolved_items:
+            if resolved_item["from_scene_ref"] != selected_from_ref:
+                continue
+            if resolved_item["requested_resolution"] != expected_resolution:
+                continue
+            if resolved_item["resolution"] != expected_resolution:
+                continue
+            # Allow to_scene_ref drift after insertion renumbering if inserted_scene_ref
+            # captures the selected edge destination.
+            if (
+                resolved_item["to_scene_ref"] == selected_to_ref
+                or resolved_item["inserted_scene_ref"] == selected_to_ref
+            ):
+                matched = resolved_item
+                break
+
+        if matched is None:
+            unresolved_selected.append(f"{selected_from_ref}->{selected_to_ref}")
             continue
-        idx, item = matched
+
+        idx = int(matched["idx"])
+        item = matched["item"]
         item_requested = _norm_text(item.get("requested_resolution"))
         if item_requested != expected_resolution:
             errors.append(
@@ -977,6 +1020,15 @@ def validate_phase_04b(
             )
         else:
             required_inserted_refs.add(inserted_ref)
+
+    if unresolved_selected:
+        errors.append(
+            issue(
+                "transition_insertion_required",
+                "Selected insertion candidates were not resolved by LLM output",
+                path="phase_report.resolved_candidates",
+            )
+        )
 
     missing_inserted_refs = sorted(required_inserted_refs - inserted_ref_set)
     if missing_inserted_refs:

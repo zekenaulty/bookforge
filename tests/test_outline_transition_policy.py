@@ -2,6 +2,7 @@
 
 from bookforge.phases.outline.validators import (
     route_phase04_candidates,
+    validate_phase_04a,
     validate_phase_04b,
 )
 
@@ -251,3 +252,70 @@ def test_phase04b_validation_requires_inserted_scene_ref_on_selected_insertions(
     )
     assert result.status == "fail"
     assert any(item.get("code") == "transition_insertion_missing_scene_ref" for item in result.errors)
+
+
+def test_phase04a_accepts_location_alias_from_labels() -> None:
+    payload = _outline_wrapper()
+    scenes = payload["outline"]["chapters"][0]["sections"][0]["scenes"]
+    for scene in scenes:
+        scene.pop("location_start", None)
+        scene.pop("location_end", None)
+
+    result = validate_phase_04a(
+        payload,
+        sections_payload={
+            "chapters": [
+                {
+                    "chapter_id": 1,
+                    "sections": [
+                        {
+                            "section_id": 1,
+                            "end_condition": "Release under watch pushes him into local politics.",
+                        }
+                    ],
+                }
+            ]
+        },
+        strict_transition_bridges=True,
+    )
+    assert result.status == "pass"
+
+
+def test_phase04b_accepts_renumbered_to_scene_when_inserted_ref_matches_selected_to() -> None:
+    payload = _outline_wrapper()
+    payload["phase_report"]["resolved_candidates"] = [
+        {
+            "from_scene_ref": "1:1",
+            "to_scene_ref": "1:3",
+            "requested_resolution": "micro_scene",
+            "resolution": "micro_scene",
+            "inserted_scene_ref": "1:2",
+        }
+    ]
+    payload["phase_report"]["inserted_scene_refs"] = ["1:2"]
+    selected = [
+        {
+            "from_scene_ref": "1:1",
+            "to_scene_ref": "1:2",
+            "requested_resolution": "micro_scene",
+        }
+    ]
+    result = validate_phase_04b(
+        payload,
+        sections_payload={
+            "chapters": [
+                {
+                    "chapter_id": 1,
+                    "sections": [
+                        {
+                            "section_id": 1,
+                            "end_condition": "Release under watch pushes him into local politics.",
+                        }
+                    ],
+                }
+            ]
+        },
+        strict_transition_bridges=True,
+        selected_candidates=selected,
+    )
+    assert result.status == "pass"
