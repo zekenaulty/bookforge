@@ -56,6 +56,15 @@ Hard execution rules:
 - Inserted scenes must be authored prose semantics; do not emit meta/fallback phrasing.
 - Do not synthesize placeholder identity values (current_location, unknown, placeholder, tbd, here, there).
 - Preserve required transition/link contracts and chapter-local scene sequencing.
+- After any insertion/renumbering, section-final scenes MUST include end_condition_echo
+  that matches the section's end_condition (update the final scene per section if it shifted).
+- After any insertion, you MUST renumber all scene_id values in this chapter to a strict
+  1..N monotonic sequence (no gaps, no placeholder 100+ ids).
+- After renumbering, you MUST update consumes_outcome_from and hands_off_to to match the
+  new scene_id sequence for every non-first/non-last scene in this chapter.
+- Scene ordering rule: scenes must be ordered in the JSON exactly in chapter sequence
+  (section 1 scenes in ascending scene_id, then section 2 scenes in ascending scene_id, etc.).
+  The scene_id sequence must be monotonic across the entire chapter in the order the scenes appear.
 
 Resolved candidate reporting:
 - phase_report.resolved_candidates must contain one entry for each selected insertion candidate in this chapter.

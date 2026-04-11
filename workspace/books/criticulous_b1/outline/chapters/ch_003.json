@@ -4,7 +4,7 @@
   "chapter_role": "pressure",
   "goal": "Survive the Floor Guardian and secure the first major loot drop.",
   "pacing": {
-    "expected_scene_count": 10,
+    "expected_scene_count": 14,
     "intensity": 5,
     "tempo": "steady"
   },
@@ -25,17 +25,20 @@
           "type": "action",
           "summary": "Artie uses the Crypt environment to kite the Bone Golem, using 'Crit-Punches' to chip away at its armor.",
           "characters": [
-            "CHAR_ARTIE"
+            "CHAR_ARTIE",
+            "CHAR_GOLEM"
           ],
-          "location_start": "Crypts - Guardian Chamber",
+          "threads": [
+            "THREAD_CRIT_EXPLOIT"
+          ],
           "location_start_label": "Crypts - Guardian Chamber",
+          "location_start": "Crypts - Guardian Chamber",
           "location_start_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
-          "location_end": "Crypts - Guardian Chamber",
           "location_end_label": "Crypts - Guardian Chamber",
+          "location_end": "Crypts - Guardian Chamber",
           "location_end_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
           "handoff_mode": "direct_continuation",
           "constraint_state": "engaged_combat",
-          "outcome": "The Golem's armor is shattered, but Artie is running out of stamina.",
           "transition_in_text": "The Bone Golem's fist smashes into the stone where Artie stood a second ago.",
           "transition_in_anchors": [
             "cracked stone floor",
@@ -43,6 +46,8 @@
             "stamina bar flicker",
             "shattered armor plates"
           ],
+          "outcome": "The Golem's armor is shattered, but Artie is running out of stamina.",
+          "hands_off_to": "3:2",
           "transition_out_text": "Artie's next punch bounces off the Golem's core with a dull thud.",
           "transition_out_anchors": [
             "crit-resist icon",
@@ -50,10 +55,8 @@
             "blue guide sparks",
             "crumbling pillars"
           ],
-          "hands_off_to": "3:2",
-          "threads": [
-            "THREAD_CRIT_EXPLOIT"
-          ]
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 2,
@@ -61,18 +64,21 @@
           "summary": "Fizz discovers that the Golem has a 'Crit-Resist' buff, making Artie's main weapon useless.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_FIZZ",
+            "CHAR_GOLEM"
           ],
-          "location_start": "Crypts - Guardian Chamber",
+          "threads": [
+            "THREAD_SYSTEM_GLITCH"
+          ],
           "location_start_label": "Crypts - Guardian Chamber",
+          "location_start": "Crypts - Guardian Chamber",
           "location_start_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
-          "location_end": "Crypts - Guardian Chamber",
           "location_end_label": "Crypts - Guardian Chamber",
+          "location_end": "Crypts - Guardian Chamber",
           "location_end_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
           "handoff_mode": "direct_continuation",
           "constraint_state": "engaged_combat",
           "consumes_outcome_from": "3:1",
-          "outcome": "Artie must find a way to bypass the resistance or die.",
           "transition_in_text": "Fizz's voice crackles in Artie's ear as the Golem readies another strike.",
           "transition_in_anchors": [
             "crit-resist icon",
@@ -80,6 +86,8 @@
             "blue guide sparks",
             "crumbling pillars"
           ],
+          "outcome": "Artie must find a way to bypass the resistance or die.",
+          "hands_off_to": "3:3",
           "transition_out_text": "Artie dives between the Golem's legs, aiming for the floor tiles.",
           "transition_out_anchors": [
             "floor tile cracks",
@@ -87,29 +95,29 @@
             "yawning pit",
             "falling debris"
           ],
-          "hands_off_to": "3:3",
-          "threads": [
-            "THREAD_SYSTEM_GLITCH"
-          ]
+          "seam_score": 10,
+          "seam_resolution": "inline_bridge"
         },
         {
           "scene_id": 3,
           "type": "choice",
           "summary": "Artie attempts to 'Crit' the ground beneath the Golem, hoping for a physics glitch.",
           "characters": [
-            "CHAR_ARTIE"
+            "CHAR_ARTIE",
+            "CHAR_GOLEM"
           ],
-          "location_start": "Crypts - Guardian Chamber",
+          "threads": [
+            "THREAD_CRIT_EXPLOIT"
+          ],
           "location_start_label": "Crypts - Guardian Chamber",
+          "location_start": "Crypts - Guardian Chamber",
           "location_start_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
-          "location_end": "Crypts - Guardian Chamber",
           "location_end_label": "Crypts - Guardian Chamber",
+          "location_end": "Crypts - Guardian Chamber",
           "location_end_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
           "handoff_mode": "direct_continuation",
           "constraint_state": "engaged_combat",
           "consumes_outcome_from": "3:2",
-          "outcome": "The floor collapses, trapping the Golem in a hole.",
-          "end_condition_echo": "The floor collapses, trapping the Golem in a hole.",
           "transition_in_text": "Artie's fist connects with a hairline fracture in the stone floor.",
           "transition_in_anchors": [
             "floor tile cracks",
@@ -117,6 +125,48 @@
             "yawning pit",
             "falling debris"
           ],
+          "outcome": "The floor gives way beneath the massive boss.",
+          "hands_off_to": "3:4",
+          "transition_out_text": "The stone shatters, sending the Golem plummeting downward.",
+          "transition_out_anchors": [
+            "crumbling edge",
+            "roaring golem",
+            "dust cloud",
+            "wedged bones"
+          ],
+          "seam_score": 45,
+          "seam_resolution": "micro_scene"
+        },
+        {
+          "scene_id": 4,
+          "type": "aftermath",
+          "summary": "The dust settles to reveal the Bone Golem wedged tightly in the newly formed pit, unable to move its massive limbs.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_GOLEM"
+          ],
+          "threads": [
+            "THREAD_CRIT_EXPLOIT"
+          ],
+          "location_start_label": "Crypts - Guardian Chamber",
+          "location_start": "Crypts - Guardian Chamber",
+          "location_start_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
+          "location_end_label": "Crypts - Guardian Chamber",
+          "location_end": "Crypts - Guardian Chamber",
+          "location_end_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "engaged_combat",
+          "consumes_outcome_from": "3:3",
+          "transition_in_text": "Artie peers over the jagged edge of the newly formed crater.",
+          "transition_in_anchors": [
+            "crumbling edge",
+            "roaring golem",
+            "dust cloud",
+            "wedged bones"
+          ],
+          "outcome": "The Golem is completely immobilized in the pit.",
+          "end_condition_echo": "The floor collapses, trapping the Golem in a hole.",
+          "hands_off_to": "3:5",
           "transition_out_text": "Artie stands at the edge of the pit, winding up his arm for the final blow.",
           "transition_out_anchors": [
             "glowing fist aura",
@@ -124,10 +174,8 @@
             "trapped golem roar",
             "dust clouds"
           ],
-          "hands_off_to": "3:4",
-          "threads": [
-            "THREAD_CRIT_EXPLOIT"
-          ]
+          "seam_score": 0,
+          "seam_resolution": "micro_scene"
         }
       ]
     },
@@ -138,23 +186,26 @@
       "end_condition": "Artie is now Level 10, but the System is watching him more closely.",
       "scenes": [
         {
-          "scene_id": 4,
+          "scene_id": 5,
           "type": "setup",
           "summary": "While the Golem is stuck, Artie spends five minutes 'charging' a punch, which the System interprets as a 'Heavy Attack'.",
           "characters": [
             "CHAR_ARTIE",
-            "CHAR_FIZZ"
+            "CHAR_FIZZ",
+            "CHAR_GOLEM"
           ],
-          "location_start": "Crypts - Guardian Chamber",
+          "threads": [
+            "THREAD_CRIT_EXPLOIT"
+          ],
           "location_start_label": "Crypts - Guardian Chamber",
+          "location_start": "Crypts - Guardian Chamber",
           "location_start_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
-          "location_end": "Crypts - Guardian Chamber",
           "location_end_label": "Crypts - Guardian Chamber",
+          "location_end": "Crypts - Guardian Chamber",
           "location_end_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
           "handoff_mode": "direct_continuation",
           "constraint_state": "free",
-          "consumes_outcome_from": "3:3",
-          "outcome": "Artie prepares his most powerful hit yet.",
+          "consumes_outcome_from": "3:4",
           "transition_in_text": "Artie stands at the edge of the pit, winding up his arm.",
           "transition_in_anchors": [
             "glowing fist aura",
@@ -162,6 +213,8 @@
             "trapped golem roar",
             "dust clouds"
           ],
+          "outcome": "Artie prepares his most powerful hit yet.",
+          "hands_off_to": "3:6",
           "transition_out_text": "Artie's fist connects with the Golem's skull with a high-pitched 'ding'.",
           "transition_out_anchors": [
             "porcelain teacup pile",
@@ -169,28 +222,30 @@
             "cosmetic crit glitter",
             "system error chime"
           ],
-          "hands_off_to": "3:5",
-          "threads": [
-            "THREAD_CRIT_EXPLOIT"
-          ]
+          "seam_score": 15,
+          "seam_resolution": "inline_bridge"
         },
         {
-          "scene_id": 5,
+          "scene_id": 6,
           "type": "action",
           "summary": "Artie lands the hit, but instead of damage, the System rolls a 'Cosmetic Crit,' turning the Golem into a pile of very expensive porcelain teacups.",
           "characters": [
-            "CHAR_ARTIE"
+            "CHAR_ARTIE",
+            "CHAR_GOLEM"
           ],
-          "location_start": "Crypts - Guardian Chamber",
+          "threads": [
+            "THREAD_CRIT_EXPLOIT",
+            "THREAD_SYSTEM_GLITCH"
+          ],
           "location_start_label": "Crypts - Guardian Chamber",
+          "location_start": "Crypts - Guardian Chamber",
           "location_start_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
-          "location_end": "Crypts - Guardian Chamber",
           "location_end_label": "Crypts - Guardian Chamber",
+          "location_end": "Crypts - Guardian Chamber",
           "location_end_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
           "handoff_mode": "direct_continuation",
           "constraint_state": "free",
-          "consumes_outcome_from": "3:4",
-          "outcome": "The boss is defeated, but the loot is... unconventional.",
+          "consumes_outcome_from": "3:5",
           "transition_in_text": "The impact sends a shockwave of glitter through the chamber.",
           "transition_in_anchors": [
             "porcelain teacup pile",
@@ -198,6 +253,8 @@
             "cosmetic crit glitter",
             "system error chime"
           ],
+          "outcome": "The boss is defeated, but the loot is... unconventional.",
+          "hands_off_to": "3:7",
           "transition_out_text": "A massive 'LEVEL UP' banner fills Artie's vision.",
           "transition_out_anchors": [
             "golden level-up beam",
@@ -205,31 +262,29 @@
             "system recalculation bar",
             "floating teacups"
           ],
-          "hands_off_to": "3:6",
-          "threads": [
-            "THREAD_CRIT_EXPLOIT",
-            "THREAD_SYSTEM_GLITCH"
-          ]
+          "seam_score": 20,
+          "seam_resolution": "inline_bridge"
         },
         {
-          "scene_id": 6,
+          "scene_id": 7,
           "type": "aftermath",
           "summary": "The System panics and tries to 'recalculate' the XP, resulting in Artie jumping five levels instantly.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
-          "location_start": "Crypts - Guardian Chamber",
+          "threads": [
+            "THREAD_SYSTEM_GLITCH"
+          ],
           "location_start_label": "Crypts - Guardian Chamber",
+          "location_start": "Crypts - Guardian Chamber",
           "location_start_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
-          "location_end": "Crypts - Guardian Chamber",
           "location_end_label": "Crypts - Guardian Chamber",
+          "location_end": "Crypts - Guardian Chamber",
           "location_end_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
           "handoff_mode": "direct_continuation",
           "constraint_state": "processed",
-          "consumes_outcome_from": "3:5",
-          "outcome": "Artie is now Level 10, but the System is watching him more closely.",
-          "end_condition_echo": "Artie is now Level 10, but the System is watching him more closely.",
+          "consumes_outcome_from": "3:6",
           "transition_in_text": "The golden light of the level-up beam washes over Artie.",
           "transition_in_anchors": [
             "golden level-up beam",
@@ -237,6 +292,9 @@
             "system recalculation bar",
             "floating teacups"
           ],
+          "outcome": "Artie is now Level 10, but the System is watching him more closely.",
+          "end_condition_echo": "Artie is now Level 10, but the System is watching him more closely.",
+          "hands_off_to": "3:8",
           "transition_out_text": "Artie sifts through the pile of porcelain, looking for anything useful.",
           "transition_out_anchors": [
             "silver ring band",
@@ -244,10 +302,8 @@
             "self-crit warning",
             "porcelain shards"
           ],
-          "hands_off_to": "3:7",
-          "threads": [
-            "THREAD_SYSTEM_GLITCH"
-          ]
+          "seam_score": 25,
+          "seam_resolution": "inline_bridge"
         }
       ]
     },
@@ -258,22 +314,24 @@
       "end_condition": "The chase is on as Artie heads toward the capital city.",
       "scenes": [
         {
-          "scene_id": 7,
+          "scene_id": 8,
           "type": "reveal",
           "summary": "Artie finds a 'Ring of the Gambler' among the teacups, which doubles crit damage but makes every 20th hit a self-crit.",
           "characters": [
             "CHAR_ARTIE"
           ],
-          "location_start": "Crypts - Guardian Chamber",
+          "threads": [
+            "THREAD_CRIT_EXPLOIT"
+          ],
           "location_start_label": "Crypts - Guardian Chamber",
+          "location_start": "Crypts - Guardian Chamber",
           "location_start_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
-          "location_end": "Crypts - Guardian Chamber",
           "location_end_label": "Crypts - Guardian Chamber",
+          "location_end": "Crypts - Guardian Chamber",
           "location_end_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
           "handoff_mode": "direct_continuation",
           "constraint_state": "free",
-          "consumes_outcome_from": "3:6",
-          "outcome": "Artie accepts the double-edged sword.",
+          "consumes_outcome_from": "3:7",
           "transition_in_text": "Artie picks up a silver ring from the wreckage of the Golem.",
           "transition_in_anchors": [
             "silver ring band",
@@ -281,6 +339,47 @@
             "self-crit warning",
             "porcelain shards"
           ],
+          "outcome": "Artie accepts the double-edged sword.",
+          "hands_off_to": "3:9",
+          "transition_out_text": "He slides the ring onto his finger, bracing for the stat surge.",
+          "transition_out_anchors": [
+            "equipped ring glow",
+            "stat surge",
+            "short-circuiting sconce",
+            "grinding stone"
+          ],
+          "seam_score": 40,
+          "seam_resolution": "micro_scene"
+        },
+        {
+          "scene_id": 9,
+          "type": "transition",
+          "summary": "Artie equips the Ring of the Gambler, and the sudden surge of glitched stats causes a nearby wall sconce to short-circuit, triggering a hidden pressure plate.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_SYSTEM_GLITCH",
+            "THREAD_THE_ASCENSION"
+          ],
+          "location_start_label": "Crypts - Guardian Chamber",
+          "location_start": "Crypts - Guardian Chamber",
+          "location_start_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
+          "location_end_label": "Crypts - Guardian Chamber",
+          "location_end": "Crypts - Guardian Chamber",
+          "location_end_id": "LOC_CRYPTS_GUARDIAN_CHAMBER_42074B",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "free",
+          "consumes_outcome_from": "3:8",
+          "transition_in_text": "The moment the ring settles on his finger, a wave of chaotic energy ripples outward.",
+          "transition_in_anchors": [
+            "equipped ring glow",
+            "stat surge",
+            "short-circuiting sconce",
+            "grinding stone"
+          ],
+          "outcome": "A hidden passage is revealed.",
+          "hands_off_to": "3:10",
           "transition_out_text": "A section of the wall slides back with a heavy grind.",
           "transition_out_anchors": [
             "faded wall paint",
@@ -288,29 +387,29 @@
             "first glitch glyphs",
             "hidden torch"
           ],
-          "hands_off_to": "3:8",
-          "threads": [
-            "THREAD_CRIT_EXPLOIT"
-          ]
+          "seam_score": 0,
+          "seam_resolution": "micro_scene"
         },
         {
-          "scene_id": 8,
+          "scene_id": 10,
           "type": "reveal",
           "summary": "A hidden door opens, revealing a mural of the 'First Glitch'\u2014a hero who looked suspiciously like Artie's high school gym teacher.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
-          "location_start": "Crypts - Secret Mural Room",
+          "threads": [
+            "THREAD_THE_ASCENSION"
+          ],
           "location_start_label": "Crypts - Secret Mural Room",
+          "location_start": "Crypts - Secret Mural Room",
           "location_start_id": "LOC_CRYPTS_SECRET_MURAL_ROOM_B35DBF",
-          "location_end": "Crypts - Secret Mural Room",
           "location_end_label": "Crypts - Secret Mural Room",
+          "location_end": "Crypts - Secret Mural Room",
           "location_end_id": "LOC_CRYPTS_SECRET_MURAL_ROOM_B35DBF",
           "handoff_mode": "direct_continuation",
           "constraint_state": "free",
-          "consumes_outcome_from": "3:7",
-          "outcome": "Artie realizes he isn't the first person to break this game.",
+          "consumes_outcome_from": "3:9",
           "transition_in_text": "Artie steps into the hidden room, his torch illuminating the mural.",
           "transition_in_anchors": [
             "faded wall paint",
@@ -318,6 +417,46 @@
             "first glitch glyphs",
             "hidden torch"
           ],
+          "outcome": "Artie realizes he isn't the first person to break this game.",
+          "hands_off_to": "3:11",
+          "transition_out_text": "He spots a narrow tunnel leading up toward the surface.",
+          "transition_out_anchors": [
+            "dark tunnel",
+            "cobwebs",
+            "distant breeze",
+            "escape route"
+          ],
+          "seam_score": 80,
+          "seam_resolution": "full_scene"
+        },
+        {
+          "scene_id": 11,
+          "type": "action",
+          "summary": "Artie navigates a forgotten escape tunnel behind the mural, dodging ancient, deactivated traps before finally reaching the surface just outside the crypt's main entrance.",
+          "characters": [
+            "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_THE_ASCENSION"
+          ],
+          "location_start_label": "Crypts - Secret Mural Room",
+          "location_start": "Crypts - Secret Mural Room",
+          "location_start_id": "LOC_CRYPTS_SECRET_MURAL_ROOM_B35DBF",
+          "location_end_label": "Crypts Entrance",
+          "location_end": "Crypts Entrance",
+          "location_end_id": "LOC_CRYPTS_ENTRANCE_0B6508",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "free",
+          "consumes_outcome_from": "3:10",
+          "transition_in_text": "Leaving the mural behind, Artie squeezes into the narrow escape shaft.",
+          "transition_in_anchors": [
+            "dark tunnel",
+            "cobwebs",
+            "distant breeze",
+            "escape route"
+          ],
+          "outcome": "Artie escapes the crypts via the secret tunnel.",
+          "hands_off_to": "3:12",
           "transition_out_text": "Artie emerges from the crypt into the cool evening air.",
           "transition_out_anchors": [
             "white paladin cape",
@@ -325,29 +464,29 @@
             "empty boss room",
             "sunset shadows"
           ],
-          "hands_off_to": "3:9",
-          "threads": [
-            "THREAD_THE_ASCENSION"
-          ]
+          "seam_score": 0,
+          "seam_resolution": "full_scene"
         },
         {
-          "scene_id": 9,
+          "scene_id": 12,
           "type": "escalation",
           "summary": "Artie exits the crypt to find Vane waiting for him, looking very confused by the lack of a boss.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_VANE"
           ],
-          "location_start": "Crypts Entrance",
+          "threads": [
+            "THREAD_VANE_RIVALRY"
+          ],
           "location_start_label": "Crypts Entrance",
+          "location_start": "Crypts Entrance",
           "location_start_id": "LOC_CRYPTS_ENTRANCE_0B6508",
-          "location_end": "Crypts Entrance",
           "location_end_label": "Crypts Entrance",
+          "location_end": "Crypts Entrance",
           "location_end_id": "LOC_CRYPTS_ENTRANCE_0B6508",
           "handoff_mode": "arrival_checkpoint",
           "constraint_state": "pursued",
-          "consumes_outcome_from": "3:8",
-          "outcome": "Vane realizes Artie stole his kill.",
+          "consumes_outcome_from": "3:11",
           "transition_in_text": "Vane stands at the entrance, his party behind him.",
           "transition_in_anchors": [
             "white paladin cape",
@@ -355,6 +494,47 @@
             "empty boss room",
             "sunset shadows"
           ],
+          "outcome": "Vane realizes Artie stole his kill.",
+          "hands_off_to": "3:13",
+          "transition_out_text": "Vane barks an order, and his party draws their weapons.",
+          "transition_out_anchors": [
+            "drawn swords",
+            "evasion blur",
+            "angry shouts",
+            "treeline escape"
+          ],
+          "seam_score": 85,
+          "seam_resolution": "full_scene"
+        },
+        {
+          "scene_id": 13,
+          "type": "action",
+          "summary": "Vane orders his party to attack, but Artie uses his ridiculous evasion cloak and new stats to slip through their formation, leaving them swinging at empty air as he breaks for the treeline.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_VANE"
+          ],
+          "threads": [
+            "THREAD_VANE_RIVALRY"
+          ],
+          "location_start_label": "Crypts Entrance",
+          "location_start": "Crypts Entrance",
+          "location_start_id": "LOC_CRYPTS_ENTRANCE_0B6508",
+          "location_end_label": "The Road to the Capital",
+          "location_end": "The Road to the Capital",
+          "location_end_id": "LOC_THE_ROAD_TO_THE_CAPITAL_E19EF1",
+          "handoff_mode": "direct_continuation",
+          "constraint_state": "fleeing",
+          "consumes_outcome_from": "3:12",
+          "transition_in_text": "The paladins lunge forward, their blades glowing with holy light.",
+          "transition_in_anchors": [
+            "drawn swords",
+            "evasion blur",
+            "angry shouts",
+            "treeline escape"
+          ],
+          "outcome": "Artie slips past the blockade.",
+          "hands_off_to": "3:14",
           "transition_out_text": "Artie breaks into a sprint, his new stats kicking in.",
           "transition_out_anchors": [
             "dusty road",
@@ -362,30 +542,29 @@
             "distant shouting",
             "capital city spires"
           ],
-          "hands_off_to": "3:10",
-          "threads": [
-            "THREAD_VANE_RIVALRY"
-          ]
+          "seam_score": 0,
+          "seam_resolution": "full_scene"
         },
         {
-          "scene_id": 10,
+          "scene_id": 14,
           "type": "transition",
           "summary": "Artie uses his new level-up speed to outrun Vane's party, heading toward the capital city.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_VANE"
           ],
-          "location_start": "The Road to the Capital",
+          "threads": [
+            "THREAD_VANE_RIVALRY"
+          ],
           "location_start_label": "The Road to the Capital",
+          "location_start": "The Road to the Capital",
           "location_start_id": "LOC_THE_ROAD_TO_THE_CAPITAL_E19EF1",
-          "location_end": "The Road to the Capital",
           "location_end_label": "The Road to the Capital",
+          "location_end": "The Road to the Capital",
           "location_end_id": "LOC_THE_ROAD_TO_THE_CAPITAL_E19EF1",
           "handoff_mode": "time_skip",
           "constraint_state": "fleeing",
-          "consumes_outcome_from": "3:9",
-          "outcome": "The chase is on.",
-          "end_condition_echo": "The chase is on as Artie heads toward the capital city.",
+          "consumes_outcome_from": "3:13",
           "transition_in_text": "Artie's boots kick up dust as he races toward the horizon.",
           "transition_in_anchors": [
             "dusty road",
@@ -393,9 +572,10 @@
             "distant shouting",
             "capital city spires"
           ],
-          "threads": [
-            "THREAD_VANE_RIVALRY"
-          ]
+          "outcome": "The chase is on.",
+          "end_condition_echo": "The chase is on as Artie heads toward the capital city.",
+          "seam_score": 0,
+          "seam_resolution": "inline_bridge"
         }
       ]
     }

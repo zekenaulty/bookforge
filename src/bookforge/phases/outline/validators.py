@@ -567,6 +567,7 @@ def validate_outline(
     sections_payload: Optional[Dict[str, Any]] = None,
     strict_transition_bridges: bool = False,
     require_links: bool = False,
+    chapter_subset_ids: Optional[Set[int]] = None,
 ) -> ValidationResult:
     errors: List[Dict[str, Any]] = []
     warnings: List[Dict[str, Any]] = []
@@ -590,6 +591,10 @@ def validate_outline(
         return ValidationResult("fail", errors, warnings, metrics)
 
     section_end_lookup = _section_end_lookup(sections_payload or {})
+    subset_ids: Optional[Set[int]] = None
+    if chapter_subset_ids:
+        subset_ids = {int(item) for item in chapter_subset_ids if _to_int(item)}
+    validated_chapters = 0
 
     for chapter_index, chapter in enumerate(chapters, start=1):
         if not isinstance(chapter, dict):
@@ -602,6 +607,18 @@ def validate_outline(
             )
             continue
         chapter_id = _to_int(chapter.get("chapter_id"))
+        if subset_ids is not None:
+            if chapter_id is None:
+                errors.append(
+                    issue(
+                        "chapter_id_required",
+                        "chapter_id is required",
+                        path=f"chapters[{chapter_index-1}].chapter_id",
+                    )
+                )
+                continue
+            if chapter_id not in subset_ids:
+                continue
         if chapter_id != chapter_index:
             errors.append(
                 issue(
@@ -611,6 +628,7 @@ def validate_outline(
                 )
             )
             continue
+        validated_chapters += 1
 
         sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
         if not sections:
@@ -724,10 +742,10 @@ def validate_outline(
                                 "end_condition_echo_mismatch",
                                 "end_condition_echo must match section end_condition",
                                 scene_ref=scene_ref,
-                            )
-                        )
+                    )
+                )
 
-    metrics["chapter_count"] = len(chapters)
+    metrics["chapter_count"] = validated_chapters if subset_ids is not None else len(chapters)
     status = "pass" if not errors else "fail"
     return ValidationResult(status, errors, warnings, metrics)
 
@@ -1029,6 +1047,14 @@ def validate_phase_04b(
                 path="phase_report.resolved_candidates",
             )
         )
+    if selected_insertions and not inserted_ref_set:
+        errors.append(
+            issue(
+                "transition_insertion_required",
+                "Selected insertion candidates require inserted scenes, but none were reported",
+                path="phase_report.inserted_scene_refs",
+            )
+        )
 
     missing_inserted_refs = sorted(required_inserted_refs - inserted_ref_set)
     if missing_inserted_refs:
@@ -1050,6 +1076,8 @@ def validate_phase_04b(
             )
         )
 
+    metrics["inserted_scene_count"] = len(inserted_ref_set)
+    metrics["unresolved_required_insertions"] = len(unresolved_selected)
     status = "pass" if not errors else "fail"
     return ValidationResult(status, errors, warnings, metrics)
 

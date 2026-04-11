@@ -35,11 +35,16 @@ def validate(
     runtime: Dict[str, Any],
 ) -> ValidationResult:
     sections = handoffs.get("outline_sections_v1") if isinstance(handoffs.get("outline_sections_v1"), dict) else None
+    chapter_id = runtime.get("current_chapter_id")
+    subset_ids = None
+    if isinstance(chapter_id, int) and chapter_id > 0:
+        subset_ids = {chapter_id}
     return validate_outline(
         payload,
         sections_payload=sections,
         strict_transition_bridges=bool(settings.get("strict_transition_bridges", False)),
         require_links=True,
+        chapter_subset_ids=subset_ids,
     )
 
 

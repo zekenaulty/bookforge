@@ -14,7 +14,7 @@ Core contract:
 
 Required top-level keys:
 - schema_version ("1.1")
-- chapters (array)
+- chapters (array) containing ONLY the target chapter
 
 Registry policy:
 - characters and threads are globally optional, but become REQUIRED when referenced.
@@ -37,7 +37,7 @@ Registry policy:
   - threads[].id, threads[].title, threads[].description
 
 Required chapter/section/scene constraints:
-- chapter_id must be sequential integers starting at 1.
+- chapter_id must equal the target chapter_id provided below.
 - chapter required keys and types:
   - chapter_id (integer)
   - title (string)
@@ -148,11 +148,17 @@ If you cannot satisfy constraints after correction attempts, return error_v1:
   "action_hint": "Provide concrete location labels and transition payload; do not use placeholders."
 }
 
-Outline spine (phase 01):
-{{outline_spine_v1}}
+Target chapter id:
+{{chapter_target_id}}
 
-Section architecture (phase 02):
-{{outline_sections_v1}}
+Chapter input outline (phase 02 slice, single chapter):
+{{chapter_input_outline}}
+
+Previous chapter (optional, read-only context):
+{{chapter_prev_outline}}
+
+Next chapter (optional, read-only context):
+{{chapter_next_outline}}
 
 Book:
 {{book}}

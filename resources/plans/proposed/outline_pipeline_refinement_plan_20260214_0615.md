@@ -132,6 +132,11 @@ Each phase is JSON-only, max 2 attempts, reason-coded error on second failure.
 - Prompt: `outline_phase_03_scene_draft.md`
 - Output artifact: `outline_draft_v1_1.json`
 - Scope: first full outline v1.1 draft with optional edge fields.
+- Execution model (priority change):
+  - Chapter-scoped two-turn execution (`T1` plan -> `T2` emit).
+  - `T1` uses phase-level `thinking_level` (or `thinking_budget` if set).
+  - `T2` defaults to `low` or `minimal` thinking to preserve output headroom.
+  - If `thinking_budget` is set, do not send `thinking_level` in the same request.
 
 4. `phase_04_transition_causality_refinement`
 - Prompt: `outline_phase_04_transition_causality_refinement.md`

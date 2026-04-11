@@ -41,6 +41,62 @@ CHAPTER_SCOPED_STEPS = {
     outline_context.PHASE_06,
 }
 
+PHASE03_T1_INSTRUCTION = (
+    "THINKING PHASE: Analyze the chapter and plan your scene draft changes. "
+    "Do NOT output the chapter JSON. Return ONLY a small JSON object: "
+    "{\"status\":\"ready_to_execute\",\"notes\":[],\"warnings\":[],\"edge_count\":0}."
+)
+
+PHASE03_T2_INSTRUCTION = (
+    "EXECUTION PHASE: Produce the final chapter-only JSON output for this phase. "
+    "Do NOT include analysis or planning text. Output JSON only."
+)
+
+PHASE04A_T1_INSTRUCTION = (
+    "THINKING PHASE: Audit chapter transition seams and plan candidate_seams. "
+    "Do NOT output the chapter JSON. Return ONLY a small JSON object: "
+    "{\"status\":\"ready_to_execute\",\"notes\":[],\"warnings\":[],\"edge_count\":0,\"candidate_count\":0}."
+)
+
+PHASE04A_T2_INSTRUCTION = (
+    "EXECUTION PHASE: Emit the final chapter-only JSON for phase 04A. "
+    "Do NOT include analysis or planning text. Output JSON only."
+)
+
+PHASE04B_T1_INSTRUCTION = (
+    "THINKING PHASE: Plan seam insertions and transition reconciliation for this chapter. "
+    "Do NOT output the chapter JSON. Return ONLY a small JSON object: "
+    "{\"status\":\"ready_to_execute\",\"notes\":[],\"warnings\":[],\"insertions\":0}."
+)
+
+PHASE04B_T2_INSTRUCTION = (
+    "EXECUTION PHASE: Emit the final chapter-only JSON for phase 04B, including required "
+    "inserted scenes and reconciliation evidence. Do NOT include analysis or planning text. "
+    "Output JSON only."
+)
+
+PHASE05_T1_INSTRUCTION = (
+    "THINKING PHASE: Plan cast refinements for this chapter. "
+    "Do NOT output the chapter JSON. Return ONLY a small JSON object: "
+    "{\"status\":\"ready_to_execute\",\"notes\":[],\"warnings\":[],\"edge_count\":0}."
+)
+
+PHASE05_T2_INSTRUCTION = (
+    "EXECUTION PHASE: Emit the final chapter-only JSON for phase 05. "
+    "Do NOT include analysis or planning text. Output JSON only."
+)
+
+PHASE06_T1_INSTRUCTION = (
+    "THINKING PHASE: Plan thread payoff refinements for this chapter. "
+    "Do NOT output the chapter JSON. Return ONLY a small JSON object: "
+    "{\"status\":\"ready_to_execute\",\"notes\":[],\"warnings\":[],\"edge_count\":0}."
+)
+
+PHASE06_T2_INSTRUCTION = (
+    "EXECUTION PHASE: Emit the final chapter-only JSON for phase 06. "
+    "Do NOT include analysis or planning text. Output JSON only."
+)
+
 
 def _resolve_outline_thinking_level(client: LLMClient, model: str) -> Optional[str]:
     if str(getattr(client, "provider", "")).lower() != "gemini":
@@ -52,6 +108,20 @@ def _resolve_outline_thinking_level(client: LLMClient, model: str) -> Optional[s
 
     generic = str(read_env_value("GEMINI_THINKING_LEVEL") or "").strip().lower()
     if generic in {"minimal", "low", "medium", "high"}:
+        return generic
+    return None
+
+
+def _resolve_outline_thinking_budget(client: LLMClient, model: str) -> Optional[int]:
+    if str(getattr(client, "provider", "")).lower() != "gemini":
+        return None
+
+    explicit = read_int_env("OUTLINE_THINKING_BUDGET", 0)
+    if isinstance(explicit, int) and explicit > 0:
+        return explicit
+
+    generic = read_int_env("GEMINI_THINKING_BUDGET", 0)
+    if isinstance(generic, int) and generic > 0:
         return generic
     return None
 
@@ -99,6 +169,105 @@ def _resolve_step_thinking_level(client: LLMClient, model: str, step_id: str) ->
     if "gemini-3-flash" in model_lower:
         return "minimal"
     return "low"
+
+
+def _resolve_step_thinking_budget(client: LLMClient, model: str, step_id: str) -> Optional[int]:
+    if str(getattr(client, "provider", "")).lower() != "gemini":
+        return None
+
+    step_key = {
+        outline_context.PHASE_01: "OUTLINE_PHASE_01_THINKING_BUDGET",
+        outline_context.PHASE_02: "OUTLINE_PHASE_02_THINKING_BUDGET",
+        outline_context.PHASE_03: "OUTLINE_PHASE_03_THINKING_BUDGET",
+        outline_context.PHASE_04: "OUTLINE_PHASE_04_THINKING_BUDGET",
+        outline_context.STEP_04A: "OUTLINE_PHASE_04A_THINKING_BUDGET",
+        outline_context.STEP_04B: "OUTLINE_PHASE_04B_THINKING_BUDGET",
+        outline_context.PHASE_05: "OUTLINE_PHASE_05_THINKING_BUDGET",
+        outline_context.PHASE_06: "OUTLINE_PHASE_06_THINKING_BUDGET",
+    }.get(step_id)
+    if step_key:
+        explicit = read_int_env(step_key, 0)
+        if isinstance(explicit, int) and explicit > 0:
+            return explicit
+
+    logical_phase = outline_context.STEP_TO_LOGICAL.get(step_id, step_id)
+    logical_key = {
+        outline_context.PHASE_01: "OUTLINE_PHASE_01_THINKING_BUDGET",
+        outline_context.PHASE_02: "OUTLINE_PHASE_02_THINKING_BUDGET",
+        outline_context.PHASE_03: "OUTLINE_PHASE_03_THINKING_BUDGET",
+        outline_context.PHASE_04: "OUTLINE_PHASE_04_THINKING_BUDGET",
+        outline_context.PHASE_05: "OUTLINE_PHASE_05_THINKING_BUDGET",
+        outline_context.PHASE_06: "OUTLINE_PHASE_06_THINKING_BUDGET",
+    }.get(logical_phase)
+    if logical_key:
+        explicit_logical = read_int_env(logical_key, 0)
+        if isinstance(explicit_logical, int) and explicit_logical > 0:
+            return explicit_logical
+
+    shared = _resolve_outline_thinking_budget(client, model)
+    if shared:
+        return shared
+    return None
+
+
+def _resolve_phase03_t2_thinking_level(model: str) -> str:
+    explicit = str(read_env_value("OUTLINE_PHASE_03_T2_THINKING_LEVEL") or "").strip().lower()
+    if explicit in {"minimal", "low", "medium", "high"}:
+        return explicit
+    model_lower = str(model or "").strip().lower()
+    if "gemini-3-flash" in model_lower:
+        return "minimal"
+    return "low"
+
+
+def _resolve_phase04a_t2_thinking_level(model: str) -> str:
+    explicit = str(read_env_value("OUTLINE_PHASE_04A_T2_THINKING_LEVEL") or "").strip().lower()
+    if explicit in {"minimal", "low", "medium", "high"}:
+        return explicit
+    model_lower = str(model or "").strip().lower()
+    if "gemini-3-flash" in model_lower:
+        return "minimal"
+    return "low"
+
+
+def _resolve_phase04b_t2_thinking_level(model: str) -> str:
+    explicit = str(read_env_value("OUTLINE_PHASE_04B_T2_THINKING_LEVEL") or "").strip().lower()
+    if explicit in {"minimal", "low", "medium", "high"}:
+        return explicit
+    model_lower = str(model or "").strip().lower()
+    if "gemini-3-flash" in model_lower:
+        return "minimal"
+    return "low"
+
+
+def _resolve_phase05_t2_thinking_level(model: str) -> str:
+    explicit = str(read_env_value("OUTLINE_PHASE_05_T2_THINKING_LEVEL") or "").strip().lower()
+    if explicit in {"minimal", "low", "medium", "high"}:
+        return explicit
+    model_lower = str(model or "").strip().lower()
+    if "gemini-3-flash" in model_lower:
+        return "minimal"
+    return "low"
+
+
+def _resolve_phase06_t2_thinking_level(model: str) -> str:
+    explicit = str(read_env_value("OUTLINE_PHASE_06_T2_THINKING_LEVEL") or "").strip().lower()
+    if explicit in {"minimal", "low", "medium", "high"}:
+        return explicit
+    model_lower = str(model or "").strip().lower()
+    if "gemini-3-flash" in model_lower:
+        return "minimal"
+    return "low"
+
+
+def _apply_thinking_policy(
+    *,
+    thinking_level: Optional[str],
+    thinking_budget: Optional[int],
+) -> Tuple[Optional[str], Optional[int]]:
+    if isinstance(thinking_budget, int) and thinking_budget > 0:
+        return None, thinking_budget
+    return thinking_level, None
 
 
 @dataclass
@@ -925,6 +1094,50 @@ def _merge_target_chapter_outline(
     return merged
 
 
+def _compose_outline_from_spine_sections(
+    *,
+    spine: Dict[str, Any],
+    sections: Dict[str, Any],
+) -> Dict[str, Any]:
+    spine_chapters = spine.get("chapters") if isinstance(spine.get("chapters"), list) else []
+    sections_chapters = sections.get("chapters") if isinstance(sections.get("chapters"), list) else []
+    sections_by_id: Dict[int, List[Dict[str, Any]]] = {}
+    for chapter in sections_chapters:
+        if not isinstance(chapter, dict):
+            continue
+        try:
+            chapter_id = int(chapter.get("chapter_id"))
+        except (TypeError, ValueError):
+            chapter_id = 0
+        if not chapter_id:
+            continue
+        raw_sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
+        sections_by_id[chapter_id] = [deepcopy(item) for item in raw_sections if isinstance(item, dict)]
+
+    outline: Dict[str, Any] = {
+        "schema_version": OUTLINE_SCHEMA_VERSION,
+        "chapters": [],
+        "characters": [],
+        "threads": [],
+    }
+    for index, chapter in enumerate(spine_chapters, start=1):
+        if not isinstance(chapter, dict):
+            continue
+        chapter_id = _chapter_id_from_chapter(chapter, index)
+        chapter_payload = deepcopy(chapter)
+        chapter_payload["chapter_id"] = chapter_id
+        raw_sections = sections_by_id.get(chapter_id, [])
+        prepared_sections: List[Dict[str, Any]] = []
+        for section in raw_sections:
+            section_payload = deepcopy(section)
+            if not isinstance(section_payload.get("scenes"), list):
+                section_payload["scenes"] = []
+            prepared_sections.append(section_payload)
+        chapter_payload["sections"] = prepared_sections
+        outline["chapters"].append(chapter_payload)
+    return outline
+
+
 def _chapter_hash(chapter: Dict[str, Any]) -> str:
     return _sha256_text(json.dumps(chapter, ensure_ascii=True, sort_keys=True))
 
@@ -1312,6 +1525,7 @@ def _execute_chapter_scoped_step(
     model: str,
     max_tokens: int,
     thinking_level: Optional[str],
+    thinking_budget: Optional[int],
     handoffs: Dict[str, Any],
     settings: Dict[str, Any],
     runtime: Dict[str, Any],
@@ -1328,7 +1542,14 @@ def _execute_chapter_scoped_step(
         checkpoint = _initial_phase_checkpoint(step_id, run_mode)
 
     if step_id == outline_context.PHASE_03:
-        base_outline = handoffs.get("outline_sections_v1")
+        spine_outline = handoffs.get("outline_spine_v1")
+        sections_outline = handoffs.get("outline_sections_v1")
+        if not isinstance(spine_outline, dict) or not isinstance(sections_outline, dict):
+            raise ValueError(f"{step_id} requires outline_spine_v1 and outline_sections_v1 handoffs.")
+        base_outline = _compose_outline_from_spine_sections(
+            spine=spine_outline,
+            sections=sections_outline,
+        )
         aggregate_report = {}
     elif step_id == outline_context.STEP_04A:
         base_outline = handoffs.get("outline_draft_v1_1")
@@ -1368,6 +1589,7 @@ def _execute_chapter_scoped_step(
 
     for chapter_id in baseline_chapter_ids:
         chapter_key = str(chapter_id)
+        runtime["current_chapter_id"] = chapter_id
         chapter_entry = chapter_attempts.get(chapter_key) if isinstance(chapter_attempts.get(chapter_key), dict) else {}
         chapter_status = str(chapter_entry.get("status") or "").strip().lower()
         if resume and not force_phase_full_rerun and chapter_status == "success":
@@ -1476,6 +1698,31 @@ def _execute_chapter_scoped_step(
                 "chapters": [deepcopy(_extract_chapter(working_outline, previous_ids[chapter_index + 1]))],
             }
 
+        use_two_turn = step_id in {
+            outline_context.PHASE_03,
+            outline_context.STEP_04A,
+            outline_context.STEP_04B,
+            outline_context.PHASE_05,
+            outline_context.PHASE_06,
+        }
+        t1_assistant_parts: Optional[List[Dict[str, Any]]] = None
+        t1_plan_payload: Optional[Dict[str, Any]] = None
+        t1_retry_message: Optional[str] = None
+        t1_instruction = PHASE03_T1_INSTRUCTION
+        t2_instruction = PHASE03_T2_INSTRUCTION
+        if step_id == outline_context.STEP_04A:
+            t1_instruction = PHASE04A_T1_INSTRUCTION
+            t2_instruction = PHASE04A_T2_INSTRUCTION
+        elif step_id == outline_context.STEP_04B:
+            t1_instruction = PHASE04B_T1_INSTRUCTION
+            t2_instruction = PHASE04B_T2_INSTRUCTION
+        elif step_id == outline_context.PHASE_05:
+            t1_instruction = PHASE05_T1_INSTRUCTION
+            t2_instruction = PHASE05_T2_INSTRUCTION
+        elif step_id == outline_context.PHASE_06:
+            t1_instruction = PHASE06_T1_INSTRUCTION
+            t2_instruction = PHASE06_T2_INSTRUCTION
+
         while chapter_attempt_count < OUTLINE_MAX_ATTEMPTS:
             chapter_attempt_count += 1
             total_attempts += 1
@@ -1512,16 +1759,168 @@ def _execute_chapter_scoped_step(
                 input_payload,
             )
 
+            if use_two_turn and t1_assistant_parts is None:
+                t1_messages: List[Message] = [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": rendered_prompt},
+                    {"role": "user", "content": t1_instruction},
+                ]
+                if t1_retry_message:
+                    t1_messages.append({"role": "user", "content": t1_retry_message})
+                t1_request = {"model": model, "temperature": 0.2, "max_tokens": max_tokens}
+                t1_level, t1_budget = _apply_thinking_policy(
+                    thinking_level=thinking_level,
+                    thinking_budget=thinking_budget,
+                )
+                if t1_budget is not None:
+                    t1_request["thinking_config"] = {"thinkingBudget": t1_budget}
+                elif t1_level:
+                    t1_request["thinking_config"] = {"thinkingLevel": t1_level}
+                t1_extra = {
+                    "book_id": book_id,
+                    "step": step_id,
+                    "phase_id": step_id,
+                    "chapter": chapter_id,
+                    "attempt": chapter_attempt_count,
+                    "turn_id": "T1",
+                }
+                key_slot = getattr(client, "key_slot", None)
+                if key_slot:
+                    t1_extra["key_slot"] = key_slot
+                try:
+                    t1_response = client.chat(
+                        t1_messages,
+                        model=model,
+                        temperature=0.2,
+                        max_tokens=max_tokens,
+                        thinking_level=t1_level,
+                        thinking_budget=t1_budget,
+                    )
+                except LLMRequestError as exc:
+                    if should_log_llm():
+                        log_llm_error(
+                            workspace,
+                            f"outline_{step_id}_chapter_{chapter_id}_t1_error",
+                            exc,
+                            request=t1_request,
+                            messages=t1_messages,
+                            extra=t1_extra,
+                        )
+                    chapter_attempts[chapter_key] = {
+                        "status": "paused" if _is_pause_error(exc) else "error",
+                        "attempts": chapter_attempt_count,
+                        "validation_summary": {
+                            "status": "fail",
+                            "errors": [outline_validators.issue("llm_request_error", exc.message, path="<request>")],
+                            "warnings": [],
+                            "metrics": {},
+                        },
+                    }
+                    checkpoint["chapter_attempts"] = chapter_attempts
+                    checkpoint["resume_cursor"] = {
+                        "phase_id": step_id,
+                        "next_chapter_id": chapter_id,
+                        "reason_code": "rate_limited_retry_exhausted" if _is_pause_error(exc) else "llm_request_error",
+                        "updated_at": outline_artifacts.utc_now_iso(),
+                    }
+                    _save_phase_checkpoint(checkpoint_path, checkpoint)
+                    if _is_pause_error(exc):
+                        _write_pause_marker(run_dir=run_dir, step_id=step_id, exc=exc)
+                    raise
+
+                if should_log_llm():
+                    log_llm_response(
+                        workspace,
+                        f"outline_{step_id}_chapter_{chapter_id}_t1_attempt{chapter_attempt_count}",
+                        t1_response,
+                        request=t1_request,
+                        messages=t1_messages,
+                        extra=t1_extra,
+                    )
+
+                _write_json(
+                    run_dir / _chapter_artifact_name(step_id, chapter_id, "plan_raw", chapter_attempt_count),
+                    {"text": t1_response.text, "raw": t1_response.raw},
+                )
+
+                try:
+                    t1_plan_payload = _extract_phase_json(step_id, t1_response.text)
+                except Exception as exc:
+                    t1_retry_message = (
+                        "Your planning output was invalid. Return ONLY the ready JSON object "
+                        "with status, notes, warnings, and edge_count."
+                    )
+                    retry_message = None
+                    plan_errors = [outline_validators.issue("json_parse", str(exc), path="<plan>")]
+                    chapter_validation_payload = {
+                        "status": "fail",
+                        "errors": plan_errors,
+                        "warnings": [],
+                        "metrics": {},
+                    }
+                    chapter_attempts[chapter_key] = {
+                        "status": "error",
+                        "attempts": chapter_attempt_count,
+                        "validation_summary": chapter_validation_payload,
+                    }
+                    checkpoint["chapter_attempts"] = chapter_attempts
+                    checkpoint["resume_cursor"] = {
+                        "phase_id": step_id,
+                        "next_chapter_id": chapter_id,
+                        "reason_code": "plan_json_invalid",
+                        "updated_at": outline_artifacts.utc_now_iso(),
+                    }
+                    _save_phase_checkpoint(checkpoint_path, checkpoint)
+                    continue
+                t1_assistant_parts = (
+                    t1_response.assistant_parts if isinstance(t1_response.assistant_parts, list) else None
+                )
+                _write_json(
+                    run_dir / _chapter_artifact_name(step_id, chapter_id, "plan"),
+                    {"schema_version": f"{step_id}_plan_v1", "plan": t1_plan_payload},
+                )
+                t1_retry_message = None
+                if t1_assistant_parts:
+                    _write_json(
+                        run_dir / _chapter_artifact_name(step_id, chapter_id, "plan_assistant_parts", chapter_attempt_count),
+                        t1_assistant_parts,
+                    )
+
             messages: List[Message] = [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": rendered_prompt},
             ]
+            provider_name = str(getattr(client, "provider", "")).lower()
+            if use_two_turn and t1_assistant_parts and provider_name == "gemini":
+                messages.append({"role": "assistant", "parts": t1_assistant_parts})
+            if use_two_turn:
+                messages.append({"role": "user", "content": t2_instruction})
             if retry_message:
                 messages.append({"role": "user", "content": retry_message})
 
             request = {"model": model, "temperature": 0.2, "max_tokens": max_tokens}
-            if thinking_level:
-                request["thinking_config"] = {"thinkingLevel": thinking_level}
+            t2_level: Optional[str] = None
+            t2_budget: Optional[int] = None
+            if use_two_turn:
+                if step_id == outline_context.STEP_04A:
+                    t2_level = _resolve_phase04a_t2_thinking_level(model)
+                elif step_id == outline_context.STEP_04B:
+                    t2_level = _resolve_phase04b_t2_thinking_level(model)
+                elif step_id == outline_context.PHASE_05:
+                    t2_level = _resolve_phase05_t2_thinking_level(model)
+                elif step_id == outline_context.PHASE_06:
+                    t2_level = _resolve_phase06_t2_thinking_level(model)
+                else:
+                    t2_level = _resolve_phase03_t2_thinking_level(model)
+            else:
+                t2_level, t2_budget = _apply_thinking_policy(
+                    thinking_level=thinking_level,
+                    thinking_budget=thinking_budget,
+                )
+            if t2_budget is not None:
+                request["thinking_config"] = {"thinkingBudget": t2_budget}
+            elif t2_level:
+                request["thinking_config"] = {"thinkingLevel": t2_level}
             extra = {
                 "book_id": book_id,
                 "step": step_id,
@@ -1530,7 +1929,9 @@ def _execute_chapter_scoped_step(
                 "attempt": chapter_attempt_count,
             }
             turn_id = runtime.get("turn_id") or runtime.get("phase_turn_id") or runtime.get("turn")
-            if step_id in {outline_context.STEP_04A, outline_context.STEP_04B} and turn_id:
+            if use_two_turn:
+                extra["turn_id"] = "T2"
+            elif step_id in {outline_context.STEP_04A, outline_context.STEP_04B} and turn_id:
                 extra["turn_id"] = str(turn_id)
             key_slot = getattr(client, "key_slot", None)
             if key_slot:
@@ -1542,7 +1943,8 @@ def _execute_chapter_scoped_step(
                     model=model,
                     temperature=0.2,
                     max_tokens=max_tokens,
-                    thinking_level=thinking_level,
+                    thinking_level=t2_level,
+                    thinking_budget=t2_budget,
                 )
             except LLMRequestError as exc:
                 if should_log_llm():
@@ -1864,6 +2266,7 @@ def _execute_step(
     model: str,
     max_tokens: int,
     thinking_level: Optional[str],
+    thinking_budget: Optional[int],
     handoffs: Dict[str, Any],
     settings: Dict[str, Any],
     runtime: Dict[str, Any],
@@ -1882,8 +2285,14 @@ def _execute_step(
     _write_json(run_dir / outline_artifacts.step_artifact_name(step_id, "input"), input_payload)
 
     request = {"model": model, "temperature": 0.2, "max_tokens": max_tokens}
-    if thinking_level:
-        request["thinking_config"] = {"thinkingLevel": thinking_level}
+    effective_level, effective_budget = _apply_thinking_policy(
+        thinking_level=thinking_level,
+        thinking_budget=thinking_budget,
+    )
+    if effective_budget is not None:
+        request["thinking_config"] = {"thinkingBudget": effective_budget}
+    elif effective_level:
+        request["thinking_config"] = {"thinkingLevel": effective_level}
     attempt = 0
     retry_message: Optional[str] = None
     last_output: Dict[str, Any] = {}
@@ -1914,7 +2323,8 @@ def _execute_step(
                 model=model,
                 temperature=0.2,
                 max_tokens=max_tokens,
-                thinking_level=thinking_level,
+                thinking_level=effective_level,
+                thinking_budget=effective_budget,
             )
         except LLMRequestError as exc:
             if should_log_llm():
@@ -2243,6 +2653,7 @@ def generate_outline(
 
             template_path = outline_context.resolve_outline_template(book_root, spec.template_name)
             step_thinking_level = _resolve_step_thinking_level(client, model, step_id)
+            step_thinking_budget = _resolve_step_thinking_budget(client, model, step_id)
             chapter_attempts: Optional[Dict[str, Any]] = None
             checkpoint_path: Optional[str] = None
             if _is_chapter_scoped_step(step_id):
@@ -2270,6 +2681,7 @@ def generate_outline(
                     model=model,
                     max_tokens=max_tokens,
                     thinking_level=step_thinking_level,
+                    thinking_budget=step_thinking_budget,
                     handoffs=handoffs,
                     settings=settings,
                     runtime=runtime,
@@ -2300,6 +2712,7 @@ def generate_outline(
                     model=model,
                     max_tokens=max_tokens,
                     thinking_level=step_thinking_level,
+                    thinking_budget=step_thinking_budget,
                     handoffs=handoffs,
                     settings=settings,
                     runtime=runtime,

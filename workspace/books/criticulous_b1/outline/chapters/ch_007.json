@@ -23,19 +23,22 @@
         {
           "scene_id": 1,
           "type": "setup",
-          "summary": "Artie learns how to eat 'Data-Packets' instead of food.",
+          "summary": "Artie learns how to eat 'Data-Packets' instead of food, accidentally critting one and causing a minor physics explosion.",
           "outcome": "Artie adapts to his new existence.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
           "threads": [
-            "THREAD_SYSTEM_GLITCH"
+            "THREAD_SYSTEM_GLITCH",
+            "THREAD_CRIT_EXPLOIT"
           ],
           "location_start_label": "Null-Zone - Data Stream",
           "location_start": "Null-Zone - Data Stream",
+          "location_start_id": "LOC_NULL_ZONE_DATA_STREAM_F4D57D",
           "location_end_label": "Null-Zone - Data Stream",
           "location_end": "Null-Zone - Data Stream",
+          "location_end_id": "LOC_NULL_ZONE_DATA_STREAM_F4D57D",
           "handoff_mode": "arrival_checkpoint",
           "constraint_state": "free",
           "transition_in_text": "Artie reaches out to touch a floating cube of light.",
@@ -45,7 +48,6 @@
             "wireframe landscape",
             "glowing stream"
           ],
-          "hands_off_to": "7:2",
           "transition_out_text": "Fizz points toward a distant, glowing tower on the horizon.",
           "transition_out_anchors": [
             "server room tower",
@@ -53,8 +55,7 @@
             "long-term quest",
             "digital horizon"
           ],
-          "location_start_id": "LOC_NULL_ZONE_DATA_STREAM_F4D57D",
-          "location_end_id": "LOC_NULL_ZONE_DATA_STREAM_F4D57D"
+          "hands_off_to": "7:2"
         },
         {
           "scene_id": 2,
@@ -71,8 +72,10 @@
           ],
           "location_start_label": "Null-Zone - Data Stream",
           "location_start": "Null-Zone - Data Stream",
+          "location_start_id": "LOC_NULL_ZONE_DATA_STREAM_F4D57D",
           "location_end_label": "Null-Zone - Data Stream",
           "location_end": "Null-Zone - Data Stream",
+          "location_end_id": "LOC_NULL_ZONE_DATA_STREAM_F4D57D",
           "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "7:1",
           "constraint_state": "free",
@@ -83,7 +86,6 @@
             "long-term quest",
             "digital horizon"
           ],
-          "hands_off_to": "7:3",
           "transition_out_text": "Artie stands at the edge of a wireframe cliff, testing his new body.",
           "transition_out_anchors": [
             "clipping glitch",
@@ -91,8 +93,7 @@
             "annoying immortality",
             "wireframe clouds"
           ],
-          "location_start_id": "LOC_NULL_ZONE_DATA_STREAM_F4D57D",
-          "location_end_id": "LOC_NULL_ZONE_DATA_STREAM_F4D57D"
+          "hands_off_to": "7:3"
         },
         {
           "scene_id": 3,
@@ -103,15 +104,19 @@
             "CHAR_ARTIE"
           ],
           "threads": [
-            "THREAD_SYSTEM_GLITCH"
+            "THREAD_SYSTEM_GLITCH",
+            "THREAD_CRIT_EXPLOIT"
           ],
           "location_start_label": "Null-Zone - The Cliffside",
           "location_start": "Null-Zone - The Cliffside",
+          "location_start_id": "LOC_NULL_ZONE_THE_CLIFFSIDE_D844EF",
           "location_end_label": "Null-Zone - The Cliffside",
           "location_end": "Null-Zone - The Cliffside",
+          "location_end_id": "LOC_NULL_ZONE_THE_CLIFFSIDE_D844EF",
           "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "7:2",
           "constraint_state": "free",
+          "end_condition_echo": "Artie realizes his immortality is just as annoying as his 1 HP build.",
           "transition_in_text": "Artie takes a deep breath and steps off the edge.",
           "transition_in_anchors": [
             "clipping glitch",
@@ -119,17 +124,14 @@
             "annoying immortality",
             "wireframe clouds"
           ],
-          "hands_off_to": "7:4",
-          "transition_out_text": "Artie's descent is a blur of unrendered air until he snaps back to the ledge, his boots clicking against the wireframe stone.",
+          "transition_out_text": "Artie's descent is a blur of unrendered air until he snaps back to the ledge, where a group of heavily armed figures is waiting by a static campfire.",
           "transition_out_anchors": [
             "beta tester badges",
             "mismatched gear",
             "static campfire",
             "hidden cave"
           ],
-          "end_condition_echo": "Artie realizes his immortality is just as annoying as his 1 HP build.",
-          "location_start_id": "LOC_NULL_ZONE_THE_CLIFFSIDE_D844EF",
-          "location_end_id": "LOC_NULL_ZONE_THE_CLIFFSIDE_D844EF"
+          "hands_off_to": "7:4"
         }
       ]
     },
@@ -142,7 +144,7 @@
         {
           "scene_id": 4,
           "type": "transition",
-          "summary": "A group of 'Beta-Testers' led by a veteran survivor finds Artie in the Null-Zone.",
+          "summary": "A group of 'Beta-Testers' led by a veteran survivor finds Artie in the Null-Zone and mentions they are tracking a dangerous anomaly.",
           "outcome": "Artie finds allies who know the world's secrets.",
           "characters": [
             "CHAR_ARTIE",
@@ -152,12 +154,15 @@
             "CHAR_BETA_LEADER"
           ],
           "threads": [
-            "THREAD_THE_ASCENSION"
+            "THREAD_THE_ASCENSION",
+            "THREAD_VANE_RIVALRY"
           ],
           "location_start_label": "Null-Zone - Hidden Camp",
           "location_start": "Null-Zone - Hidden Camp",
+          "location_start_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2",
           "location_end_label": "Null-Zone - Hidden Camp",
           "location_end": "Null-Zone - Hidden Camp",
+          "location_end_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2",
           "handoff_mode": "arrival_checkpoint",
           "consumes_outcome_from": "7:3",
           "constraint_state": "sheltered",
@@ -168,7 +173,6 @@
             "static campfire",
             "hidden cave"
           ],
-          "hands_off_to": "7:5",
           "transition_out_text": "The lead tester pulls up a holographic map of the world, the blue light illuminating the grim faces of the camp.",
           "transition_out_anchors": [
             "patch-hunter icon",
@@ -176,8 +180,7 @@
             "holographic map",
             "red alert"
           ],
-          "location_start_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2",
-          "location_end_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2"
+          "hands_off_to": "7:5"
         },
         {
           "scene_id": 5,
@@ -189,12 +192,15 @@
             "CHAR_BETA_LEADER"
           ],
           "threads": [
-            "THREAD_VANE_RIVALRY"
+            "THREAD_VANE_RIVALRY",
+            "THREAD_THE_ASCENSION"
           ],
           "location_start_label": "Null-Zone - Hidden Camp",
           "location_start": "Null-Zone - Hidden Camp",
+          "location_start_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2",
           "location_end_label": "Null-Zone - Hidden Camp",
           "location_end": "Null-Zone - Hidden Camp",
+          "location_end_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2",
           "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "7:4",
           "constraint_state": "free",
@@ -205,7 +211,6 @@
             "holographic map",
             "red alert"
           ],
-          "hands_off_to": "7:6",
           "transition_out_text": "A legendary quest notification appears in Artie's vision, the text burning with a golden intensity.",
           "transition_out_anchors": [
             "legendary quest banner",
@@ -213,13 +218,12 @@
             "series arc lock",
             "golden glow"
           ],
-          "location_start_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2",
-          "location_end_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2"
+          "hands_off_to": "7:6"
         },
         {
           "scene_id": 6,
           "type": "reveal",
-          "summary": "Artie receives his first 'Legendary' quest: 'Delete the Admin'.",
+          "summary": "Artie receives his first 'Legendary' quest: 'Delete the Admin', which is the only way to stop Vane and fix the System.",
           "outcome": "The series arc is locked in.",
           "characters": [
             "CHAR_ARTIE",
@@ -228,15 +232,19 @@
           ],
           "threads": [
             "THREAD_THE_ASCENSION",
-            "THREAD_SYSTEM_GLITCH"
+            "THREAD_SYSTEM_GLITCH",
+            "THREAD_VANE_RIVALRY"
           ],
           "location_start_label": "Null-Zone - Hidden Camp",
           "location_start": "Null-Zone - Hidden Camp",
+          "location_start_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2",
           "location_end_label": "Null-Zone - Hidden Camp",
           "location_end": "Null-Zone - Hidden Camp",
+          "location_end_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2",
           "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "7:5",
           "constraint_state": "free",
+          "end_condition_echo": "The series arc is locked in with the quest 'Delete the Admin'.",
           "transition_in_text": "The golden banner of the quest fills the camp with light, drowning out the dim glow of the static fire.",
           "transition_in_anchors": [
             "legendary quest banner",
@@ -244,17 +252,14 @@
             "series arc lock",
             "golden glow"
           ],
-          "hands_off_to": "7:7",
-          "transition_out_text": "The Beta-Testers activate a swirling vortex of code, the portal's edges fraying into the surrounding trees.",
+          "transition_out_text": "With the quest accepted, the Beta-Testers pack up their static campfire and lead Artie toward the portal coordinates.",
           "transition_out_anchors": [
-            "glitch-woods portal",
-            "swirling code",
             "packed bags",
-            "determined faces"
+            "determined faces",
+            "portal coordinates",
+            "camp breakdown"
           ],
-          "end_condition_echo": "The series arc is locked in with the quest 'Delete the Admin'.",
-          "location_start_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2",
-          "location_end_id": "LOC_NULL_ZONE_HIDDEN_CAMP_96A1E2"
+          "hands_off_to": "7:7"
         }
       ]
     },
@@ -279,28 +284,28 @@
           ],
           "location_start_label": "Null-Zone - Portal Gate",
           "location_start": "Null-Zone - Portal Gate",
+          "location_start_id": "LOC_NULL_ZONE_PORTAL_GATE_D3FA54",
           "location_end_label": "Null-Zone - Portal Gate",
           "location_end": "Null-Zone - Portal Gate",
+          "location_end_id": "LOC_NULL_ZONE_PORTAL_GATE_D3FA54",
           "handoff_mode": "arrival_checkpoint",
           "consumes_outcome_from": "7:6",
           "constraint_state": "free",
-          "transition_in_text": "The portal hums with a power that Artie can feel vibrating through his NaN HP bar as they approach the gate.",
+          "transition_in_text": "The group arrives at the coordinates, and the Beta-Testers activate a swirling vortex of code, the portal's edges fraying into the surrounding trees.",
           "transition_in_anchors": [
-            "glitch-woods portal",
-            "swirling code",
             "packed bags",
-            "determined faces"
+            "determined faces",
+            "portal coordinates",
+            "camp breakdown"
           ],
-          "hands_off_to": "7:8",
           "transition_out_text": "Artie takes a final look at the wireframe world, his hand hovering over the swirling event horizon.",
           "transition_out_anchors": [
             "swirling portal",
-            "drop rate joke",
-            "final step",
-            "fading light"
+            "event horizon",
+            "fading light",
+            "wireframe ground"
           ],
-          "location_start_id": "LOC_NULL_ZONE_PORTAL_GATE_D3FA54",
-          "location_end_id": "LOC_NULL_ZONE_PORTAL_GATE_D3FA54"
+          "hands_off_to": "7:8"
         },
         {
           "scene_id": 8,
@@ -316,21 +321,21 @@
           ],
           "location_start_label": "Null-Zone - Portal Gate",
           "location_start": "Null-Zone - Portal Gate",
+          "location_start_id": "LOC_NULL_ZONE_PORTAL_GATE_D3FA54",
           "location_end_label": "Null-Zone - Portal Gate",
           "location_end": "Null-Zone - Portal Gate",
+          "location_end_id": "LOC_NULL_ZONE_PORTAL_GATE_D3FA54",
           "handoff_mode": "time_skip",
           "consumes_outcome_from": "7:7",
           "constraint_state": "free",
+          "end_condition_echo": "Artie steps into a portal, ending Book 1.",
           "transition_in_text": "Artie's foot touches the edge of the swirling vortex, the code beginning to pull him in.",
           "transition_in_anchors": [
             "swirling portal",
-            "drop rate joke",
-            "final step",
-            "fading light"
-          ],
-          "end_condition_echo": "Artie steps into a portal, ending Book 1.",
-          "location_start_id": "LOC_NULL_ZONE_PORTAL_GATE_D3FA54",
-          "location_end_id": "LOC_NULL_ZONE_PORTAL_GATE_D3FA54"
+            "event horizon",
+            "fading light",
+            "wireframe ground"
+          ]
         }
       ]
     }

@@ -3,6 +3,7 @@
 from typing import Iterable, List, Tuple
 import json
 import logging
+import random
 import socket
 import time
 import urllib.error
@@ -92,6 +93,15 @@ def post_json(
         logger.warning("Retrying after %.2fs due to %s", delay, reason)
         time.sleep(delay)
 
+    def _retry_delay_with_jitter(base_delay: float, status_code: int) -> float:
+        if base_delay <= 0:
+            base_delay = retry_backoff
+        if status_code == 503:
+            base_delay *= 2.0
+            jitter = random.uniform(0.8, 1.2)
+            return base_delay * jitter
+        return base_delay
+
     attempt = 0
     while True:
         data = json.dumps(payload).encode("utf-8")
@@ -108,6 +118,7 @@ def post_json(
                 delay = err.retry_after_seconds
                 if delay is None:
                     delay = retry_backoff * (2 ** attempt)
+                delay = _retry_delay_with_jitter(delay, exc.code)
                 logger.warning("Retrying after %.2fs due to HTTP %s", delay, exc.code)
                 time.sleep(delay)
                 attempt += 1

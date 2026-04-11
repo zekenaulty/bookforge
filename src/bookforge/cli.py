@@ -422,8 +422,8 @@ def build_parser() -> argparse.ArgumentParser:
     outline_generate.add_argument(
         "--transition-insert-budget-per-chapter",
         type=int,
-        default=2,
-        help="Maximum transition scene insertions selected per chapter (default: 2).",
+        default=12,
+        help="Maximum transition scene insertions selected per chapter (default: 12).",
     )
     outline_generate.add_argument(
         "--allow-transition-scene-insertions",
@@ -546,7 +546,7 @@ def build_parser() -> argparse.ArgumentParser:
         default="planner",
         help="Model phase selector for the current thoughts request (default: planner).",
     )
-    llm_current.add_argument("--max-tokens", type=int, default=2048, help="Max tokens for summary.")
+    llm_current.add_argument("--max-tokens", type=int, default=65000, help="Max tokens for summary.")
     llm_current.add_argument("--temperature", type=float, default=0.2, help="Temperature for summary.")
     llm_current.add_argument(
         "--thinking-level",

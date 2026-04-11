@@ -22,6 +22,7 @@ class GeminiClient(LLMClient):
         temperature: float = 0.7,
         max_tokens: int = 1024,
         thinking_level: Optional[str] = None,
+        thinking_budget: Optional[int] = None,
     ) -> LLMResponse:
         self._throttle()
         system_text, non_system = split_system_messages(messages)
@@ -43,7 +44,14 @@ class GeminiClient(LLMClient):
             },
         }
         normalized_level = str(thinking_level or "").strip().lower()
-        if normalized_level in {"minimal", "low", "medium", "high"}:
+        normalized_budget = None
+        if isinstance(thinking_budget, int) and thinking_budget > 0:
+            normalized_budget = thinking_budget
+        if normalized_budget is not None:
+            payload["generationConfig"]["thinkingConfig"] = {
+                "thinkingBudget": normalized_budget
+            }
+        elif normalized_level in {"minimal", "low", "medium", "high"}:
             payload["generationConfig"]["thinkingConfig"] = {
                 "thinkingLevel": normalized_level
             }
@@ -52,7 +60,14 @@ class GeminiClient(LLMClient):
 
         url = f"{self.api_url}/models/{model}:generateContent?key={self.api_key}"
         headers = {"Content-Type": "application/json"}
-        raw = post_json(url, payload, headers, timeout=self.timeout_seconds, max_retries=3)
+        raw = post_json(
+            url,
+            payload,
+            headers,
+            timeout=self.timeout_seconds,
+            max_retries=16,
+            retry_backoff=2.0,
+        )
         candidates = raw.get("candidates", [])
         text = ""
         assistant_parts = []

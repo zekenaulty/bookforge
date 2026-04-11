@@ -5,6 +5,10 @@ Refactor outline phases 4, 5, and 6 to run chapter-by-chapter instead of full-bo
 
 This plan is designed to keep existing phase 1-3 behavior intact while hardening phase 4-6 reliability.
 
+Note (new dependency):
+Phase 03 is now a priority stabilization target with chapter-scoped two-turn execution and thinking-budget caps.
+Phase 4-6 stability assumes Phase 03 outputs are reliable and not truncated by thought overflow.
+
 ## Doctrine Anchor
 This plan inherits:
 1. `resources/plans/proposed/outline_pipeline_doctrine_manifesto_20260216_0205.md`

@@ -13,7 +13,7 @@ from bookforge.llm.types import Message
 
 CURRENT_THOUGHTS_SYSTEM = (
     "You are a reflective assistant. Return a concise JSON summary of your current context. "
-    "Do NOT reveal chain-of-thought or hidden reasoning. Use the provided schema only."
+    "Use the provided schema only."
 )
 
 CURRENT_THOUGHTS_USER = (

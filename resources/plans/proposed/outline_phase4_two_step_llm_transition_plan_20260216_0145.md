@@ -21,6 +21,11 @@ If a seam requires a transition scene:
 2. If LLM does not author it, phase 04 fails.
 3. Deterministic code may not synthesize replacement semantic content.
 
+## Long-Term Execution Direction
+1. All outline phases will migrate to a two-turn model (`T1` plan -> `T2` execute) when stable.
+2. All outline phases will prefer chapter-by-chapter execution where possible (scene-by-scene where already used).
+3. Phase 04A/04B are the first enforced chapter-scoped two-turn steps in this plan.
+
 ## Phase 04 Decomposition
 Prompt contract sources:
 1. 04A source (existing): `resources/prompt_blocks/phase/outline_pipeline/phase_04_transition_causality_refinement_prompt_contract.md`
@@ -30,22 +35,23 @@ Composed templates:
 1. `resources/prompt_templates/outline_phase_04a_transition_seam_analysis.md`
 2. `resources/prompt_templates/outline_phase_04b_transition_execution.md`
 
-### 04A: Seam Analysis LLM Step
+### 04A: Seam Analysis LLM Step (Chapter-Scoped)
 Objective:
 1. analyze adjacent scene edges,
 2. produce seam scores/resolution recommendations,
 3. return candidate edges that require insertion.
 
 Input payload:
-1. full phase-03 outline artifact,
-2. transition hints (optional/strict as configured),
-3. policy settings:
+1. target chapter outline slice only (no full-book payload),
+2. compact neighbor context (optional, read-only),
+3. transition hints filtered to chapter,
+4. policy settings:
    - strict transition mode,
    - insertion budget,
    - scene-count mode.
 
 Output payload:
-1. full outline object (updated seam metadata allowed),
+1. chapter-only seam analysis artifact,
 2. `phase_report` with:
    - `candidate_seams[]` entries:
      - `from_scene_ref`
@@ -59,23 +65,23 @@ Validation gates:
 2. candidate ref format and existence checks,
 3. seam score numeric range checks.
 
-### 04B: Seam Execution LLM Step
+### 04B: Seam Execution LLM Step (Chapter-Scoped)
 Objective:
 1. resolve selected seam candidates,
 2. author inserted transition scenes for selected `micro_scene`/`full_scene` candidates,
 3. return a coherent outline with valid sequencing and links.
 
 Input payload:
-1. 04A validated output,
+1. 04A validated output for the target chapter only,
 2. deterministic routing block:
    - `selected_candidates[]`,
    - `blocked_candidates[]` with reasons,
    - `downgrade_constraints[]`,
    - exact-mode conflict markers if relevant.
-3. 04A-to-04B handoff block (`outline_phase_04a_output`).
+3. 04A-to-04B handoff block scoped to chapter (`outline_phase_04a_output_chapter`).
 
 Output payload:
-1. full outline object,
+1. chapter-only outline patch,
 2. `phase_report` with:
    - `inserted_scene_refs[]`,
    - `blocked_by_budget[]`,

@@ -3,9 +3,10 @@
 ## Purpose
 Define a production-safe two-turn execution model for chapter-scoped phases that need heavy reasoning and strict artifact emission, without merging phases.
 
-Initial target:
-1. Phase 04A (transition seam analysis)
-2. Phase 04B (transition execution)
+Initial target (revised, priority order):
+1. Phase 03 (scene draft) — chapter-scoped two-turn to stop thinking overflow
+2. Phase 04A (transition seam analysis)
+3. Phase 04B (transition execution)
 
 Planned reuse pattern:
 1. Writing
@@ -42,6 +43,27 @@ Execution framing:
 1. Treat each chapter+phase pair as a short-lived micro-conversation (`T1 -> T2`) with immediate continuity use only.
 2. Do not assume thought continuity survives long pauses; explicit plan artifacts are the durable bridge.
 
+## Thinking Budget Policy (Critical for Phase 03)
+Phase 03 is currently failing due to thought token overflow. We will introduce a thinking budget cap and per-turn thinking control to guarantee output headroom.
+
+### Policy
+1. `thinking_budget` is an optional hard cap for reasoning tokens.
+2. If `thinking_budget` is set, **do not send `thinking_level`** in the same request (Gemini rejects mixed usage).
+3. If `thinking_budget` is not set, fall back to `thinking_level`.
+4. Per-turn defaults:
+   1. `T1` uses step/phase-level `thinking_level` (or `thinking_budget` if set).
+   2. `T2` defaults to `low` (or `minimal`) unless explicitly overridden.
+
+### Env cascade (per step/phase)
+1. `OUTLINE_PHASE_03_THINKING_BUDGET` (or phase/step-specific)
+2. `OUTLINE_THINKING_BUDGET`
+3. `GEMINI_THINKING_BUDGET`
+
+If no budget is set, use the existing thinking level cascade:
+1. `OUTLINE_PHASE_03_THINKING_LEVEL`
+2. `OUTLINE_THINKING_LEVEL`
+3. `GEMINI_THINKING_LEVEL`
+
 ## Doc-Backed Ground Truth (Gemini 3 Flash + Thought Signatures)
 This section is the protocol anchor for this plan.
 
@@ -72,9 +94,10 @@ This section is the protocol anchor for this plan.
 ## Why This Is Needed
 Observed and expected issues in single-turn chapter calls:
 1. Model spends output budget on internal planning and leaves incomplete artifacts.
-2. Seam insertion can pass structure but leave transition chain misalignment.
-3. Long payload context increases token pressure and drift.
-4. Resume after quota/rate pause may not preserve hidden thought continuity.
+2. Phase 03 scene drafting has repeatedly failed due to thought-token overflow (MAX_TOKENS) even when chapter-scoped.
+3. Seam insertion can pass structure but leave transition chain misalignment.
+4. Long payload context increases token pressure and drift.
+5. Resume after quota/rate pause may not preserve hidden thought continuity.
 
 Two-turn chapter execution addresses this by:
 1. Separating planning from rendering.
@@ -448,14 +471,16 @@ Extension template:
 9. No long-pause dependency on hidden thought state is required for correctness.
 
 ## Rollout Sequence
-1. Finalize contract docs for 04A-T1, 04A-T2, 04B-T1, 04B-T2.
-2. Add artifact schema definitions for compact plan artifacts and reconciliation evidence.
-3. Implement chapter context minimization and prompt payload restrictions.
-4. Implement two-turn runner path for 04A/04B with checkpoint semantics.
-5. Add deterministic validations and targeted retry routing.
-6. Run chapter-level pilot on one book and compare:
+1. Add thinking budget support + mutual-exclusion policy (budget vs level).
+2. Implement Phase 03 two-turn runner (T1 plan + T2 emit) with per-turn thinking control.
+3. Finalize contract docs for 04A-T1, 04A-T2, 04B-T1, 04B-T2.
+4. Add artifact schema definitions for compact plan artifacts and reconciliation evidence.
+5. Implement chapter context minimization and prompt payload restrictions.
+6. Implement two-turn runner path for 04A/04B with checkpoint semantics.
+7. Add deterministic validations and targeted retry routing.
+8. Run chapter-level pilot on one book and compare:
    1. seam resolution quality
    2. orphan beat incidence
    3. retry rate
    4. token and turn consumption
-7. If stable, evaluate adoption for writing/linting/repair using the same template.
+9. If stable, evaluate adoption for writing/linting/repair using the same template.

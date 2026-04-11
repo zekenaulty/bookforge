@@ -24,5 +24,6 @@ class LLMClient(ABC):
         temperature: float = 0.7,
         max_tokens: int = 1024,
         thinking_level: Optional[str] = None,
+        thinking_budget: Optional[int] = None,
     ) -> LLMResponse:
         raise NotImplementedError

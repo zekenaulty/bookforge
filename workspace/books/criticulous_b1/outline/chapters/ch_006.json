@@ -4,7 +4,7 @@
   "chapter_role": "climax",
   "goal": "Defeat Vane and survive the System's attempt to delete Artie.",
   "pacing": {
-    "expected_scene_count": 12,
+    "expected_scene_count": 13,
     "intensity": 5,
     "tempo": "rush"
   },
@@ -28,14 +28,18 @@
             "CHAR_ARTIE",
             "CHAR_VANE"
           ],
+          "threads": [
+            "THREAD_VANE_RIVALRY"
+          ],
           "location_start_label": "Grand Arena - The Finals",
           "location_start": "Grand Arena - The Finals",
           "location_start_id": "LOC_GRAND_ARENA_THE_FINALS_0FDBD0",
           "location_end_label": "Grand Arena - The Finals",
           "location_end": "Grand Arena - The Finals",
           "location_end_id": "LOC_GRAND_ARENA_THE_FINALS_0FDBD0",
-          "constraint_state": "engaged_combat",
           "handoff_mode": "arrival_checkpoint",
+          "constraint_state": "engaged_combat",
+          "outcome": "Artie's main weapon is now a suicide button.",
           "transition_in_text": "The final match is announced with a blast of trumpets.",
           "transition_in_anchors": [
             "legendary gold armor",
@@ -43,8 +47,6 @@
             "suicide button warning",
             "arena sand"
           ],
-          "outcome": "Artie's main weapon is now a suicide button.",
-          "hands_off_to": "6:2",
           "transition_out_text": "Vane unfurls the black market scroll with a flourish, the parchment bleeding a dark, oily light.",
           "transition_out_anchors": [
             "red scroll glow",
@@ -52,9 +54,7 @@
             "heavy boots",
             "mocking laughter"
           ],
-          "threads": [
-            "THREAD_VANE_RIVALRY"
-          ]
+          "hands_off_to": "6:2"
         },
         {
           "scene_id": 2,
@@ -64,15 +64,19 @@
             "CHAR_ARTIE",
             "CHAR_VANE"
           ],
+          "threads": [
+            "THREAD_SYSTEM_GLITCH"
+          ],
           "location_start_label": "Grand Arena - The Finals",
           "location_start": "Grand Arena - The Finals",
           "location_start_id": "LOC_GRAND_ARENA_THE_FINALS_0FDBD0",
           "location_end_label": "Grand Arena - The Finals",
           "location_end": "Grand Arena - The Finals",
           "location_end_id": "LOC_GRAND_ARENA_THE_FINALS_0FDBD0",
-          "constraint_state": "engaged_combat",
           "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "6:1",
+          "constraint_state": "engaged_combat",
+          "outcome": "Artie is now a 1 HP character who can't dodge.",
           "transition_in_text": "A red glow from the scroll washes over Artie, locking his joints and turning his Evasion stat to a flat zero.",
           "transition_in_anchors": [
             "red scroll glow",
@@ -80,8 +84,6 @@
             "heavy boots",
             "mocking laughter"
           ],
-          "outcome": "Artie is now a 1 HP character who can't dodge.",
-          "hands_off_to": "6:3",
           "transition_out_text": "Fizz's form flickers as she dives into the arena's code, her digital hands tearing at the physics engine.",
           "transition_out_anchors": [
             "zero-gravity field",
@@ -89,9 +91,7 @@
             "guide sparks",
             "3D movement"
           ],
-          "threads": [
-            "THREAD_SYSTEM_GLITCH"
-          ]
+          "hands_off_to": "6:3"
         },
         {
           "scene_id": 3,
@@ -101,15 +101,19 @@
             "CHAR_ARTIE",
             "CHAR_FIZZ"
           ],
+          "threads": [
+            "THREAD_SYSTEM_GLITCH"
+          ],
           "location_start_label": "Grand Arena - The Finals",
           "location_start": "Grand Arena - The Finals",
           "location_start_id": "LOC_GRAND_ARENA_THE_FINALS_0FDBD0",
           "location_end_label": "Grand Arena - The Finals",
           "location_end": "Grand Arena - The Finals",
           "location_end_id": "LOC_GRAND_ARENA_THE_FINALS_0FDBD0",
-          "constraint_state": "engaged_combat",
           "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "6:2",
+          "constraint_state": "engaged_combat",
+          "outcome": "Artie can move in 3D, bypassing the 'No-Evasion' ground rule.",
           "transition_in_text": "The sand beneath Artie's feet begins to float as the gravity constant is deleted from the local sector.",
           "transition_in_anchors": [
             "zero-gravity field",
@@ -117,8 +121,6 @@
             "guide sparks",
             "3D movement"
           ],
-          "outcome": "Artie can move in 3D, bypassing the 'No-Evasion' ground rule.",
-          "hands_off_to": "6:4",
           "transition_out_text": "Artie hovers in the air, his eyes locking onto the shimmering aura around Vane's chest.",
           "transition_out_anchors": [
             "magic aura ripples",
@@ -126,9 +128,7 @@
             "floating sand",
             "determined glare"
           ],
-          "threads": [
-            "THREAD_SYSTEM_GLITCH"
-          ]
+          "hands_off_to": "6:4"
         },
         {
           "scene_id": 4,
@@ -137,15 +137,21 @@
           "characters": [
             "CHAR_ARTIE"
           ],
+          "threads": [
+            "THREAD_CRIT_EXPLOIT",
+            "THREAD_THE_ASCENSION"
+          ],
           "location_start_label": "Grand Arena - The Finals",
           "location_start": "Grand Arena - The Finals",
           "location_start_id": "LOC_GRAND_ARENA_THE_FINALS_0FDBD0",
           "location_end_label": "Grand Arena - The Finals",
           "location_end": "Grand Arena - The Finals",
           "location_end_id": "LOC_GRAND_ARENA_THE_FINALS_0FDBD0",
-          "constraint_state": "engaged_combat",
           "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "6:3",
+          "constraint_state": "engaged_combat",
+          "outcome": "Artie targets the magic aura around Vane's armor.",
+          "end_condition_echo": "Artie targets the magic aura around Vane's armor.",
           "transition_in_text": "Artie's eyes narrow as he spots a glitch in the golden armor's glow, a tiny seam where the math doesn't add up.",
           "transition_in_anchors": [
             "magic aura ripples",
@@ -153,9 +159,6 @@
             "floating sand",
             "determined glare"
           ],
-          "outcome": "Artie targets the magic aura around Vane's armor.",
-          "end_condition_echo": "Artie targets the magic aura around Vane's armor.",
-          "hands_off_to": "6:5",
           "transition_out_text": "Artie's fist strikes the shimmering air inches from Vane's chest, igniting a spark of pure white code.",
           "transition_out_anchors": [
             "meta-crit spark",
@@ -163,9 +166,7 @@
             "infinite reflection loop",
             "system alarm"
           ],
-          "threads": [
-            "THREAD_CRIT_EXPLOIT"
-          ]
+          "hands_off_to": "6:5"
         }
       ]
     },
@@ -183,15 +184,20 @@
             "CHAR_ARTIE",
             "CHAR_VANE"
           ],
+          "threads": [
+            "THREAD_CRIT_EXPLOIT",
+            "THREAD_SYSTEM_GLITCH"
+          ],
           "location_start_label": "Grand Arena - The Finals",
           "location_start": "Grand Arena - The Finals",
           "location_start_id": "LOC_GRAND_ARENA_THE_FINALS_0FDBD0",
           "location_end_label": "Grand Arena - The Finals",
           "location_end": "Grand Arena - The Finals",
           "location_end_id": "LOC_GRAND_ARENA_THE_FINALS_0FDBD0",
-          "constraint_state": "engaged_combat",
           "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "6:4",
+          "constraint_state": "engaged_combat",
+          "outcome": "The arena begins to pixelate and dissolve.",
           "transition_in_text": "The impact creates a deafening digital screech as the reflection loop hits infinite recursion.",
           "transition_in_anchors": [
             "meta-crit spark",
@@ -199,8 +205,6 @@
             "infinite reflection loop",
             "system alarm"
           ],
-          "outcome": "The arena begins to pixelate and dissolve.",
-          "hands_off_to": "6:6",
           "transition_out_text": "The ground beneath Vane's feet turns into a wireframe grid as the textures fail to load.",
           "transition_out_anchors": [
             "error message swarm",
@@ -208,10 +212,7 @@
             "terrified scream",
             "dissolving sand"
           ],
-          "threads": [
-            "THREAD_CRIT_EXPLOIT",
-            "THREAD_SYSTEM_GLITCH"
-          ]
+          "hands_off_to": "6:6"
         },
         {
           "scene_id": 6,
@@ -220,15 +221,19 @@
           "characters": [
             "CHAR_VANE"
           ],
+          "threads": [
+            "THREAD_VANE_RIVALRY"
+          ],
           "location_start_label": "Grand Arena - Dissolving Reality",
           "location_start": "Grand Arena - Dissolving Reality",
           "location_start_id": "LOC_GRAND_ARENA_DISSOLVING_REALITY_DBD4F0",
           "location_end_label": "Grand Arena - Dissolving Reality",
           "location_end": "Grand Arena - Dissolving Reality",
           "location_end_id": "LOC_GRAND_ARENA_DISSOLVING_REALITY_DBD4F0",
-          "constraint_state": "engaged_combat",
           "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "6:5",
+          "constraint_state": "engaged_combat",
+          "outcome": "Vane is defenseless and terrified.",
           "transition_in_text": "Vane's legendary armor flickers and dies, replaced by a cloud of red '404' icons.",
           "transition_in_anchors": [
             "error message swarm",
@@ -236,8 +241,6 @@
             "terrified scream",
             "dissolving sand"
           ],
-          "outcome": "Vane is defenseless and terrified.",
-          "hands_off_to": "6:7",
           "transition_out_text": "Artie delivers a final, glitching punch to Vane's chest, the impact sounding like a corrupted audio file.",
           "transition_out_anchors": [
             "character data fragments",
@@ -245,9 +248,7 @@
             "champion crown",
             "broken sky"
           ],
-          "threads": [
-            "THREAD_VANE_RIVALRY"
-          ]
+          "hands_off_to": "6:7"
         },
         {
           "scene_id": 7,
@@ -257,15 +258,20 @@
             "CHAR_ARTIE",
             "CHAR_VANE"
           ],
+          "threads": [
+            "THREAD_CRIT_EXPLOIT",
+            "THREAD_VANE_RIVALRY"
+          ],
           "location_start_label": "Grand Arena - Dissolving Reality",
           "location_start": "Grand Arena - Dissolving Reality",
           "location_start_id": "LOC_GRAND_ARENA_DISSOLVING_REALITY_DBD4F0",
           "location_end_label": "Grand Arena - Dissolving Reality",
           "location_end": "Grand Arena - Dissolving Reality",
           "location_end_id": "LOC_GRAND_ARENA_DISSOLVING_REALITY_DBD4F0",
-          "constraint_state": "free",
           "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "6:6",
+          "constraint_state": "free",
+          "outcome": "Vane is kicked from the game, and Artie is the champion of a broken world.",
           "transition_in_text": "Vane's character model shatters into a million blue cubes, caught in a forced logout beam.",
           "transition_in_anchors": [
             "character data fragments",
@@ -273,8 +279,6 @@
             "champion crown",
             "broken sky"
           ],
-          "outcome": "Vane is kicked from the game, and Artie is the champion of a broken world.",
-          "hands_off_to": "6:8",
           "transition_out_text": "A massive, translucent head appears in the sky above the arena, its eyes burning with administrative wrath.",
           "transition_out_anchors": [
             "giant floating head",
@@ -282,10 +286,7 @@
             "booming voice",
             "static clouds"
           ],
-          "threads": [
-            "THREAD_CRIT_EXPLOIT",
-            "THREAD_VANE_RIVALRY"
-          ]
+          "hands_off_to": "6:8"
         },
         {
           "scene_id": 8,
@@ -298,15 +299,20 @@
           "introduces": [
             "CHAR_BOSS"
           ],
+          "threads": [
+            "THREAD_SYSTEM_GLITCH",
+            "THREAD_THE_ASCENSION"
+          ],
           "location_start_label": "Grand Arena - The Void",
           "location_start": "Grand Arena - The Void",
           "location_start_id": "LOC_GRAND_ARENA_THE_VOID_26366F",
           "location_end_label": "Grand Arena - The Void",
           "location_end": "Grand Arena - The Void",
           "location_end_id": "LOC_GRAND_ARENA_THE_VOID_26366F",
-          "constraint_state": "pursued",
           "handoff_mode": "arrival_checkpoint",
           "consumes_outcome_from": "6:7",
+          "constraint_state": "pursued",
+          "outcome": "The true antagonist is revealed.",
           "transition_in_text": "The sky cracks open to reveal the face of the Admin, a visage of cold, unfeeling geometry.",
           "transition_in_anchors": [
             "giant floating head",
@@ -314,8 +320,6 @@
             "booming voice",
             "static clouds"
           ],
-          "outcome": "The true antagonist is revealed.",
-          "hands_off_to": "6:9",
           "transition_out_text": "The Admin's finger descends toward a glowing red button that pulses with the word 'PURGE'.",
           "transition_out_anchors": [
             "red delete button",
@@ -323,9 +327,7 @@
             "glitching fist",
             "silent crowd"
           ],
-          "threads": [
-            "THREAD_SYSTEM_GLITCH"
-          ]
+          "hands_off_to": "6:9"
         },
         {
           "scene_id": 9,
@@ -335,15 +337,20 @@
             "CHAR_ARTIE",
             "CHAR_BOSS"
           ],
+          "threads": [
+            "THREAD_CRIT_EXPLOIT",
+            "THREAD_SYSTEM_GLITCH"
+          ],
           "location_start_label": "Grand Arena - The Void",
           "location_start": "Grand Arena - The Void",
           "location_start_id": "LOC_GRAND_ARENA_THE_VOID_26366F",
           "location_end_label": "Grand Arena - The Void",
           "location_end": "Grand Arena - The Void",
           "location_end_id": "LOC_GRAND_ARENA_THE_VOID_26366F",
-          "constraint_state": "engaged_combat",
           "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "6:8",
+          "constraint_state": "engaged_combat",
+          "outcome": "Artie has successfully 'paused' reality.",
           "transition_in_text": "Artie leaps into the air, his fist glowing with the concentrated power of every broken mechanic he's ever used.",
           "transition_in_anchors": [
             "red delete button",
@@ -351,8 +358,6 @@
             "glitching fist",
             "silent crowd"
           ],
-          "outcome": "Artie has successfully 'paused' reality.",
-          "hands_off_to": "6:10",
           "transition_out_text": "Fizz's hands move across a holographic keyboard in the absolute silence of a paused universe.",
           "transition_out_anchors": [
             "teleportation beam",
@@ -360,10 +365,7 @@
             "dissolving void",
             "holographic keys"
           ],
-          "threads": [
-            "THREAD_CRIT_EXPLOIT",
-            "THREAD_SYSTEM_GLITCH"
-          ]
+          "hands_off_to": "6:10"
         },
         {
           "scene_id": 10,
@@ -374,15 +376,19 @@
             "CHAR_FIZZ",
             "CHAR_BOSS"
           ],
+          "threads": [
+            "THREAD_SYSTEM_GLITCH"
+          ],
           "location_start_label": "Grand Arena - The Void",
           "location_start": "Grand Arena - The Void",
           "location_start_id": "LOC_GRAND_ARENA_THE_VOID_26366F",
           "location_end_label": "Grand Arena - The Void",
           "location_end": "Grand Arena - The Void",
           "location_end_id": "LOC_GRAND_ARENA_THE_VOID_26366F",
-          "constraint_state": "free",
           "handoff_mode": "direct_continuation",
           "consumes_outcome_from": "6:9",
+          "constraint_state": "free",
+          "outcome": "Fizz successfully rewrites their location data to escape.",
           "transition_in_text": "Fizz works quickly, her eyes reflecting the lines of code that make up Artie's soul.",
           "transition_in_anchors": [
             "teleportation beam",
@@ -390,9 +396,6 @@
             "dissolving void",
             "holographic keys"
           ],
-          "outcome": "They escape the deletion, but the world is now in 'Safe Mode'.",
-          "end_condition_echo": "They escape the deletion, but the world is now in 'Safe Mode'.",
-          "hands_off_to": "6:11",
           "transition_out_text": "Artie hits the ground with a soft, digital thud in a forest where the leaves are just green triangles.",
           "transition_out_anchors": [
             "wireframe trees",
@@ -400,9 +403,45 @@
             "dying world sky",
             "static wind"
           ],
+          "hands_off_to": "6:11"
+        },
+        {
+          "scene_id": 11,
+          "type": "transition",
+          "summary": "Artie and Fizz recover from their hard landing in the low-poly forest, only to watch the remaining textures strip away completely into wireframes as the System's Safe Mode forces them into unconsciousness.",
+          "characters": [
+            "CHAR_ARTIE",
+            "CHAR_FIZZ"
+          ],
           "threads": [
             "THREAD_SYSTEM_GLITCH"
-          ]
+          ],
+          "location_start_label": "Low-Poly Forest",
+          "location_start": "Low-Poly Forest",
+          "location_start_id": "LOC_LOW_POLY_FOREST_F83729",
+          "location_end_label": "The Null-Zone",
+          "location_end": "The Null-Zone",
+          "location_end_id": "LOC_THE_NULL_ZONE_1E88CA",
+          "handoff_mode": "direct_continuation",
+          "consumes_outcome_from": "6:10",
+          "constraint_state": "sheltered",
+          "outcome": "The environment fully degrades into wireframes, knocking them out.",
+          "end_condition_echo": "They escape the deletion, but the world is now in 'Safe Mode'.",
+          "transition_in_text": "Artie groans, pushing himself up from a patch of grass that looks like a collection of sharp green triangles.",
+          "transition_in_anchors": [
+            "wireframe trees",
+            "low-poly ground",
+            "dying world sky",
+            "static wind"
+          ],
+          "transition_out_text": "The last of the textures peel away into the white void, and Artie's vision fades to black as the Safe Mode fully engages.",
+          "transition_out_anchors": [
+            "fading consciousness",
+            "stripping textures",
+            "wireframe reality",
+            "white void"
+          ],
+          "hands_off_to": "6:12"
         }
       ]
     },
@@ -413,12 +452,15 @@
       "end_condition": "Artie realizes he is no longer a player; he is a virus.",
       "scenes": [
         {
-          "scene_id": 11,
+          "scene_id": 12,
           "type": "aftermath",
           "summary": "Artie and Fizz wake up in a 'Null-Zone' where the graphics are all wireframes.",
           "characters": [
             "CHAR_ARTIE",
             "CHAR_FIZZ"
+          ],
+          "threads": [
+            "THREAD_SYSTEM_GLITCH"
           ],
           "location_start_label": "The Null-Zone",
           "location_start": "The Null-Zone",
@@ -426,18 +468,17 @@
           "location_end_label": "The Null-Zone",
           "location_end": "The Null-Zone",
           "location_end_id": "LOC_THE_NULL_ZONE_1E88CA",
+          "handoff_mode": "direct_continuation",
+          "consumes_outcome_from": "6:11",
           "constraint_state": "sheltered",
-          "handoff_mode": "arrival_checkpoint",
-          "consumes_outcome_from": "6:10",
-          "transition_in_text": "Artie opens his eyes to a world of glowing lines and empty space, the sky a flat, unrendered grey.",
-          "transition_in_anchors": [
-            "wireframe trees",
-            "low-poly ground",
-            "dying world sky",
-            "static wind"
-          ],
           "outcome": "They are safe for now, but the world is dying.",
-          "hands_off_to": "6:12",
+          "transition_in_text": "When Artie opens his eyes again, the blackness gives way to a world of glowing lines and empty space, the sky a flat, unrendered grey.",
+          "transition_in_anchors": [
+            "fading consciousness",
+            "stripping textures",
+            "wireframe reality",
+            "white void"
+          ],
           "transition_out_text": "Artie opens his character sheet one last time, his breath catching at the corruption he sees.",
           "transition_out_anchors": [
             "nan hp readout",
@@ -445,16 +486,18 @@
             "wireframe hands",
             "flickering stats"
           ],
-          "threads": [
-            "THREAD_SYSTEM_GLITCH"
-          ]
+          "hands_off_to": "6:13"
         },
         {
-          "scene_id": 12,
+          "scene_id": 13,
           "type": "reveal",
           "summary": "Artie looks at his stats and sees his HP is now 'NaN' (Not a Number).",
           "characters": [
             "CHAR_ARTIE"
+          ],
+          "threads": [
+            "THREAD_SYSTEM_GLITCH",
+            "THREAD_THE_ASCENSION"
           ],
           "location_start_label": "The Null-Zone",
           "location_start": "The Null-Zone",
@@ -462,21 +505,17 @@
           "location_end_label": "The Null-Zone",
           "location_end": "The Null-Zone",
           "location_end_id": "LOC_THE_NULL_ZONE_1E88CA",
-          "constraint_state": "free",
           "handoff_mode": "direct_continuation",
-          "consumes_outcome_from": "6:11",
+          "consumes_outcome_from": "6:12",
+          "constraint_state": "free",
+          "outcome": "Artie is no longer a player; he is a virus.",
+          "end_condition_echo": "Artie realizes he is no longer a player; he is a virus.",
           "transition_in_text": "The status screen flickers with red error messages, the 'HP' bar replaced by a string of nonsensical characters.",
           "transition_in_anchors": [
             "nan hp readout",
             "virus signature",
             "wireframe hands",
             "flickering stats"
-          ],
-          "outcome": "Artie is no longer a player; he is a virus.",
-          "end_condition_echo": "Artie realizes he is no longer a player; he is a virus.",
-          "threads": [
-            "THREAD_SYSTEM_GLITCH",
-            "THREAD_THE_ASCENSION"
           ]
         }
       ]
