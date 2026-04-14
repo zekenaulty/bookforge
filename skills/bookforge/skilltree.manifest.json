@@ -1,0 +1,606 @@
+{
+  "schema_version": "bookforge_skilltree_v1",
+  "root": "bookforge",
+  "default_model": "gemini-2.5-flash",
+  "skills": [
+    {
+      "skill_id": "bookforge.orchestrators.book-workflow",
+      "folder": "orchestrators/book-workflow",
+      "display_name": "Book Workflow Orchestrator",
+      "llm_description": "Routes setup, outline, run, recovery, and export requests across the BookForge skill tree.",
+      "kind": "orchestrator",
+      "category": "orchestrators",
+      "graph_node": "book_workflow",
+      "phase_id": "book_workflow",
+      "logical_phase": "book_workflow",
+      "prompt_contract": "Choose the correct BookForge workflow, preserve graph boundaries, and hand work to the best matching child skill.",
+      "output_hint": "a routed action plan or a direct next-step response",
+      "required_params": ["request"],
+      "optional_params": ["book_id", "workspace", "phase_selector", "input_payload"],
+      "source_refs": ["docs/help/index.md", "src/bookforge/cli.py", "README.md"],
+      "help_refs": ["docs/help/index.md"],
+      "routes": ["bookforge.orchestrators.outline-pipeline", "bookforge.orchestrators.run-pipeline"],
+      "example_params": {
+        "request": "Create or resume the next useful BookForge action for criticulous_b1.",
+        "book_id": "criticulous_b1",
+        "workspace": "workspace"
+      }
+    },
+    {
+      "skill_id": "bookforge.orchestrators.outline-pipeline",
+      "folder": "orchestrators/outline-pipeline",
+      "display_name": "Outline Pipeline Orchestrator",
+      "llm_description": "Routes outline generation, rerun, resume, and phase-window requests across the outline graph.",
+      "kind": "orchestrator",
+      "category": "orchestrators",
+      "graph_node": "outline_pipeline",
+      "phase_id": "outline_pipeline",
+      "logical_phase": "outline_pipeline",
+      "prompt_contract": "Route outline tasks to the correct outline phase skill and preserve the existing phase order from BookForge.",
+      "output_hint": "a routed outline action plan or a direct next-step response",
+      "required_params": ["request", "book_id"],
+      "optional_params": ["from_phase", "to_phase", "transition_hints", "working_outline"],
+      "source_refs": ["docs/help/outline_generate.md", "src/bookforge/outline.py", "src/bookforge/phases/outline/context.py"],
+      "help_refs": ["docs/help/outline_generate.md", "docs/help/outline_backup.md", "docs/help/outline_restore.md"],
+      "routes": [
+        "bookforge.outline.chapter-spine",
+        "bookforge.outline.section-architecture",
+        "bookforge.outline.scene-draft",
+        "bookforge.outline.transition-seam-analysis",
+        "bookforge.outline.transition-execution",
+        "bookforge.outline.metadata-relink",
+        "bookforge.outline.intro-sync",
+        "bookforge.outline.handoff-normalize",
+        "bookforge.outline.seam-hygiene",
+        "bookforge.outline.cast-function-refinement",
+        "bookforge.outline.thread-payoff-refinement"
+      ],
+      "example_params": {
+        "request": "Resume outline work from transition execution through seam hygiene.",
+        "book_id": "criticulous_b1",
+        "from_phase": "phase_04b_transition_execution",
+        "to_phase": "phase_04d_seam_hygiene"
+      }
+    },
+    {
+      "skill_id": "bookforge.orchestrators.run-pipeline",
+      "folder": "orchestrators/run-pipeline",
+      "display_name": "Run Pipeline Orchestrator",
+      "llm_description": "Routes scene-planning, drafting, repair, lint, and commit requests across the run graph.",
+      "kind": "orchestrator",
+      "category": "orchestrators",
+      "graph_node": "run_pipeline",
+      "phase_id": "run_pipeline",
+      "logical_phase": "run_pipeline",
+      "prompt_contract": "Route run-loop tasks to the right scene-phase skill without collapsing distinct validation and repair steps together.",
+      "output_hint": "a routed run action plan or a direct next-step response",
+      "required_params": ["request", "book_id"],
+      "optional_params": ["chapter", "scene", "state_snapshot", "scene_card"],
+      "source_refs": ["docs/help/run.md", "src/bookforge/runner.py"],
+      "help_refs": ["docs/help/run.md", "docs/help/llm.md"],
+      "routes": [
+        "bookforge.run.scene-planning",
+        "bookforge.run.preflight-state",
+        "bookforge.run.continuity-pack",
+        "bookforge.run.scene-writing",
+        "bookforge.run.scene-repair",
+        "bookforge.run.state-repair",
+        "bookforge.run.scene-lint",
+        "bookforge.run.scene-commit"
+      ],
+      "example_params": {
+        "request": "Prepare the next scene-writing loop and tell me the next concrete phase.",
+        "book_id": "criticulous_b1",
+        "chapter": 1,
+        "scene": 1
+      }
+    },
+    {
+      "skill_id": "bookforge.outline.chapter-spine",
+      "folder": "outline/chapter-spine",
+      "display_name": "Outline Phase 01 - Chapter Spine",
+      "llm_description": "Builds the chapter spine from prompt intent and outline seed context.",
+      "kind": "phase",
+      "category": "outline",
+      "graph_node": "outline.phase_01_chapter_spine",
+      "phase_id": "phase_01_chapter_spine",
+      "logical_phase": "phase_01_chapter_spine",
+      "prompt_contract": "Generate the spine_v1 chapter topology and preserve strict chapter-level structure.",
+      "output_hint": "JSON matching the spine_v1 output contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["prompt_file", "constraints"],
+      "source_refs": ["resources/prompt_blocks/phase/outline_pipeline/phase_01_chapter_spine_prompt_contract.md", "src/bookforge/phases/outline/phase_01_chapter_spine.py", "docs/help/outline_generate.md"],
+      "help_refs": ["docs/help/outline_generate.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Draft the opening chapter spine for a progression fantasy.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "premise": "A failed scholar becomes a dungeon archivist.",
+          "target_chapter_count": 8
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.outline.section-architecture",
+      "folder": "outline/section-architecture",
+      "display_name": "Outline Phase 02 - Section Architecture",
+      "llm_description": "Expands the chapter spine into chapter sections with intentional section roles and structure.",
+      "kind": "phase",
+      "category": "outline",
+      "graph_node": "outline.phase_02_section_architecture",
+      "phase_id": "phase_02_section_architecture",
+      "logical_phase": "phase_02_section_architecture",
+      "prompt_contract": "Transform the spine into sections_v1 while preserving chapter identity and order.",
+      "output_hint": "JSON matching the sections_v1 output contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["working_spine", "constraints"],
+      "source_refs": ["resources/prompt_blocks/phase/outline_pipeline/phase_02_section_architecture_prompt_contract.md", "src/bookforge/phases/outline/phase_02_section_architecture.py", "docs/help/outline_generate.md"],
+      "help_refs": ["docs/help/outline_generate.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Expand the spine into a sectioned chapter plan.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "schema_version": "spine_v1",
+          "chapters": [
+            {
+              "chapter_id": 1,
+              "title": "The Archive Below"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.outline.scene-draft",
+      "folder": "outline/scene-draft",
+      "display_name": "Outline Phase 03 - Scene Draft",
+      "llm_description": "Builds a full scene-level draft outline with transition-ready fields.",
+      "kind": "phase",
+      "category": "outline",
+      "graph_node": "outline.phase_03_scene_draft",
+      "phase_id": "phase_03_scene_draft",
+      "logical_phase": "phase_03_scene_draft",
+      "prompt_contract": "Produce the scene-draft outline with sections, scenes, and transition-ready structure.",
+      "output_hint": "JSON matching the outline scene-draft contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["working_sections", "transition_hints"],
+      "source_refs": ["resources/prompt_blocks/phase/outline_pipeline/phase_03_scene_draft_prompt_contract.md", "src/bookforge/phases/outline/phase_03_scene_draft.py", "docs/help/outline_generate.md"],
+      "help_refs": ["docs/help/outline_generate.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Draft the scene outline for chapter one.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "schema_version": "sections_v1",
+          "chapters": [
+            {
+              "chapter_id": 1,
+              "sections": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.outline.transition-seam-analysis",
+      "folder": "outline/transition-seam-analysis",
+      "display_name": "Outline Phase 04A - Transition Seam Analysis",
+      "llm_description": "Finds transition seam candidates and proposes required transition resolutions.",
+      "kind": "phase",
+      "category": "outline",
+      "graph_node": "outline.phase_04a_transition_seam_analysis",
+      "phase_id": "phase_04a_transition_seam_analysis",
+      "logical_phase": "phase_04_transition_causality_refinement",
+      "prompt_contract": "Analyze the scene draft for seam failures and emit candidate transition fixes with routing-ready metadata.",
+      "output_hint": "JSON matching the transition_refine_v1 seam-analysis contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["transition_hints", "policy_context"],
+      "source_refs": ["resources/prompt_blocks/phase/outline_pipeline/phase_04_transition_causality_refinement_prompt_contract.md", "src/bookforge/phases/outline/phase_04a_transition_seam_analysis.py", "docs/help/outline_generate.md"],
+      "help_refs": ["docs/help/outline_generate.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Identify transition seam problems for chapter one.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "chapter_id": 1,
+          "outline": {}
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.outline.transition-execution",
+      "folder": "outline/transition-execution",
+      "display_name": "Outline Phase 04B - Transition Execution",
+      "llm_description": "Executes selected transition repairs and authors inserted transition scenes when required.",
+      "kind": "phase",
+      "category": "outline",
+      "graph_node": "outline.phase_04b_transition_execution",
+      "phase_id": "phase_04b_transition_execution",
+      "logical_phase": "phase_04_transition_causality_refinement",
+      "prompt_contract": "Apply the routed transition candidates and author all required semantic transition content.",
+      "output_hint": "JSON matching the transition_refine_v1 execution contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["selected_candidates", "blocked_candidates", "policy_context"],
+      "source_refs": ["resources/prompt_blocks/phase/outline_pipeline/phase_04b_transition_execution_prompt_contract.md", "src/bookforge/phases/outline/phase_04b_transition_execution.py", "docs/help/outline_generate.md"],
+      "help_refs": ["docs/help/outline_generate.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Execute the approved transition fixes for chapter one.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "chapter_id": 1,
+          "outline": {}
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.outline.metadata-relink",
+      "folder": "outline/metadata-relink",
+      "display_name": "Outline Phase 04C - Metadata Relink",
+      "llm_description": "Repairs structural relink drift after transition insertion without authoring new scenes.",
+      "kind": "phase",
+      "category": "outline",
+      "graph_node": "outline.phase_04c_metadata_relink",
+      "phase_id": "phase_04c_metadata_relink",
+      "logical_phase": "phase_04_transition_causality_refinement",
+      "prompt_contract": "Relink metadata within the allowed window and keep structural edits inside the permitted field set.",
+      "output_hint": "JSON matching the outline_relink_v1 contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["window", "allowed_fields"],
+      "source_refs": ["resources/prompt_blocks/phase/outline_pipeline/phase_04c_metadata_relink_prompt_contract.md", "src/bookforge/phases/outline/phase_04c_metadata_relink.py", "docs/help/outline_generate.md"],
+      "help_refs": ["docs/help/outline_generate.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Relink metadata after inserted transition scenes.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "chapter_id": 1,
+          "outline": {}
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.outline.intro-sync",
+      "folder": "outline/intro-sync",
+      "display_name": "Outline Phase 04C-Intro - Character Intro Sync",
+      "llm_description": "Repairs character intro fields after transition edits while leaving scenes unchanged.",
+      "kind": "phase",
+      "category": "outline",
+      "graph_node": "outline.phase_04c_intro_sync",
+      "phase_id": "phase_04c_intro_sync",
+      "logical_phase": "phase_04_transition_causality_refinement",
+      "prompt_contract": "Update only the targeted character intro fields and preserve the scene outline exactly.",
+      "output_hint": "JSON matching the outline_intro_sync_v1 contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["character_registry", "character_ids"],
+      "source_refs": ["resources/prompt_blocks/phase/outline_pipeline/phase_04c_intro_sync_prompt_contract.md", "src/bookforge/phases/outline/phase_04c_intro_sync.py", "docs/help/outline_generate.md"],
+      "help_refs": ["docs/help/outline_generate.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Sync the character intro registry for chapter-local fixes.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "chapter_id": 1,
+          "outline": {}
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.outline.handoff-normalize",
+      "folder": "outline/handoff-normalize",
+      "display_name": "Outline Phase 04C-Handoff - Handoff Normalize",
+      "llm_description": "Normalizes terminal handoff and location-jump metadata for targeted scenes only.",
+      "kind": "phase",
+      "category": "outline",
+      "graph_node": "outline.phase_04c_handoff_normalize",
+      "phase_id": "phase_04c_handoff_normalize",
+      "logical_phase": "phase_04_transition_causality_refinement",
+      "prompt_contract": "Normalize the allowed handoff fields for the targeted refs without changing scene order or scene identity.",
+      "output_hint": "JSON matching the outline_handoff_normalize_v1 contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["handoff_targets", "allowed_jump_modes"],
+      "source_refs": ["resources/prompt_blocks/phase/outline_pipeline/phase_04c_handoff_normalize_prompt_contract.md", "src/bookforge/phases/outline/phase_04c_handoff_normalize.py", "docs/help/outline_generate.md"],
+      "help_refs": ["docs/help/outline_generate.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Normalize handoff metadata for the last scene in chapter one.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "chapter_id": 1,
+          "outline": {}
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.outline.seam-hygiene",
+      "folder": "outline/seam-hygiene",
+      "display_name": "Outline Phase 04D - Seam Hygiene",
+      "llm_description": "Performs final local seam cleanup after transition insertion and relink steps.",
+      "kind": "phase",
+      "category": "outline",
+      "graph_node": "outline.phase_04d_seam_hygiene",
+      "phase_id": "phase_04d_seam_hygiene",
+      "logical_phase": "phase_04_transition_causality_refinement",
+      "prompt_contract": "Clean seam-local hygiene issues inside the active window without altering scene identity or order.",
+      "output_hint": "JSON matching the outline_seam_hygiene_v1 contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["window", "allowed_fields"],
+      "source_refs": ["resources/prompt_blocks/phase/outline_pipeline/phase_04d_seam_hygiene_prompt_contract.md", "src/bookforge/phases/outline/phase_04d_seam_hygiene.py", "docs/help/outline_generate.md"],
+      "help_refs": ["docs/help/outline_generate.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Perform seam hygiene on the active transition window.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "chapter_id": 1,
+          "outline": {}
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.outline.cast-function-refinement",
+      "folder": "outline/cast-function-refinement",
+      "display_name": "Outline Phase 05 - Cast Function Refinement",
+      "llm_description": "Refines scene-level cast function so every presence earns narrative work.",
+      "kind": "phase",
+      "category": "outline",
+      "graph_node": "outline.phase_05_cast_function_refinement",
+      "phase_id": "phase_05_cast_function_refinement",
+      "logical_phase": "phase_05_cast_function_refinement",
+      "prompt_contract": "Refine cast usage and preserve validated outline structure.",
+      "output_hint": "JSON matching the cast_refine_v1 contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["chapter", "working_outline"],
+      "source_refs": ["resources/prompt_blocks/phase/outline_pipeline/phase_05_cast_function_refinement_prompt_contract.md", "src/bookforge/phases/outline/phase_05_cast_function_refinement.py", "docs/help/outline_generate.md"],
+      "help_refs": ["docs/help/outline_generate.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Refine cast function pressure across chapter two.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "chapter_id": 2,
+          "outline": {}
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.outline.thread-payoff-refinement",
+      "folder": "outline/thread-payoff-refinement",
+      "display_name": "Outline Phase 06 - Thread Payoff Refinement",
+      "llm_description": "Tightens thread progression and payoff distribution across the final outline.",
+      "kind": "phase",
+      "category": "outline",
+      "graph_node": "outline.phase_06_thread_payoff_refinement",
+      "phase_id": "phase_06_thread_payoff_refinement",
+      "logical_phase": "phase_06_thread_payoff_refinement",
+      "prompt_contract": "Refine thread/payoff structure while preserving validated cast and transition work.",
+      "output_hint": "JSON matching the final outline output contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["chapter", "working_outline"],
+      "source_refs": ["resources/prompt_blocks/phase/outline_pipeline/phase_06_thread_payoff_refinement_prompt_contract.md", "src/bookforge/phases/outline/phase_06_thread_payoff_refinement.py", "docs/help/outline_generate.md"],
+      "help_refs": ["docs/help/outline_generate.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Refine thread payoff continuity in the final outline.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "outline": {}
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.run.scene-planning",
+      "folder": "run/scene-planning",
+      "display_name": "Run Phase - Scene Planning",
+      "llm_description": "Plans the next scene card from outline, state, and recent lint context.",
+      "kind": "phase",
+      "category": "run",
+      "graph_node": "run.plan",
+      "phase_id": "plan",
+      "logical_phase": "plan",
+      "prompt_contract": "Generate the scene card and preserve the BookForge scene-card contract.",
+      "output_hint": "JSON matching the scene-card contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["chapter", "scene", "state_snapshot"],
+      "source_refs": ["resources/prompt_blocks/phase/plan/scene_card_prompt_contract_and_schema.md", "src/bookforge/phases/plan.py", "docs/help/run.md"],
+      "help_refs": ["docs/help/run.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Plan the next scene card.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "chapter": 1,
+          "scene": 1
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.run.preflight-state",
+      "folder": "run/preflight-state",
+      "display_name": "Run Phase - Preflight State",
+      "llm_description": "Applies scene-local preflight state reasoning before prose generation.",
+      "kind": "phase",
+      "category": "run",
+      "graph_node": "run.preflight",
+      "phase_id": "preflight",
+      "logical_phase": "preflight",
+      "prompt_contract": "Emit the authoritative preflight patch for scene-local state updates.",
+      "output_hint": "JSON matching the preflight patch contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["chapter", "scene", "state_snapshot"],
+      "source_refs": ["resources/prompt_blocks/phase/preflight/", "src/bookforge/phases/preflight_phase.py", "docs/help/run.md"],
+      "help_refs": ["docs/help/run.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Generate the preflight state patch for the current scene.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "scene_card": {},
+          "state": {}
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.run.continuity-pack",
+      "folder": "run/continuity-pack",
+      "display_name": "Run Phase - Continuity Pack",
+      "llm_description": "Builds the continuity pack used to ground scene writing without replaying raw prose.",
+      "kind": "phase",
+      "category": "run",
+      "graph_node": "run.continuity_pack",
+      "phase_id": "continuity_pack",
+      "logical_phase": "continuity_pack",
+      "prompt_contract": "Produce the continuity pack and preserve factual continuity anchors.",
+      "output_hint": "JSON matching the continuity-pack contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["chapter", "scene", "state_snapshot"],
+      "source_refs": ["resources/prompt_blocks/phase/continuity_pack/prompt_contract_and_constraints.md", "src/bookforge/phases/continuity_phase.py", "docs/help/run.md"],
+      "help_refs": ["docs/help/run.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Build the continuity pack for the next scene.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "scene_card": {},
+          "state": {}
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.run.scene-writing",
+      "folder": "run/scene-writing",
+      "display_name": "Run Phase - Scene Writing",
+      "llm_description": "Writes the full scene prose and primary patch from the approved scene card and continuity pack.",
+      "kind": "phase",
+      "category": "run",
+      "graph_node": "run.write",
+      "phase_id": "write",
+      "logical_phase": "write",
+      "prompt_contract": "Write the scene prose and emit the corresponding patch without violating continuity rules.",
+      "output_hint": "scene prose plus JSON patch aligned with the write contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["chapter", "scene", "continuity_pack"],
+      "source_refs": ["resources/prompt_blocks/phase/write/", "src/bookforge/phases/write_phase.py", "docs/help/run.md"],
+      "help_refs": ["docs/help/run.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Write the scene prose for the approved scene card.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "scene_card": {},
+          "continuity_pack": {}
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.run.scene-repair",
+      "folder": "run/scene-repair",
+      "display_name": "Run Phase - Scene Repair",
+      "llm_description": "Repairs scene prose and patch output after lint or deterministic invariant failures.",
+      "kind": "phase",
+      "category": "run",
+      "graph_node": "run.repair",
+      "phase_id": "repair",
+      "logical_phase": "repair",
+      "prompt_contract": "Repair the scene output while preserving required state and continuity invariants.",
+      "output_hint": "repaired scene prose plus JSON patch aligned with the repair contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["chapter", "scene", "lint_report"],
+      "source_refs": ["resources/prompt_blocks/phase/repair/", "src/bookforge/phases/repair_phase.py", "docs/help/run.md"],
+      "help_refs": ["docs/help/run.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Repair the failing scene output using the lint report.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "scene_card": {},
+          "lint_report": {}
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.run.state-repair",
+      "folder": "run/state-repair",
+      "display_name": "Run Phase - State Repair",
+      "llm_description": "Repairs the authoritative patch after prose generation without rewriting the full scene again.",
+      "kind": "phase",
+      "category": "run",
+      "graph_node": "run.state_repair",
+      "phase_id": "state_repair",
+      "logical_phase": "state_repair",
+      "prompt_contract": "Emit the authoritative state-repair patch while preserving the already-written prose.",
+      "output_hint": "JSON matching the state-repair contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["chapter", "scene", "prose"],
+      "source_refs": ["resources/prompt_blocks/phase/state_repair/", "src/bookforge/phases/state_repair_phase.py", "docs/help/run.md"],
+      "help_refs": ["docs/help/run.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Repair the state patch after prose generation.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "scene_card": {},
+          "prose": "Sample prose"
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.run.scene-lint",
+      "folder": "run/scene-lint",
+      "display_name": "Run Phase - Scene Lint",
+      "llm_description": "Evaluates the scene and patch for continuity, invariant, and anti-duplication failures.",
+      "kind": "phase",
+      "category": "run",
+      "graph_node": "run.lint",
+      "phase_id": "lint",
+      "logical_phase": "lint",
+      "prompt_contract": "Produce a lint report that surfaces failure reasons instead of silently forgiving them.",
+      "output_hint": "JSON matching the lint report contract",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["chapter", "scene", "pre_state", "post_state"],
+      "source_refs": ["resources/prompt_blocks/phase/lint/lint_policy_rules_and_inputs.md", "src/bookforge/phases/lint_phase.py", "docs/help/run.md"],
+      "help_refs": ["docs/help/run.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Lint the current scene output.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "scene_card": {},
+          "prose": "Sample prose",
+          "patch": {}
+        }
+      }
+    },
+    {
+      "skill_id": "bookforge.run.scene-commit",
+      "folder": "run/scene-commit",
+      "display_name": "Run Phase - Scene Commit",
+      "llm_description": "Commits validated prose, state, and metadata artifacts to the BookForge workspace.",
+      "kind": "phase",
+      "category": "run",
+      "graph_node": "run.commit",
+      "phase_id": "commit",
+      "logical_phase": "commit",
+      "prompt_contract": "Package the final commit step, including artifact writes and durable state advancement, without skipping validations.",
+      "output_hint": "a deterministic commit checklist or commit-ready response",
+      "required_params": ["request", "book_id", "input_payload"],
+      "optional_params": ["chapter", "scene", "lint_report"],
+      "source_refs": ["src/bookforge/runner.py", "src/bookforge/pipeline/state_apply.py", "docs/help/run.md"],
+      "help_refs": ["docs/help/run.md"],
+      "routes": [],
+      "example_params": {
+        "request": "Commit the validated scene outputs.",
+        "book_id": "criticulous_b1",
+        "input_payload": {
+          "scene_card": {},
+          "patch": {},
+          "lint_report": {
+            "status": "pass"
+          }
+        }
+      }
+    }
+  ]
+}

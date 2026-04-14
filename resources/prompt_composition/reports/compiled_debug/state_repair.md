@@ -119,13 +119,17 @@ Naming repairs:
 - Transfer vs registry conflict rule (must follow):
   - If you create a NEW item in item_registry_updates with final custodian already set (e.g., CHAR_ARTIE), DO NOT emit transfer_updates for that item.
   - If you emit transfer_updates for a NEW item, the registry entry must start with custodian="world" and then transfer to the character.
-  - expected_before must match the registry entry at the moment of transfer (after any registry update that applies before it).  - `inventory_alignment_updates` for scene-fit posture normalization.
+  - expected_before must match the registry entry at the moment of transfer (after any registry update that applies before it).
+  - `inventory_alignment_updates` for scene-fit posture normalization.
   - `item_registry_updates` for durable item metadata/custody changes.
   - `plot_device_updates` for durable plot-device custody/activation changes.
-  - `transfer_updates` for item handoffs (source, destination, reason, optional transfer_chain).
+  - `transfer_updates` for item handoffs (`from` endpoint object, `to` endpoint object, reason, optional transfer_chain).
   - Every `transfer_updates` entry must include `item_id` and `reason` (non-empty string).
+  - `transfer_updates.from` and `transfer_updates.to` MUST be objects; never strings.
+    - INVALID: {"item_id": "ITEM_X", "source": "CHAR_A", "destination": "world", "reason": "handoff"}
+    - INVALID: {"item_id": "ITEM_X", "from": "CHAR_A", "to": "world", "reason": "handoff"}
+    - VALID: {"item_id": "ITEM_X", "from": {"character_id": "CHAR_A"}, "to": {"custodian": "world"}, "reason": "handoff"}
   - `inventory_alignment_updates` must be an array of objects; never an object with an `updates` field.
-
 <!-- end entry=E006 semantic=state_repair.transfer_registry_conflict_rule -->
 <!-- begin entry=E007 semantic=state_repair.durable_mutation_constraints_scope_and_reason_rules source=resources/prompt_blocks/phase/state_repair/durable_mutation_constraints_scope_and_reason_rules.md repeat=1/1 -->
   - inventory_alignment_updates[*].set MUST be an object (not a list).
@@ -199,13 +203,16 @@ JSON Contract Block (strict; arrays only):
     - VALID:   "plot_device_updates": [{"device_id": "DEVICE_X", "set": {...}}]
   - transfer_updates:
     - INVALID: "transfer_updates": {"item_id": "ITEM_X"}
-    - VALID:   "transfer_updates": [{"item_id": "ITEM_X", "reason": "handoff"}]
+    - INVALID: "transfer_updates": [{"item_id": "ITEM_X", "source": "CHAR_A", "destination": "world", "reason": "handoff"}]
+    - INVALID: "transfer_updates": [{"item_id": "ITEM_X", "from": "CHAR_A", "to": "world", "reason": "handoff"}]
+    - VALID:   "transfer_updates": [{"item_id": "ITEM_X", "from": {"character_id": "CHAR_A"}, "to": {"custodian": "world"}, "reason": "handoff"}]
   - inventory_alignment_updates:
     - INVALID: "inventory_alignment_updates": {"updates": [{...}]}
+    - INVALID: "inventory_alignment_updates": [{"remove": [{"item_id": "ITEM_X"}]}]
     - VALID:   "inventory_alignment_updates": [{"character_id": "CHAR_X", "set": {...}, "reason": "..."}]
+    - VALID:   "inventory_alignment_updates": [{"character_id": "CHAR_X", "remove": ["inventory.ITEM_X"], "reason": "..."}]
   - global_continuity_system_updates:
     - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
     - VALID:   "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
 - custodian must be a non-null string id or "world"; never null.
-
 <!-- end entry=E010 semantic=state_repair.updates_arrays_only_contract_block -->

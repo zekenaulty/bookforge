@@ -46,6 +46,10 @@ To prevent monolithic drift:
    - `src/bookforge/phases/outline/phase_03_scene_draft.py`
    - `src/bookforge/phases/outline/phase_04a_transition_seam_analysis.py`
    - `src/bookforge/phases/outline/phase_04b_transition_execution.py`
+   - `src/bookforge/phases/outline/phase_04c_metadata_relink.py`
+   - `src/bookforge/phases/outline/phase_04c_intro_sync.py`
+   - `src/bookforge/phases/outline/phase_04c_handoff_normalize.py`
+   - `src/bookforge/phases/outline/phase_04d_seam_hygiene.py`
    - `src/bookforge/phases/outline/phase_05_cast_function_refinement.py`
    - `src/bookforge/phases/outline/phase_06_thread_payoff_refinement.py`
 5. Shared cross-phase helpers belong in dedicated modules, not `outline.py`:
@@ -62,11 +66,15 @@ The top-level pipeline remains six phases, but phase 04 is internally split into
 3. Phase 03: scene draft (full outline v1.1 + required transition contract fields)
 4. Phase 04A: transition seam analysis and candidate proposal (LLM)
 5. Phase 04B: transition refinement and insertion execution (LLM)
-6. Phase 05: cast function refinement
-7. Phase 06: thread/payoff refinement
+6. Phase 04C: metadata relink for insertion drift (LLM)
+7. Phase 04C-Intro: character intro sync (LLM)
+8. Phase 04C-Handoff: chapter-terminal + location jump normalization (LLM)
+9. Phase 04D: seam hygiene (LLM)
+10. Phase 05: cast function refinement
+11. Phase 06: thread/payoff refinement
 
 Note:
-1. Phase 04A and 04B are one logical phase to the CLI (`phase_04_transition_causality_refinement`) but two explicit internal attempts/steps for orchestration and artifacting.
+1. Phase 04A/04B/04C/04C-Intro/04C-Handoff/04D are one logical phase to the CLI (`phase_04_transition_causality_refinement`) but explicit internal steps for orchestration and artifacting.
 2. Code may select candidate edges deterministically only for routing; code may not inject semantic scene text.
 
 ## Prompt Asset Delta (Explicit)
@@ -77,13 +85,29 @@ Required additions/changes:
 1. Treat existing file as phase 04A contract source (seam analysis contract).
 2. Add new phase 04B contract file:
    - `resources/prompt_blocks/phase/outline_pipeline/phase_04b_transition_execution_prompt_contract.md`
-3. Add or split composed prompt templates:
+3. Add new phase 04C contract file:
+   - `resources/prompt_blocks/phase/outline_pipeline/phase_04c_metadata_relink_prompt_contract.md`
+4. Add new phase 04C-Intro contract file:
+   - `resources/prompt_blocks/phase/outline_pipeline/phase_04c_intro_sync_prompt_contract.md`
+5. Add new phase 04C-Handoff contract file:
+   - `resources/prompt_blocks/phase/outline_pipeline/phase_04c_handoff_normalize_prompt_contract.md`
+6. Add new phase 04D contract file:
+   - `resources/prompt_blocks/phase/outline_pipeline/phase_04d_seam_hygiene_prompt_contract.md`
+7. Add or split composed prompt templates:
    - `resources/prompt_templates/outline_phase_04a_transition_seam_analysis.md`
    - `resources/prompt_templates/outline_phase_04b_transition_execution.md`
-4. Add new composition manifests:
+   - `resources/prompt_templates/outline_phase_04c_metadata_relink.md`
+   - `resources/prompt_templates/outline_phase_04c_intro_sync.md`
+   - `resources/prompt_templates/outline_phase_04c_handoff_normalize.md`
+   - `resources/prompt_templates/outline_phase_04d_seam_hygiene.md`
+8. Add new composition manifests:
    - `resources/prompt_composition/manifests/outline_phase_04a_transition_seam_analysis.composition.manifest.json`
    - `resources/prompt_composition/manifests/outline_phase_04b_transition_execution.composition.manifest.json`
-5. Keep legacy template compatibility for operator-facing phase naming:
+   - `resources/prompt_composition/manifests/outline_phase_04c_metadata_relink.composition.manifest.json`
+   - `resources/prompt_composition/manifests/outline_phase_04c_intro_sync.composition.manifest.json`
+   - `resources/prompt_composition/manifests/outline_phase_04c_handoff_normalize.composition.manifest.json`
+   - `resources/prompt_composition/manifests/outline_phase_04d_seam_hygiene.composition.manifest.json`
+9. Keep legacy template compatibility for operator-facing phase naming:
    - `outline_phase_04_transition_causality_refinement` remains CLI logical phase ID.
    - Runtime can map this to internal steps `04A` and `04B`.
 
@@ -122,7 +146,7 @@ Compiler allowlist must be updated for whichever placeholders are adopted.
 3. Inserting synthetic transition scenes with generated summary/outcome/transition prose.
 4. Silently rewriting seam resolution from model output without reason-coded visibility.
 
-## Phase 04 Internal Two-Step Flow
+## Phase 04 Internal Multi-Step Flow
 ### Step 04A: seam analysis (LLM)
 Input:
 1. Phase 03 outline artifact.
@@ -147,6 +171,7 @@ Output:
 1. Full updated outline with inserted scenes authored by LLM where required.
 2. Updated phase report with:
    - inserted scene refs,
+   - insertion edge impacts,
    - blocked_by_budget refs,
    - downgraded_resolution refs,
    - unresolved_required_insertions refs.
@@ -154,6 +179,64 @@ Output:
 Hard rule:
 1. If inserted scene is required and not authored by LLM, phase 04 fails.
 2. No deterministic substitute scene content may be generated.
+
+### Step 04C: metadata relink (LLM)
+Input:
+1. 04B output.
+2. Impact windows derived from 04B insertion_edge_impacts.
+3. Allowed-fields contract (structural only).
+
+Output:
+1. Full updated outline with structural relink fixes applied in-window.
+2. Updated phase report with touched refs/fields and intro updates.
+
+Hard rule:
+1. No scene add/remove/reorder or scene_id changes.
+2. Only window refs and allowed fields may change.
+
+### Step 04C-Intro: character intro sync (LLM)
+Input:
+1. 04C output.
+2. Chapter-local list of character ids whose `intro` is stale.
+3. Authoritative character registry snapshot.
+
+Output:
+1. Chapter outline unchanged.
+2. Character registry with corrected `intro` entries for listed ids only.
+
+Hard rule:
+1. No scene changes and no character add/remove.
+2. Only `characters[*].intro` for listed ids may change.
+
+### Step 04C-Handoff: handoff normalize (LLM)
+Input:
+1. 04C-Intro output.
+2. Chapter-local handoff fix list (scene refs + reason).
+3. Allowed location-jump modes list.
+
+Output:
+1. Chapter outline with `handoff_mode` updated for listed refs only.
+2. Phase report of touched refs.
+
+Hard rule:
+1. Only `handoff_mode` may change on listed refs.
+2. Chapter-final scenes must be `handoff_mode=terminal`.
+3. Location jumps must use `arrival_checkpoint` or `time_skip` unless the scene is terminal.
+
+### Step 04D: seam hygiene (LLM)
+Input:
+1. 04C-Handoff output.
+2. Window list derived from insertion impacts + missing seam metadata + identical anchors.
+3. Allowed seam/transition fields list (authoritative).
+
+Output:
+1. Chapter outline with seam metadata and anchors repaired in-window.
+2. Phase report with touched refs/fields.
+
+Hard rule:
+1. Seam metadata (`seam_score`, `seam_resolution`) required on every scene.
+2. Successor transition_in anchors must reflect the true predecessor after insertion.
+3. No scene add/remove/reorder or registry changes.
 
 ## Scene Count and Insertion Policy
 Default mode:
@@ -200,7 +283,12 @@ Required phase 04 artifacts:
 6. `phase_04b_attempt_1.raw.json`
 7. `phase_04b_output.json`
 8. `phase_04b_validation.json`
-9. `outline_transitions_refined_v1_1.json` (handoff artifact)
+9. `phase_04c_input.json`
+10. `phase_04c_attempt_1.raw.json`
+11. `phase_04c_output.json`
+12. `phase_04c_validation.json`
+13. `outline_transitions_refined_v1_1.json` (handoff artifact, post-04B)
+14. `outline_transitions_relinked_v1_1.json` (handoff artifact, post-04C)
 
 Phase 04 step-split trace artifacts:
 1. `phase_04_selected_candidates.json`
@@ -242,9 +330,11 @@ Phase 04B prompt must additionally include:
    - phase 04A execution logic.
 7. `src/bookforge/phases/outline/phase_04b_transition_execution.py` (new)
    - phase 04B execution logic and insertion-resolution validation handoff.
-8. `src/bookforge/phases/outline/phase_05_cast_function_refinement.py` (new)
+8. `src/bookforge/phases/outline/phase_04c_metadata_relink.py` (new)
+   - phase 04C metadata relink execution logic.
+9. `src/bookforge/phases/outline/phase_05_cast_function_refinement.py` (new)
    - phase 05 execution logic.
-9. `src/bookforge/phases/outline/phase_06_thread_payoff_refinement.py` (new)
+10. `src/bookforge/phases/outline/phase_06_thread_payoff_refinement.py` (new)
    - phase 06 execution logic.
 10. `src/bookforge/phases/outline/validators.py` (new)
    - shared deterministic validators.
@@ -256,17 +346,23 @@ Phase 04B prompt must additionally include:
    - treat as 04A contract source.
 14. `resources/prompt_blocks/phase/outline_pipeline/phase_04b_transition_execution_prompt_contract.md` (new)
    - define 04B insertion execution and inserted-scene authoring contract.
-15. `resources/prompt_templates/outline_phase_04a_transition_seam_analysis.md` (new/split)
+15. `resources/prompt_blocks/phase/outline_pipeline/phase_04c_metadata_relink_prompt_contract.md` (new)
+   - define 04C metadata relink contract.
+16. `resources/prompt_templates/outline_phase_04a_transition_seam_analysis.md` (new/split)
    - compiled 04A template.
-16. `resources/prompt_templates/outline_phase_04b_transition_execution.md` (new)
+17. `resources/prompt_templates/outline_phase_04b_transition_execution.md` (new)
    - compiled 04B template.
-17. `resources/prompt_composition/manifests/outline_phase_04a_transition_seam_analysis.composition.manifest.json` (new)
+18. `resources/prompt_templates/outline_phase_04c_metadata_relink.md` (new)
+   - compiled 04C template.
+19. `resources/prompt_composition/manifests/outline_phase_04a_transition_seam_analysis.composition.manifest.json` (new)
    - compose 04A template from blocks.
-18. `resources/prompt_composition/manifests/outline_phase_04b_transition_execution.composition.manifest.json` (new)
+20. `resources/prompt_composition/manifests/outline_phase_04b_transition_execution.composition.manifest.json` (new)
    - compose 04B template from blocks.
-19. `resources/prompt_composition/prompt_tokens_allowlist.json`
-   - allowlist 04B routing payload placeholders.
-20. `resources/prompt_composition/source_of_truth_checksums.json`
+21. `resources/prompt_composition/manifests/outline_phase_04c_metadata_relink.composition.manifest.json` (new)
+   - compose 04C template from blocks.
+22. `resources/prompt_composition/prompt_tokens_allowlist.json`
+   - allowlist 04B/04C routing + window payload placeholders.
+23. `resources/prompt_composition/source_of_truth_checksums.json`
    - refresh checksums after prompt asset changes.
 21. `src/bookforge/workspace.py`
    - include new templates in workspace distribution.
@@ -279,8 +375,8 @@ Phase 04B prompt must additionally include:
 
 ## Formalization Gate
 No implementation should begin until reviewers sign off on:
-1. phase 04A/04B prompt asset names and locations,
-2. 04B routing payload placeholders,
+1. phase 04A/04B/04C prompt asset names and locations,
+2. 04B/04C routing + window payload placeholders,
 3. failure/gating behavior for unresolved required insertions,
 4. exact-mode conflict behavior.
 
@@ -288,10 +384,11 @@ No implementation should begin until reviewers sign off on:
 1. No phase code creates transition prose or anchor text.
 2. No phase code inserts semantic transition scenes with generated placeholder content.
 3. Phase 04 selected insertion candidates are authored by LLM or the phase fails.
-4. Exact-mode conflicts fail explicitly with reason code; no silent downgrade.
-5. Console and report visibility includes seam decision outcomes.
-6. Resume/rerun behavior remains deterministic and dependency-safe.
-7. Prompt compiler remains sole prompt source of truth.
+4. Phase 04C relink touches only window refs and allowed fields.
+5. Exact-mode conflicts fail explicitly with reason code; no silent downgrade.
+6. Console and report visibility includes seam decision outcomes.
+7. Resume/rerun behavior remains deterministic and dependency-safe.
+8. Prompt compiler remains sole prompt source of truth.
 
 ## Rollout Sequence
 1. Rebuild plans and prompt contracts first.

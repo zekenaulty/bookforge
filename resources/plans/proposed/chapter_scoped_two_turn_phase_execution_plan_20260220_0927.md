@@ -7,11 +7,17 @@ Initial target (revised, priority order):
 1. Phase 03 (scene draft) — chapter-scoped two-turn to stop thinking overflow
 2. Phase 04A (transition seam analysis)
 3. Phase 04B (transition execution)
+4. Phase 04C (metadata relink)
 
 Planned reuse pattern:
 1. Writing
 2. Linting
 3. Repair
+
+Status update (2026-04-11):
+1. Two-turn is implemented for outline phases 03/04A/04B/04C/05/06.
+2. Two-turn is implemented for writing-loop phases: plan, preflight, write, repair, state_repair, lint.
+3. Per-turn thinking levels are now resolved via `*_T1_THINKING_LEVEL` and `*_T2_THINKING_LEVEL` env overrides.
 
 This plan is process and architecture only. No code behavior is changed by this document itself.
 
@@ -262,6 +268,30 @@ Execution discipline:
 2. If execution touches refs outside declared scope, flag as drift and route targeted retry.
 3. If continuity replay fails, rerun `T1` first; do not execute blind `T2`.
 
+## Phase 04C Two-Turn Workflow
+
+### 04C-T1 (Planning)
+Goal:
+1. Review the provided impact window and plan structural relink actions.
+2. Confirm allowed edit fields and targeted refs.
+
+Output:
+1. Minimal confirmation object only (ready/not-ready + counts).
+
+Persist:
+1. Thought signature if returned.
+2. `04C_plan_compact.json` with window scope confirmation.
+
+### 04C-T2 (Execution)
+Goal:
+1. Apply structural relink within the impact window only.
+2. Update only allowed fields (links, terminal handoff_mode, end_condition_echo, intro metadata as scoped).
+
+Execution discipline:
+1. Do not add/remove scenes or change scene_id values.
+2. Do not edit scenes outside the window.
+3. Do not edit fields outside the allowlist.
+
 ## Deterministic Validation Scope
 Deterministic checks must remain structural.
 
@@ -279,6 +309,12 @@ Deterministic checks must remain structural.
    3. successor `consumes_outcome_from`
 3. Reconciliation evidence present for affected refs.
 4. Required transition fields are present/non-empty on touched scenes.
+
+### 04C validation
+1. Only window scene refs may change.
+2. Only allowed fields may change within touched scenes.
+3. No scene add/remove/reorder or scene_id changes.
+4. Character intro updates only for characters within window scope.
 
 Deterministic validator does not:
 1. Decide whether prose is "good"
@@ -464,11 +500,12 @@ Extension template:
 2. 04A emits edge audit for every adjacent edge and candidate seams derived from that audit.
 3. 04B selected insertion candidates result in authored inserted scenes or explicit terminal error.
 4. 04B insertion outputs include reconciliation evidence for all affected scene refs.
-5. Resume logic treats incomplete turn pairs as non-durable and restarts safely from T1 unless equivalent explicit plan artifact path is valid.
-6. No deterministic semantic autofill is introduced.
-7. Immediate `T1 -> T2` continuity attempts preserve assistant parts losslessly.
-8. When continuity is unavailable, explicit-plan fallback path produces equivalent contract-compliant output.
-9. No long-pause dependency on hidden thought state is required for correctness.
+5. 04C relink output touches only window scene refs and only allowed fields.
+6. Resume logic treats incomplete turn pairs as non-durable and restarts safely from T1 unless equivalent explicit plan artifact path is valid.
+7. No deterministic semantic autofill is introduced.
+8. Immediate `T1 -> T2` continuity attempts preserve assistant parts losslessly.
+9. When continuity is unavailable, explicit-plan fallback path produces equivalent contract-compliant output.
+10. No long-pause dependency on hidden thought state is required for correctness.
 
 ## Rollout Sequence
 1. Add thinking budget support + mutual-exclusion policy (budget vs level).

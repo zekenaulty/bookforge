@@ -14,6 +14,7 @@ from bookforge.pipeline.parse import _extract_json
 from bookforge.pipeline.prompts import _resolve_template, _system_prompt_for_phase
 from bookforge.pipeline.state_apply import _summary_from_state
 from bookforge.pipeline.state_patch import _normalize_state_patch_for_validation
+from bookforge.pipeline.thinking import resolve_turn_thinking_level
 from bookforge.prompt.renderer import render_template_file
 from bookforge.util.schema import validate_json
 
@@ -54,46 +55,87 @@ def _state_repair(
         },
     )
 
-    messages: List[Message] = [
+    base_messages: List[Message] = [
         {"role": "system", "content": _system_prompt_for_phase(system_path, book_root / "outline" / "outline.json", "state_repair")},
         {"role": "user", "content": prompt},
     ]
 
-    response = _chat(
-        workspace,
-        "state_repair",
-        client,
-        messages,
-        model=model,
-        temperature=0.2,
-        max_tokens=_state_repair_max_tokens(),
-        log_extra=_log_scope(book_root, scene_card),
-    )
+    log_extra = _log_scope(book_root, scene_card)
+    log_extra = {**log_extra, "phase_id": "state_repair"}
+    t1_level = resolve_turn_thinking_level("state_repair", "T1")
+    t2_level = resolve_turn_thinking_level("state_repair", "T2")
+
+    t1_parts: Optional[List[Dict[str, Any]]] = None
+    t1_retry_message: Optional[str] = None
+    t1_attempt = 0
+    while True:
+        t1_messages = list(base_messages)
+        t1_messages.append({
+            "role": "user",
+            "content": (
+                "THINKING PHASE: Analyze the draft patch and plan the corrected state patch. "
+                "Do NOT output the JSON patch. Return ONLY a small JSON object: "
+                "{\"status\":\"ready_to_execute\",\"notes\":[],\"warnings\":[],\"edge_count\":0}."
+            ),
+        })
+        if t1_retry_message:
+            t1_messages.append({"role": "user", "content": t1_retry_message})
+        response = _chat(
+            workspace,
+            "state_repair_t1",
+            client,
+            t1_messages,
+            model=model,
+            temperature=0.2,
+            max_tokens=_state_repair_max_tokens(),
+            thinking_level=t1_level,
+            log_extra={**log_extra, "turn_id": "T1"},
+        )
+        try:
+            _extract_json(response.text or "")
+            t1_parts = response.assistant_parts if isinstance(response.assistant_parts, list) else None
+            break
+        except Exception:
+            t1_attempt += 1
+            if t1_attempt > _json_retry_count():
+                raise
+            t1_retry_message = "Return ONLY the ready JSON object. No prose, no markdown, no commentary."
 
     retries = _json_retry_count()
     attempt = 0
     while True:
         try:
+            t2_messages = list(base_messages)
+            if t1_parts and str(getattr(client, "provider", "")).lower() == "gemini":
+                t2_messages.append({"role": "assistant", "parts": t1_parts})
+            t2_messages.append({
+                "role": "user",
+                "content": (
+                    "EXECUTION PHASE: Emit the corrected STATE_PATCH JSON only. "
+                    "Do NOT include analysis or planning text. Output JSON only."
+                ),
+            })
+            if attempt > 0:
+                t2_messages.append({
+                    "role": "user",
+                    "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
+                })
+            response = _chat(
+                workspace,
+                "state_repair",
+                client,
+                t2_messages,
+                model=model,
+                temperature=0.2,
+                max_tokens=_state_repair_max_tokens(),
+                thinking_level=t2_level,
+                log_extra={**log_extra, "turn_id": "T2"},
+            )
             patch = _extract_json(response.text)
             break
         except ValueError as exc:
             if attempt >= retries:
                 raise exc
-            retry_messages = list(messages)
-            retry_messages.append({
-                "role": "user",
-                "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
-            })
-            response = _chat(
-                workspace,
-                f"state_repair_json_retry{attempt + 1}",
-                client,
-                retry_messages,
-                model=model,
-                temperature=0.2,
-                max_tokens=_state_repair_max_tokens(),
-                log_extra=_log_scope(book_root, scene_card),
-            )
             attempt += 1
     schema_attempt = 0
     while True:
@@ -104,7 +146,16 @@ def _state_repair(
         except ValueError as exc:
             if schema_attempt >= retries:
                 raise
-            retry_messages = list(messages)
+            retry_messages = list(base_messages)
+            if t1_parts and str(getattr(client, "provider", "")).lower() == "gemini":
+                retry_messages.append({"role": "assistant", "parts": t1_parts})
+            retry_messages.append({
+                "role": "user",
+                "content": (
+                    "EXECUTION PHASE: Emit the corrected STATE_PATCH JSON only. "
+                    "Do NOT include analysis or planning text. Output JSON only."
+                ),
+            })
             retry_messages.append({
                 "role": "user",
                 "content": _state_patch_schema_retry_message(exc, prose_required=False),
@@ -117,7 +168,8 @@ def _state_repair(
                 model=model,
                 temperature=0.2,
                 max_tokens=_state_repair_max_tokens(),
-                log_extra=_log_scope(book_root, scene_card),
+                thinking_level=t2_level,
+                log_extra={**log_extra, "turn_id": "T2"},
             )
             patch = _extract_json(response.text)
             schema_attempt += 1

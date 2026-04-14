@@ -84,6 +84,8 @@ Phase-04 split extension (required by rebuild plans):
 - existing file above is treated as phase 04A seam-analysis contract source.
 - new file required for phase 04B execution contract:
   - `resources/prompt_blocks/phase/outline_pipeline/phase_04b_transition_execution_prompt_contract.md`
+- new file required for phase 04C metadata relink contract:
+  - `resources/prompt_blocks/phase/outline_pipeline/phase_04c_metadata_relink_prompt_contract.md`
 - see:
   - `resources/plans/proposed/outline_phase4_two_step_llm_transition_plan_20260216_0145.md`
   - `resources/plans/proposed/outline_pipeline_rebuild_implementation_checklist_20260216_0145.md`
@@ -107,6 +109,9 @@ Phase-04 split extension (required by rebuild plans):
 - `outline_phase_02_section_architecture.md`
 - `outline_phase_03_scene_draft.md`
 - `outline_phase_04_transition_causality_refinement.md`
+- `outline_phase_04a_transition_seam_analysis.md`
+- `outline_phase_04b_transition_execution.md`
+- `outline_phase_04c_metadata_relink.md`
 - `outline_phase_05_cast_function_refinement.md`
 - `outline_phase_06_thread_payoff_refinement.md`
 

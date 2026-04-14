@@ -7,6 +7,10 @@ from . import phase_02_section_architecture
 from . import phase_03_scene_draft
 from . import phase_04a_transition_seam_analysis
 from . import phase_04b_transition_execution
+from . import phase_04c_metadata_relink
+from . import phase_04c_intro_sync
+from . import phase_04c_handoff_normalize
+from . import phase_04d_seam_hygiene
 from . import phase_05_cast_function_refinement
 from . import phase_06_thread_payoff_refinement
 
@@ -17,6 +21,10 @@ HANDLERS = {
     "phase_03_scene_draft": phase_03_scene_draft,
     "phase_04a_transition_seam_analysis": phase_04a_transition_seam_analysis,
     "phase_04b_transition_execution": phase_04b_transition_execution,
+    "phase_04c_metadata_relink": phase_04c_metadata_relink,
+    "phase_04c_intro_sync": phase_04c_intro_sync,
+    "phase_04c_handoff_normalize": phase_04c_handoff_normalize,
+    "phase_04d_seam_hygiene": phase_04d_seam_hygiene,
     "phase_05_cast_function_refinement": phase_05_cast_function_refinement,
     "phase_06_thread_payoff_refinement": phase_06_thread_payoff_refinement,
 }
@@ -39,4 +47,7 @@ def step_runtime_defaults() -> Dict[str, Any]:
             "exact_conflicts": [],
         },
         "phase04_routing_by_chapter": {},
+        "phase04_insertion_impacts_by_chapter": {},
+        "phase04c_windows_by_chapter": {},
+        "phase04d_windows_by_chapter": {},
     }

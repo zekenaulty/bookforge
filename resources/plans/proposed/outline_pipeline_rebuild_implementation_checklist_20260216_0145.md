@@ -30,16 +30,20 @@ Locked doctrine statement:
 6. `src/bookforge/phases/outline/phase_03_scene_draft.py` (new)
 7. `src/bookforge/phases/outline/phase_04a_transition_seam_analysis.py` (new)
 8. `src/bookforge/phases/outline/phase_04b_transition_execution.py` (new)
-9. `src/bookforge/phases/outline/phase_05_cast_function_refinement.py` (new)
-10. `src/bookforge/phases/outline/phase_06_thread_payoff_refinement.py` (new)
-11. `src/bookforge/phases/outline/validators.py` (new)
-12. `src/bookforge/phases/outline/artifacts.py` (new)
-13. `src/bookforge/phases/outline/context.py` (new)
+9. `src/bookforge/phases/outline/phase_04c_metadata_relink.py` (new)
+10. `src/bookforge/phases/outline/phase_04c_intro_sync.py` (new)
+11. `src/bookforge/phases/outline/phase_04c_handoff_normalize.py` (new)
+12. `src/bookforge/phases/outline/phase_04d_seam_hygiene.py` (new)
+13. `src/bookforge/phases/outline/phase_05_cast_function_refinement.py` (new)
+14. `src/bookforge/phases/outline/phase_06_thread_payoff_refinement.py` (new)
+15. `src/bookforge/phases/outline/validators.py` (new)
+16. `src/bookforge/phases/outline/artifacts.py` (new)
+17. `src/bookforge/phases/outline/context.py` (new)
 
 ### Tasks
 1. Convert outline pipeline to runner-style phase modules (`src/bookforge/phases/outline/*`).
 2. Keep `src/bookforge/outline.py` as orchestration shell only.
-3. Add internal 04A and 04B step orchestration under logical phase 04.
+3. Add internal 04A/04B/04C/04C-Intro/04C-Handoff/04D step orchestration under logical phase 04.
 4. Add explicit per-step artifact writes (`phase_04a_*`, `phase_04b_*`).
 5. Ensure rerun and resume can restart from 04A or 04B deterministically.
 6. Ensure dependency checks prevent 04B execution without valid 04A output.
@@ -71,18 +75,34 @@ Locked doctrine statement:
 ### Files
 1. `resources/prompt_blocks/phase/outline_pipeline/phase_04_transition_causality_refinement_prompt_contract.md` (04A source)
 2. `resources/prompt_blocks/phase/outline_pipeline/phase_04b_transition_execution_prompt_contract.md` (new, 04B source)
-3. `resources/prompt_templates/outline_phase_04a_transition_seam_analysis.md` (new/split)
-4. `resources/prompt_templates/outline_phase_04b_transition_execution.md` (new)
-5. `resources/prompt_composition/manifests/outline_phase_04a_transition_seam_analysis.composition.manifest.json` (new)
-6. `resources/prompt_composition/manifests/outline_phase_04b_transition_execution.composition.manifest.json` (new)
+3. `resources/prompt_blocks/phase/outline_pipeline/phase_04c_metadata_relink_prompt_contract.md` (new, 04C source)
+4. `resources/prompt_blocks/phase/outline_pipeline/phase_04c_intro_sync_prompt_contract.md` (new, 04C-Intro source)
+5. `resources/prompt_blocks/phase/outline_pipeline/phase_04c_handoff_normalize_prompt_contract.md` (new, 04C-Handoff source)
+6. `resources/prompt_blocks/phase/outline_pipeline/phase_04d_seam_hygiene_prompt_contract.md` (new, 04D source)
+7. `resources/prompt_templates/outline_phase_04a_transition_seam_analysis.md` (new/split)
+8. `resources/prompt_templates/outline_phase_04b_transition_execution.md` (new)
+9. `resources/prompt_templates/outline_phase_04c_metadata_relink.md` (new)
+10. `resources/prompt_templates/outline_phase_04c_intro_sync.md` (new)
+11. `resources/prompt_templates/outline_phase_04c_handoff_normalize.md` (new)
+12. `resources/prompt_templates/outline_phase_04d_seam_hygiene.md` (new)
+13. `resources/prompt_composition/manifests/outline_phase_04a_transition_seam_analysis.composition.manifest.json` (new)
+14. `resources/prompt_composition/manifests/outline_phase_04b_transition_execution.composition.manifest.json` (new)
+15. `resources/prompt_composition/manifests/outline_phase_04c_metadata_relink.composition.manifest.json` (new)
+16. `resources/prompt_composition/manifests/outline_phase_04c_intro_sync.composition.manifest.json` (new)
+17. `resources/prompt_composition/manifests/outline_phase_04c_handoff_normalize.composition.manifest.json` (new)
+18. `resources/prompt_composition/manifests/outline_phase_04d_seam_hygiene.composition.manifest.json` (new)
 
 ### Tasks
 1. Implement explicit 04A and 04B contract split.
 2. 04A contract: candidate seam extraction with required candidate list fields.
 3. 04B contract: selected candidates + explicit inserted scene authoring requirement.
-4. Add hard prohibition on leaving selected insertions unresolved.
-5. Add `error_v1` reason codes specific to 04A/04B failures.
-6. Add explicit prompt language that inserted scenes must contain authored prose semantics, not fallback/meta phrasing.
+4. 04C contract: window-scoped structural relink only (no prose rewrites).
+5. 04C-Intro contract: intro metadata sync only; no scene edits.
+6. 04C-Handoff contract: handoff_mode normalize only; no scene edits.
+7. 04D contract: seam hygiene + anchor repair within window; seam metadata required on all scenes.
+8. Add hard prohibition on leaving selected insertions unresolved.
+9. Add `error_v1` reason codes specific to 04A/04B/04C/04C-Intro/04C-Handoff/04D failures.
+7. Add explicit prompt language that inserted scenes must contain authored prose semantics, not fallback/meta phrasing.
 
 ### Compiler tasks
 1. add/adjust manifests,
@@ -99,10 +119,14 @@ Locked doctrine statement:
 ### Tasks
 1. Validate 04A candidate list shape and refs.
 2. Validate 04B selected insertion resolution completeness.
-3. Add explicit `unresolved_required_insertions` terminal failure.
-4. Preserve existing link/sequence checks.
-5. Preserve strict placeholder/meta detection as route-to-LLM fix, not auto-heal.
-6. Ensure exact-count insertion conflicts are explicit and terminal.
+3. Validate 04C relink window scope + allowed-field-only edits.
+4. Validate 04C-Intro intro-only edits and first-appearance alignment.
+5. Validate 04C-Handoff handoff_mode-only edits + location jump rules + terminal normalization.
+6. Validate 04D seam hygiene window scope + required seam metadata.
+7. Add explicit `unresolved_required_insertions` terminal failure.
+5. Preserve existing link/sequence checks.
+6. Preserve strict placeholder/meta detection as route-to-LLM fix, not auto-heal.
+7. Ensure exact-count insertion conflicts are explicit and terminal.
 
 ## Workstream E: Reporting and Write Gate
 ### Files
@@ -132,13 +156,16 @@ Locked doctrine statement:
 6. `tests/test_prompt_composition.py`
 7. `resources/prompt_composition/manifests/outline_phase_04a_transition_seam_analysis.composition.manifest.json`
 8. `resources/prompt_composition/manifests/outline_phase_04b_transition_execution.composition.manifest.json`
+9. `resources/prompt_composition/manifests/outline_phase_04c_metadata_relink.composition.manifest.json`
 
 ### Tasks
 1. register new 04A/04B template names and manifest ids,
-2. ensure workspace template distribution includes them,
-3. recompose and refresh checksums,
-4. update expected template counts/tests.
-5. ensure 04B placeholder inputs are compiler-allowlisted (selected/blocked/policy payload blocks).
+2. register new 04C-Intro/04C-Handoff/04D template names and manifest ids,
+3. ensure workspace template distribution includes them,
+4. recompose and refresh checksums,
+5. update expected template counts/tests.
+6. ensure 04B placeholder inputs are compiler-allowlisted (selected/blocked/policy payload blocks).
+7. ensure 04C/04D window + allowlist payloads are compiler-allowlisted.
 
 ## Workstream G: Tests
 ### Files
@@ -159,6 +186,7 @@ Locked doctrine statement:
 7. resume from 04B uses valid 04A artifact and fingerprint checks.
 8. 04B prompt render includes selected/blocked/policy payload blocks (no missing placeholders at runtime).
 9. Orchestrator dispatches through module handlers; phase logic is not embedded in `outline.py`.
+10. 04C relink only touches window refs and allowed fields.
 
 ## Workstream H: Audit Run Procedure
 ### Target
@@ -187,9 +215,9 @@ Locked doctrine statement:
 
 ## Ramifications Summary (Reviewer-Facing)
 1. Prompt surface area increases:
-   - +1 prompt-block contract (04B),
-   - +2 compiled phase-04 templates (04A/04B),
-   - +2 composition manifests.
+   - +2 prompt-block contracts (04B/04C),
+   - +3 compiled phase-04 templates (04A/04B/04C),
+   - +3 composition manifests.
 2. Runtime artifact volume increases with step-split trace files and routing payload artifacts.
 3. Outline run latency may increase due to extra 04B step and retries.
 4. Failure visibility improves but will produce more explicit terminal errors during early tuning.

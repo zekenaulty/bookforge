@@ -29,7 +29,7 @@ from bookforge.phases.repair_phase import _repair_scene
 from bookforge.phases.state_repair_phase import _state_repair
 from bookforge.phases.lint_phase import _lint_scene
 from bookforge.prompt.renderer import render_template_file
-from bookforge.pipeline.config import _style_anchor_max_tokens, _durable_slice_max_expansions, _lint_mode
+from bookforge.pipeline.config import _style_anchor_max_tokens, _durable_slice_max_expansions, _lint_mode, _lint_repair_max_passes
 from bookforge.pipeline.outline import _outline_summary, _build_character_registry, _build_thread_registry, _character_name_map, _character_id_map
 from bookforge.pipeline.scene import _scene_cast_ids_from_outline, _load_character_states, _parse_until
 from bookforge.pipeline.state_apply import _summary_from_state, _apply_state_patch, _apply_character_updates, _apply_character_stat_updates, _update_bible, _rollup_chapter_summary, _compile_chapter_markdown
@@ -872,8 +872,10 @@ def run_loop(
             _status(f"Lint status: {lint_report.get('status', 'unknown')}")
 
         write_attempts = 1
+        max_repair_passes = max(_lint_repair_max_passes(), durable_expand_max)
+        repair_passes = 0
         if lint_mode != "off" and lint_report.get("status") == "fail":
-            while True:
+            while repair_passes < max_repair_passes:
                 if _lint_has_issue_code(lint_report, "durable_slice_missing"):
                     requested_ids = _durable_slice_retry_ids(lint_report)
                     new_ids = [item for item in requested_ids if item not in durable_expand_ids]
@@ -913,6 +915,7 @@ def run_loop(
                 _record_phase_success(book_root, chapter_num, scene_num, "repair", {"prose": _artifact_relpath(book_root, prose_path), "patch": _artifact_relpath(book_root, patch_path)})
                 _status("Repair complete OK")
                 write_attempts += 1
+                repair_passes += 1
 
                 _status(f"Repairing state: ch{chapter_num:03d} sc{scene_num:03d}...")
                 try:
@@ -978,16 +981,15 @@ def run_loop(
 
                 if lint_report.get("status") != "fail":
                     break
-                if lint_mode != "strict":
-                    break
-                if not _lint_has_issue_code(lint_report, "durable_slice_missing"):
-                    break
-                requested_ids = _durable_slice_retry_ids(lint_report)
-                new_ids = [item for item in requested_ids if item not in durable_expand_ids]
-                if not new_ids:
-                    break
-                if durable_expand_attempts >= durable_expand_max:
-                    break
+                if lint_mode == "strict":
+                    if not _lint_has_issue_code(lint_report, "durable_slice_missing"):
+                        break
+                    requested_ids = _durable_slice_retry_ids(lint_report)
+                    new_ids = [item for item in requested_ids if item not in durable_expand_ids]
+                    if not new_ids:
+                        break
+                    if durable_expand_attempts >= durable_expand_max:
+                        break
 
             if lint_report.get("status") == "fail" and lint_mode == "strict":
                 if _lint_has_issue_code(lint_report, "durable_slice_missing"):
@@ -1106,7 +1108,6 @@ def run_loop(
 
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
-
 
 
 

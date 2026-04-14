@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Tuple
 from .validators import (
     ValidationResult,
     compile_location_identity,
+    derive_phase04c_windows,
     issue,
     validate_phase_04b,
 )
@@ -27,6 +28,22 @@ def preprocess(
     compiled_registry, location_errors = compile_location_identity(outline=outline, registry=registry)
     runtime["location_registry"] = compiled_registry
     wrapper["outline"] = outline
+
+    phase_report = wrapper.get("phase_report") if isinstance(wrapper.get("phase_report"), dict) else {}
+    impacts = (
+        phase_report.get("insertion_edge_impacts")
+        if isinstance(phase_report.get("insertion_edge_impacts"), list)
+        else []
+    )
+    chapters = outline.get("chapters") if isinstance(outline.get("chapters"), list) else []
+    if chapters and isinstance(chapters[0], dict):
+        chapter_id = str(chapters[0].get("chapter_id") or "").strip()
+        if chapter_id:
+            windows = derive_phase04c_windows(chapter=chapters[0], insertion_impacts=impacts)
+            runtime.setdefault("phase04c_windows_by_chapter", {})
+            runtime["phase04c_windows_by_chapter"][chapter_id] = windows
+            runtime.setdefault("phase04_insertion_impacts_by_chapter", {})
+            runtime["phase04_insertion_impacts_by_chapter"][chapter_id] = impacts
 
     routing = runtime.get("phase04_routing") if isinstance(runtime.get("phase04_routing"), dict) else {}
     exact_conflicts = routing.get("exact_conflicts") if isinstance(routing.get("exact_conflicts"), list) else []
@@ -76,9 +93,17 @@ def prompt_extras(runtime: Dict[str, Any]) -> Dict[str, Any]:
         routing = current
     else:
         routing = runtime.get("phase04_routing") if isinstance(runtime.get("phase04_routing"), dict) else {}
+    selected = routing.get("selected", []) if isinstance(routing.get("selected"), list) else []
+    selected_insertions = [
+        item
+        for item in selected
+        if isinstance(item, dict)
+        and str(item.get("requested_resolution") or "").strip() in {"micro_scene", "full_scene"}
+    ]
     return {
         "outline_phase_04a_output": runtime.get("outline_phase_04a_output", {}),
-        "phase_04_selected_candidates_json": routing.get("selected", []),
+        "phase_04_selected_candidates_json": selected,
+        "phase_04_selected_insertions_json": selected_insertions,
         "phase_04_blocked_candidates_json": routing.get("blocked", []),
         "phase_04_policy_context_json": {
             "candidate_count": routing.get("candidate_count", 0),

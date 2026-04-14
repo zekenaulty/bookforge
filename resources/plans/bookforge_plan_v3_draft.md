@@ -70,6 +70,7 @@ Architecture Snapshot (current)
 - Pipeline modules: prompts, parse, durable, state_apply, lint helpers.
 - Durable registries: item_registry.json, plot_devices.json + snapshots and ledger.
 - DCAS: appearance_current/history, APPEARANCE_CHECK, projection refresh.
+- Two-turn execution (T1 plan -> T2 execute) is supported for plan/preflight/write/repair/state_repair/lint with per-turn thinking levels.
 
 Key Additions vs v2
 - Preflight alignment phase with scope gating.
@@ -270,6 +271,9 @@ Implementation Tasks
 - Add durable change ledger in write compliance.
 - Enforce last‑occurrence‑wins for in‑scene UI values.
 - Require evidence for lint failures and avoid early‑stop errors.
+- Adopt two-turn execution (T1 high -> T2 low) for plan/preflight/write/repair/state_repair/lint.
+- Add per-phase `*_T2_THINKING_LEVEL` env overrides and log `turn_id` in LLM request metadata.
+- Add configurable lint/repair pass cap (`BOOKFORGE_LINT_REPAIR_MAX_PASSES`) for paid-key iterations.
 
 Inputs
 - Prose, pre/post state, continuity pack, patch.

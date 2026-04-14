@@ -8,6 +8,7 @@ Reduce lint/repair latency and token burn while preserving continuity correctnes
 - We are adding **routing**, not removing safeguards blindly.
 - Conceptually yes: this introduces a deterministic triage layer (a form of state/prose issue routing) and optionally specialized lint lanes.
 - We only skip expensive paths when issue class and contracts prove it is safe.
+- Baseline execution now uses two-turn (T1 plan -> T2 execute) for lint/repair/state_repair; routing must preserve this pattern and only retry T2 unless T1 fails.
 
 ## Why This Is Needed (Receipts)
 - Scene windows in recent `ch001` run cluster around 23-24 minutes for retry-heavy scenes.

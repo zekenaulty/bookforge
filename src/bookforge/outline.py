@@ -3,7 +3,7 @@
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Set
 import hashlib
 import json
 import logging
@@ -36,6 +36,10 @@ OUTLINE_BACKUP_INDEX_FILE = "outline_backups_index.json"
 CHAPTER_SCOPED_STEPS = {
     outline_context.STEP_04A,
     outline_context.STEP_04B,
+    outline_context.STEP_04C,
+    outline_context.STEP_04C_INTRO,
+    outline_context.STEP_04C_HANDOFF,
+    outline_context.STEP_04D,
     outline_context.PHASE_03,
     outline_context.PHASE_05,
     outline_context.PHASE_06,
@@ -73,6 +77,54 @@ PHASE04B_T2_INSTRUCTION = (
     "EXECUTION PHASE: Emit the final chapter-only JSON for phase 04B, including required "
     "inserted scenes and reconciliation evidence. Do NOT include analysis or planning text. "
     "Output JSON only."
+)
+
+PHASE04C_T1_INSTRUCTION = (
+    "THINKING PHASE: Plan metadata relink actions for the specified window only. "
+    "Do NOT output the chapter JSON. Return ONLY a small JSON object: "
+    "{\"status\":\"ready_to_execute\",\"notes\":[],\"warnings\":[],\"edits\":0}."
+)
+
+PHASE04C_T2_INSTRUCTION = (
+    "EXECUTION PHASE: Emit the final chapter-only JSON for phase 04C, "
+    "restricted to the active window and allowed fields. "
+    "Do NOT include analysis or planning text. Output JSON only."
+)
+
+PHASE04C_INTRO_T1_INSTRUCTION = (
+    "THINKING PHASE: Plan character intro sync for the specified character ids only. "
+    "Do NOT output the chapter JSON. Return ONLY a small JSON object: "
+    "{\"status\":\"ready_to_execute\",\"notes\":[],\"warnings\":[],\"updates\":0}."
+)
+
+PHASE04C_INTRO_T2_INSTRUCTION = (
+    "EXECUTION PHASE: Emit the final chapter-only JSON for phase 04C intro sync, "
+    "updating only character intro metadata for the allowed ids. "
+    "Do NOT include analysis or planning text. Output JSON only."
+)
+
+PHASE04C_HANDOFF_T1_INSTRUCTION = (
+    "THINKING PHASE: Plan handoff_mode normalization for the specified scene refs only. "
+    "Do NOT output the chapter JSON. Return ONLY a small JSON object: "
+    "{\"status\":\"ready_to_execute\",\"notes\":[],\"warnings\":[],\"updates\":0}."
+)
+
+PHASE04C_HANDOFF_T2_INSTRUCTION = (
+    "EXECUTION PHASE: Emit the final chapter-only JSON for phase 04C handoff normalize, "
+    "updating only handoff_mode for the allowed scene refs. "
+    "Do NOT include analysis or planning text. Output JSON only."
+)
+
+PHASE04D_T1_INSTRUCTION = (
+    "THINKING PHASE: Plan seam hygiene edits for the specified window only. "
+    "Do NOT output the chapter JSON. Return ONLY a small JSON object: "
+    "{\"status\":\"ready_to_execute\",\"notes\":[],\"warnings\":[],\"edits\":0}."
+)
+
+PHASE04D_T2_INSTRUCTION = (
+    "EXECUTION PHASE: Emit the final chapter-only JSON for phase 04D, "
+    "restricted to the active window and allowed fields. "
+    "Do NOT include analysis or planning text. Output JSON only."
 )
 
 PHASE05_T1_INSTRUCTION = (
@@ -137,6 +189,10 @@ def _resolve_step_thinking_level(client: LLMClient, model: str, step_id: str) ->
         outline_context.PHASE_04: "OUTLINE_PHASE_04_THINKING_LEVEL",
         outline_context.STEP_04A: "OUTLINE_PHASE_04A_THINKING_LEVEL",
         outline_context.STEP_04B: "OUTLINE_PHASE_04B_THINKING_LEVEL",
+        outline_context.STEP_04C: "OUTLINE_PHASE_04C_THINKING_LEVEL",
+        outline_context.STEP_04C_INTRO: "OUTLINE_PHASE_04C_INTRO_THINKING_LEVEL",
+        outline_context.STEP_04C_HANDOFF: "OUTLINE_PHASE_04C_HANDOFF_THINKING_LEVEL",
+        outline_context.STEP_04D: "OUTLINE_PHASE_04D_THINKING_LEVEL",
         outline_context.PHASE_05: "OUTLINE_PHASE_05_THINKING_LEVEL",
         outline_context.PHASE_06: "OUTLINE_PHASE_06_THINKING_LEVEL",
     }.get(step_id)
@@ -182,6 +238,10 @@ def _resolve_step_thinking_budget(client: LLMClient, model: str, step_id: str) -
         outline_context.PHASE_04: "OUTLINE_PHASE_04_THINKING_BUDGET",
         outline_context.STEP_04A: "OUTLINE_PHASE_04A_THINKING_BUDGET",
         outline_context.STEP_04B: "OUTLINE_PHASE_04B_THINKING_BUDGET",
+        outline_context.STEP_04C: "OUTLINE_PHASE_04C_THINKING_BUDGET",
+        outline_context.STEP_04C_INTRO: "OUTLINE_PHASE_04C_INTRO_THINKING_BUDGET",
+        outline_context.STEP_04C_HANDOFF: "OUTLINE_PHASE_04C_HANDOFF_THINKING_BUDGET",
+        outline_context.STEP_04D: "OUTLINE_PHASE_04D_THINKING_BUDGET",
         outline_context.PHASE_05: "OUTLINE_PHASE_05_THINKING_BUDGET",
         outline_context.PHASE_06: "OUTLINE_PHASE_06_THINKING_BUDGET",
     }.get(step_id)
@@ -232,6 +292,36 @@ def _resolve_phase04a_t2_thinking_level(model: str) -> str:
 
 def _resolve_phase04b_t2_thinking_level(model: str) -> str:
     explicit = str(read_env_value("OUTLINE_PHASE_04B_T2_THINKING_LEVEL") or "").strip().lower()
+    if explicit in {"minimal", "low", "medium", "high"}:
+        return explicit
+    model_lower = str(model or "").strip().lower()
+    if "gemini-3-flash" in model_lower:
+        return "minimal"
+    return "low"
+
+
+def _resolve_phase04c_t2_thinking_level(model: str) -> str:
+    explicit = str(read_env_value("OUTLINE_PHASE_04C_T2_THINKING_LEVEL") or "").strip().lower()
+    if explicit in {"minimal", "low", "medium", "high"}:
+        return explicit
+    model_lower = str(model or "").strip().lower()
+    if "gemini-3-flash" in model_lower:
+        return "minimal"
+    return "low"
+
+
+def _resolve_phase04c_intro_t2_thinking_level(model: str) -> str:
+    explicit = str(read_env_value("OUTLINE_PHASE_04C_INTRO_T2_THINKING_LEVEL") or "").strip().lower()
+    if explicit in {"minimal", "low", "medium", "high"}:
+        return explicit
+    model_lower = str(model or "").strip().lower()
+    if "gemini-3-flash" in model_lower:
+        return "minimal"
+    return "low"
+
+
+def _resolve_phase04d_t2_thinking_level(model: str) -> str:
+    explicit = str(read_env_value("OUTLINE_PHASE_04D_T2_THINKING_LEVEL") or "").strip().lower()
     if explicit in {"minimal", "low", "medium", "high"}:
         return explicit
     model_lower = str(model or "").strip().lower()
@@ -613,9 +703,44 @@ def format_outline_pipeline_summary(
 
 
 def _resolve_outline_payload_from_run(run_dir: Path) -> Tuple[Dict[str, Any], str]:
+    history_path = run_dir / outline_artifacts.PHASE_HISTORY_FILE
+    if history_path.exists():
+        try:
+            history = _read_json(history_path)
+        except Exception:
+            history = {}
+        steps = history.get("steps") if isinstance(history.get("steps"), dict) else {}
+        if isinstance(steps, dict) and steps:
+            for step_id in reversed(outline_context.STEP_ORDER):
+                entry = steps.get(step_id)
+                status = str(entry.get("status") or "").strip().lower() if isinstance(entry, dict) else ""
+                if status != "success":
+                    continue
+                spec = outline_context.step_spec(step_id)
+                path = run_dir / spec.handoff_file
+                if not path.exists():
+                    continue
+                try:
+                    payload = _read_json(path)
+                except Exception:
+                    continue
+                outline_payload: Dict[str, Any]
+                if isinstance(payload.get("outline"), dict):
+                    outline_payload = payload.get("outline")
+                else:
+                    outline_payload = payload if isinstance(payload, dict) else {}
+                chapters = outline_payload.get("chapters")
+                if not isinstance(chapters, list) or not chapters:
+                    continue
+                return deepcopy(outline_payload), spec.handoff_file
+
     candidates: List[Tuple[str, str]] = [
         ("outline_final_v1_1.json", "outline"),
         ("outline_cast_refined_v1_1.json", "outline"),
+        ("outline_seams_hygiened_v1_1.json", "outline"),
+        ("outline_handoff_normalized_v1_1.json", "outline"),
+        ("outline_intro_synced_v1_1.json", "outline"),
+        ("outline_transitions_relinked_v1_1.json", "outline"),
         ("outline_transitions_refined_v1_1.json", "outline"),
         ("phase_04a_output.json", "wrapper"),
         ("outline_draft_v1_1.json", "outline"),
@@ -1328,10 +1453,21 @@ def _chapter_scoped_phase_report(
             "candidate_seams",
             "resolved_candidates",
             "inserted_scene_refs",
+            "insertion_edge_impacts",
             "blocked_by_budget",
             "downgraded_resolution",
             "unresolved_required_insertions",
         ):
+            values = scoped.get(key) if isinstance(scoped.get(key), list) else []
+            scoped[key] = [
+                item
+                for item in values
+                if _phase_report_item_matches_chapter(item, chapter_id)
+            ]
+        return scoped
+
+    if step_id in {outline_context.STEP_04C_HANDOFF, outline_context.STEP_04D}:
+        for key in ("touched_scene_refs", "touched_fields"):
             values = scoped.get(key) if isinstance(scoped.get(key), list) else []
             scoped[key] = [
                 item
@@ -1358,6 +1494,140 @@ def _aggregate_phase04_routing(routing_by_chapter: Dict[str, Dict[str, Any]]) ->
             values = chapter_routing.get(key) if isinstance(chapter_routing.get(key), list) else []
             aggregate[key].extend(values)
     return aggregate
+
+
+def _window_character_ids(chapter: Dict[str, Any], window_refs: List[str]) -> List[str]:
+    if not isinstance(chapter, dict):
+        return []
+    chapter_id = chapter.get("chapter_id")
+    window_set = {str(ref) for ref in window_refs if str(ref).strip()}
+    if not window_set:
+        return []
+    found: List[str] = []
+    seen: set[str] = set()
+    sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
+    for section in sections:
+        if not isinstance(section, dict):
+            continue
+        scenes = section.get("scenes") if isinstance(section.get("scenes"), list) else []
+        for scene in scenes:
+            if not isinstance(scene, dict):
+                continue
+            scene_id = scene.get("scene_id")
+            if chapter_id is None or scene_id is None:
+                continue
+            ref = f"{chapter_id}:{scene_id}"
+            if ref not in window_set:
+                continue
+            characters = scene.get("characters") if isinstance(scene.get("characters"), list) else []
+            for char_id in characters:
+                char_key = str(char_id).strip()
+                if not char_key or char_key in seen:
+                    continue
+                seen.add(char_key)
+                found.append(char_key)
+    return found
+
+
+def _resolve_phase04c_windows_for_chapter(
+    *,
+    runtime: Dict[str, Any],
+    run_dir: Path,
+    chapter_id: int,
+    chapter_outline: Dict[str, Any],
+) -> List[Dict[str, Any]]:
+    chapter_key = str(chapter_id)
+    windows_by_chapter = runtime.get("phase04c_windows_by_chapter")
+    if isinstance(windows_by_chapter, dict):
+        existing = windows_by_chapter.get(chapter_key)
+        if isinstance(existing, list):
+            return deepcopy(existing)
+
+    output_path = run_dir / _chapter_artifact_name(outline_context.STEP_04B, chapter_id, "output")
+    if output_path.exists():
+        payload = _read_json(output_path)
+        phase_report = payload.get("phase_report") if isinstance(payload.get("phase_report"), dict) else {}
+        impacts = phase_report.get("insertion_edge_impacts") if isinstance(phase_report.get("insertion_edge_impacts"), list) else []
+        windows = outline_validators.derive_phase04c_windows(
+            chapter=chapter_outline,
+            insertion_impacts=impacts,
+        )
+        runtime.setdefault("phase04c_windows_by_chapter", {})
+        runtime["phase04c_windows_by_chapter"][chapter_key] = deepcopy(windows)
+        return windows
+    return []
+
+
+def _resolve_phase04c_intro_targets_for_chapter(
+    *,
+    runtime: Dict[str, Any],
+    outline: Dict[str, Any],
+    chapter_id: int,
+) -> List[str]:
+    chapter_key = str(chapter_id)
+    intro_map = runtime.get("phase04c_intro_by_chapter")
+    if not isinstance(intro_map, dict):
+        intro_map = outline_validators.derive_intro_mismatches_by_chapter(outline)
+        runtime["phase04c_intro_by_chapter"] = intro_map
+    targets = intro_map.get(chapter_key)
+    return targets if isinstance(targets, list) else []
+
+
+def _resolve_phase04c_handoff_targets_for_chapter(
+    *,
+    runtime: Dict[str, Any],
+    chapter_outline: Dict[str, Any],
+    chapter_id: int,
+    allowed_jump_modes: Set[str],
+) -> List[Dict[str, Any]]:
+    chapter_key = str(chapter_id)
+    handoff_map = runtime.get("phase04c_handoff_by_chapter")
+    if isinstance(handoff_map, dict):
+        existing = handoff_map.get(chapter_key)
+        if isinstance(existing, list):
+            return deepcopy(existing)
+    targets = outline_validators.derive_handoff_normalize_targets(
+        chapter=chapter_outline,
+        allowed_jump_modes=allowed_jump_modes,
+    )
+    runtime.setdefault("phase04c_handoff_by_chapter", {})
+    runtime["phase04c_handoff_by_chapter"][chapter_key] = deepcopy(targets)
+    return targets
+
+
+def _resolve_phase04d_windows_for_chapter(
+    *,
+    runtime: Dict[str, Any],
+    run_dir: Path,
+    chapter_id: int,
+    chapter_outline: Dict[str, Any],
+) -> List[Dict[str, Any]]:
+    chapter_key = str(chapter_id)
+    windows_by_chapter = runtime.get("phase04d_windows_by_chapter")
+    if isinstance(windows_by_chapter, dict):
+        existing = windows_by_chapter.get(chapter_key)
+        if isinstance(existing, list):
+            return deepcopy(existing)
+
+    impacts_by_chapter = runtime.get("phase04_insertion_impacts_by_chapter")
+    impacts = impacts_by_chapter.get(chapter_key) if isinstance(impacts_by_chapter, dict) else None
+    if not isinstance(impacts, list):
+        output_path = run_dir / _chapter_artifact_name(outline_context.STEP_04B, chapter_id, "output")
+        if output_path.exists():
+            payload = _read_json(output_path)
+            phase_report = payload.get("phase_report") if isinstance(payload.get("phase_report"), dict) else {}
+            impacts = phase_report.get("insertion_edge_impacts") if isinstance(phase_report.get("insertion_edge_impacts"), list) else []
+    if not isinstance(impacts, list):
+        impacts = []
+
+    windows = outline_validators.derive_phase04d_windows(
+        chapter=chapter_outline,
+        insertion_impacts=impacts,
+        require_seam_fields=True,
+    )
+    runtime.setdefault("phase04d_windows_by_chapter", {})
+    runtime["phase04d_windows_by_chapter"][chapter_key] = deepcopy(windows)
+    return windows
 
 
 def _chapter_render_values(
@@ -1413,9 +1683,29 @@ def _extract_chapter_patch_from_response(
     parsed: Dict[str, Any],
     chapter_id: int,
 ) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
-    if step_id in {outline_context.STEP_04A, outline_context.STEP_04B, outline_context.PHASE_05}:
+    if step_id in {
+        outline_context.STEP_04A,
+        outline_context.STEP_04B,
+        outline_context.STEP_04C,
+        outline_context.STEP_04C_INTRO,
+        outline_context.STEP_04C_HANDOFF,
+        outline_context.STEP_04D,
+        outline_context.PHASE_05,
+    }:
         outline_payload = parsed.get("outline") if isinstance(parsed.get("outline"), dict) else {}
-        report_key = "phase_report" if step_id in {outline_context.STEP_04A, outline_context.STEP_04B} else "cast_report"
+        report_key = (
+            "phase_report"
+            if step_id
+            in {
+                outline_context.STEP_04A,
+                outline_context.STEP_04B,
+                outline_context.STEP_04C,
+                outline_context.STEP_04C_INTRO,
+                outline_context.STEP_04C_HANDOFF,
+                outline_context.STEP_04D,
+            }
+            else "cast_report"
+        )
         chapter_report = parsed.get(report_key) if isinstance(parsed.get(report_key), dict) else {}
     else:
         outline_payload = parsed
@@ -1436,7 +1726,14 @@ def _extract_chapter_patch_from_response(
         "characters": outline_payload.get("characters"),
         "threads": outline_payload.get("threads"),
     }
-    if step_id in {outline_context.STEP_04A, outline_context.STEP_04B}:
+    if step_id in {
+        outline_context.STEP_04A,
+        outline_context.STEP_04B,
+        outline_context.STEP_04C,
+        outline_context.STEP_04C_INTRO,
+        outline_context.STEP_04C_HANDOFF,
+        outline_context.STEP_04D,
+    }:
         chapter_report = _chapter_scoped_phase_report(
             step_id=step_id,
             chapter_id=chapter_id,
@@ -1446,7 +1743,15 @@ def _extract_chapter_patch_from_response(
 
 
 def _outline_from_step_payload(step_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
-    if step_id in {outline_context.STEP_04A, outline_context.STEP_04B, outline_context.PHASE_05}:
+    if step_id in {
+        outline_context.STEP_04A,
+        outline_context.STEP_04B,
+        outline_context.STEP_04C,
+        outline_context.STEP_04C_INTRO,
+        outline_context.STEP_04C_HANDOFF,
+        outline_context.STEP_04D,
+        outline_context.PHASE_05,
+    }:
         return payload.get("outline") if isinstance(payload.get("outline"), dict) else {}
     return payload
 
@@ -1493,6 +1798,34 @@ def _build_step_output_payload(
     if step_id == outline_context.STEP_04B:
         payload = {
             "schema_version": "transition_refine_v1",
+            "outline": merged_outline,
+            "phase_report": aggregate_report,
+        }
+        return payload
+    if step_id == outline_context.STEP_04C:
+        payload = {
+            "schema_version": "outline_relink_v1",
+            "outline": merged_outline,
+            "phase_report": aggregate_report,
+        }
+        return payload
+    if step_id == outline_context.STEP_04C_INTRO:
+        payload = {
+            "schema_version": "outline_intro_sync_v1",
+            "outline": merged_outline,
+            "phase_report": aggregate_report,
+        }
+        return payload
+    if step_id == outline_context.STEP_04C_HANDOFF:
+        payload = {
+            "schema_version": "outline_handoff_normalize_v1",
+            "outline": merged_outline,
+            "phase_report": aggregate_report,
+        }
+        return payload
+    if step_id == outline_context.STEP_04D:
+        payload = {
+            "schema_version": "outline_seam_hygiene_v1",
             "outline": merged_outline,
             "phase_report": aggregate_report,
         }
@@ -1566,8 +1899,38 @@ def _execute_chapter_scoped_step(
         else:
             base_outline = None
             aggregate_report = {}
-    elif step_id == outline_context.PHASE_05:
+    elif step_id == outline_context.STEP_04C:
         base_outline = handoffs.get("outline_transitions_refined_v1_1")
+        aggregate_report = {}
+    elif step_id == outline_context.STEP_04C_INTRO:
+        base_outline = handoffs.get("outline_transitions_relinked_v1_1")
+        if base_outline is None:
+            base_outline = handoffs.get("outline_transitions_refined_v1_1")
+        aggregate_report = {}
+    elif step_id == outline_context.STEP_04C_HANDOFF:
+        base_outline = handoffs.get("outline_intro_synced_v1_1")
+        if base_outline is None:
+            base_outline = handoffs.get("outline_transitions_relinked_v1_1")
+        if base_outline is None:
+            base_outline = handoffs.get("outline_transitions_refined_v1_1")
+        aggregate_report = {}
+    elif step_id == outline_context.STEP_04D:
+        base_outline = handoffs.get("outline_handoff_normalized_v1_1")
+        if base_outline is None:
+            base_outline = handoffs.get("outline_intro_synced_v1_1")
+        if base_outline is None:
+            base_outline = handoffs.get("outline_transitions_relinked_v1_1")
+        aggregate_report = {}
+    elif step_id == outline_context.PHASE_05:
+        base_outline = handoffs.get("outline_seams_hygiened_v1_1")
+        if base_outline is None:
+            base_outline = handoffs.get("outline_handoff_normalized_v1_1")
+        if base_outline is None:
+            base_outline = handoffs.get("outline_intro_synced_v1_1")
+        if base_outline is None:
+            base_outline = handoffs.get("outline_transitions_relinked_v1_1")
+        if base_outline is None:
+            base_outline = handoffs.get("outline_transitions_refined_v1_1")
         aggregate_report = {}
     else:
         base_outline = handoffs.get("outline_cast_refined_v1_1")
@@ -1614,7 +1977,14 @@ def _execute_chapter_scoped_step(
                     "threads": stored_outline.get("threads"),
                 },
             )
-            if step_id in {outline_context.STEP_04A, outline_context.STEP_04B}:
+            if step_id in {
+                outline_context.STEP_04A,
+                outline_context.STEP_04B,
+                outline_context.STEP_04C,
+                outline_context.STEP_04C_INTRO,
+                outline_context.STEP_04C_HANDOFF,
+                outline_context.STEP_04D,
+            }:
                 chapter_report = (
                     stored_payload.get("phase_report")
                     if isinstance(stored_payload.get("phase_report"), dict)
@@ -1698,10 +2068,1188 @@ def _execute_chapter_scoped_step(
                 "chapters": [deepcopy(_extract_chapter(working_outline, previous_ids[chapter_index + 1]))],
             }
 
+        if step_id == outline_context.STEP_04C_INTRO:
+            intro_targets = _resolve_phase04c_intro_targets_for_chapter(
+                runtime=runtime,
+                outline=working_outline,
+                chapter_id=chapter_id,
+            )
+            if not intro_targets:
+                chapter_report = {
+                    "updated_character_ids": [],
+                    "notes": [],
+                }
+                aggregate_report = _merge_step_report(
+                    aggregate_report,
+                    chapter_report,
+                    chapter_id=chapter_id,
+                )
+                chapter_validation_payload = {
+                    "status": "pass",
+                    "errors": [],
+                    "warnings": [],
+                    "metrics": {"updated_character_count": 0},
+                }
+                chapter_output_payload = _build_step_output_payload(
+                    step_id=step_id,
+                    merged_outline=working_outline,
+                    aggregate_report=aggregate_report,
+                )
+                _write_json(
+                    run_dir / _chapter_artifact_name(step_id, chapter_id, "output"),
+                    chapter_output_payload,
+                )
+                _write_json(
+                    run_dir / _chapter_artifact_name(step_id, chapter_id, "validation"),
+                    chapter_validation_payload,
+                )
+                chapter_attempts[chapter_key] = {
+                    "status": "success",
+                    "attempts": 0,
+                    "validation_summary": chapter_validation_payload,
+                }
+                checkpoint["chapter_attempts"] = chapter_attempts
+                checkpoint["resume_cursor"] = {
+                    "phase_id": step_id,
+                    "next_chapter_id": chapter_id + 1,
+                    "reason_code": "resume_incremental",
+                    "updated_at": outline_artifacts.utc_now_iso(),
+                }
+                _save_phase_checkpoint(checkpoint_path, checkpoint)
+                continue
+
+            runtime["phase04c_intro_character_ids"] = deepcopy(intro_targets)
+            runtime["phase04c_intro_character_registry"] = deepcopy(
+                working_outline.get("characters") if isinstance(working_outline.get("characters"), list) else []
+            )
+            runtime["phase04c_intro_before_outline"] = deepcopy(working_outline)
+
+        if step_id == outline_context.STEP_04C_HANDOFF:
+            allowed_jump_modes = {"arrival_checkpoint", "time_skip"}
+            handoff_targets = _resolve_phase04c_handoff_targets_for_chapter(
+                runtime=runtime,
+                chapter_outline=_extract_chapter(working_outline, chapter_id),
+                chapter_id=chapter_id,
+                allowed_jump_modes=allowed_jump_modes,
+            )
+            if not handoff_targets:
+                chapter_report = {
+                    "touched_scene_refs": [],
+                    "notes": [],
+                }
+                aggregate_report = _merge_step_report(
+                    aggregate_report,
+                    chapter_report,
+                    chapter_id=chapter_id,
+                )
+                chapter_validation_payload = {
+                    "status": "pass",
+                    "errors": [],
+                    "warnings": [],
+                    "metrics": {"touched_scene_count": 0},
+                }
+                chapter_output_payload = _build_step_output_payload(
+                    step_id=step_id,
+                    merged_outline=working_outline,
+                    aggregate_report=aggregate_report,
+                )
+                _write_json(
+                    run_dir / _chapter_artifact_name(step_id, chapter_id, "output"),
+                    chapter_output_payload,
+                )
+                _write_json(
+                    run_dir / _chapter_artifact_name(step_id, chapter_id, "validation"),
+                    chapter_validation_payload,
+                )
+                chapter_attempts[chapter_key] = {
+                    "status": "success",
+                    "attempts": 0,
+                    "validation_summary": chapter_validation_payload,
+                }
+                checkpoint["chapter_attempts"] = chapter_attempts
+                checkpoint["resume_cursor"] = {
+                    "phase_id": step_id,
+                    "next_chapter_id": chapter_id + 1,
+                    "reason_code": "resume_incremental",
+                    "updated_at": outline_artifacts.utc_now_iso(),
+                }
+                _save_phase_checkpoint(checkpoint_path, checkpoint)
+                continue
+
+            runtime["phase04c_handoff_targets"] = deepcopy(handoff_targets)
+            runtime["phase04c_handoff_allowed_jump_modes"] = sorted(allowed_jump_modes)
+            runtime["phase04c_handoff_scene_refs"] = [
+                str(item.get("scene_ref"))
+                for item in handoff_targets
+                if isinstance(item, dict) and str(item.get("scene_ref") or "").strip()
+            ]
+            runtime["phase04c_handoff_before_outline"] = deepcopy(working_outline)
+
+        if step_id == outline_context.STEP_04C:
+            windows = _resolve_phase04c_windows_for_chapter(
+                runtime=runtime,
+                run_dir=run_dir,
+                chapter_id=chapter_id,
+                chapter_outline=_extract_chapter(working_outline, chapter_id),
+            )
+            if not windows:
+                chapter_report = {
+                    "window_reports": [],
+                    "window_count": 0,
+                }
+                aggregate_report = _merge_step_report(
+                    aggregate_report,
+                    chapter_report,
+                    chapter_id=chapter_id,
+                )
+                chapter_validation_payload = {
+                    "status": "pass",
+                    "errors": [],
+                    "warnings": [],
+                    "metrics": {"window_count": 0},
+                }
+                chapter_output_payload = _build_step_output_payload(
+                    step_id=step_id,
+                    merged_outline=working_outline,
+                    aggregate_report=aggregate_report,
+                )
+                _write_json(
+                    run_dir / _chapter_artifact_name(step_id, chapter_id, "output"),
+                    chapter_output_payload,
+                )
+                _write_json(
+                    run_dir / _chapter_artifact_name(step_id, chapter_id, "validation"),
+                    chapter_validation_payload,
+                )
+                chapter_attempts[chapter_key] = {
+                    "status": "success",
+                    "attempts": 0,
+                    "validation_summary": chapter_validation_payload,
+                    "window_count": 0,
+                }
+                checkpoint["chapter_attempts"] = chapter_attempts
+                checkpoint["resume_cursor"] = {
+                    "phase_id": step_id,
+                    "next_chapter_id": chapter_id + 1,
+                    "reason_code": "resume_incremental",
+                    "updated_at": outline_artifacts.utc_now_iso(),
+                }
+                _save_phase_checkpoint(checkpoint_path, checkpoint)
+                continue
+
+            allowed_fields = {
+                "scene_fields": [
+                    "consumes_outcome_from",
+                    "hands_off_to",
+                    "handoff_mode",
+                    "end_condition_echo",
+                ],
+                "character_fields": ["intro"],
+            }
+
+            window_reports: List[Dict[str, Any]] = []
+            total_window_attempts = 0
+            for window_index, window in enumerate(windows, start=1):
+                window_attempts = 0
+                window_success = False
+                window_retry_message: Optional[str] = None
+                t1_retry_message: Optional[str] = None
+                t1_assistant_parts: Optional[List[Dict[str, Any]]] = None
+                while window_attempts < OUTLINE_MAX_ATTEMPTS:
+                    window_attempts += 1
+                    total_window_attempts += 1
+                    window_base_outline = deepcopy(working_outline)
+                    window_output_payload: Dict[str, Any] = {}
+                    window_report_payload: Dict[str, Any] = {}
+
+                    chapter_input_outline = {
+                        "schema_version": OUTLINE_SCHEMA_VERSION,
+                        "chapters": [deepcopy(_extract_chapter(working_outline, chapter_id))],
+                        "characters": deepcopy(
+                            working_outline.get("characters")
+                            if isinstance(working_outline.get("characters"), list)
+                            else []
+                        ),
+                        "threads": deepcopy(
+                            working_outline.get("threads")
+                            if isinstance(working_outline.get("threads"), list)
+                            else []
+                        ),
+                    }
+
+                    window_payload = deepcopy(window) if isinstance(window, dict) else {}
+                    window_payload["window_index"] = window_index
+                    window_payload["window_count"] = len(windows)
+                    window_payload["character_ids"] = _window_character_ids(
+                        chapter_input_outline.get("chapters", [{}])[0] if isinstance(chapter_input_outline.get("chapters"), list) else {},
+                        window_payload.get("scene_refs") if isinstance(window_payload.get("scene_refs"), list) else [],
+                    )
+                    runtime["phase04c_current_window"] = window_payload
+                    runtime["phase04c_allowed_fields"] = deepcopy(allowed_fields)
+                    runtime["phase04c_window_scene_refs"] = window_payload.get("scene_refs", [])
+                    runtime["phase04c_window_character_ids"] = window_payload.get("character_ids", [])
+                    runtime["phase04c_window_id"] = window_payload.get("window_id")
+                    runtime["phase04c_before_outline"] = deepcopy(working_outline)
+
+                    chapter_render_values = _chapter_render_values(
+                        step_id=step_id,
+                        chapter_id=chapter_id,
+                        chapter_outline=chapter_input_outline,
+                        previous_chapter_outline=prev_outline,
+                        next_chapter_outline=next_outline,
+                        book=book,
+                        targets=targets,
+                        notes=notes,
+                        user_prompt=user_prompt,
+                        transition_hints=transition_hints,
+                        scene_count_policy=scene_count_policy,
+                        runtime=runtime,
+                    )
+                    rendered_prompt = render_template_file(template_path, chapter_render_values)
+                    input_payload = {
+                        "step_id": step_id,
+                        "logical_phase": spec.logical_phase,
+                        "template": str(template_path),
+                        "chapter_id": chapter_id,
+                        "window_index": window_index,
+                        "render_values": chapter_render_values,
+                        "prompt_hash": _sha256_text(rendered_prompt),
+                    }
+                    _write_json(
+                        run_dir / _chapter_artifact_name(step_id, chapter_id, f"window_{window_index:02d}_input"),
+                        input_payload,
+                    )
+
+                    if t1_assistant_parts is None:
+                        t1_messages: List[Message] = [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": rendered_prompt},
+                            {"role": "user", "content": PHASE04C_T1_INSTRUCTION},
+                        ]
+                        if t1_retry_message:
+                            t1_messages.append({"role": "user", "content": t1_retry_message})
+                        t1_level, t1_budget = _apply_thinking_policy(
+                            thinking_level=thinking_level,
+                            thinking_budget=thinking_budget,
+                        )
+                        t1_request = {"model": model, "temperature": 0.2, "max_tokens": max_tokens}
+                        if t1_budget is not None:
+                            t1_request["thinking_config"] = {"thinkingBudget": t1_budget}
+                        elif t1_level:
+                            t1_request["thinking_config"] = {"thinkingLevel": t1_level}
+                        t1_extra = {
+                            "book_id": book_id,
+                            "step": step_id,
+                            "phase_id": step_id,
+                            "chapter": chapter_id,
+                            "window_id": window_payload.get("window_id"),
+                            "window_index": window_index,
+                            "attempt": window_attempts,
+                            "turn_id": "T1",
+                        }
+                        key_slot = getattr(client, "key_slot", None)
+                        if key_slot:
+                            t1_extra["key_slot"] = key_slot
+                        try:
+                            t1_response = client.chat(
+                                t1_messages,
+                                model=model,
+                                temperature=0.2,
+                                max_tokens=max_tokens,
+                                thinking_level=t1_level,
+                                thinking_budget=t1_budget,
+                            )
+                        except LLMRequestError as exc:
+                            if should_log_llm():
+                                log_llm_error(
+                                    workspace,
+                                    f"outline_{step_id}_chapter_{chapter_id}_window_{window_index}_t1_error",
+                                    exc,
+                                    request=t1_request,
+                                    messages=t1_messages,
+                                    extra=t1_extra,
+                                )
+                            chapter_attempts[chapter_key] = {
+                                "status": "paused" if _is_pause_error(exc) else "error",
+                                "attempts": total_window_attempts,
+                                "validation_summary": {
+                                    "status": "fail",
+                                    "errors": [outline_validators.issue("llm_request_error", exc.message, path="<request>")],
+                                    "warnings": [],
+                                    "metrics": {},
+                                },
+                            }
+                            checkpoint["chapter_attempts"] = chapter_attempts
+                            checkpoint["resume_cursor"] = {
+                                "phase_id": step_id,
+                                "next_chapter_id": chapter_id,
+                                "reason_code": "rate_limited_retry_exhausted" if _is_pause_error(exc) else "llm_request_error",
+                                "updated_at": outline_artifacts.utc_now_iso(),
+                            }
+                            _save_phase_checkpoint(checkpoint_path, checkpoint)
+                            if _is_pause_error(exc):
+                                _write_pause_marker(run_dir=run_dir, step_id=step_id, exc=exc)
+                            raise
+
+                        if should_log_llm():
+                            log_llm_response(
+                                workspace,
+                                f"outline_{step_id}_chapter_{chapter_id}_window_{window_index}_t1_attempt{window_attempts}",
+                                t1_response,
+                                request=t1_request,
+                                messages=t1_messages,
+                                extra=t1_extra,
+                            )
+
+                        _write_json(
+                            run_dir / _chapter_artifact_name(step_id, chapter_id, f"window_{window_index:02d}_plan_raw", window_attempts),
+                            {"text": t1_response.text, "raw": t1_response.raw},
+                        )
+
+                        try:
+                            t1_plan_payload = _extract_phase_json(step_id, t1_response.text)
+                        except Exception as exc:
+                            t1_retry_message = (
+                                "Your planning output was invalid. Return ONLY the ready JSON object "
+                                "with status, notes, warnings, and edits."
+                            )
+                            window_retry_message = None
+                            plan_errors = [outline_validators.issue("json_parse", str(exc), path="<plan>")]
+                            chapter_validation_payload = {
+                                "status": "fail",
+                                "errors": plan_errors,
+                                "warnings": [],
+                                "metrics": {},
+                            }
+                            _write_json(
+                                run_dir / _chapter_artifact_name(step_id, chapter_id, f"window_{window_index:02d}_validation"),
+                                chapter_validation_payload,
+                            )
+                            _save_phase_checkpoint(checkpoint_path, checkpoint)
+                            continue
+                        t1_assistant_parts = (
+                            t1_response.assistant_parts if isinstance(t1_response.assistant_parts, list) else None
+                        )
+                        _write_json(
+                            run_dir / _chapter_artifact_name(step_id, chapter_id, f"window_{window_index:02d}_plan"),
+                            {"schema_version": f"{step_id}_plan_v1", "plan": t1_plan_payload},
+                        )
+                        t1_retry_message = None
+                        if t1_assistant_parts:
+                            _write_json(
+                                run_dir / _chapter_artifact_name(step_id, chapter_id, f"window_{window_index:02d}_plan_assistant_parts", window_attempts),
+                                t1_assistant_parts,
+                            )
+
+                    messages: List[Message] = [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": rendered_prompt},
+                    ]
+                    provider_name = str(getattr(client, "provider", "")).lower()
+                    if t1_assistant_parts and provider_name == "gemini":
+                        messages.append({"role": "assistant", "parts": t1_assistant_parts})
+                    messages.append({"role": "user", "content": PHASE04C_T2_INSTRUCTION})
+                    if window_retry_message:
+                        messages.append({"role": "user", "content": window_retry_message})
+
+                    request = {"model": model, "temperature": 0.2, "max_tokens": max_tokens}
+                    t2_level = _resolve_phase04c_t2_thinking_level(model)
+                    if t2_level:
+                        request["thinking_config"] = {"thinkingLevel": t2_level}
+                    extra = {
+                        "book_id": book_id,
+                        "step": step_id,
+                        "phase_id": step_id,
+                        "chapter": chapter_id,
+                        "window_id": window_payload.get("window_id"),
+                        "window_index": window_index,
+                        "attempt": window_attempts,
+                        "turn_id": "T2",
+                    }
+                    key_slot = getattr(client, "key_slot", None)
+                    if key_slot:
+                        extra["key_slot"] = key_slot
+
+                    try:
+                        response = client.chat(
+                            messages,
+                            model=model,
+                            temperature=0.2,
+                            max_tokens=max_tokens,
+                            thinking_level=t2_level,
+                            thinking_budget=None,
+                        )
+                    except LLMRequestError as exc:
+                        if should_log_llm():
+                            log_llm_error(
+                                workspace,
+                                f"outline_{step_id}_chapter_{chapter_id}_window_{window_index}_error",
+                                exc,
+                                request=request,
+                                messages=messages,
+                                extra=extra,
+                            )
+                        chapter_attempts[chapter_key] = {
+                            "status": "paused" if _is_pause_error(exc) else "error",
+                            "attempts": total_window_attempts,
+                            "validation_summary": {
+                                "status": "fail",
+                                "errors": [outline_validators.issue("llm_request_error", exc.message, path="<request>")],
+                                "warnings": [],
+                                "metrics": {},
+                            },
+                        }
+                        checkpoint["chapter_attempts"] = chapter_attempts
+                        checkpoint["resume_cursor"] = {
+                            "phase_id": step_id,
+                            "next_chapter_id": chapter_id,
+                            "reason_code": "rate_limited_retry_exhausted" if _is_pause_error(exc) else "llm_request_error",
+                            "updated_at": outline_artifacts.utc_now_iso(),
+                        }
+                        _save_phase_checkpoint(checkpoint_path, checkpoint)
+                        if _is_pause_error(exc):
+                            _write_pause_marker(run_dir=run_dir, step_id=step_id, exc=exc)
+                        raise
+
+                    if should_log_llm():
+                        log_llm_response(
+                            workspace,
+                            f"outline_{step_id}_chapter_{chapter_id}_window_{window_index}_attempt{window_attempts}",
+                            response,
+                            request=request,
+                            messages=messages,
+                            extra=extra,
+                        )
+
+                    _write_json(
+                        run_dir / _chapter_artifact_name(step_id, chapter_id, f"window_{window_index:02d}_attempt_raw", window_attempts),
+                        {"text": response.text, "raw": response.raw},
+                    )
+
+                    errors: List[Dict[str, Any]] = []
+                    warnings: List[Dict[str, Any]] = []
+                    metrics: Dict[str, Any] = {}
+                    parsed: Dict[str, Any] = {}
+
+                    try:
+                        parsed = _extract_phase_json(step_id, response.text)
+                    except Exception as exc:
+                        errors.append(outline_validators.issue("json_parse", str(exc), path="<root>"))
+                    else:
+                        if _is_error_v1_payload(parsed):
+                            validation_result = outline_validators.parse_error_v1(parsed, step_id)
+                            errors.extend(validation_result.errors)
+                            warnings.extend(validation_result.warnings)
+                            metrics.update(validation_result.metrics)
+                        else:
+                            try:
+                                chapter_patch, chapter_report, registry_updates = _extract_chapter_patch_from_response(
+                                    step_id=step_id,
+                                    parsed=parsed,
+                                    chapter_id=chapter_id,
+                                )
+                            except Exception as exc:
+                                errors.append(
+                                    outline_validators.issue(
+                                        "chapter_scoped_payload_expected",
+                                        str(exc),
+                                        path="outline.chapters",
+                                    )
+                                )
+                            else:
+                                single_outline_payload = {
+                                    "schema_version": OUTLINE_SCHEMA_VERSION,
+                                    "chapters": [deepcopy(chapter_patch)],
+                                    "characters": deepcopy(registry_updates.get("characters") or []),
+                                    "threads": deepcopy(registry_updates.get("threads") or []),
+                                }
+
+                                preprocessed, preprocess_errors = handler.preprocess(
+                                    single_outline_payload,
+                                    handoffs=handoffs,
+                                    settings=settings,
+                                    runtime=runtime,
+                                )
+                                errors.extend(preprocess_errors)
+
+                                pre_outline = preprocessed.get("outline") if isinstance(preprocessed.get("outline"), dict) else {}
+                                pre_chapters = pre_outline.get("chapters") if isinstance(pre_outline.get("chapters"), list) else []
+                                if pre_chapters and isinstance(pre_chapters[0], dict):
+                                    chapter_patch = deepcopy(pre_chapters[0])
+                                chapter_report = preprocessed.get("phase_report") if isinstance(preprocessed.get("phase_report"), dict) else chapter_report
+                                window_report_payload = deepcopy(chapter_report) if isinstance(chapter_report, dict) else {}
+
+                                candidate_outline = _merge_target_chapter_outline(
+                                    window_base_outline,
+                                    chapter_id=chapter_id,
+                                    chapter_patch=chapter_patch,
+                                    registry_updates=registry_updates,
+                                )
+                                invariant_errors = _validate_chapter_invariants(
+                                    before_outline=window_base_outline,
+                                    after_outline=candidate_outline,
+                                    target_chapter_id=chapter_id,
+                                    baseline_chapter_ids=baseline_chapter_ids,
+                                )
+                                errors.extend(invariant_errors)
+
+                                candidate_payload = _build_step_output_payload(
+                                    step_id=step_id,
+                                    merged_outline=candidate_outline,
+                                    aggregate_report=chapter_report,
+                                )
+                                validation_result = handler.validate(
+                                    candidate_payload,
+                                    handoffs=handoffs,
+                                    settings=settings,
+                                    runtime=runtime,
+                                )
+                                errors.extend(validation_result.errors)
+                                warnings.extend(validation_result.warnings)
+                                metrics.update(validation_result.metrics)
+
+                                if not errors:
+                                    working_outline = candidate_outline
+                                    window_reports.append(window_report_payload)
+                                    window_output_payload = candidate_payload
+
+                    chapter_validation_payload = {
+                        "status": "pass" if not errors else "fail",
+                        "errors": errors,
+                        "warnings": warnings,
+                        "metrics": metrics,
+                    }
+                    _write_json(
+                        run_dir / _chapter_artifact_name(step_id, chapter_id, f"window_{window_index:02d}_validation"),
+                        chapter_validation_payload,
+                    )
+                    _write_json(
+                        run_dir / _chapter_artifact_name(step_id, chapter_id, f"window_{window_index:02d}_output"),
+                        window_output_payload if window_output_payload else parsed,
+                    )
+
+                    if not errors:
+                        window_success = True
+                        break
+
+                    working_outline = window_base_outline
+                    window_retry_message = _phase_retry_message(step_id, errors)
+
+                if not window_success:
+                    reasons = [
+                        str(item.get("message") or item.get("code") or "validation_error")
+                        for item in chapter_validation_payload.get("errors", [])
+                    ][:8]
+                    raise OutlinePhaseFailure(
+                        step_id=step_id,
+                        reasons=reasons,
+                        validator_evidence=chapter_validation_payload.get("errors", []),
+                    )
+
+            touched_scene_refs: List[str] = []
+            touched_fields: List[str] = []
+            updated_character_ids: List[str] = []
+            for report in window_reports:
+                if not isinstance(report, dict):
+                    continue
+                touched_scene_refs.extend(
+                    [str(item) for item in report.get("touched_scene_refs", []) if str(item).strip()]
+                    if isinstance(report.get("touched_scene_refs"), list)
+                    else []
+                )
+                touched_fields.extend(
+                    [str(item) for item in report.get("touched_fields", []) if str(item).strip()]
+                    if isinstance(report.get("touched_fields"), list)
+                    else []
+                )
+                updated_character_ids.extend(
+                    [str(item) for item in report.get("updated_character_ids", []) if str(item).strip()]
+                    if isinstance(report.get("updated_character_ids"), list)
+                    else []
+                )
+
+            chapter_report = {
+                "window_reports": window_reports,
+                "window_count": len(windows),
+                "touched_scene_refs": sorted(set(touched_scene_refs)),
+                "touched_fields": sorted(set(touched_fields)),
+                "updated_character_ids": sorted(set(updated_character_ids)),
+            }
+            aggregate_report = _merge_step_report(
+                aggregate_report,
+                chapter_report,
+                chapter_id=chapter_id,
+            )
+            chapter_validation_payload = {
+                "status": "pass",
+                "errors": [],
+                "warnings": [],
+                "metrics": {
+                    "window_count": len(windows),
+                    "window_attempts": total_window_attempts,
+                },
+            }
+            chapter_output_payload = _build_step_output_payload(
+                step_id=step_id,
+                merged_outline=working_outline,
+                aggregate_report=aggregate_report,
+            )
+            _write_json(
+                run_dir / _chapter_artifact_name(step_id, chapter_id, "output"),
+                chapter_output_payload,
+            )
+            _write_json(
+                run_dir / _chapter_artifact_name(step_id, chapter_id, "validation"),
+                chapter_validation_payload,
+            )
+            chapter_attempts[chapter_key] = {
+                "status": "success",
+                "attempts": total_window_attempts,
+                "validation_summary": chapter_validation_payload,
+                "window_count": len(windows),
+            }
+            checkpoint["chapter_attempts"] = chapter_attempts
+            checkpoint["resume_cursor"] = {
+                "phase_id": step_id,
+                "next_chapter_id": chapter_id + 1,
+                "reason_code": "resume_incremental",
+                "updated_at": outline_artifacts.utc_now_iso(),
+            }
+            _save_phase_checkpoint(checkpoint_path, checkpoint)
+            continue
+
+        if step_id == outline_context.STEP_04D:
+            windows = _resolve_phase04d_windows_for_chapter(
+                runtime=runtime,
+                run_dir=run_dir,
+                chapter_id=chapter_id,
+                chapter_outline=_extract_chapter(working_outline, chapter_id),
+            )
+            if not windows:
+                chapter_report = {
+                    "window_reports": [],
+                    "window_count": 0,
+                }
+                aggregate_report = _merge_step_report(
+                    aggregate_report,
+                    chapter_report,
+                    chapter_id=chapter_id,
+                )
+                chapter_validation_payload = {
+                    "status": "pass",
+                    "errors": [],
+                    "warnings": [],
+                    "metrics": {"window_count": 0},
+                }
+                chapter_output_payload = _build_step_output_payload(
+                    step_id=step_id,
+                    merged_outline=working_outline,
+                    aggregate_report=aggregate_report,
+                )
+                _write_json(
+                    run_dir / _chapter_artifact_name(step_id, chapter_id, "output"),
+                    chapter_output_payload,
+                )
+                _write_json(
+                    run_dir / _chapter_artifact_name(step_id, chapter_id, "validation"),
+                    chapter_validation_payload,
+                )
+                chapter_attempts[chapter_key] = {
+                    "status": "success",
+                    "attempts": 0,
+                    "validation_summary": chapter_validation_payload,
+                    "window_count": 0,
+                }
+                checkpoint["chapter_attempts"] = chapter_attempts
+                checkpoint["resume_cursor"] = {
+                    "phase_id": step_id,
+                    "next_chapter_id": chapter_id + 1,
+                    "reason_code": "resume_incremental",
+                    "updated_at": outline_artifacts.utc_now_iso(),
+                }
+                _save_phase_checkpoint(checkpoint_path, checkpoint)
+                continue
+
+            allowed_fields = {
+                "scene_fields": [
+                    "transition_in_text",
+                    "transition_in_anchors",
+                    "transition_out_text",
+                    "transition_out_anchors",
+                    "seam_score",
+                    "seam_resolution",
+                    "hard_cut_justification",
+                    "intentional_cinematic_cut",
+                ],
+            }
+
+            window_reports: List[Dict[str, Any]] = []
+            total_window_attempts = 0
+            for window_index, window in enumerate(windows, start=1):
+                window_attempts = 0
+                window_success = False
+                window_retry_message: Optional[str] = None
+                t1_retry_message: Optional[str] = None
+                t1_assistant_parts: Optional[List[Dict[str, Any]]] = None
+                while window_attempts < OUTLINE_MAX_ATTEMPTS:
+                    window_attempts += 1
+                    total_window_attempts += 1
+                    window_base_outline = deepcopy(working_outline)
+                    window_output_payload: Dict[str, Any] = {}
+                    window_report_payload: Dict[str, Any] = {}
+
+                    chapter_input_outline = {
+                        "schema_version": OUTLINE_SCHEMA_VERSION,
+                        "chapters": [deepcopy(_extract_chapter(working_outline, chapter_id))],
+                        "characters": deepcopy(
+                            working_outline.get("characters")
+                            if isinstance(working_outline.get("characters"), list)
+                            else []
+                        ),
+                        "threads": deepcopy(
+                            working_outline.get("threads")
+                            if isinstance(working_outline.get("threads"), list)
+                            else []
+                        ),
+                    }
+
+                    window_payload = deepcopy(window) if isinstance(window, dict) else {}
+                    window_payload["window_index"] = window_index
+                    window_payload["window_count"] = len(windows)
+                    runtime["phase04d_current_window"] = window_payload
+                    runtime["phase04d_allowed_fields"] = deepcopy(allowed_fields)
+                    runtime["phase04d_window_scene_refs"] = window_payload.get("scene_refs", [])
+                    runtime["phase04d_window_id"] = window_payload.get("window_id")
+                    runtime["phase04d_before_outline"] = deepcopy(working_outline)
+
+                    chapter_render_values = _chapter_render_values(
+                        step_id=step_id,
+                        chapter_id=chapter_id,
+                        chapter_outline=chapter_input_outline,
+                        previous_chapter_outline=prev_outline,
+                        next_chapter_outline=next_outline,
+                        book=book,
+                        targets=targets,
+                        notes=notes,
+                        user_prompt=user_prompt,
+                        transition_hints=transition_hints,
+                        scene_count_policy=scene_count_policy,
+                        runtime=runtime,
+                    )
+                    rendered_prompt = render_template_file(template_path, chapter_render_values)
+                    input_payload = {
+                        "step_id": step_id,
+                        "logical_phase": spec.logical_phase,
+                        "template": str(template_path),
+                        "chapter_id": chapter_id,
+                        "window_index": window_index,
+                        "render_values": chapter_render_values,
+                        "prompt_hash": _sha256_text(rendered_prompt),
+                    }
+                    _write_json(
+                        run_dir / _chapter_artifact_name(step_id, chapter_id, f"window_{window_index:02d}_input"),
+                        input_payload,
+                    )
+
+                    if t1_assistant_parts is None:
+                        t1_messages: List[Message] = [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": rendered_prompt},
+                            {"role": "user", "content": PHASE04D_T1_INSTRUCTION},
+                        ]
+                        if t1_retry_message:
+                            t1_messages.append({"role": "user", "content": t1_retry_message})
+                        t1_level, t1_budget = _apply_thinking_policy(
+                            thinking_level=thinking_level,
+                            thinking_budget=thinking_budget,
+                        )
+                        t1_request = {"model": model, "temperature": 0.2, "max_tokens": max_tokens}
+                        if t1_budget is not None:
+                            t1_request["thinking_config"] = {"thinkingBudget": t1_budget}
+                        elif t1_level:
+                            t1_request["thinking_config"] = {"thinkingLevel": t1_level}
+                        t1_extra = {
+                            "book_id": book_id,
+                            "step": step_id,
+                            "phase_id": step_id,
+                            "chapter": chapter_id,
+                            "window_id": window_payload.get("window_id"),
+                            "window_index": window_index,
+                            "attempt": window_attempts,
+                            "turn_id": "T1",
+                        }
+                        key_slot = getattr(client, "key_slot", None)
+                        if key_slot:
+                            t1_extra["key_slot"] = key_slot
+                        try:
+                            t1_response = client.chat(
+                                t1_messages,
+                                model=model,
+                                temperature=0.2,
+                                max_tokens=max_tokens,
+                                thinking_level=t1_level,
+                                thinking_budget=t1_budget,
+                            )
+                        except LLMRequestError as exc:
+                            if should_log_llm():
+                                log_llm_error(
+                                    workspace,
+                                    f"outline_{step_id}_chapter_{chapter_id}_window_{window_index}_t1_error",
+                                    exc,
+                                    request=t1_request,
+                                    messages=t1_messages,
+                                    extra=t1_extra,
+                                )
+                            chapter_attempts[chapter_key] = {
+                                "status": "paused" if _is_pause_error(exc) else "error",
+                                "attempts": total_window_attempts,
+                                "validation_summary": {
+                                    "status": "fail",
+                                    "errors": [outline_validators.issue("llm_request_error", exc.message, path="<request>")],
+                                    "warnings": [],
+                                    "metrics": {},
+                                },
+                            }
+                            checkpoint["chapter_attempts"] = chapter_attempts
+                            checkpoint["resume_cursor"] = {
+                                "phase_id": step_id,
+                                "next_chapter_id": chapter_id,
+                                "reason_code": "rate_limited_retry_exhausted" if _is_pause_error(exc) else "llm_request_error",
+                                "updated_at": outline_artifacts.utc_now_iso(),
+                            }
+                            _save_phase_checkpoint(checkpoint_path, checkpoint)
+                            if _is_pause_error(exc):
+                                _write_pause_marker(run_dir=run_dir, step_id=step_id, exc=exc)
+                            raise
+
+                        if should_log_llm():
+                            log_llm_response(
+                                workspace,
+                                f"outline_{step_id}_chapter_{chapter_id}_window_{window_index}_t1_attempt{window_attempts}",
+                                t1_response,
+                                request=t1_request,
+                                messages=t1_messages,
+                                extra=t1_extra,
+                            )
+
+                        _write_json(
+                            run_dir / _chapter_artifact_name(step_id, chapter_id, f"window_{window_index:02d}_plan_raw", window_attempts),
+                            {"text": t1_response.text, "raw": t1_response.raw},
+                        )
+
+                        try:
+                            t1_plan_payload = _extract_phase_json(step_id, t1_response.text)
+                        except Exception as exc:
+                            t1_retry_message = (
+                                "Your planning output was invalid. Return ONLY the ready JSON object "
+                                "with status, notes, warnings, and edits."
+                            )
+                            window_retry_message = None
+                            plan_errors = [outline_validators.issue("json_parse", str(exc), path="<plan>")]
+                            chapter_validation_payload = {
+                                "status": "fail",
+                                "errors": plan_errors,
+                                "warnings": [],
+                                "metrics": {},
+                            }
+                            _write_json(
+                                run_dir / _chapter_artifact_name(step_id, chapter_id, f"window_{window_index:02d}_validation"),
+                                chapter_validation_payload,
+                            )
+                            _save_phase_checkpoint(checkpoint_path, checkpoint)
+                            continue
+                        t1_assistant_parts = (
+                            t1_response.assistant_parts if isinstance(t1_response.assistant_parts, list) else None
+                        )
+                        _write_json(
+                            run_dir / _chapter_artifact_name(step_id, chapter_id, f"window_{window_index:02d}_plan"),
+                            {"schema_version": f"{step_id}_plan_v1", "plan": t1_plan_payload},
+                        )
+                        t1_retry_message = None
+                        if t1_assistant_parts:
+                            _write_json(
+                                run_dir / _chapter_artifact_name(step_id, chapter_id, f"window_{window_index:02d}_plan_assistant_parts", window_attempts),
+                                t1_assistant_parts,
+                            )
+
+                    messages: List[Message] = [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": rendered_prompt},
+                    ]
+                    provider_name = str(getattr(client, "provider", "")).lower()
+                    if t1_assistant_parts and provider_name == "gemini":
+                        messages.append({"role": "assistant", "parts": t1_assistant_parts})
+                    messages.append({"role": "user", "content": PHASE04D_T2_INSTRUCTION})
+                    if window_retry_message:
+                        messages.append({"role": "user", "content": window_retry_message})
+
+                    request = {"model": model, "temperature": 0.2, "max_tokens": max_tokens}
+                    t2_level = _resolve_phase04d_t2_thinking_level(model)
+                    if t2_level:
+                        request["thinking_config"] = {"thinkingLevel": t2_level}
+                    extra = {
+                        "book_id": book_id,
+                        "step": step_id,
+                        "phase_id": step_id,
+                        "chapter": chapter_id,
+                        "window_id": window_payload.get("window_id"),
+                        "window_index": window_index,
+                        "attempt": window_attempts,
+                        "turn_id": "T2",
+                    }
+                    key_slot = getattr(client, "key_slot", None)
+                    if key_slot:
+                        extra["key_slot"] = key_slot
+
+                    try:
+                        response = client.chat(
+                            messages,
+                            model=model,
+                            temperature=0.2,
+                            max_tokens=max_tokens,
+                            thinking_level=t2_level,
+                            thinking_budget=None,
+                        )
+                    except LLMRequestError as exc:
+                        if should_log_llm():
+                            log_llm_error(
+                                workspace,
+                                f"outline_{step_id}_chapter_{chapter_id}_window_{window_index}_error",
+                                exc,
+                                request=request,
+                                messages=messages,
+                                extra=extra,
+                            )
+                        chapter_attempts[chapter_key] = {
+                            "status": "paused" if _is_pause_error(exc) else "error",
+                            "attempts": total_window_attempts,
+                            "validation_summary": {
+                                "status": "fail",
+                                "errors": [outline_validators.issue("llm_request_error", exc.message, path="<request>")],
+                                "warnings": [],
+                                "metrics": {},
+                            },
+                        }
+                        checkpoint["chapter_attempts"] = chapter_attempts
+                        checkpoint["resume_cursor"] = {
+                            "phase_id": step_id,
+                            "next_chapter_id": chapter_id,
+                            "reason_code": "rate_limited_retry_exhausted" if _is_pause_error(exc) else "llm_request_error",
+                            "updated_at": outline_artifacts.utc_now_iso(),
+                        }
+                        _save_phase_checkpoint(checkpoint_path, checkpoint)
+                        if _is_pause_error(exc):
+                            _write_pause_marker(run_dir=run_dir, step_id=step_id, exc=exc)
+                        raise
+
+                    if should_log_llm():
+                        log_llm_response(
+                            workspace,
+                            f"outline_{step_id}_chapter_{chapter_id}_window_{window_index}_attempt{window_attempts}",
+                            response,
+                            request=request,
+                            messages=messages,
+                            extra=extra,
+                        )
+
+                    _write_json(
+                        run_dir / _chapter_artifact_name(step_id, chapter_id, f"window_{window_index:02d}_attempt_raw", window_attempts),
+                        {"text": response.text, "raw": response.raw},
+                    )
+
+                    errors: List[Dict[str, Any]] = []
+                    warnings: List[Dict[str, Any]] = []
+                    metrics: Dict[str, Any] = {}
+                    parsed: Dict[str, Any] = {}
+
+                    try:
+                        parsed = _extract_phase_json(step_id, response.text)
+                    except Exception as exc:
+                        errors.append(outline_validators.issue("json_parse", str(exc), path="<root>"))
+                    else:
+                        if _is_error_v1_payload(parsed):
+                            validation_result = outline_validators.parse_error_v1(parsed, step_id)
+                            errors.extend(validation_result.errors)
+                            warnings.extend(validation_result.warnings)
+                            metrics.update(validation_result.metrics)
+                        else:
+                            try:
+                                chapter_patch, chapter_report, registry_updates = _extract_chapter_patch_from_response(
+                                    step_id=step_id,
+                                    parsed=parsed,
+                                    chapter_id=chapter_id,
+                                )
+                            except Exception as exc:
+                                errors.append(
+                                    outline_validators.issue(
+                                        "chapter_scoped_payload_expected",
+                                        str(exc),
+                                        path="outline.chapters",
+                                    )
+                                )
+                            else:
+                                single_outline_payload = {
+                                    "schema_version": OUTLINE_SCHEMA_VERSION,
+                                    "chapters": [deepcopy(chapter_patch)],
+                                    "characters": deepcopy(registry_updates.get("characters") or []),
+                                    "threads": deepcopy(registry_updates.get("threads") or []),
+                                }
+
+                                preprocessed, preprocess_errors = handler.preprocess(
+                                    single_outline_payload,
+                                    handoffs=handoffs,
+                                    settings=settings,
+                                    runtime=runtime,
+                                )
+                                errors.extend(preprocess_errors)
+
+                                pre_outline = preprocessed.get("outline") if isinstance(preprocessed.get("outline"), dict) else {}
+                                pre_chapters = pre_outline.get("chapters") if isinstance(pre_outline.get("chapters"), list) else []
+                                if pre_chapters and isinstance(pre_chapters[0], dict):
+                                    chapter_patch = deepcopy(pre_chapters[0])
+                                chapter_report = preprocessed.get("phase_report") if isinstance(preprocessed.get("phase_report"), dict) else chapter_report
+                                window_report_payload = deepcopy(chapter_report) if isinstance(chapter_report, dict) else {}
+
+                                candidate_outline = _merge_target_chapter_outline(
+                                    window_base_outline,
+                                    chapter_id=chapter_id,
+                                    chapter_patch=chapter_patch,
+                                    registry_updates=registry_updates,
+                                )
+                                invariant_errors = _validate_chapter_invariants(
+                                    before_outline=window_base_outline,
+                                    after_outline=candidate_outline,
+                                    target_chapter_id=chapter_id,
+                                    baseline_chapter_ids=baseline_chapter_ids,
+                                )
+                                errors.extend(invariant_errors)
+
+                                candidate_payload = _build_step_output_payload(
+                                    step_id=step_id,
+                                    merged_outline=candidate_outline,
+                                    aggregate_report=chapter_report,
+                                )
+                                validation_result = handler.validate(
+                                    candidate_payload,
+                                    handoffs=handoffs,
+                                    settings=settings,
+                                    runtime=runtime,
+                                )
+                                errors.extend(validation_result.errors)
+                                warnings.extend(validation_result.warnings)
+                                metrics.update(validation_result.metrics)
+
+                                if not errors:
+                                    working_outline = candidate_outline
+                                    window_reports.append(window_report_payload)
+                                    window_output_payload = candidate_payload
+
+                    chapter_validation_payload = {
+                        "status": "pass" if not errors else "fail",
+                        "errors": errors,
+                        "warnings": warnings,
+                        "metrics": metrics,
+                    }
+                    _write_json(
+                        run_dir / _chapter_artifact_name(step_id, chapter_id, f"window_{window_index:02d}_validation"),
+                        chapter_validation_payload,
+                    )
+                    _write_json(
+                        run_dir / _chapter_artifact_name(step_id, chapter_id, f"window_{window_index:02d}_output"),
+                        window_output_payload if window_output_payload else parsed,
+                    )
+
+                    if not errors:
+                        window_success = True
+                        break
+
+                    working_outline = window_base_outline
+                    window_retry_message = _phase_retry_message(step_id, errors)
+
+                if not window_success:
+                    reasons = [
+                        str(item.get("message") or item.get("code") or "validation_error")
+                        for item in chapter_validation_payload.get("errors", [])
+                    ][:8]
+                    raise OutlinePhaseFailure(
+                        step_id=step_id,
+                        reasons=reasons,
+                        validator_evidence=chapter_validation_payload.get("errors", []),
+                    )
+
+            touched_scene_refs: List[str] = []
+            touched_fields: List[str] = []
+            for report in window_reports:
+                if not isinstance(report, dict):
+                    continue
+                touched_scene_refs.extend(
+                    [str(item) for item in report.get("touched_scene_refs", []) if str(item).strip()]
+                    if isinstance(report.get("touched_scene_refs"), list)
+                    else []
+                )
+                touched_fields.extend(
+                    [str(item) for item in report.get("touched_fields", []) if str(item).strip()]
+                    if isinstance(report.get("touched_fields"), list)
+                    else []
+                )
+
+            chapter_report = {
+                "window_reports": window_reports,
+                "window_count": len(windows),
+                "touched_scene_refs": sorted(set(touched_scene_refs)),
+                "touched_fields": sorted(set(touched_fields)),
+            }
+            aggregate_report = _merge_step_report(
+                aggregate_report,
+                chapter_report,
+                chapter_id=chapter_id,
+            )
+            chapter_validation_payload = {
+                "status": "pass",
+                "errors": [],
+                "warnings": [],
+                "metrics": {
+                    "window_count": len(windows),
+                    "window_attempts": total_window_attempts,
+                },
+            }
+            chapter_output_payload = _build_step_output_payload(
+                step_id=step_id,
+                merged_outline=working_outline,
+                aggregate_report=aggregate_report,
+            )
+            _write_json(
+                run_dir / _chapter_artifact_name(step_id, chapter_id, "output"),
+                chapter_output_payload,
+            )
+            _write_json(
+                run_dir / _chapter_artifact_name(step_id, chapter_id, "validation"),
+                chapter_validation_payload,
+            )
+            chapter_attempts[chapter_key] = {
+                "status": "success",
+                "attempts": total_window_attempts,
+                "validation_summary": chapter_validation_payload,
+                "window_count": len(windows),
+            }
+            checkpoint["chapter_attempts"] = chapter_attempts
+            checkpoint["resume_cursor"] = {
+                "phase_id": step_id,
+                "next_chapter_id": chapter_id + 1,
+                "reason_code": "resume_incremental",
+                "updated_at": outline_artifacts.utc_now_iso(),
+            }
+            _save_phase_checkpoint(checkpoint_path, checkpoint)
+            continue
+
         use_two_turn = step_id in {
             outline_context.PHASE_03,
             outline_context.STEP_04A,
             outline_context.STEP_04B,
+            outline_context.STEP_04C,
+            outline_context.STEP_04C_INTRO,
+            outline_context.STEP_04C_HANDOFF,
+            outline_context.STEP_04D,
             outline_context.PHASE_05,
             outline_context.PHASE_06,
         }
@@ -1716,6 +3264,18 @@ def _execute_chapter_scoped_step(
         elif step_id == outline_context.STEP_04B:
             t1_instruction = PHASE04B_T1_INSTRUCTION
             t2_instruction = PHASE04B_T2_INSTRUCTION
+        elif step_id == outline_context.STEP_04C:
+            t1_instruction = PHASE04C_T1_INSTRUCTION
+            t2_instruction = PHASE04C_T2_INSTRUCTION
+        elif step_id == outline_context.STEP_04C_INTRO:
+            t1_instruction = PHASE04C_INTRO_T1_INSTRUCTION
+            t2_instruction = PHASE04C_INTRO_T2_INSTRUCTION
+        elif step_id == outline_context.STEP_04C_HANDOFF:
+            t1_instruction = PHASE04C_HANDOFF_T1_INSTRUCTION
+            t2_instruction = PHASE04C_HANDOFF_T2_INSTRUCTION
+        elif step_id == outline_context.STEP_04D:
+            t1_instruction = PHASE04D_T1_INSTRUCTION
+            t2_instruction = PHASE04D_T2_INSTRUCTION
         elif step_id == outline_context.PHASE_05:
             t1_instruction = PHASE05_T1_INSTRUCTION
             t2_instruction = PHASE05_T2_INSTRUCTION
@@ -1906,6 +3466,14 @@ def _execute_chapter_scoped_step(
                     t2_level = _resolve_phase04a_t2_thinking_level(model)
                 elif step_id == outline_context.STEP_04B:
                     t2_level = _resolve_phase04b_t2_thinking_level(model)
+                elif step_id == outline_context.STEP_04C:
+                    t2_level = _resolve_phase04c_t2_thinking_level(model)
+                elif step_id == outline_context.STEP_04C_INTRO:
+                    t2_level = _resolve_phase04c_intro_t2_thinking_level(model)
+                elif step_id == outline_context.STEP_04C_HANDOFF:
+                    t2_level = _resolve_phase04c_t2_thinking_level(model)
+                elif step_id == outline_context.STEP_04D:
+                    t2_level = _resolve_phase04d_t2_thinking_level(model)
                 elif step_id == outline_context.PHASE_05:
                     t2_level = _resolve_phase05_t2_thinking_level(model)
                 elif step_id == outline_context.PHASE_06:
@@ -2025,7 +3593,15 @@ def _execute_chapter_scoped_step(
                         )
                     else:
                         single_outline_payload = deepcopy(parsed)
-                        if step_id in {outline_context.STEP_04A, outline_context.STEP_04B, outline_context.PHASE_05}:
+                        if step_id in {
+                            outline_context.STEP_04A,
+                            outline_context.STEP_04B,
+                            outline_context.STEP_04C,
+                            outline_context.STEP_04C_INTRO,
+                            outline_context.STEP_04C_HANDOFF,
+                            outline_context.STEP_04D,
+                            outline_context.PHASE_05,
+                        }:
                             single_outline_payload["outline"] = {
                                 "schema_version": OUTLINE_SCHEMA_VERSION,
                                 "chapters": [deepcopy(chapter_patch)],
@@ -2058,12 +3634,27 @@ def _execute_chapter_scoped_step(
                                 chapter_routing_map.get(chapter_key) if isinstance(chapter_routing_map.get(chapter_key), dict) else {}
                             )
 
-                        if step_id in {outline_context.STEP_04A, outline_context.STEP_04B, outline_context.PHASE_05}:
+                        if step_id in {
+                            outline_context.STEP_04A,
+                            outline_context.STEP_04B,
+                            outline_context.STEP_04C,
+                            outline_context.STEP_04C_INTRO,
+                            outline_context.STEP_04C_HANDOFF,
+                            outline_context.STEP_04D,
+                            outline_context.PHASE_05,
+                        }:
                             pre_outline = preprocessed.get("outline") if isinstance(preprocessed.get("outline"), dict) else {}
                             pre_chapters = pre_outline.get("chapters") if isinstance(pre_outline.get("chapters"), list) else []
                             if pre_chapters and isinstance(pre_chapters[0], dict):
                                 chapter_patch = deepcopy(pre_chapters[0])
-                            if step_id in {outline_context.STEP_04A, outline_context.STEP_04B}:
+                            if step_id in {
+                                outline_context.STEP_04A,
+                                outline_context.STEP_04B,
+                                outline_context.STEP_04C,
+                                outline_context.STEP_04C_INTRO,
+                                outline_context.STEP_04C_HANDOFF,
+                                outline_context.STEP_04D,
+                            }:
                                 chapter_report = preprocessed.get("phase_report") if isinstance(preprocessed.get("phase_report"), dict) else chapter_report
                             elif step_id == outline_context.PHASE_05:
                                 chapter_report = preprocessed.get("cast_report") if isinstance(preprocessed.get("cast_report"), dict) else chapter_report
@@ -2213,8 +3804,52 @@ def _execute_chapter_scoped_step(
             "outline": working_outline,
             "cast_report": aggregate_report,
         }
+    elif step_id == outline_context.STEP_04C:
+        output_payload = {
+            "schema_version": "outline_relink_v1",
+            "outline": working_outline,
+            "phase_report": aggregate_report,
+        }
+    elif step_id == outline_context.STEP_04C_INTRO:
+        output_payload = {
+            "schema_version": "outline_intro_sync_v1",
+            "outline": working_outline,
+            "phase_report": aggregate_report,
+        }
+    elif step_id == outline_context.STEP_04C_HANDOFF:
+        output_payload = {
+            "schema_version": "outline_handoff_normalize_v1",
+            "outline": working_outline,
+            "phase_report": aggregate_report,
+        }
+    elif step_id == outline_context.STEP_04D:
+        output_payload = {
+            "schema_version": "outline_seam_hygiene_v1",
+            "outline": working_outline,
+            "phase_report": aggregate_report,
+        }
     else:
         output_payload = working_outline
+
+    if step_id == outline_context.STEP_04C:
+        runtime.pop("phase04c_before_outline", None)
+        runtime.pop("phase04c_window_scene_refs", None)
+        runtime.pop("phase04c_window_character_ids", None)
+        runtime.pop("phase04c_window_id", None)
+    if step_id == outline_context.STEP_04C_INTRO:
+        runtime.pop("phase04c_intro_before_outline", None)
+        runtime.pop("phase04c_intro_character_ids", None)
+        runtime.pop("phase04c_intro_character_registry", None)
+    if step_id == outline_context.STEP_04C_HANDOFF:
+        runtime.pop("phase04c_handoff_before_outline", None)
+        runtime.pop("phase04c_handoff_scene_refs", None)
+        runtime.pop("phase04c_handoff_targets", None)
+        runtime.pop("phase04c_handoff_allowed_jump_modes", None)
+    if step_id == outline_context.STEP_04D:
+        runtime.pop("phase04d_before_outline", None)
+        runtime.pop("phase04d_window_scene_refs", None)
+        runtime.pop("phase04d_window_id", None)
+        runtime.pop("phase04d_allowed_fields", None)
 
     final_validation = handler.validate(
         output_payload,
@@ -2862,6 +4497,10 @@ def generate_outline(
         final_outline = outline_validators.normalize_outline_for_write(handoffs["outline_final_v1_1"])
     elif isinstance(handoffs.get("outline_cast_refined_v1_1"), dict):
         final_outline = outline_validators.normalize_outline_for_write(handoffs["outline_cast_refined_v1_1"])
+    elif isinstance(handoffs.get("outline_transitions_relinked_v1_1"), dict):
+        final_outline = outline_validators.normalize_outline_for_write(
+            handoffs["outline_transitions_relinked_v1_1"]
+        )
     elif isinstance(handoffs.get("outline_transitions_refined_v1_1"), dict):
         final_outline = outline_validators.normalize_outline_for_write(handoffs["outline_transitions_refined_v1_1"])
 

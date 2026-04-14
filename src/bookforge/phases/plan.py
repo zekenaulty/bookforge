@@ -15,6 +15,7 @@ from bookforge.llm.logging import log_llm_error, log_llm_response, should_log_ll
 from bookforge.llm.types import LLMResponse, Message
 from bookforge.llm.errors import LLMRequestError
 from bookforge.pipeline.phase_history import _load_phase_history
+from bookforge.pipeline.thinking import resolve_turn_thinking_level
 from bookforge.prompt.renderer import render_template_file
 from bookforge.util.paths import repo_root
 from bookforge.util.json_extract import extract_json
@@ -24,6 +25,15 @@ from bookforge.util.schema import validate_json
 SCENE_CARD_SCHEMA_VERSION = "1.1"
 DEFAULT_EMPTY_RESPONSE_RETRIES = 1
 DEFAULT_JSON_RETRY_COUNT = 1
+PLAN_T1_INSTRUCTION = (
+    "THINKING PHASE: Analyze the outline window and plan the scene card. "
+    "Do NOT output the scene card JSON. Return ONLY a small JSON object: "
+    "{\"status\":\"ready_to_execute\",\"notes\":[],\"warnings\":[],\"edge_count\":0}."
+)
+PLAN_T2_INSTRUCTION = (
+    "EXECUTION PHASE: Emit the final scene card JSON only. "
+    "Do NOT include analysis or planning text. Output JSON only."
+)
 
 
 def _int_env(name: str, default: int) -> int:
@@ -516,56 +526,93 @@ def plan_scene(
     elif model is None:
         model = "default"
 
-    messages: List[Message] = [
+    base_messages: List[Message] = [
         {"role": "system", "content": system_path.read_text(encoding="utf-8")},
         {"role": "user", "content": prompt},
     ]
 
     max_tokens = _plan_max_tokens()
-    request = {"model": model, "temperature": 0.4, "max_tokens": max_tokens}
     log_path: Optional[Path] = None
     key_slot = getattr(client, "key_slot", None)
-    log_extra: Dict[str, Any] = {"book_id": book_id, "chapter": chapter_num, "scene": scene_num}
+    log_extra: Dict[str, Any] = {"book_id": book_id, "chapter": chapter_num, "scene": scene_num, "phase_id": "plan"}
     if key_slot:
         log_extra["key_slot"] = key_slot
-    retries = _empty_response_retries()
-    attempt = 0
+
+    t1_level = resolve_turn_thinking_level("plan", "T1")
+    t2_level = resolve_turn_thinking_level("plan", "T2")
+    t1_retry_message: Optional[str] = None
+    t1_attempt = 0
+    t1_parts: Optional[List[Dict[str, Any]]] = None
     while True:
+        t1_messages = list(base_messages)
+        t1_messages.append({"role": "user", "content": PLAN_T1_INSTRUCTION})
+        if t1_retry_message:
+            t1_messages.append({"role": "user", "content": t1_retry_message})
+        request = {"model": model, "temperature": 0.4, "max_tokens": max_tokens}
         try:
-            response = client.chat(messages, model=model, temperature=0.4, max_tokens=max_tokens)
+            response = client.chat(
+                t1_messages,
+                model=model,
+                temperature=0.4,
+                max_tokens=max_tokens,
+                thinking_level=t1_level,
+            )
         except LLMRequestError as exc:
             if should_log_llm():
-                log_llm_error(workspace, "plan_scene_error", exc, request=request, messages=messages, extra=log_extra)
+                log_llm_error(workspace, "plan_scene_t1_error", exc, request=request, messages=t1_messages, extra={**log_extra, "turn_id": "T1"})
             raise
-        label = "plan_scene" if attempt == 0 else f"plan_scene_retry{attempt}"
+        label = "plan_scene_t1" if t1_attempt == 0 else f"plan_scene_t1_retry{t1_attempt}"
         if should_log_llm():
-            log_path = log_llm_response(workspace, label, response, request=request, messages=messages, extra=log_extra)
-        if str(response.text).strip() or attempt >= retries:
+            log_llm_response(workspace, label, response, request=request, messages=t1_messages, extra={**log_extra, "turn_id": "T1"})
+        try:
+            _extract_json(response.text)
+            t1_parts = response.assistant_parts if isinstance(response.assistant_parts, list) else None
             break
-        attempt += 1
+        except ValueError:
+            t1_attempt += 1
+            if t1_attempt > _json_retry_count():
+                raise
+            t1_retry_message = "Return ONLY the ready JSON object. No prose, no markdown, no commentary."
+
     retries = _json_retry_count()
     parse_attempt = 0
     while True:
+        t2_messages = list(base_messages)
+        if t1_parts and str(getattr(client, "provider", "")).lower() == "gemini":
+            t2_messages.append({"role": "assistant", "parts": t1_parts})
+        t2_messages.append({"role": "user", "content": PLAN_T2_INSTRUCTION})
+        if parse_attempt > 0:
+            t2_messages.append({
+                "role": "user",
+                "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
+            })
+        request = {"model": model, "temperature": 0.4, "max_tokens": max_tokens}
+        try:
+            response = client.chat(
+                t2_messages,
+                model=model,
+                temperature=0.4,
+                max_tokens=max_tokens,
+                thinking_level=t2_level,
+            )
+        except LLMRequestError as exc:
+            if should_log_llm():
+                log_llm_error(workspace, "plan_scene_t2_error", exc, request=request, messages=t2_messages, extra={**log_extra, "turn_id": "T2"})
+            raise
+        label = "plan_scene" if parse_attempt == 0 else f"plan_scene_json_retry{parse_attempt}"
+        if should_log_llm():
+            log_path = log_llm_response(workspace, label, response, request=request, messages=t2_messages, extra={**log_extra, "turn_id": "T2"})
         try:
             card = _extract_json(response.text)
             break
         except ValueError as exc:
             if parse_attempt >= retries:
                 if not log_path:
-                    log_path = log_llm_response(workspace, "plan_scene", response, request=request, messages=messages, extra=log_extra)
+                    log_path = log_llm_response(workspace, "plan_scene", response, request=request, messages=t2_messages, extra={**log_extra, "turn_id": "T2"})
                 extra_msg = ""
                 if _response_truncated(response):
                     extra_msg = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_PLAN_MAX_TOKENS."
                 raise ValueError(f"{exc}{extra_msg} (raw response logged to {log_path})") from exc
-            retry_messages = list(messages)
-            retry_messages.append({
-                "role": "user",
-                "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
-            })
-            response = client.chat(retry_messages, model=model, temperature=0.4, max_tokens=max_tokens)
-            label = f"plan_scene_json_retry{parse_attempt + 1}"
-            if should_log_llm():
-                log_path = log_llm_response(workspace, label, response, request=request, messages=retry_messages, extra=log_extra)
             parse_attempt += 1
 
     # Fill cast ids from model response if outline window had none.
@@ -628,4 +675,3 @@ def plan_scene(
     state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
 
     return scene_path
-

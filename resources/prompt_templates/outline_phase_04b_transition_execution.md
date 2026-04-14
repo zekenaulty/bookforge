@@ -19,6 +19,7 @@ Required output schema:
   "phase_report": {
     "inserted_scene_refs": [],
     "resolved_candidates": [],
+    "insertion_edge_impacts": [],
     "blocked_by_budget": [],
     "unresolved_required_insertions": [],
     "edits_applied": []
@@ -39,6 +40,9 @@ Inputs for deterministic routing context (chapter-scoped):
 - Selected candidates to execute:
 {{phase_04_selected_candidates_json}}
 
+- Selected insertion candidates (micro/full only):
+{{phase_04_selected_insertions_json}}
+
 - Blocked candidates (for reporting only):
 {{phase_04_blocked_candidates_json}}
 
@@ -56,15 +60,7 @@ Hard execution rules:
 - Inserted scenes must be authored prose semantics; do not emit meta/fallback phrasing.
 - Do not synthesize placeholder identity values (current_location, unknown, placeholder, tbd, here, there).
 - Preserve required transition/link contracts and chapter-local scene sequencing.
-- After any insertion/renumbering, section-final scenes MUST include end_condition_echo
-  that matches the section's end_condition (update the final scene per section if it shifted).
-- After any insertion, you MUST renumber all scene_id values in this chapter to a strict
-  1..N monotonic sequence (no gaps, no placeholder 100+ ids).
-- After renumbering, you MUST update consumes_outcome_from and hands_off_to to match the
-  new scene_id sequence for every non-first/non-last scene in this chapter.
-- Scene ordering rule: scenes must be ordered in the JSON exactly in chapter sequence
-  (section 1 scenes in ascending scene_id, then section 2 scenes in ascending scene_id, etc.).
-  The scene_id sequence must be monotonic across the entire chapter in the order the scenes appear.
+- After insertions, re-evaluate section boundaries: the LAST scene in each section must include end_condition_echo equal to the section's end_condition. If insertions changed which scene is last, move/copy end_condition_echo accordingly (do not drop it).
 
 Resolved candidate reporting:
 - phase_report.resolved_candidates must contain one entry for each selected insertion candidate in this chapter.
@@ -76,6 +72,18 @@ Resolved candidate reporting:
   - resolution (must equal requested_resolution for selected insertion candidates)
   - inserted_scene_ref (chapter_id:scene_id of the inserted scene)
 - Every inserted_scene_ref listed in resolved_candidates must also appear in phase_report.inserted_scene_refs.
+- IMPORTANT: from_scene_ref and to_scene_ref in resolved_candidates must match the original selected insertion candidates exactly (copy them verbatim from phase_04_selected_insertions_json). Do not renumber those refs in the report, even if scene numbering changes after insertion.
+- Do not include resolved_candidates entries for inline_bridge selections.
+- Do not include resolved_candidates entries for edges not in phase_04_selected_insertions_json.
+
+Insertion impact reporting (required when any insertion occurs):
+- phase_report.insertion_edge_impacts must include one entry per inserted scene in this chapter.
+- Each entry must include:
+  - from_scene_ref (the scene that now hands off to the inserted scene)
+  - to_scene_ref (the scene that now consumes the inserted scene)
+  - inserted_scene_ref (chapter_id:scene_id of the inserted scene)
+  - requested_resolution
+  - resolution (must match requested_resolution)
 
 If you cannot satisfy constraints after correction attempts, return error_v1:
 {

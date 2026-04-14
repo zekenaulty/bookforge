@@ -11,6 +11,7 @@ DEFAULT_PREFLIGHT_MAX_TOKENS = 67000
 DEFAULT_STYLE_ANCHOR_MAX_TOKENS = 67000
 DEFAULT_APPEARANCE_MAX_TOKENS = 67000
 DEFAULT_DURABLE_SLICE_MAX_EXPANSIONS = 2
+DEFAULT_LINT_REPAIR_MAX_PASSES = 2
 
 
 def _int_env(name: str, default: int) -> int:
@@ -50,6 +51,9 @@ def _appearance_max_tokens() -> int:
 
 def _durable_slice_max_expansions() -> int:
     return max(0, _int_env("BOOKFORGE_DURABLE_SLICE_MAX_EXPANSIONS", DEFAULT_DURABLE_SLICE_MAX_EXPANSIONS))
+
+def _lint_repair_max_passes() -> int:
+    return max(0, _int_env("BOOKFORGE_LINT_REPAIR_MAX_PASSES", DEFAULT_LINT_REPAIR_MAX_PASSES))
 
 
 def _lint_mode() -> str:

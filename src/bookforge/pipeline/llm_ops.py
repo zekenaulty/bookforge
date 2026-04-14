@@ -84,6 +84,8 @@ def _chat(
     model: str,
     temperature: float,
     max_tokens: int,
+    thinking_level: Optional[str] = None,
+    thinking_budget: Optional[int] = None,
     log_extra: Optional[Dict[str, Any]] = None,
 ) -> LLMResponse:
     key_slot = getattr(client, "key_slot", None)
@@ -94,13 +96,24 @@ def _chat(
         merged_extra["key_slot"] = key_slot
     extra = merged_extra or None
     request = {"model": model, "temperature": temperature, "max_tokens": max_tokens}
+    if thinking_budget is not None:
+        request["thinking_config"] = {"thinkingBudget": thinking_budget}
+    elif thinking_level:
+        request["thinking_config"] = {"thinkingLevel": thinking_level}
     retries = _empty_response_retries()
     error_retries = _request_error_retries()
     attempt = 0
     error_attempt = 0
     while True:
         try:
-            response = client.chat(messages, model=model, temperature=temperature, max_tokens=max_tokens)
+            response = client.chat(
+                messages,
+                model=model,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                thinking_level=thinking_level,
+                thinking_budget=thinking_budget,
+            )
         except LLMRequestError as exc:
             if should_log_llm():
                 log_llm_error(workspace, f"{label}_error", exc, request=request, messages=messages, extra=extra)

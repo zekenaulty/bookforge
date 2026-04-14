@@ -8,6 +8,9 @@ No markdown, no code fences, no commentary. Use strict JSON (double quotes, no t
 If outline_window includes character information, keep those character ids in mind.
 If character_states are provided, keep inventory/persona/continuity mechanics consistent; do not invent conflicting facts.
 If outline_window.current.introduces is present, the scene must introduce those characters.
+If outline_window.section.end_condition is present, align scene-card end_condition to satisfy that closure target.
+If outline_window.current includes transition payload/link fields, copy them through into the scene card verbatim where possible. Do not re-derive or rename.
+Do not emit placeholder transition/location values (current_location, unknown, placeholder, tbd, here, there).
 If recent_lint_warnings include ui_gate_unknown, set ui_allowed explicitly for this scene.
 
 Required keys:
@@ -22,6 +25,26 @@ Required keys:
 - constraints (array)
 - end_condition
 - ui_allowed (boolean; true only when System/UI is active in this scene)
+- location_start_id (LOC_* canonical location id)
+- location_end_id (LOC_* canonical location id)
+- location_start_label
+- location_end_label
+- location_start
+- location_end
+- handoff_mode
+- constraint_state
+- transition_in_text
+- transition_in_anchors (array of 3-6 strings)
+- seam_score (0-100 integer)
+- seam_resolution ("inline_bridge"|"micro_scene"|"full_scene")
+
+Required when present in outline_window.current:
+- consumes_outcome_from
+- hands_off_to
+- transition_out_text
+- transition_out_anchors
+- hard_cut_justification
+- intentional_cinematic_cut
 
 Recommended keys (use ids from the outline; do not invent ids):
 - cast_present (array of character names for prose guidance)
@@ -58,6 +81,22 @@ JSON shape example (fill with real values):
   "constraints": ["target_words: 1900"],
   "end_condition": "The protagonist leaves home.",
   "ui_allowed": false,
+  "location_start_id": "LOC_OAKHAVEN_NORTH_GATE_CHECKPOINT",
+  "location_end_id": "LOC_OAKHAVEN_BARNABYS_TAVERN",
+  "location_start_label": "North Gate Checkpoint",
+  "location_end_label": "Barnaby's Tavern",
+  "location_start": "North Gate Checkpoint",
+  "location_end": "Barnaby's Tavern",
+  "handoff_mode": "detained_then_release",
+  "constraint_state": "processed",
+  "transition_in_text": "After a brief detention and scanner review, the guards release Artie under watch and direct him to Barnaby's Tavern.",
+  "transition_in_anchors": ["detention", "scanner", "release", "guards", "tavern"],
+  "transition_out_text": "Artie enters Barnaby's under scrutiny and without leverage.",
+  "transition_out_anchors": ["barnabys_tavern", "under_watch", "no_leverage"],
+  "consumes_outcome_from": "1:6",
+  "hands_off_to": "1:8",
+  "seam_score": 78,
+  "seam_resolution": "micro_scene",
   "cast_present": ["Eldrin"],
   "cast_present_ids": ["CHAR_Eldrin"],
   "introduces": [],
@@ -89,6 +128,5 @@ Recent lint warnings (prior scene, if any):
 
 Task:
 Create the next scene card.
-
 
 <!-- end entry=E001 semantic=plan.scene_card_prompt_contract_and_schema -->

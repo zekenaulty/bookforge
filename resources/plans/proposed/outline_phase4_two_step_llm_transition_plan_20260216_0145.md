@@ -3,6 +3,10 @@
 ## Purpose
 Define an explicit, enforceable two-step implementation for phase 04 so seam detection and seam execution both remain LLM-authored at the semantic layer.
 
+Status note (2026-04-11):
+Phase 04A/04B now execute as chapter-scoped two-turn pairs (T1 plan -> T2 execute). See
+`resources/plans/proposed/chapter_scoped_two_turn_phase_execution_plan_20260220_0927.md` for the turn mechanics.
+
 This plan addresses the prior failure class:
 1. LLM identified seams.
 2. Code inserted scenes/fallback transition text.
@@ -30,10 +34,12 @@ If a seam requires a transition scene:
 Prompt contract sources:
 1. 04A source (existing): `resources/prompt_blocks/phase/outline_pipeline/phase_04_transition_causality_refinement_prompt_contract.md`
 2. 04B source (new): `resources/prompt_blocks/phase/outline_pipeline/phase_04b_transition_execution_prompt_contract.md`
+3. 04C source (new): `resources/prompt_blocks/phase/outline_pipeline/phase_04c_metadata_relink_prompt_contract.md`
 
 Composed templates:
 1. `resources/prompt_templates/outline_phase_04a_transition_seam_analysis.md`
 2. `resources/prompt_templates/outline_phase_04b_transition_execution.md`
+3. `resources/prompt_templates/outline_phase_04c_metadata_relink.md`
 
 ### 04A: Seam Analysis LLM Step (Chapter-Scoped)
 Objective:
@@ -84,6 +90,7 @@ Output payload:
 1. chapter-only outline patch,
 2. `phase_report` with:
    - `inserted_scene_refs[]`,
+   - `insertion_edge_impacts[]`,
    - `blocked_by_budget[]`,
    - `downgraded_resolution[]`,
    - `unresolved_required_insertions[]`,
@@ -94,7 +101,34 @@ Validation gates:
 1. all selected insertion candidates are resolved by authored scene insertion or explicit terminal error,
 2. inserted scene objects contain full required scene contract fields,
 3. no placeholder or meta fallback phrasing in transition fields,
-4. links and scene ordering remain valid.
+4. insertion_edge_impacts reported for each inserted scene,
+5. links and scene ordering remain valid.
+
+### 04C: Metadata Relink LLM Step (Window-Scoped)
+Objective:
+1. reconcile structural metadata drift caused by inserted scenes,
+2. operate only within contiguous impact windows derived from 04B,
+3. avoid semantic/prose rewrites.
+
+Input payload:
+1. chapter N slice after 04B insertion,
+2. impact window descriptor (scene refs + edge impacts),
+3. allowed-fields contract (structural only).
+
+Output payload:
+1. chapter-only outline patch,
+2. `phase_report` with:
+   - `window_id`
+   - `touched_scene_refs[]`
+   - `touched_fields[]`
+   - `updated_character_ids[]`
+   - `notes[]`
+
+Validation gates:
+1. only window scene refs may change,
+2. only allowed fields may change within touched scenes,
+3. no scene add/remove/reorder or scene_id changes,
+4. character intro updates only for characters within window scope.
 
 ## Deterministic Routing Logic (Non-Semantic)
 Routing is deterministic, authoring is not.
@@ -163,13 +197,16 @@ Critical retry cap:
 ## Compiler/Manifest Touchpoints (Explicit)
 Required files to add/update:
 1. `resources/prompt_blocks/phase/outline_pipeline/phase_04b_transition_execution_prompt_contract.md` (new)
-2. `resources/prompt_templates/outline_phase_04a_transition_seam_analysis.md` (new or split output)
-3. `resources/prompt_templates/outline_phase_04b_transition_execution.md` (new)
-4. `resources/prompt_composition/manifests/outline_phase_04a_transition_seam_analysis.composition.manifest.json` (new)
-5. `resources/prompt_composition/manifests/outline_phase_04b_transition_execution.composition.manifest.json` (new)
-6. `resources/prompt_composition/prompt_tokens_allowlist.json` (add phase-04 step placeholders)
-7. `resources/prompt_composition/source_of_truth_checksums.json` (refresh)
-8. `src/bookforge/workspace.py` (`PROMPT_TEMPLATE_FILES` update)
+2. `resources/prompt_blocks/phase/outline_pipeline/phase_04c_metadata_relink_prompt_contract.md` (new)
+3. `resources/prompt_templates/outline_phase_04a_transition_seam_analysis.md` (new or split output)
+4. `resources/prompt_templates/outline_phase_04b_transition_execution.md` (new)
+5. `resources/prompt_templates/outline_phase_04c_metadata_relink.md` (new)
+6. `resources/prompt_composition/manifests/outline_phase_04a_transition_seam_analysis.composition.manifest.json` (new)
+7. `resources/prompt_composition/manifests/outline_phase_04b_transition_execution.composition.manifest.json` (new)
+8. `resources/prompt_composition/manifests/outline_phase_04c_metadata_relink.composition.manifest.json` (new)
+9. `resources/prompt_composition/prompt_tokens_allowlist.json` (add phase-04 step placeholders)
+10. `resources/prompt_composition/source_of_truth_checksums.json` (refresh)
+11. `src/bookforge/workspace.py` (`PROMPT_TEMPLATE_FILES` update)
 
 ## 04B Placeholder Contract (Proposed Lock)
 To avoid runtime/render drift, 04B should use explicit JSON blob placeholders:
@@ -187,10 +224,12 @@ Renderer requirements:
 1. `src/bookforge/outline.py` remains orchestration shell and dispatches to phase modules.
 2. `src/bookforge/phases/outline/phase_04a_transition_seam_analysis.py` handles 04A render/execute/validate flow.
 3. `src/bookforge/phases/outline/phase_04b_transition_execution.py` handles 04B render/execute/validate flow.
-4. 04B render context must include selected/blocked/policy JSON payload blocks.
-5. Routing payload artifacts must be persisted before rendering 04B.
-6. 04B validation must assert selected insertions were resolved by LLM output, not post-hoc code mutation.
-7. 04B retry directives must include failing selected candidate refs and unresolved insertion reasons.
+4. `src/bookforge/phases/outline/phase_04c_metadata_relink.py` handles 04C render/execute/validate flow.
+5. 04B render context must include selected/blocked/policy JSON payload blocks.
+6. Routing payload artifacts must be persisted before rendering 04B.
+7. 04B validation must assert selected insertions were resolved by LLM output, not post-hoc code mutation.
+8. 04B must emit insertion_edge_impacts for 04C window derivation.
+9. 04C validation must enforce window-only, allowed-field-only edits.
 
 ## Field Semantics for Inserted Scenes
 Inserted scene minimum required fields:
@@ -235,7 +274,11 @@ Required artifacts:
 6. `phase_04b_attempt_N.raw.json`
 7. `phase_04b_output.json`
 8. `phase_04b_validation.json`
-9. `phase_04_transition_decision_trace.json`
+9. `phase_04c_input.json`
+10. `phase_04c_attempt_N.raw.json`
+11. `phase_04c_output.json`
+12. `phase_04c_validation.json`
+13. `phase_04_transition_decision_trace.json`
 
 Decision trace minimum fields:
 1. all candidates,

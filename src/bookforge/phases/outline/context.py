@@ -19,6 +19,10 @@ PHASE_06 = "phase_06_thread_payoff_refinement"
 
 STEP_04A = "phase_04a_transition_seam_analysis"
 STEP_04B = "phase_04b_transition_execution"
+STEP_04C = "phase_04c_metadata_relink"
+STEP_04C_INTRO = "phase_04c_intro_sync"
+STEP_04C_HANDOFF = "phase_04c_handoff_normalize"
+STEP_04D = "phase_04d_seam_hygiene"
 
 LOGICAL_PHASE_ORDER: List[str] = [
     PHASE_01,
@@ -35,6 +39,10 @@ STEP_ORDER: List[str] = [
     PHASE_03,
     STEP_04A,
     STEP_04B,
+    STEP_04C,
+    STEP_04C_INTRO,
+    STEP_04C_HANDOFF,
+    STEP_04D,
     PHASE_05,
     PHASE_06,
 ]
@@ -45,6 +53,10 @@ STEP_TO_LOGICAL: Dict[str, str] = {
     PHASE_03: PHASE_03,
     STEP_04A: PHASE_04,
     STEP_04B: PHASE_04,
+    STEP_04C: PHASE_04,
+    STEP_04C_INTRO: PHASE_04,
+    STEP_04C_HANDOFF: PHASE_04,
+    STEP_04D: PHASE_04,
     PHASE_05: PHASE_05,
     PHASE_06: PHASE_06,
 }
@@ -53,7 +65,7 @@ LOGICAL_TO_STEPS: Dict[str, List[str]] = {
     PHASE_01: [PHASE_01],
     PHASE_02: [PHASE_02],
     PHASE_03: [PHASE_03],
-    PHASE_04: [STEP_04A, STEP_04B],
+    PHASE_04: [STEP_04A, STEP_04B, STEP_04C, STEP_04C_INTRO, STEP_04C_HANDOFF, STEP_04D],
     PHASE_05: [PHASE_05],
     PHASE_06: [PHASE_06],
 }
@@ -111,6 +123,38 @@ STEP_SPECS: Dict[str, StepSpec] = {
         handoff_key="outline_transitions_refined_v1_1",
         handoff_file="outline_transitions_refined_v1_1.json",
         output_schema="transition_refine_v1",
+    ),
+    STEP_04C: StepSpec(
+        step_id=STEP_04C,
+        logical_phase=PHASE_04,
+        template_name="outline_phase_04c_metadata_relink.md",
+        handoff_key="outline_transitions_relinked_v1_1",
+        handoff_file="outline_transitions_relinked_v1_1.json",
+        output_schema="outline_relink_v1",
+    ),
+    STEP_04C_INTRO: StepSpec(
+        step_id=STEP_04C_INTRO,
+        logical_phase=PHASE_04,
+        template_name="outline_phase_04c_intro_sync.md",
+        handoff_key="outline_intro_synced_v1_1",
+        handoff_file="outline_intro_synced_v1_1.json",
+        output_schema="outline_intro_sync_v1",
+    ),
+    STEP_04C_HANDOFF: StepSpec(
+        step_id=STEP_04C_HANDOFF,
+        logical_phase=PHASE_04,
+        template_name="outline_phase_04c_handoff_normalize.md",
+        handoff_key="outline_handoff_normalized_v1_1",
+        handoff_file="outline_handoff_normalized_v1_1.json",
+        output_schema="outline_handoff_normalize_v1",
+    ),
+    STEP_04D: StepSpec(
+        step_id=STEP_04D,
+        logical_phase=PHASE_04,
+        template_name="outline_phase_04d_seam_hygiene.md",
+        handoff_key="outline_seams_hygiened_v1_1",
+        handoff_file="outline_seams_hygiened_v1_1.json",
+        output_schema="outline_seam_hygiene_v1",
     ),
     PHASE_05: StepSpec(
         step_id=PHASE_05,

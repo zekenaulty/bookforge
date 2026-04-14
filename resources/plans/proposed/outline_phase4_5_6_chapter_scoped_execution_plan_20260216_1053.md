@@ -89,6 +89,20 @@ Hard rule:
 1. If insertion is required and chapter output does not include it, fail and retry.
 2. Never synthesize inserted scenes in code.
 
+### Phase 4c (metadata relink)
+Input:
+1. Chapter N slice after 4b insertion.
+2. Impact window descriptor (scene refs + edge impacts).
+3. Allowed-fields contract (structural only).
+
+Output:
+1. Relinked chapter N slice (structural metadata only).
+2. Chapter relink report (touched refs + fields + updated character intros).
+
+Hard rule:
+1. No scene add/remove/reorder or scene_id changes.
+2. Only window refs and allowed fields may change.
+
 ### Phase 5 (cast function refinement)
 Input:
 1. Chapter N slice from phase 4 output.
@@ -130,17 +144,29 @@ Goal:
 Policy defaults:
 1. Phase 4a: `high`
 2. Phase 4b: `high`
-3. Phase 5: `high`
-4. Phase 6: `high`
+3. Phase 4c: `high`
+4. Phase 5: `high`
+5. Phase 6: `high`
+
+Two-turn policy:
+1. Each chapter uses `T1` (planning) then `T2` (execution).
+2. `T1` uses the phase default (above) unless overridden.
+3. `T2` defaults to `low` unless overridden per phase with:
+   - `OUTLINE_PHASE_04A_T2_THINKING_LEVEL`
+   - `OUTLINE_PHASE_04B_T2_THINKING_LEVEL`
+   - `OUTLINE_PHASE_04C_T2_THINKING_LEVEL`
+   - `OUTLINE_PHASE_05_T2_THINKING_LEVEL`
+   - `OUTLINE_PHASE_06_T2_THINKING_LEVEL`
 
 Env override hierarchy:
 1. `OUTLINE_PHASE_04A_THINKING_LEVEL`
 2. `OUTLINE_PHASE_04B_THINKING_LEVEL`
-3. `OUTLINE_PHASE_05_THINKING_LEVEL`
-4. `OUTLINE_PHASE_06_THINKING_LEVEL`
-5. `OUTLINE_THINKING_LEVEL`
-6. `GEMINI_THINKING_LEVEL`
-7. Phase fallback default
+3. `OUTLINE_PHASE_04C_THINKING_LEVEL`
+4. `OUTLINE_PHASE_05_THINKING_LEVEL`
+5. `OUTLINE_PHASE_06_THINKING_LEVEL`
+6. `OUTLINE_THINKING_LEVEL`
+7. `GEMINI_THINKING_LEVEL`
+8. Phase fallback default
 
 Notes:
 1. Do not send legacy `thinking_budget` with `thinkingLevel`.
@@ -188,16 +214,18 @@ Aggregated per-phase:
 4. `phase_<id>_thought_signature_index.json` (latest signature per chapter/turn)
 
 Handoffs:
-1. Phase 4 -> `outline_transitions_refined_v1_1.json`
-2. Phase 5 -> `outline_cast_refined_v1_1.json`
-3. Phase 6 -> `outline_final_v1_1.json`
+1. Phase 4B -> `outline_transitions_refined_v1_1.json`
+2. Phase 4C -> `outline_transitions_relinked_v1_1.json`
+3. Phase 5 -> `outline_cast_refined_v1_1.json`
+4. Phase 6 -> `outline_final_v1_1.json`
 
 ## Prompt and Template Changes
 Templates to refactor for chapter scope:
 1. `resources/prompt_templates/outline_phase_04a_transition_seam_analysis.md`
 2. `resources/prompt_templates/outline_phase_04b_transition_execution.md`
-3. `resources/prompt_templates/outline_phase_05_cast_function_refinement.md`
-4. `resources/prompt_templates/outline_phase_06_thread_payoff_refinement.md`
+3. `resources/prompt_templates/outline_phase_04c_metadata_relink.md`
+4. `resources/prompt_templates/outline_phase_05_cast_function_refinement.md`
+5. `resources/prompt_templates/outline_phase_06_thread_payoff_refinement.md`
 
 Contract changes:
 1. Inputs are chapter slice + required context summaries, not full outline.

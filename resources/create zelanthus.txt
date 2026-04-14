@@ -1,0 +1,62 @@
+Here’s a clean **full run cycle** command set (single‑line commands), plus a new **Eldriv‑Vale‑derived author** with deeper mystery/suspense/long‑arc complexity. I’m making two assumptions to keep this actionable:
+
+**Assumptions**
+- You want a **new series id** and a **new book** for *The Zelanthus Codex: Volume XV*.
+- The three existing books (`nyxian_p1_v1`, `criticulous_the_rng_hellscape`, `starwrought_b1_v1`) should run under that same series id, but **CLI doesn’t expose a series‑rebind** for existing books; we can re‑init them later or edit `series.json` if needed.
+
+If those assumptions are wrong, tell me and I’ll adjust.
+
+---
+
+## Commands (single line each)
+
+### 1) Create new book in the shared series
+```powershell
+python -m bookforge.cli --workspace workspace init --book zelanthus_codex_v15_b1 --series-id zelanthus_codex_v15
+```
+
+### 2) Update templates (new book)
+```powershell
+python -m bookforge.cli --workspace workspace book update-templates --book zelanthus_codex_v15_b1
+```
+
+### 3) Generate the new author (Eldriv‑Vale‑derived, deeper mystery / long‑arc)
+```powershell
+python -m bookforge.cli --workspace workspace author generate --name "Eldriv Vale (Veiled Arc)" --notes "Base on Eldriv Vale voice. Add deep mystery and suspense undercurrents, slow-burn dread, long-running narrative complexity, layered revelations, and stronger character voice projection. Expand breadth/depth of characterization and consistency of thematic drift."
+```
+
+### 4) Outline for the new book (use a prompt file you create from your Zelanthus summary)
+```powershell
+python -m bookforge.cli --workspace workspace outline generate --book zelanthus_codex_v15_b1 --new-version --prompt-file workspace/books/zelanthus_codex_v15_b1/outline/outline.draft.user.json
+```
+
+### 5) Run the writing loop for the new book
+```powershell
+python -m bookforge.cli --workspace workspace run --book zelanthus_codex_v15_b1
+```
+
+---
+
+## Run cycles for the 3 existing books (same series plan)
+
+If you just want full cycles without rebinding series id:
+```powershell
+python -m bookforge.cli --workspace workspace book update-templates --book nyxian_p1_v1
+python -m bookforge.cli --workspace workspace outline generate --book nyxian_p1_v1 --new-version
+python -m bookforge.cli --workspace workspace run --book nyxian_p1_v1
+python -m bookforge.cli --workspace workspace book update-templates --book criticulous_the_rng_hellscape
+python -m bookforge.cli --workspace workspace outline generate --book criticulous_the_rng_hellscape --new-version
+python -m bookforge.cli --workspace workspace run --book criticulous_the_rng_hellscape
+python -m bookforge.cli --workspace workspace book update-templates --book starwrought_b1_v1
+python -m bookforge.cli --workspace workspace outline generate --book starwrought_b1_v1 --new-version
+python -m bookforge.cli --workspace workspace run --book starwrought_b1_v1
+```
+
+---
+
+## About the Google Doc
+I don’t have access to Google Docs directly. If you want the Zelanthus content folded into `outline.draft.user.json`, paste the relevant sections here or export as a text file and point me to it.
+
+---
+
+If you want me to **rebind the existing books to the new series id** and **generate the outline prompt file for Zelanthus** with your provided text, I can do that next.
