@@ -9,11 +9,17 @@ from bookforge.llm.factory import get_llm_client, resolve_model
 from bookforge.llm.logging import log_llm_response, should_log_llm
 from bookforge.llm.signatures import load_signature_ledger, select_signature, load_signature_index
 from bookforge.llm.types import Message
+from bookforge.util.json_extract import extract_json
 
 
 CURRENT_THOUGHTS_SYSTEM = (
     "You are a reflective assistant. Return a concise JSON summary of your current context. "
     "Use the provided schema only."
+)
+
+CUSTOM_THOUGHTS_SYSTEM = (
+    "You are a reflective assistant. Reconstruct working context from the provided reasoning seed. "
+    "Follow the user's instruction exactly. If the user asks for JSON, return JSON only."
 )
 
 CURRENT_THOUGHTS_USER = (
@@ -40,14 +46,34 @@ def _load_assistant_parts(workspace: Path, record: Dict[str, Any]) -> Optional[L
     return payload if isinstance(payload, list) else None
 
 
-def _build_messages(provider: str, assistant_parts: Optional[List[Dict[str, Any]]]) -> List[Message]:
+def _build_messages(
+    provider: str,
+    assistant_parts: Optional[List[Dict[str, Any]]],
+    *,
+    system_prompt: str,
+    user_prompt: str,
+) -> List[Message]:
     messages: List[Message] = [
-        {"role": "system", "content": CURRENT_THOUGHTS_SYSTEM},
+        {"role": "system", "content": system_prompt},
     ]
     if assistant_parts and provider == "gemini":
         messages.append({"role": "assistant", "parts": assistant_parts})
-    messages.append({"role": "user", "content": CURRENT_THOUGHTS_USER})
+    messages.append({"role": "user", "content": user_prompt})
     return messages
+
+
+def format_thought_response(text: str) -> str:
+    raw = str(text or "").strip()
+    if not raw:
+        return ""
+    try:
+        payload = extract_json(raw, label="Current thoughts response", require_object=False)
+    except Exception:
+        try:
+            payload = json.loads(raw)
+        except Exception:
+            return raw
+    return json.dumps(payload, ensure_ascii=True, indent=2)
 
 
 def list_signatures(
@@ -86,10 +112,11 @@ def run_current_thoughts(
     chapter_id: Optional[str] = None,
     book_id: Optional[str] = None,
     use_global_author: bool = False,
+    user_prompt: Optional[str] = None,
     max_tokens: int = 2048,
     temperature: float = 0.2,
     thinking_level: Optional[str] = None,
-) -> Path:
+) -> Dict[str, Any]:
     config = load_config()
     client = get_llm_client(config, phase=model_phase)
     model = resolve_model(model_phase, config)
@@ -108,7 +135,14 @@ def run_current_thoughts(
         if isinstance(active, dict):
             selected = active
     assistant_parts = _load_assistant_parts(workspace, selected) if selected else None
-    messages = _build_messages(str(client.provider).lower(), assistant_parts)
+    prompt_text = str(user_prompt or CURRENT_THOUGHTS_USER).strip() or CURRENT_THOUGHTS_USER
+    system_text = CUSTOM_THOUGHTS_SYSTEM if user_prompt else CURRENT_THOUGHTS_SYSTEM
+    messages = _build_messages(
+        str(client.provider).lower(),
+        assistant_parts,
+        system_prompt=system_text,
+        user_prompt=prompt_text,
+    )
     response = client.chat(
         messages,
         model=model,
@@ -132,6 +166,7 @@ def run_current_thoughts(
                 "temperature": temperature,
                 "max_tokens": max_tokens,
                 "thinking_level": thinking_level,
+                "user_prompt": prompt_text,
             },
             messages=messages,
             extra=log_extra,
@@ -146,11 +181,19 @@ def run_current_thoughts(
                 "model": model,
                 "provider": client.provider,
                 "signature_id": selected.get("signature_id") if selected else None,
+                "prompt_text": prompt_text,
                 "response_text": response.text,
+                "formatted_response_text": format_thought_response(response.text),
             },
             ensure_ascii=True,
             indent=2,
         ),
         encoding="utf-8",
     )
-    return output_path
+    return {
+        "output_path": output_path,
+        "response_text": response.text,
+        "formatted_text": format_thought_response(response.text),
+        "signature_id": selected.get("signature_id") if isinstance(selected, dict) else None,
+        "prompt_text": prompt_text,
+    }

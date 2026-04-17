@@ -13,7 +13,7 @@ from bookforge.outline import (
 from bookforge.runner import run_loop
 from bookforge.characters import generate_characters
 from bookforge.workspace import init_book_workspace, parse_genre, parse_targets, reset_book_workspace_detailed, update_book_templates
-from bookforge.llm.thoughts import list_signatures, run_current_thoughts
+from bookforge.llm.thoughts import format_thought_response, list_signatures, run_current_thoughts
 from bookforge.llm.signatures import select_signature, set_active_signature
 
 
@@ -254,7 +254,7 @@ def _llm_signatures(args: argparse.Namespace) -> int:
 def _llm_current_thoughts(args: argparse.Namespace) -> int:
     workspace = Path(args.workspace)
     try:
-        output_path = run_current_thoughts(
+        result = run_current_thoughts(
             workspace,
             model_phase=str(getattr(args, "model_phase", "planner") or "planner"),
             signature_id=getattr(args, "signature_id", None),
@@ -263,6 +263,7 @@ def _llm_current_thoughts(args: argparse.Namespace) -> int:
             chapter_id=getattr(args, "chapter", None),
             book_id=getattr(args, "book", None),
             use_global_author=bool(getattr(args, "global_author", False)),
+            user_prompt=getattr(args, "prompt", None),
             max_tokens=int(getattr(args, "max_tokens", 2048) or 2048),
             temperature=float(getattr(args, "temperature", 0.2) or 0.2),
             thinking_level=getattr(args, "thinking_level", None),
@@ -270,7 +271,12 @@ def _llm_current_thoughts(args: argparse.Namespace) -> int:
     except Exception as exc:
         sys.stderr.write(f"Current thoughts failed: {exc}\n")
         return 1
-    sys.stdout.write(f"Current thoughts saved to {output_path}\n")
+    formatted = format_thought_response(str(result.get("response_text") or ""))
+    if formatted:
+        sys.stdout.write(formatted.rstrip() + "\n")
+    output_path = result.get("output_path")
+    if output_path:
+        sys.stdout.write(f"Current thoughts saved to {output_path}\n")
     return 0
 
 
@@ -536,6 +542,10 @@ def build_parser() -> argparse.ArgumentParser:
     llm_current.add_argument("--turn", help="Optional turn id filter for signature selection.")
     llm_current.add_argument("--chapter", help="Optional chapter id filter for signature selection.")
     llm_current.add_argument("--signature-id", help="Explicit signature id to use.")
+    llm_current.add_argument(
+        "--prompt",
+        help="Override the default user prompt for current-thoughts.",
+    )
     llm_current.add_argument(
         "--global-author",
         action="store_true",
