@@ -4,6 +4,35 @@ Status: In Progress
 Date: 2026-04-13
 Owner: BookForge Outline/Writing Pipeline
 
+## Active Plan State (2026-04-18)
+Current status:
+- The section workflow is real and has been exercised on live book data.
+- The writer-side phases already use a real two-turn pattern (`T1` think, `T2` execute).
+- On the Gemini path, `T2` already receives the prior `T1` assistant parts inside the same phase call chain.
+- That carry is still implicit runtime behavior, not yet an explicit thought-signature lineage contract.
+- The next major workflow gap is chapter assembly quality, not section production.
+
+What is proven:
+- Section-level `stub -> frozen -> locked` advancement works on live workspaces.
+- The system retains full canonical state while only mutating one active section at a time.
+- Resume/retry behavior is strong enough for long-running section advancement.
+
+What is now blocking:
+- Chapter assembly currently recompiles by concatenating locked scene markdown.
+- That reintroduces merge-layer seam artifacts that do not show up at scene or section scope:
+  - tense breaks
+  - scaffold leakage
+  - duplicated beats
+  - redundant item re-grounding
+  - factual contradictions across section joins
+- Thought signatures are being captured and `T1` assistant parts are being carried into `T2`, but that lineage is not yet explicit or auditable in the workflow surface.
+
+Immediate next work:
+- Harden `T1 -> T2` lineage as an explicit contract in the writing loop.
+- Increase default lint/repair loop depth modestly.
+- Add a chapter seam audit/repair/finalization layer after the last section in a chapter is locked.
+- Treat configured model selection as authoritative; do not use runtime model overrides as a throughput workaround.
+
 ## Progress Update (2026-04-17)
 Implemented and proven in the repo/workspace:
 - Transitional `workflow` CLI surface exists:
@@ -44,6 +73,8 @@ Still open:
 - section drafting must become first-class so the workflow does not depend on pre-existing chapter draft artifacts
 - deeper outline phase refactor (native section-scoped 03/04A/04B/04C/04D/05/06) remains in progress
 - writer/runtime model policy should explicitly support mixed-cost execution such as high-reasoning planning with cheaper execution
+- chapter seam finalization is not yet first-class; chapter compilation is still too close to plain concatenation
+- lint/repair diagnostics still live in a noisy artifact surface and need a clearer operational summary path
 
 Operational findings from the first live section runs:
 - The section workflow is now real enough to expose downstream defects under production-like execution instead of only outline-only artifacts.
@@ -52,6 +83,8 @@ Operational findings from the first live section runs:
   - transport/provider failures (`503`, dropped connections)
   - token-budget failures (`MAX_TOKENS`, truncated JSON/prose)
   - real pipeline defects (schema mismatch, normalization gaps, apply-time invariants)
+- Long-running workflow commands must use long timeout windows. Runtime duration is a real characteristic of the correctness-constrained pipeline, not evidence that the configured model should be overridden ad hoc.
+- The configured model stack in workspace/env is authoritative. Future workflow automation must not silently or opportunistically replace it in order to chase throughput.
 - Resume behavior is now part of the operational contract:
   - long-running section advancement may legitimately time out at the shell/process boundary even when the workflow itself is healthy
   - resumable progress has been proven across a partially completed frozen section
@@ -83,6 +116,8 @@ This plan is intended to reduce the blast radius of outline failures, lower toke
 6. Execution order is forward-only by section; no out-of-order section drafting in v1.
 7. Only one active section may be draftable at a time in v1; no parallel section execution.
 8. Phase 05 and Phase 06 remain active and run section-scoped before S3 freeze.
+9. The configured model stack for a run is authoritative; workflow code must not silently override it in order to chase throughput.
+10. Final chapter promotion requires a chapter seam audit/repair gate after the final section lock.
 
 ## Doctrine Alignment
 - LLM authors semantics; orchestrator routes and enforces deterministic invariants.
@@ -178,6 +213,21 @@ Rules:
 11. Run the writing loop for the frozen section.
 12. Promote registries/state and lock section at S4.
 13. Advance to next section.
+
+## Chapter Finalization Flow
+Section correctness is necessary but not sufficient. A chapter assembled from individually good locked sections can still expose merge artifacts.
+
+After the final section in a chapter reaches S4:
+1. Assemble provisional chapter markdown from the locked scenes/sections.
+2. Run chapter seam audit on the assembled chapter.
+3. If seam issues are found, run chapter seam repair scoped to seam neighborhoods and merge artifacts only.
+4. Validate the repaired chapter against the expected chapter state delta and continuity contract.
+5. Promote the chapter as finalized only if:
+   - seam audit passes
+   - chapter state delta remains valid
+   - no forbidden edits escaped seam-local scope
+
+This is not cross-chapter linting. It is chapter-finalization quality control over artifacts introduced by section assembly.
 
 ## Transitional Workflow Surface
 The first implementation cut does not require an immediate full rewrite of every outline phase into native section-scoped execution.
@@ -350,6 +400,7 @@ Implications:
 - User-facing docs must explain that only one section is writable at a time, while the full canonical book state remains retained.
 - `run` becomes a lower-level scene loop that can still be called directly, but the preferred iterative path is the workflow wrapper.
 - Partial chapter prose is valid transitional state; chapter compilation may be provisional until all chapter sections are locked.
+- Final chapter promotion is not equivalent to raw section concatenation; it includes chapter seam audit/repair/finalize.
 
 ## Scope Boundaries
 - Insertions occur only in the active section.
@@ -358,6 +409,7 @@ Implications:
 - Boundary repair may inspect adjacent sections but may only mutate the active one.
 - Written sections are immutable unless a manual repair mode is explicitly invoked.
 - A section may legally have zero required insertions; 04B treats that as a valid no-op.
+- Chapter seam repair may edit only seam neighborhoods and merge-layer artifacts after all sections are locked; it is not a back door to reopen scene-authoring scope.
 
 ## Relationship to Dynamic Lint/Repair
 This plan is compatible with the dynamic outline lint/repair loop plan.
@@ -420,6 +472,16 @@ Rules:
 - windowed phases may resume within-section from phase-local checkpoints
 - if a phase cannot resume within-section, it reruns the active section from the last committed pre-S3 state
 - this is legal because narrative truth is not committed until S3/S4
+
+## Runtime Policy
+The system is correctness-first on the scene/section critical path.
+
+Rules:
+- The write loop, lint/repair loop, and section workflow remain fundamentally serial across state boundaries.
+- Long-running workflow commands must be given long enough timeout windows to complete naturally.
+- The configured workspace/env model selection is authoritative for the run.
+- If future mixed-cost routing is introduced, it must be explicit configuration, not ad hoc command-level override.
+- `T1 -> T2` execution in writer phases must preserve the planning lineage from `T1` into `T2`; this is already true on Gemini via assistant-parts carry and must become an explicit logged contract.
 
 ## Partial Chapter Compile Contract
 Partially written chapters are valid workspace state, but not final compile units.
@@ -688,6 +750,62 @@ Change shape:
 - Low to moderate.
 - Only needed if we add new prompt template filenames or want to preseed empty view files.
 - If we reuse current template filenames and create views lazily at runtime, this file may need little or no change.
+
+### 13. Writer-Phase T1 -> T2 Lineage
+Files:
+- `src/bookforge/phases/write_phase.py`
+- `src/bookforge/phases/preflight_phase.py`
+- `src/bookforge/phases/repair_phase.py`
+- `src/bookforge/phases/state_repair_phase.py`
+- `src/bookforge/phases/lint_phase.py`
+- `src/bookforge/llm/logging.py`
+- `src/bookforge/llm/signatures.py`
+
+Change shape:
+- Moderate change.
+- The write phases already carry `T1` assistant parts into `T2` on Gemini.
+- The missing work is to make that lineage explicit and auditable in runtime artifacts rather than relying on implicit in-memory flow.
+
+Required additions:
+- record `t1_signature_id` or equivalent lineage metadata on `T2`
+- persist enough metadata to prove which planning turn informed execution
+- keep provider-specific behavior backward-compatible
+
+### 14. Chapter Seam Audit / Repair / Finalization
+Files:
+- `src/bookforge/section_workflow.py`
+- `src/bookforge/runner.py`
+- `src/bookforge/pipeline/state_apply.py`
+- new chapter seam audit/repair helpers or phases
+- new prompt templates/blocks for chapter seam audit/repair
+
+Change shape:
+- Major change.
+- Current chapter compilation is a mostly mechanical assembly step.
+- It needs to become a real quality gate that can detect and repair seam-local merge artifacts before final chapter promotion.
+
+Required additions:
+- provisional chapter assembly before final promotion
+- seam report artifact emission
+- seam-local repair pass
+- post-repair state-delta validation
+- explicit final chapter promotion gate
+
+### 15. Diagnostics / Log Split
+Files:
+- `src/bookforge/llm/thoughts.py`
+- `src/bookforge/llm/logging.py`
+- `src/bookforge/pipeline/phase_history.py`
+- workflow/report helpers to be added
+
+Change shape:
+- Moderate change.
+- Current raw LLM logs, thought/probe artifacts, and per-scene repair artifacts are too mixed for efficient fault classification.
+
+Required additions:
+- separate thought/probe artifacts from transport logging
+- summarize lint/repair failure classes
+- preserve backward compatibility with current logs while introducing a clearer operational surface
 
 ## New Helper Modules Recommended
 To avoid further inflating existing large files, the first implementation pass should likely add:
@@ -980,7 +1098,99 @@ Acceptance:
 Dependencies:
 - Story 6
 
-### Story 8A - Outline-Phase Thin Prompt Injection
+### Story 8 - T1 -> T2 Signature Lineage Hardening
+Goal:
+- Turn the existing in-memory `T1 -> T2` carry into an explicit and auditable runtime contract for the writing loop.
+
+Primary files:
+- `src/bookforge/phases/write_phase.py`
+- `src/bookforge/phases/preflight_phase.py`
+- `src/bookforge/phases/repair_phase.py`
+- `src/bookforge/phases/state_repair_phase.py`
+- `src/bookforge/phases/lint_phase.py`
+- `src/bookforge/llm/logging.py`
+- `src/bookforge/llm/signatures.py`
+
+Scope:
+- Record the `T1` signature/assistant-parts lineage used by `T2`
+- Add explicit metadata such as `t1_signature_id` or `parent_signature_id` to runtime logs/artifacts where available
+- Preserve current Gemini assistant-parts carry behavior
+- Make lineage failures diagnosable instead of implicit
+
+Not in scope:
+- changing the prompt content itself
+- introducing new model-routing policy
+
+Acceptance:
+- Each two-turn writer phase can prove which `T1` planning output informed its `T2` execution
+- Logs/artifacts make lineage visible without reconstructing it manually from raw transport logs
+- The implementation remains backward-compatible with providers that do not expose the same assistant-parts shape
+
+Dependencies:
+- Story 7
+
+### Story 9 - Chapter Seam Audit
+Goal:
+- Detect chapter-level merge artifacts that emerge only after all sections in a chapter have been locked and assembled.
+
+Primary files:
+- `src/bookforge/section_workflow.py`
+- `src/bookforge/runner.py`
+- `src/bookforge/pipeline/state_apply.py`
+- new chapter seam audit phase/helpers
+- new prompt templates/blocks for seam audit
+
+Scope:
+- Assemble provisional chapter markdown
+- Audit for merge-layer defects:
+  - tense breaks
+  - scaffold leakage
+  - duplicated beats
+  - redundant item re-grounding
+  - factual contradictions at joins
+- Emit a structured chapter seam report
+
+Not in scope:
+- rewriting full scenes
+- cross-chapter prose linting
+
+Acceptance:
+- Clean chapters can produce an explicit no-op audit result
+- Dirty chapters produce a structured seam report with seam-local targets
+- The seam report is available before final chapter promotion
+
+Dependencies:
+- Story 7
+
+### Story 10 - Chapter Seam Repair + Finalization Gate
+Goal:
+- Repair seam-local chapter merge artifacts and gate final chapter promotion on seam cleanliness plus state integrity.
+
+Primary files:
+- `src/bookforge/section_workflow.py`
+- `src/bookforge/runner.py`
+- `src/bookforge/pipeline/state_apply.py`
+- new chapter seam repair phase/helpers
+- new prompt templates/blocks for seam repair
+
+Scope:
+- Repair only seam neighborhoods and merge-layer artifacts
+- Validate repaired output against expected chapter state delta
+- Finalize the chapter only after seam audit/repair passes
+
+Not in scope:
+- manual reopen mode
+- scene-interior rewrites beyond allowed seam-local edits
+
+Acceptance:
+- Chapter finalization is no longer a blind concatenation path
+- State-delta failures route back to seam repair with context
+- Repair retries are bounded and escalate cleanly when seam repair cannot preserve state integrity
+
+Dependencies:
+- Story 9
+
+### Story 11A - Outline-Phase Thin Prompt Injection
 Goal:
 - Reduce prompt weight for outline-facing prompts by using the thin view as global navigation context.
 
@@ -1002,7 +1212,7 @@ Acceptance:
 Dependencies:
 - Story 1
 
-### Story 8B - Writer-Phase Thin Prompt Injection
+### Story 11B - Writer-Phase Thin Prompt Injection
 Goal:
 - Shift writer/preflight/repair/state_repair system-prompt outline injection to `outline.thin.json` once the writer is section-aware.
 
@@ -1022,7 +1232,7 @@ Dependencies:
 - Story 1
 - Story 7
 
-### Story 9 - Section-Aware Thought Scope
+### Story 12 - Section-Aware Thought Scope
 Goal:
 - Keep thought signature logging and selection exact under section chunking.
 
@@ -1049,7 +1259,7 @@ Dependencies:
 - Story 3 for outline-side scope
 - Story 7 for writer-side scope
 
-### Story 10 - Dynamic Outline Lint / Repair Integration
+### Story 13 - Dynamic Outline Lint / Repair Integration
 Goal:
 - Reapply the existing dynamic lint/repair plan in section scope once section chunking is stable.
 
@@ -1076,6 +1286,36 @@ Dependencies:
 - Story 6
 - Story 5
 
+### Story 14 - Lint/Repair Diagnostics + Thought/Log Split
+Goal:
+- Make lint/repair failures diagnosable without digging through mixed raw LLM transport logs.
+
+Primary files:
+- `src/bookforge/llm/thoughts.py`
+- `src/bookforge/llm/logging.py`
+- `src/bookforge/pipeline/phase_history.py`
+- workflow/report helpers to be added
+
+Scope:
+- separate introspection/probe artifacts from transport logs
+- add per-scene/per-chapter diagnostics summaries for:
+  - real truncation / `MAX_TOKENS`
+  - malformed JSON
+  - schema mismatch
+  - repeated lint issues across repair passes
+- keep existing logs readable during migration
+
+Not in scope:
+- deleting or rewriting historical logs
+
+Acceptance:
+- Operators can identify whether a failure is prompt-shape, token-budget, provider, or schema-related from summary artifacts
+- Thought/probe artifacts no longer live only as overwritten or mixed log outputs
+
+Dependencies:
+- Story 8
+- Story 10
+
 ## Story Order Recommendation
 Implement in this order:
 1. Story 1
@@ -1085,18 +1325,25 @@ Implement in this order:
 5. Story 5
 6. Story 6
 7. Story 7
-8. Story 8A
-9. Story 8B
-10. Story 9
-11. Story 10
+8. Story 8
+9. Story 9
+10. Story 10
+11. Story 11A
+12. Story 11B
+13. Story 12
+14. Story 13
+15. Story 14
 
 Reasoning:
 - Stories 1-6 establish the new outline truth model.
 - Story 7 is the first place the writing loop needs to care.
-- Story 8A is a lightweight outline-side optimization once thin view production is trustworthy.
-- Story 8B depends on a section-aware writer.
-- Story 9 must follow once section identity is real across execution paths.
-- Story 10 should not be built on shifting ownership rules.
+- Story 8 hardens the already-existing two-turn writer behavior into an explicit contract before more workflow complexity is added.
+- Stories 9-10 close the now-visible chapter assembly quality gap.
+- Story 11A is a lightweight outline-side optimization once thin view production is trustworthy.
+- Story 11B depends on a section-aware writer.
+- Story 12 must follow once section identity is real across execution paths.
+- Story 13 should not be built on shifting ownership rules.
+- Story 14 becomes more valuable after the seam/finalization loop exists and real failure classes can be summarized.
 
 ## Deterministic Checks Required
 Before rollout reaches writing, add checks for:
@@ -1105,12 +1352,18 @@ Before rollout reaches writing, add checks for:
 - no cross-section mutation outside active section
 - boundary artifact presence before opening next section
 - no mutation of frozen/locked sections
+- chapter seam finalization gate present before final chapter promotion
+- `T1 -> T2` lineage metadata present for two-turn writer phases
+- configured-model policy respected by workflow commands
 
 ## Risks / Watchouts
 - Section-level insertion can still create ugly cross-section seams if boundary ownership is not enforced.
 - Active-section-only mutation means the new section must absorb seam responsibility from the old one.
 - Registry timing must not let draft churn become authoritative too early.
 - View updates must be atomic or prompts will consume mixed-stage truth.
+- Chapter seam repair must not become a disguised scene rewrite pass.
+- If `T1 -> T2` lineage remains implicit, later debugging will keep conflating good planning with bad execution.
+- Long runtime is a real property of the correctness-constrained pipeline; trying to “fix” it by silently changing model config is an orchestration bug, not an optimization.
 
 ## Rollout Stages
 Stage 1
@@ -1130,12 +1383,17 @@ Stage 3
 - Make runner/cursor section-aware.
 
 Stage 4
+- Harden `T1 -> T2` writer-phase lineage.
+- Add chapter seam audit/repair/finalization after the last locked section in a chapter.
+
+Stage 5
 - Promote provisional registry data at S4.
 - Wire thin outline into system prompt injection.
 
-Stage 5
+Stage 6
 - Integrate dynamic lint/repair windows with active-section routing.
 - Add section-aware thought signature scope and CLI filters.
+- Add diagnostics summaries and separate thought/probe artifacts from raw transport logging.
 
 ## Open Questions
 - Whether manual reopen mode should exist at all, and if so, what its explicit scope is.
