@@ -9,6 +9,7 @@ import re
 import uuid
 
 from .errors import LLMRequestError
+from .storage import llm_log_path
 from .types import LLMResponse, Message
 from bookforge.config.env import read_env_value
 from .signatures import append_signature_records, update_active_signatures
@@ -177,10 +178,6 @@ def should_log_llm() -> bool:
     return flag in {"1", "true", "yes", "on"}
 
 
-def llm_log_dir(workspace: Path) -> Path:
-    return workspace / "logs" / "llm"
-
-
 def _relpath(workspace: Path, path: Path) -> str:
     try:
         return str(path.relative_to(workspace))
@@ -317,11 +314,9 @@ def log_llm_response(
     extra: Optional[Dict[str, Any]] = None,
     messages: Optional[list[Message]] = None,
 ) -> Path:
-    log_dir = llm_log_dir(workspace)
-    log_dir.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    prefix = _log_scope_prefix(extra)
-    log_path = log_dir / f"{prefix}{label}_{timestamp}.json"
+    log_path = llm_log_path(workspace, label=label, extra=extra, timestamp=timestamp)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
     system_text = ""
     non_system: list[Message] = []
     if messages:
@@ -417,11 +412,9 @@ def log_llm_error(
     extra: Optional[Dict[str, Any]] = None,
     messages: Optional[list[Message]] = None,
 ) -> Path:
-    log_dir = llm_log_dir(workspace)
-    log_dir.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    prefix = _log_scope_prefix(extra)
-    log_path = log_dir / f"{prefix}{label}_{timestamp}.json"
+    log_path = llm_log_path(workspace, label=label, extra=extra, timestamp=timestamp)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
     system_text = ""
     non_system: list[Message] = []
     if messages:

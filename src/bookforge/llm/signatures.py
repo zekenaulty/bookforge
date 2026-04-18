@@ -7,29 +7,84 @@ import json
 import os
 import time
 
+from .storage import (
+    legacy_signature_active_lock_path,
+    legacy_signature_active_path,
+    legacy_signature_index_path,
+    legacy_signature_ledger_path,
+    signature_active_lock_path,
+    signature_active_path,
+    signature_index_path,
+    signature_ledger_path,
+)
+
 
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def llm_log_dir(workspace: Path) -> Path:
-    return workspace / "logs" / "llm"
-
-
 def ledger_path(workspace: Path) -> Path:
-    return llm_log_dir(workspace) / "thought_signature_ledger.jsonl"
+    return signature_ledger_path(workspace)
 
 
 def index_path(workspace: Path) -> Path:
-    return llm_log_dir(workspace) / "thought_signature_index.json"
+    return signature_index_path(workspace)
 
 
 def active_path(workspace: Path) -> Path:
-    return llm_log_dir(workspace) / "thought_signature_active.json"
+    return signature_active_path(workspace)
 
 
 def active_lock_path(workspace: Path) -> Path:
-    return llm_log_dir(workspace) / ".thought_signature_active.lock"
+    return signature_active_lock_path(workspace)
+
+
+def _preferred_or_legacy_path(preferred: Path, legacy: Path) -> Path:
+    if preferred.exists():
+        return preferred
+    if legacy.exists():
+        return legacy
+    return preferred
+
+
+def _ensure_parent(path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def _bootstrap_ledger_target(workspace: Path) -> Path:
+    preferred = ledger_path(workspace)
+    legacy = legacy_signature_ledger_path(workspace)
+    if not preferred.exists() and legacy.exists():
+        _ensure_parent(preferred)
+        preferred.write_text(legacy.read_text(encoding="utf-8"), encoding="utf-8")
+    return preferred
+
+
+def _bootstrap_index_target(workspace: Path) -> Path:
+    preferred = index_path(workspace)
+    legacy = legacy_signature_index_path(workspace)
+    if not preferred.exists() and legacy.exists():
+        _ensure_parent(preferred)
+        preferred.write_text(legacy.read_text(encoding="utf-8"), encoding="utf-8")
+    return preferred
+
+
+def _bootstrap_active_target(workspace: Path) -> Path:
+    preferred = active_path(workspace)
+    legacy = legacy_signature_active_path(workspace)
+    if not preferred.exists() and legacy.exists():
+        _ensure_parent(preferred)
+        preferred.write_text(legacy.read_text(encoding="utf-8"), encoding="utf-8")
+    return preferred
+
+
+def _bootstrap_active_lock_target(workspace: Path) -> Path:
+    preferred = active_lock_path(workspace)
+    legacy = legacy_signature_active_lock_path(workspace)
+    if not preferred.exists() and legacy.exists():
+        _ensure_parent(preferred)
+        preferred.write_text(legacy.read_text(encoding="utf-8"), encoding="utf-8")
+    return preferred
 
 
 def _load_index(path: Path) -> Dict[str, Any]:
@@ -173,13 +228,12 @@ def append_signature_records(workspace: Path, records: Iterable[Dict[str, Any]])
     records_list = [record for record in records if isinstance(record, dict)]
     if not records_list:
         return
-    log_dir = llm_log_dir(workspace)
-    log_dir.mkdir(parents=True, exist_ok=True)
-    ledger = ledger_path(workspace)
+    ledger = _bootstrap_ledger_target(workspace)
+    _ensure_parent(ledger)
     with ledger.open("a", encoding="utf-8") as handle:
         for record in records_list:
             handle.write(json.dumps(record, ensure_ascii=True) + "\n")
-    index_file = index_path(workspace)
+    index_file = _bootstrap_index_target(workspace)
     index_payload = _load_index(index_file)
     by_scope = index_payload.get("by_scope") if isinstance(index_payload.get("by_scope"), dict) else {}
     by_signature_id = (
@@ -206,11 +260,11 @@ def update_active_signatures(workspace: Path, records: Iterable[Dict[str, Any]])
     records_list = [record for record in records if isinstance(record, dict)]
     if not records_list:
         return
-    lock_path = active_lock_path(workspace)
+    lock_path = _bootstrap_active_lock_target(workspace)
     if not _acquire_lock(lock_path):
         return
     try:
-        active_file = active_path(workspace)
+        active_file = _bootstrap_active_target(workspace)
         active_payload = _load_active(active_file)
         by_phase = active_payload.get("by_phase") if isinstance(active_payload.get("by_phase"), dict) else {}
         global_slot = active_payload.get("global") if isinstance(active_payload.get("global"), dict) else {}
@@ -268,11 +322,11 @@ def set_active_signature(
 ) -> None:
     if not isinstance(record, dict):
         return
-    lock_path = active_lock_path(workspace)
+    lock_path = _bootstrap_active_lock_target(workspace)
     if not _acquire_lock(lock_path):
         return
     try:
-        active_file = active_path(workspace)
+        active_file = _bootstrap_active_target(workspace)
         active_payload = _load_active(active_file)
         by_phase = active_payload.get("by_phase") if isinstance(active_payload.get("by_phase"), dict) else {}
         global_slot = active_payload.get("global") if isinstance(active_payload.get("global"), dict) else {}
@@ -301,7 +355,7 @@ def set_active_signature(
 
 
 def load_signature_ledger(workspace: Path, limit: Optional[int] = None) -> List[Dict[str, Any]]:
-    path = ledger_path(workspace)
+    path = _preferred_or_legacy_path(ledger_path(workspace), legacy_signature_ledger_path(workspace))
     if not path.exists():
         return []
     records: List[Dict[str, Any]] = []
@@ -322,7 +376,8 @@ def load_signature_ledger(workspace: Path, limit: Optional[int] = None) -> List[
 
 
 def load_signature_index(workspace: Path) -> Dict[str, Any]:
-    return _load_index(index_path(workspace))
+    path = _preferred_or_legacy_path(index_path(workspace), legacy_signature_index_path(workspace))
+    return _load_index(path)
 
 
 def select_signature(
