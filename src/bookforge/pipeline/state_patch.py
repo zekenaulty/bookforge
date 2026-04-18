@@ -170,6 +170,44 @@ def _fill_character_continuity_update_context(patch: Dict[str, Any], scene_card:
             update.setdefault("scene", scene)
 
 
+def _normalize_remove_entries(remove_block: Any, *, prefix: str = "") -> List[str]:
+    normalized: List[str] = []
+    if isinstance(remove_block, list):
+        for item in remove_block:
+            text = str(item).strip()
+            if text:
+                normalized.append(text)
+        return normalized
+    if isinstance(remove_block, dict):
+        for key, value in remove_block.items():
+            key_text = str(key).strip()
+            if not key_text:
+                continue
+            path = f"{prefix}.{key_text}" if prefix else key_text
+            if isinstance(value, dict):
+                normalized.extend(_normalize_remove_entries(value, prefix=path))
+                continue
+            if isinstance(value, list):
+                for item in value:
+                    item_text = str(item).strip()
+                    if item_text:
+                        normalized.append(f"{path}[]={item_text}")
+                continue
+            if value is None or value is True:
+                normalized.append(path)
+                continue
+            value_text = str(value).strip()
+            if value_text:
+                normalized.append(f"{path}[]={value_text}")
+        return normalized
+    if remove_block is None:
+        return normalized
+    text = str(remove_block).strip()
+    if text:
+        normalized.append(text)
+    return normalized
+
+
 def _coerce_stat_updates(patch: Dict[str, Any]) -> None:
     updates = patch.get("character_continuity_system_updates")
     if not isinstance(updates, list):
@@ -197,6 +235,10 @@ def _coerce_stat_updates(patch: Dict[str, Any]) -> None:
                 elif item is not None:
                     normalized_titles.append({"name": str(item)})
             set_block["titles"] = normalized_titles
+
+        remove_block = update.get("remove")
+        if not isinstance(remove_block, list):
+            update["remove"] = _normalize_remove_entries(remove_block)
 
         update["set"] = set_block
         update["delta"] = delta_block
@@ -501,7 +543,6 @@ def _sanitize_preflight_patch(
             sanitized.pop("plot_device_updates", None)
 
     return sanitized
-
 
 
 

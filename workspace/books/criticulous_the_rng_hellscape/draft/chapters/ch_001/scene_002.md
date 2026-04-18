@@ -1,0 +1,11 @@
+Artie rolls up his sleeve and shoves his arm through the anti-theft flap of the vending machine. The heavy plastic door bites into his bicep, but the promise of barbecue chips demands sacrifice. He presses the side of his pale face against the cool glass, squinting through the glare of the humming fluorescent lights. His fingers stretch upward, blindly navigating the metallic landscape of the drop chute. 
+
+His Employee ID Badge swings from its neck lanyard, clinking uselessly against the machine’s exterior as he leans harder into the narrow opening. The heavy weight of his Leather Wallet in his right pocket throws him slightly off balance, forcing him to plant his feet wider on the cheap linoleum floor. He grunts, straining his shoulder. Just a few more inches. 
+
+His fingertips brush the crinkly foil of the chip bag. A small victory. 
+
+Artie twists his wrist, attempting to pinch the bottom corner of the snack. Instead, his elbow bumps against a secondary internal guard—a rigid, spring-loaded piece of metal designed specifically to thwart this exact maneuver. He tries to quickly pull back, but the sudden movement triggers the mechanism. The metal plate snaps downward, pinning his forearm against the side of the drop chute. 
+
+Panic spikes. He yanks his arm backward, a sharp jerk that only tightens the machine's mechanical grip. His cheap suit jacket bunches uncomfortably at the shoulder. He tries twisting his wrist to slide free, but his hand slips off the snack bag entirely and plunges deeper into the dark recess beside the dispensing coils. 
+
+Something sharp scrapes across his knuckles. He pushes against the side chassis to find leverage, but there is no solid surface—only a gap in the interior paneling. His hand wedges tightly against a bundle of exposed wires, trapping him completely. A faint, ozone-scented hum vibrates against his bare skin.

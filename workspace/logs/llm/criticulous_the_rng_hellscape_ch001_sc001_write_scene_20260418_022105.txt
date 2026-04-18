@@ -1,0 +1,130 @@
+COMPLIANCE:
+Scene ID: SC_001_001
+Allowed events: Artie attempts to buy chips, bag gets stuck, Artie decides on manual retrieval.
+Forbidden milestones: None in state yet.
+
+Current arm-side / inventory facts: 
+- inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)
+- inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)
+- container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])
+- container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])
+
+Durable changes committed: None. Inventory remains stable.
+
+APPEARANCE_CHECK:
+- CHAR_ARTIE: messy brown hair, muddy brown eyes, pale skin, average height.
+
+PROSE:
+Artie’s stomach growled, a hollow, echoing rumble that cut through the sterile quiet of the office breakroom. He was aggressively hungry, the kind of mid-afternoon starving that made the humming fluorescent lights overhead seem to pulse in time with his mounting headache. Dragging his feet across the scuffed linoleum, his muddy brown eyes locked onto the glowing, humming monolith in the corner: the vending machine. It was a beacon of high-sodium salvation.
+
+He ran a hand through his messy brown hair, adjusting the collar of his cheap, ill-fitting suit. Around his neck, his Employee ID Badge swung on its lanyard, a plastic pendulum marking the slow death of his twenties. He reached into his right pocket and pulled out his Leather Wallet, his thumb flicking it open to extract a slightly crumpled dollar bill. He shoved the wallet back into his pocket, keeping his right hand free to smooth out the currency.
+
+"Come on," Artie muttered, feeding the dollar into the machine's blinking slot. The bill validator whirred, spat it out, and demanded a flatter sacrifice. He sighed, rubbed the bill against the sharp edge of the machine, and tried again. This time, the machine swallowed the cash with a satisfying mechanical clunk. 
+
+He punched in the coordinates for the barbecue potato chips. E-4. The alpha-numeric code of champions. 
+
+Inside the glass case, the metal coil began its slow, agonizing rotation. The silver packaging of the chips shimmied forward, reaching the precipice of the shelf. Artie leaned in, his pale face reflecting in the glass, anticipating the dull thud of delivered processed carbs. 
+
+The bag tipped. It slid. And then, defying all laws of physics and basic human decency, it caught on the lip of the shelf below. The coil stopped turning. The bag of chips hung suspended at a forty-five-degree angle, mocking him. 
+
+Artie blinked. He tapped the glass with his knuckles. The stuck snack did not budge. He pressed his forehead against the cool pane, staring at the foil bag trapped just inches from freedom. His ten out of ten maximum stamina felt entirely drained by the sheer injustice of it all. He wasn't about to walk away and let the next guy get a two-for-one drop. 
+
+Artie stepped back, rolling his shoulders. He glared at the stuck snack, weighing his options. Banging on the glass hadn't worked. Leaving was out of the question. He made his decision. If the machine wouldn't yield its treasure willingly, it was time for manual retrieval.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "LOC_OFFICE_BREAKROOM",
+    "open_threads": [],
+    "recent_facts": [
+      "Artie's bag of chips is stuck in the vending machine.",
+      "Artie is preparing to manually retrieve his snack."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 1,
+      "inventory": [
+        {
+          "container": "pocket_right",
+          "item_id": "ITEM_wallet",
+          "item_name": "Leather Wallet",
+          "status": "stowed"
+        },
+        {
+          "container": "neck_lanyard",
+          "item_id": "ITEM_employee_id",
+          "item_name": "Employee ID Badge",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "contents": [
+            "ITEM_wallet"
+          ],
+          "location": "pants",
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "neck_lanyard",
+          "contents": [
+            "ITEM_employee_id"
+          ],
+          "location": "neck",
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": []
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie attempted to buy a bag of chips from the office vending machine.",
+      "The bag got stuck on the coil, failing to drop.",
+      "Frustrated and hungry, Artie decided to manually retrieve the snack."
+    ],
+    "key_events": [
+      "Artie entered the breakroom hungry.",
+      "He used a dollar from his Leather Wallet to buy chips.",
+      "The chips got stuck against the vending machine glass.",
+      "Artie resolved to use manual retrieval to get his food."
+    ],
+    "must_stay_true": [
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "Artie has 10/10 HP and 10/10 Stamina.",
+      "milestone: stuck_chip_bag_decision = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Artie, a mundane office worker, got his snack stuck in a vending machine and decided to reach in after it."
+    ]
+  },
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 10,
+            "max": 10
+          },
+          "stamina": {
+            "current": 10,
+            "max": 10
+          }
+        }
+      }
+    }
+  ]
+}

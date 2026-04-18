@@ -1,0 +1,189 @@
+COMPLIANCE:
+Scene ID: SC_002_007
+Allowed events: Investigate rumbling, spot Boss Trigger, realize Vane's plan.
+Forbidden milestones: none
+Current arm-side / inventory facts: Artie has Cloak, Dagger, Trophy, Wallet, ID.
+
+APPEARANCE_CHECK:
+- CHAR_ARTIE: late_twenties skinny_fat brown brown messy
+- CHAR_FIZZ: ageless ethereal digital_blue neon_pink glowing
+
+PROSE:
+Leaving the mountain of loot behind, Artie and Fizz follow the rumbling deeper into the crypts. The damp, moss-covered walls of the antechamber quickly gave way to smooth, polished obsidian as the corridor sloped downward into the dark. The vibrations in the floor grew stronger with every step, rattling the loose copper coins Artie had absentmindedly stuffed into his pockets. 
+
+He pulled the oversized collar of the Cloak of the Cowardly Lion tighter around his shoulders. The enchanted fabric muffled his footsteps, though it still let out a faint, pathetic whimper every time a torch flickered too quickly. His Rusty Iron Dagger remained stowed securely in his belt; after realizing he could just throw rocks to trigger his glitch, getting into melee range seemed like a sucker's game.
+
+"The architecture is shifting," Fizz noted, floating a few inches ahead of him. Her pixelated pink hair glowed faintly in the gloom, casting long, strange shadows against the obsidian walls. "We are leaving the standard spawn zones. The instance data here is highly restricted."
+
+"Restricted means better drops," Artie muttered, stepping over a shattered ribcage. Unlike the upper levels, there were no wandering skeletons here. The floor was littered with pulverized bone and deep, aggressive scorch marks. Someone had already been through here, and recently. Someone who hit very, very hard.
+
+The corridor opened into a massive, circular stone chamber. The air was thick with the smell of ozone and old dust. In the dead center of the room, illuminated by a single shaft of pale light from the cavernous ceiling, sat an obsidian pedestal. Resting atop it was a jagged, glowing red crystal.
+
+Artie approached cautiously, squinting at the crystal. The System obediently provided a readout.
+
+[Item Description: Floor Guardian Summoning Crystal (Boss Trigger)]
+[Rarity: Epic]
+[Effect: Instantly summons the local Floor Guardian. Consumable.]
+[Level Warning: Recommended Level 25+. Proceed with extreme caution.]
+
+"A Boss Trigger," Fizz said, her digital voice dropping an octave in artificial dread. "This is a manual spawn item. It's usually left behind when a high-level player clears a dungeon's trash mobs but doesn't want to fight the boss immediately. They save the trigger for when they have a full party or active buffs."
+
+Artie looked around the scorched, empty room. The pulverized bones, the heavy, aggressive cleave marks on the walls. There was only one player in Oakhaven arrogant enough to clear a dungeon and leave the boss on ice. Vane. The heavily armored jerk was probably back in the city, gathering his cronies or stacking buffs before returning to claim his prize.
+
+Artie stares at the Boss Trigger, a dangerous idea forming.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "LOC_OAKHAVEN_CRYPTS_LOWER",
+    "open_threads": [
+      "THREAD_GLITCH",
+      "THREAD_VANE_RIVALRY",
+      "THREAD_CURSED_LOOT"
+    ],
+    "recent_facts": [
+      "Artie and Fizz entered the lower levels of the Oakhaven Crypts.",
+      "They discovered a Boss Trigger left behind on an obsidian pedestal.",
+      "Artie realized Vane had cleared the lower crypts and left the boss for later."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 2,
+      "scene": 7,
+      "inventory": [
+        {
+          "container": "pocket_right",
+          "item": "ITEM_wallet",
+          "status": "stowed"
+        },
+        {
+          "container": "neck_lanyard",
+          "item": "ITEM_employee_id",
+          "status": "equipped"
+        },
+        {
+          "container": "lapel",
+          "item": "ITEM_participation_trophy",
+          "status": "equipped"
+        },
+        {
+          "container": "belt",
+          "item": "ITEM_rusty_iron_dagger",
+          "status": "stowed"
+        },
+        {
+          "container": "shoulders",
+          "item": "ITEM_cloak_of_the_cowardly_lion",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_wallet"
+          ]
+        },
+        {
+          "container": "neck_lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_employee_id"
+          ]
+        },
+        {
+          "container": "lapel",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_participation_trophy"
+          ]
+        },
+        {
+          "container": "belt",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_rusty_iron_dagger"
+          ]
+        },
+        {
+          "container": "shoulders",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_cloak_of_the_cowardly_lion"
+          ]
+        }
+      ],
+      "persona_updates": [
+        "Artie is tempted to steal Vane's boss kill to gain a massive XP boost, despite the extreme danger."
+      ],
+      "invariants_add": []
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "chapter": 2,
+      "scene": 7,
+      "inventory": [],
+      "containers": [],
+      "persona_updates": [
+        "Fizz is highly alarmed by the presence of the Boss Trigger and the level gap it represents."
+      ],
+      "invariants_add": []
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "ITEM_boss_trigger",
+      "set": {
+        "activation_state": "active",
+        "last_seen": {
+          "chapter": 2,
+          "scene": 7,
+          "location": "LOC_OAKHAVEN_CRYPTS_LOWER"
+        }
+      }
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie and Fizz followed the rumbling deeper into the crypts, finding the lower levels cleared of monsters.",
+      "They discovered an Epic-rarity Boss Trigger left on a pedestal.",
+      "Artie realized Vane had cleared the dungeon and left the trigger to farm later, giving Artie a dangerous idea."
+    ],
+    "key_events": [
+      "Artie and Fizz entered the lower levels of the Oakhaven Crypts.",
+      "They found a Floor Guardian Summoning Crystal (Boss Trigger) on a pedestal.",
+      "Artie deduced that Vane had cleared the area and left the trigger behind.",
+      "Artie began considering activating the trigger to steal Vane's boss kill."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+      "Artie's stats are locked at 1 max HP and 100% Critical Hit Rate, with 12 max Stamina.",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+      "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+      "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+      "milestone: cloak_acquired = DONE",
+      "Artie and Fizz are currently in the Oakhaven Crypts Lower Levels.",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+      "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "Artie has 905 XP."
+    ],
+    "chapter_so_far_add": [
+      "Artie and Fizz ventured into the lower crypts and found a Boss Trigger left behind by Vane."
+    ]
+  }
+}

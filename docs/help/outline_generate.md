@@ -2,6 +2,8 @@
 
 Purpose
 - Generate, rerun, or resume the phased outline pipeline for a book.
+- This remains the lower-level batch outline surface.
+- For the new iterative section lifecycle, prefer `bookforge workflow` and use `outline generate` to produce or refresh source outline artifacts.
 
 Usage
 - `bookforge outline generate --book <id> [options]`
@@ -72,6 +74,7 @@ Outputs
 - The prompt file can include a plain-English summary, characters, world, or system notes to ground the outline.
 - If the outline includes characters, writes outline/characters.json.
 - Updates state.json with outline path and status when applicable.
+- In the section workflow model, these run artifacts are the source material used to initialize/freeze sections into canonical `outline/outline.json`.
 
 Debugging
 - If the model returns invalid JSON, raw request/response logs are written under `workspace/logs/llm/` using phase/attempt labels.
@@ -96,5 +99,8 @@ Examples
   - `bookforge --workspace workspace outline generate --book my_novel_v1 --prompt-file prompts\outline_seed.md`
 
 Related commands
+- `bookforge workflow init` (initialize section workflow state from outline artifacts)
+- `bookforge workflow freeze-section` (promote one section into canonical outline state)
+- `bookforge workflow advance-section` (freeze -> write -> lock one section end to end)
 - `bookforge outline backup` (preserve a completed run-derived outline snapshot and artifacts)
 - `bookforge outline restore` (recover `outline.json` from run id or backup snapshot)

@@ -8,6 +8,7 @@ Stub commands
 Commands
 - init: docs/help/init.md
 - author generate: docs/help/author_generate.md
+- workflow: docs/help/workflow.md
 - outline generate: docs/help/outline_generate.md
 - outline backup: docs/help/outline_backup.md
 - outline restore: docs/help/outline_restore.md

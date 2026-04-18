@@ -1,0 +1,47 @@
+Artie examines the stat allocation menu Fizz just opened for him. The glowing blue interface hovered in the absolute blankness of the Character Creation Void, casting a cool light over his pale skin and messy brown hair. 
+
+[Stat Allocation]
+[Available Points: 10]
+[Vitality: 1 (Max HP: 10)]
+[Strength: 1]
+[Agility: 1]
+[Luck: 1]
+
+"So, I just dump everything into Vitality, right?" Artie asked, reaching up to tap the floating screen. His plastic Employee ID Badge dangled from its neck lanyard, clinking softly against his chest. He shifted his weight, feeling the familiar, mundane lump of his Leather Wallet stowed in his right pocket—small comforts in an otherwise terrifying digital afterlife. "If I have more HP, I don't die again. Simple accounting."
+
+Fizz zipped around his head, her neon_pink hair leaving a faint, pixelated light trail. "I mean, usually people balance it out, but considering you just got one-shot by a snack dispenser, I highly recommend beefing up your health pool. Go ahead, tap the plus sign."
+
+Artie pressed his index finger against the glowing symbol next to Vitality. 
+
+[Vitality: 2 (Max HP: 20)]
+[Available Points: 9]
+
+"See? Easy," Artie muttered. He tapped it again. And again.
+
+On the fourth tap, the blue screen stuttered. A harsh, grinding static noise echoed through the void. The interface inverted its colors, flashing a violent, blinding red that reflected in Fizz's wide, digital_blue eyes.
+
+[ERROR 404: Anomaly Integrity Breach]
+[Unrecognized Soul Signature. Stat Allocation Overridden.]
+
+"Whoa, hey!" Fizz shouted, her ethereal build flickering rapidly as she darted backward. "What did you do? The slider bar is jamming!"
+
+"I didn't do anything!" Artie yelled, jamming his finger against the minus sign in a panic. "It's stuck!"
+
+The red text flickered wildly, the numbers spinning like a broken slot machine. 
+
+[Correcting Anomaly...]
+[Vitality locked to 0.1]
+[Max HP: 1]
+[Compensating Build Deficit...]
+[Critical Hit Rate set to 100%]
+
+"One HP?" Artie stared at the flickering red text. "What kind of build has one HP? A stiff breeze is going to kill me!"
+
+"I can't stop it!" Fizz yelled, pulling up rapidly scrolling logs that vanished as quickly as they appeared. A flashing warning icon pulsed above her head. "The system is forcing the character confirmation despite the errors!"
+
+[Build Locked.]
+[Initialization Complete.]
+
+"Wait, no, cancel!" Artie shouted, waving his hands at the frozen screen. 
+
+The system finalizes the glitched build, preparing to teleport Artie.

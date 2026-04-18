@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "Artie and Fizz spawned in the Tutorial Forest and encountered a basic slime.",
+      "Artie kicked the slime in a panic, triggering a massive critical hit that dealt 99,999 damage.",
+      "The slime was vaporized, leaving behind a golden loot drop."
+    ],
+    "key_events": [
+      "Artie encountered a basic slime in the Tutorial Forest.",
+      "Artie kicked the slime, dealing 99,999 damage due to his 100% critical hit rate.",
+      "The slime was vaporized and dropped a golden loot drop.",
+      "Artie gained 5 XP."
+    ],
+    "must_stay_true": [
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "REMOVE: Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+      "Artie has 1/1 HP, 10/10 Stamina, a 100% Critical Hit Rate, and 5/100 XP.",
+      "Artie is physically present in the Tutorial Forest."
+    ],
+    "chapter_so_far_add": [
+      "Artie defeated his first enemy, a basic slime, with a single catastrophic critical hit."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "scene": 7,
+      "chapter": 1,
+      "persona_updates": [
+        "Artie is terrified of combat due to his 1 HP but realizes his basic attacks deal catastrophic damage."
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "item": "ITEM_wallet",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_employee_id",
+          "container": "neck_lanyard",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_wallet"
+          ]
+        },
+        {
+          "container": "neck_lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_employee_id"
+          ]
+        }
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "scene": 7,
+      "chapter": 1,
+      "persona_updates": [
+        "Fizz is shocked by the sheer magnitude of Artie's glitched damage output."
+      ],
+      "invariants_add": [],
+      "inventory": [],
+      "containers": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "scene": 7,
+      "chapter": 1,
+      "set": {
+        "reason": "Gained 5 XP from defeating the basic slime."
+      },
+      "delta": {
+        "resources": {
+          "xp": {
+            "current": 5
+          }
+        }
+      },
+      "remove": []
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "open_threads": [
+      "THREAD_GLITCH"
+    ],
+    "location": "LOC_TUTORIAL_FOREST",
+    "recent_facts": [
+      "Artie defeated a basic slime with a 99,999 damage critical hit.",
+      "A golden loot drop spawned from the vaporized slime."
+    ]
+  }
+}

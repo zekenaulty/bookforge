@@ -1,0 +1,238 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_004",
+  "chapter": 1,
+  "scene": 4,
+  "scene_target": "Artie meets Fizz and begins the character creation process.",
+  "goal": "Introduce the system guide and initiate character creation.",
+  "conflict": "Artie's confusion and denial versus Fizz's chipper system administration.",
+  "required_callbacks": [],
+  "constraints": [
+    "target_words: 2000"
+  ],
+  "end_condition": "Artie accepts his death and opens the stat allocation menu.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_CHARACTER_CREATION_VOID",
+  "location_end_id": "LOC_CHARACTER_CREATION_VOID",
+  "location_start_label": "Character Creation Void",
+  "location_end_label": "Character Creation Void",
+  "location_start": "Character Creation Void",
+  "location_end": "Character Creation Void",
+  "handoff_mode": "direct",
+  "constraint_state": "processed",
+  "transition_in_text": "Artie floats in the void, recovering from his electrocution, as a glowing pixelated fairy appears.",
+  "transition_in_anchors": [
+    "void",
+    "electrocution",
+    "glowing",
+    "fairy",
+    "system"
+  ],
+  "transition_out_text": "Artie stares at the stat allocation screen, ready to build his character.",
+  "transition_out_anchors": [
+    "stat_allocation",
+    "screen",
+    "ready"
+  ],
+  "seam_score": 90,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Artie",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "introduces": [
+    "Fizz"
+  ],
+  "introduces_ids": [
+    "CHAR_FIZZ"
+  ],
+  "thread_ids": [],
+  "required_in_custody": [
+    "ITEM_wallet",
+    "ITEM_employee_id"
+  ],
+  "required_scene_accessible": [
+    "ITEM_wallet",
+    "ITEM_employee_id"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "scene_continuation",
+  "timeline_scope": "present",
+  "ontological_scope": "non_real",
+  "continuity_system_focus": [
+    "stats",
+    "classes",
+    "titles"
+  ],
+  "ui_mechanics_expected": [
+    "System Notification",
+    "Character Creation",
+    "HP",
+    "Stamina"
+  ],
+  "prose_path": "draft/chapters/ch_001/scene_004.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "summary_update": {
+      "last_scene": [
+        "Artie met Fizz, a pixelated fairy and system guide, in the Character Creation Void.",
+        "Fizz confirmed that Artie died from the vending machine electrocution and was flagged as an Anomaly.",
+        "Artie accepted his death and Fizz opened the stat allocation menu for him to build his character."
+      ],
+      "key_events": [
+        "Artie awoke in the Character Creation Void with his Leather Wallet and Employee ID Badge.",
+        "A pixelated fairy named Fizz introduced herself as his system guide.",
+        "Fizz informed Artie that he is dead and his soul was flagged as an Anomaly.",
+        "Artie's system UI confirmed he has 0/10 HP and the status 'Dead'.",
+        "Artie accepted his fate and Fizz summoned the stat allocation screen."
+      ],
+      "must_stay_true": [
+        "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+        "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+        "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+        "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+        "Artie has 0/10 HP and 10/10 Stamina.",
+        "Artie is dead and his consciousness is floating in the Character Creation Void."
+      ],
+      "chapter_so_far_add": [
+        "Artie met Fizz, a system guide, in the Character Creation Void.",
+        "Fizz confirmed his death and opened the character creation interface."
+      ]
+    },
+    "character_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "scene": 4,
+        "chapter": 1,
+        "persona_updates": [
+          "Artie has accepted that he is dead and trapped in a system-governed afterlife."
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "item": "ITEM_wallet",
+            "container": "pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_employee_id",
+            "container": "neck_lanyard",
+            "status": "equipped"
+          }
+        ],
+        "containers": [
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_wallet"
+            ]
+          },
+          {
+            "container": "neck_lanyard",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_employee_id"
+            ]
+          }
+        ]
+      },
+      {
+        "character_id": "CHAR_FIZZ",
+        "scene": 4,
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is cheerfully guiding Artie through the character creation process."
+        ],
+        "invariants_add": [],
+        "inventory": [],
+        "containers": []
+      }
+    ],
+    "character_continuity_system_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "scene": 4,
+        "chapter": 1,
+        "set": {
+          "stats": {
+            "hp": {
+              "current": 0,
+              "max": 10
+            },
+            "stamina": {
+              "current": 10,
+              "max": 10
+            }
+          },
+          "statuses": [
+            {
+              "name": "Dead",
+              "active": true,
+              "source": "environmental_hazard"
+            }
+          ],
+          "reason": "Artie's UI confirms his dead status and 0 HP."
+        },
+        "delta": {}
+      }
+    ],
+    "world_updates": {
+      "cast_present": [
+        "CHAR_ARTIE",
+        "CHAR_FIZZ"
+      ],
+      "location": "LOC_CHARACTER_CREATION_VOID",
+      "open_threads": [],
+      "recent_facts": [
+        "Artie met Fizz, his assigned system guide.",
+        "Fizz confirmed Artie is dead and has been flagged as an Anomaly.",
+        "Artie accepted his situation and Fizz opened the character creation interface."
+      ]
+    }
+  },
+  "scene_summary": [
+    "Artie met Fizz, a pixelated fairy and system guide, in the Character Creation Void.",
+    "Fizz confirmed that Artie died from the vending machine electrocution and was flagged as an Anomaly.",
+    "Artie accepted his death and Fizz opened the stat allocation menu for him to build his character."
+  ],
+  "key_events": [
+    "Artie awoke in the Character Creation Void with his Leather Wallet and Employee ID Badge.",
+    "A pixelated fairy named Fizz introduced herself as his system guide.",
+    "Fizz informed Artie that he is dead and his soul was flagged as an Anomaly.",
+    "Artie's system UI confirmed he has 0/10 HP and the status 'Dead'.",
+    "Artie accepted his fate and Fizz summoned the stat allocation screen."
+  ],
+  "must_stay_true": [
+    "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+    "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+    "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+    "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+    "Artie has 0/10 HP and 10/10 Stamina.",
+    "Artie is dead and his consciousness is floating in the Character Creation Void."
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "fail",
+    "issues": [
+      {
+        "code": "pipeline_state_incoherent",
+        "message": "State snapshot for Artie disagrees with must_stay_true HP 10/10.",
+        "severity": "error",
+        "evidence": {
+          "line": 8,
+          "excerpt": "Artie has 0/10 HP and 10/10 Stamina."
+        }
+      }
+    ]
+  },
+  "write_attempts": 3,
+  "updated_at": "2026-04-18T03:06:06Z"
+}

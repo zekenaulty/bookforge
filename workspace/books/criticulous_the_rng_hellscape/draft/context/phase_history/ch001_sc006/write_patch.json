@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "location": "LOC_TUTORIAL_FOREST",
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "open_threads": [
+      "THREAD_GLITCH"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "The system glitch finalized Artie's build against his will, locking his stats at 1 HP and a 100% Critical Hit Rate.",
+      "Fizz attempted to override the system lock but was denied.",
+      "The teleportation sequence initiated, dragging Artie and Fizz out of the Character Creation Void.",
+      "Artie successfully survived the transition and spawned into the Tutorial Forest."
+    ],
+    "key_events": [
+      "The system finalized Artie's glitched stat allocation.",
+      "Fizz failed to bypass the system's Anomaly flag.",
+      "Artie and Fizz were forcefully teleported out of the void.",
+      "Artie arrived safely in the Tutorial Forest."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie is dead and his consciousness is floating in the Character Creation Void.",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+      "Artie's physical avatar has manifested in the Tutorial Forest."
+    ],
+    "chapter_so_far_add": [
+      "The system finalized Artie's glitched build and forcefully teleported him from the void into the physical reality of the Tutorial Forest."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 6,
+      "inventory": [
+        {
+          "item": "ITEM_wallet",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_employee_id",
+          "container": "neck_lanyard",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_wallet"
+          ]
+        },
+        {
+          "container": "neck_lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_employee_id"
+          ]
+        }
+      ],
+      "invariants_add": [
+        "Artie's physical avatar has manifested in the Tutorial Forest."
+      ],
+      "persona_updates": [
+        "Artie is terrified of his new physical reality in the forest, hyper-aware that the slightest injury will kill him instantly."
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "chapter": 1,
+      "scene": 6,
+      "inventory": [],
+      "containers": [],
+      "invariants_add": [],
+      "persona_updates": [
+        "Fizz is frustrated by her lack of administrative power and has followed Artie into the physical game world to keep him alive."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "crit_rate": {
+            "current": 100,
+            "max": 100
+          },
+          "stamina": {
+            "current": 10,
+            "max": 10
+          }
+        },
+        "reason": "System finalized the build, permanently locking the glitched stats into Artie's avatar."
+      },
+      "delta": {},
+      "chapter": 1,
+      "scene": 6
+    }
+  ],
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "pale",
+      "skin",
+      "messy",
+      "brown",
+      "hair",
+      "skinny_fat",
+      "build",
+      "wearing",
+      "cheap",
+      "suit."
+    ],
+    "CHAR_FIZZ": [
+      "tiny",
+      "ethereal",
+      "build",
+      "translucent",
+      "skin",
+      "neon_pink",
+      "hair",
+      "digital_blue",
+      "eyes."
+    ]
+  }
+}

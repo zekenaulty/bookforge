@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.1",
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "name": "Artie",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      }
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "name": "Fizz",
+      "intro": {
+        "chapter": 1,
+        "scene": 4
+      }
+    }
+  ],
+  "threads": [
+    {
+      "thread_id": "THREAD_GLITCH",
+      "label": "The 1 HP Glitch",
+      "status": "active"
+    }
+  ],
+  "chapters": [
+    {
+      "chapter_id": 2,
+      "title": "The Glass Cannon\u2019s Guide to Not Dying",
+      "goal": "Artie acquires the Cloak of the Cowardly Lion and begins exploiting the system's loot mechanics in the crypts.",
+      "chapter_role": "setup",
+      "stakes_shift": "From desperate survival to tactical exploitation of the system's physics and drop rates.",
+      "bridge": {
+        "from_prev": "Artie escapes Vane but remains a one-hit-kill target.",
+        "to_next": "Artie's rapid farming triggers the attention of the Floor Guardian."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "steady",
+        "expected_scene_count": 9
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Coward's Wardrobe",
+          "intent": "Artie seeks gear to survive his 1 HP fragility and exploits a quest loophole.",
+          "section_role": "setup",
+          "status": "draftable",
+          "target_scene_count": 3,
+          "end_condition": "Artie steals the Cloak of the Cowardly Lion from a locked starter chest.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "type": "setup",
+              "summary": "Artie ducks into a quiet alleyway in Oakhaven to inspect his glitched stats and discovers a premium locked starter chest.",
+              "outcome": "Artie discovers a premium locked starter chest in a back alley.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "location_start_label": "Oakhaven Square",
+              "location_end_label": "Oakhaven Back Alley",
+              "location_start": "The bustling central square of Oakhaven",
+              "location_end": "A dim, cobblestone alleyway behind the merchant stalls",
+              "transition_in_text": "Artie pushes his way through the crowded market stalls of Oakhaven Square, desperate to find a quiet place to check his glitched stats.",
+              "transition_in_anchors": [
+                "crowded market stalls",
+                "cobblestone street",
+                "shouting merchants"
+              ],
+              "transition_out_text": "Spotting a narrow gap between two potion shops, Artie slips into the shadows of the alley.",
+              "transition_out_anchors": [
+                "narrow gap",
+                "potion shop wall",
+                "alley shadows"
+              ],
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:10",
+              "hands_off_to": "2:2"
+            },
+            {
+              "scene_id": 2,
+              "type": "conflict",
+              "summary": "Fizz warns Artie that the chest requires a premium key, but Artie decides to test his 100% critical hit rate on the unbreakable lock.",
+              "outcome": "Artie uses his rusty dagger to land a critical hit on the chest's unbreakable lock.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "location_start_label": "Oakhaven Back Alley",
+              "location_end_label": "Oakhaven Back Alley",
+              "location_start": "A dim, cobblestone alleyway behind the merchant stalls",
+              "location_end": "A dim, cobblestone alleyway behind the merchant stalls",
+              "transition_in_text": "Artie approaches the glowing premium chest tucked behind a stack of discarded crates.",
+              "transition_in_anchors": [
+                "glowing premium chest",
+                "discarded crates",
+                "alley shadows"
+              ],
+              "transition_out_text": "Artie raises his rusty dagger and strikes the heavy iron padlock with all his nonexistent strength.",
+              "transition_out_anchors": [
+                "rusty iron dagger",
+                "heavy iron padlock",
+                "glowing chest lid"
+              ],
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:1",
+              "hands_off_to": "2:3"
+            },
+            {
+              "scene_id": 3,
+              "type": "climax",
+              "summary": "The lock shatters instantly, allowing Artie to loot the Cloak of the Cowardly Lion just as the noise attracts unwanted attention.",
+              "outcome": "Artie steals the Cloak of the Cowardly Lion from a locked starter chest.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "location_start_label": "Oakhaven Back Alley",
+              "location_end_label": "Oakhaven Crypt Entrance",
+              "location_start": "A dim, cobblestone alleyway behind the merchant stalls",
+              "location_end": "The crumbling stone steps leading down to the city crypts",
+              "transition_in_text": "The heavy iron padlock shatters into digital fragments under the force of Artie's critical strike.",
+              "transition_in_anchors": [
+                "shattered padlock fragments",
+                "glowing chest lid",
+                "rusty iron dagger"
+              ],
+              "transition_out_text": "Clutching the dusty fabric cloak to his chest, Artie sprints toward the open iron gates of the city crypts.",
+              "transition_out_anchors": [
+                "dusty fabric cloak",
+                "open iron gates",
+                "crumbling stone steps"
+              ],
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "fleeing",
+              "consumes_outcome_from": "2:2",
+              "hands_off_to": "2:4",
+              "end_condition_echo": "Artie steals the Cloak of the Cowardly Lion from a locked starter chest."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Loot Pinata Theory",
+          "intent": "Artie enters the crypts and discovers how his crits break the loot drop system.",
+          "section_role": "conflict",
+          "status": "stub",
+          "target_scene_count": 3,
+          "end_condition": "Artie clears a room of skeletons, turning them into a mountain of loot.",
+          "scenes": []
+        },
+        {
+          "section_id": 3,
+          "title": "Summoning Trouble",
+          "intent": "Vane's interference forces Artie to take a massive risk for XP.",
+          "section_role": "climax",
+          "status": "stub",
+          "target_scene_count": 3,
+          "end_condition": "Artie activates the Boss Trigger left behind by Vane.",
+          "scenes": []
+        }
+      ]
+    }
+  ]
+}

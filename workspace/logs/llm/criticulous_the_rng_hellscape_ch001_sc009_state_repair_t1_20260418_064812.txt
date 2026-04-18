@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "reason": "Confirmed 1 HP status during duel challenge.",
+        "stats": {
+          "crit_rate": {
+            "current": 100,
+            "max": 100
+          },
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "stamina": {
+            "current": 10,
+            "max": 10
+          }
+        }
+      }
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "set": {
+        "reason": "Displayed stats in duel UI.",
+        "stats": {
+          "hp": {
+            "current": 500,
+            "max": 500
+          },
+          "mp": {
+            "current": 200,
+            "max": 200
+          }
+        },
+        "stats.level": {
+          "current": 15,
+          "max": 15
+        }
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "pocket_right",
+          "contents": [
+            "ITEM_wallet"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "neck_lanyard",
+          "contents": [
+            "ITEM_employee_id"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "lapel",
+          "contents": [
+            "ITEM_participation_trophy"
+          ],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "pocket_right",
+          "item": "ITEM_wallet",
+          "status": "stowed"
+        },
+        {
+          "container": "neck_lanyard",
+          "item": "ITEM_employee_id",
+          "status": "equipped"
+        },
+        {
+          "container": "lapel",
+          "item": "ITEM_participation_trophy",
+          "status": "equipped"
+        }
+      ],
+      "persona_updates": [
+        "Artie is acutely aware that his 1 HP makes him entirely unsuited for direct combat against other players."
+      ]
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "containers": [
+        {
+          "container": "back_scabbard",
+          "contents": [
+            "ITEM_vane_greatsword"
+          ],
+          "owner": "CHAR_VANE"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "back_scabbard",
+          "item": "ITEM_vane_greatsword",
+          "status": "equipped"
+        }
+      ],
+      "persona_updates": [
+        "Vane is ruthless and willing to kill lower-level players for rare loot."
+      ]
+    }
+  ],
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie was intercepted by Vane, a level 15 player who demanded the Participation Trophy.",
+      "Vane initiated a deathmatch duel, forcing Artie to look for an escape to avoid instant death."
+    ],
+    "key_events": [
+      "Vane intercepted Artie at the edge of the Tutorial Forest.",
+      "Vane noticed the Participation Trophy and demanded it, believing it to be a rare drop.",
+      "Vane issued a formal System Duel Request for the trophy.",
+      "Artie reviewed his 1/1 HP and realized he could not survive a fight.",
+      "Artie spotted the gates of Oakhaven and began planning his escape."
+    ],
+    "last_scene": [
+      "Artie was intercepted at the edge of the Tutorial Forest by Vane.",
+      "Vane demanded Artie hand over the Participation Trophy and initiated a deathmatch duel.",
+      "Realizing his 1 HP meant instant death, Artie looked toward the gates of Oakhaven for an escape."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie is physically present in the Tutorial Forest.",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+      "Artie is physically present at the Tutorial Forest Edge.",
+      "Artie has 5 XP.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+      "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])"
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_VANE"
+    ],
+    "location": "LOC_TUTORIAL_FOREST_EDGE",
+    "open_threads": [
+      "THREAD_CURSED_LOOT",
+      "THREAD_VANE_RIVALRY",
+      "THREAD_GLITCH"
+    ]
+  }
+}

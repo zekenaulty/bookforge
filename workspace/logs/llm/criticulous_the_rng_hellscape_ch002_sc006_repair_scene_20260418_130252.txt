@@ -1,0 +1,166 @@
+COMPLIANCE:
+Scene ID: SC_002_006
+Allowed events: Artie clears a room of skeletons, turning them into a mountain of loot.
+Forbidden milestones: None
+Current arm-side / inventory facts: Cloak of the Cowardly Lion (equipped, shoulders), Rusty Iron Dagger (stowed, belt)
+
+APPEARANCE_CHECK:
+- CHAR_ARTIE: late_twenties skinny_fat brown_eyes brown_hair messy_hair average_height male pale_skin human
+- CHAR_FIZZ: ageless ethereal digital_blue_eyes neon_pink_hair glowing_hair tiny female translucent_skin system_entity
+
+PROSE:
+Artie stared at the massive loot pile burying the shattered remains of the first skeleton, a slow, greedy realization dawning on him. If a single pebble could do that, he had just stumbled onto a highly repeatable exploit. He scooped up a handful of gravel from the damp floor, eyeing the other shambling skeletons deeper in the antechamber.
+
+"Did you catch the math on that?" Artie asked, adjusting the oversized Cloak of the Cowardly Lion on his shoulders so it wouldn't snag his throwing arm. 
+
+Fizz zipped over the mountain of gold coins and glowing bone fragments, her digital eyes wide. "It's a cascading math failure. The rock triggered a 99,999 damage critical hit, instantly shattering the skeleton. The engine couldn't handle it."
+
+"So it panicked?"
+
+"Exactly," Fizz said, dropping her voice to a conspiratorial whisper. "The massive overkill damage caused a system error, forcing the skeleton to drop its entire loot table at once."
+
+Artie grinned. His 1/1 HP was a terrifying liability, but right now? It was the key to the kingdom. He checked that his Rusty Iron Dagger was securely stowed at his belt. He wouldn't need the blade. He had rocks. He wound up and lobbed a jagged piece of crypt masonry at a skeleton limping toward him from the shadows. The rock pinged off the monster's skull with a pathetic clack.
+
+[Critical Hit! -99,999 HP]
+[Target Defeated.]
+
+The skeleton exploded into a shower of white light. A second later, the air filled with the heavy clinking of currency and the clatter of useless low-level gear.
+
+[Experience Gained: 150 XP]
+[Loot Drop: 42 Gold Coins, 14 Bone Fragments, 1 Rusty Iron Helm, 2 Minor Stamina Potions, 1 Skeletal Femur, 1 Tattered Tunic...]
+
+"Oh, this is beautiful," Artie laughed, side-stepping a rolling skull. He threw another rock. Then another.
+
+[Critical Hit! -99,999 HP]
+[Target Defeated.]
+[Experience Gained: 150 XP]
+
+He developed a rhythm. Chuck a pebble, watch the skeleton vaporize, dodge the incoming avalanche of loot. The antechamber quickly transformed from a gloomy, damp crypt into a glittering hazard zone. He had to be careful not to trip over the knee-deep piles of copper and silver, or the sheer volume of rusty iron swords threatening to impale him. 
+
+[Experience Gained: 150 XP]
+[Experience Gained: 150 XP]
+[Level Up! You are now Level 2.]
+[Level Up! You are now Level 3.]
+
+Artie paused, panting slightly as the golden glow of leveling washed over him. He opened his stat sheet.
+
+[HP: 1/1 (Locked)]
+[Stamina: 12/12]
+[Stat Points Available: 10]
+
+"Still locked at one HP," Artie sighed, dismissing the window. "But the stamina bump is nice."
+
+"You're destabilizing the local instance," Fizz warned, hovering above a particularly tall stack of iron shields. "The physics engine is struggling to render all these individual coins."
+
+"Just one more," Artie said, spotting a final Skeletal Guard cowering in the corner. Artie flicked a tiny chip of gravel.
+
+[Critical Hit! -99,999 HP]
+[Target Defeated.]
+[Experience Gained: 150 XP]
+
+A fresh geyser of loot erupted, cascading across the floor and burying the last patch of visible cobblestone. Artie stood amidst a ridiculous mountain of loot, having cleared the room of every last threat in the antechamber.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": ["CHAR_ARTIE", "CHAR_FIZZ"],
+    "location": "LOC_OAKHAVEN_CRYPTS",
+    "open_threads": ["THREAD_GLITCH", "THREAD_VANE_RIVALRY", "THREAD_CURSED_LOOT"],
+    "recent_facts": [
+      "Artie systematically cleared the crypt antechamber by throwing rocks at skeletons.",
+      "The massive overkill damage forced each skeleton to drop its entire loot table.",
+      "Artie leveled up to Level 3 and gained stat points, though his HP remained locked at 1."
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "Artie realized his 100% critical hit rate could be used to farm skeletons by throwing rocks.",
+      "He systematically cleared the crypt antechamber, turning the monsters into massive piles of loot.",
+      "Artie leveled up to Level 3, increasing his Stamina to 12, though his HP remained locked at 1."
+    ],
+    "key_events": [
+      "Artie used rocks to trigger 99,999 damage critical hits on multiple skeletons.",
+      "The overkill damage caused a system error, forcing the skeletons to drop their entire loot tables.",
+      "Artie leveled up twice, reaching Level 3.",
+      "Artie gained 10 Stat Points and increased his Stamina to 12/12.",
+      "Artie cleared the antechamber, leaving it buried in a mountain of loot."
+    ],
+    "must_stay_true": [
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "REMOVE: Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+      "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+      "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+      "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+      "milestone: cloak_acquired = DONE",
+      "Artie and Fizz are currently in the Oakhaven Crypts.",
+      "REMOVE: Artie has 155 XP.",
+      "Artie has 905 XP.",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+      "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])"
+    ],
+    "chapter_so_far_add": [
+      "Artie systematically farmed skeletons in the crypt antechamber by throwing rocks, turning them into loot pinatas.",
+      "Artie reached Level 3, gaining stat points and stamina, but his HP remained locked at 1."
+    ]
+  },
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "level": {"current": 3},
+          "stamina": {"current": 12, "max": 12}
+        },
+        "resources": {
+          "xp": {"current": 905},
+          "stat_points": {"current": 10}
+        }
+      },
+      "reason": "Artie defeated multiple skeletons, gaining XP, leveling up to 3, and increasing stamina."
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 2,
+      "scene": 6,
+      "inventory": [
+        {"item": "ITEM_wallet", "container": "pocket_right", "status": "stowed"},
+        {"item": "ITEM_employee_id", "container": "neck_lanyard", "status": "equipped"},
+        {"item": "ITEM_participation_trophy", "container": "lapel", "status": "equipped"},
+        {"item": "ITEM_rusty_iron_dagger", "container": "belt", "status": "stowed"},
+        {"item": "ITEM_cloak_of_the_cowardly_lion", "container": "shoulders", "status": "equipped"}
+      ],
+      "containers": [
+        {"container": "pocket_right", "owner": "CHAR_ARTIE", "contents": ["ITEM_wallet"]},
+        {"container": "neck_lanyard", "owner": "CHAR_ARTIE", "contents": ["ITEM_employee_id"]},
+        {"container": "lapel", "owner": "CHAR_ARTIE", "contents": ["ITEM_participation_trophy"]},
+        {"container": "belt", "owner": "CHAR_ARTIE", "contents": ["ITEM_rusty_iron_dagger"]},
+        {"container": "shoulders", "owner": "CHAR_ARTIE", "contents": ["ITEM_cloak_of_the_cowardly_lion"]}
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Artie is thrilled to discover he can exploit the system's math to farm enemies safely from a distance."
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "chapter": 2,
+      "scene": 6,
+      "inventory": [],
+      "containers": [],
+      "invariants_add": [],
+      "persona_updates": [
+        "Fizz is concerned that Artie's massive loot generation is destabilizing the local instance's physics engine."
+      ]
+    }
+  ]
+}

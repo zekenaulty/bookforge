@@ -1,0 +1,197 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "recent_facts": [
+      "Artie shattered an unbreakable tutorial chest lock using his 100% Critical Hit Rate.",
+      "Artie stole the Cloak of the Cowardly Lion and fled from the guild guards."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "inventory": [
+        {
+          "item": "ITEM_wallet",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_employee_id",
+          "container": "neck_lanyard",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_participation_trophy",
+          "container": "lapel",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_rusty_iron_dagger",
+          "container": "hand_right",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_cloak_cowardly_lion",
+          "container": "shoulders",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_wallet"
+          ]
+        },
+        {
+          "container": "neck_lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_employee_id"
+          ]
+        },
+        {
+          "container": "lapel",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_participation_trophy"
+          ]
+        },
+        {
+          "container": "hand_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_rusty_iron_dagger"
+          ]
+        },
+        {
+          "container": "shoulders",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_cloak_cowardly_lion"
+          ]
+        }
+      ],
+      "appearance_updates": {
+        "set": {
+          "attire": {
+            "items": [
+              "Employee ID Badge",
+              "Participation Trophy",
+              "Cloak of the Cowardly Lion"
+            ],
+            "mode": "derived"
+          }
+        },
+        "reason": "Artie equipped the Cloak of the Cowardly Lion."
+      },
+      "invariants_add": [
+        "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+        "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_cowardly_lion])"
+      ],
+      "persona_updates": [
+        "Artie has confirmed that his glitched stats can break fundamental game mechanics like indestructible objects."
+      ],
+      "chapter": 2,
+      "scene": 3
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_cloak_cowardly_lion",
+      "set": {
+        "name": "Cloak of the Cowardly Lion",
+        "display_name": "Cloak of the Cowardly Lion",
+        "type": "armor",
+        "owner_scope": "world",
+        "custodian": "world",
+        "linked_threads": [],
+        "state_tags": [
+          "defensive_gear"
+        ],
+        "last_seen": {
+          "chapter": 2,
+          "scene": 3,
+          "location": "LOC_OAKHAVEN_STARTER_QUEST_HUB"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_cloak_cowardly_lion",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "CHAR_ARTIE"
+      },
+      "reason": "Artie looted the cloak from the shattered tutorial chest."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie struck the indestructible lock of the tutorial chest with his Rusty Iron Dagger.",
+      "His 100% Critical Hit Rate caused a massive damage spike that shattered the lock entirely.",
+      "Artie looted the Cloak of the Cowardly Lion from the chest and equipped it.",
+      "As guild guards approached, Artie and Fizz fled into a nearby alleyway."
+    ],
+    "key_events": [
+      "Artie destroyed an unbreakable tutorial lock using his glitched stats.",
+      "Artie acquired and equipped the Cloak of the Cowardly Lion.",
+      "Artie fled from the Oakhaven guild guards."
+    ],
+    "must_stay_true": [
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+      "Artie has 5 XP.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+      "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+      "Artie is physically present at the Starter Quest Hub.",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=held, container=hand_right)",
+      "container: hand_right (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+      "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_cowardly_lion])",
+      "milestone: cloak_acquired = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Artie used his guaranteed critical hit to shatter an unbreakable tutorial chest lock.",
+      "Artie acquired the Cloak of the Cowardly Lion and fled from the arriving guild guards."
+    ]
+  },
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "messy",
+      "brown",
+      "hair",
+      "pale",
+      "skin",
+      "skinny_fat",
+      "build",
+      "wearing",
+      "Employee",
+      "ID",
+      "Badge",
+      "and",
+      "Participation",
+      "Trophy."
+    ],
+    "CHAR_FIZZ": [
+      "glowing",
+      "digital_blue",
+      "eyes",
+      "neon_pink",
+      "hair",
+      "tiny",
+      "ethereal",
+      "build."
+    ]
+  },
+  "character_continuity_system_updates": []
+}

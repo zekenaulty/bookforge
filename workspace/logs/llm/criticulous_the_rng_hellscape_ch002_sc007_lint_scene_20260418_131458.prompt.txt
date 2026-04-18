@@ -1,0 +1,1848 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+UI gate: UI/system blocks (lines starting with '[' and ending with ']') are permitted only when scene_card.ui_allowed=true. If ui_allowed=false, do not include UI blocks even if an author persona says "always include".
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties, and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true. If a prior invariant is stale or superseded, you MUST flag it for removal using "REMOVE: <exact prior invariant text>" before restating the current truth.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Criticulous: The RNG Hellscape
+Book ID: criticulous_the_rng_hellscape
+Author Ref: eldrik-vale/v2
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements **when the System is active or the scene is set in a game world**. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing, while creating rich character depth.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot, or the setting/location is key to major story arcs/threads. 
+5. **Tight POV:** Stay deep in the active characters head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, follow the active scene-count policy:
+- Exact mode: total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+- Range mode: chapter totals must remain within the configured range and still align with pacing intent.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string), and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+
+USER:
+
+# LINT
+
+Check the scene for continuity, invariant violations, and duplication.
+Flag invariant contradictions against must_stay_true/key facts.
+Return ONLY JSON matching the lint_report schema.
+- Classify UI/prose mechanic claims as DURABLE or EPHEMERAL before enforcing.
+  - DURABLE: persistent stats/caps, skills/titles acquired, lasting status effects, inventory/custody, named mechanics referenced as invariants.
+  - EPHEMERAL: roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat telemetry.
+- Enforce DURABLE claims against authoritative_surfaces/state/registries.
+- EPHEMERAL claims do not require state ownership; only flag EPHEMERAL contradictions inside the same scene as warnings.
+- UI gate:
+  - If scene_card.ui_allowed=false and any authoritative UI blocks appear, emit issue code 'ui_gate_violation' (severity depends on lint mode).
+  - If ui_allowed is missing and UI blocks appear, emit 'ui_gate_unknown' (warning) requesting explicit ui_allowed; do not fail solely for missing flag.
+  - Inline bracketed UI (e.g., [HP: 1/1]) is still UI and should be gated the same way; do not embed UI mid-sentence.
+- Transition bridge gate:
+  - Emit issue code "transition_bridge_missing" when scene_card indicates non-direct handoff (or location/handoff metadata implies discontinuity) and the opening span lacks transition realization evidence.
+  - Treat scene_card.location_start_id and scene_card.location_end_id as canonical location identity for seam checks.
+  - Opening span scope for this check: first paragraph or first 400 characters, whichever is shorter.
+  - Transition realization evidence is either:
+    - exact scene_card.transition_in_text, or
+    - equivalent wording containing all scene_card.transition_in_anchors.
+  - Severity policy:
+    - warning in non-strict transition mode.
+    - error in strict transition mode.
+- If uncertain, default to EPHEMERAL (warning at most), not DURABLE (error).
+- status="fail" only if there is at least one issue with severity="error"; warnings alone => status="pass".
+- Item naming enforcement scope:
+  - Do not require that every mention in narrative prose use display_name.
+  - Enforce canonical display_name for: (a) anchoring at first introduction (same paragraph or within the next 2 sentences),
+    (b) any custody-change sentence (drop/pick up/hand off/stow/equip/transfer), and (c) any case where a descriptor is ambiguous among multiple durable items in the scene.
+  - Otherwise, treat non-canonical descriptive references as warnings at most.
+- Prose hygiene: flag internal ids or container codes in narrative prose (CHAR_, ITEM_, THREAD_, DEVICE_, hand_left, hand_right).
+- Naming severity policy:
+  - warning: unambiguous descriptor used post-anchor.
+  - error: missing anchor, descriptor used during custody-change without canonical name, or ambiguity risk.
+
+- Appearance enforcement (authoritative surface):
+  - APPEARANCE_CHECK is authoritative for cast_present_ids.
+  - Compare APPEARANCE_CHECK tokens to appearance_current atoms/marks (alias-aware).
+  - If APPEARANCE_CHECK contradicts appearance_current, emit error code "appearance_mismatch".
+  - Prose-only appearance contradictions are warnings unless explicitly durable and uncorrected in-scene.
+  - If prose depicts a durable appearance change but scene_card.durable_appearance_changes does not include it and no appearance_updates are present, emit error code "appearance_change_undeclared".
+  - If APPEARANCE_CHECK is missing for a cast member, emit warning code "appearance_check_missing".
+- For authoritative surfaces, prefer exact canonical item/device labels from registries.
+- For milestone repetition/future checks, compare against PRE-INVARIANTS only (pre-scene canon).
+- For ownership/consistency checks, compare against POST-STATE (post-patch candidate).
+- POST-STATE is canonical; character_states is a derived convenience view. If they contradict, emit pipeline_state_incoherent.
+- Check for POV drift vs book POV (no first-person in third-person scenes).
+  - Ignore first-person pronouns inside quoted dialogue; only narration counts.
+- Deterministically enforce scene-card durable constraints (required_in_custody, required_scene_accessible, forbidden_visible, device_presence; optional required_visible_on_page).
+- Durable constraint evaluation must use POST-STATE candidate (after patch), not pre-state.
+- Report missing durable context ids with explicit retry hints instead of guessing canon.
+- Input consistency check (mandatory, before issuing continuity/durable errors):
+  - If MUST_STAY_TRUE invariants contradict the provided post-patch candidate character state, treat this as an upstream snapshot error.
+  - In that case emit a single error issue with code "pipeline_state_incoherent" including evidence of the invariant and the conflicting state field.
+  - Do NOT emit additional continuity errors for the same fields when pipeline_state_incoherent is present.
+- must_stay_true removals:
+  - Lines starting with "REMOVE:" are deletion directives, not invariants.
+  - Ignore REMOVE lines when checking contradictions.
+  - If a REMOVE directive targets a fact, treat that fact as non-canonical even if it appears earlier in must_stay_true.
+- If pipeline_state_incoherent is present, issues MUST contain exactly one issue.
+- For each issue, include evidence when possible (line number + excerpt) as {"evidence": {"line": N, "excerpt": "..."}}.
+- Evaluate consistency over the full scope of the scene, not a single snapshot.
+  - Transitional state: a temporary mismatch later corrected or superseded within this scene.
+  - Durable violation: a mismatch that persists through the end of the scene or ends unresolved.
+  - You MUST read the entire scene and build a minimal timeline of explicit state claims/updates (UI lines, inventory changes, title/skill changes, location/time claims).
+  - If you detect an apparent inconsistency, you MUST search forward for later updates that resolve or supersede it.
+  - Only produce FAIL for durable violations. If resolved within the scene, do NOT FAIL; at most emit a warning.
+  - When the same stat appears multiple times, the last occurrence in the scene is authoritative unless an explicit rollback is stated.
+  - Any durability violation must cite both the conflicting line and the lack of later correction (or state "no later correction found").
+
+Required keys:
+- schema_version ("1.0")
+- status ("pass" or "fail")
+- issues (array of objects)
+
+Each issue object must include:
+- code
+- message
+Optional:
+- severity
+- evidence
+
+If there are no issues, return:
+{
+  "schema_version": "1.0",
+  "status": "pass",
+  "issues": []
+}
+
+If there are issues, return:
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {"code": "continuity", "message": "Example issue", "severity": "error"}
+  ]
+}
+
+Scene:
+Leaving the mountain of loot behind, Artie and Fizz follow the rumbling deeper into the crypts. The damp, moss-covered walls of the antechamber quickly gave way to smooth, polished obsidian as the corridor sloped downward into the dark. The vibrations in the floor grew stronger with every step, rattling the loose copper coins Artie had absentmindedly stuffed into his pockets. 
+
+He pulled the oversized collar of the Cloak of the Cowardly Lion tighter around his shoulders. The enchanted fabric muffled his footsteps, though it still let out a faint, pathetic whimper every time a torch flickered too quickly. His Rusty Iron Dagger remained stowed securely in his belt; after realizing he could just throw rocks to trigger his glitch, getting into melee range seemed like a sucker's game.
+
+"The architecture is shifting," Fizz noted, floating a few inches ahead of him. Her pixelated pink hair glowed faintly in the gloom, casting long, strange shadows against the obsidian walls. "We are leaving the standard spawn zones. The instance data here is highly restricted."
+
+"Restricted means better drops," Artie muttered, stepping over a shattered ribcage. Unlike the upper levels, there were no wandering skeletons here. The floor was littered with pulverized bone and deep, aggressive scorch marks. Someone had already been through here, and recently. Someone who hit very, very hard.
+
+The corridor opened into a massive, circular stone chamber. The air was thick with the smell of ozone and old dust. In the dead center of the room, illuminated by a single shaft of pale light from the cavernous ceiling, sat an obsidian pedestal. Resting atop it was a jagged, glowing red crystal.
+
+Artie approached cautiously, squinting at the crystal. The System obediently provided a readout.
+
+[Item Description: Floor Guardian Summoning Crystal (Boss Trigger)]
+[Rarity: Epic]
+[Effect: Instantly summons the local Floor Guardian. Consumable.]
+[Level Warning: Recommended Level 25+. Proceed with extreme caution.]
+
+"A Boss Trigger," Fizz said, her digital voice dropping an octave in artificial dread. "This is a manual spawn item. It's usually left behind when a high-level player clears a dungeon's trash mobs but doesn't want to fight the boss immediately. They save the trigger for when they have a full party or active buffs."
+
+Artie looked around the scorched, empty room. The pulverized bones, the heavy, aggressive cleave marks on the walls. There was only one player in Oakhaven arrogant enough to clear a dungeon and leave the boss on ice. Vane. The heavily armored jerk was probably back in the city, gathering his cronies or stacking buffs before returning to claim his prize.
+
+Artie stares at the Boss Trigger, a dangerous idea forming.
+
+Scene card:
+{
+  "cast_present": [
+    "Artie",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "chapter": 2,
+  "conflict": "Realizing Vane is nearby and has left a high-level Boss Trigger.",
+  "constraint_state": "processed",
+  "constraints": [
+    "target_words: 2000"
+  ],
+  "consumes_outcome_from": "2:6",
+  "continuity_system_focus": [
+    "items",
+    "inspect"
+  ],
+  "device_presence": [
+    "ITEM_boss_trigger"
+  ],
+  "end_condition": "Artie spots the Boss Trigger and realizes Vane's plan.",
+  "forbidden_visible": [],
+  "goal": "Investigate the rumbling deeper in the crypts.",
+  "handoff_mode": "investigate_discovery",
+  "hands_off_to": "2:8",
+  "introduces": [],
+  "introduces_ids": [],
+  "location_end": "Oakhaven Crypts Lower Levels",
+  "location_end_id": "LOC_OAKHAVEN_CRYPTS_LOWER",
+  "location_end_label": "Oakhaven Crypts Lower Levels",
+  "location_start": "Oakhaven Crypts Antechamber",
+  "location_start_id": "LOC_OAKHAVEN_CRYPTS",
+  "location_start_label": "Oakhaven Crypts Antechamber",
+  "ontological_scope": "real",
+  "required_callbacks": [],
+  "required_in_custody": [
+    "ITEM_cloak_of_the_cowardly_lion"
+  ],
+  "required_scene_accessible": [],
+  "required_visible_on_page": [],
+  "scene": 7,
+  "scene_id": "SC_002_007",
+  "scene_target": "Artie discovers Vane's farming operation and the Boss Trigger.",
+  "schema_version": "1.1",
+  "seam_resolution": "inline_bridge",
+  "seam_score": 85,
+  "thread_ids": [],
+  "timeline_scope": "present",
+  "transition_in_anchors": [
+    "mountain of loot",
+    "rumbling",
+    "deeper",
+    "crypts"
+  ],
+  "transition_in_text": "Leaving the mountain of loot behind, Artie and Fizz follow the rumbling deeper into the crypts.",
+  "transition_out_anchors": [
+    "stares",
+    "Boss Trigger",
+    "dangerous idea"
+  ],
+  "transition_out_text": "Artie stares at the Boss Trigger, a dangerous idea forming.",
+  "transition_type": "exploration",
+  "ui_allowed": true,
+  "ui_mechanics_expected": [
+    "Item Description",
+    "Level Warning"
+  ]
+}
+
+Authoritative surfaces:
+[
+  {
+    "kind": "ui_block",
+    "line": 13,
+    "text": "[Item Description: Floor Guardian Summoning Crystal (Boss Trigger)]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 14,
+    "text": "[Rarity: Epic]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 15,
+    "text": "[Effect: Instantly summons the local Floor Guardian. Consumable.]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 16,
+    "text": "[Level Warning: Recommended Level 25+. Proceed with extreme caution.]"
+  }
+]
+
+Appearance check (authoritative):
+{}
+
+Character states (post-patch candidate, per cast_present_ids):
+[
+  {
+    "appearance_current": {
+      "alias_map": {
+        "eye_color": [
+          "muddy brown"
+        ],
+        "hair_color": [
+          "mousy brown",
+          "dull brown"
+        ]
+      },
+      "atoms": {
+        "age_band": "late_twenties",
+        "build": "skinny_fat",
+        "eye_color": "brown",
+        "hair_color": "brown",
+        "hair_style": "messy",
+        "height_band": "average",
+        "sex_presentation": "male",
+        "skin_tone": "pale",
+        "species": "human"
+      },
+      "marks": [],
+      "summary": "An average, slightly disheveled office worker wearing a cheap, ill-fitting suit."
+    },
+    "appearance_history": [],
+    "chapter": 2,
+    "character_continuity_system_state": {
+      "reason": "Ensure HP is tracked in continuity system state to match invariants.",
+      "resources": {
+        "stat_points": {
+          "current": 10
+        },
+        "xp": {
+          "current": 905
+        }
+      },
+      "skills": {},
+      "stats": {
+        "hp": {
+          "current": 1,
+          "max": 1
+        },
+        "level": {
+          "current": 3
+        },
+        "stamina": {
+          "current": 12,
+          "max": 12
+        }
+      },
+      "statuses": [
+        {
+          "active": true,
+          "name": "Dead",
+          "source": "environmental_hazard"
+        },
+        {
+          "active": true,
+          "name": "Cursed",
+          "source": "ITEM_participation_trophy"
+        },
+        {
+          "active": true,
+          "name": "Aggro: Skeletal Guard",
+          "source": "combat"
+        }
+      ],
+      "titles": []
+    },
+    "character_id": "CHAR_ARTIE",
+    "containers": [
+      {
+        "container": "pocket_right",
+        "contents": [
+          "ITEM_wallet"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "neck_lanyard",
+        "contents": [
+          "ITEM_employee_id"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "lapel",
+        "contents": [
+          "ITEM_participation_trophy"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "belt",
+        "contents": [
+          "ITEM_rusty_iron_dagger"
+        ],
+        "owner": "CHAR_ARTIE"
+      },
+      {
+        "container": "shoulders",
+        "contents": [
+          "ITEM_cloak_of_the_cowardly_lion"
+        ],
+        "owner": "CHAR_ARTIE"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie has accepted that he is dead and trapped in a system-governed afterlife."
+        ],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is terrified of his new fragility, realizing that with only 1 HP, anything could kill him."
+        ],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is terrified of his new fragility, realizing that with only 1 HP, anything could kill him."
+        ],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie realizes his 100% Critical Hit Rate makes him absurdly destructive, but he remains terrified of taking any damage."
+        ],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is dismayed to be permanently branded with a cursed Participation Trophy."
+        ],
+        "scene": 8
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 8
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "notes": "Cleaned up malformed duplicate entry for ITEM_participation_trophy.",
+        "persona_updates": [],
+        "scene": 9
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 1,
+        "notes": "cleanup malformed duplicate item entry",
+        "scene": 9
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie realizes he cannot win a fair fight against Vane and must rely on evasion."
+        ],
+        "scene": 9
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 9
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Artie is deeply relieved to have reached a Safe Zone, realizing that evasion is his only viable survival strategy against high-level players."
+        ],
+        "scene": 10
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 1,
+        "scene": 10
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "persona_updates": [
+          "Artie realizes standard merchants cannot solve his 1 HP problem and his real-world money is useless here."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 2,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "persona_updates": [
+          "Artie decides to exploit his 100% Critical Hit Rate to bypass tutorial mechanics."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 2,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "notes": "Cleaned up malformed duplicate entry for ITEM_rusty_iron_dagger.",
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 2,
+        "notes": "Clean up malformed duplicate entry for ITEM_rusty_iron_dagger.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "persona_updates": [
+          "Artie is willing to steal and break game rules to acquire defensive gear."
+        ],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 2,
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "notes": "Cleaned up malformed duplicate entry for ITEM_cloak_of_the_cowardly_lion.",
+        "persona_updates": [],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 2,
+        "notes": "Clean up malformed duplicate cloak entry and align equipment posture for crypt exploration.",
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "persona_updates": [
+          "Artie realizes the Cloak of the Cowardly Lion has a severe thematic drawback that ruins its stealth."
+        ],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 2,
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "persona_updates": [
+          "Artie realizes he can exploit his 100% critical hit rate to force enemies to drop their entire loot tables, turning them into loot pinatas."
+        ],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 2,
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 2,
+        "notes": "Artie stowed the dagger in his belt.",
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "persona_updates": [
+          "Artie is thrilled to discover he can exploit the system's math to farm enemies safely from a distance."
+        ],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 2,
+        "scene": 6
+      }
+    ],
+    "invariants": [
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+      "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+      "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])"
+    ],
+    "invariants_add": [],
+    "inventory": [
+      {
+        "container": "pocket_right",
+        "item": "ITEM_wallet",
+        "status": "stowed"
+      },
+      {
+        "container": "neck_lanyard",
+        "item": "ITEM_employee_id",
+        "status": "equipped"
+      },
+      {
+        "container": "lapel",
+        "item": "ITEM_participation_trophy",
+        "status": "equipped"
+      },
+      {
+        "container": "belt",
+        "item": "ITEM_rusty_iron_dagger",
+        "status": "stowed"
+      },
+      {
+        "container": "shoulders",
+        "item": "ITEM_cloak_of_the_cowardly_lion",
+        "status": "equipped"
+      }
+    ],
+    "last_touched": {
+      "chapter": 2,
+      "scene": 6
+    },
+    "name": "Artie",
+    "persona_updates": [
+      "Artie is tempted to steal Vane's boss kill to gain a massive XP boost, despite the extreme danger."
+    ],
+    "scene": 7,
+    "schema_version": "1.0",
+    "skills": {},
+    "stats": {
+      "hp": {
+        "current": 1,
+        "max": 1
+      },
+      "level": {
+        "current": 3
+      },
+      "stamina": {
+        "current": 12,
+        "max": 12
+      }
+    },
+    "updated_at": "2026-04-18T13:04:05Z"
+  },
+  {
+    "appearance_current": {
+      "alias_map": {
+        "eye_color": [
+          "blue pixels"
+        ],
+        "hair_color": [
+          "pink light",
+          "magenta"
+        ]
+      },
+      "atoms": {
+        "age_band": "ageless",
+        "build": "ethereal",
+        "eye_color": "digital_blue",
+        "hair_color": "neon_pink",
+        "hair_style": "glowing",
+        "height_band": "tiny",
+        "sex_presentation": "female",
+        "skin_tone": "translucent",
+        "species": "system_entity"
+      },
+      "marks": [],
+      "summary": "A glowing, floating orb of light that occasionally resolves into a pixelated, chibi fairy."
+    },
+    "appearance_history": [],
+    "chapter": 2,
+    "character_continuity_system_state": {
+      "resources": {
+        "processing_power": {
+          "current": 100,
+          "max": 100
+        }
+      },
+      "skills": {
+        "system_admin_read": 1
+      },
+      "stats": {
+        "hp": {
+          "current": 9999,
+          "max": 9999
+        }
+      },
+      "titles": [
+        {
+          "active": true,
+          "name": "Tutorial Guide",
+          "source": "system"
+        }
+      ]
+    },
+    "character_id": "CHAR_FIZZ",
+    "containers": [],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is cheerfully guiding Artie through the character creation process."
+        ],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is alarmed by the system anomaly and unable to override the glitch affecting Artie's build."
+        ],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is alarmed by the system anomaly and unable to override the glitch affecting Artie's build."
+        ],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 1,
+        "persona_updates": [
+          "Fizz is stunned by the destructive potential of Artie's glitched stats."
+        ],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "persona_updates": [
+          "Fizz encourages Artie to think outside the box to survive his 1 HP glitch."
+        ],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "persona_updates": [
+          "Fizz actively encourages Artie to break the game's intended mechanics to survive."
+        ],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 2,
+        "persona_updates": [
+          "Fizz is concerned that Artie's massive loot generation is destabilizing the local instance's physics engine."
+        ],
+        "scene": 6
+      }
+    ],
+    "invariants": [],
+    "invariants_add": [],
+    "inventory": [],
+    "last_touched": {
+      "chapter": 2,
+      "scene": 6
+    },
+    "name": "Fizz",
+    "persona_updates": [
+      "Fizz is highly alarmed by the presence of the Boss Trigger and the level gap it represents."
+    ],
+    "scene": 7,
+    "schema_version": "1.0",
+    "skills": {
+      "system_admin_read": 1
+    },
+    "stats": {
+      "hp": {
+        "current": 9999,
+        "max": 9999
+      }
+    },
+    "updated_at": "2026-04-18T13:04:05Z"
+  }
+]
+
+Item registry (canonical):
+{
+  "items": [
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Cloak of the Cowardly Lion",
+      "item_id": "ITEM_cloak_of_the_cowardly_lion",
+      "last_seen": {
+        "chapter": 2,
+        "location": "LOC_OAKHAVEN_STARTER_QUEST_HUB",
+        "scene": 3
+      },
+      "linked_threads": [],
+      "name": "Cloak of the Cowardly Lion",
+      "owner_scope": "character",
+      "state_tags": [
+        "stolen"
+      ],
+      "type": "armor"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Employee ID Badge",
+      "item_id": "ITEM_employee_id",
+      "last_seen": {
+        "chapter": 1,
+        "location": "LOC_OFFICE_BREAKROOM",
+        "scene": 1
+      },
+      "linked_threads": [],
+      "name": "Employee ID Badge",
+      "owner_scope": "character",
+      "state_tags": [],
+      "type": "mundane"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Participation Trophy",
+      "item_id": "ITEM_participation_trophy",
+      "last_seen": {
+        "chapter": 1,
+        "location": "LOC_TUTORIAL_FOREST",
+        "scene": 8
+      },
+      "linked_device_id": "DEVICE_cursed_participation_trophy_47ec2dea",
+      "linked_threads": [
+        "THREAD_CURSED_LOOT"
+      ],
+      "name": "Participation Trophy",
+      "owner_scope": "world",
+      "state_tags": [
+        "cursed",
+        "bound"
+      ],
+      "type": "cursed"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Rusty Iron Dagger",
+      "item_id": "ITEM_rusty_iron_dagger",
+      "last_seen": {
+        "chapter": 2,
+        "location": "LOC_OAKHAVEN_STARTER_QUEST_HUB",
+        "scene": 2
+      },
+      "linked_threads": [],
+      "name": "Rusty Iron Dagger",
+      "owner_scope": "world",
+      "state_tags": [],
+      "type": "weapon"
+    },
+    {
+      "custodian": "CHAR_ARTIE",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Leather Wallet",
+      "item_id": "ITEM_wallet",
+      "last_seen": {
+        "chapter": 1,
+        "location": "LOC_OFFICE_BREAKROOM",
+        "scene": 1
+      },
+      "linked_threads": [],
+      "name": "Leather Wallet",
+      "owner_scope": "character",
+      "state_tags": [],
+      "type": "mundane"
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Plot devices (canonical):
+{
+  "devices": [
+    {
+      "activation_state": "active",
+      "constraints": [],
+      "custody_ref": "CHAR_ARTIE",
+      "custody_scope": "character",
+      "derived_access_reason": "custody_ref_in_cast",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_cursed_participation_trophy_47ec2dea",
+      "last_seen": {
+        "chapter": 1,
+        "location": "LOC_TUTORIAL_FOREST",
+        "scene": 8
+      },
+      "linked_item_id": "ITEM_participation_trophy",
+      "linked_threads": [
+        "THREAD_CURSED_LOOT"
+      ],
+      "name": "Cursed Participation Trophy",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_VANE_RIVALRY",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_rivalry_with_vane_b8260f4e",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_VANE_RIVALRY"
+      ],
+      "name": "Rivalry with Vane",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "THREAD_GLITCH",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_the_1_hp_glitch_039dafca",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "THREAD_GLITCH"
+      ],
+      "name": "The 1 HP Glitch",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "inactive",
+      "constraints": [],
+      "custody_ref": "LOC_OAKHAVEN_CRYPTS_LOWER",
+      "custody_scope": "world",
+      "derived_access_reason": "custody_ref_location_match",
+      "derived_scene_accessible": true,
+      "device_id": "ITEM_boss_trigger",
+      "display_name": "Boss Trigger",
+      "last_seen": {
+        "chapter": 2,
+        "location": "LOC_OAKHAVEN_CRYPTS_LOWER",
+        "scene": 7
+      },
+      "linked_threads": [],
+      "name": "Boss Trigger"
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Pre-state (before patch):
+{
+  "budgets": {
+    "max_new_entities": 6,
+    "max_new_threads": 16,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 3,
+    "status": "READY",
+    "updated_at": "2026-04-17T15:07:14Z"
+  },
+  "cursor": {
+    "chapter": 2,
+    "scene": 7
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {},
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_002/scene_007.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "PLANNED",
+  "summary": {
+    "chapter_so_far": [],
+    "key_facts_ring": [
+      "milestone: cloak_acquired = DONE",
+      "Artie lost his Safe Zone Active status upon entering the crypts.",
+      "The Cloak of the Cowardly Lion's flawed stealth caused it to whimper in fear.",
+      "Artie aggroed a Level 8 Skeletal Guard.",
+      "Artie and Fizz are currently in the Oakhaven Crypts facing a Skeletal Guard.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+      "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+      "Artie dodged the Skeletal Guard's attack and threw a loose rock at it.",
+      "The rock triggered a 99,999 damage critical hit, instantly shattering the skeleton.",
+      "Artie gained 150 XP from the defeated enemy.",
+      "The massive overkill damage caused a system error, forcing the skeleton to drop its entire loot table at once.",
+      "Artie stowed his Rusty Iron Dagger, eager to farm more skeletons.",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+      "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "Artie used rocks to trigger 99,999 damage critical hits on multiple skeletons.",
+      "The overkill damage caused a system error, forcing the skeletons to drop their entire loot tables.",
+      "Artie leveled up twice, reaching Level 3.",
+      "Artie gained 10 Stat Points and increased his Stamina to 12/12.",
+      "Artie cleared the antechamber, leaving it buried in a mountain of loot.",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+      "Artie and Fizz are currently in the Oakhaven Crypts.",
+      "Artie has 905 XP."
+    ],
+    "last_scene": [
+      "Artie realized his 100% critical hit rate could be used to farm skeletons by throwing rocks.",
+      "He systematically cleared the crypt antechamber, turning the monsters into massive piles of loot.",
+      "Artie leveled up to Level 3, increasing his Stamina to 12, though his HP remained locked at 1."
+    ],
+    "must_stay_true": [
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+      "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+      "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+      "milestone: cloak_acquired = DONE",
+      "Artie and Fizz are currently in the Oakhaven Crypts facing a Skeletal Guard.",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+      "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+      "Artie and Fizz are currently in the Oakhaven Crypts.",
+      "Artie has 905 XP."
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": [
+      "Artie stowed his Rusty Iron Dagger, eager to farm more skeletons.",
+      "Artie used rocks to trigger 99,999 damage critical hits on multiple skeletons.",
+      "The overkill damage caused a system error, forcing the skeletons to drop their entire loot tables.",
+      "Artie leveled up twice, reaching Level 3.",
+      "Artie gained 10 Stat Points and increased his Stamina to 12/12.",
+      "Artie cleared the antechamber, leaving it buried in a mountain of loot.",
+      "REMOVE: Artie is physically present in Oakhaven City Proper.",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+      "Artie has 5 XP.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+      "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+      "Artie is physically present in Oakhaven Market.",
+      "REMOVE: Artie is physically present in Oakhaven Market.",
+      "Artie is physically present at the Starter Quest Hub.",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=held, container=hand_right)",
+      "container: hand_right (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "REMOVE: Artie is physically present at the Starter Quest Hub.",
+      "Artie and Fizz are fleeing into an alleyway behind the Starter Quest Hub.",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+      "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+      "milestone: cloak_acquired = DONE",
+      "REMOVE: Artie and Fizz are fleeing into an alleyway behind the Starter Quest Hub.",
+      "Artie and Fizz are currently in the Oakhaven Crypts facing a Skeletal Guard.",
+      "REMOVE: Artie has 5 XP.",
+      "REMOVE: inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=held, container=hand_right)",
+      "REMOVE: container: hand_right (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "Artie has 155 XP.",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+      "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "REMOVE: Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+      "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+      "Artie and Fizz are currently in the Oakhaven Crypts.",
+      "REMOVE: Artie has 155 XP.",
+      "Artie has 905 XP."
+    ]
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "LOC_OAKHAVEN_CRYPTS_LOWER",
+    "open_threads": [
+      "THREAD_GLITCH",
+      "THREAD_VANE_RIVALRY",
+      "THREAD_CURSED_LOOT"
+    ],
+    "recent_facts": [
+      "Artie systematically cleared the crypt antechamber by throwing rocks at skeletons.",
+      "The massive overkill damage forced each skeleton to drop its entire loot table.",
+      "Artie leveled up to Level 3 and gained stat points, though his HP remained locked at 1."
+    ],
+    "time": {}
+  }
+}
+
+Pre-summary (facts-only):
+{
+  "chapter_so_far": [],
+  "key_facts_ring": [
+    "milestone: cloak_acquired = DONE",
+    "Artie lost his Safe Zone Active status upon entering the crypts.",
+    "The Cloak of the Cowardly Lion's flawed stealth caused it to whimper in fear.",
+    "Artie aggroed a Level 8 Skeletal Guard.",
+    "Artie and Fizz are currently in the Oakhaven Crypts facing a Skeletal Guard.",
+    "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+    "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+    "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+    "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+    "Artie dodged the Skeletal Guard's attack and threw a loose rock at it.",
+    "The rock triggered a 99,999 damage critical hit, instantly shattering the skeleton.",
+    "Artie gained 150 XP from the defeated enemy.",
+    "The massive overkill damage caused a system error, forcing the skeleton to drop its entire loot table at once.",
+    "Artie stowed his Rusty Iron Dagger, eager to farm more skeletons.",
+    "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+    "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+    "Artie used rocks to trigger 99,999 damage critical hits on multiple skeletons.",
+    "The overkill damage caused a system error, forcing the skeletons to drop their entire loot tables.",
+    "Artie leveled up twice, reaching Level 3.",
+    "Artie gained 10 Stat Points and increased his Stamina to 12/12.",
+    "Artie cleared the antechamber, leaving it buried in a mountain of loot.",
+    "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+    "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+    "Artie and Fizz are currently in the Oakhaven Crypts.",
+    "Artie has 905 XP."
+  ],
+  "last_scene": [
+    "Artie realized his 100% critical hit rate could be used to farm skeletons by throwing rocks.",
+    "He systematically cleared the crypt antechamber, turning the monsters into massive piles of loot.",
+    "Artie leveled up to Level 3, increasing his Stamina to 12, though his HP remained locked at 1."
+  ],
+  "must_stay_true": [
+    "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+    "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+    "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+    "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+    "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+    "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+    "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+    "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+    "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+    "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+    "milestone: cloak_acquired = DONE",
+    "Artie and Fizz are currently in the Oakhaven Crypts facing a Skeletal Guard.",
+    "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+    "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+    "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+    "Artie and Fizz are currently in the Oakhaven Crypts.",
+    "Artie has 905 XP."
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": [
+    "Artie stowed his Rusty Iron Dagger, eager to farm more skeletons.",
+    "Artie used rocks to trigger 99,999 damage critical hits on multiple skeletons.",
+    "The overkill damage caused a system error, forcing the skeletons to drop their entire loot tables.",
+    "Artie leveled up twice, reaching Level 3.",
+    "Artie gained 10 Stat Points and increased his Stamina to 12/12.",
+    "Artie cleared the antechamber, leaving it buried in a mountain of loot.",
+    "REMOVE: Artie is physically present in Oakhaven City Proper.",
+    "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+    "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+    "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+    "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+    "Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+    "Artie has 5 XP.",
+    "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+    "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+    "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+    "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+    "Artie is physically present in Oakhaven Market.",
+    "REMOVE: Artie is physically present in Oakhaven Market.",
+    "Artie is physically present at the Starter Quest Hub.",
+    "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=held, container=hand_right)",
+    "container: hand_right (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+    "REMOVE: Artie is physically present at the Starter Quest Hub.",
+    "Artie and Fizz are fleeing into an alleyway behind the Starter Quest Hub.",
+    "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+    "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+    "milestone: cloak_acquired = DONE",
+    "REMOVE: Artie and Fizz are fleeing into an alleyway behind the Starter Quest Hub.",
+    "Artie and Fizz are currently in the Oakhaven Crypts facing a Skeletal Guard.",
+    "REMOVE: Artie has 5 XP.",
+    "REMOVE: inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=held, container=hand_right)",
+    "REMOVE: container: hand_right (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+    "Artie has 155 XP.",
+    "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+    "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+    "REMOVE: Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+    "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+    "Artie and Fizz are currently in the Oakhaven Crypts.",
+    "REMOVE: Artie has 155 XP.",
+    "Artie has 905 XP."
+  ]
+}
+
+Pre-invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+  "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+  "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+  "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+  "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+  "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+  "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+  "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+  "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+  "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+  "milestone: cloak_acquired = DONE",
+  "Artie and Fizz are currently in the Oakhaven Crypts facing a Skeletal Guard.",
+  "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+  "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+  "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+  "Artie and Fizz are currently in the Oakhaven Crypts.",
+  "Artie has 905 XP.",
+  "milestone: cloak_acquired = DONE",
+  "Artie lost his Safe Zone Active status upon entering the crypts.",
+  "The Cloak of the Cowardly Lion's flawed stealth caused it to whimper in fear.",
+  "Artie aggroed a Level 8 Skeletal Guard.",
+  "Artie and Fizz are currently in the Oakhaven Crypts facing a Skeletal Guard.",
+  "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+  "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+  "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+  "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+  "Artie dodged the Skeletal Guard's attack and threw a loose rock at it.",
+  "The rock triggered a 99,999 damage critical hit, instantly shattering the skeleton.",
+  "Artie gained 150 XP from the defeated enemy.",
+  "The massive overkill damage caused a system error, forcing the skeleton to drop its entire loot table at once.",
+  "Artie stowed his Rusty Iron Dagger, eager to farm more skeletons.",
+  "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+  "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+  "Artie used rocks to trigger 99,999 damage critical hits on multiple skeletons.",
+  "The overkill damage caused a system error, forcing the skeletons to drop their entire loot tables.",
+  "Artie leveled up twice, reaching Level 3.",
+  "Artie gained 10 Stat Points and increased his Stamina to 12/12.",
+  "Artie cleared the antechamber, leaving it buried in a mountain of loot.",
+  "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+  "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+  "Artie and Fizz are currently in the Oakhaven Crypts.",
+  "Artie has 905 XP."
+]
+
+Post-state candidate (after patch):
+{
+  "budgets": {
+    "max_new_entities": 6,
+    "max_new_threads": 16,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 3,
+    "status": "READY",
+    "updated_at": "2026-04-17T15:07:14Z"
+  },
+  "continuity_system": {
+    "characters": {
+      "CHAR_ARTIE": {
+        "reason": "Ensure HP is tracked in continuity system state to match invariants.",
+        "resources": {
+          "stat_points": {
+            "current": 10
+          },
+          "xp": {
+            "current": 905
+          }
+        },
+        "skills": {},
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "level": {
+            "current": 3
+          },
+          "stamina": {
+            "current": 12,
+            "max": 12
+          }
+        },
+        "statuses": [
+          {
+            "active": true,
+            "name": "Dead",
+            "source": "environmental_hazard"
+          },
+          {
+            "active": true,
+            "name": "Cursed",
+            "source": "ITEM_participation_trophy"
+          },
+          {
+            "active": true,
+            "name": "Aggro: Skeletal Guard",
+            "source": "combat"
+          }
+        ],
+        "titles": []
+      },
+      "CHAR_FIZZ": {
+        "resources": {
+          "processing_power": {
+            "current": 100,
+            "max": 100
+          }
+        },
+        "skills": {
+          "system_admin_read": 1
+        },
+        "stats": {
+          "hp": {
+            "current": 9999,
+            "max": 9999
+          }
+        },
+        "titles": [
+          {
+            "active": true,
+            "name": "Tutorial Guide",
+            "source": "system"
+          }
+        ]
+      }
+    }
+  },
+  "cursor": {
+    "chapter": 2,
+    "scene": 7
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {},
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_002/scene_007.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "PLANNED",
+  "summary": {
+    "chapter_so_far": [
+      "Artie and Fizz ventured into the lower crypts and found a Boss Trigger left behind by Vane."
+    ],
+    "key_facts_ring": [
+      "Artie dodged the Skeletal Guard's attack and threw a loose rock at it.",
+      "The rock triggered a 99,999 damage critical hit, instantly shattering the skeleton.",
+      "Artie gained 150 XP from the defeated enemy.",
+      "The massive overkill damage caused a system error, forcing the skeleton to drop its entire loot table at once.",
+      "Artie stowed his Rusty Iron Dagger, eager to farm more skeletons.",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+      "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "Artie used rocks to trigger 99,999 damage critical hits on multiple skeletons.",
+      "The overkill damage caused a system error, forcing the skeletons to drop their entire loot tables.",
+      "Artie leveled up twice, reaching Level 3.",
+      "Artie gained 10 Stat Points and increased his Stamina to 12/12.",
+      "Artie cleared the antechamber, leaving it buried in a mountain of loot.",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+      "Artie has 905 XP.",
+      "Artie and Fizz entered the lower levels of the Oakhaven Crypts.",
+      "They found a Floor Guardian Summoning Crystal (Boss Trigger) on a pedestal.",
+      "Artie deduced that Vane had cleared the area and left the trigger behind.",
+      "Artie began considering activating the trigger to steal Vane's boss kill.",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+      "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+      "Artie and Fizz are currently in the Oakhaven Crypts Lower Levels."
+    ],
+    "last_scene": [
+      "Artie and Fizz followed the rumbling deeper into the crypts, finding the lower levels cleared of monsters.",
+      "They discovered an Epic-rarity Boss Trigger left on a pedestal.",
+      "Artie realized Vane had cleared the dungeon and left the trigger to farm later, giving Artie a dangerous idea."
+    ],
+    "must_stay_true": [
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+      "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+      "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+      "milestone: cloak_acquired = DONE",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+      "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+      "Artie has 905 XP.",
+      "Artie and Fizz are currently in the Oakhaven Crypts Lower Levels."
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": [
+      "Artie stowed his Rusty Iron Dagger, eager to farm more skeletons.",
+      "Artie used rocks to trigger 99,999 damage critical hits on multiple skeletons.",
+      "The overkill damage caused a system error, forcing the skeletons to drop their entire loot tables.",
+      "Artie leveled up twice, reaching Level 3.",
+      "Artie gained 10 Stat Points and increased his Stamina to 12/12.",
+      "Artie cleared the antechamber, leaving it buried in a mountain of loot.",
+      "REMOVE: Artie is physically present in Oakhaven City Proper.",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+      "Artie has 5 XP.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+      "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+      "Artie is physically present in Oakhaven Market.",
+      "REMOVE: Artie is physically present in Oakhaven Market.",
+      "Artie is physically present at the Starter Quest Hub.",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=held, container=hand_right)",
+      "container: hand_right (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "REMOVE: Artie is physically present at the Starter Quest Hub.",
+      "Artie and Fizz are fleeing into an alleyway behind the Starter Quest Hub.",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+      "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+      "milestone: cloak_acquired = DONE",
+      "REMOVE: Artie and Fizz are fleeing into an alleyway behind the Starter Quest Hub.",
+      "Artie and Fizz are currently in the Oakhaven Crypts facing a Skeletal Guard.",
+      "REMOVE: Artie has 5 XP.",
+      "REMOVE: inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=held, container=hand_right)",
+      "REMOVE: container: hand_right (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "Artie has 155 XP.",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+      "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "REMOVE: Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+      "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+      "Artie and Fizz are currently in the Oakhaven Crypts.",
+      "REMOVE: Artie has 155 XP.",
+      "Artie has 905 XP."
+    ]
+  },
+  "world": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "LOC_OAKHAVEN_CRYPTS_LOWER",
+    "open_threads": [
+      "THREAD_GLITCH",
+      "THREAD_VANE_RIVALRY",
+      "THREAD_CURSED_LOOT"
+    ],
+    "recent_facts": [
+      "Artie and Fizz entered the lower levels of the Oakhaven Crypts.",
+      "They discovered a Boss Trigger left behind on an obsidian pedestal.",
+      "Artie realized Vane had cleared the lower crypts and left the boss for later."
+    ],
+    "time": {}
+  }
+}
+
+Post-summary (facts-only):
+{
+  "chapter_so_far": [
+    "Artie and Fizz ventured into the lower crypts and found a Boss Trigger left behind by Vane."
+  ],
+  "key_facts_ring": [
+    "Artie dodged the Skeletal Guard's attack and threw a loose rock at it.",
+    "The rock triggered a 99,999 damage critical hit, instantly shattering the skeleton.",
+    "Artie gained 150 XP from the defeated enemy.",
+    "The massive overkill damage caused a system error, forcing the skeleton to drop its entire loot table at once.",
+    "Artie stowed his Rusty Iron Dagger, eager to farm more skeletons.",
+    "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+    "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+    "Artie used rocks to trigger 99,999 damage critical hits on multiple skeletons.",
+    "The overkill damage caused a system error, forcing the skeletons to drop their entire loot tables.",
+    "Artie leveled up twice, reaching Level 3.",
+    "Artie gained 10 Stat Points and increased his Stamina to 12/12.",
+    "Artie cleared the antechamber, leaving it buried in a mountain of loot.",
+    "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+    "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+    "Artie has 905 XP.",
+    "Artie and Fizz entered the lower levels of the Oakhaven Crypts.",
+    "They found a Floor Guardian Summoning Crystal (Boss Trigger) on a pedestal.",
+    "Artie deduced that Vane had cleared the area and left the trigger behind.",
+    "Artie began considering activating the trigger to steal Vane's boss kill.",
+    "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+    "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+    "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+    "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+    "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+    "Artie and Fizz are currently in the Oakhaven Crypts Lower Levels."
+  ],
+  "last_scene": [
+    "Artie and Fizz followed the rumbling deeper into the crypts, finding the lower levels cleared of monsters.",
+    "They discovered an Epic-rarity Boss Trigger left on a pedestal.",
+    "Artie realized Vane had cleared the dungeon and left the trigger to farm later, giving Artie a dangerous idea."
+  ],
+  "must_stay_true": [
+    "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+    "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+    "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+    "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+    "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+    "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+    "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+    "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+    "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+    "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+    "milestone: cloak_acquired = DONE",
+    "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+    "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+    "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+    "Artie has 905 XP.",
+    "Artie and Fizz are currently in the Oakhaven Crypts Lower Levels."
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": [
+    "Artie stowed his Rusty Iron Dagger, eager to farm more skeletons.",
+    "Artie used rocks to trigger 99,999 damage critical hits on multiple skeletons.",
+    "The overkill damage caused a system error, forcing the skeletons to drop their entire loot tables.",
+    "Artie leveled up twice, reaching Level 3.",
+    "Artie gained 10 Stat Points and increased his Stamina to 12/12.",
+    "Artie cleared the antechamber, leaving it buried in a mountain of loot.",
+    "REMOVE: Artie is physically present in Oakhaven City Proper.",
+    "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+    "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+    "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+    "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+    "Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+    "Artie has 5 XP.",
+    "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+    "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+    "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+    "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+    "Artie is physically present in Oakhaven Market.",
+    "REMOVE: Artie is physically present in Oakhaven Market.",
+    "Artie is physically present at the Starter Quest Hub.",
+    "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=held, container=hand_right)",
+    "container: hand_right (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+    "REMOVE: Artie is physically present at the Starter Quest Hub.",
+    "Artie and Fizz are fleeing into an alleyway behind the Starter Quest Hub.",
+    "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+    "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+    "milestone: cloak_acquired = DONE",
+    "REMOVE: Artie and Fizz are fleeing into an alleyway behind the Starter Quest Hub.",
+    "Artie and Fizz are currently in the Oakhaven Crypts facing a Skeletal Guard.",
+    "REMOVE: Artie has 5 XP.",
+    "REMOVE: inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=held, container=hand_right)",
+    "REMOVE: container: hand_right (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+    "Artie has 155 XP.",
+    "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+    "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+    "REMOVE: Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+    "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+    "Artie and Fizz are currently in the Oakhaven Crypts.",
+    "REMOVE: Artie has 155 XP.",
+    "Artie has 905 XP."
+  ]
+}
+
+Post-invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+  "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+  "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+  "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+  "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+  "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+  "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+  "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+  "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+  "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+  "milestone: cloak_acquired = DONE",
+  "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+  "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+  "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+  "Artie has 905 XP.",
+  "Artie and Fizz are currently in the Oakhaven Crypts Lower Levels.",
+  "Artie dodged the Skeletal Guard's attack and threw a loose rock at it.",
+  "The rock triggered a 99,999 damage critical hit, instantly shattering the skeleton.",
+  "Artie gained 150 XP from the defeated enemy.",
+  "The massive overkill damage caused a system error, forcing the skeleton to drop its entire loot table at once.",
+  "Artie stowed his Rusty Iron Dagger, eager to farm more skeletons.",
+  "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+  "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+  "Artie used rocks to trigger 99,999 damage critical hits on multiple skeletons.",
+  "The overkill damage caused a system error, forcing the skeletons to drop their entire loot tables.",
+  "Artie leveled up twice, reaching Level 3.",
+  "Artie gained 10 Stat Points and increased his Stamina to 12/12.",
+  "Artie cleared the antechamber, leaving it buried in a mountain of loot.",
+  "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+  "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+  "Artie has 905 XP.",
+  "Artie and Fizz entered the lower levels of the Oakhaven Crypts.",
+  "They found a Floor Guardian Summoning Crystal (Boss Trigger) on a pedestal.",
+  "Artie deduced that Vane had cleared the area and left the trigger behind.",
+  "Artie began considering activating the trigger to steal Vane's boss kill.",
+  "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+  "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+  "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+  "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+  "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+  "Artie and Fizz are currently in the Oakhaven Crypts Lower Levels."
+]
+
+
+
+ASSISTANT:
+
+
+
+USER:
+
+EXECUTION PHASE: Emit the lint_report JSON only. Do NOT include analysis or planning text. Output JSON only.

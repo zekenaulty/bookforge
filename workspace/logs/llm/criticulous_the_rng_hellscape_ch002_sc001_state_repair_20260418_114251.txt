@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "reason": "Reaffirming durable stats and establishing 0 gold during market browsing.",
+      "set": {
+        "resources": {
+          "gold": {
+            "current": 0
+          },
+          "xp": {
+            "current": 5
+          }
+        },
+        "stats": {
+          "crit_rate": {
+            "current": 100,
+            "max": 100
+          },
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "stamina": {
+            "current": 10,
+            "max": 10
+          }
+        }
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "pocket_right",
+          "contents": [
+            "ITEM_wallet"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "neck_lanyard",
+          "contents": [
+            "ITEM_employee_id"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "lapel",
+          "contents": [
+            "ITEM_participation_trophy"
+          ],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "pocket_right",
+          "item": "ITEM_wallet",
+          "status": "stowed"
+        },
+        {
+          "container": "neck_lanyard",
+          "item": "ITEM_employee_id",
+          "status": "equipped"
+        },
+        {
+          "container": "lapel",
+          "item": "ITEM_participation_trophy",
+          "status": "equipped"
+        }
+      ],
+      "persona_updates": [
+        "Artie is deeply frustrated by the rigid system economy and level requirements that prevent him from acquiring defensive gear."
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "containers": [],
+      "invariants_add": [],
+      "inventory": [],
+      "persona_updates": [
+        "Fizz remains cheerfully unhelpful, viewing Artie's near-death fragility as a minor statistical anomaly rather than a crisis."
+      ]
+    }
+  ],
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie browsed Oakhaven Market for defensive gear but found everything was either level-locked or too expensive.",
+      "Realizing his real-world money was useless, Artie concluded that standard merchants could not solve his 1 HP fragility."
+    ],
+    "key_events": [
+      "Artie and Fizz explored Oakhaven Market for defensive items.",
+      "Artie attempted to buy Juggernaut's Fortress Plate but was blocked by a Level 25 requirement and a 15,000 Gold price tag.",
+      "Artie checked bargain bin items and realized low-level armor would not prevent him from dying in one hit.",
+      "Artie checked his Leather Wallet and confirmed his real-world money had no system value.",
+      "Artie concluded that standard merchants were a dead end for his survival strategy."
+    ],
+    "last_scene": [
+      "Artie browsed the stalls of Oakhaven Market looking for defensive gear.",
+      "He discovered that any armor capable of protecting his 1 HP was either too expensive or locked behind high level requirements.",
+      "After checking his useless real-world wallet, Artie realized standard merchants could not solve his fragility problem."
+    ],
+    "must_stay_true": [
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+      "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+      "REMOVE: Artie is physically present in Oakhaven City Proper.",
+      "Artie is physically present in Oakhaven Market."
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "LOC_OAKHAVEN_MARKET",
+    "open_threads": [
+      "THREAD_GLITCH",
+      "THREAD_VANE_RIVALRY",
+      "THREAD_CURSED_LOOT"
+    ],
+    "recent_facts": [
+      "Artie browsed Oakhaven Market for defensive gear.",
+      "Artie discovered that effective defensive gear is level-locked or too expensive.",
+      "Artie realized his real-world money in his Leather Wallet has no value in the system.",
+      "Artie concluded that standard merchants cannot solve his 1 HP fragility."
+    ]
+  }
+}

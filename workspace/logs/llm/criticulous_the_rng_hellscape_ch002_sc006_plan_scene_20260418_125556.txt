@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_002_006",
+  "chapter": 2,
+  "scene": 6,
+  "scene_target": "Artie clears a room of skeletons, turning them into a mountain of loot.",
+  "goal": "Systematically farm the skeletons using the loot pinata exploit.",
+  "conflict": "Managing the sheer volume of loot and avoiding any accidental hits while farming.",
+  "required_callbacks": [
+    "The rock triggered a 99,999 damage critical hit, instantly shattering the skeleton.",
+    "The massive overkill damage caused a system error, forcing the skeleton to drop its entire loot table at once."
+  ],
+  "constraints": [
+    "target_words: 2000"
+  ],
+  "end_condition": "The antechamber is cleared, leaving a massive pile of loot.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_OAKHAVEN_CRYPTS",
+  "location_end_id": "LOC_OAKHAVEN_CRYPTS",
+  "location_start_label": "Oakhaven Crypts - Antechamber",
+  "location_end_label": "Oakhaven Crypts - Antechamber",
+  "location_start": "Oakhaven Crypts - Antechamber",
+  "location_end": "Oakhaven Crypts - Antechamber",
+  "handoff_mode": "continuous",
+  "constraint_state": "processed",
+  "transition_in_text": "Artie stares at the massive pile of loot from the first skeleton and realizes he has a repeatable exploit.",
+  "transition_in_anchors": [
+    "loot pile",
+    "realization",
+    "exploit",
+    "skeletons"
+  ],
+  "transition_out_text": "Artie stands amidst a ridiculous mountain of loot, having cleared the room.",
+  "transition_out_anchors": [
+    "mountain of loot",
+    "cleared room",
+    "antechamber"
+  ],
+  "consumes_outcome_from": "2:5",
+  "hands_off_to": "2:7",
+  "seam_score": 90,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Artie",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "THREAD_GLITCH",
+    "THREAD_CURSED_LOOT"
+  ],
+  "required_in_custody": [
+    "ITEM_cloak_of_the_cowardly_lion",
+    "ITEM_rusty_iron_dagger"
+  ],
+  "required_scene_accessible": [
+    "ITEM_cloak_of_the_cowardly_lion"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "combat_aftermath",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "resources",
+    "stats"
+  ],
+  "ui_mechanics_expected": [
+    "XP",
+    "Loot Drop",
+    "Damage",
+    "Crit"
+  ]
+}

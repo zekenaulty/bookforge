@@ -1,0 +1,180 @@
+COMPLIANCE:
+Scene ID: SC_001_009
+Allowed events: Artie is intercepted by Vane, who tries to force a duel for the Participation Trophy. Artie realizes he cannot win a fair fight and looks for an escape.
+Forbidden milestones: N/A
+Current arm-side / inventory facts: 
+- inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)
+- inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)
+- inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)
+- inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)
+
+APPEARANCE_CHECK:
+- CHAR_ARTIE: brown hair, brown eyes, skinny_fat build, pale skin
+- CHAR_VANE: silver hair, crimson eyes, muscular build, tanned skin, Guild Master Tattoo on left cheek
+
+PROSE:
+Artie reached the edge of the Tutorial Forest, the pixelated pine needles giving way to a worn dirt path, only to be intercepted by Vane. A shadow blotted out the digital sun as the massive figure stepped into the clearing. Vane was an overly designed fantasy warlord bristling with unnecessary armor spikes. A dark Guild Master Tattoo marked his left cheek, standing out starkly against his tanned skin and spiky silver hair.
+
+"Well, well," Vane rumbled, his crimson eyes locking onto Artie's chest. "A golden-tier drop from a tutorial mob? You must have some insane RNG, noob."
+
+Artie glanced down at his lapel. The cursed Participation Trophy gleamed with an obnoxious, unearned luster. "This? It's literally just a piece of plastic. It says 'You Tried' on the bottom."
+
+"Don't play dumb," Vane sneered, crossing his thick, muscular arms. The massive Obsidian Greatsword strapped to his back scabbard shifted with the movement, the dark, glass-like blade humming with latent energy. "I've been farming this zone for three days. Hand it over, or I take it the hard way."
+
+Before Artie could explain that the cursed item was permanently glued to his cheap suit, a red holographic window shattered the air between them.
+
+[System Notification: Duel Request Received!]
+[Challenger: Vane (Lvl. 15) – HP: 500/500]
+[Condition: Deathmatch]
+[Wager: Equipped Item (Participation Trophy)]
+
+Artie stared at the floating red text, his heart hammering against his ribs. Level fifteen? Five hundred health? 
+
+"Accept the duel," Vane demanded, his hand dropping to the hilt of his greatsword. "Or I flag up and player-kill you right here. Your choice."
+
+Artie pulled up his own status bar.
+
+[HP: 1/1]
+
+Right. A single tap from that oversized butter knife, a stiff breeze, or even a particularly aggressive sneeze from the warlord would shatter Artie's single hit point into digital dust. His one-hundred-percent critical hit rate wouldn't matter at all if he was sliced in half before he could even throw a punch. 
+
+Artie's brown eyes darted past Vane's spiked shoulder pads, scanning the fortified stone walls in the distance. The heavy iron gates of Oakhaven were just down the path, bustling with the noise of a passing merchant caravan. 
+
+He swallowed hard. Artie realized he could not win a fair fight and looked for an escape.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": ["CHAR_ARTIE", "CHAR_VANE"],
+    "location": "LOC_TUTORIAL_FOREST_EDGE",
+    "open_threads": ["THREAD_CURSED_LOOT", "THREAD_VANE_RIVALRY"]
+  },
+  "summary_update": {
+    "last_scene": [
+      "Artie was intercepted at the edge of the Tutorial Forest by Vane.",
+      "Vane demanded Artie hand over the Participation Trophy and initiated a deathmatch duel.",
+      "Realizing his 1 HP meant instant death, Artie looked toward the gates of Oakhaven for an escape."
+    ],
+    "key_events": [
+      "Vane intercepted Artie at the edge of the Tutorial Forest.",
+      "Vane noticed the Participation Trophy and demanded it, believing it to be a rare drop.",
+      "Vane issued a formal System Duel Request for the trophy.",
+      "Artie reviewed his 1/1 HP and realized he could not survive a fight.",
+      "Artie spotted the gates of Oakhaven and began planning his escape."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie has 10/10 HP and 10/10 Stamina.",
+      "Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+      "Artie is physically present at the Tutorial Forest Edge.",
+      "Artie has 5 XP.",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+      "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])"
+    ],
+    "chapter_so_far_add": [
+      "Artie was intercepted by Vane, a level 15 player who demanded the Participation Trophy.",
+      "Vane initiated a deathmatch duel, forcing Artie to look for an escape to avoid instant death."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 9,
+      "inventory": [
+        {
+          "item": "ITEM_wallet",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_employee_id",
+          "container": "neck_lanyard",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_participation_trophy",
+          "container": "lapel",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": ["ITEM_wallet"]
+        },
+        {
+          "container": "neck_lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": ["ITEM_employee_id"]
+        },
+        {
+          "container": "lapel",
+          "owner": "CHAR_ARTIE",
+          "contents": ["ITEM_participation_trophy"]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Artie is acutely aware that his 1 HP makes him entirely unsuited for direct combat against other players."
+      ]
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "chapter": 1,
+      "scene": 9,
+      "inventory": [
+        {
+          "item": "ITEM_vane_greatsword",
+          "container": "back_scabbard",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "back_scabbard",
+          "owner": "CHAR_VANE",
+          "contents": ["ITEM_vane_greatsword"]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Vane is ruthless and willing to kill lower-level players for rare loot."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {"current": 1, "max": 1},
+          "stamina": {"current": 10, "max": 10},
+          "crit_rate": {"current": 100, "max": 100}
+        }
+      },
+      "reason": "Confirmed 1 HP status during duel challenge."
+    },
+    {
+      "character_id": "CHAR_VANE",
+      "set": {
+        "stats": {
+          "hp": {"current": 500, "max": 500},
+          "mp": {"current": 200, "max": 200}
+        },
+        "stats.level": {
+          "current": 15,
+          "max": 15
+        }
+      },
+      "reason": "Displayed stats in duel UI."
+    }
+  ]
+}

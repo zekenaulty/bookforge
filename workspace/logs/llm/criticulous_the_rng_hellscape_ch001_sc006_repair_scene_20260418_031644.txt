@@ -1,0 +1,178 @@
+COMPLIANCE:
+Scene ID: SC_001_006
+Allowed events: Artie's stats are locked, teleportation sequence, arrival in Tutorial Forest.
+Forbidden milestones: None.
+Current arm-side / inventory facts: Leather Wallet in pocket_right, Employee ID Badge in neck_lanyard.
+
+APPEARANCE_CHECK:
+- CHAR_ARTIE: brown, messy, pale, skinny_fat
+- CHAR_FIZZ: digital_blue, neon_pink, glowing, translucent
+
+PROSE:
+The glitch locks Artie's stats to a maximum of 1 HP and a 100% Critical Hit Rate, finalizing his build against his will. The infinite white expanse of the void echoed with a harsh, metallic chime as the system slammed the metaphorical door on his character sheet.
+
+`[System Notification: Anomaly Integrity Breach. Build Finalized.]`
+`[HP: 1/1 (Locked)]`
+`[Critical Hit Rate: 100% (Locked)]`
+
+"Cancel!" Fizz shrieked, her tiny, translucent hands flying across a holographic keyboard that materialized out of thin air. Her neon pink hair flared as she hammered at the glowing keys. "Abort! Ctrl-Z! Undo!"
+
+`[Error 404: Administrator Override Denied.]`
+
+Artie stared at the floating blue text. He was an accountant; he knew a catastrophic deficit when he saw one. "Fizz," he said, his voice terrifyingly calm. "What does one HP mean in this context?"
+
+The pixelated fairy stopped typing. She slowly turned to face him, her digital blue eyes wide with panic. "It means if you trip on a root, you die. If a mildly aggressive bee stings you, you die."
+
+Artie swallowed hard. He looked down at his chest. His Employee ID Badge still hung from the cheap nylon neck lanyard. He reached a trembling hand into his right pocket, his fingers brushing against the worn leather of his Leather Wallet. They were the only two things that had crossed over with him. 
+
+"I'm going to die in a cheap suit," Artie whispered.
+
+`[Warning: Teleportation Sequence Initiated.]`
+
+The pristine void fractured, black gridlines appearing across the space. 
+
+"Hold on to something!" Fizz yelled, diving toward him and grabbing onto the edge of his lanyard.
+
+`[Destination: Tutorial Forest.]`
+`[Transferring User: Artie (Anomaly)]`
+
+The void collapsed. Artie felt like he was being shoved through a dial-up modem. His vision inverted, colors bleeding into a blinding spectrum of neon static. For three agonizing seconds, his entire existence was reduced to a stream of raw data.
+
+Then, gravity returned with a vengeance.
+
+Artie slammed hard into a patch of damp, spongy earth. He squeezed his eyes shut, fully expecting a system prompt to announce his immediate demise from fall damage. Nothing happened. He was still breathing. 
+
+`[Teleportation Complete.]`
+
+He cracked one eye open. The blinding white of the void was gone, replaced by the deep, shadowed greens of a dense woodland. The air smelled of pine needles and damp soil. Fizz floated upward, shaking her head to clear a halo of tiny, glitching stars. 
+
+Artie pushed himself up onto his hands and knees. The dirt beneath his palms felt real. He patted his right pocket. The Leather Wallet was still there. He climbed to his feet, brushing a layer of pixelated moss off his slacks. 
+
+Artie spawns in the tutorial forest with his glitched stats locked.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "LOC_TUTORIAL_FOREST",
+    "open_threads": [
+      "THREAD_GLITCH"
+    ],
+    "recent_facts": [
+      "The system finalized Artie's glitched build.",
+      "Artie and Fizz were teleported from the Character Creation Void to the Tutorial Forest."
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "The system finalized Artie's glitched build, locking him at 1 HP and 100% Critical Hit Rate.",
+      "A teleportation sequence initiated, dragging Artie and Fizz out of the void.",
+      "Artie spawned in the Tutorial Forest, surviving the transition."
+    ],
+    "key_events": [
+      "The system locked Artie's stats against Fizz's attempts to override the glitch.",
+      "A teleportation sequence forcefully transferred Artie out of the Character Creation Void.",
+      "Artie and Fizz arrived in the Tutorial Forest."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie is dead and his consciousness is floating in the Character Creation Void.",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "Artie has spawned in the Tutorial Forest with his glitched stats locked.",
+      "Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate."
+    ],
+    "chapter_so_far_add": [
+      "The system finalized the glitched build and teleported Artie and Fizz to the Tutorial Forest."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 6,
+      "inventory": [
+        {
+          "item": "ITEM_wallet",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_employee_id",
+          "container": "neck_lanyard",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_wallet"
+          ]
+        },
+        {
+          "container": "neck_lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_employee_id"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Artie is terrified of his 1 HP reality but relieved to have survived the teleportation to the Tutorial Forest."
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "chapter": 1,
+      "scene": 6,
+      "inventory": [],
+      "containers": [],
+      "invariants_add": [],
+      "persona_updates": [
+        "Fizz is frustrated by her inability to override the system and is now stuck with Artie in the Tutorial Forest."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "stamina": {
+            "current": 10,
+            "max": 10
+          },
+          "crit_rate": {
+            "current": 100,
+            "max": 100
+          }
+        },
+        "statuses": [
+          {
+            "name": "Anomaly",
+            "source": "glitch",
+            "active": true
+          }
+        ]
+      },
+      "remove": {
+        "statuses": [
+          "Dead"
+        ]
+      },
+      "reason": "Teleported to the physical game world, removing the Dead status from the void."
+    }
+  ]
+}

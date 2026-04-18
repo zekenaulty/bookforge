@@ -1,0 +1,266 @@
+{
+  "schema_version": "1.1",
+  "characters": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "name": "Artie",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      }
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "name": "Fizz",
+      "intro": {
+        "chapter": 1,
+        "scene": 4
+      }
+    }
+  ],
+  "chapters": [
+    {
+      "chapter_id": 2,
+      "title": "The Glass Cannon\u2019s Guide to Not Dying",
+      "goal": "Artie acquires the Cloak of the Cowardly Lion and begins exploiting the system's loot mechanics in the crypts.",
+      "chapter_role": "setup",
+      "stakes_shift": "From desperate survival to tactical exploitation of the system's physics and drop rates.",
+      "bridge": {
+        "from_prev": "Artie escapes Vane but remains a one-hit-kill target.",
+        "to_next": "Artie's rapid farming triggers the attention of the Floor Guardian."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "steady",
+        "expected_scene_count": 9
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Coward's Wardrobe",
+          "intent": "Artie seeks gear to survive his 1 HP fragility and exploits a quest loophole.",
+          "section_role": "setup",
+          "status": "locked",
+          "target_scene_count": 3,
+          "end_condition": "Artie steals the Cloak of the Cowardly Lion from a locked starter chest.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "summary": "Artie wanders the Oakhaven market looking for defensive gear, but everything is either too expensive or level-locked, leaving him vulnerable.",
+              "type": "setup",
+              "outcome": "Artie realizes standard merchants cannot solve his 1 HP problem.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "location_start_label": "Oakhaven Square",
+              "location_end_label": "Oakhaven Market",
+              "location_start": "The bustling central square of Oakhaven",
+              "location_end": "A row of overpriced armor stalls in the market",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie catches his breath among the crowded market stalls, scanning for armor vendors.",
+              "transition_in_anchors": [
+                "crowded market stalls",
+                "smell of roasted meat",
+                "clinking armor plates"
+              ],
+              "transition_out_text": "Artie turns away from the laughing merchant, his empty pockets offering no solutions.",
+              "transition_out_anchors": [
+                "laughing merchant",
+                "empty pockets",
+                "gleaming steel breastplate"
+              ],
+              "hands_off_to": "2:2",
+              "seam_score": 100,
+              "seam_resolution": "inline_bridge"
+            },
+            {
+              "scene_id": 2,
+              "summary": "Fizz points out a 'Starter Quest' loophole involving an allegedly unbreakable display chest meant to teach players about lockpicking.",
+              "type": "conflict",
+              "outcome": "Artie decides to bypass the quest requirements and just break the chest.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "2:1",
+              "location_start_label": "Oakhaven Market",
+              "location_end_label": "Oakhaven Quest Board",
+              "location_start": "A row of overpriced armor stalls in the market",
+              "location_end": "The crowded plaza in front of the Adventurer's Guild",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Fizz projects a glowing blue waypoint leading away from the market toward the guild plaza.",
+              "transition_in_anchors": [
+                "glowing blue waypoint",
+                "cobblestone path",
+                "wooden guild sign"
+              ],
+              "transition_out_text": "Artie steps up to the heavy display chest, ignoring the warning signs.",
+              "transition_out_anchors": [
+                "heavy display chest",
+                "painted warning sign",
+                "rusty iron dagger"
+              ],
+              "hands_off_to": "2:3",
+              "seam_score": 100,
+              "seam_resolution": "inline_bridge"
+            },
+            {
+              "scene_id": 3,
+              "summary": "Artie strikes the 'indestructible' lock, triggering a massive critical hit that shatters it, allowing him to loot the Cloak of the Cowardly Lion.",
+              "type": "climax",
+              "outcome": "Artie steals the Cloak of the Cowardly Lion from a locked starter chest.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "2:2",
+              "location_start_label": "Oakhaven Quest Board",
+              "location_end_label": "Oakhaven Alleyway",
+              "location_start": "The crowded plaza in front of the Adventurer's Guild",
+              "location_end": "A shadowed alley behind the guild hall",
+              "handoff_mode": "aftermath_relocation",
+              "constraint_state": "fleeing",
+              "transition_in_text": "Artie raises his rusty dagger and brings it down hard on the indestructible lock.",
+              "transition_in_anchors": [
+                "rusty iron dagger",
+                "indestructible lock",
+                "sparking metal"
+              ],
+              "transition_out_text": "Artie wraps the oversized cloak around his shoulders and ducks into a nearby alley before the guards arrive.",
+              "transition_out_anchors": [
+                "oversized lion cloak",
+                "shadowed alley",
+                "shouting guild guards"
+              ],
+              "hands_off_to": "2:4",
+              "seam_score": 100,
+              "seam_resolution": "inline_bridge",
+              "end_condition_echo": "Artie steals the Cloak of the Cowardly Lion from a locked starter chest."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Loot Pinata Theory",
+          "intent": "Artie enters the crypts and discovers how his crits break the loot drop system.",
+          "section_role": "conflict",
+          "status": "draftable",
+          "target_scene_count": 3,
+          "end_condition": "Artie clears a room of skeletons, turning them into a mountain of loot.",
+          "scenes": [
+            {
+              "scene_id": 4,
+              "summary": "Artie enters the Oakhaven Crypts, testing his new Cloak of the Cowardly Lion to sneak past high-level mobs, but accidentally aggros a skeleton.",
+              "type": "setup",
+              "outcome": "Artie realizes the cloak's stealth is flawed but his 100% crit still applies to basic attacks.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "2:3",
+              "location_start_label": "Oakhaven Alleyway",
+              "location_end_label": "Oakhaven Crypts Entrance",
+              "location_start": "A shadowed alley behind the guild hall",
+              "location_end": "The damp entrance to the Oakhaven Crypts",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Artie slips out of the shadowed alleyway, following Fizz's glowing waypoint toward the low-level crypts on the edge of town.",
+              "transition_in_anchors": [
+                "oversized lion cloak",
+                "damp stone steps",
+                "flickering torchlight"
+              ],
+              "transition_out_text": "Artie steps on a brittle femur, drawing the glowing red eyes of a skeletal guard.",
+              "transition_out_anchors": [
+                "brittle femur bone",
+                "glowing red eyes",
+                "rusty iron sword"
+              ],
+              "hands_off_to": "2:5",
+              "seam_score": 100,
+              "seam_resolution": "inline_bridge"
+            },
+            {
+              "scene_id": 5,
+              "summary": "Artie panics and throws a random rock at the skeleton, triggering a massive critical hit that shatters it into an absurd amount of loot.",
+              "type": "conflict",
+              "outcome": "Artie discovers that his crits force enemies to drop their entire loot table at once.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "2:4",
+              "location_start_label": "Oakhaven Crypts Entrance",
+              "location_end_label": "Crypt Antechamber",
+              "location_start": "The damp entrance to the Oakhaven Crypts",
+              "location_end": "A small antechamber inside the crypts",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "engaged_combat",
+              "transition_in_text": "Artie scrambles backward across the damp stone as the skeleton lunges, grabbing a loose rock from the floor.",
+              "transition_in_anchors": [
+                "loose rock",
+                "lunging skeleton",
+                "rusty iron sword"
+              ],
+              "transition_out_text": "Artie stares at the mountain of gold coins and rare bone fragments burying the shattered skeleton.",
+              "transition_out_anchors": [
+                "mountain of gold coins",
+                "glowing bone fragments",
+                "dusty crypt floor"
+              ],
+              "hands_off_to": "2:6",
+              "seam_score": 100,
+              "seam_resolution": "inline_bridge"
+            },
+            {
+              "scene_id": 6,
+              "summary": "Realizing the exploit, Artie systematically clears the antechamber by throwing pebbles at a horde of skeletons, creating a massive pile of loot.",
+              "type": "climax",
+              "outcome": "Artie clears a room of skeletons, turning them into a mountain of loot.",
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "consumes_outcome_from": "2:5",
+              "location_start_label": "Crypt Antechamber",
+              "location_end_label": "Crypt Antechamber",
+              "location_start": "A small antechamber inside the crypts",
+              "location_end": "A small antechamber inside the crypts",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "Artie scoops up a handful of gravel, eyeing the next group of skeletons with a greedy grin.",
+              "transition_in_anchors": [
+                "handful of gravel",
+                "shambling skeletons",
+                "mountain of gold coins"
+              ],
+              "transition_out_text": "Artie sits atop his new hoard, ignoring the deep rumbling echoing from the lower crypt levels.",
+              "transition_out_anchors": [
+                "massive loot pile",
+                "deep rumbling sound",
+                "shaking stone walls"
+              ],
+              "hands_off_to": "2:7",
+              "seam_score": 100,
+              "seam_resolution": "inline_bridge",
+              "end_condition_echo": "Artie clears a room of skeletons, turning them into a mountain of loot."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Summoning Trouble",
+          "intent": "Vane's interference forces Artie to take a massive risk for XP.",
+          "section_role": "climax",
+          "status": "stub",
+          "target_scene_count": 3,
+          "end_condition": "Artie activates the Boss Trigger left behind by Vane.",
+          "scenes": []
+        }
+      ]
+    }
+  ]
+}

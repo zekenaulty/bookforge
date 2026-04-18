@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_009",
+  "chapter": 1,
+  "scene": 9,
+  "scene_target": "Artie is intercepted by Vane, who tries to force a duel for the Participation Trophy.",
+  "goal": "Survive the encounter with Vane without engaging in combat.",
+  "conflict": "Vane wants the 'rare' trophy and tries to force a duel, but Artie knows his 1 HP means instant death if he gets hit.",
+  "required_callbacks": [],
+  "constraints": [
+    "target_words: 2000"
+  ],
+  "end_condition": "Artie realizes he cannot win a fair fight and looks for an escape.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_TUTORIAL_FOREST_EDGE",
+  "location_end_id": "LOC_TUTORIAL_FOREST_EDGE",
+  "location_start_label": "Tutorial Forest Edge",
+  "location_end_label": "Tutorial Forest Edge",
+  "location_start": "Tutorial Forest Edge",
+  "location_end": "Tutorial Forest Edge",
+  "handoff_mode": "direct",
+  "constraint_state": "processed",
+  "transition_in_text": "Artie reaches the edge of the Tutorial Forest, only to be intercepted by Vane.",
+  "transition_in_anchors": [
+    "forest_edge",
+    "intercepted",
+    "vane"
+  ],
+  "transition_out_text": "Artie realizes he cannot win a fair fight and looks for an escape.",
+  "transition_out_anchors": [
+    "cannot_win",
+    "fair_fight",
+    "looks_for_escape"
+  ],
+  "consumes_outcome_from": "1:8",
+  "hands_off_to": "1:10",
+  "seam_score": 85,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Artie",
+    "Vane"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_VANE"
+  ],
+  "introduces": [
+    "Vane"
+  ],
+  "introduces_ids": [
+    "CHAR_VANE"
+  ],
+  "thread_ids": [
+    "THREAD_VANE_RIVALRY",
+    "THREAD_CURSED_LOOT"
+  ],
+  "required_in_custody": [
+    "ITEM_participation_trophy"
+  ],
+  "required_scene_accessible": [
+    "ITEM_participation_trophy"
+  ],
+  "required_visible_on_page": [
+    "ITEM_participation_trophy"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "scene_continuation",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "titles"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Level",
+    "Duel Request"
+  ]
+}

@@ -386,6 +386,25 @@ def _apply_bag_updates(bag: Dict[str, Any], updates: Dict[str, Any]) -> None:
         for key in remove_block:
             name = str(key).strip()
             if name:
+                if "[]=" in name:
+                    list_path, _, target = name.partition("[]=")
+                    parts = [part for part in list_path.split(".") if part]
+                    if not parts:
+                        continue
+                    parent = bag
+                    for part in parts[:-1]:
+                        next_obj = parent.get(part)
+                        if not isinstance(next_obj, dict):
+                            parent = {}
+                            break
+                        parent = next_obj
+                    if isinstance(parent, dict):
+                        existing = parent.get(parts[-1])
+                        if isinstance(existing, list):
+                            parent[parts[-1]] = [
+                                entry for entry in existing if not _bag_list_entry_matches_target(entry, target)
+                            ]
+                    continue
                 if "." not in name:
                     bag.pop(name, None)
                     continue
@@ -401,6 +420,21 @@ def _apply_bag_updates(bag: Dict[str, Any], updates: Dict[str, Any]) -> None:
                     parent = next_obj
                 if isinstance(parent, dict):
                     parent.pop(parts[-1], None)
+
+
+def _bag_list_entry_matches_target(entry: Any, target: str) -> bool:
+    target_norm = _normalize_invariant_text(target)
+    if not target_norm:
+        return False
+    if isinstance(entry, dict):
+        for key in ("name", "id", "title", "item", "item_id", "character_id", "device_id", "status"):
+            value = entry.get(key)
+            if _normalize_invariant_text(value) == target_norm:
+                return True
+        if _normalize_invariant_text(json.dumps(entry, sort_keys=True, ensure_ascii=True)) == target_norm:
+            return True
+        return False
+    return _normalize_invariant_text(entry) == target_norm
 
 
 def _ensure_character_continuity_system_state(state: Dict[str, Any]) -> Dict[str, Any]:

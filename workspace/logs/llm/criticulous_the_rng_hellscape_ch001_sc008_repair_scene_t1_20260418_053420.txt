@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "LOC_TUTORIAL_FOREST",
+    "open_threads": [
+      "THREAD_GLITCH",
+      "THREAD_CURSED_LOOT"
+    ],
+    "recent_facts": [
+      "Artie looted a golden drop from the vaporized slime.",
+      "The drop contained the cursed Participation Trophy, which permanently equipped itself to Artie's lapel."
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "Artie looted the golden drop left by the vaporized slime.",
+      "The item revealed itself as a cheap Participation Trophy.",
+      "The trophy permanently equipped itself to Artie's lapel as a cursed item."
+    ],
+    "key_events": [
+      "Artie looted the golden drop left by the vaporized slime.",
+      "The item revealed itself as a cheap Participation Trophy.",
+      "The trophy permanently equipped itself to Artie's lapel as a cursed item."
+    ],
+    "must_stay_true": [
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+      "Artie is physically present in the Tutorial Forest.",
+      "Artie has 5 XP.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])"
+    ],
+    "chapter_so_far_add": [
+      "Artie looted the golden drop left by the vaporized slime.",
+      "The item revealed itself as a cheap Participation Trophy.",
+      "The trophy permanently equipped itself to Artie's lapel as a cursed item."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 8,
+      "inventory": [
+        {
+          "item": "ITEM_wallet",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_employee_id",
+          "container": "neck_lanyard",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_participation_trophy",
+          "container": "lapel",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_wallet"
+          ]
+        },
+        {
+          "container": "neck_lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_employee_id"
+          ]
+        },
+        {
+          "container": "lapel",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_participation_trophy"
+          ]
+        }
+      ],
+      "invariants_add": [
+        "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+        "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])"
+      ],
+      "persona_updates": [
+        "Artie is dismayed to be permanently branded with a cursed Participation Trophy."
+      ]
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_participation_trophy",
+      "set": {
+        "name": "Participation Trophy",
+        "display_name": "Participation Trophy",
+        "type": "cursed",
+        "owner_scope": "world",
+        "custodian": "world",
+        "linked_threads": [
+          "THREAD_CURSED_LOOT"
+        ],
+        "state_tags": [
+          "cursed",
+          "bound"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 8,
+          "location": "LOC_TUTORIAL_FOREST"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_participation_trophy",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "CHAR_ARTIE"
+      },
+      "reason": "Looted from the vaporized slime"
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "statuses": [
+          {
+            "name": "Dead",
+            "source": "environmental_hazard",
+            "active": true
+          },
+          {
+            "name": "Cursed",
+            "source": "ITEM_participation_trophy",
+            "active": true
+          }
+        ]
+      },
+      "reason": "Equipped the cursed Participation Trophy"
+    }
+  ]
+}

@@ -2,6 +2,8 @@
 
 Purpose
 - Run the scene generation loop (plan -> preflight -> write -> repair -> state_repair -> lint -> commit).
+- This is the lower-level writer loop.
+- In the section workflow model, `run` is typically invoked indirectly by `bookforge workflow advance-section` after a section has been frozen.
 
 Usage
 - bookforge run --book <id> [--steps <n>] [--until chapter:N | chapter:N:scene:M] [--resume] [--ack-outline-attention-items] [--force-outline-gate-bypass]
@@ -33,10 +35,11 @@ Outline write gate
 - Writing is blocked when strict attention items are present unless `--force-outline-gate-bypass` is set.
 - Non-strict attention items require explicit acknowledgement via `--ack-outline-attention-items`.
 - `--force-outline-gate-bypass` is intended for controlled testing only.
+- In the transitional section workflow implementation, `--force-outline-gate-bypass` may still be needed when writing against workflow-frozen sections derived from older non-success outline runs.
 
 Outputs
 - draft/chapters/ch_###/scene_###.md (scene prose)
-- draft/chapters/ch_###.md (compiled chapter when a chapter completes)
+- draft/chapters/ch_###.md (compiled chapter output; may be provisional when only some chapter sections are locked)
 - draft/chapters/ch_###/scene_###.meta.json (scene card + state patch + lint report)
 - draft/context/continuity_pack.json
 - draft/context/bible.md and draft/context/last_excerpt.md
@@ -68,3 +71,8 @@ Examples
 
 - Force outline context on continuity and lint too:
   BOOKFORGE_CONTINUITY_PACK_INCLUDE_OUTLINE=1 BOOKFORGE_LINT_INCLUDE_OUTLINE=1 bookforge run --book my_novel_v1 --until chapter:1
+
+Related commands
+- `bookforge workflow init`
+- `bookforge workflow freeze-section`
+- `bookforge workflow advance-section`

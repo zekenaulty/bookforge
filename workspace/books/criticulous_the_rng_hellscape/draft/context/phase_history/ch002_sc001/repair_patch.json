@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "LOC_OAKHAVEN_MARKET",
+    "open_threads": [
+      "THREAD_VANE_RIVALRY",
+      "THREAD_CURSED_LOOT",
+      "THREAD_GLITCH"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "Artie browsed the Oakhaven Market for defensive gear.",
+      "He discovered that all viable armor was either too expensive or level-locked.",
+      "Artie checked his Leather Wallet but realized his real-world currency was useless.",
+      "He concluded that standard merchants could not solve his 1 HP fragility."
+    ],
+    "key_events": [
+      "Artie and Fizz browsed the Oakhaven Market for defensive gear.",
+      "Artie discovered that all viable armor was either too expensive or level-locked.",
+      "Artie checked his Leather Wallet but realized his real-world currency was useless.",
+      "Artie concluded that standard merchants could not solve his 1 HP fragility."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+      "REMOVE: Artie is physically present in Oakhaven City Proper.",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+      "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+      "Artie is physically present in Oakhaven Market."
+    ],
+    "chapter_so_far_add": [
+      "Artie browsed the Oakhaven Market but found all defensive gear was too expensive or level-locked.",
+      "Realizing his real-world money was useless, Artie gave up on standard merchants."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 2,
+      "scene": 1,
+      "persona_updates": [
+        "Artie realizes standard merchants cannot solve his 1 HP problem and his real-world money is useless here."
+      ],
+      "inventory": [
+        {
+          "container": "pocket_right",
+          "item": "ITEM_wallet",
+          "status": "stowed"
+        },
+        {
+          "container": "neck_lanyard",
+          "item": "ITEM_employee_id",
+          "status": "equipped"
+        },
+        {
+          "container": "lapel",
+          "item": "ITEM_participation_trophy",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "contents": [
+            "ITEM_wallet"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "neck_lanyard",
+          "contents": [
+            "ITEM_employee_id"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "lapel",
+          "contents": [
+            "ITEM_participation_trophy"
+          ],
+          "owner": "CHAR_ARTIE"
+        }
+      ],
+      "invariants_add": []
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "chapter": 2,
+      "scene": 1,
+      "persona_updates": [
+        "Fizz encourages Artie to think outside the box to survive his 1 HP glitch."
+      ],
+      "inventory": [],
+      "containers": [],
+      "invariants_add": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "stamina": {
+            "current": 10,
+            "max": 10
+          },
+          "crit_rate": {
+            "current": 100,
+            "max": 100
+          }
+        },
+        "resources": {
+          "gold": {
+            "current": 0
+          },
+          "xp": {
+            "current": 5
+          }
+        },
+        "reason": "Reaffirming durable stats and establishing 0 gold during market browsing."
+      },
+      "remove": [],
+      "delta": {},
+      "chapter": 2,
+      "scene": 1
+    }
+  ],
+  "_appearance_check": {
+    "CHAR_ARTIE": [
+      "messy",
+      "brown",
+      "hair",
+      "pale",
+      "skin",
+      "skinny_fat",
+      "build"
+    ],
+    "CHAR_FIZZ": [
+      "neon_pink",
+      "glowing",
+      "hair",
+      "digital_blue",
+      "eyes",
+      "translucent",
+      "skin"
+    ]
+  }
+}

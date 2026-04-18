@@ -648,7 +648,7 @@ def validate_phase_02(
             )
             continue
         chapter_id = _to_int(chapter.get("chapter_id"))
-        if chapter_id != chapter_index:
+        if subset_ids is None and chapter_id != chapter_index:
             errors.append(
                 issue(
                     "chapter_id_sequential",
@@ -992,7 +992,7 @@ def validate_outline(
                 continue
             if chapter_id not in subset_ids:
                 continue
-        if chapter_id != chapter_index:
+        if subset_ids is None and chapter_id != chapter_index:
             errors.append(
                 issue(
                     "chapter_id_sequential",
@@ -1047,6 +1047,9 @@ def validate_outline(
 
             scenes = section.get("scenes") if isinstance(section.get("scenes"), list) else []
             if not scenes:
+                section_status = _norm_text(section.get("status"))
+                if section_status == "stub":
+                    continue
                 errors.append(
                     issue(
                         "scenes_required",

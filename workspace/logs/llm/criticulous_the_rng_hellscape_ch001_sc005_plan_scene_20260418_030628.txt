@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_005",
+  "chapter": 1,
+  "scene": 5,
+  "scene_target": "Introduce the UI glitch that locks Artie into the 1 HP / 100% Crit build.",
+  "goal": "Artie attempts to allocate his stats safely.",
+  "conflict": "A system glitch overrides Artie's choices and locks him into an extreme glass-cannon build.",
+  "required_callbacks": [],
+  "constraints": [
+    "target_words: 2000"
+  ],
+  "end_condition": "Artie is stuck with a glass-cannon build.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_CHARACTER_CREATION_VOID",
+  "location_end_id": "LOC_CHARACTER_CREATION_VOID",
+  "location_start_label": "Character Creation Void",
+  "location_end_label": "Character Creation Void",
+  "location_start": "Character Creation Void",
+  "location_end": "Character Creation Void",
+  "handoff_mode": "direct",
+  "constraint_state": "processed",
+  "transition_in_text": "Artie examines the stat allocation menu Fizz just opened for him.",
+  "transition_in_anchors": [
+    "stat",
+    "allocation",
+    "menu"
+  ],
+  "transition_out_text": "The system finalizes the glitched build, preparing to teleport Artie.",
+  "transition_out_anchors": [
+    "system",
+    "finalizes",
+    "glitched"
+  ],
+  "consumes_outcome_from": "1:4",
+  "hands_off_to": "1:6",
+  "seam_score": 90,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Artie",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "THREAD_GLITCH"
+  ],
+  "required_in_custody": [
+    "ITEM_wallet",
+    "ITEM_employee_id"
+  ],
+  "required_scene_accessible": [
+    "ITEM_wallet",
+    "ITEM_employee_id"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "continuous",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Crit Rate",
+    "Stat Points"
+  ]
+}

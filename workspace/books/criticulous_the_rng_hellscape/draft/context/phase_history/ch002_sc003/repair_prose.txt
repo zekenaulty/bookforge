@@ -1,0 +1,27 @@
+Artie stood before the heavy tutorial chest, the Rusty Iron Dagger gripped tightly in his right hand, ready to test his glitched stats against the game's intended architecture. The chest sat in the center of the Starter Quest Hub, bolted to the cobblestones and heavily reinforced with steel bands. A massive, supposedly indestructible padlock secured the latch. 
+
+"Go on," Fizz urged, hovering near his shoulder as a pulsing orb of neon pink light. "The system says that lock requires a Level 15 Thief with a Mythic lockpick. Let's see what a Level 1 accountant with a broken math engine can do."
+
+Artie swallowed hard. He raised the Rusty Iron Dagger and brought it down in a clumsy, overarching stab. The pitted iron tip struck the center of the heavy padlock.
+
+For a fraction of a second, the universe seemed to pause. Then, the lock detonated. 
+
+[Critical Hit! 99,999 Damage!]
+
+A shockwave of displaced air blasted outward, sending a shower of glowing digital shrapnel across the plaza. The heavy steel bands of the tutorial chest snapped like dry twigs, and the lid blew completely off its hinges.
+
+[System Notification: Warning. Indestructible object destroyed. Error logging failed.]
+
+Artie shielded his face with his free arm, coughing through the cloud of pixelated dust. As the smoke cleared, a single item hovered above the splintered remains of the chest, glowing with a soft, golden light. 
+
+[Loot Acquired: Cloak of the Cowardly Lion]
+
+Reaching out, Artie grabbed the Cloak of the Cowardly Lion. It was heavy, fashioned from a ridiculously oversized, faux-fur mane that immediately draped over his shoulders and fastened itself around his neck. It felt warm, and absurdly conspicuous. 
+
+"Hey! You there! Stop!" 
+
+Artie whipped around to see two heavily armored guild guards sprinting across the plaza, their halberds lowered. 
+
+"Time to go!" Fizz chirped, darting toward a shadowed alleyway behind the guild hall. 
+
+Artie didn't hesitate. Gripping his dagger, he turned and sprinted after the glowing fairy, his new oversized lion cloak billowing wildly behind him as he fled the scene of the crime.

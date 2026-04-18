@@ -15,6 +15,13 @@ from bookforge.characters import generate_characters
 from bookforge.workspace import init_book_workspace, parse_genre, parse_targets, reset_book_workspace_detailed, update_book_templates
 from bookforge.llm.thoughts import format_thought_response, list_signatures, run_current_thoughts
 from bookforge.llm.signatures import select_signature, set_active_signature
+from bookforge.section_workflow import (
+    advance_section_workflow,
+    freeze_section_from_phase03_artifact,
+    get_section_workflow_status,
+    initialize_section_workflow,
+    lock_section_from_written_state,
+)
 
 
 def _init(args: argparse.Namespace) -> int:
@@ -162,6 +169,146 @@ def _run(args: argparse.Namespace) -> int:
         sys.stderr.write(f"Run failed: {exc}\n")
         return 1
     sys.stdout.write("Run completed.\n")
+    return 0
+
+
+def _workflow_init(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        result = initialize_section_workflow(
+            workspace=workspace,
+            book_id=args.book,
+            run_id=getattr(args, "run_id", None),
+            overwrite=bool(getattr(args, "overwrite", False)),
+        )
+    except Exception as exc:
+        sys.stderr.write(f"Workflow init failed: {exc}\n")
+        return 1
+    sys.stdout.write(
+        "Section workflow initialized.\n"
+        f"Book: {result.get('book_id')}\n"
+        f"Run: {result.get('run_id')}\n"
+        f"Outline: {result.get('outline_path')}\n"
+        f"Registry: {result.get('registry_path')}\n"
+    )
+    views = result.get("views") if isinstance(result.get("views"), dict) else {}
+    for key in ("thin", "toc", "index", "appendix"):
+        if views.get(key):
+            sys.stdout.write(f"{key}: {views.get(key)}\n")
+    return 0
+
+
+def _workflow_status(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        status = get_section_workflow_status(workspace=workspace, book_id=args.book)
+    except Exception as exc:
+        sys.stderr.write(f"Workflow status failed: {exc}\n")
+        return 1
+    cursor = status.get("cursor") if isinstance(status.get("cursor"), dict) else {}
+    sys.stdout.write(
+        f"Book: {status.get('book_id')}\n"
+        f"State status: {status.get('state_status')}\n"
+        f"Source run: {status.get('source_run_id')}\n"
+        f"Cursor: ch{int(cursor.get('chapter', 0) or 0):03d} sc{int(cursor.get('scene', 0) or 0):03d}\n"
+    )
+    active = status.get("active_section")
+    if isinstance(active, dict):
+        sys.stdout.write(
+            f"Active section: ch{int(active.get('chapter_id', 0) or 0):03d} "
+            f"sec{int(active.get('section_id', 0) or 0):03d} "
+            f"status={active.get('status')}\n"
+        )
+    chapters = status.get("chapters") if isinstance(status.get("chapters"), list) else []
+    for chapter in chapters:
+        if not isinstance(chapter, dict):
+            continue
+        chapter_id = int(chapter.get("chapter_id", 0) or 0)
+        sys.stdout.write(f"Chapter {chapter_id}: {chapter.get('title')}\n")
+        sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
+        for section in sections:
+            if not isinstance(section, dict):
+                continue
+            sys.stdout.write(
+                "  "
+                f"sec {int(section.get('section_id', 0) or 0)} "
+                f"[{section.get('status')}] "
+                f"{section.get('title')} "
+                f"refs={section.get('scene_ref_start')}->{section.get('scene_ref_end')}\n"
+            )
+    return 0
+
+
+def _workflow_freeze_section(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        result = freeze_section_from_phase03_artifact(
+            workspace=workspace,
+            book_id=args.book,
+            chapter_id=int(args.chapter),
+            section_id=int(args.section),
+            run_id=getattr(args, "run_id", None),
+        )
+    except Exception as exc:
+        sys.stderr.write(f"Freeze section failed: {exc}\n")
+        return 1
+    sys.stdout.write(
+        f"Section frozen: ch{int(result.get('chapter_id', 0) or 0):03d} "
+        f"sec{int(result.get('section_id', 0) or 0):03d}\n"
+        f"Scene range: {result.get('scene_ref_start')} -> {result.get('scene_ref_end')}\n"
+        f"Boundary: {result.get('boundary_artifact')}\n"
+    )
+    return 0
+
+
+def _workflow_lock_section(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        result = lock_section_from_written_state(
+            workspace=workspace,
+            book_id=args.book,
+            chapter_id=int(args.chapter),
+            section_id=int(args.section),
+        )
+    except Exception as exc:
+        sys.stderr.write(f"Lock section failed: {exc}\n")
+        return 1
+    sys.stdout.write(
+        f"Section locked: ch{int(result.get('chapter_id', 0) or 0):03d} "
+        f"sec{int(result.get('section_id', 0) or 0):03d}\n"
+        f"Scene range: {result.get('scene_ref_start')} -> {result.get('scene_ref_end')}\n"
+    )
+    return 0
+
+
+def _workflow_advance_section(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        result = advance_section_workflow(
+            workspace=workspace,
+            book_id=args.book,
+            chapter_id=int(args.chapter),
+            section_id=int(args.section),
+            run_id=getattr(args, "run_id", None),
+            resume=bool(getattr(args, "resume", False)),
+            ack_outline_attention_items=bool(
+                getattr(args, "ack_outline_attention_items", False)
+            ),
+            force_outline_gate_bypass=bool(
+                getattr(args, "force_outline_gate_bypass", False)
+            ),
+        )
+    except Exception as exc:
+        sys.stderr.write(f"Advance section failed: {exc}\n")
+        return 1
+    freeze = result.get("freeze") if isinstance(result.get("freeze"), dict) else {}
+    lock = result.get("lock") if isinstance(result.get("lock"), dict) else {}
+    sys.stdout.write(
+        f"Section advanced end-to-end: ch{int(freeze.get('chapter_id', 0) or 0):03d} "
+        f"sec{int(freeze.get('section_id', 0) or 0):03d}\n"
+        f"Frozen range: {freeze.get('scene_ref_start')} -> {freeze.get('scene_ref_end')}\n"
+        f"Locked range: {lock.get('scene_ref_start')} -> {lock.get('scene_ref_end')}\n"
+    )
     return 0
 
 
@@ -524,6 +671,68 @@ def build_parser() -> argparse.ArgumentParser:
         help="Bypass outline write gate checks (testing only).",
     )
     run_parser.set_defaults(func=_run)
+
+    workflow_parser = subparsers.add_parser("workflow", help="Section workflow commands.")
+    workflow_sub = workflow_parser.add_subparsers(dest="workflow_command", required=True)
+
+    workflow_init = workflow_sub.add_parser(
+        "init",
+        help="Initialize section workflow state from outline pipeline artifacts.",
+    )
+    workflow_init.add_argument("--book", required=True, help="Book id.")
+    workflow_init.add_argument("--run-id", help="Optional outline pipeline run id.")
+    workflow_init.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Rebuild canonical workflow files from the selected outline run.",
+    )
+    workflow_init.set_defaults(func=_workflow_init)
+
+    workflow_status = workflow_sub.add_parser("status", help="Show section workflow status.")
+    workflow_status.add_argument("--book", required=True, help="Book id.")
+    workflow_status.set_defaults(func=_workflow_status)
+
+    workflow_freeze = workflow_sub.add_parser(
+        "freeze-section",
+        help="Freeze one section into the canonical outline from a phase-03 chapter artifact.",
+    )
+    workflow_freeze.add_argument("--book", required=True, help="Book id.")
+    workflow_freeze.add_argument("--chapter", required=True, type=int, help="Chapter id.")
+    workflow_freeze.add_argument("--section", required=True, type=int, help="Section id.")
+    workflow_freeze.add_argument("--run-id", help="Optional outline pipeline run id.")
+    workflow_freeze.set_defaults(func=_workflow_freeze_section)
+
+    workflow_lock = workflow_sub.add_parser(
+        "lock-section",
+        help="Lock one frozen section after prose and meta artifacts exist for all section scenes.",
+    )
+    workflow_lock.add_argument("--book", required=True, help="Book id.")
+    workflow_lock.add_argument("--chapter", required=True, type=int, help="Chapter id.")
+    workflow_lock.add_argument("--section", required=True, type=int, help="Section id.")
+    workflow_lock.set_defaults(func=_workflow_lock_section)
+
+    workflow_advance = workflow_sub.add_parser(
+        "advance-section",
+        help="Freeze, write, and lock one section end to end.",
+    )
+    workflow_advance.add_argument("--book", required=True, help="Book id.")
+    workflow_advance.add_argument("--chapter", required=True, type=int, help="Chapter id.")
+    workflow_advance.add_argument("--section", required=True, type=int, help="Section id.")
+    workflow_advance.add_argument("--run-id", help="Optional outline pipeline run id.")
+    workflow_advance.add_argument("--resume", action="store_true", help="Resume a prior run.")
+    workflow_advance.add_argument(
+        "--ack-outline-attention-items",
+        "--ack-outline-issues",
+        dest="ack_outline_attention_items",
+        action="store_true",
+        help="Acknowledge outline attention items before writing.",
+    )
+    workflow_advance.add_argument(
+        "--force-outline-gate-bypass",
+        action="store_true",
+        help="Bypass outline write gate checks while running the writer loop.",
+    )
+    workflow_advance.set_defaults(func=_workflow_advance_section)
 
     llm_parser = subparsers.add_parser("llm", help="LLM utilities.")
     llm_sub = llm_parser.add_subparsers(dest="llm_command", required=True)

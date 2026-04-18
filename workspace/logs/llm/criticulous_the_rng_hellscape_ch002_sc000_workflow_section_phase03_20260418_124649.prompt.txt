@@ -1,0 +1,1010 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+UI gate: UI/system blocks (lines starting with '[' and ending with ']') are permitted only when scene_card.ui_allowed=true. If ui_allowed=false, do not include UI blocks even if an author persona says "always include".
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties, and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true. If a prior invariant is stale or superseded, you MUST flag it for removal using "REMOVE: <exact prior invariant text>" before restating the current truth.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: Criticulous: The RNG Hellscape
+Book ID: criticulous_the_rng_hellscape
+Author Ref: eldrik-vale/v2
+Genre: litrpg, isekai, comedy
+Series ID: crit-iculous
+Series Ref: series/crit-iculous
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 2000
+- chapters: 7
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements **when the System is active or the scene is set in a game world**. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing, while creating rich character depth.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot, or the setting/location is key to major story arcs/threads. 
+5. **Tight POV:** Stay deep in the active characters head. Their snarky observations are the lens through which we see the world.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, follow the active scene-count policy:
+- Exact mode: total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+- Range mode: chapter totals must remain within the configured range and still align with pacing intent.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string), and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+
+USER:
+
+# OUTLINE PIPELINE PHASE 03: SCENE DRAFT
+
+Timeline Lock does not apply during outlining; you are planning, not writing a Scene Card.
+
+Return ONLY a single JSON object that matches outline schema v1.1.
+No markdown, no code fences, no commentary.
+Use strict JSON (double quotes, no trailing commas).
+
+Core contract:
+- Each scene is one writing unit.
+- Every scene must include type and outcome.
+- outcome must be a concrete state change.
+- Do not pad with travel/recap/mood-only scenes.
+
+Required top-level keys:
+- schema_version ("1.1")
+- chapters (array) containing ONLY the target chapter
+
+Registry policy:
+- characters and threads are globally optional, but become REQUIRED when referenced.
+- If any scene includes characters/introduces/callbacks entries that reference character ids, top-level characters is required.
+- If any scene includes threads entries that reference thread ids, top-level threads is required.
+- Use canonical registry keys only. Do not use alias keys.
+  - characters[] object required keys and types:
+    - character_id (string)
+    - name (string)
+    - intro (object) with required keys:
+      - chapter (integer, >=1)
+      - scene (integer, >=1)
+    - optional: pronouns (string), role (string)
+  - threads[] object required keys and types:
+    - thread_id (string)
+    - label (string)
+    - status (string)
+- Forbidden alias keys:
+  - characters[].id, characters[].title, characters[].description
+  - threads[].id, threads[].title, threads[].description
+
+Required chapter/section/scene constraints:
+- chapter_id must equal the target chapter_id provided below.
+- chapter required keys and types:
+  - chapter_id (integer)
+  - title (string)
+  - goal (string)
+  - chapter_role (string)
+  - stakes_shift (string)
+  - bridge (object) with required keys:
+    - from_prev (string)
+    - to_next (string)
+  - pacing (object) with required keys:
+    - intensity (number or string)
+    - tempo (string)
+    - expected_scene_count (integer, >=1)
+  - sections (array)
+- section_id must be sequential integers within each chapter.
+- section required keys and types:
+  - section_id (integer)
+  - title (string)
+  - intent (string)
+  - scenes (array)
+  - preserve and output end_condition (string) from phase 02
+- scene_id is chapter-local and must be monotonic across all sections in that chapter.
+- scene required keys and types:
+  - scene_id (integer)
+  - summary (string)
+  - type (string)
+  - outcome (string)
+  - characters (array of character_id strings)
+- optional scene keys:
+  - introduces (array of character_id strings)
+  - threads (array of thread_id strings)
+  - callbacks (array of id strings)
+- Preserve section.end_condition from phase 02 for every section.
+- Each section-final scene must include end_condition_echo that exactly matches phase-02 end_condition.
+- Any referenced character/thread id must match a declared top-level registry id exactly (case-sensitive).
+
+Required transition fields (phase 03 and later):
+- location_start_label (required, non-empty string)
+- location_end_label (required, non-empty string)
+- location_start (non-empty string)
+- location_end (non-empty string)
+- handoff_mode (enum string)
+- constraint_state (enum string)
+- transition_in_text (required for EVERY scene, including first scene in chapter; non-empty string; connective action, not recap)
+- transition_in_anchors (required for EVERY scene, including first scene in chapter; array of 3-6 non-empty strings)
+- For non-first scenes: consumes_outcome_from (required, chapter_id:scene_id)
+- For non-last scenes in chapter (including section-final scenes when chapter continues): transition_out_text (required, non-empty), transition_out_anchors (required, 3-6 strings), and hands_off_to (required, chapter_id:scene_id)
+- Anchor cardinality rule:
+  - transition_in_anchors and transition_out_anchors must each contain 3-6 non-empty strings.
+  - If you only have 1-2 anchors, add additional concrete anchors before returning (never return fewer than 3).
+- Anchor content rule (hard):
+  - Anchors must be concrete sensory/location/action tokens, not meta/template language.
+  - Forbidden anchor words/tokens include: `placeholder`, `unknown`, `tbd`, `here`, `there`, `n/a`.
+  - Example forbidden anchor: `placeholder textures`.
+  - Replace with concrete anchors such as `wet cobblestones`, `vault glyphs`, `iron gate hinges`.
+- Section-boundary continuity rule (hard):
+  - Section-final scenes are NOT exempt from handoff fields unless they are also the final scene of the chapter.
+  - end_condition_echo does not replace transition_out_text, transition_out_anchors, or hands_off_to.
+  - If a scene is the last scene in a section but another scene exists later in the same chapter, that scene MUST include transition_out_text, transition_out_anchors, and hands_off_to.
+
+Location id compilation:
+- The orchestrator owns canonical LOC_* id generation from labels.
+- You may include location_start_id/location_end_id, but labels are mandatory and ids will be validated/normalized by the orchestrator.
+
+Transition enum guidance:
+- handoff_mode: direct_continuation, escorted_transfer, detained_then_release, time_skip, hard_cut, montage, offscreen_processing, combat_disengage, arrival_checkpoint, aftermath_relocation
+- constraint_state: free, pursued, detained, processed, sheltered, restricted, engaged_combat, fleeing
+- Strict bridge mode rule:
+  - When strict transition bridges are enabled, do NOT emit handoff_mode=hard_cut.
+  - Use non-hard-cut values such as time_skip, offscreen_processing, arrival_checkpoint, or combat_disengage.
+
+Placeholder prohibition (hard):
+- Do NOT emit placeholder location/transition values such as current_location, unknown, placeholder, tbd, here, there, n/a.
+- If exact location identity is unavailable, return error_v1 with reason code missing_location_context.
+- Do not emit synthetic anchor labels (for example anchor_1, anchor_2).
+- Because strict validation rejects placeholder tokens, do not use bare tokens `here` or `there` in transition text fields; use concrete location nouns instead.
+- Lexical ban in transition text fields:
+  - Forbidden words (as standalone tokens): `here`, `there`, `unknown`, `placeholder`, `tbd`, `n/a`.
+  - Example: avoid `The walls here are covered...`; use `The walls of the Glitch Vault are covered...`.
+  - Example: avoid `...nowhere left to run that they can't follow`; use `...no route out of Iron District Alley that the Sentinels cannot follow`.
+
+Seam scoring fields are optional in phase 03 but recommended:
+- seam_score (0-100 int)
+- seam_resolution (inline_bridge|micro_scene|full_scene)
+
+Compatibility and omission rule:
+- If a field is optional, omit when unknown; do NOT emit empty strings.
+- Legacy transition_in may be present only as a compatibility alias; canonical field is transition_in_text.
+- Do not use alternate key names for required schema fields.
+- Before returning final JSON, run this self-check:
+  - Order scenes by scene_id within each chapter.
+  - For every scene except the highest scene_id in that chapter:
+    - hands_off_to must be present and non-empty.
+    - transition_out_text must be present and non-empty.
+    - transition_out_anchors must contain 3-6 non-empty strings.
+
+Output must remain compatible with scene-count policy:
+{
+  "chapter_scene_count_exact_mode": false,
+  "expected_scene_count_enforcement": "strong_non_exact",
+  "mode": "strong_non_exact",
+  "notes": []
+}
+
+If you cannot satisfy constraints after correction attempts, return error_v1:
+{
+  "result": "ERROR",
+  "schema_version": "error_v1",
+  "error_type": "validation_error",
+  "reason_code": "missing_location_context",
+  "missing_fields": ["chapters[0].sections[0].scenes[0].location_start_label"],
+  "phase": "phase_03_scene_draft",
+  "action_hint": "Provide concrete location labels and transition payload; do not use placeholders."
+}
+
+Target chapter id:
+2
+
+Chapter input outline (phase 02 slice, single chapter):
+{
+  "chapters": [
+    {
+      "bridge": {
+        "from_prev": "Artie escapes Vane but remains a one-hit-kill target.",
+        "to_next": "Artie's rapid farming triggers the attention of the Floor Guardian."
+      },
+      "chapter_id": 2,
+      "chapter_role": "setup",
+      "goal": "Artie acquires the Cloak of the Cowardly Lion and begins exploiting the system's loot mechanics in the crypts.",
+      "pacing": {
+        "expected_scene_count": 9,
+        "intensity": 3,
+        "tempo": "steady"
+      },
+      "sections": [
+        {
+          "end_condition": "Artie steals the Cloak of the Cowardly Lion from a locked starter chest.",
+          "intent": "Artie seeks gear to survive his 1 HP fragility and exploits a quest loophole.",
+          "scenes": [
+            {
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "constraint_state": "free",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:2",
+              "location_end": "A row of overpriced armor stalls in the market",
+              "location_end_label": "Oakhaven Market",
+              "location_start": "The bustling central square of Oakhaven",
+              "location_start_label": "Oakhaven Square",
+              "outcome": "Artie realizes standard merchants cannot solve his 1 HP problem.",
+              "scene_id": 1,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 100,
+              "summary": "Artie wanders the Oakhaven market looking for defensive gear, but everything is either too expensive or level-locked, leaving him vulnerable.",
+              "transition_in_anchors": [
+                "crowded market stalls",
+                "smell of roasted meat",
+                "clinking armor plates"
+              ],
+              "transition_in_text": "Artie catches his breath among the crowded market stalls, scanning for armor vendors.",
+              "transition_out_anchors": [
+                "laughing merchant",
+                "empty pockets",
+                "gleaming steel breastplate"
+              ],
+              "transition_out_text": "Artie turns away from the laughing merchant, his empty pockets offering no solutions.",
+              "type": "setup"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:1",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:3",
+              "location_end": "The crowded plaza in front of the Adventurer's Guild",
+              "location_end_label": "Oakhaven Quest Board",
+              "location_start": "A row of overpriced armor stalls in the market",
+              "location_start_label": "Oakhaven Market",
+              "outcome": "Artie decides to bypass the quest requirements and just break the chest.",
+              "scene_id": 2,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 100,
+              "summary": "Fizz points out a 'Starter Quest' loophole involving an allegedly unbreakable display chest meant to teach players about lockpicking.",
+              "transition_in_anchors": [
+                "glowing blue waypoint",
+                "cobblestone path",
+                "wooden guild sign"
+              ],
+              "transition_in_text": "Fizz projects a glowing blue waypoint leading away from the market toward the guild plaza.",
+              "transition_out_anchors": [
+                "heavy display chest",
+                "painted warning sign",
+                "rusty iron dagger"
+              ],
+              "transition_out_text": "Artie steps up to the heavy display chest, ignoring the warning signs.",
+              "type": "conflict"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "constraint_state": "fleeing",
+              "consumes_outcome_from": "2:2",
+              "end_condition_echo": "Artie steals the Cloak of the Cowardly Lion from a locked starter chest.",
+              "handoff_mode": "aftermath_relocation",
+              "hands_off_to": "2:4",
+              "location_end": "A shadowed alley behind the guild hall",
+              "location_end_label": "Oakhaven Alleyway",
+              "location_start": "The crowded plaza in front of the Adventurer's Guild",
+              "location_start_label": "Oakhaven Quest Board",
+              "outcome": "Artie steals the Cloak of the Cowardly Lion from a locked starter chest.",
+              "scene_id": 3,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 100,
+              "summary": "Artie strikes the 'indestructible' lock, triggering a massive critical hit that shatters it, allowing him to loot the Cloak of the Cowardly Lion.",
+              "transition_in_anchors": [
+                "rusty iron dagger",
+                "indestructible lock",
+                "sparking metal"
+              ],
+              "transition_in_text": "Artie raises his rusty dagger and brings it down hard on the indestructible lock.",
+              "transition_out_anchors": [
+                "oversized lion cloak",
+                "shadowed alley",
+                "shouting guild guards"
+              ],
+              "transition_out_text": "Artie wraps the oversized cloak around his shoulders and ducks into a nearby alley before the guards arrive.",
+              "type": "climax"
+            }
+          ],
+          "section_id": 1,
+          "section_role": "setup",
+          "status": "locked",
+          "target_scene_count": 3,
+          "title": "The Coward's Wardrobe"
+        },
+        {
+          "end_condition": "Artie clears a room of skeletons, turning them into a mountain of loot.",
+          "intent": "Artie enters the crypts and discovers how his crits break the loot drop system.",
+          "scenes": [
+            {
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:3",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:5",
+              "location_end": "The damp entrance to the Oakhaven Crypts",
+              "location_end_label": "Oakhaven Crypts Entrance",
+              "location_start": "A shadowed alley behind the guild hall",
+              "location_start_label": "Oakhaven Alleyway",
+              "outcome": "Artie realizes the cloak's stealth is flawed but his 100% crit still applies to basic attacks.",
+              "scene_id": 4,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 100,
+              "summary": "Artie enters the Oakhaven Crypts, testing his new Cloak of the Cowardly Lion to sneak past high-level mobs, but accidentally aggros a skeleton.",
+              "transition_in_anchors": [
+                "oversized lion cloak",
+                "damp stone steps",
+                "flickering torchlight"
+              ],
+              "transition_in_text": "Artie slips out of the shadowed alleyway, following Fizz's glowing waypoint toward the low-level crypts on the edge of town.",
+              "transition_out_anchors": [
+                "brittle femur bone",
+                "glowing red eyes",
+                "rusty iron sword"
+              ],
+              "transition_out_text": "Artie steps on a brittle femur, drawing the glowing red eyes of a skeletal guard.",
+              "type": "setup"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "constraint_state": "engaged_combat",
+              "consumes_outcome_from": "2:4",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:6",
+              "location_end": "A small antechamber inside the crypts",
+              "location_end_label": "Crypt Antechamber",
+              "location_start": "The damp entrance to the Oakhaven Crypts",
+              "location_start_label": "Oakhaven Crypts Entrance",
+              "outcome": "Artie discovers that his crits force enemies to drop their entire loot table at once.",
+              "scene_id": 5,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 100,
+              "summary": "Artie panics and throws a random rock at the skeleton, triggering a massive critical hit that shatters it into an absurd amount of loot.",
+              "transition_in_anchors": [
+                "loose rock",
+                "lunging skeleton",
+                "rusty iron sword"
+              ],
+              "transition_in_text": "Artie scrambles backward across the damp stone as the skeleton lunges, grabbing a loose rock from the floor.",
+              "transition_out_anchors": [
+                "mountain of gold coins",
+                "glowing bone fragments",
+                "dusty crypt floor"
+              ],
+              "transition_out_text": "Artie stares at the mountain of gold coins and rare bone fragments burying the shattered skeleton.",
+              "type": "conflict"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:5",
+              "end_condition_echo": "Artie clears a room of skeletons, turning them into a mountain of loot.",
+              "handoff_mode": "time_skip",
+              "hands_off_to": "2:7",
+              "location_end": "A small antechamber inside the crypts",
+              "location_end_label": "Crypt Antechamber",
+              "location_start": "A small antechamber inside the crypts",
+              "location_start_label": "Crypt Antechamber",
+              "outcome": "Artie clears a room of skeletons, turning them into a mountain of loot.",
+              "scene_id": 6,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 100,
+              "summary": "Realizing the exploit, Artie systematically clears the antechamber by throwing pebbles at a horde of skeletons, creating a massive pile of loot.",
+              "transition_in_anchors": [
+                "handful of gravel",
+                "shambling skeletons",
+                "mountain of gold coins"
+              ],
+              "transition_in_text": "Artie scoops up a handful of gravel, eyeing the next group of skeletons with a greedy grin.",
+              "transition_out_anchors": [
+                "massive loot pile",
+                "deep rumbling sound",
+                "shaking stone walls"
+              ],
+              "transition_out_text": "Artie sits atop his new hoard, ignoring the deep rumbling echoing from the lower crypt levels.",
+              "type": "climax"
+            }
+          ],
+          "section_id": 2,
+          "section_role": "conflict",
+          "status": "draftable",
+          "target_scene_count": 3,
+          "title": "Loot Pinata Theory"
+        },
+        {
+          "end_condition": "Artie activates the Boss Trigger left behind by Vane.",
+          "intent": "Vane's interference forces Artie to take a massive risk for XP.",
+          "scenes": [],
+          "section_id": 3,
+          "section_role": "climax",
+          "status": "stub",
+          "target_scene_count": 3,
+          "title": "Summoning Trouble"
+        }
+      ],
+      "stakes_shift": "From desperate survival to tactical exploitation of the system's physics and drop rates.",
+      "title": "The Glass Cannon\u2019s Guide to Not Dying"
+    }
+  ],
+  "schema_version": "1.1"
+}
+
+Previous chapter (optional, read-only context):
+{
+  "chapters": [
+    {
+      "bridge": {
+        "from_prev": "Artie dies in a vending machine accident and enters the character creation void.",
+        "to_next": "Artie must find a way to survive his fragility by acquiring gear that compensates for his 1 HP."
+      },
+      "chapter_id": 1,
+      "chapter_role": "hook",
+      "goal": "Artie survives his first encounter and establishes his 1 HP / 100% Crit anomaly status in Oakhaven.",
+      "pacing": {
+        "expected_scene_count": 10,
+        "intensity": 5,
+        "tempo": "rush"
+      },
+      "sections": [
+        {
+          "end_condition": "Artie dies from electrocution and enters the Character Creation Void.",
+          "intent": "Establish Artie's mundane life and his absurd death via vending machine.",
+          "scenes": [
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "free",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "1:2",
+              "introduces": [
+                "CHAR_ARTIE"
+              ],
+              "location_end": "The breakroom of a mid-sized accounting firm",
+              "location_end_label": "Office Breakroom",
+              "location_start": "The breakroom of a mid-sized accounting firm",
+              "location_start_label": "Office Breakroom",
+              "outcome": "Artie decides to manually retrieve the stuck snack.",
+              "scene_id": 1,
+              "summary": "Artie, a hungry accountant, attempts to buy a bag of chips from the office vending machine, but the bag gets stuck.",
+              "transition_in_anchors": [
+                "stale coffee smell",
+                "humming fluorescent lights",
+                "empty snack wrapper"
+              ],
+              "transition_in_text": "Artie\u2019s stomach growls as he walks toward the breakroom vending machine.",
+              "transition_out_anchors": [
+                "stuck chip bag",
+                "vending machine glass",
+                "metal coil"
+              ],
+              "transition_out_text": "Artie glares at the dangling bag of chips and prepares to intervene.",
+              "type": "setup"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:1",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "1:3",
+              "location_end": "The breakroom of a mid-sized accounting firm",
+              "location_end_label": "Office Breakroom",
+              "location_start": "The breakroom of a mid-sized accounting firm",
+              "location_start_label": "Office Breakroom",
+              "outcome": "Artie's hand gets stuck near the internal wiring.",
+              "scene_id": 2,
+              "summary": "Artie tries to shake the machine and eventually reaches into the dispenser flap to dislodge the chips.",
+              "transition_in_anchors": [
+                "stuck chip bag",
+                "vending machine glass",
+                "metal coil"
+              ],
+              "transition_in_text": "Artie stares at the stuck bag of chips behind the vending machine glass.",
+              "transition_out_anchors": [
+                "dispenser flap hinge",
+                "cold metal interior",
+                "frayed power cord"
+              ],
+              "transition_out_text": "Artie reaches deep into the machine's dispenser flap to shake the snack loose.",
+              "type": "conflict"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "processed",
+              "consumes_outcome_from": "1:2",
+              "end_condition_echo": "Artie dies from electrocution and enters the Character Creation Void.",
+              "handoff_mode": "time_skip",
+              "hands_off_to": "1:4",
+              "location_end": "A digital void between realities",
+              "location_end_label": "Character Creation Void",
+              "location_start": "The breakroom of a mid-sized accounting firm",
+              "location_start_label": "Office Breakroom",
+              "outcome": "Artie dies and enters the Character Creation Void.",
+              "scene_id": 3,
+              "summary": "A massive electrical surge from the machine kills Artie instantly, sending his consciousness into the void.",
+              "transition_in_anchors": [
+                "exposed wiring",
+                "blue electrical arc",
+                "smell of ozone"
+              ],
+              "transition_in_text": "Artie reaches into the machine's dispenser flap to shake the snack loose.",
+              "transition_out_anchors": [
+                "flickering breakroom lights",
+                "smell of burning plastic",
+                "fading office chatter"
+              ],
+              "transition_out_text": "The world turns white as the electricity stops Artie's heart.",
+              "type": "climax"
+            }
+          ],
+          "section_id": 1,
+          "section_role": "setup",
+          "status": "locked",
+          "target_scene_count": 3,
+          "title": "Death by Snacking"
+        },
+        {
+          "end_condition": "Artie spawns in the tutorial forest with his glitched stats locked.",
+          "intent": "Introduce Fizz and the UI glitch that locks Artie into the 1 HP / 100% Crit build.",
+          "scenes": [
+            {
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "constraint_state": "processed",
+              "consumes_outcome_from": "1:3",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "1:5",
+              "introduces": [
+                "CHAR_FIZZ"
+              ],
+              "location_end": "A digital void between realities",
+              "location_end_label": "Character Creation Void",
+              "location_start": "A digital void between realities",
+              "location_start_label": "Character Creation Void",
+              "outcome": "Artie begins the character creation process.",
+              "scene_id": 4,
+              "summary": "Artie meets Fizz, the AI assistant, who explains he has been 'recruited' into the game world.",
+              "transition_in_anchors": [
+                "infinite white floor",
+                "floating blue screens",
+                "digital chime"
+              ],
+              "transition_in_text": "Artie wakes up in a white expanse of the Character Creation Void.",
+              "transition_out_anchors": [
+                "stat slider bar",
+                "flickering red text",
+                "error code 404"
+              ],
+              "transition_out_text": "Fizz gestures to the stat allocation panel floating in the void.",
+              "type": "setup"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "constraint_state": "processed",
+              "consumes_outcome_from": "1:4",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "1:6",
+              "location_end": "A digital void between realities",
+              "location_end_label": "Character Creation Void",
+              "location_start": "A digital void between realities",
+              "location_start_label": "Character Creation Void",
+              "outcome": "Artie is stuck with a glass-cannon build.",
+              "scene_id": 5,
+              "summary": "A glitch occurs during stat allocation, locking Artie's HP at 1 and his Critical Hit rate at 100%.",
+              "threads": [
+                "THREAD_GLITCH"
+              ],
+              "transition_in_anchors": [
+                "stat slider bar",
+                "flickering red text",
+                "error code 404"
+              ],
+              "transition_in_text": "Fizz gestures to the stat allocation panel floating in the void.",
+              "transition_out_anchors": [
+                "flashing warning icon",
+                "distorted system voice",
+                "rapidly scrolling logs"
+              ],
+              "transition_out_text": "The system forces the character confirmation despite the errors.",
+              "type": "conflict"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:5",
+              "end_condition_echo": "Artie spawns in the tutorial forest with his glitched stats locked.",
+              "handoff_mode": "arrival_checkpoint",
+              "hands_off_to": "1:7",
+              "location_end": "A low-resolution starter forest",
+              "location_end_label": "Tutorial Forest",
+              "location_start": "A digital void between realities",
+              "location_start_label": "Character Creation Void",
+              "outcome": "Artie spawns in the tutorial forest with his glitched stats locked.",
+              "scene_id": 6,
+              "summary": "The system finalizes the build and teleports Artie into the Tutorial Forest.",
+              "transition_in_anchors": [
+                "pixelated pine needles",
+                "low-poly moss",
+                "distant bird chirp"
+              ],
+              "transition_in_text": "The white void dissolves into the pixelated trees of the Tutorial Forest.",
+              "transition_out_anchors": [
+                "rustling digital leaves",
+                "distant wolf howl",
+                "sunlight through pixels"
+              ],
+              "transition_out_text": "The loading bar hits 100% and the forest floor solidifies under Artie's feet.",
+              "type": "climax"
+            }
+          ],
+          "section_id": 2,
+          "section_role": "conflict",
+          "status": "locked",
+          "target_scene_count": 3,
+          "title": "The Grease-Fire Build"
+        },
+        {
+          "end_condition": "Artie acquires the cursed Participation Trophy after vaporizing a slime.",
+          "intent": "Demonstrate the power of the crit build and introduce the cursed item mechanic.",
+          "scenes": [
+            {
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:6",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "1:8",
+              "location_end": "A low-resolution starter forest",
+              "location_end_label": "Tutorial Forest",
+              "location_start": "A low-resolution starter forest",
+              "location_start_label": "Tutorial Forest",
+              "outcome": "Artie kills the slime with a single, absurdly powerful hit.",
+              "scene_id": 7,
+              "summary": "Artie encounters his first enemy, a blue slime, and discovers that even a light tap results in a massive crit.",
+              "transition_in_anchors": [
+                "jiggling blue gel",
+                "rusty iron dagger",
+                "crunching dry leaves"
+              ],
+              "transition_in_text": "A blue slime bounces into the clearing of the Tutorial Forest.",
+              "transition_out_anchors": [
+                "blue slime residue",
+                "floating damage numbers",
+                "scattered copper coins"
+              ],
+              "transition_out_text": "The slime explodes into a shower of loot across the forest floor.",
+              "type": "conflict"
+            },
+            {
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_FIZZ"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "1:7",
+              "end_condition_echo": "Artie acquires the cursed Participation Trophy after vaporizing a slime.",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "1:9",
+              "location_end": "A low-resolution starter forest",
+              "location_end_label": "Tutorial Forest",
+              "location_start": "A low-resolution starter forest",
+              "location_start_label": "Tutorial Forest",
+              "outcome": "Artie acquires the cursed Participation Trophy after vaporizing a slime.",
+              "scene_id": 8,
+              "summary": "Artie loots the slime and finds the Participation Trophy, which is cursed and cannot be unequipped.",
+              "threads": [
+                "THREAD_CURSED_LOOT"
+              ],
+              "transition_in_anchors": [
+                "golden loot chest",
+                "tattered red ribbon",
+                "wooden trophy base"
+              ],
+              "transition_in_text": "The slime explodes into a shower of loot across the forest floor.",
+              "transition_out_anchors": [
+                "rising town smoke",
+                "worn dirt path",
+                "clanking metal trophy"
+              ],
+              "transition_out_text": "Artie pockets the trophy and heads toward the smoke on the horizon.",
+              "type": "climax"
+            }
+          ],
+          "section_id": 3,
+          "section_role": "conflict",
+          "status": "locked",
+          "target_scene_count": 2,
+          "title": "The Participation Trophy"
+        },
+        {
+          "end_condition": "Artie escapes a forced duel with Vane and enters Oakhaven proper.",
+          "intent": "Introduce the world's RNG obsession and the primary antagonist, Vane.",
+          "scenes": [
+            {
+              "characters": [
+                "CHAR_ARTIE",
+                "CHAR_VANE"
+              ],
+              "constraint_state": "engaged_combat",
+              "consumes_outcome_from": "1:8",
+              "handoff_mode": "combat_disengage",
+              "hands_off_to": "1:10",
+              "introduces": [
+                "CHAR_VANE"
+              ],
+              "location_end": "The fortified entrance to Oakhaven",
+              "location_end_label": "Oakhaven Gate",
+              "location_start": "A low-resolution starter forest",
+              "location_start_label": "Tutorial Forest",
+              "outcome": "Artie realizes he cannot win a fair fight and looks for an escape.",
+              "scene_id": 9,
+              "summary": "Artie is intercepted by Vane, a high-level player who tries to force Artie into a duel for his 'rare' trophy.",
+              "threads": [
+                "THREAD_VANE_RIVALRY"
+              ],
+              "transition_in_anchors": [
+                "polished silver armor",
+                "heavy leather boots",
+                "shadow of a sword"
+              ],
+              "transition_in_text": "A shadow falls over Artie as he inspects the Participation Trophy.",
+              "transition_out_anchors": [
+                "heavy iron hinges",
+                "stone wall moss",
+                "shouted guard orders"
+              ],
+              "transition_out_text": "Artie sprints toward the city gates as Vane draws his blade.",
+              "type": "conflict"
+            },
+            {
+              "callbacks": [
+                "CHAR_VANE"
+              ],
+              "characters": [
+                "CHAR_ARTIE"
+              ],
+              "constraint_state": "fleeing",
+              "consumes_outcome_from": "1:9",
+              "end_condition_echo": "Artie escapes a forced duel with Vane and enters Oakhaven proper.",
+              "handoff_mode": "arrival_checkpoint",
+              "location_end": "The bustling central square of Oakhaven",
+              "location_end_label": "Oakhaven Square",
+              "location_start": "The fortified entrance to Oakhaven",
+              "location_start_label": "Oakhaven Gate",
+              "outcome": "Artie escapes a forced duel with Vane and enters Oakhaven proper.",
+              "scene_id": 10,
+              "summary": "Artie uses the chaos of a passing merchant caravan to slip past Vane and enter the safety of Oakhaven.",
+              "transition_in_anchors": [
+                "iron gate portcullis",
+                "cobblestone street",
+                "crowded market stalls"
+              ],
+              "transition_in_text": "Artie dives through the closing iron gates of Oakhaven.",
+              "type": "climax"
+            }
+          ],
+          "section_id": 4,
+          "section_role": "climax",
+          "status": "locked",
+          "target_scene_count": 2,
+          "title": "Oakhaven's Welcome"
+        }
+      ],
+      "stakes_shift": "From mundane office drone to a high-value system anomaly targeted by a powerful rival.",
+      "title": "Welcome to the RNG-Hellscape"
+    }
+  ]
+}
+
+Next chapter (optional, read-only context):
+{
+  "chapters": [
+    {
+      "bridge": {
+        "from_prev": "Artie summons the Floor Guardian to maximize his XP gains.",
+        "to_next": "Vane's fury over the stolen kill forces Artie to flee toward the capital city."
+      },
+      "chapter_id": 3,
+      "chapter_role": "pressure",
+      "goal": "Artie defeats the Bone Golem through a physics exploit and reaches Level 10, becoming a recognized threat.",
+      "pacing": {
+        "expected_scene_count": 10,
+        "intensity": 4,
+        "tempo": "steady"
+      },
+      "sections": [
+        {
+          "end_condition": "Fizz reveals the Bone Golem has a Crit-Resist aura.",
+          "intent": "Artie faces a boss that negates his primary advantage.",
+          "scenes": [],
+          "section_id": 1,
+          "section_role": "setup",
+          "status": "stub",
+          "target_scene_count": 3,
+          "title": "The Un-Crittable Golem"
+        },
+        {
+          "end_condition": "Artie defeats the Golem via a Cosmetic Crit and reaches Level 10.",
+          "intent": "Artie uses physics exploits to bypass the boss's mechanical defenses.",
+          "scenes": [],
+          "section_id": 2,
+          "section_role": "conflict",
+          "status": "stub",
+          "target_scene_count": 4,
+          "title": "Critting the Environment"
+        },
+        {
+          "end_condition": "Artie flees the crypts as Vane arrives to find the boss already dead.",
+          "intent": "Establish the deeper lore of the system and the threat of Vane's pursuit.",
+          "scenes": [],
+          "section_id": 3,
+          "section_role": "climax",
+          "status": "stub",
+          "target_scene_count": 3,
+          "title": "The First Glitch Mural"
+        }
+      ],
+      "stakes_shift": "From local anomaly to a system-level glitch that threatens the established power hierarchy.",
+      "title": "Math-Boss vs. The Glitch"
+    }
+  ]
+}
+
+Book:
+{
+  "author_ref": "eldrik-vale/v2",
+  "book_id": "criticulous_the_rng_hellscape",
+  "genre": [
+    "litrpg",
+    "isekai",
+    "comedy"
+  ],
+  "invariants": [
+    "No world resets.",
+    "No convenient amnesia as a continuity device.",
+    "Do not change established names/relationships."
+  ],
+  "page_metrics": {
+    "chars_per_page": 1500,
+    "words_per_page": 250
+  },
+  "schema_version": "1.0",
+  "series_id": "crit-iculous",
+  "series_ref": "series/crit-iculous",
+  "targets": {
+    "avg_scene_words": 2000,
+    "chapters": 7
+  },
+  "title": "Criticulous: The RNG Hellscape",
+  "voice": {
+    "pov": "third_limited",
+    "style_tags": [
+      "no-recaps",
+      "forward-motion",
+      "tight-prose"
+    ],
+    "tense": "past"
+  }
+}
+
+Targets:
+{
+  "avg_scene_words": 2000,
+  "chapters": 7
+}
+
+User prompt (optional):
+
+
+Notes:
+Active section target: chapter 2, section 2.
+Draft ONLY the active section's scenes.
+Preserve any existing earlier section scenes unchanged.
+Leave later sections as stubs with empty scenes arrays.
+Return exactly one chapter payload containing the full chapter shape.
+Previous section 2:1 is locked with terminal ref 2:3.
+The active section target_scene_count is 3.
+Scene ids must remain chapter-local and monotonic across the chapter.
+
+Transition hints (optional):
+{
+  "hints": []
+}
+
+
+USER:
+
+EXECUTION PHASE: Produce the final chapter-only JSON output for this phase. Do NOT include analysis or planning text. Output JSON only.

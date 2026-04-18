@@ -1,0 +1,255 @@
+{
+  "schema_version": "1.0",
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "stamina": {
+            "current": 10,
+            "max": 10
+          },
+          "crit_rate": {
+            "current": 100,
+            "max": 100
+          }
+        },
+        "resources": {
+          "xp": {
+            "current": 5
+          },
+          "gold": {
+            "current": 0
+          }
+        }
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 2,
+      "scene": 3,
+      "persona_updates": [
+        "Artie realizes his glitched stats can break fundamental game mechanics, allowing him to bypass level restrictions."
+      ],
+      "inventory": [
+        {
+          "container": "pocket_right",
+          "item": "ITEM_wallet",
+          "status": "stowed"
+        },
+        {
+          "container": "neck_lanyard",
+          "item": "ITEM_employee_id",
+          "status": "equipped"
+        },
+        {
+          "container": "lapel",
+          "item": "ITEM_participation_trophy",
+          "status": "equipped"
+        },
+        {
+          "container": "hand_right",
+          "item": "ITEM_rusty_iron_dagger",
+          "status": "held"
+        },
+        {
+          "container": "shoulders",
+          "item": "ITEM_cloak_of_the_cowardly_lion",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_wallet"
+          ]
+        },
+        {
+          "container": "neck_lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_employee_id"
+          ]
+        },
+        {
+          "container": "lapel",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_participation_trophy"
+          ]
+        },
+        {
+          "container": "hand_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_rusty_iron_dagger"
+          ]
+        },
+        {
+          "container": "shoulders",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_cloak_of_the_cowardly_lion"
+          ]
+        }
+      ],
+      "invariants_add": [
+        "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+        "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])"
+      ]
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "reason": "Artie equipped the Cloak of the Cowardly Lion.",
+      "set": {
+        "inventory": [
+          {
+            "container": "pocket_right",
+            "item": "ITEM_wallet",
+            "status": "stowed"
+          },
+          {
+            "container": "neck_lanyard",
+            "item": "ITEM_employee_id",
+            "status": "equipped"
+          },
+          {
+            "container": "lapel",
+            "item": "ITEM_participation_trophy",
+            "status": "equipped"
+          },
+          {
+            "container": "hand_right",
+            "item": "ITEM_rusty_iron_dagger",
+            "status": "held"
+          },
+          {
+            "container": "shoulders",
+            "item": "ITEM_cloak_of_the_cowardly_lion",
+            "status": "equipped"
+          }
+        ],
+        "containers": [
+          {
+            "container": "pocket_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_wallet"
+            ]
+          },
+          {
+            "container": "neck_lanyard",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_employee_id"
+            ]
+          },
+          {
+            "container": "lapel",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_participation_trophy"
+            ]
+          },
+          {
+            "container": "hand_right",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_rusty_iron_dagger"
+            ]
+          },
+          {
+            "container": "shoulders",
+            "owner": "CHAR_ARTIE",
+            "contents": [
+              "ITEM_cloak_of_the_cowardly_lion"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_cloak_of_the_cowardly_lion",
+      "set": {
+        "name": "Cloak of the Cowardly Lion",
+        "display_name": "Cloak of the Cowardly Lion",
+        "type": "armor",
+        "owner_scope": "character",
+        "custodian": "CHAR_ARTIE",
+        "linked_threads": [],
+        "state_tags": [
+          "loot",
+          "equipped"
+        ],
+        "last_seen": {
+          "chapter": 2,
+          "scene": 3,
+          "location": "LOC_OAKHAVEN_STARTER_QUEST_HUB"
+        }
+      }
+    }
+  ],
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie used his guaranteed critical hit to destroy an unbreakable tutorial chest.",
+      "He looted the Cloak of the Cowardly Lion and fled from the guild guards."
+    ],
+    "key_events": [
+      "Artie attacked the indestructible tutorial chest lock.",
+      "A massive critical hit destroyed the lock and the chest.",
+      "Artie acquired and equipped the Cloak of the Cowardly Lion.",
+      "Guild guards spotted Artie, forcing him and Fizz to flee."
+    ],
+    "last_scene": [
+      "Artie struck the unbreakable tutorial chest with his Rusty Iron Dagger.",
+      "His 100% critical hit rate shattered the lock, dealing massive damage.",
+      "Artie looted the Cloak of the Cowardly Lion from the destroyed chest.",
+      "Artie and Fizz fled into an alleyway to escape the approaching guild guards."
+    ],
+    "must_stay_true": [
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+      "Artie has 5 XP.",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+      "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+      "Artie is physically present at the Starter Quest Hub.",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=held, container=hand_right)",
+      "container: hand_right (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+      "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])"
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "LOC_OAKHAVEN_STARTER_QUEST_HUB",
+    "open_threads": [
+      "THREAD_GLITCH",
+      "THREAD_VANE_RIVALRY",
+      "THREAD_CURSED_LOOT"
+    ],
+    "recent_facts": [
+      "Artie destroyed an indestructible tutorial chest with a massive critical hit.",
+      "Artie looted the Cloak of the Cowardly Lion and fled from guild guards."
+    ]
+  }
+}

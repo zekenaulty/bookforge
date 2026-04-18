@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "LOC_OAKHAVEN_CRYPTS_LOWER",
+    "open_threads": [
+      "THREAD_GLITCH",
+      "THREAD_VANE_RIVALRY",
+      "THREAD_CURSED_LOOT"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "scene": 8,
+      "chapter": 2,
+      "persona_updates": [
+        "Artie's risk assessment logic is completely skewed by his 1 HP glitch, making him willing to face impossible odds for high XP payouts."
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "pocket_right",
+          "item": "ITEM_wallet",
+          "status": "stowed"
+        },
+        {
+          "container": "neck_lanyard",
+          "item": "ITEM_employee_id",
+          "status": "equipped"
+        },
+        {
+          "container": "lapel",
+          "item": "ITEM_participation_trophy",
+          "status": "equipped"
+        },
+        {
+          "container": "belt",
+          "item": "ITEM_rusty_iron_dagger",
+          "status": "stowed"
+        },
+        {
+          "container": "shoulders",
+          "item": "ITEM_cloak_of_the_cowardly_lion",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "contents": [
+            "ITEM_wallet"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "neck_lanyard",
+          "contents": [
+            "ITEM_employee_id"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "lapel",
+          "contents": [
+            "ITEM_participation_trophy"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "belt",
+          "contents": [
+            "ITEM_rusty_iron_dagger"
+          ],
+          "owner": "CHAR_ARTIE"
+        },
+        {
+          "container": "shoulders",
+          "contents": [
+            "ITEM_cloak_of_the_cowardly_lion"
+          ],
+          "owner": "CHAR_ARTIE"
+        }
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "scene": 8,
+      "chapter": 2,
+      "persona_updates": [
+        "Fizz is horrified by Artie's twisted logic and his willingness to summon a Floor Guardian."
+      ],
+      "invariants_add": [],
+      "inventory": [],
+      "containers": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "stamina": {
+            "current": 12,
+            "max": 12
+          },
+          "level": {
+            "current": 3
+          }
+        },
+        "resources": {
+          "xp": {
+            "current": 905
+          }
+        }
+      }
+    }
+  ],
+  "plot_device_updates": [
+    {
+      "device_id": "ITEM_boss_trigger",
+      "set": {
+        "last_seen": {
+          "chapter": 2,
+          "scene": 8,
+          "location": "LOC_OAKHAVEN_CRYPTS_LOWER"
+        }
+      }
+    }
+  ],
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie calculated the massive XP payout and decided to steal Vane's boss kill despite Fizz's frantic warnings."
+    ],
+    "key_events": [
+      "Artie and Fizz debated the extreme risk of activating the Boss Trigger.",
+      "Fizz warned Artie that the Floor Guardian was designed for Level 30 players.",
+      "Artie argued that his 1 HP meant any attack was fatal regardless of the enemy's level.",
+      "Artie dismissed Fizz's warnings and prepared to activate the Boss Trigger for the massive XP payout."
+    ],
+    "last_scene": [
+      "Artie and Fizz followed the rumbling deeper into the crypts, finding the lower levels cleared of monsters.",
+      "They discovered an Epic-rarity Boss Trigger left on a pedestal.",
+      "Artie realized Vane had cleared the dungeon and left the trigger to farm later, giving Artie a dangerous idea."
+    ],
+    "must_stay_true": [
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+      "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+      "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+      "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+      "milestone: cloak_acquired = DONE",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+      "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "Artie has 1/1 HP, 12/12 Stamina, and a 100% Critical Hit Rate.",
+      "Artie has 905 XP.",
+      "Artie and Fizz are currently in the Oakhaven Crypts Lower Levels."
+    ]
+  }
+}

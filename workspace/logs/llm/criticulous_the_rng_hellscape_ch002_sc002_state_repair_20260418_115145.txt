@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0",
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "scene": 2,
+      "chapter": 2,
+      "persona_updates": [
+        "Artie decides to exploit his 100% critical hit rate to break tutorial hardware."
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "pocket_right",
+          "item": "ITEM_wallet",
+          "status": "stowed"
+        },
+        {
+          "container": "neck_lanyard",
+          "item": "ITEM_employee_id",
+          "status": "equipped"
+        },
+        {
+          "container": "lapel",
+          "item": "ITEM_participation_trophy",
+          "status": "equipped"
+        },
+        {
+          "container": "hand_right",
+          "item": "ITEM_rusty_iron_dagger",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_wallet"
+          ]
+        },
+        {
+          "container": "neck_lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_employee_id"
+          ]
+        },
+        {
+          "container": "lapel",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_participation_trophy"
+          ]
+        },
+        {
+          "container": "hand_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_rusty_iron_dagger"
+          ]
+        }
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "scene": 2,
+      "chapter": 2,
+      "set": {
+        "stats": {
+          "crit_rate": {
+            "current": 100,
+            "max": 100
+          },
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "stamina": {
+            "current": 10,
+            "max": 10
+          }
+        }
+      },
+      "delta": {},
+      "remove": []
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_rusty_iron_dagger",
+      "set": {
+        "name": "Rusty Iron Dagger",
+        "display_name": "Rusty Iron Dagger",
+        "type": "weapon",
+        "owner_scope": "world",
+        "custodian": "world",
+        "linked_threads": [],
+        "state_tags": [
+          "mundane"
+        ],
+        "last_seen": {
+          "chapter": 2,
+          "scene": 2,
+          "location": "LOC_OAKHAVEN_STARTER_QUEST_HUB"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_rusty_iron_dagger",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "CHAR_ARTIE"
+      },
+      "reason": "Artie picked up the discarded dagger."
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "LOC_OAKHAVEN_STARTER_QUEST_HUB",
+    "open_threads": [
+      "THREAD_VANE_RIVALRY",
+      "THREAD_CURSED_LOOT",
+      "THREAD_GLITCH"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "Artie and Fizz approached the Starter Quest Hub.",
+      "Fizz pointed out an unbreakable tutorial chest containing the Cloak of the Cowardly Lion.",
+      "Artie picked up a Rusty Iron Dagger and decided to break the chest using his guaranteed critical hit."
+    ],
+    "key_events": [
+      "Artie and Fizz arrived at the Starter Quest Hub.",
+      "They found a tutorial chest meant for lockpicking.",
+      "Artie picked up a Rusty Iron Dagger.",
+      "Artie prepared to strike the chest to exploit his 100% crit rate."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie is physically present in Oakhaven Market.",
+      "Artie is physically present at the Starter Quest Hub.",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=held, container=hand_right)",
+      "container: hand_right (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+      "Artie has 5 XP.",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+      "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])"
+    ],
+    "chapter_so_far_add": [
+      "Artie and Fizz found a tutorial chest at the Starter Quest Hub.",
+      "Artie decided to break the chest with a Rusty Iron Dagger to get the Cloak of the Cowardly Lion."
+    ]
+  }
+}

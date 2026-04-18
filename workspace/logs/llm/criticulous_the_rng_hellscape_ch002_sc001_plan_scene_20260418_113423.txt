@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_002_001",
+  "chapter": 2,
+  "scene": 1,
+  "scene_target": "Artie realizes standard merchants cannot solve his 1 HP problem.",
+  "goal": "Find defensive gear to protect his fragile 1 HP.",
+  "conflict": "Available gear is either far too expensive or strictly level-locked.",
+  "required_callbacks": [],
+  "constraints": [
+    "target_words: 2000"
+  ],
+  "end_condition": "Artie gives up on standard merchants, realizing he needs an alternative solution.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_OAKHAVEN_CITY_PROPER",
+  "location_end_id": "LOC_OAKHAVEN_MARKET",
+  "location_start_label": "Oakhaven City Proper",
+  "location_end_label": "Oakhaven Market",
+  "location_start": "Oakhaven City Proper",
+  "location_end": "Oakhaven Market",
+  "handoff_mode": "direct",
+  "constraint_state": "processed",
+  "transition_in_text": "Artie, now safe from Vane, begins browsing the city's market stalls with Fizz.",
+  "transition_in_anchors": [
+    "safe_zone",
+    "market_stalls",
+    "browsing"
+  ],
+  "transition_out_text": "Artie realizes his wallet is useless here and standard gear won't save him.",
+  "transition_out_anchors": [
+    "useless_wallet",
+    "standard_gear",
+    "no_solution"
+  ],
+  "consumes_outcome_from": "1:10",
+  "hands_off_to": "2:2",
+  "seam_score": 85,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Artie",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "THREAD_GLITCH",
+    "THREAD_CURSED_LOOT"
+  ],
+  "required_in_custody": [
+    "ITEM_wallet",
+    "ITEM_employee_id",
+    "ITEM_participation_trophy"
+  ],
+  "required_scene_accessible": [
+    "ITEM_wallet",
+    "ITEM_employee_id",
+    "ITEM_participation_trophy"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "scene_continuation",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Level Requirement",
+    "Price",
+    "Defense"
+  ]
+}

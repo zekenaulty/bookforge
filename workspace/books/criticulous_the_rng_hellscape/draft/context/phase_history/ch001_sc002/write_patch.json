@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE"
+    ],
+    "location": "LOC_OFFICE_BREAKROOM",
+    "recent_facts": [
+      "Artie shoved his arm into the vending machine to retrieve his chips.",
+      "The machine's anti-theft mechanism trapped Artie's arm.",
+      "Artie's hand is wedged against exposed wiring."
+    ],
+    "open_threads": []
+  },
+  "summary_update": {
+    "last_scene": [
+      "Artie rolled up his sleeve and reached into the vending machine's dispenser flap.",
+      "An internal anti-theft guard snapped down, pinning his forearm.",
+      "While trying to break free, his hand slipped and wedged tightly against a bundle of exposed internal wires."
+    ],
+    "key_events": [
+      "Artie shoved his arm through the anti-theft flap of the vending machine.",
+      "The internal security mechanism activated, trapping his forearm.",
+      "Artie's hand became wedged against live, exposed wiring inside the machine chassis."
+    ],
+    "must_stay_true": [
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "Artie has 10/10 HP and 10/10 Stamina.",
+      "Artie's arm is physically trapped inside the breakroom vending machine against exposed wires."
+    ],
+    "chapter_so_far_add": [
+      "Artie attempted to retrieve his stuck snack manually, but the machine's anti-theft mechanisms trapped his arm against exposed internal wiring."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 1,
+      "scene": 2,
+      "inventory": [
+        {
+          "item": "ITEM_wallet",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_employee_id",
+          "container": "neck_lanyard",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_wallet"
+          ]
+        },
+        {
+          "container": "neck_lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_employee_id"
+          ]
+        }
+      ],
+      "invariants_add": [
+        "Artie's arm is physically trapped inside the breakroom vending machine against exposed wires."
+      ],
+      "persona_updates": []
+    }
+  ],
+  "character_continuity_system_updates": []
+}

@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.0",
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "resources": {
+          "xp": {
+            "current": 155
+          }
+        }
+      },
+      "reason": "Gained 150 XP from defeating the Skeletal Guard."
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_wallet"
+          ]
+        },
+        {
+          "container": "neck_lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_employee_id"
+          ]
+        },
+        {
+          "container": "lapel",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_participation_trophy"
+          ]
+        },
+        {
+          "container": "shoulders",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_cloak_of_the_cowardly_lion"
+          ]
+        },
+        {
+          "container": "belt",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_rusty_iron_dagger"
+          ]
+        }
+      ],
+      "invariants_add": [
+        "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+        "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])"
+      ],
+      "inventory": [
+        {
+          "container": "pocket_right",
+          "item": "ITEM_wallet",
+          "status": "stowed"
+        },
+        {
+          "container": "neck_lanyard",
+          "item": "ITEM_employee_id",
+          "status": "equipped"
+        },
+        {
+          "container": "lapel",
+          "item": "ITEM_participation_trophy",
+          "status": "equipped"
+        },
+        {
+          "container": "shoulders",
+          "item": "ITEM_cloak_of_the_cowardly_lion",
+          "status": "equipped"
+        },
+        {
+          "container": "belt",
+          "item": "ITEM_rusty_iron_dagger",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": [
+        "Artie realizes he can exploit the system's overkill mechanics to generate massive amounts of loot."
+      ]
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_flawless_femur",
+      "set": {
+        "custodian": "world",
+        "display_name": "Flawless Femur of the Forgotten",
+        "last_seen": {
+          "chapter": 2,
+          "location": "LOC_OAKHAVEN_CRYPTS",
+          "scene": 5
+        },
+        "linked_threads": [],
+        "name": "Flawless Femur of the Forgotten",
+        "owner_scope": "world",
+        "state_tags": [
+          "dropped"
+        ],
+        "type": "loot"
+      }
+    }
+  ],
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Artie discovered that his 100% critical hit rate causes a buffer overflow in the loot system, forcing enemies to drop their entire loot table at once."
+    ],
+    "key_events": [
+      "Artie defeated a Level 8 Skeletal Guard with a thrown rock.",
+      "The attack dealt 99,999 damage due to Artie's glitched stats.",
+      "Artie gained 150 XP.",
+      "The system experienced a buffer overflow and dumped the skeleton's entire loot table.",
+      "Artie stowed his Rusty Iron Dagger in his belt."
+    ],
+    "last_scene": [
+      "Artie threw a rock at a Skeletal Guard, triggering a massive critical hit.",
+      "The overkill damage broke the system's loot generation, causing the skeleton to drop its entire loot table.",
+      "Artie realized his 100% critical hit rate could be used to farm absurd amounts of loot."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie has 5 XP.",
+      "REMOVE: inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=held, container=hand_right)",
+      "REMOVE: container: hand_right (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "Artie has 155 XP.",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=stowed, container=belt)",
+      "container: belt (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "Artie and Fizz are in the Oakhaven Crypts surrounded by a massive pile of loot."
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "LOC_OAKHAVEN_CRYPTS",
+    "open_threads": [
+      "THREAD_GLITCH",
+      "THREAD_VANE_RIVALRY",
+      "THREAD_CURSED_LOOT"
+    ],
+    "recent_facts": [
+      "Artie defeated a Skeletal Guard with a 99,999 damage critical hit from a thrown rock.",
+      "The overkill damage caused the system to dump the skeleton's entire loot table.",
+      "Artie gained 150 XP."
+    ]
+  }
+}

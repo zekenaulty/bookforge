@@ -1,8 +1,69 @@
 # Section-Chunked Outline -> Insert -> Seam -> Write Plan
 
-Status: Proposed
+Status: In Progress
 Date: 2026-04-13
 Owner: BookForge Outline/Writing Pipeline
+
+## Progress Update (2026-04-17)
+Implemented and proven in the repo/workspace:
+- Transitional `workflow` CLI surface exists:
+  - `workflow init`
+  - `workflow status`
+  - `workflow freeze-section`
+  - `workflow lock-section`
+  - `workflow advance-section`
+- Canonical workflow artifacts now exist and are maintained:
+  - `outline.json`
+  - `snapshot_registry.json`
+  - `outline.thin.json`
+  - `outline.toc.json`
+  - `outline.index.json`
+  - `outline.appendix.json`
+  - per-section boundary artifacts
+- Full end-to-end lifecycle has been proven for one real section in `criticulous_the_rng_hellscape`:
+  - Chapter 1, Section 1 moved `stub -> frozen -> locked`
+  - prose and meta were generated for all section scenes
+  - state cursor advanced to the next expected scene
+- Chapter 1, Section 2 has also been exercised far enough to prove the next real runtime failure class:
+  - scenes 4 and 5 completed under the new workflow
+  - scene 6 exposed a real `state_patch` normalization/schema bug in live writer execution
+  - this confirms the remaining gap is now inside downstream write/state handling, not the section workflow surface itself
+- Chapter 1 is now fully section-locked end to end:
+  - Section 3 completed under the workflow
+  - Section 4 completed under the workflow
+  - cross-section and chapter-rollup behavior have now been exercised beyond the bootstrap section
+- Chapter 2, Section 1 is now frozen and locked under the new workflow:
+  - this proves cross-chapter boundary handoff is viable
+  - this also proves the dynamic section-draft fallback is viable once section-scoped validation accepts mixed-state chapter payloads
+- Chapter 2, Section 2 is now frozen and locked under the new workflow.
+- Chapter 2, Section 3 has been frozen and partially advanced under the new workflow:
+  - the active section is resumable after shell/provider timeouts
+  - the dominant issue at this point is runtime duration, not a new correctness defect
+
+Still open:
+- section drafting must become first-class so the workflow does not depend on pre-existing chapter draft artifacts
+- deeper outline phase refactor (native section-scoped 03/04A/04B/04C/04D/05/06) remains in progress
+- writer/runtime model policy should explicitly support mixed-cost execution such as high-reasoning planning with cheaper execution
+
+Operational findings from the first live section runs:
+- The section workflow is now real enough to expose downstream defects under production-like execution instead of only outline-only artifacts.
+- The current speed/cost workaround is temporary env-level model overrides. The intended steady-state policy is explicit turn-aware model routing, likely allowing higher-reasoning T1 planning with cheaper T2 execution where safe.
+- Live failures must now be classified into three buckets during section advancement:
+  - transport/provider failures (`503`, dropped connections)
+  - token-budget failures (`MAX_TOKENS`, truncated JSON/prose)
+  - real pipeline defects (schema mismatch, normalization gaps, apply-time invariants)
+- Resume behavior is now part of the operational contract:
+  - long-running section advancement may legitimately time out at the shell/process boundary even when the workflow itself is healthy
+  - resumable progress has been proven across a partially completed frozen section
+  - the workflow wrapper can now be treated as restart-safe for live advancement, not just outline bootstrap
+- Progress should continue section by section under the workflow wrapper, with plan updates reflecting each newly discovered defect class and each newly proven lifecycle stage.
+
+Concrete fixes completed during live workflow execution:
+- `state_patch` normalization now converts object-style continuity removals into schema-valid string-array remove operations.
+- continuity bag application now supports targeted list-item removal semantics (for example, removing a single status by name rather than dropping the whole list).
+- section-scoped phase 03 validation no longer rejects a single-chapter subset just because the local payload chapter id is not `1`.
+- mixed-state section validation now allows later sections to remain explicit `stub` sections with empty scene arrays during active section drafting.
+- section-scoped phase 03 `T1` is now non-fatal when the provider ignores the small planning contract and emits malformed/truncated content; the workflow proceeds to `T2` instead of aborting on advisory planning output.
 
 ## Summary
 Shift the pipeline from chapter-sized outline execution to section-sized chunks so outline drafting, seam insertion, seam repair, and prose writing happen in smaller, cheaper, and more stable units. Keep a thin global outline view available at all times, but only thicken the active section chunk while it is being worked.
@@ -28,6 +89,17 @@ This plan is intended to reduce the blast radius of outline failures, lower toke
 - No deterministic semantic healing; deterministic normalization is allowed only when truth is unambiguous.
 - No silent drops of model-created data.
 - Active work happens in bounded section windows, not whole-book rewrites.
+
+## Canonical State Retention
+The canonical book state is never reduced or discarded.
+
+Rules:
+- Scope reduction applies to mutation rights and prompt/context weight, not to durable state retention.
+- `outline.json` remains the merged canonical outline for downstream compatibility.
+- Frozen and locked sections remain fully present in canonical outline, registry, boundary, prose, and state artifacts.
+- Only the active section is exposed as the thick mutable working set for outline and prose operations.
+- Prior sections are read-only continuity context.
+- Future sections remain explicit stubs until drafted.
 
 ## Core Terms
 Draftable
@@ -106,6 +178,15 @@ Rules:
 11. Run the writing loop for the frozen section.
 12. Promote registries/state and lock section at S4.
 13. Advance to next section.
+
+## Transitional Workflow Surface
+The first implementation cut does not require an immediate full rewrite of every outline phase into native section-scoped execution.
+
+Transitional rules:
+- The new primary user-facing surface is a section workflow layer that links outline freeze -> write -> lock.
+- Legacy `outline generate` and `run` commands remain available as lower-level/batch tools.
+- The workflow layer may initially freeze sections from already-generated chapter artifacts while the deeper phase refactor is in progress.
+- This is acceptable as long as the canonical state, boundary artifact, freeze/lock semantics, and writer-facing section lifecycle are already enforced.
 
 ## Boundary Ownership
 Section boundaries need explicit ownership so we do not violate the "no reopen" decision.
@@ -253,6 +334,22 @@ Known ordering dependency:
   - next section stub
   - relevant registries and state slices
 - `outline.thin.json` is navigation context only; it is never the source of truth for the active section.
+
+## Command and Help Surface Implications
+The command model changes from "batch outline, then batch write" to linked section lifecycle transitions.
+
+Primary workflow intent:
+- bootstrap workflow state from outline artifacts
+- freeze the next section into canonical outline state
+- write the frozen section
+- lock the written section
+- advance forward
+
+Implications:
+- Outline and writing are no longer presented as isolated top-level stages for the primary workflow.
+- User-facing docs must explain that only one section is writable at a time, while the full canonical book state remains retained.
+- `run` becomes a lower-level scene loop that can still be called directly, but the preferred iterative path is the workflow wrapper.
+- Partial chapter prose is valid transitional state; chapter compilation may be provisional until all chapter sections are locked.
 
 ## Scope Boundaries
 - Insertions occur only in the active section.

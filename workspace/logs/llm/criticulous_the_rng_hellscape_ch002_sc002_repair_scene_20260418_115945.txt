@@ -1,0 +1,221 @@
+PROSE:
+Artie and Fizz left the sprawling merchant stalls of the market behind, their footsteps echoing on the cobblestones as they approached the Starter Quest Hub. The bustling plaza was a chaotic mess of novice adventurers waving wooden swords, but Fizz floated ahead, a tiny, ethereal system entity cutting a path toward a quieter corner of the hub. Her glowing neon pink hair and digital blue eyes pulsed with light as she zipped over the crowd.
+
+Artie followed, pushing his messy brown hair out of his muddy brown eyes. His pale, skinny-fat frame looked entirely out of place among the armored warriors, his cheap suit offering zero protection. The cursed Participation Trophy gleamed mockingly on his lapel, right next to his mundane Employee ID Badge.
+
+"There," Fizz said, her digital voice chiming. "If you can't buy armor, we have to exploit the tutorial mechanics."
+
+Artie rubbed his temples. "Exploit how? I have zero gold and the durability of wet tissue paper."
+
+"Look at that," Fizz instructed, pointing a pixelated finger at a massive, iron-banded trunk sitting on a raised wooden platform. A painted warning sign was nailed to the base.
+
+Artie approached the heavy display chest. A blue holographic window hovered just above the reinforced lid.
+
+[Starter Quest: The Unbreakable Lock]
+[Objective: Learn the value of specialized skills by attempting to open this chest.]
+[Requirement: Lockpicking Lvl 5 or Iron Key]
+[Reward: 10 XP, Cloak of the Cowardly Lion]
+
+"It's a lesson in failure," Fizz explained, zipping around the padlock. "The System puts this here to teach newbies that they can't brute-force everything. The lock is functionally unbreakable for anyone under level ten. But the cloak inside? It’s a defensive item meant for squishy rogue builds."
+
+Artie stared at the massive steel padlock. "So, I need to find a rogue?"
+
+"No," Fizz said, her digital eyes narrowing into glowing crescents. "You are a walking system error. You don't need lockpicking."
+
+Artie pulled up his own status screen, the grim reality of his glitched build flashing before his eyes.
+
+[HP: 1/1 | Stamina: 10/10 | Crit Rate: 100%]
+
+He looked from his pathetic single hit point to the guaranteed critical strike. The System said the lock was unbreakable because it had a massive health pool and high defense. But a critical hit bypassed standard damage mitigation. If a simple kick could vaporize a slime and deal ninety-nine thousand damage, what would it do to a piece of tutorial hardware?
+
+It was a terrible idea. If the chest had a damage reflection mechanic, his 1 HP would instantly vanish, sending him back to the void. But standing around in an oversized suit with a cursed golden pin wasn't going to keep him alive either.
+
+He needed that cloak.
+
+Artie glanced around the plaza, noticing a discarded Rusty Iron Dagger lying near a battered training dummy. He scooped it up, the coarse metal heavy in his right hand. It wasn't much, but it was better than breaking his knuckles.
+
+Making his decision, Artie stepped past the painted warning sign. He gripped the hilt tightly, his eyes locked on the heavy iron padlock. Taking a deep breath, Artie prepared to strike the unbreakable chest.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "CHAR_ARTIE",
+      "CHAR_FIZZ"
+    ],
+    "location": "LOC_OAKHAVEN_STARTER_QUEST_HUB",
+    "open_threads": [
+      "THREAD_GLITCH",
+      "THREAD_VANE_RIVALRY",
+      "THREAD_CURSED_LOOT"
+    ]
+  },
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_rusty_iron_dagger",
+      "set": {
+        "name": "Rusty Iron Dagger",
+        "display_name": "Rusty Iron Dagger",
+        "type": "weapon",
+        "owner_scope": "world",
+        "custodian": "world",
+        "linked_threads": [],
+        "state_tags": [],
+        "last_seen": {
+          "chapter": 2,
+          "scene": 2,
+          "location": "LOC_OAKHAVEN_STARTER_QUEST_HUB"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_rusty_iron_dagger",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "CHAR_ARTIE"
+      },
+      "reason": "Artie picked up the discarded dagger from the ground."
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "chapter": 2,
+      "scene": 2,
+      "inventory": [
+        {
+          "item": "ITEM_wallet",
+          "container": "pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_employee_id",
+          "container": "neck_lanyard",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_participation_trophy",
+          "container": "lapel",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_rusty_iron_dagger",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "pocket_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_wallet"
+          ]
+        },
+        {
+          "container": "neck_lanyard",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_employee_id"
+          ]
+        },
+        {
+          "container": "lapel",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_participation_trophy"
+          ]
+        },
+        {
+          "container": "hand_right",
+          "owner": "CHAR_ARTIE",
+          "contents": [
+            "ITEM_rusty_iron_dagger"
+          ]
+        }
+      ],
+      "invariants_add": [
+        "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=held, container=hand_right)",
+        "container: hand_right (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])"
+      ],
+      "persona_updates": [
+        "Artie decides to exploit his 100% Critical Hit Rate to bypass tutorial mechanics."
+      ]
+    },
+    {
+      "character_id": "CHAR_FIZZ",
+      "chapter": 2,
+      "scene": 2,
+      "inventory": [],
+      "containers": [],
+      "invariants_add": [],
+      "persona_updates": [
+        "Fizz actively encourages Artie to break the game's intended mechanics to survive."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "CHAR_ARTIE",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 1
+          },
+          "stamina": {
+            "current": 10,
+            "max": 10
+          },
+          "crit_rate": {
+            "current": 100,
+            "max": 100
+          }
+        }
+      },
+      "reason": "Reaffirming stats to match UI snapshot."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie and Fizz arrived at the Starter Quest Hub.",
+      "Fizz pointed out an 'unbreakable' tutorial chest containing the Cloak of the Cowardly Lion.",
+      "Artie picked up a discarded Rusty Iron Dagger.",
+      "Artie decided to use his guaranteed critical hit to break the chest's lock."
+    ],
+    "key_events": [
+      "Artie and Fizz relocated to the Starter Quest Hub.",
+      "Fizz identified a tutorial chest meant to teach lockpicking.",
+      "Artie acquired a Rusty Iron Dagger from the ground.",
+      "Artie prepared to strike the unbreakable lock, hoping his 100% crit rate would bypass its defenses."
+    ],
+    "must_stay_true": [
+      "REMOVE: Artie is physically present in Oakhaven Market.",
+      "REMOVE: Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+      "Artie is physically present at the Starter Quest Hub.",
+      "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=held, container=hand_right)",
+      "container: hand_right (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+      "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+      "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+      "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+      "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+      "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+      "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+      "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+      "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+      "Artie has 1 max HP and 1 current HP.",
+      "Artie has 10 max Stamina and 10 current Stamina.",
+      "Artie has a 100 percent Critical Hit Rate.",
+      "Artie has 5 XP."
+    ],
+    "chapter_so_far_add": [
+      "Fizz led Artie to the Starter Quest Hub to exploit a tutorial chest.",
+      "Artie picked up a Rusty Iron Dagger and prepared to break the chest's unbreakable lock."
+    ]
+  }
+}

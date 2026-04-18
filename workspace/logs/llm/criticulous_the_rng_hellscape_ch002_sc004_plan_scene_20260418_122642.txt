@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_002_004",
+  "chapter": 2,
+  "scene": 4,
+  "scene_target": "Artie realizes the cloak's stealth is flawed but his 100% crit still applies to basic attacks.",
+  "goal": "Test the Cloak of the Cowardly Lion to sneak past high-level mobs in the crypts.",
+  "conflict": "The cloak's stealth is flawed, causing Artie to accidentally aggro a skeleton.",
+  "required_callbacks": [],
+  "constraints": [
+    "target_words: 2000"
+  ],
+  "end_condition": "Artie aggros a skeleton and prepares to defend himself.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_OAKHAVEN_ALLEYWAY",
+  "location_end_id": "LOC_OAKHAVEN_CRYPTS",
+  "location_start_label": "Oakhaven Alleyway",
+  "location_end_label": "Oakhaven Crypts",
+  "location_start": "An alleyway behind the Starter Quest Hub.",
+  "location_end": "The Oakhaven Crypts.",
+  "handoff_mode": "flee_to_dungeon",
+  "constraint_state": "processed",
+  "transition_in_text": "Artie and Fizz evade the guards and slip into the Oakhaven Crypts to test his new gear.",
+  "transition_in_anchors": [
+    "evade",
+    "guards",
+    "slip",
+    "crypts",
+    "test"
+  ],
+  "transition_out_text": "Artie stands exposed as the skeleton turns its glowing eyes toward him.",
+  "transition_out_anchors": [
+    "exposed",
+    "skeleton",
+    "glowing_eyes",
+    "aggro"
+  ],
+  "consumes_outcome_from": "2:3",
+  "hands_off_to": "2:5",
+  "seam_score": 85,
+  "seam_resolution": "micro_scene",
+  "cast_present": [
+    "Artie",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "THREAD_GLITCH",
+    "THREAD_CURSED_LOOT"
+  ],
+  "required_in_custody": [
+    "ITEM_cloak_of_the_cowardly_lion",
+    "ITEM_rusty_iron_dagger"
+  ],
+  "required_scene_accessible": [
+    "ITEM_cloak_of_the_cowardly_lion",
+    "ITEM_rusty_iron_dagger"
+  ],
+  "required_visible_on_page": [
+    "ITEM_cloak_of_the_cowardly_lion"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "travel_arrival",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "statuses"
+  ],
+  "ui_mechanics_expected": [
+    "Stealth",
+    "Aggro",
+    "HP"
+  ]
+}

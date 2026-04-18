@@ -1,0 +1,293 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_002_004",
+  "chapter": 2,
+  "scene": 4,
+  "scene_target": "Artie realizes the cloak's stealth is flawed but his 100% crit still applies to basic attacks.",
+  "goal": "Test the Cloak of the Cowardly Lion to sneak past high-level mobs in the crypts.",
+  "conflict": "The cloak's stealth is flawed, causing Artie to accidentally aggro a skeleton.",
+  "required_callbacks": [],
+  "constraints": [
+    "target_words: 2000"
+  ],
+  "end_condition": "Artie aggros a skeleton and prepares to defend himself.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_OAKHAVEN_ALLEYWAY",
+  "location_end_id": "LOC_OAKHAVEN_CRYPTS",
+  "location_start_label": "Oakhaven Alleyway",
+  "location_end_label": "Oakhaven Crypts",
+  "location_start": "An alleyway behind the Starter Quest Hub.",
+  "location_end": "The Oakhaven Crypts.",
+  "handoff_mode": "flee_to_dungeon",
+  "constraint_state": "processed",
+  "transition_in_text": "Artie and Fizz evade the guards and slip into the Oakhaven Crypts to test his new gear.",
+  "transition_in_anchors": [
+    "evade",
+    "guards",
+    "slip",
+    "crypts",
+    "test"
+  ],
+  "transition_out_text": "Artie stands exposed as the skeleton turns its glowing eyes toward him.",
+  "transition_out_anchors": [
+    "exposed",
+    "skeleton",
+    "glowing_eyes",
+    "aggro"
+  ],
+  "consumes_outcome_from": "2:3",
+  "hands_off_to": "2:5",
+  "seam_score": 85,
+  "seam_resolution": "micro_scene",
+  "cast_present": [
+    "Artie",
+    "Fizz"
+  ],
+  "cast_present_ids": [
+    "CHAR_ARTIE",
+    "CHAR_FIZZ"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [],
+  "required_in_custody": [
+    "ITEM_cloak_of_the_cowardly_lion",
+    "ITEM_rusty_iron_dagger"
+  ],
+  "required_scene_accessible": [
+    "ITEM_cloak_of_the_cowardly_lion",
+    "ITEM_rusty_iron_dagger"
+  ],
+  "required_visible_on_page": [
+    "ITEM_cloak_of_the_cowardly_lion"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "travel_arrival",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "statuses"
+  ],
+  "ui_mechanics_expected": [
+    "Stealth",
+    "Aggro",
+    "HP"
+  ],
+  "prose_path": "draft/chapters/ch_002/scene_004.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "character_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "scene": 4,
+        "chapter": 2,
+        "persona_updates": [
+          "Artie realizes the Cloak of the Cowardly Lion has a severe thematic drawback that ruins its stealth."
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "container": "pocket_right",
+            "item": "ITEM_wallet",
+            "status": "stowed"
+          },
+          {
+            "container": "neck_lanyard",
+            "item": "ITEM_employee_id",
+            "status": "equipped"
+          },
+          {
+            "container": "lapel",
+            "item": "ITEM_participation_trophy",
+            "status": "equipped"
+          },
+          {
+            "container": "hand_right",
+            "item": "ITEM_rusty_iron_dagger",
+            "status": "held"
+          },
+          {
+            "container": "shoulders",
+            "item": "ITEM_cloak_of_the_cowardly_lion",
+            "status": "equipped"
+          }
+        ],
+        "containers": [
+          {
+            "container": "pocket_right",
+            "contents": [
+              "ITEM_wallet"
+            ],
+            "owner": "CHAR_ARTIE"
+          },
+          {
+            "container": "neck_lanyard",
+            "contents": [
+              "ITEM_employee_id"
+            ],
+            "owner": "CHAR_ARTIE"
+          },
+          {
+            "container": "lapel",
+            "contents": [
+              "ITEM_participation_trophy"
+            ],
+            "owner": "CHAR_ARTIE"
+          },
+          {
+            "container": "hand_right",
+            "contents": [
+              "ITEM_rusty_iron_dagger"
+            ],
+            "owner": "CHAR_ARTIE"
+          },
+          {
+            "container": "shoulders",
+            "contents": [
+              "ITEM_cloak_of_the_cowardly_lion"
+            ],
+            "owner": "CHAR_ARTIE"
+          }
+        ]
+      }
+    ],
+    "character_continuity_system_updates": [
+      {
+        "character_id": "CHAR_ARTIE",
+        "scene": 4,
+        "chapter": 2,
+        "set": {
+          "reason": "Artie entered the crypts, lost Safe Zone status, and aggroed a skeleton.",
+          "stats": {
+            "crit_rate": {
+              "current": 100,
+              "max": 100
+            },
+            "hp": {
+              "current": 1,
+              "max": 1
+            },
+            "stamina": {
+              "current": 10,
+              "max": 10
+            }
+          },
+          "statuses": [
+            {
+              "active": true,
+              "name": "Dead",
+              "source": "environmental_hazard"
+            },
+            {
+              "active": true,
+              "name": "Cursed",
+              "source": "ITEM_participation_trophy"
+            },
+            {
+              "active": true,
+              "name": "Aggro: Skeletal Guard",
+              "source": "combat"
+            }
+          ]
+        },
+        "delta": {},
+        "remove": []
+      }
+    ],
+    "world_updates": {
+      "cast_present": [
+        "CHAR_ARTIE",
+        "CHAR_FIZZ"
+      ],
+      "location": "LOC_OAKHAVEN_CRYPTS",
+      "open_threads": [
+        "THREAD_GLITCH",
+        "THREAD_VANE_RIVALRY",
+        "THREAD_CURSED_LOOT"
+      ]
+    },
+    "summary_update": {
+      "last_scene": [
+        "Artie and Fizz entered the Oakhaven Crypts to test the Cloak of the Cowardly Lion.",
+        "Artie realized the cloak's stealth modifier was flawed, causing it to whimper.",
+        "Artie accidentally stepped on a bone and aggroed a skeletal guard."
+      ],
+      "key_events": [
+        "Artie lost his Safe Zone Active status upon entering the crypts.",
+        "The Cloak of the Cowardly Lion's flawed stealth caused it to whimper in fear.",
+        "Artie aggroed a Level 8 Skeletal Guard."
+      ],
+      "chapter_so_far_add": [
+        "Artie entered the Oakhaven Crypts and aggroed a Skeletal Guard due to his cloak's flawed stealth."
+      ],
+      "must_stay_true": [
+        "REMOVE: Artie and Fizz are fleeing into an alleyway behind the Starter Quest Hub.",
+        "Artie and Fizz are currently in the Oakhaven Crypts facing a Skeletal Guard.",
+        "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+        "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+        "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+        "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+        "Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+        "Artie has 5 XP.",
+        "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+        "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+        "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+        "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+        "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=held, container=hand_right)",
+        "container: hand_right (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+        "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+        "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+        "milestone: cloak_acquired = DONE"
+      ]
+    }
+  },
+  "scene_summary": [
+    "Artie and Fizz entered the Oakhaven Crypts to test the Cloak of the Cowardly Lion.",
+    "Artie realized the cloak's stealth modifier was flawed, causing it to whimper.",
+    "Artie accidentally stepped on a bone and aggroed a skeletal guard."
+  ],
+  "key_events": [
+    "Artie lost his Safe Zone Active status upon entering the crypts.",
+    "The Cloak of the Cowardly Lion's flawed stealth caused it to whimper in fear.",
+    "Artie aggroed a Level 8 Skeletal Guard."
+  ],
+  "must_stay_true": [
+    "REMOVE: Artie and Fizz are fleeing into an alleyway behind the Starter Quest Hub.",
+    "Artie and Fizz are currently in the Oakhaven Crypts facing a Skeletal Guard.",
+    "inventory: CHAR_ARTIE -> Leather Wallet (status=stowed, container=pocket_right)",
+    "inventory: CHAR_ARTIE -> Employee ID Badge (status=equipped, container=neck_lanyard)",
+    "container: pocket_right (owner=CHAR_ARTIE, contents=[ITEM_wallet])",
+    "container: neck_lanyard (owner=CHAR_ARTIE, contents=[ITEM_employee_id])",
+    "Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate.",
+    "Artie has 5 XP.",
+    "inventory: CHAR_ARTIE -> Participation Trophy (status=equipped, container=lapel)",
+    "container: lapel (owner=CHAR_ARTIE, contents=[ITEM_participation_trophy])",
+    "inventory: CHAR_VANE -> Obsidian Greatsword (status=equipped, container=back_scabbard)",
+    "container: back_scabbard (owner=CHAR_VANE, contents=[ITEM_vane_greatsword])",
+    "inventory: CHAR_ARTIE -> Rusty Iron Dagger (status=held, container=hand_right)",
+    "container: hand_right (owner=CHAR_ARTIE, contents=[ITEM_rusty_iron_dagger])",
+    "inventory: CHAR_ARTIE -> Cloak of the Cowardly Lion (status=equipped, container=shoulders)",
+    "container: shoulders (owner=CHAR_ARTIE, contents=[ITEM_cloak_of_the_cowardly_lion])",
+    "milestone: cloak_acquired = DONE"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "fail",
+    "issues": [
+      {
+        "code": "pipeline_state_incoherent",
+        "message": "State snapshot for Artie disagrees with must_stay_true HP 10/10.",
+        "severity": "error",
+        "evidence": {
+          "line": 8,
+          "excerpt": "Artie has 1/1 HP, 10/10 Stamina, and a 100% Critical Hit Rate."
+        }
+      }
+    ]
+  },
+  "write_attempts": 3,
+  "updated_at": "2026-04-18T12:39:15Z"
+}
