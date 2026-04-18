@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from bookforge.llm.client import LLMClient
+from bookforge.llm.logging import prior_response_content_array_metadata
 from bookforge.llm.types import Message
 from bookforge.pipeline.config import _state_repair_max_tokens
 from bookforge.pipeline.durable import _durable_state_context
@@ -108,6 +109,11 @@ def _state_repair(
             t2_messages = list(base_messages)
             if t1_parts and str(getattr(client, "provider", "")).lower() == "gemini":
                 t2_messages.append({"role": "assistant", "parts": t1_parts})
+            t2_log_extra = {
+                **log_extra,
+                "turn_id": "T2",
+                **prior_response_content_array_metadata(t1_parts),
+            }
             t2_messages.append({
                 "role": "user",
                 "content": (
@@ -129,7 +135,7 @@ def _state_repair(
                 temperature=0.2,
                 max_tokens=_state_repair_max_tokens(),
                 thinking_level=t2_level,
-                log_extra={**log_extra, "turn_id": "T2"},
+                log_extra=t2_log_extra,
             )
             patch = _extract_json(response.text)
             break
@@ -149,6 +155,11 @@ def _state_repair(
             retry_messages = list(base_messages)
             if t1_parts and str(getattr(client, "provider", "")).lower() == "gemini":
                 retry_messages.append({"role": "assistant", "parts": t1_parts})
+            t2_log_extra = {
+                **log_extra,
+                "turn_id": "T2",
+                **prior_response_content_array_metadata(t1_parts),
+            }
             retry_messages.append({
                 "role": "user",
                 "content": (
@@ -169,7 +180,7 @@ def _state_repair(
                 temperature=0.2,
                 max_tokens=_state_repair_max_tokens(),
                 thinking_level=t2_level,
-                log_extra={**log_extra, "turn_id": "T2"},
+                log_extra=t2_log_extra,
             )
             patch = _extract_json(response.text)
             schema_attempt += 1

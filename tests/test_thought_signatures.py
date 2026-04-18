@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from bookforge.llm.logging import log_llm_response
+from bookforge.llm.logging import log_llm_response, prior_response_content_array_metadata
 from bookforge.llm.types import LLMResponse
 
 
@@ -52,3 +52,20 @@ def test_signature_active_intent_outcome(tmp_path: Path) -> None:
     assert phase_bucket["intent"]["signature_id"] != phase_bucket["outcome"]["signature_id"]
     assert phase_bucket["intent"]["turn_id"] == "T1"
     assert phase_bucket["outcome"]["turn_id"] == "T2"
+
+
+def test_prior_response_content_array_metadata_extracts_signature_details() -> None:
+    metadata = prior_response_content_array_metadata(
+        [
+            {"text": "plan"},
+            {"text": "hidden", "thoughtSignature": "sig-1"},
+        ]
+    )
+
+    assert metadata["prior_response_content_array_reused"] is True
+    assert metadata["prior_response_content_array_source"] == "prior_turn_model_response"
+    assert metadata["prior_response_content_array_part_count"] == 2
+    assert metadata["prior_response_content_array_signature_count"] == 1
+    assert metadata["prior_response_content_array_signature_part_indexes"] == [1]
+    assert isinstance(metadata["prior_response_content_array_sha256"], str)
+    assert len(metadata["prior_response_content_array_sha256"]) == 64

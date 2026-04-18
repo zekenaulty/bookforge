@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 import re
 
 from bookforge.llm.client import LLMClient
+from bookforge.llm.logging import prior_response_content_array_metadata
 from bookforge.llm.types import Message
 from bookforge.pipeline.config import _lint_max_tokens, _lint_mode
 from bookforge.pipeline.durable import _durable_state_context
@@ -315,6 +316,11 @@ def _lint_scene(
             t2_messages = list(base_messages)
             if t1_parts and str(getattr(client, "provider", "")).lower() == "gemini":
                 t2_messages.append({"role": "assistant", "parts": t1_parts})
+            t2_log_extra = {
+                **log_extra,
+                "turn_id": "T2",
+                **prior_response_content_array_metadata(t1_parts),
+            }
             t2_messages.append({
                 "role": "user",
                 "content": (
@@ -336,7 +342,7 @@ def _lint_scene(
                 temperature=0.0,
                 max_tokens=_lint_max_tokens(),
                 thinking_level=t2_level,
-                log_extra={**log_extra, "turn_id": "T2"},
+                log_extra=t2_log_extra,
             )
             report = _extract_json(response.text)
             break

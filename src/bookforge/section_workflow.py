@@ -11,6 +11,7 @@ from bookforge.llm.errors import LLMRequestError
 from bookforge.llm.factory import get_llm_client, resolve_model
 from bookforge.llm.logging import log_llm_error, log_llm_response, should_log_llm
 from bookforge.outline import PHASE03_T1_INSTRUCTION, PHASE03_T2_INSTRUCTION
+from bookforge.pipeline.chapter_seam import finalize_locked_chapter
 from bookforge.phases.outline import context as outline_context
 from bookforge.phases.outline import get_handler
 from bookforge.prompt.renderer import render_template_file
@@ -207,7 +208,18 @@ def _build_snapshot_registry(book_id: str, run_id: str, outline: Dict[str, Any])
                     "boundary_artifact": None,
                 }
             )
-        chapters_payload.append({"chapter_id": chapter_id, "title": str(chapter.get("title") or "").strip(), "sections": section_payloads})
+        chapters_payload.append(
+            {
+                "chapter_id": chapter_id,
+                "title": str(chapter.get("title") or "").strip(),
+                "chapter_status": "in_progress",
+                "chapter_seam_report": None,
+                "chapter_provisional_markdown": None,
+                "chapter_final_markdown": None,
+                "chapter_candidate_markdown": None,
+                "sections": section_payloads,
+            }
+        )
     return {
         "schema_version": "section_workflow_v1",
         "book_id": book_id,
@@ -262,6 +274,20 @@ def _find_registry_section(registry: Dict[str, Any], chapter_id: int, section_id
             if current_section_id == section_id:
                 return section
     raise ValueError(f"Section not found in registry: {chapter_id}:{section_id}")
+
+
+def _find_registry_chapter(registry: Dict[str, Any], chapter_id: int) -> Dict[str, Any]:
+    chapters = registry.get("chapters") if isinstance(registry.get("chapters"), list) else []
+    for chapter in chapters:
+        if not isinstance(chapter, dict):
+            continue
+        try:
+            current_chapter_id = int(chapter.get("chapter_id"))
+        except (TypeError, ValueError):
+            continue
+        if current_chapter_id == chapter_id:
+            return chapter
+    raise ValueError(f"Chapter not found in registry: {chapter_id}")
 
 
 def _find_outline_section(outline: Dict[str, Any], chapter_id: int, section_id: int) -> Dict[str, Any]:
@@ -386,6 +412,7 @@ def _rebuild_views(book_root: Path, outline: Dict[str, Any], registry: Dict[str,
     chapters = outline.get("chapters") if isinstance(outline.get("chapters"), list) else []
     registry_chapters = registry.get("chapters") if isinstance(registry.get("chapters"), list) else []
     registry_map: Dict[Tuple[int, int], Dict[str, Any]] = {}
+    chapter_registry_map: Dict[int, Dict[str, Any]] = {}
     for chapter in registry_chapters:
         if not isinstance(chapter, dict):
             continue
@@ -393,6 +420,7 @@ def _rebuild_views(book_root: Path, outline: Dict[str, Any], registry: Dict[str,
             chapter_id = int(chapter.get("chapter_id"))
         except (TypeError, ValueError):
             continue
+        chapter_registry_map[chapter_id] = chapter
         sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
         for section in sections:
             if not isinstance(section, dict):
@@ -407,6 +435,7 @@ def _rebuild_views(book_root: Path, outline: Dict[str, Any], registry: Dict[str,
     toc_chapters: List[Dict[str, Any]] = []
     index_sections: List[Dict[str, Any]] = []
     appendix_sections: List[Dict[str, Any]] = []
+    appendix_chapters: List[Dict[str, Any]] = []
 
     for chapter in chapters:
         if not isinstance(chapter, dict):
@@ -415,6 +444,7 @@ def _rebuild_views(book_root: Path, outline: Dict[str, Any], registry: Dict[str,
             chapter_id = int(chapter.get("chapter_id"))
         except (TypeError, ValueError):
             continue
+        registry_chapter = chapter_registry_map.get(chapter_id, {})
         chapter_sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
         thin_sections: List[Dict[str, Any]] = []
         toc_sections: List[Dict[str, Any]] = []
@@ -480,6 +510,7 @@ def _rebuild_views(book_root: Path, outline: Dict[str, Any], registry: Dict[str,
                 "chapter_id": chapter_id,
                 "title": str(chapter.get("title") or "").strip(),
                 "goal": str(chapter.get("goal") or "").strip(),
+                "chapter_status": str(registry_chapter.get("chapter_status") or "in_progress").strip(),
                 "sections": thin_sections,
             }
         )
@@ -487,7 +518,20 @@ def _rebuild_views(book_root: Path, outline: Dict[str, Any], registry: Dict[str,
             {
                 "chapter_id": chapter_id,
                 "title": str(chapter.get("title") or "").strip(),
+                "chapter_status": str(registry_chapter.get("chapter_status") or "in_progress").strip(),
+                "chapter_seam_report": registry_chapter.get("chapter_seam_report"),
+                "chapter_final_markdown": registry_chapter.get("chapter_final_markdown"),
                 "sections": toc_sections,
+            }
+        )
+        appendix_chapters.append(
+            {
+                "chapter_id": chapter_id,
+                "chapter_status": str(registry_chapter.get("chapter_status") or "in_progress").strip(),
+                "chapter_seam_report": registry_chapter.get("chapter_seam_report"),
+                "chapter_provisional_markdown": registry_chapter.get("chapter_provisional_markdown"),
+                "chapter_final_markdown": registry_chapter.get("chapter_final_markdown"),
+                "chapter_candidate_markdown": registry_chapter.get("chapter_candidate_markdown"),
             }
         )
 
@@ -518,6 +562,7 @@ def _rebuild_views(book_root: Path, outline: Dict[str, Any], registry: Dict[str,
             "outline_pipeline_latest": "outline/outline_pipeline_report_latest.json",
             "snapshot_registry": "outline/snapshot_registry.json",
         },
+        "chapters": appendix_chapters,
         "sections": appendix_sections,
     }
     return {
@@ -1061,6 +1106,49 @@ def _next_cursor_after_section(registry: Dict[str, Any], chapter_id: int, sectio
     return next_chapter, 1
 
 
+def _chapter_all_sections_locked(registry: Dict[str, Any], chapter_id: int) -> bool:
+    chapter = _find_registry_chapter(registry, chapter_id)
+    sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
+    seen = False
+    for section in sections:
+        if not isinstance(section, dict):
+            continue
+        seen = True
+        if str(section.get("status") or "").strip().lower() != "locked":
+            return False
+    return seen
+
+
+def _update_chapter_finalization_fields(
+    registry: Dict[str, Any],
+    chapter_id: int,
+    chapter_finalization: Dict[str, Any],
+) -> None:
+    registry_chapter = _find_registry_chapter(registry, chapter_id)
+    registry_chapter["chapter_status"] = str(chapter_finalization.get("status") or "attention_required").strip()
+    registry_chapter["chapter_seam_report"] = chapter_finalization.get("report_path")
+    registry_chapter["chapter_provisional_markdown"] = chapter_finalization.get("provisional_path")
+    registry_chapter["chapter_final_markdown"] = chapter_finalization.get("final_path")
+    registry_chapter["chapter_candidate_markdown"] = chapter_finalization.get("candidate_path")
+
+
+def finalize_chapter_from_locked_sections(
+    workspace: Path,
+    book_id: str,
+    chapter_id: int,
+) -> Dict[str, Any]:
+    book_root, _, _, outline, registry = _ensure_initialized(workspace=workspace, book_id=book_id, run_id=None)
+    if not _chapter_all_sections_locked(registry, chapter_id):
+        raise ValueError(f"Chapter {chapter_id} is not ready for finalization; all sections must be locked first.")
+    chapter_finalization = finalize_locked_chapter(book_root, outline, chapter_id)
+    _update_chapter_finalization_fields(registry, chapter_id, chapter_finalization)
+    paths = _write_workflow_state(book_root, outline, registry)
+    result = dict(chapter_finalization)
+    result["outline_path"] = str(paths["outline"])
+    result["registry_path"] = str(paths["registry"])
+    return result
+
+
 def lock_section_from_written_state(
     workspace: Path,
     book_id: str,
@@ -1110,6 +1198,17 @@ def lock_section_from_written_state(
     outline_section["status"] = "locked"
     registry_section["status"] = "locked"
     registry["active_section"] = None
+    registry_chapter = _find_registry_chapter(registry, chapter_id)
+    registry_chapter["chapter_status"] = "in_progress"
+    registry_chapter["chapter_seam_report"] = None
+    registry_chapter["chapter_provisional_markdown"] = None
+    registry_chapter["chapter_final_markdown"] = None
+    registry_chapter["chapter_candidate_markdown"] = None
+
+    chapter_finalization: Optional[Dict[str, Any]] = None
+    if _chapter_all_sections_locked(registry, chapter_id):
+        chapter_finalization = finalize_locked_chapter(book_root, outline, chapter_id)
+        _update_chapter_finalization_fields(registry, chapter_id, chapter_finalization)
     state_path = book_root / "state.json"
     if state_path.exists():
         state = _read_json(state_path)
@@ -1126,6 +1225,7 @@ def lock_section_from_written_state(
         "scene_ref_start": f"{chapter_id}:{scene_start}",
         "scene_ref_end": f"{chapter_id}:{scene_end}",
         "outline_path": str(paths["outline"]),
+        "chapter_finalization": chapter_finalization,
         "updated": True,
     }
 
@@ -1174,7 +1274,16 @@ def get_section_workflow_status(
         "state_status": state.get("status"),
         "active_section": registry.get("active_section"),
         "source_run_id": registry.get("source_run_id"),
-        "chapters": chapters_summary,
+        "chapters": [
+            {
+                **chapter_row,
+                "chapter_status": str(_find_registry_chapter(registry, int(chapter_row.get("chapter_id") or 0)).get("chapter_status") or "in_progress").strip(),
+                "chapter_seam_report": _find_registry_chapter(registry, int(chapter_row.get("chapter_id") or 0)).get("chapter_seam_report"),
+                "chapter_final_markdown": _find_registry_chapter(registry, int(chapter_row.get("chapter_id") or 0)).get("chapter_final_markdown"),
+                "chapter_candidate_markdown": _find_registry_chapter(registry, int(chapter_row.get("chapter_id") or 0)).get("chapter_candidate_markdown"),
+            }
+            for chapter_row in chapters_summary
+        ],
     }
 
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 from bookforge.llm.client import LLMClient
+from bookforge.llm.logging import prior_response_content_array_metadata
 from bookforge.llm.types import Message
 from bookforge.pipeline.config import _preflight_max_tokens
 from bookforge.pipeline.llm_ops import _chat, _json_retry_count
@@ -100,6 +101,11 @@ def _scene_state_preflight(
         t2_messages = list(base_messages)
         if t1_parts and str(getattr(client, "provider", "")).lower() == "gemini":
             t2_messages.append({"role": "assistant", "parts": t1_parts})
+        t2_log_extra = {
+            **log_extra,
+            "turn_id": "T2",
+            **prior_response_content_array_metadata(t1_parts),
+        }
         t2_messages.append({
             "role": "user",
             "content": (
@@ -118,7 +124,7 @@ def _scene_state_preflight(
             temperature=0.2,
             max_tokens=_preflight_max_tokens(),
             thinking_level=t2_level,
-            log_extra={**log_extra, "turn_id": "T2"},
+            log_extra=t2_log_extra,
         )
         raw = response.text or ""
         patch = _extract_json(raw)

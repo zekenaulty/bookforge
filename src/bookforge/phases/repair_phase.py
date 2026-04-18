@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from bookforge.llm.client import LLMClient
+from bookforge.llm.logging import prior_response_content_array_metadata
 from bookforge.llm.types import Message
 from bookforge.pipeline.config import _repair_max_tokens
 from bookforge.pipeline.durable import _durable_state_context
@@ -105,6 +106,11 @@ def _repair_scene(
             t2_messages = list(base_messages)
             if t1_parts and str(getattr(client, "provider", "")).lower() == "gemini":
                 t2_messages.append({"role": "assistant", "parts": t1_parts})
+            t2_log_extra = {
+                **log_extra,
+                "turn_id": "T2",
+                **prior_response_content_array_metadata(t1_parts),
+            }
             t2_messages.append({
                 "role": "user",
                 "content": (
@@ -126,7 +132,7 @@ def _repair_scene(
                 temperature=0.4,
                 max_tokens=_repair_max_tokens(),
                 thinking_level=t2_level,
-                log_extra={**log_extra, "turn_id": "T2"},
+                log_extra=t2_log_extra,
             )
             prose, patch = _extract_prose_and_patch(response.text)
             appearance_check = _extract_appearance_check(response.text)
@@ -153,6 +159,11 @@ def _repair_scene(
             retry_messages = list(base_messages)
             if t1_parts and str(getattr(client, "provider", "")).lower() == "gemini":
                 retry_messages.append({"role": "assistant", "parts": t1_parts})
+            t2_log_extra = {
+                **log_extra,
+                "turn_id": "T2",
+                **prior_response_content_array_metadata(t1_parts),
+            }
             retry_messages.append({
                 "role": "user",
                 "content": (
@@ -173,7 +184,7 @@ def _repair_scene(
                 temperature=0.4,
                 max_tokens=_repair_max_tokens(),
                 thinking_level=t2_level,
-                log_extra={**log_extra, "turn_id": "T2"},
+                log_extra=t2_log_extra,
             )
             prose, patch = _extract_prose_and_patch(response.text)
             appearance_check = _extract_appearance_check(response.text)

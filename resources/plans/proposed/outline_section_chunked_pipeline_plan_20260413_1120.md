@@ -9,7 +9,7 @@ Current status:
 - The section workflow is real and has been exercised on live book data.
 - The writer-side phases already use a real two-turn pattern (`T1` think, `T2` execute).
 - On the Gemini path, `T2` already receives the prior `T1` assistant parts inside the same phase call chain.
-- That carry is still implicit runtime behavior, not yet an explicit thought-signature lineage contract.
+- That carry is still implicit runtime behavior, but the next step should stay minimal: verify and preserve the existing carry contract rather than building a second redundant parent-signature graph unless logs prove it is necessary.
 - The next major workflow gap is chapter assembly quality, not section production.
 
 What is proven:
@@ -25,13 +25,29 @@ What is now blocking:
   - duplicated beats
   - redundant item re-grounding
   - factual contradictions across section joins
-- Thought signatures are being captured and `T1` assistant parts are being carried into `T2`, but that lineage is not yet explicit or auditable in the workflow surface.
+- repeated restart energy where a new scene restates the close of the previous scene instead of flowing forward
+- overlap-heavy joins where the opening of scene N+1 partially rewrites the ending of scene N
+- Thought signatures are already doing real work; the concern is not lack of signatures, but making sure we do not build duplicate machinery around what the assistant-parts/signature system already gives us.
 
 Immediate next work:
-- Harden `T1 -> T2` lineage as an explicit contract in the writing loop.
-- Increase default lint/repair loop depth modestly.
+- Verify/preserve the existing `T1 -> T2` carry contract in the writing loop with the lightest instrumentation that gives us confidence.
+- Increase default lint/repair loop depth from `2` to `8`.
 - Add a chapter seam audit/repair/finalization layer after the last section in a chapter is locked.
 - Treat configured model selection as authoritative; do not use runtime model overrides as a throughput workaround.
+- Keep writable operational data architecture flexible, with a bias toward a separate writable-data repo/workspace rather than an in-repo `app/data` split.
+
+Progress since this state snapshot:
+- Default lint/repair pass depth has been raised to `8`.
+- Writer-side `T2` logging now records whether it reused the prior Gemini response-content array, including count/hash/signature metadata, without building a second signature lineage system.
+- A chapter seam finalization path now exists:
+  - final section lock can trigger chapter seam audit/repair/finalization
+  - `workflow finalize-chapter` can backfill existing locked chapters
+  - Chapter 1 in `criticulous_the_rng_hellscape` has already been finalized through this path
+- The current chapter seam implementation is deliberately conservative and deterministic:
+  - it removes scaffold-like seam paragraphs
+  - trims overlap-heavy opening sentences at joins
+  - emits a chapter seam report and only promotes `ch_XXX.md` when error-class seam issues are cleared
+- Full chapter state-delta validation at finalization time is still pending; current finalization is a seam-quality gate, not yet a full semantic/state gate.
 
 ## Progress Update (2026-04-17)
 Implemented and proven in the repo/workspace:
@@ -84,6 +100,7 @@ Operational findings from the first live section runs:
   - token-budget failures (`MAX_TOKENS`, truncated JSON/prose)
   - real pipeline defects (schema mismatch, normalization gaps, apply-time invariants)
 - Long-running workflow commands must use long timeout windows. Runtime duration is a real characteristic of the correctness-constrained pipeline, not evidence that the configured model should be overridden ad hoc.
+- Workflow command wrappers and test scripts should default to multi-hour timeout windows when driving real book generation; one-hour retry loops are operationally wrong for this system.
 - The configured model stack in workspace/env is authoritative. Future workflow automation must not silently or opportunistically replace it in order to chase throughput.
 - Resume behavior is now part of the operational contract:
   - long-running section advancement may legitimately time out at the shell/process boundary even when the workflow itself is healthy
@@ -118,6 +135,7 @@ This plan is intended to reduce the blast radius of outline failures, lower toke
 8. Phase 05 and Phase 06 remain active and run section-scoped before S3 freeze.
 9. The configured model stack for a run is authoritative; workflow code must not silently override it in order to chase throughput.
 10. Final chapter promotion requires a chapter seam audit/repair gate after the final section lock.
+11. Default lint/repair pass depth target is `8` unless runtime evidence justifies a lower configured value.
 
 ## Doctrine Alignment
 - LLM authors semantics; orchestrator routes and enforces deterministic invariants.
@@ -228,6 +246,13 @@ After the final section in a chapter reaches S4:
    - no forbidden edits escaped seam-local scope
 
 This is not cross-chapter linting. It is chapter-finalization quality control over artifacts introduced by section assembly.
+
+Priority seam classes for this pass:
+- restart energy where scene N+1 restates the close of scene N instead of advancing
+- overlap-heavy joins where adjacent scenes partially duplicate the same beat
+- tense blending introduced by assembled scene boundaries
+- scaffold leakage and scene-card style summary lines in final prose
+- repeated re-grounding of persistent items/entities purely because they remain present in state
 
 ## Transitional Workflow Surface
 The first implementation cut does not require an immediate full rewrite of every outline phase into native section-scoped execution.
@@ -479,9 +504,10 @@ The system is correctness-first on the scene/section critical path.
 Rules:
 - The write loop, lint/repair loop, and section workflow remain fundamentally serial across state boundaries.
 - Long-running workflow commands must be given long enough timeout windows to complete naturally.
+- Workflow automation and test harnesses should assume multi-hour execution windows for real multi-chapter/book runs.
 - The configured workspace/env model selection is authoritative for the run.
 - If future mixed-cost routing is introduced, it must be explicit configuration, not ad hoc command-level override.
-- `T1 -> T2` execution in writer phases must preserve the planning lineage from `T1` into `T2`; this is already true on Gemini via assistant-parts carry and must become an explicit logged contract.
+- `T1 -> T2` execution in writer phases must preserve the planning carry from `T1` into `T2`; this is already true on Gemini via assistant-parts carry and should be verified with the smallest possible amount of additional instrumentation.
 
 ## Partial Chapter Compile Contract
 Partially written chapters are valid workspace state, but not final compile units.
@@ -1100,7 +1126,7 @@ Dependencies:
 
 ### Story 8 - T1 -> T2 Signature Lineage Hardening
 Goal:
-- Turn the existing in-memory `T1 -> T2` carry into an explicit and auditable runtime contract for the writing loop.
+- Verify and preserve the existing `T1 -> T2` carry contract in the writing loop without building duplicate signature machinery unless runtime evidence shows it is needed.
 
 Primary files:
 - `src/bookforge/phases/write_phase.py`
@@ -1112,18 +1138,20 @@ Primary files:
 - `src/bookforge/llm/signatures.py`
 
 Scope:
-- Record the `T1` signature/assistant-parts lineage used by `T2`
-- Add explicit metadata such as `t1_signature_id` or `parent_signature_id` to runtime logs/artifacts where available
+- Keep the existing Gemini assistant-parts carry intact
+- Add only the minimum instrumentation needed to confirm that `T2` was executed against the immediately preceding `T1` planning context
+- Prefer tests and compact diagnostics over building a second parent/child signature graph by default
 - Preserve current Gemini assistant-parts carry behavior
 - Make lineage failures diagnosable instead of implicit
 
 Not in scope:
 - changing the prompt content itself
 - introducing new model-routing policy
+- building a heavyweight signature relationship system unless simpler verification proves insufficient
 
 Acceptance:
-- Each two-turn writer phase can prove which `T1` planning output informed its `T2` execution
-- Logs/artifacts make lineage visible without reconstructing it manually from raw transport logs
+- Each two-turn writer phase can verify that `T2` used the immediately preceding `T1` planning context
+- Operators can diagnose broken carry without reconstructing the full path manually from raw transport logs
 - The implementation remains backward-compatible with providers that do not expose the same assistant-parts shape
 
 Dependencies:
@@ -1143,6 +1171,8 @@ Primary files:
 Scope:
 - Assemble provisional chapter markdown
 - Audit for merge-layer defects:
+  - repeated restart energy where a scene re-announces the prior scene close
+  - overlap-heavy joins where adjacent scenes partially duplicate the same beat
   - tense breaks
   - scaffold leakage
   - duplicated beats
@@ -1175,6 +1205,7 @@ Primary files:
 
 Scope:
 - Repair only seam neighborhoods and merge-layer artifacts
+- Specifically target overlap/restart-energy cleanup so assembled chapters advance instead of re-entering the same beat at every join
 - Validate repaired output against expected chapter state delta
 - Finalize the chapter only after seam audit/repair passes
 
@@ -1316,6 +1347,29 @@ Dependencies:
 - Story 8
 - Story 10
 
+### Story 15 - Writable Data Boundary Direction
+Goal:
+- Keep writable operational data storage flexible while biasing toward a separate writable-data repo/workspace rather than committing to an in-repo `app/data` split too early.
+
+Primary files:
+- planning/docs first
+- storage/root resolution helpers as needed later
+
+Scope:
+- define storage assumptions so new diagnostics/thought/seam artifacts are not hard-coded into a monorepo-only layout
+- preserve current workspace behavior while leaving room to move writable data out of the code repo
+
+Not in scope:
+- performing the repo split now
+- migrating historical data
+
+Acceptance:
+- New artifact work does not assume a permanent in-repo `app/data` structure
+- Storage touchpoints stay abstract enough to support a later separate writable-data repo/workspace migration
+
+Dependencies:
+- Story 14
+
 ## Story Order Recommendation
 Implement in this order:
 1. Story 1
@@ -1333,6 +1387,7 @@ Implement in this order:
 13. Story 12
 14. Story 13
 15. Story 14
+16. Story 15
 
 Reasoning:
 - Stories 1-6 establish the new outline truth model.
@@ -1344,6 +1399,7 @@ Reasoning:
 - Story 12 must follow once section identity is real across execution paths.
 - Story 13 should not be built on shifting ownership rules.
 - Story 14 becomes more valuable after the seam/finalization loop exists and real failure classes can be summarized.
+- Story 15 remains intentionally late because it should constrain new storage coupling without forcing the repo split decision up front.
 
 ## Deterministic Checks Required
 Before rollout reaches writing, add checks for:
@@ -1355,6 +1411,8 @@ Before rollout reaches writing, add checks for:
 - chapter seam finalization gate present before final chapter promotion
 - `T1 -> T2` lineage metadata present for two-turn writer phases
 - configured-model policy respected by workflow commands
+- default lint/repair pass budget raised to `8`
+- workflow/test command wrappers use timeout windows appropriate for multi-hour runs
 
 ## Risks / Watchouts
 - Section-level insertion can still create ugly cross-section seams if boundary ownership is not enforced.
@@ -1363,7 +1421,8 @@ Before rollout reaches writing, add checks for:
 - View updates must be atomic or prompts will consume mixed-stage truth.
 - Chapter seam repair must not become a disguised scene rewrite pass.
 - If `T1 -> T2` lineage remains implicit, later debugging will keep conflating good planning with bad execution.
-- Long runtime is a real property of the correctness-constrained pipeline; trying to “fix” it by silently changing model config is an orchestration bug, not an optimization.
+- Long runtime is a real property of the correctness-constrained pipeline; trying to "fix" it by silently changing model config is an orchestration bug, not an optimization.
+- Diagnostics/storage work should not accidentally lock the project into an in-repo writable-data layout if the long-term direction is a separate writable-data repo/workspace.
 
 ## Rollout Stages
 Stage 1

@@ -17,6 +17,7 @@ from bookforge.llm.thoughts import format_thought_response, list_signatures, run
 from bookforge.llm.signatures import select_signature, set_active_signature
 from bookforge.section_workflow import (
     advance_section_workflow,
+    finalize_chapter_from_locked_sections,
     freeze_section_from_phase03_artifact,
     get_section_workflow_status,
     initialize_section_workflow,
@@ -224,7 +225,14 @@ def _workflow_status(args: argparse.Namespace) -> int:
         if not isinstance(chapter, dict):
             continue
         chapter_id = int(chapter.get("chapter_id", 0) or 0)
-        sys.stdout.write(f"Chapter {chapter_id}: {chapter.get('title')}\n")
+        chapter_status = str(chapter.get("chapter_status") or "").strip()
+        chapter_suffix = f" [{chapter_status}]" if chapter_status else ""
+        sys.stdout.write(f"Chapter {chapter_id}{chapter_suffix}: {chapter.get('title')}\n")
+        if chapter.get("chapter_seam_report"):
+            sys.stdout.write(
+                f"  seam_report={chapter.get('chapter_seam_report')} "
+                f"final={chapter.get('chapter_final_markdown') or chapter.get('chapter_candidate_markdown')}\n"
+            )
         sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
         for section in sections:
             if not isinstance(section, dict):
@@ -278,6 +286,12 @@ def _workflow_lock_section(args: argparse.Namespace) -> int:
         f"sec{int(result.get('section_id', 0) or 0):03d}\n"
         f"Scene range: {result.get('scene_ref_start')} -> {result.get('scene_ref_end')}\n"
     )
+    chapter_finalization = result.get("chapter_finalization") if isinstance(result.get("chapter_finalization"), dict) else None
+    if chapter_finalization:
+        sys.stdout.write(
+            f"Chapter finalization: {chapter_finalization.get('status')} "
+            f"report={chapter_finalization.get('report_path')}\n"
+        )
     return 0
 
 
@@ -308,6 +322,32 @@ def _workflow_advance_section(args: argparse.Namespace) -> int:
         f"sec{int(freeze.get('section_id', 0) or 0):03d}\n"
         f"Frozen range: {freeze.get('scene_ref_start')} -> {freeze.get('scene_ref_end')}\n"
         f"Locked range: {lock.get('scene_ref_start')} -> {lock.get('scene_ref_end')}\n"
+    )
+    chapter_finalization = lock.get("chapter_finalization") if isinstance(lock.get("chapter_finalization"), dict) else None
+    if chapter_finalization:
+        sys.stdout.write(
+            f"Chapter finalization: {chapter_finalization.get('status')} "
+            f"report={chapter_finalization.get('report_path')}\n"
+        )
+    return 0
+
+
+def _workflow_finalize_chapter(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        result = finalize_chapter_from_locked_sections(
+            workspace=workspace,
+            book_id=args.book,
+            chapter_id=int(args.chapter),
+        )
+    except Exception as exc:
+        sys.stderr.write(f"Finalize chapter failed: {exc}\n")
+        return 1
+    sys.stdout.write(
+        f"Chapter finalized: ch{int(args.chapter):03d}\n"
+        f"Status: {result.get('status')}\n"
+        f"Report: {result.get('report_path')}\n"
+        f"Final: {result.get('final_path') or result.get('candidate_path')}\n"
     )
     return 0
 
@@ -710,6 +750,14 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_lock.add_argument("--chapter", required=True, type=int, help="Chapter id.")
     workflow_lock.add_argument("--section", required=True, type=int, help="Section id.")
     workflow_lock.set_defaults(func=_workflow_lock_section)
+
+    workflow_finalize = workflow_sub.add_parser(
+        "finalize-chapter",
+        help="Run chapter seam finalization for a chapter whose sections are already locked.",
+    )
+    workflow_finalize.add_argument("--book", required=True, help="Book id.")
+    workflow_finalize.add_argument("--chapter", required=True, type=int, help="Chapter id.")
+    workflow_finalize.set_defaults(func=_workflow_finalize_chapter)
 
     workflow_advance = workflow_sub.add_parser(
         "advance-section",

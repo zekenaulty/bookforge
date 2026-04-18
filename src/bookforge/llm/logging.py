@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import hashlib
 from pathlib import Path
 from typing import Any, Dict, Optional, List
 import json
@@ -237,6 +238,33 @@ def _extract_thought_signatures(parts: List[Dict[str, Any]]) -> List[Dict[str, A
                 "signature": signature,
             })
     return signatures
+
+
+def prior_response_content_array_metadata(parts: Optional[List[Dict[str, Any]]]) -> Dict[str, Any]:
+    if not isinstance(parts, list) or not parts:
+        return {"prior_response_content_array_reused": False}
+    try:
+        serialized = json.dumps(parts, ensure_ascii=True, sort_keys=True)
+    except (TypeError, ValueError):
+        serialized = ""
+    signatures = _extract_thought_signatures(parts)
+    metadata: Dict[str, Any] = {
+        "prior_response_content_array_reused": True,
+        "prior_response_content_array_source": "prior_turn_model_response",
+        "prior_response_content_array_part_count": len(parts),
+        "prior_response_content_array_signature_count": len(signatures),
+    }
+    if serialized:
+        metadata["prior_response_content_array_sha256"] = hashlib.sha256(
+            serialized.encode("utf-8")
+        ).hexdigest()
+    if signatures:
+        metadata["prior_response_content_array_signature_part_indexes"] = [
+            int(entry.get("part_index", 0))
+            for entry in signatures
+            if isinstance(entry, dict) and entry.get("part_index") is not None
+        ]
+    return metadata
 
 
 def _infer_phase_id(label: str) -> str:
