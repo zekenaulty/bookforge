@@ -74,11 +74,46 @@ EXCLUDED_EXTENSIONS = {
     ".iso"
 }
 
+# Hard exclusions for snapshot size control. These are applied before
+# .gitignore/Git include resolution so generated workspaces and verbose LLM
+# transport logs do not dominate repo snapshots.
+HARD_EXCLUDED_ROOT_PREFIXES = {
+    "workspace",
+}
+
+HARD_EXCLUDED_PATH_FRAGMENTS = {
+    "logs/llm",
+}
+
 def is_text_file(file_path: Path) -> bool:
     """
     Check if a file should be considered text based on extension.
     """
     return file_path.suffix.lower() not in EXCLUDED_EXTENSIONS
+
+
+def is_hard_excluded(rel_posix_path: str) -> bool:
+    """
+    Return True when a path matches non-negotiable snapshot exclusions.
+
+    These exclusions are repo/tooling specific rather than source-control
+    specific, so they should apply even if the files are tracked.
+    """
+    normalized = str(rel_posix_path or "").strip().replace("\\", "/").strip("/")
+    if not normalized:
+        return False
+
+    for prefix in HARD_EXCLUDED_ROOT_PREFIXES:
+        if normalized == prefix or normalized.startswith(prefix + "/"):
+            return True
+
+    wrapped = f"/{normalized}/"
+    for fragment in HARD_EXCLUDED_PATH_FRAGMENTS:
+        token = "/" + fragment.strip("/") + "/"
+        if wrapped == token or token in wrapped:
+            return True
+
+    return False
 
 def should_ignore(rel_posix_path: str, is_dir: bool, spec, self_rel_posix: str, include_set):
     """Return True if the path should be ignored.
@@ -91,6 +126,9 @@ def should_ignore(rel_posix_path: str, is_dir: bool, spec, self_rel_posix: str, 
     """
     # Always ignore arc.py itself
     if rel_posix_path == self_rel_posix:
+        return True
+
+    if is_hard_excluded(rel_posix_path):
         return True
 
     if spec is not None:
