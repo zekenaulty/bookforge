@@ -26,6 +26,23 @@ def _format_scene_prefix(value: Any) -> str:
         return ""
 
 
+def _normalize_action_descriptor(label: str) -> str:
+    raw = _sanitize_component(str(label or "event"))
+    if not raw:
+        return "event"
+    patterns = (
+        r"_json_retry\d+$",
+        r"_schema_retry\d+$",
+        r"_retry\d+$",
+        r"_error$",
+    )
+    normalized = raw
+    for pattern in patterns:
+        normalized = re.sub(pattern, "", normalized)
+    normalized = normalized.strip("-_.")
+    return normalized or raw
+
+
 def llm_transport_root(workspace: Path) -> Path:
     return workspace / "logs" / "llm"
 
@@ -44,11 +61,13 @@ def llm_log_path(
     extra = extra if isinstance(extra, dict) else {}
     book_component = _sanitize_component(str(extra.get("book_id") or "global"))
     chapter_component = _format_chapter_component(extra.get("chapter"))
-    action_component = _sanitize_component(str(label or "event"))
+    raw_label_component = _sanitize_component(str(label or "event"))
+    action_component = _normalize_action_descriptor(str(label or "event"))
     scene_prefix = _format_scene_prefix(extra.get("scene"))
     if not timestamp:
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    return llm_transport_root(workspace) / book_component / chapter_component / action_component / f"{scene_prefix}{timestamp}.json"
+    filename = f"{scene_prefix}{raw_label_component}_{timestamp}.json"
+    return llm_transport_root(workspace) / book_component / chapter_component / action_component / filename
 
 
 def thoughts_root(workspace: Path) -> Path:

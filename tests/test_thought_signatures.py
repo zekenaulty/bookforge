@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 
 from bookforge.llm.logging import log_llm_response, prior_response_content_array_metadata
+from bookforge.llm.signatures import purge_signatures
+from bookforge.llm.storage import signature_active_path
 from bookforge.llm.types import LLMResponse
 
 
@@ -45,13 +47,46 @@ def test_signature_active_intent_outcome(tmp_path: Path) -> None:
         messages=[],
     )
 
-    active_path = workspace / "logs" / "llm" / "thought_signature_active.json"
+    active_path = signature_active_path(workspace)
     assert active_path.exists()
     payload = _read_json(active_path)
     phase_bucket = payload["by_phase"]["phase_04a_transition_seam_analysis"]
     assert phase_bucket["intent"]["signature_id"] != phase_bucket["outcome"]["signature_id"]
     assert phase_bucket["intent"]["turn_id"] == "T1"
     assert phase_bucket["outcome"]["turn_id"] == "T2"
+
+
+def test_purge_signatures_filters_by_book(tmp_path: Path) -> None:
+    workspace = tmp_path
+    response = LLMResponse(
+        text="ok",
+        raw={},
+        provider="gemini",
+        model="test",
+        assistant_parts=[{"text": "ok", "thoughtSignature": "sig"}],
+    )
+    log_llm_response(
+        workspace,
+        "outline_phase_04a_transition_seam_analysis_chapter_001_attempt1",
+        response,
+        request={"model": "test", "temperature": 0.2, "max_tokens": 10},
+        extra={"book_id": "book-a", "phase_id": "phase_04a_transition_seam_analysis", "turn_id": "T1", "chapter": 1},
+        messages=[],
+    )
+    log_llm_response(
+        workspace,
+        "outline_phase_04a_transition_seam_analysis_chapter_001_attempt1",
+        response,
+        request={"model": "test", "temperature": 0.2, "max_tokens": 10},
+        extra={"book_id": "book-b", "phase_id": "phase_04a_transition_seam_analysis", "turn_id": "T1", "chapter": 1},
+        messages=[],
+    )
+
+    result = purge_signatures(workspace, book_id="book-a")
+
+    assert result["removed"] == 1
+    payload = _read_json(signature_active_path(workspace))
+    assert payload["by_phase"]["phase_04a_transition_seam_analysis"]["intent"]["book_id"] == "book-b"
 
 
 def test_prior_response_content_array_metadata_extracts_signature_details() -> None:

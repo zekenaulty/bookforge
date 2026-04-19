@@ -11,6 +11,13 @@ from datetime import datetime, timezone
 from bookforge.prompt.composition import compose_prompt_templates
 from bookforge.prompt.system import write_system_prompt
 from bookforge.memory.durable_state import ensure_durable_state_files
+from bookforge.llm.signatures import purge_signatures
+from bookforge.llm.storage import (
+    current_thoughts_dir,
+    current_thoughts_latest_path,
+    llm_transport_root,
+    thoughts_root,
+)
 from bookforge.util.paths import repo_root
 from bookforge.util.schema import SCHEMA_VERSION, validate_json
 
@@ -399,26 +406,43 @@ def _ensure_dir(path: Path, report: Dict[str, Any], key: str) -> None:
 
 
 def _clear_workspace_logs(workspace: Path, book_id: str, logs_scope: str, report: Dict[str, Any]) -> None:
-    logs_root = workspace / "logs" / "llm"
+    logs_root = llm_transport_root(workspace)
     if not logs_root.exists() or not logs_root.is_dir():
-        return
+        logs_root = None
 
     deleted = 0
-    if logs_scope == "all":
-        for candidate in logs_root.iterdir():
-            if candidate.is_file():
-                candidate.unlink()
+    if logs_root is not None:
+        if logs_scope == "all":
+            shutil.rmtree(logs_root)
+            logs_root.mkdir(parents=True, exist_ok=True)
+            report["all_log_files_deleted"] = int(report.get("all_log_files_deleted", 0)) + 1
+        else:
+            book_log_dir = logs_root / book_id
+            if book_log_dir.exists() and book_log_dir.is_dir():
+                shutil.rmtree(book_log_dir)
                 deleted += 1
-        report["all_log_files_deleted"] = int(report.get("all_log_files_deleted", 0)) + deleted
-    else:
-        pattern = f"{book_id}_*"
-        for candidate in logs_root.glob(pattern):
-            if candidate.is_file():
-                candidate.unlink()
-                deleted += 1
-        report["book_log_files_deleted"] = int(report.get("book_log_files_deleted", 0)) + deleted
+            report["book_log_files_deleted"] = int(report.get("book_log_files_deleted", 0)) + deleted
 
     report["files_deleted"] = int(report.get("files_deleted", 0)) + deleted
+    thoughts_deleted = 0
+    latest_path = current_thoughts_latest_path(workspace)
+    if latest_path.exists():
+        latest_path.unlink()
+        thoughts_deleted += 1
+    current_root = current_thoughts_dir(workspace)
+    if logs_scope == "all":
+        if current_root.exists() and current_root.is_dir():
+            shutil.rmtree(current_root)
+            thoughts_deleted += 1
+        purge_report = purge_signatures(workspace)
+    else:
+        book_current_dir = current_root / book_id
+        if book_current_dir.exists() and book_current_dir.is_dir():
+            shutil.rmtree(book_current_dir)
+            thoughts_deleted += 1
+        purge_report = purge_signatures(workspace, book_id=book_id)
+    report["thought_artifacts_deleted"] = int(report.get("thought_artifacts_deleted", 0)) + thoughts_deleted
+    report["thought_signatures_removed"] = int(report.get("thought_signatures_removed", 0)) + int(purge_report.get("removed", 0))
 
 
 
@@ -481,17 +505,28 @@ def _collect_reset_archive_targets(
     _add_if_exists(context_dir / 'plot_devices')
 
     if include_logs and not keep_logs:
-        logs_root = workspace / 'logs' / 'llm'
+        logs_root = llm_transport_root(workspace)
         if logs_root.exists() and logs_root.is_dir():
             if logs_scope == 'all':
-                for candidate in logs_root.iterdir():
-                    if candidate.is_file():
-                        targets.append(candidate)
+                targets.append(logs_root)
             else:
-                pattern = f"{book_id}_*"
-                for candidate in logs_root.glob(pattern):
-                    if candidate.is_file():
-                        targets.append(candidate)
+                book_log_dir = logs_root / book_id
+                if book_log_dir.exists():
+                    targets.append(book_log_dir)
+        current_root = current_thoughts_dir(workspace)
+        if current_root.exists() and current_root.is_dir():
+            if logs_scope == 'all':
+                targets.append(current_root)
+                signatures_root = thoughts_root(workspace) / 'signatures'
+                if signatures_root.exists():
+                    targets.append(signatures_root)
+            else:
+                book_current_dir = current_root / book_id
+                if book_current_dir.exists():
+                    targets.append(book_current_dir)
+                latest_path = current_thoughts_latest_path(workspace)
+                if latest_path.exists():
+                    targets.append(latest_path)
 
     # Deduplicate and ensure we don't include child paths when parent is already included.
     unique_targets = []

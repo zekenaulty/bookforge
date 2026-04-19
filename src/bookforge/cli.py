@@ -14,6 +14,7 @@ from bookforge.runner import run_loop
 from bookforge.characters import generate_characters
 from bookforge.workspace import init_book_workspace, parse_genre, parse_targets, reset_book_workspace_detailed, update_book_templates
 from bookforge.llm.thoughts import format_thought_response, list_signatures, run_current_thoughts
+from bookforge.llm.storage import signature_active_path
 from bookforge.llm.signatures import select_signature, set_active_signature
 from bookforge.section_workflow import (
     advance_section_workflow,
@@ -464,12 +465,15 @@ def _llm_current_thoughts(args: argparse.Namespace) -> int:
     output_path = result.get("output_path")
     if output_path:
         sys.stdout.write(f"Current thoughts saved to {output_path}\n")
+    history_path = result.get("history_path")
+    if history_path:
+        sys.stdout.write(f"Current thoughts history saved to {history_path}\n")
     return 0
 
 
 def _llm_show_active(args: argparse.Namespace) -> int:
     workspace = Path(args.workspace)
-    active_path = (workspace / "logs" / "llm" / "thought_signature_active.json")
+    active_path = signature_active_path(workspace)
     if active_path.exists():
         sys.stdout.write(active_path.read_text(encoding="utf-8") + "\n")
         return 0
@@ -880,7 +884,7 @@ def build_parser() -> argparse.ArgumentParser:
     book_reset.add_argument(
         "--keep-logs",
         action="store_true",
-        help="Do not clear workspace/logs/llm artifacts during reset.",
+        help="Do not clear workspace/logs/llm transport logs or workspace/thoughts artifacts during reset.",
     )
     book_reset.add_argument(
         "--logs-scope",
@@ -902,7 +906,7 @@ def build_parser() -> argparse.ArgumentParser:
     book_reset.add_argument(
         "--archive-logs",
         action="store_true",
-        help="Include logs/llm + logs/runs in the archive when --archive is set.",
+        help="Include logs/llm transport logs and workspace/thoughts artifacts in the archive when --archive is set.",
     )
     book_reset.set_defaults(func=_book_reset)
 

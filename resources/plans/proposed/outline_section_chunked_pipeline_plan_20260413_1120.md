@@ -39,6 +39,8 @@ Immediate next work:
 Progress since this state snapshot:
 - Default lint/repair pass depth has been raised to `8`.
 - Writer-side `T2` logging now records whether it reused the prior Gemini response-content array, including count/hash/signature metadata, without building a second signature lineage system.
+- Transport logging is being reorganized under `workspace/logs/llm/{book}/{chapter}/{action_descriptor}/...` instead of a single flat folder.
+- Thought-signature state and current-thought artifacts are being split out of `workspace/logs/llm` into `workspace/thoughts/signatures/` and `workspace/thoughts/current/`.
 - A chapter seam finalization path now exists:
   - final section lock can trigger chapter seam audit/repair/finalization
   - `workflow finalize-chapter` can backfill existing locked chapters
@@ -1329,6 +1331,8 @@ Primary files:
 
 Scope:
 - separate introspection/probe artifacts from transport logs
+- organize transport logs under `workspace/logs/llm/{book}/{chapter}/{action_descriptor}/...`
+- keep current-thought history under its own folder separate from signature state
 - add per-scene/per-chapter diagnostics summaries for:
   - real truncation / `MAX_TOKENS`
   - malformed JSON

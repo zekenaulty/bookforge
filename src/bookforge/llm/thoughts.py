@@ -8,6 +8,10 @@ from bookforge.config.env import load_config
 from bookforge.llm.factory import get_llm_client, resolve_model
 from bookforge.llm.logging import log_llm_response, should_log_llm
 from bookforge.llm.signatures import load_signature_ledger, select_signature, load_signature_index
+from bookforge.llm.storage import (
+    current_thoughts_latest_path,
+    current_thoughts_timestamped_path,
+)
 from bookforge.llm.types import Message
 from bookforge.util.json_extract import extract_json
 
@@ -157,6 +161,15 @@ def run_current_thoughts(
         log_extra["signature_id"] = selected.get("signature_id")
         log_extra["signature_scope"] = selected.get("scope")
     if should_log_llm():
+        selected_book_id = selected.get("book_id") if isinstance(selected, dict) else None
+        selected_chapter_id = selected.get("chapter_id") if isinstance(selected, dict) else None
+        selected_scene_id = selected.get("scene_id") if isinstance(selected, dict) else None
+        if selected_book_id:
+            log_extra["book_id"] = selected_book_id
+        if selected_chapter_id is not None:
+            log_extra["chapter"] = selected_chapter_id
+        if selected_scene_id is not None:
+            log_extra["scene"] = selected_scene_id
         log_llm_response(
             workspace,
             "current_thoughts",
@@ -171,27 +184,38 @@ def run_current_thoughts(
             messages=messages,
             extra=log_extra,
         )
-    output_dir = workspace / "logs" / "llm"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / "current_thoughts_latest.json"
-    output_path.write_text(
-        json.dumps(
-            {
-                "schema_version": "current_thoughts_v1",
-                "model": model,
-                "provider": client.provider,
-                "signature_id": selected.get("signature_id") if selected else None,
-                "prompt_text": prompt_text,
-                "response_text": response.text,
-                "formatted_response_text": format_thought_response(response.text),
-            },
-            ensure_ascii=True,
-            indent=2,
-        ),
+    selected_book_id = selected.get("book_id") if isinstance(selected, dict) else None
+    selected_chapter_id = selected.get("chapter_id") if isinstance(selected, dict) else None
+    latest_path = current_thoughts_latest_path(workspace)
+    history_path = current_thoughts_timestamped_path(
+        workspace,
+        book_id=selected_book_id,
+        chapter_id=selected_chapter_id,
+    )
+    latest_path.parent.mkdir(parents=True, exist_ok=True)
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "schema_version": "current_thoughts_v1",
+        "model": model,
+        "provider": client.provider,
+        "signature_id": selected.get("signature_id") if selected else None,
+        "book_id": selected_book_id,
+        "chapter_id": selected_chapter_id,
+        "prompt_text": prompt_text,
+        "response_text": response.text,
+        "formatted_response_text": format_thought_response(response.text),
+    }
+    latest_path.write_text(
+        json.dumps(payload, ensure_ascii=True, indent=2),
+        encoding="utf-8",
+    )
+    history_path.write_text(
+        json.dumps(payload, ensure_ascii=True, indent=2),
         encoding="utf-8",
     )
     return {
-        "output_path": output_path,
+        "output_path": latest_path,
+        "history_path": history_path,
         "response_text": response.text,
         "formatted_text": format_thought_response(response.text),
         "signature_id": selected.get("signature_id") if isinstance(selected, dict) else None,

@@ -124,6 +124,17 @@ def _load_index(path: Path) -> Dict[str, Any]:
     return payload
 
 
+def _empty_index_payload() -> Dict[str, Any]:
+    return {
+        "schema_version": "thought_signature_index_v1",
+        "updated_at": _utc_now_iso(),
+        "latest": None,
+        "by_scope": {},
+        "by_signature_id": {},
+        "global_author": None,
+    }
+
+
 def _load_active(path: Path) -> Dict[str, Any]:
     if not path.exists():
         return {
@@ -151,6 +162,15 @@ def _load_active(path: Path) -> Dict[str, Any]:
     payload.setdefault("by_phase", {})
     payload.setdefault("global", {})
     return payload
+
+
+def _empty_active_payload() -> Dict[str, Any]:
+    return {
+        "schema_version": "thought_signature_active_v1",
+        "updated_at": _utc_now_iso(),
+        "by_phase": {},
+        "global": {},
+    }
 
 
 def _scope_key(record: Dict[str, Any]) -> str:
@@ -191,6 +211,73 @@ def _summarize_record(record: Dict[str, Any]) -> Dict[str, Any]:
         "scope": record.get("scope"),
     }
     return keep
+
+
+def _build_index_payload(records: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
+    payload = _empty_index_payload()
+    by_scope: Dict[str, Any] = {}
+    by_signature_id: Dict[str, Any] = {}
+    latest: Optional[Dict[str, Any]] = None
+    global_author: Optional[Dict[str, Any]] = None
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        summary = dict(record)
+        signature_id = str(record.get("signature_id") or "")
+        if signature_id:
+            by_signature_id[signature_id] = summary
+        by_scope[_scope_key(record)] = summary
+        latest = summary
+        if record.get("scope") == "global_author":
+            global_author = summary
+    payload["by_scope"] = by_scope
+    payload["by_signature_id"] = by_signature_id
+    payload["latest"] = latest
+    payload["global_author"] = global_author
+    payload["updated_at"] = _utc_now_iso()
+    return payload
+
+
+def _build_active_payload(records: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
+    payload = _empty_active_payload()
+    by_phase: Dict[str, Any] = {}
+    global_slot: Dict[str, Any] = {}
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        phase_id = str(record.get("phase_id") or "")
+        turn_id = str(record.get("turn_id") or "")
+        summary = _summarize_record(record)
+        policy = _policy_for_phase(phase_id)
+        phase_bucket = by_phase.get(phase_id) if isinstance(by_phase.get(phase_id), dict) else {}
+        phase_bucket["policy"] = policy
+        phase_bucket["last"] = summary
+        if policy in {"prefer_t1", "prefer_t1_with_outcome"}:
+            if turn_id.upper() == "T1":
+                phase_bucket["intent"] = summary
+            elif turn_id.upper() == "T2":
+                phase_bucket["outcome"] = summary
+        elif policy == "prefer_t2":
+            if turn_id.upper() == "T2":
+                phase_bucket["intent"] = summary
+            else:
+                phase_bucket.setdefault("intent", summary)
+        elif policy == "prefer_latest":
+            phase_bucket["intent"] = summary
+            phase_bucket["outcome"] = summary
+        else:
+            phase_bucket["intent"] = summary
+        by_phase[phase_id] = phase_bucket
+
+        global_slot["last"] = summary
+        if turn_id.upper() == "T1":
+            global_slot["intent"] = summary
+        elif turn_id.upper() == "T2":
+            global_slot["outcome"] = summary
+    payload["by_phase"] = by_phase
+    payload["global"] = global_slot
+    payload["updated_at"] = _utc_now_iso()
+    return payload
 
 
 def _acquire_lock(lock_path: Path, ttl_seconds: int = 30) -> bool:
@@ -236,11 +323,7 @@ def append_signature_records(workspace: Path, records: Iterable[Dict[str, Any]])
     index_file = _bootstrap_index_target(workspace)
     index_payload = _load_index(index_file)
     by_scope = index_payload.get("by_scope") if isinstance(index_payload.get("by_scope"), dict) else {}
-    by_signature_id = (
-        index_payload.get("by_signature_id")
-        if isinstance(index_payload.get("by_signature_id"), dict)
-        else {}
-    )
+    by_signature_id = index_payload.get("by_signature_id") if isinstance(index_payload.get("by_signature_id"), dict) else {}
     for record in records_list:
         summary = dict(record)
         signature_id = str(record.get("signature_id") or "")
@@ -409,3 +492,36 @@ def select_signature(
         return record
     latest = index_payload.get("latest")
     return latest if isinstance(latest, dict) else None
+
+
+def purge_signatures(workspace: Path, *, book_id: Optional[str] = None) -> Dict[str, int]:
+    records = load_signature_ledger(workspace, limit=None)
+    if book_id:
+        kept = [
+            record
+            for record in records
+            if str(record.get("book_id") or "") != str(book_id)
+        ]
+    else:
+        kept = []
+
+    ledger = ledger_path(workspace)
+    _ensure_parent(ledger)
+    with ledger.open("w", encoding="utf-8") as handle:
+        for record in kept:
+            handle.write(json.dumps(record, ensure_ascii=True) + "\n")
+
+    index_file = index_path(workspace)
+    _ensure_parent(index_file)
+    index_payload = _build_index_payload(kept)
+    index_file.write_text(json.dumps(index_payload, ensure_ascii=True, indent=2), encoding="utf-8")
+
+    active_file = active_path(workspace)
+    _ensure_parent(active_file)
+    active_payload = _build_active_payload(kept)
+    active_file.write_text(json.dumps(active_payload, ensure_ascii=True, indent=2), encoding="utf-8")
+
+    return {
+        "removed": len(records) - len(kept),
+        "kept": len(kept),
+    }
