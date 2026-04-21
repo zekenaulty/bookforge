@@ -1,0 +1,273 @@
+COMPLIANCE:
+Scene ID: SC_003_004
+Allowed events: Artie draws aggro, Rhea strikes support structure, tunnel collapses on scavengers, party gathers untaxed loot, quest completes.
+Forbidden milestones: none (all required milestones are NOT_YET or not present)
+
+Current arm-side / inventory facts: 
+- char_rhea: Makeshift Masonry Bludgeon (equipped, hand_right)
+- char_artie: jagged piece of rebar (equipped, hand_right)
+
+Durable changes committed:
+- char_rhea Stamina decreased to 38/100.
+- char_rhea Copper Credits increased to 16.
+- Vermin Control (Local) quest status changed to completed for all party members.
+- ITEM_scavenger_carapace_stack acquired by char_rhea (stowed in blazer_pocket_left).
+
+APPEARANCE_CHECK:
+- CHAR_RHEA: pale skin, slender, black hair, messy bob, dark brown eyes, branded wrist, bruised leg
+- CHAR_VEX: hologram, glowing, blue, translucent, sci-fi, digital
+- CHAR_ARTIE: injured, broken arm, bruised chest
+
+PROSE:
+With Artie desperately drawing the aggro of the chittering scavengers, Rhea timed her strike against the compromised support structure. Artie looked half-dead, his broken left arm hanging uselessly at his side as he waved his jagged piece of rebar with his uninjured hand. His health was a terrifyingly fragile metric. If one of those ash-crusted beasts so much as grazed him, his remaining four hit points would vanish instantly.
+
+"Now, Rhea!" Artie screamed, deflecting a snapping jaw with the rusty iron.
+
+Rhea swung her Makeshift Masonry Bludgeon with everything she had. The heavy stone head slammed into the cracked concrete pillar.
+
+[Stamina: 38/100]
+
+The ceiling groaned, letting out a deep, structural death rattle. 
+
+"Move!" Rhea yelled.
+
+Artie dove backward, sliding through the ash just as the tunnel's roof gave way. Tons of concrete and rusted steel collapsed, burying the scavengers in a deafening roar of dust and violence. 
+
+Rhea wiped a streak of grime from her forehead, watching her health bar to ensure the physics engine hadn't clipped her with splash damage. 
+
+[HP: 25/100]
+
+Vex floated nearby, his glowing blue holographic form entirely unaffected by the debris cloud. The cynical clerk projected a green telemetry window, his digitized eyes scanning the rapid flow of system code.
+
+[System Alert: Environmental Hazard Detected]
+[Entities Terminated: Ash-Crusted Scavenger (x3)]
+[Combat Tax: Bypassed]
+[Gathering Tax: Bypassed]
+[Durability Penalty: 0]
+[Quest Complete: Vermin Control (Local)]
+[Loot Generated: 12 Copper Credits, Scavenger Carapaces (x3)]
+
+Rhea checked her own interface. No hidden fees. No predatory debt triggers. The system had registered the kills as an environmental accident, leaving their durability and stamina entirely untaxed by the engagement. 
+
+"It worked," Vex muttered, his voice laced with a mix of relief and reluctant awe. "Zero net loss. The ledger didn't even blink."
+
+Artie let out a ragged breath from the floor, clutching his bruised purple chest. "Thank god."
+
+Rhea walked over to the rubble. The dust settled, revealing untaxed loot and confirming the exploit's success. She gathered the carapaces and the scattered coins, slipping them into her pockets with a grim smile. The math was finally on their side.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "char_rhea",
+      "char_vex",
+      "char_artie"
+    ],
+    "location": "LOC_COLLAPSED_TRANSIT_TUNNEL"
+  },
+  "character_updates": [
+    {
+      "character_id": "char_rhea",
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_makeshift_masonry_bludgeon",
+          "status": "equipped"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_obsidian_shard",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_ash_fungus",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_scavenger_carapace_stack",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_right",
+          "item": "ITEM_cracked_smartphone",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_right",
+          "item": "ITEM_copper_credits",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_makeshift_masonry_bludgeon"
+          ],
+          "owner": "char_rhea"
+        },
+        {
+          "container": "hand_left",
+          "contents": [],
+          "owner": "char_rhea"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "contents": [
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus",
+            "ITEM_scavenger_carapace_stack"
+          ],
+          "owner": "char_rhea"
+        },
+        {
+          "container": "blazer_pocket_right",
+          "contents": [
+            "ITEM_cracked_smartphone",
+            "ITEM_copper_credits"
+          ],
+          "owner": "char_rhea"
+        }
+      ],
+      "invariants_add": [
+        "milestone: quest_vermin_control_complete = DONE"
+      ],
+      "persona_updates": [
+        "Rhea confirms that her party synergy effectively bypasses the System's combat and gathering taxes via environmental physics exploits."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "char_rhea",
+      "set": {
+        "quests": [
+          {
+            "name": "Vermin Control (Local)",
+            "status": "completed"
+          }
+        ]
+      },
+      "delta": {
+        "resources": {
+          "copper_credits": {
+            "current": 12
+          }
+        },
+        "stats": {
+          "stamina": {
+            "current": -2
+          }
+        }
+      },
+      "reason": "Completed the extermination quest and gathered untaxed loot."
+    },
+    {
+      "character_id": "char_artie",
+      "set": {
+        "quests": [
+          {
+            "name": "Vermin Control (Local)",
+            "status": "completed"
+          }
+        ]
+      },
+      "reason": "Party completed the extermination quest."
+    },
+    {
+      "character_id": "char_vex",
+      "set": {
+        "quests": [
+          {
+            "name": "Vermin Control (Local)",
+            "status": "completed"
+          }
+        ]
+      },
+      "reason": "Party completed the extermination quest."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_scavenger_carapace_stack",
+      "set": {
+        "name": "Scavenger Carapaces",
+        "display_name": "Scavenger Carapaces",
+        "type": "material",
+        "owner_scope": "world",
+        "custodian": "world",
+        "state_tags": [
+          "untaxed"
+        ],
+        "last_seen": {
+          "chapter": 3,
+          "scene": 4,
+          "location": "LOC_COLLAPSED_TRANSIT_TUNNEL"
+        },
+        "linked_threads": []
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_scavenger_carapace_stack",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "char_rhea"
+      },
+      "reason": "Gathered untaxed loot from crushed scavengers."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Artie drew the scavengers' aggro with his jagged piece of rebar, risking his last 4 HP.",
+      "Rhea struck the compromised support structure with her Makeshift Masonry Bludgeon, collapsing the tunnel ceiling on the scavengers.",
+      "Vex confirmed the system registered the kills as an environmental hazard, bypassing all durability and gathering taxes.",
+      "Rhea gathered the untaxed Scavenger Carapaces and Copper Credits, proving their party synergy worked perfectly."
+    ],
+    "key_events": [
+      "Artie successfully tanked the scavengers without taking fatal damage.",
+      "Rhea executed the physics exploit, crushing the scavengers with the tunnel ceiling.",
+      "The party completed the Vermin Control (Local) quest with zero net loss to durability or stamina.",
+      "Rhea looted untaxed Scavenger Carapaces and Copper Credits from the rubble."
+    ],
+    "must_stay_true": [
+      "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+      "milestone: first_credits_banked = DONE",
+      "milestone: rhea_cornered_by_vex_and_artie = DONE",
+      "mechanic: char_artie HP is 4/100",
+      "mechanic: char_artie has active status Stage Two Systemic Shock",
+      "mechanic: char_artie has active status Minor Hemorrhage",
+      "mechanic: char_artie has active title Indentured Soul",
+      "injury: char_artie severe internal damage",
+      "injury: char_artie broken left arm",
+      "milestone: party_formed_rhea_vex_artie = DONE",
+      "mechanic: char_rhea has active status Party Leader",
+      "mechanic: char_artie has active status Party Member",
+      "mechanic: char_vex has active status Party Member",
+      "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "container: hand_left (owner=char_rhea, contents=[])",
+      "REMOVE: mechanic: char_rhea Stamina is 40/100",
+      "mechanic: char_rhea Stamina is 38/100",
+      "REMOVE: mechanic: char_rhea has 4 Copper Credits",
+      "mechanic: char_rhea has 16 Copper Credits",
+      "REMOVE: mechanic: char_rhea has active quest Vermin Control (Local)",
+      "REMOVE: mechanic: char_artie has active quest Vermin Control (Local)",
+      "REMOVE: mechanic: char_vex has active quest Vermin Control (Local)",
+      "milestone: quest_vermin_control_complete = DONE",
+      "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "REMOVE: container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapace_stack])"
+    ],
+    "chapter_so_far_add": [
+      "The party successfully completed their first extermination quest by dropping a tunnel ceiling on the scavengers.",
+      "The environmental kill exploit worked, allowing Rhea to gather untaxed loot and bypass the System's predatory gathering fees."
+    ]
+  }
+}

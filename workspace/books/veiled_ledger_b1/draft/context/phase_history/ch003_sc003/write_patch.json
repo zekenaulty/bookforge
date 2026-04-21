@@ -1,0 +1,168 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+    "cast_present": [
+      "char_rhea",
+      "char_vex",
+      "char_artie"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "char_rhea",
+      "chapter": 3,
+      "scene": 3,
+      "inventory": [
+        {
+          "item": "ITEM_makeshift_masonry_bludgeon",
+          "container": "hand_right",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_ash_fungus",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_copper_credits",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_makeshift_masonry_bludgeon"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "char_rhea",
+          "contents": []
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus"
+          ]
+        },
+        {
+          "container": "blazer_pocket_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_cracked_smartphone",
+            "ITEM_copper_credits"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "char_rhea",
+      "set": {
+        "quests": [
+          {
+            "name": "Vermin Control (Local)",
+            "status": "active"
+          }
+        ]
+      },
+      "remove": [],
+      "delta": {},
+      "chapter": 3,
+      "scene": 3
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "char_rhea",
+      "set": {
+        "inventory.ITEM_copper_credits.container": "blazer_pocket_right",
+        "inventory.ITEM_copper_credits.status": "stowed"
+      },
+      "reason": "Rhea stowed the credits to free her left hand.",
+      "reason_category": "scene_action"
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "After forming the party, Vex pulled a low-level quest from the terminal, and the trio headed to a collapsed transit tunnel.",
+      "Artie used a jagged piece of rebar to draw the scavengers' aggro despite being at critically low HP.",
+      "Rhea positioned herself to trigger an environmental hazard, preparing to drop the ceiling on the distracted mobs."
+    ],
+    "key_events": [
+      "The party accepted the Vermin Control quest.",
+      "Rhea stowed her Copper Credits to prepare for combat.",
+      "Artie successfully drew aggro from the scavengers in the collapsed transit tunnel.",
+      "Rhea moved into position to execute the physics exploit with her Makeshift Masonry Bludgeon."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: char_rhea -> Copper Credits (status=held, container=hand_left)",
+      "REMOVE: container: hand_left (owner=char_rhea, contents=[ITEM_copper_credits])",
+      "REMOVE: container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+      "mechanic: char_rhea HP is 25/100",
+      "mechanic: char_rhea Stamina is 40/100",
+      "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+      "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "container: hand_left (owner=char_rhea, contents=[])",
+      "milestone: first_credits_banked = DONE",
+      "mechanic: char_rhea has 4 Copper Credits",
+      "milestone: rhea_cornered_by_vex_and_artie = DONE",
+      "mechanic: char_artie HP is 4/100",
+      "mechanic: char_artie has active status Stage Two Systemic Shock",
+      "mechanic: char_artie has active status Minor Hemorrhage",
+      "mechanic: char_artie has active title Indentured Soul",
+      "injury: char_artie severe internal damage",
+      "injury: char_artie broken left arm",
+      "milestone: party_formed_rhea_vex_artie = DONE",
+      "mechanic: char_rhea has active status Party Leader",
+      "mechanic: char_artie has active status Party Member",
+      "mechanic: char_vex has active status Party Member"
+    ],
+    "chapter_so_far_add": []
+  },
+  "_appearance_check": {
+    "char_rhea": [
+      "slender",
+      "pale",
+      "human",
+      "messy",
+      "bob",
+      "dark",
+      "brown",
+      "eyes."
+    ],
+    "char_vex": [
+      "glowing",
+      "blue",
+      "hologram."
+    ],
+    "char_artie": [
+      "broken",
+      "left",
+      "arm",
+      "bruised",
+      "chest."
+    ]
+  }
+}

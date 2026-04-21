@@ -1,0 +1,270 @@
+PROSE:
+The System chimes, finalizing the contract signatures from the previous moment. The green text of the custom liability agreement flashed once, searing itself into the retinas of everyone present before dissolving into the stale air of the Collapsed Transit Tunnel.
+
+[Party Formed: The Mercy Cache (Provisional)]
+[Status Effect Applied: Mutual Assured Destruction. (Duration: Indefinite)]
+[Warning: Friendly fire will result in immediate geometric debt reflection. Unilateral reporting will incur a 100% HP tax.]
+
+Rhea Mercer patted the right pocket of her blazer, feeling the reassuring weight of her Copper Credits and her Cracked Smartphone. The math was finally on her side. She looked at Vance Harrow, who stood gripping his Rebar in his right hand, his scarred face illuminated by the lingering glow of the party interface.
+
+"Well," Vance said, his voice a low rumble over the distant shifting of debris. "That's a hell of a leash." He shoved his own meager share of Copper Credits deeper into his torn pocket.
+
+[Party Leader: Rhea Mercer]
+[Party Member: Vance Harrow]
+[Party Member: Unit 734]
+
+Unit 734 hovered nearby, its drone chassis humming a slightly elevated pitch. The sickly light of its projector flickered as it processed the new operational parameters. It didn't have lungs to sigh, but the mechanical whir sounded distinctly resigned.
+
+"It's not a leash, it's an insurance policy," Rhea corrected, adjusting the weight of her Makeshift Masonry Bludgeon in her right hand. "The Ledger wants us dead or indebted. We just made it mathematically unprofitable for any of us to betray the others."
+
+Vance grunted, adjusting his grip on the Rebar. "Just means if one of us screws up, we all burn."
+
+"Then don't screw up," Rhea said, her eyes tracking the green party telemetry window that hovered in her peripheral vision.
+
+The party UI settled into a neat, unobtrusive list at the edge of her sight, the Mutual Assured Destruction icon pulsing with a faint, warning red. It was a terrifying amount of shared liability, but it was the only way to survive the frontier node's predatory economy.
+
+Bound by the new strictures, the party turns their attention to the path ahead.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+    "open_threads": [
+      "party_alliance",
+      "system_debt_trap"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "Vance and Unit 734 reviewed Rhea's restrictive custom party contract.",
+      "Despite their reservations about the severe penalties for friendly fire and reporting, both agreed to sign.",
+      "The System accepted the contract, officially forming the party and applying the Mutual Assured Destruction buff."
+    ],
+    "key_events": [
+      "The System finalized the custom liability contract, officially forming the party.",
+      "The Mutual Assured Destruction status effect was applied to Rhea, Vance, and Unit 734.",
+      "The party UI established Rhea as the Party Leader.",
+      "The trio acknowledged the severe penalties for betrayal and prepared to move deeper into the frontier."
+    ],
+    "must_stay_true": [
+      "REMOVE: mechanic: char_rhea has 16 Copper Credits",
+      "REMOVE: inventory: vance_harrow -> Rebar (status=held, container=shoulder)",
+      "REMOVE: container: shoulder (owner=vance_harrow, contents=[ITEM_rebar])",
+      "mechanic: rhea_mercer has 11 Copper Credits",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+      "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+      "milestone: custom_liability_contract_signed = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Rhea formed a party with Vance and Unit 734 under a custom liability contract.",
+      "The contract applied a Mutual Assured Destruction buff to prevent betrayal."
+    ]
+  },
+  "inventory_alignment_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_makeshift_masonry_bludgeon",
+            "container": "hand_right",
+            "status": "held"
+          }
+        ],
+        "containers": [
+          {
+            "container": "hand_right",
+            "owner": "rhea_mercer",
+            "contents": [
+              "ITEM_makeshift_masonry_bludgeon"
+            ]
+          }
+        ]
+      },
+      "reason": "scene_fit_posture_normalization",
+      "reason_category": "after_combat_cleanup"
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 3,
+      "scene": 6,
+      "inventory": [
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_copper_credits",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_scavenger_carapaces",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_ash_fungus",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_makeshift_masonry_bludgeon",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_cracked_smartphone",
+            "ITEM_copper_credits"
+          ]
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_scavenger_carapaces",
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": []
+        },
+        {
+          "container": "hand_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_makeshift_masonry_bludgeon"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": []
+    },
+    {
+      "character_id": "vance_harrow",
+      "chapter": 3,
+      "scene": 6,
+      "inventory": [
+        {
+          "item": "ITEM_copper_credits_vance",
+          "container": "torn_pocket",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_rebar",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "torn_pocket",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_copper_credits_vance"
+          ]
+        },
+        {
+          "container": "hand_right",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_rebar"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "copper_credits": 11,
+        "party_mechanics": {
+          "party_name": "The Mercy Cache (Provisional)",
+          "role": "Party Leader"
+        },
+        "statuses": [
+          {
+            "active": true,
+            "name": "Party Leader",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Mutual Assured Destruction",
+            "source": "Custom Party Contract"
+          }
+        ]
+      }
+    },
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "copper_credits": 5,
+        "party_mechanics": {
+          "party_name": "The Mercy Cache (Provisional)",
+          "role": "Party Member"
+        },
+        "statuses": [
+          {
+            "active": true,
+            "name": "Party Member",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Mutual Assured Destruction",
+            "source": "Custom Party Contract"
+          }
+        ]
+      }
+    },
+    {
+      "character_id": "unit_734",
+      "set": {
+        "party_mechanics": {
+          "party_name": "The Mercy Cache (Provisional)",
+          "role": "Party Member"
+        },
+        "statuses": [
+          {
+            "active": true,
+            "name": "Party Member",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Mutual Assured Destruction",
+            "source": "Custom Party Contract"
+          }
+        ]
+      }
+    }
+  ]
+}

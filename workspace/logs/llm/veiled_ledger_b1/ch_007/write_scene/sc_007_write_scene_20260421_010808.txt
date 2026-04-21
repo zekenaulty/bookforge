@@ -1,0 +1,231 @@
+COMPLIANCE:
+Scene ID: SC_007_007
+Allowed events: Loot the overseer's desk, secure the Mercy Cache coordinates and administrative residue token, node collapses.
+Forbidden milestones: none
+
+Current arm-side / inventory facts: 
+- vance_harrow -> Rebar (status=held, container=hand_right)
+- rhea_mercer -> Raw Data Packet (status=stowed, container=blazer_pocket_left)
+- rhea_mercer -> Null-Value Token (status=stowed, container=blazer_pocket_left)
+- blazer_pocket_left contents: [ITEM_administrative_coordinate_chip, ITEM_raw_data_packet, ITEM_null_value_token]
+
+Durable changes committed:
+- Added ITEM_mercy_cache_coordinates to rhea_mercer blazer_pocket_right
+- Added ITEM_administrative_residue_token to rhea_mercer blazer_pocket_right
+- Registered both new items in item_registry_updates.
+
+APPEARANCE_CHECK:
+- rhea_mercer: singed hair
+- vance_harrow: blistered hands
+- unit_734: smoking chassis
+
+PROSE:
+With the feral overseer dead, the room begins to violently shake as the local node destabilizes. The glowing white fragments of the defeated entity dissolve into the cracking stone floor, leaving nothing but a massive, overturned obsidian desk amidst the ruin of the Inner Office. 
+
+[System Notification: Local Node Anchor Lost. Structural Collapse Imminent.]
+
+Rhea stumbles forward. Her lungs burn from total stamina depletion, and the singed hair on her arms prickles against the sudden rush of cold, unanchored ozone filling the chamber. She drops to her knees beside the shattered desk. 
+
+[Loot Window: Overseer's Sanctum Desk]
+
+A holographic interface flickers to life over the rubble, spitting out two physical objects. Rhea grabs the first—a heavy, glowing roll of parchment. 
+
+[Item Description: Mercy Cache Coordinates - Mythic. The location of the frontier node's off-ledger vault.]
+
+She snatches the second item, a jagged piece of purple code-glass that hums with stolen authority. 
+
+[Item Description: Administrative Residue Token - High-Tier. Permanent illicit system access bypass.]
+
+Behind her, Vance Harrow coughs violently, gripping his Rebar with heavily blistered hands. He is barely standing, his health bar a terrifying sliver of red. "We need to move, Mercer! Now!" 
+
+Unit 734’s smoking chassis sparks as a deafening klaxon overrides the drone's internal audio. 
+
+[Critical Failure: Frontier Zone Purge Initiated in 00:00:30]
+
+Chunks of masonry begin to rain from the ceiling, shattering against the polished marble floor. Rhea pockets the Mercy Cache coordinates and administrative residue token as the System broadcasts a critical failure across the zone.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "recent_facts": [
+      "The feral overseer's death caused the local frontier node to destabilize.",
+      "Rhea looted the massive obsidian desk, acquiring the Mercy Cache Coordinates and Administrative Residue Token.",
+      "The System initiated a critical failure and a 30-second zone purge countdown."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 7,
+      "scene": 7,
+      "persona_updates": [
+        "Rhea realizes she has successfully stolen the keys to the local system's kingdom, but must survive the imminent purge to use them."
+      ],
+      "inventory": [
+        {
+          "item": "ITEM_administrative_coordinate_chip",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_raw_data_packet",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_null_value_token",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_mercy_cache_coordinates",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_administrative_residue_token",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": []
+        },
+        {
+          "container": "hand_right",
+          "owner": "rhea_mercer",
+          "contents": []
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_administrative_coordinate_chip",
+            "ITEM_raw_data_packet",
+            "ITEM_null_value_token"
+          ]
+        },
+        {
+          "container": "blazer_pocket_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_mercy_cache_coordinates",
+            "ITEM_administrative_residue_token"
+          ]
+        },
+        {
+          "container": "system_inventory",
+          "owner": "rhea_mercer",
+          "contents": []
+        }
+      ],
+      "invariants_add": [
+        "inventory: rhea_mercer -> Mercy Cache Coordinates (status=stowed, container=blazer_pocket_right)",
+        "inventory: rhea_mercer -> Administrative Residue Token (status=stowed, container=blazer_pocket_right)"
+      ]
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_mercy_cache_coordinates",
+      "set": {
+        "name": "Mercy Cache Coordinates",
+        "display_name": "Mercy Cache Coordinates",
+        "type": "quest_item",
+        "owner_scope": "character",
+        "custodian": "rhea_mercer",
+        "linked_threads": [
+          "system_debt_trap"
+        ],
+        "state_tags": [
+          "loot",
+          "mythic"
+        ],
+        "last_seen": {
+          "chapter": 7,
+          "scene": 7,
+          "location": "LOC_OVERSEER_INNER_OFFICE"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_administrative_residue_token",
+      "set": {
+        "name": "Administrative Residue Token",
+        "display_name": "Administrative Residue Token",
+        "type": "quest_item",
+        "owner_scope": "character",
+        "custodian": "rhea_mercer",
+        "linked_threads": [
+          "system_debt_trap"
+        ],
+        "state_tags": [
+          "loot",
+          "high_tier"
+        ],
+        "last_seen": {
+          "chapter": 7,
+          "scene": 7,
+          "location": "LOC_OVERSEER_INNER_OFFICE"
+        }
+      }
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "frontier_zone_purge_timer": 30,
+        "node_status": "Critical Failure"
+      },
+      "reason": "The overseer's death triggered a structural collapse and zone purge."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "With the feral overseer defeated, the local node lost its anchor and began to violently destabilize.",
+      "Rhea looted the shattered obsidian desk, securing the Mercy Cache Coordinates and an Administrative Residue Token.",
+      "The System initiated a critical failure protocol, broadcasting a thirty-second countdown until the frontier zone purged."
+    ],
+    "key_events": [
+      "The feral overseer's death caused the local frontier node to crash.",
+      "Rhea looted the overturned obsidian desk.",
+      "Rhea acquired the Mercy Cache Coordinates and the Administrative Residue Token, stowing them in her right blazer pocket.",
+      "The System broadcasted a Critical Failure and initiated a 30-second zone purge."
+    ],
+    "must_stay_true": [
+      "milestone: elite_guards_defeated = DONE",
+      "mechanic: vance_harrow HP is 2/100",
+      "milestone: compliance_checks_bypassed = DONE",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "milestone: inner_office_breached = DONE",
+      "container: system_inventory (owner=rhea_mercer, contents=[])",
+      "milestone: debt_lock_applied = DONE",
+      "milestone: formal_dispute_initiated = DONE",
+      "mechanic: rhea_mercer Stamina is 0/150",
+      "milestone: catastrophic_default_triggered = DONE",
+      "milestone: overseer_shields_stripped = DONE",
+      "inventory: rhea_mercer -> Raw Data Packet (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Null-Value Token (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip, ITEM_raw_data_packet, ITEM_null_value_token])",
+      "container: hand_right (owner=rhea_mercer, contents=[])",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "mechanic: vance_harrow Rebar Durability is 58%",
+      "milestone: feral_overseer_defeated = DONE",
+      "milestone: debt_lock_removed = DONE",
+      "inventory: rhea_mercer -> Mercy Cache Coordinates (status=stowed, container=blazer_pocket_right)",
+      "inventory: rhea_mercer -> Administrative Residue Token (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_mercy_cache_coordinates, ITEM_administrative_residue_token])",
+      "milestone: mercy_cache_coordinates_secured = DONE",
+      "milestone: administrative_residue_token_secured = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Rhea looted the overseer's desk, securing the Mercy Cache Coordinates and an Administrative Residue Token.",
+      "The System broadcasted a Critical Failure, initiating a purge of the destabilized frontier zone."
+    ]
+  }
+}

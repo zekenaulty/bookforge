@@ -1,0 +1,165 @@
+COMPLIANCE:
+Scene ID: SC_003_003
+Allowed events: Party accepts quest, travels to tunnel, Artie draws aggro, Rhea positions for environmental kill.
+Forbidden milestones: None violated.
+
+Current arm-side / inventory facts: Rhea right hand Makeshift Masonry Bludgeon, left hand Copper Credits (will stow). Artie right hand jagged piece of rebar.
+
+Durable changes committed: Rhea stows Copper Credits.
+
+APPEARANCE_CHECK:
+- char_rhea: slender pale human, messy bob, dark brown eyes.
+- char_vex: glowing blue hologram.
+- char_artie: broken left arm, bruised chest.
+
+PROSE:
+After formalizing the party, Vex pulled a low-level extermination quest from the rusted terminal, and the trio headed to a collapsed transit tunnel to test their exploit. 
+
+[Party Quest Accepted: Vermin Control (Local)]
+[Objective: Clear the collapsed transit tunnel.]
+
+Rhea slipped the untaxed Copper Credits into her right blazer pocket, freeing up her left hand for balance as she hefted her Makeshift Masonry Bludgeon. The tunnel entrance loomed ahead, a jagged maw of shattered concrete and exposed rebar that smelled faintly of sulfur and wet rot. Inside, the clicking of ash-crusted scavengers echoed against the dark walls.
+
+"Alright, muscle," Rhea whispered, glancing at Artie. The man looked like a walking corpse, his left arm hanging uselessly at his side and his chest a canvas of deep purple bruising. "You just need to get their attention. Do not get hit."
+
+"I've got four hit points," Artie muttered, his right hand white-knuckling a jagged piece of rebar. "If a stiff breeze hits me, my soul gets repossessed."
+
+[Party Telemetry: Artie HP 4/100. Status: Critical.]
+
+"Then don't stand in the breeze," Vex supplied helpfully from the sidelines, his glowing blue holographic form hovering a safe distance from the tunnel entrance. "If you die, the paperwork for a sudden party dissolution is atrocious."
+
+Artie grunted, stepping into the gloom of the collapsed transit tunnel. He banged his jagged piece of rebar against a rusted metal pipe, the screeching noise immediately drawing the red, glowing eyes of three scavengers. 
+
+[Aggro Shift: Artie (Threat Level: High)]
+
+The creatures hissed, their brittle carapaces scraping against the concrete as they lunged toward him. Artie held the scavengers' attention by a thread as Rhea crept along the shadows, raising her Makeshift Masonry Bludgeon as she prepared to drop the ceiling on them.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+    "cast_present": ["char_rhea", "char_vex", "char_artie"]
+  },
+  "character_updates": [
+    {
+      "character_id": "char_rhea",
+      "chapter": 3,
+      "scene": 3,
+      "inventory": [
+        {
+          "item": "ITEM_makeshift_masonry_bludgeon",
+          "container": "hand_right",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_ash_fungus",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_copper_credits",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "char_rhea",
+          "contents": ["ITEM_makeshift_masonry_bludgeon"]
+        },
+        {
+          "container": "hand_left",
+          "owner": "char_rhea",
+          "contents": []
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "char_rhea",
+          "contents": ["ITEM_obsidian_shard", "ITEM_ash_fungus"]
+        },
+        {
+          "container": "blazer_pocket_right",
+          "owner": "char_rhea",
+          "contents": ["ITEM_cracked_smartphone", "ITEM_copper_credits"]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "char_rhea",
+      "set": {
+        "quests": [
+          {
+            "name": "Vermin Control (Local)",
+            "status": "active"
+          }
+        ]
+      }
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "char_rhea",
+      "set": {
+        "inventory.ITEM_copper_credits.container": "blazer_pocket_right",
+        "inventory.ITEM_copper_credits.status": "stowed"
+      },
+      "reason": "Rhea stowed the credits to free her left hand.",
+      "reason_category": "scene_action"
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "After forming the party, Vex pulled a low-level quest from the terminal, and the trio headed to a collapsed transit tunnel.",
+      "Artie used a jagged piece of rebar to draw the scavengers' aggro despite being at critically low HP.",
+      "Rhea positioned herself to trigger an environmental hazard, preparing to drop the ceiling on the distracted mobs."
+    ],
+    "key_events": [
+      "The party accepted the Vermin Control quest.",
+      "Rhea stowed her Copper Credits to prepare for combat.",
+      "Artie successfully drew aggro from the scavengers in the collapsed transit tunnel.",
+      "Rhea moved into position to execute the physics exploit with her Makeshift Masonry Bludgeon."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: char_rhea -> Copper Credits (status=held, container=hand_left)",
+      "REMOVE: container: hand_left (owner=char_rhea, contents=[ITEM_copper_credits])",
+      "REMOVE: container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+      "mechanic: char_rhea HP is 25/100",
+      "mechanic: char_rhea Stamina is 40/100",
+      "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+      "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "container: hand_left (owner=char_rhea, contents=[])",
+      "milestone: first_credits_banked = DONE",
+      "mechanic: char_rhea has 4 Copper Credits",
+      "milestone: rhea_cornered_by_vex_and_artie = DONE",
+      "mechanic: char_artie HP is 4/100",
+      "mechanic: char_artie has active status Stage Two Systemic Shock",
+      "mechanic: char_artie has active status Minor Hemorrhage",
+      "mechanic: char_artie has active title Indentured Soul",
+      "injury: char_artie severe internal damage",
+      "injury: char_artie broken left arm",
+      "milestone: party_formed_rhea_vex_artie = DONE",
+      "mechanic: char_rhea has active status Party Leader",
+      "mechanic: char_artie has active status Party Member",
+      "mechanic: char_vex has active status Party Member"
+    ],
+    "chapter_so_far_add": []
+  }
+}

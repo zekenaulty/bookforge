@@ -1,0 +1,35 @@
+With Artie desperately drawing the aggro of the chittering scavengers, Rhea timed her strike against the compromised support structure. Artie looked half-dead, his broken left arm hanging uselessly at his side as he waved his jagged piece of rebar with his uninjured hand. His health was a terrifyingly fragile metric. If one of those ash-crusted beasts so much as grazed him, his remaining four hit points would vanish instantly.
+
+"Now, Rhea!" Artie screamed, deflecting a snapping jaw with the rusty iron.
+
+Rhea swung her Makeshift Masonry Bludgeon with everything she had. The heavy stone head slammed into the cracked concrete pillar.
+
+[Stamina: 38/100]
+
+The ceiling groaned, letting out a deep, structural death rattle. 
+
+"Move!" Rhea yelled.
+
+Artie dove backward, sliding through the ash just as the tunnel's roof gave way. Tons of concrete and rusted steel collapsed, burying the scavengers in a deafening roar of dust and violence. 
+
+Rhea wiped a streak of grime from her forehead, pushing her messy black bob out of her eyes as she watched her health bar to ensure the physics engine hadn't clipped her bruised left leg with splash damage. 
+
+[HP: 25/100]
+
+Vex floated nearby, his glowing blue holographic form entirely unaffected by the debris cloud. The translucent azure light of his digitized silhouette cut through the gloom as the cynical clerk projected a green telemetry window, his eyes scanning the rapid flow of system code.
+
+[System Alert: Environmental Hazard Detected]
+[Entities Terminated: Ash-Crusted Scavenger (x3)]
+[Combat Tax: Bypassed]
+[Gathering Tax: Bypassed]
+[Durability: Untaxed]
+[Quest Complete: Vermin Control (Local)]
+[Loot Generated: 12 Copper Credits, Scavenger Carapaces (x3)]
+
+Rhea checked her own interface. No hidden fees. No predatory debt triggers. The system had registered the kills as an environmental accident, leaving their durability and stamina entirely untaxed by the engagement. 
+
+"It worked," Vex muttered, his voice laced with a mix of relief and reluctant awe. "Zero net loss. The ledger didn't even blink."
+
+Artie let out a ragged breath from the floor, clutching his bruised purple chest. "Thank god."
+
+As the dust settled, revealing the untaxed loot and confirming the exploit's success, Rhea walked over to the rubble. She gathered the Scavenger Carapaces and the Copper Credits, slipping them into her pockets with a grim smile. The math was finally on their side.

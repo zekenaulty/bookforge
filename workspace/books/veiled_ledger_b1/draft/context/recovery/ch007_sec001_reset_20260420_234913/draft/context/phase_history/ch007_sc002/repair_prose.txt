@@ -1,0 +1,40 @@
+The shattered doors seal behind them as the foyer locks down, trapping the party with regenerating guards and activating lethal compliance grids. Red lasers slice through the dusty air, forming a deadly, geometric web across the polished marble floor.
+
+Vance doesn't have time to catch his breath. The remains of the gilded construct he just smashed begin to twitch, the stamped metal folding back into place. The regenerating guard rises, its stamp-hammer swinging in a brutal arc. Vance brings up his Rebar, taking the kinetic force of the blow directly on his forearms.
+
+[HP: 10/100]
+
+He grunts, his heavily blistered hands slipping on the iron. "Rhea! Little busy here!"
+
+"Working on it!" Rhea snaps, the singed arm hair on her bare forearms bristling as she turns to the heavy blast door blocking the corridor. A holographic terminal hovers beside it, glowing with a harsh, bureaucratic red.
+
+Unit 734 hovers over her shoulder, plumes of thick smoke venting from its metallic body, its smoking chassis rattling. Despite its critical chassis failure, the drone extends a sparking interface cable into the terminal's port.
+
+[Chassis Integrity: 34%]
+[Warning: Critical System Failure Imminent.]
+
+The red lasers pause their sweep, and a new window projects directly into Rhea's vision.
+
+[Compliance Check Initiated.]
+[Inventory Audit required. Please deposit assets to clear the ledger.]
+
+"It wants a bribe," Rhea mutters, her chest heaving as the Exhaustion debuff makes her limbs feel like lead. "A literal paywall."
+
+Vance deflects another crushing blow from the guard, the impact dropping him to his knees. He is barely surviving the regenerating guard's attacks, his health bar flashing a critical, strobing red. 
+
+Rhea steps up to the terminal's physical deposit slot. She raises her right hand and shoves the Obsidian Shard into the grinding gears. The machine shrieks, shaving off a layer of the stone before violently ejecting the core back into her palm.
+
+[Item Partially Consumed: Obsidian Shard.]
+[Value Accepted. Audit Progress: 38%.]
+
+"Not enough!" Unit 734 whirs, its voice box crackling. "The ledger demands further liquidation!"
+
+Rhea frantically opens her system inventory. She can't risk the Null-Value Token in her left hand or the Administrative Coordinate Chip in her pocket. Instead, she dumps a stream of abstract junk data—cached error logs, corrupted metadata from the tollbooth, and a handful of untaxed Copper Credits. She physically throws her Cracked Smartphone and a piece of Scrap Parchment into the slot, watching the system devour them.
+
+[Assets Liquidated.]
+[Inventory Audit: Complete.]
+[Compliance Check: Passed.]
+
+The red laser grid fizzles out in a shower of sparks. The heavy blast door slides open with a pneumatic hiss. Rhea successfully bypasses the compliance checks, opening the path to the inner sanctum but sacrificing several pieces of looted gear.
+
+"Move!" Rhea yells, grabbing Vance by the shoulder as the regenerating guard winds up for another lethal swing.

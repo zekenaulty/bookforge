@@ -1,0 +1,236 @@
+COMPLIANCE:
+Scene ID: SC_003_005
+Allowed events: Rhea drafts a custom liability contract, Vance and Unit 734 interact, UI prompts appear.
+Forbidden milestones: party_formed_rhea_vex_artie = DONE (already done, do not re-form, just formalize contract).
+Current arm-side / inventory facts: Rhea has Makeshift Masonry Bludgeon. Copper Credits moved to world.
+
+APPEARANCE_CHECK:
+- rhea_mercer: ash-smeared face, torn blazer
+- vance_harrow: scarred face, ash-smeared
+- unit_734: drone chassis, optical lens
+
+PROSE:
+With the Copper Credits divided into three uneven but untaxed piles on a slab of fallen concrete, Vance wiped a smear of ash from his face and suggested forming a standard System Party. Rhea, inherently distrustful of default Ledger contracts after her near-death experience with the starter cache, immediately shut the idea down, insisting on drafting a custom liability agreement. 
+
+"It's just a button," Vance argued, his hand hovering over his personal interface. A glowing blue prompt materialized between them in the gloom of the collapsed transit tunnel.
+
+[Party Contract: Standard Ledger Alliance]
+[Warning: Acceptance binds all participants to local node tariff schedules.]
+
+"It's a debt trap," Rhea corrected, pointing her Makeshift Masonry Bludgeon at the tiny, pulsing asterisk hidden in the bottom corner of the holographic parchment. "If one of us defaults on a stamina tax, the System amortizes the deficit across the party. I am not subsidizing your bleeding."
+
+She turned her attention to the glowing, hovering form of the local clerk. "You. Open the backend."
+
+Unit 734 whirred, its optical lens clicking in annoyance. "Standard users do not possess the administrative rights to alter—"
+
+"I possess the right to crush more environmental debris onto more untaxed scavengers and bankrupt your local node's projected ecosystem," Rhea interrupted. "Open it."
+
+The drone clicked again, a sound remarkably like a synthetic sigh. The blue window shattered, replaced by a cascading wall of jagged, green text.
+
+[System Syntax: Developer Framework Unlocked]
+[Terms and Conditions: Custom Clause Generation Active]
+
+Rhea stepped up to the scrolling code, her eyes scanning the variables. She forced Unit 734 to pull up the raw contract syntax, her fingers moving rapidly through the air as she began drafting a custom party contract. She wasn't just forming an alliance; she was building a legal fortress. She locked in clauses that explicitly forbade friendly fire, established a mathematically rigid division of assets to prevent loot skimming, and completely disabled unilateral reporting to the local overseer.
+
+"Sign it," Rhea said, stepping back as the green text solidified into a binding document. "Or you can go back to fighting the math on your own."
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+    "open_threads": [
+      "party_alliance",
+      "system_debt_trap"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 3,
+      "scene": 5,
+      "appearance_updates": {
+        "set": {
+          "atoms": [
+            "ash-smeared face",
+            "torn blazer"
+          ]
+        },
+        "reason": "Scene description anchoring."
+      },
+      "inventory": [
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_ash_fungus",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_scavenger_carapaces",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_makeshift_masonry_bludgeon",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_cracked_smartphone"
+          ]
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus",
+            "ITEM_scavenger_carapaces"
+          ]
+        },
+        {
+          "container": "hand_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_makeshift_masonry_bludgeon"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": []
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": []
+    },
+    {
+      "character_id": "vance_harrow",
+      "chapter": 3,
+      "scene": 5,
+      "appearance_updates": {
+        "set": {
+          "atoms": [
+            "scarred face",
+            "ash-smeared"
+          ]
+        },
+        "reason": "Scene description anchoring."
+      },
+      "inventory": [],
+      "containers": [],
+      "invariants_add": [],
+      "persona_updates": []
+    },
+    {
+      "character_id": "unit_734",
+      "chapter": 3,
+      "scene": 5,
+      "appearance_updates": {
+        "set": {
+          "atoms": [
+            "drone chassis",
+            "optical lens"
+          ]
+        },
+        "reason": "Scene description anchoring."
+      },
+      "inventory": [],
+      "containers": [],
+      "invariants_add": [],
+      "persona_updates": []
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_copper_credits",
+      "set": {
+        "name": "Copper Credits",
+        "display_name": "Copper Credits",
+        "type": "currency",
+        "owner_scope": "world",
+        "custodian": "world",
+        "linked_threads": [],
+        "state_tags": [],
+        "last_seen": {
+          "chapter": 3,
+          "scene": 5,
+          "location": "LOC_COLLAPSED_TRANSIT_TUNNEL"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_makeshift_masonry_bludgeon",
+      "set": {
+        "name": "Makeshift Masonry Bludgeon",
+        "display_name": "Makeshift Masonry Bludgeon",
+        "type": "weapon",
+        "owner_scope": "character",
+        "custodian": "rhea_mercer",
+        "linked_threads": [],
+        "state_tags": [],
+        "last_seen": {
+          "chapter": 3,
+          "scene": 5,
+          "location": "LOC_COLLAPSED_TRANSIT_TUNNEL"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_copper_credits",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "Placed on concrete slab to divide loot."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Rhea placed the Copper Credits on a concrete slab to divide the untaxed loot.",
+      "Vance suggested forming a standard System Party, but Rhea refused the predatory default terms.",
+      "Rhea forced Unit 734 to open the developer framework, drafting a custom liability contract to prevent friendly fire and loot skimming."
+    ],
+    "key_events": [
+      "Rhea divided the Copper Credits among the party.",
+      "Rhea rejected the standard Ledger Alliance contract.",
+      "Rhea accessed the System Syntax Developer Framework via Unit 734.",
+      "Rhea drafted a custom party contract with strict liability and asset division clauses."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "REMOVE: container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+      "inventory: world -> Copper Credits (status=placed, container=concrete_slab)",
+      "container: concrete_slab (owner=world, contents=[ITEM_copper_credits])",
+      "inventory: char_rhea -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+      "milestone: custom_party_contract_drafted = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Rhea drafted a custom liability contract to formalize her alliance with Vance and Unit 734, explicitly forbidding friendly fire and loot skimming."
+    ]
+  }
+}

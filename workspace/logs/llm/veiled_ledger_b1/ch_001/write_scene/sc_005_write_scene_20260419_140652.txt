@@ -1,0 +1,177 @@
+COMPLIANCE:
+Scene ID: SC_001_005
+Allowed events: Rhea finds an exploit using environmental debris to break the pedestal, acquiring raw materials without a contract.
+Forbidden milestones: starter_cache_rejected (already done)
+
+Current arm-side / inventory facts: Cracked Smartphone (stowed in blazer_pocket_right)
+
+Durable changes committed: 
+- Created ITEM_obsidian_shard
+- Created ITEM_raw_masonry_chunk
+- Transferred both to Rhea's hands
+
+APPEARANCE_CHECK:
+- CHAR_ID: pale slender human woman, black messy bob, branded wrist, bruised leg
+
+PROSE:
+Rhea stood before the darkened pedestal, her breath pluming in the cold ash wind. The cache was permanently locked, but she was already looking for another way to extract value from the stubborn block of stone. The System had presented her with a digital choice, but it had made the mistake of placing that choice in a physical world. 
+
+[HP: 1/100]
+
+One hit point. A stiff breeze or a bad stumble could theoretically kill her, sending her back to whatever void she'd fallen out of. She needed a weapon. She needed a tool. She dropped to her knees, wincing as the bruised meat of her left leg protested the movement, and began sifting through the debris at the base of the structure. Her fingers closed over a jagged, wedge-shaped piece of black glass. She pulled the Obsidian Shard free from the dirt. It was sharp enough to slice her thumb, drawing a bead of bright crimson. No blue box appeared to claim ownership of the rock.
+
+Perfect. 
+
+She turned her attention back to the pedestal. It was smooth, glowing faintly at the seams, built from some proprietary architectural asset the System used to enforce its rules. But it was still matter. It still occupied space.
+
+Rhea gripped the obsidian tightly in her left hand. She brought it down hard against the corner of the pedestal's base. 
+
+*Clack.*
+
+The impact vibrated up her arm, jarring her teeth, but the stone didn't shatter. She swung again, putting the meager weight of her shoulders into the strike. Physics didn't require a signature. Physics didn't charge compounding interest.
+
+*Crack.*
+
+A fracture spiderwebbed across the glowing stone. With a final, desperate pry of the obsidian wedge, a piece of the architecture snapped loose and tumbled into the ash. 
+
+Rhea scooped up the prize with her free hand. Rhea held the raw chunk of masonry, feeling its latent warmth, having successfully bypassed the contract.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "char_rhea"
+    ],
+    "location": "LOC_TUTORIAL_CRATER_RIDGE"
+  },
+  "character_updates": [
+    {
+      "character_id": "char_rhea",
+      "chapter": 1,
+      "scene": 5,
+      "inventory": [
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_raw_masonry_chunk",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_cracked_smartphone"
+          ]
+        }
+      ],
+      "invariants_add": [
+        "inventory: char_rhea -> Obsidian Shard (status=held, container=hand_left)",
+        "inventory: char_rhea -> Raw Masonry Chunk (status=held, container=hand_right)"
+      ],
+      "persona_updates": []
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "set": {
+        "name": "Obsidian Shard",
+        "display_name": "Obsidian Shard",
+        "type": "material",
+        "owner_scope": "world",
+        "custodian": "world",
+        "linked_threads": [],
+        "state_tags": [
+          "sharp",
+          "raw"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 5,
+          "location": "LOC_TUTORIAL_CRATER_RIDGE"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_raw_masonry_chunk",
+      "set": {
+        "name": "Raw Masonry Chunk",
+        "display_name": "Raw Masonry Chunk",
+        "type": "material",
+        "owner_scope": "world",
+        "custodian": "world",
+        "linked_threads": [],
+        "state_tags": [
+          "heavy",
+          "system_material"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 5,
+          "location": "LOC_TUTORIAL_CRATER_RIDGE"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "char_rhea"
+      },
+      "reason": "picked up from ground"
+    },
+    {
+      "item_id": "ITEM_raw_masonry_chunk",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "char_rhea"
+      },
+      "reason": "broken off pedestal"
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Rhea used a sharp piece of obsidian to chip away at the locked Starter Cache pedestal.",
+      "She successfully broke off a raw chunk of System masonry without triggering a digital contract.",
+      "She secured her first unbranded materials, relying on physics to bypass the System's rules."
+    ],
+    "key_events": [
+      "Rhea found an Obsidian Shard in the crater debris.",
+      "She used the shard to physically vandalize the locked Starter Cache pedestal.",
+      "She acquired a Raw Masonry Chunk without triggering the System's predatory debt mechanics."
+    ],
+    "must_stay_true": [
+      "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+      "inventory: char_rhea -> Obsidian Shard (status=held, container=hand_left)",
+      "inventory: char_rhea -> Raw Masonry Chunk (status=held, container=hand_right)",
+      "mechanic: char_rhea HP is 1/100",
+      "mechanic: char_rhea has active status Tutorial Grace Period",
+      "mechanic: char_rhea has active title Indentured Soul",
+      "mechanic: char_rhea has 100,000 Soul Debt",
+      "injury: char_rhea bruised left leg",
+      "milestone: starter_cache_discovered = DONE",
+      "milestone: starter_cache_rejected = DONE",
+      "milestone: pedestal_vandalized = DONE"
+    ],
+    "chapter_so_far_add": []
+  }
+}

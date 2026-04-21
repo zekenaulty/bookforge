@@ -1,0 +1,174 @@
+PROSE:
+Rhea carefully rose from her resting spot, fighting through Exhaustion to put her physics exploit into motion. A few yards away, an ash-crusted scavenger was still scraping at the dry riverbed, its brittle claws oblivious to her presence.
+
+A glowing blue box flickered in her periphery, clinically indifferent to her suffering.
+
+[Warning: Stamina Depleted. Further exertion will consume HP.]
+
+She stared at the numbers.
+
+[HP: 1/100]
+[Stamina: 0/100]
+
+She couldn't afford a single misstep. At one hit point, a stumble, a heavy cough, or a swung weapon was a fatal event. She waited, her lungs burning, leaning against a petrified root until the merciless System ledger finally ticked over.
+
+[Stamina: 1/100]
+
+With agonizing slowness, she slipped the glowing Ash-Fungus into her left blazer pocket, freeing her hand. She crouched lower behind the thick root, her right hand gripping the rough, heavy handle of her Makeshift Masonry Bludgeon. The weapon was crude, heavy, and delightfully unregistered. 
+
+She picked up a loose stone from the ash. The UI flashed an immediate update.
+
+[Stamina: 0/100]
+
+Rhea froze, her heart hammering against her ribs. She didn't throw it. She couldn't. She held her breath, waiting for the invisible timer to cycle again.
+
+[Stamina: 1/100]
+
+She hurled the stone. It clattered against the jagged rocks near the tree line. The scavenger hissed, its brittle body pivoting toward the sound. It scurried away from the riverbed, moving directly beneath a cluster of glowing fungus and a massive, precariously balanced petrified branch.
+
+Rhea crept forward. Every step was calculated to avoid the System's exertion threshold. She positioned herself next to the petrified tree's trunk. The scavenger chittered right under the deadfall.
+
+She didn't have the stamina to swing the Makeshift Masonry Bludgeon. A full-force attack would trigger a combat exertion penalty, drain her last HP, and kill her instantly. Instead, she lifted the heavy masonry chunk just enough to let gravity do the work.
+
+[Stamina: 0/100]
+[Warning: Exertion threshold impending.]
+
+She let go of the tension in her arm, guiding the bludgeon's heavy head and letting its sheer, unbranded mass fall forward like a pendulum. 
+
+The bludgeon slammed into the brittle trunk. 
+
+Physics took over. The petrified wood cracked. The vibration traveled upward, snapping the massive dead branch loose. It plummeted, striking the scavenger with a sickening crunch and pinning the creature to the ash. A cloud of gray dust plumed outward. Splintered wood and chunks of glowing fungus rained down around the crushed mob.
+
+[Scavenger Defeated. +15 Experience Points.]
+
+Rhea squeezed her eyes shut, waiting for the blue flash of a Gathering Tax. 
+
+Nothing happened. 
+
+The System didn't register the fallen fungus and wood as a harvested resource. Because she hadn't actively gathered them, they were just environmental debris, knocked loose by a physical collision.
+
+Panting heavily, Rhea stood over the crushed scavenger, staring down at the pile of glowing fungus and splintered wood that the System registered as untaxed environmental debris.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "char_rhea"
+    ],
+    "location": "LOC_ASH_CHOKED_FOREST",
+    "open_threads": []
+  },
+  "summary_update": {
+    "last_scene": [
+      "Rhea managed her 0 Stamina / 1 HP state by waiting for minimal stamina regeneration to avoid fatal HP drain.",
+      "She herded an ash-crusted scavenger under a deadfall trap using a thrown stone.",
+      "Using gravity instead of a stamina-draining attack, she struck a petrified tree with her Makeshift Masonry Bludgeon.",
+      "The resulting debris crushed the scavenger and dropped untaxed resources, proving her physics exploit worked."
+    ],
+    "key_events": [
+      "Rhea waited for micro-regenerations of stamina before taking any action to avoid HP drain.",
+      "She stowed her Ash-Fungus to free her left hand.",
+      "She herded the scavenger under a precarious petrified branch using a thrown stone.",
+      "She triggered the deadfall by letting her heavy bludgeon fall against the tree, avoiding an exertion penalty.",
+      "The falling debris crushed the scavenger and dropped untaxed loot."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: char_rhea -> Ash-Fungus (status=held, container=hand_left)",
+      "REMOVE: container: hand_left (owner=char_rhea, contents=[ITEM_ash_fungus])",
+      "REMOVE: container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard])",
+      "inventory: char_rhea -> Ash-Fungus (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+      "milestone: physics_exploit_successful = DONE",
+      "mechanic: char_rhea HP is 1/100",
+      "mechanic: char_rhea Stamina is 0/100",
+      "mechanic: char_rhea has active status Exhaustion",
+      "mechanic: char_rhea has active status Tutorial Grace Period"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "char_rhea",
+      "chapter": 2,
+      "scene": 4,
+      "inventory": [
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_ash_fungus",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_makeshift_masonry_bludgeon",
+          "container": "hand_right",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_cracked_smartphone"
+          ]
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus"
+          ]
+        },
+        {
+          "container": "hand_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_makeshift_masonry_bludgeon"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "char_rhea",
+          "contents": []
+        }
+      ],
+      "persona_updates": [
+        "Rhea successfully executes a physics exploit, proving that the System's logic can be bypassed by using environmental collisions instead of direct attacks."
+      ],
+      "invariants_add": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "char_rhea",
+      "set": {
+        "stats": {
+          "xp": {
+            "current": 15
+          }
+        }
+      },
+      "reason": "Gained XP from defeating the scavenger via environmental kill."
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "char_rhea",
+      "set": {
+        "inventory.ITEM_ash_fungus.container": "blazer_pocket_left",
+        "inventory.ITEM_ash_fungus.status": "stowed"
+      },
+      "reason": "Stowed the fungus to free a hand for throwing a stone."
+    }
+  ]
+}

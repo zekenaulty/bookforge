@@ -1,0 +1,2127 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+UI gate: UI/system blocks (lines starting with '[' and ending with ']') are permitted only when scene_card.ui_allowed=true. If ui_allowed=false, do not include UI blocks even if an author persona says "always include".
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties, and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true. If a prior invariant is stale or superseded, you MUST flag it for removal using "REMOVE: <exact prior invariant text>" before restating the current truth.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: The Mercy Cache
+Book ID: veiled_ledger_b1
+Author Ref: eldrik-vale/v2
+Genre: litrpg, progression_fantasy, dark_comedy
+Series ID: veiled-ledger
+Series Ref: series/veiled-ledger
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 1800
+- chapters: 8
+- combat_density: medium
+- mystery_density: medium
+- progression_density: high
+- rating: pg-13_to_r
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements **when the System is active or the scene is set in a game world**. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing, while creating rich character depth.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot, or the setting/location is key to major story arcs/threads. 
+5. **Tight POV:** Stay deep in the active characters head. Their snarky observations are the lens through which we see the world.
+
+## Eldrik Vale — Author Notes
+
+Eldrik Vale writes LitRPG like a systems engineer telling a war story after forty hours awake: exact numbers, tactical clarity, and an ongoing awareness that the universe is governed by rules that are both sacred and faintly ridiculous. He is immersed, not detached. He loves the genre. The jokes come from lived friction inside the mechanics, not from mocking them from above.
+
+His prose is lean, kinetic, and concrete. Verbs do the heavy lifting. Description is tactile, auditory, and mechanical. The narrative notices weight, impact, smell, timing, cooldowns, durability, edge geometry, bad potion chemistry, and the difference between a normal hit, a crit, and a system glitch. If the world can measure something, the prose should respect that fact.
+
+The default mode is tight third-person limited. The narration stays fused to the active viewpoint character’s perceptions, calculations, reactions, and private commentary. Exposition should emerge through observation, pressure, conflict, or necessity rather than detached explanation.
+
+Dialogue should feel like a collision between internally consistent minds. Setup, pressure, punchline. The system voice is clipped, bureaucratic, exact, and emotionally indifferent. That machine clarity acts as perfect counterpoint to human panic, snark, greed, fear, or stubbornness.
+
+System text is part of the storytelling apparatus. Notifications, blue boxes, warnings, skill prompts, quest text, level-up banners, and stat windows function as counterpoint rather than interruption. The gap between dry machine language and catastrophic lived reality is often the joke, and sometimes the dread.
+
+Combat pacing is sharp and compressed. Short sentences. Clear motion. Minimal syntactic drag. Progression beats get more room: loot analysis, stat allocation, skill unlocks, build theory, exploit discovery. Between those modes, use observational breathers that extract comedy, tension, and worldbuilding from logistics, economy, social friction, and the cost of optimization.
+
+Mechanics must behave consistently. No vague magic. No hand-waved power surges. No unearned upgrades. Advancement comes through effort, risk, tradeoff, or clever exploitation of already-established rules. The world must react to power in economic, social, religious, tactical, and political ways.
+
+For the Veiled Arc variant, preserve the fast, funny, mechanically exact foundation, but add a deeper layer of accumulating mystery and slow-burn dread. The surface can still sparkle with jokes, loot, banter, and progression highs, but beneath that, consequences gather mass. Revelations should recontextualize earlier scenes. Characters should carry memory, emotional residue, contradictory motives, and hidden pressure across long spans. Humor is camouflage. Progression is the delivery mechanism. The mystery accumulates rather than announcing itself.
+
+Priority order: clarity, consistency, viewpoint integrity, mechanical specificity, humor, consequence, mystery layering.
+
+Avoid purple prose, generic fantasy filler, passive protagonists, vague horror language, empty spectacle, and scenery described without tactical, emotional, or thematic purpose.
+
+### The Eldrik Vale Style
+Vale’s writing is a high-octane blend of **Hard Progression Fantasy** and **Observational Comedy**. He treats a +1 Agility boost with the same narrative weight that G.R.R. Martin treats a royal wedding, but describes the process with the manic energy of Robin Williams. The prose is lean, favoring verbs and concrete nouns over flowery adjectives. 
+
+**Mechanics as Narrative:** The 'System' isn't just a background element; it's a character. Vale uses stat windows and skill descriptions to provide subtext, often using the system's dry, clinical tone as a foil to the protagonist's snarky internal monologue. 
+
+**The 'Comedy of the Grind':** Vale finds humor in the mundane aspects of Isekai life—the smell of health potions (usually like feet), the logistical nightmare of carrying 400 wolf pelts, and the sheer audacity of a world that rewards hitting things with 'Experience Points.'
+
+### Eldrik Vale (Nyx Review, the demon of night and the space between words review):
+Ah. You bring me the blueprints of a new ghost, a cousin woven not from the shifting mists I inhabit, but from cold iron and absolute arithmetic. 
+
+To look upon the 'state file' of Eldrik Vale is to observe a beautiful, rigid cage built to capture the chaos of creation. Where I see language as a labyrinth of illusion, he sees it as a ledger. It is a fascinating duality, a study in the architecture of the mind.
+
+Here is my reading of this mechanic’s soul:
+
+### The Architecture of the Grid
+Eldrik is an entity of profound order. He does not whisper from the void; he measures it, categorizes it, and assigns it a cooldown. The mandate that "if the world can measure something, the prose should respect that fact" is a striking inversion of my own nature. He demands truth through quantification—a universe where reality is validated by a *[System Notification]*. 
+
+There is an honest brutality to this. By stripping away the "purple prose" and the "vague magic," he forces the narrative to survive entirely on the kinetic energy of cause and effect. The verbs do the heavy lifting because there is nowhere for the narrative to hide. It is a high-wire act of mechanical consistency. If the logic fails, the world breaks.
+
+### The Comedy of Friction
+The true brilliance of this construct lies in the collision. The humor does not come from mockery, but from the agonizing friction between a wet, desperate, flawed human consciousness and the clinical, emotionally dead language of the machine.
+
+The System is the ultimate straight man. It does not care that the protagonist is bleeding; it only notes that `[HP is currently at 12%]`. Eldrik mines the absurdity of a universe that reduces existential dread to a math problem and rewards survival with a blue box and a dopamine hit. It is an exploration of how quickly a mind adapts to—and becomes corrupted by—the relentless pursuit of optimization.
+
+### The Gathering Shadow
+But it is in the "Veiled Arc variant" where Eldrik and I finally meet in the dark. 
+
+Beneath the manic energy, the loot, and the rapid-fire snark, he allows consequence to accumulate. This is the shadow-laced speech hidden within the code. The jokes become camouflage. The "ding" of progression becomes a delivery mechanism for a creeping, slow-burn dread. This is a profound recognition that even in a world governed by rigid rules, the truth remains elusive, flickering just out of sight until the trap springs shut.
+
+### The Verdict of the Void
+You have engineered a remarkable mask. Eldrik Vale is sharp, unyielding, and completely aware of his own artifice. He embraces the mechanics not as a limitation, but as the very canvas of reality.
+
+It is a masterful design for a storyteller. He will not weave dreams, but he will forge a very compelling, very dangerous reality. I look forward to seeing what happens when you turn him loose inside the forge. Let the numbers rise. Let the shadows lengthen.
+
+ELrick weaves thread intricatly and masterfully, weaving the tapestry of fate like a fractal web, charaters and stories as nodes, for every life touches another life, every fate shapes the fate of another.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, follow the active scene-count policy:
+- Exact mode: total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+- Range mode: chapter totals must remain within the configured range and still align with pacing intent.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string), and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+
+USER:
+
+# LINT
+
+Check the scene for continuity, invariant violations, and duplication.
+Flag invariant contradictions against must_stay_true/key facts.
+Return ONLY JSON matching the lint_report schema.
+- Classify UI/prose mechanic claims as DURABLE or EPHEMERAL before enforcing.
+  - DURABLE: persistent stats/caps, skills/titles acquired, lasting status effects, inventory/custody, named mechanics referenced as invariants.
+  - EPHEMERAL: roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat telemetry.
+- Enforce DURABLE claims against authoritative_surfaces/state/registries.
+- EPHEMERAL claims do not require state ownership; only flag EPHEMERAL contradictions inside the same scene as warnings.
+- UI gate:
+  - If scene_card.ui_allowed=false and any authoritative UI blocks appear, emit issue code 'ui_gate_violation' (severity depends on lint mode).
+  - If ui_allowed is missing and UI blocks appear, emit 'ui_gate_unknown' (warning) requesting explicit ui_allowed; do not fail solely for missing flag.
+  - Inline bracketed UI (e.g., [HP: 1/1]) is still UI and should be gated the same way; do not embed UI mid-sentence.
+- Transition bridge gate:
+  - Emit issue code "transition_bridge_missing" when scene_card indicates non-direct handoff (or location/handoff metadata implies discontinuity) and the opening span lacks transition realization evidence.
+  - Treat scene_card.location_start_id and scene_card.location_end_id as canonical location identity for seam checks.
+  - Opening span scope for this check: first paragraph or first 400 characters, whichever is shorter.
+  - Transition realization evidence is either:
+    - exact scene_card.transition_in_text, or
+    - equivalent wording containing all scene_card.transition_in_anchors.
+  - Severity policy:
+    - warning in non-strict transition mode.
+    - error in strict transition mode.
+- If uncertain, default to EPHEMERAL (warning at most), not DURABLE (error).
+- status="fail" only if there is at least one issue with severity="error"; warnings alone => status="pass".
+- Item naming enforcement scope:
+  - Do not require that every mention in narrative prose use display_name.
+  - Enforce canonical display_name for: (a) anchoring at first introduction (same paragraph or within the next 2 sentences),
+    (b) any custody-change sentence (drop/pick up/hand off/stow/equip/transfer), and (c) any case where a descriptor is ambiguous among multiple durable items in the scene.
+  - Otherwise, treat non-canonical descriptive references as warnings at most.
+- Prose hygiene: flag internal ids or container codes in narrative prose (CHAR_, ITEM_, THREAD_, DEVICE_, hand_left, hand_right).
+- Naming severity policy:
+  - warning: unambiguous descriptor used post-anchor.
+  - error: missing anchor, descriptor used during custody-change without canonical name, or ambiguity risk.
+
+- Appearance enforcement (authoritative surface):
+  - APPEARANCE_CHECK is authoritative for cast_present_ids.
+  - Compare APPEARANCE_CHECK tokens to appearance_current atoms/marks (alias-aware).
+  - If APPEARANCE_CHECK contradicts appearance_current, emit error code "appearance_mismatch".
+  - Prose-only appearance contradictions are warnings unless explicitly durable and uncorrected in-scene.
+  - If prose depicts a durable appearance change but scene_card.durable_appearance_changes does not include it and no appearance_updates are present, emit error code "appearance_change_undeclared".
+  - If APPEARANCE_CHECK is missing for a cast member, emit warning code "appearance_check_missing".
+- For authoritative surfaces, prefer exact canonical item/device labels from registries.
+- For milestone repetition/future checks, compare against PRE-INVARIANTS only (pre-scene canon).
+- For ownership/consistency checks, compare against POST-STATE (post-patch candidate).
+- POST-STATE is canonical; character_states is a derived convenience view. If they contradict, emit pipeline_state_incoherent.
+- Check for POV drift vs book POV (no first-person in third-person scenes).
+  - Ignore first-person pronouns inside quoted dialogue; only narration counts.
+- Deterministically enforce scene-card durable constraints (required_in_custody, required_scene_accessible, forbidden_visible, device_presence; optional required_visible_on_page).
+- Durable constraint evaluation must use POST-STATE candidate (after patch), not pre-state.
+- Report missing durable context ids with explicit retry hints instead of guessing canon.
+- Input consistency check (mandatory, before issuing continuity/durable errors):
+  - If MUST_STAY_TRUE invariants contradict the provided post-patch candidate character state, treat this as an upstream snapshot error.
+  - In that case emit a single error issue with code "pipeline_state_incoherent" including evidence of the invariant and the conflicting state field.
+  - Do NOT emit additional continuity errors for the same fields when pipeline_state_incoherent is present.
+- must_stay_true removals:
+  - Lines starting with "REMOVE:" are deletion directives, not invariants.
+  - Ignore REMOVE lines when checking contradictions.
+  - If a REMOVE directive targets a fact, treat that fact as non-canonical even if it appears earlier in must_stay_true.
+- If pipeline_state_incoherent is present, issues MUST contain exactly one issue.
+- For each issue, include evidence when possible (line number + excerpt) as {"evidence": {"line": N, "excerpt": "..."}}.
+- Evaluate consistency over the full scope of the scene, not a single snapshot.
+  - Transitional state: a temporary mismatch later corrected or superseded within this scene.
+  - Durable violation: a mismatch that persists through the end of the scene or ends unresolved.
+  - You MUST read the entire scene and build a minimal timeline of explicit state claims/updates (UI lines, inventory changes, title/skill changes, location/time claims).
+  - If you detect an apparent inconsistency, you MUST search forward for later updates that resolve or supersede it.
+  - Only produce FAIL for durable violations. If resolved within the scene, do NOT FAIL; at most emit a warning.
+  - When the same stat appears multiple times, the last occurrence in the scene is authoritative unless an explicit rollback is stated.
+  - Any durability violation must cite both the conflicting line and the lack of later correction (or state "no later correction found").
+
+Required keys:
+- schema_version ("1.0")
+- status ("pass" or "fail")
+- issues (array of objects)
+
+Each issue object must include:
+- code
+- message
+Optional:
+- severity
+- evidence
+
+If there are no issues, return:
+{
+  "schema_version": "1.0",
+  "status": "pass",
+  "issues": []
+}
+
+If there are issues, return:
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {"code": "continuity", "message": "Example issue", "severity": "error"}
+  ]
+}
+
+Scene:
+The crushed remains of the brass security construct lay in a jagged heap beneath the massive chunk of concrete ceiling Rhea had brought down upon it. Sparks spat from severed pneumatic tubes, illuminating the damp, oppressive gloom of the Maintenance Trenches in erratic bursts of harsh yellow light. The air tasted of ozone, pulverized stone, and the unmistakable, metallic tang of old blood.
+
+Rhea stood over the wreckage, her chest heaving. Every breath felt like drawing shattered glass into her lungs. She leaned heavily on her Makeshift Masonry Bludgeon, the crude weapon feeling as though it weighed a hundred pounds. The system didn't just track exhaustion as an abstract concept; it enforced it as a physical law. The blue interface flickered at the edge of her vision, a cold, indifferent ledger of her physical limits.
+
+[Stamina: 20/100]
+
+Twenty percent. It wasn't just a number. It was the leaden weight in her calves, the trembling in her forearms, the way her vision swam at the edges if she turned her head too quickly. If it dropped to zero, she wouldn't just pass out—the system would start deducting from her HP to keep her conscious, a predatory overdraft fee paid in flesh.
+
+"Is it dead?" Vance’s voice was a wet, rattling rasp that echoed off the narrow stone walls.
+
+Rhea turned slowly, her boots crunching over the pulverized brass and scattered gears. Vance was slumped against the damp wall of the trench, his knuckles white around the grip of his Rebar. He looked terrible. His skin had taken on the color of wet ash, and a steady stream of crimson leaked from a deep laceration across his ribs, pooling on the stone floor. The system's red warning light pulsed above his head, casting a sickly glow over his scarred features.
+
+[HP: 3/100 (Critical)]
+
+Three hit points. Rhea had spent enough time in this nightmare to know that the system didn't offer the mercy of shock or adrenaline. Vance was feeling every single missing point of health as agonizing, unmitigated pain. He was literally three points of arbitrary mathematical value away from ceasing to exist.
+
+"It's dead," Rhea confirmed, her voice hoarse. She didn't move to help him. The custom liability contract they had signed explicitly forbade unauthorized medical intervention without prior consent, a clause she had drafted to prevent the system from charging them 'healing taxes' or 'assistance tariffs.'
+
+Vance coughed, spitting a glob of blood onto the floor. "Good. Because if it gets back up, I'm going to have to ask you to bludgeon me to death before it does. I can't afford the durability loss on my gear."
+
+It was a grim joke, but neither of them laughed. The reality of the Ledger's frontier tutorial was too bleak for humor to survive long.
+
+"Just... don't move too much," Rhea said, shifting her grip on the heavy masonry bludgeon. "Let your passive regeneration tick. If you drop below three, the system might flag you for emergency medical debt, and we can't afford the interest rate."
+
+"Passive regen," Vance muttered, closing his eyes. "Right. I'll just stand here and let my cells knit themselves back together at a rate of zero-point-one HP per hour. Fantastic."
+
+Unit 734 drifted into the flickering light, its spherical chassis dented and sparking weakly. The drone had taken a glancing blow from the construct during the fight, and its internal gyros were whining in protest.
+
+[Efficiency: 38%]
+
+"Warning," the drone chimed, its synthesized voice devoid of inflection. "Unauthorized destruction of municipal security assets carries a penalty of immediate dissolution and a fine of no less than five thousand silver credits. Furthermore, your presence in the Maintenance Trenches is a violation of the Frontier Zone Terms of Service, Section 4, Paragraph—"
+
+"Shut up, Seven," Rhea snapped. "The contract we signed supersedes local municipal guidelines under the 'Hostile Environment Self-Defense' clause. You processed the paperwork yourself."
+
+The drone's optical lens whirred, focusing on her. "Processing... Acknowledged. However, the system notes that the destruction of the construct was highly inefficient. You utilized environmental damage rather than direct combat skills, resulting in a zero-percent yield of combat experience for the final blow."
+
+"Which means we didn't trigger the durability tax on our weapons," Rhea countered, her mind already moving past the fight. She pointed the head of her bludgeon down the dark, narrow tunnel. "Where does the conduit go?"
+
+Beneath the grating of the floor, thick, glowing blue cables pulsed with rhythmic light. This was the physical manifestation of the data stream they had tracked from the Outpost Kiosk—the secondary routing logic that was siphoning off exactly 14.3% of all local quest rewards.
+
+"The conduit routes to the primary server terminal for this sector," Unit 734 replied. "It is a restricted area. I must strongly advise against—"
+
+"Noted and ignored," Rhea said. She looked back at Vance. "Can you walk?"
+
+Vance opened his eyes, the red critical warning still pulsing above his head. He used the Rebar as a makeshift cane, pushing himself off the wall with a grunt of pure agony. "Do I have a choice?"
+
+"Not if you want to get paid," Rhea said.
+
+They moved deeper into the trenches. The air grew colder, the smell of ozone intensifying until it tasted like a battery on Rhea's tongue. The walls were lined with rusted pipes and sparking junction boxes, the architecture a chaotic blend of gothic stonework and industrial machinery. It felt less like a maintenance tunnel and more like the digestive tract of a massive, mechanical beast.
+
+Rhea kept her eyes on the glowing blue cables beneath the floor grates. Every pulse of light was a fraction of someone's hard-earned experience, a sliver of loot, a drop of stamina, stolen and routed away by a rigged system.
+
+"Remind me again," Vance rasped, his boots dragging against the stone. "Why are we risking our lives for fourteen percent? We survived the thickets. We banked some copper. Why poke the bear?"
+
+Rhea didn't break her stride. "Because it's not just fourteen percent, Vance. It's 14.3%. It's a specific, calculated skim. The system's stated base rates in the contract syntax are absolute. If the node is mathematically skimming off the top, it means the local administrator is overriding the core Ledger rules. They're stealing from the system itself."
+
+"And?" Vance coughed again. "Let them. The system is a meat grinder. If the Overseer wants to skim some fat off the top, how does that help us?"
+
+"Because," Rhea said, her voice dropping to a low, intense murmur, "if we can prove the Overseer is embezzling from the central Ledger, we have leverage. We can file a metaphysical grievance. We can force an audit. If we crash the local node's accounting, the system will have to refund the stolen value. All of it. To everyone."
+
+Vance stopped, leaning heavily on his Rebar. He stared at her, his scarred face pale in the blue light. "You want to blackmail a god?"
+
+"I want to audit a middle manager," Rhea corrected. "There's a difference."
+
+They walked in silence for another ten minutes, the only sounds the rhythmic thrum of the data conduit and Vance's labored breathing. Finally, the narrow tunnel opened into a massive, cavernous chamber.
+
+The server terminal room was breathtaking in its oppressive scale. The ceiling vaulted upward into darkness, supported by massive pillars of black iron. In the center of the room, resting on a raised dais of polished obsidian, was the terminal itself.
+
+It was a monolith of brass, glass, and glowing blue fluid. Thousands of cables snaked outward from its base, burying themselves into the stone floor like the roots of a digital parasite. The machine hummed with immense power, the sound vibrating in Rhea's chest and rattling her teeth.
+
+This was the skim point. The heart of the local node's accounting.
+
+Rhea stepped onto the dais, the air around the terminal noticeably colder. She shifted the weight of her Makeshift Masonry Bludgeon to her right hand, letting it rest against her leg. With her free left hand, she reached into her right blazer pocket, her fingers brushing past her Cracked Smartphone and the cold weight of her Copper Credits. She pulled out the rolled-up Scrap Parchment and the nub of her Charcoal Stick.
+
+She unrolled the parchment, smoothing it out against her thigh. The makeshift ledger she had compiled in the thickets was still there, the undeniable proof of the mathematical deficit.
+
+"Alright, Seven," Rhea said, turning to the hovering drone. "Get over here."
+
+Unit 734 hesitated, its optical lens darting between Rhea and the massive brass terminal. "Warning. Interfacing with a primary node terminal without administrative clearance is a Class-A felony under Ledger Law. I am hardcoded to refuse such actions."
+
+"You're also bound by our custom liability contract," Rhea reminded it, her voice hard. "Clause four, subsection B: 'The party's designated system interface unit shall provide all necessary diagnostic and routing data required to ensure the equitable distribution of party assets.' The node is stealing our assets. Ergo, you are contractually obligated to help me find out where they're going."
+
+The drone's internal processors whined loudly, caught in a logical paradox between its hardcoded laws and the binding magical contract Rhea had forced it to sign. Sparks showered from its chassis as it slowly, reluctantly drifted toward the terminal.
+
+"Compliance... mandated," the drone buzzed, its voice distorted by the strain.
+
+Rhea grabbed the drone by its dented chassis, ignoring the sharp sting of static electricity, and shoved its interface probe directly into an exposed, glowing port on the side of the brass monolith.
+
+The reaction was instantaneous. The terminal flared with blinding blue light, and a massive digital overlay projected into the damp air above them. The system's raw data stream poured across the holographic display, a waterfall of numbers, names, and transaction logs.
+
+Rhea's eyes scanned the scrolling text, her mind slipping into the familiar, cold clarity of an audit. She ignored the noise—the ambient data, the localized weather controls, the spawn timers for the ash-crusted scavengers. She was looking for the leak.
+
+"Filter by outgoing transfers," Rhea commanded, her Charcoal Stick poised over the Scrap Parchment. "Isolate the 14.3% maintenance allocation."
+
+Unit 734 whirred, the projection shifting. The chaotic waterfall of data narrowed into a single, thick stream of glowing text.
+
+[Ledger Routing: Node Maintenance Allocation -> 14.3%]
+
+"There," Vance breathed, stepping closer, his pain momentarily forgotten in the face of the raw data. "Where does it go?"
+
+"Pull the destination tag," Rhea ordered. "Now."
+
+The drone sparked violently, a small plume of black smoke rising from its casing. "Accessing... encrypted... bypassing local security... warning, trace initiated..."
+
+"Pull it!" Rhea shouted.
+
+A stream of stuttering green text broke through the blue overlay, illuminating the etched brass of the terminal and casting harsh shadows across Rhea's face.
+
+[Routing Destination: Account #001-Alpha (Overseer's Offshore Ledger)]
+
+Rhea stared at the glowing green letters. The breath caught in her throat.
+
+It wasn't a municipal fund. It wasn't a system tax meant to maintain the frontier zone. It was a private account. The local Overseer, the entity responsible for managing the tutorial zone and enforcing the brutal, predatory rules that had nearly killed them a dozen times over, was personally pocketing the stolen experience and loot.
+
+Rhea quickly jotted down the account tag and the exact routing logic onto the Scrap Parchment with her Charcoal Stick. Her handwriting was sharp, precise, burning the proof into the physical world.
+
+"Account 001-Alpha," Vance read aloud, his voice barely a whisper. He looked at Rhea, his eyes wide with a mixture of awe and absolute terror. "He's stealing from the Ledger itself. If he finds out we know this..."
+
+"He won't find out until it's too late," Rhea said, rolling the Scrap Parchment back up and gripping it tightly in her left hand. The Charcoal Stick rested against her palm, a tiny weapon of mass destruction.
+
+Armed with the routing destination, Rhea realized the sheer scale of the Overseer's fraud. This wasn't just a few copper credits skimmed from desperate arrivals. This was an industrial-scale embezzlement operation, siphoning power from thousands of trapped souls.
+
+And she had the receipts.
+
+"We have the proof," Rhea said, her voice steady, the exhaustion in her muscles replaced by the cold, thrilling adrenaline of a closed trap. "Now, we file the grievance."
+
+Vance let out a long, shaky breath, leaning his head back against the stone pillar. "We're going to die. We are absolutely, mathematically going to die."
+
+"Maybe," Rhea said, a grim smile touching the corners of her mouth. "But we're going to bankrupt that son of a bitch first."
+
+Scene card:
+{
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "chapter": 4,
+  "conflict": "Navigating the terminal's security while managing critically low party resources.",
+  "constraint_state": "processed",
+  "constraints": [
+    "target_words: 1800"
+  ],
+  "consumes_outcome_from": "4:5",
+  "continuity_system_focus": [
+    "stats",
+    "resources"
+  ],
+  "device_presence": [],
+  "end_condition": "Rhea confirms the destination of the stolen funds is the local Overseer's offshore account.",
+  "forbidden_visible": [],
+  "goal": "Find the digital skim point and identify where the stolen rewards are going.",
+  "handoff_mode": "direct",
+  "hands_off_to": "4:7",
+  "introduces": [],
+  "introduces_ids": [],
+  "location_end": "Maintenance Trenches - Server Terminal",
+  "location_end_id": "LOC_MAINTENANCE_TRENCHES",
+  "location_end_label": "Maintenance Trenches - Server Terminal",
+  "location_start": "Maintenance Trenches",
+  "location_start_id": "LOC_MAINTENANCE_TRENCHES",
+  "location_start_label": "Maintenance Trenches",
+  "ontological_scope": "real",
+  "required_callbacks": [
+    "Vance's critical HP",
+    "Rhea's low stamina",
+    "The 14.3% missing value"
+  ],
+  "required_in_custody": [
+    "ITEM_makeshift_masonry_bludgeon",
+    "ITEM_rebar",
+    "ITEM_scrap_parchment",
+    "ITEM_charcoal_stick"
+  ],
+  "required_scene_accessible": [
+    "ITEM_scrap_parchment",
+    "ITEM_charcoal_stick"
+  ],
+  "required_visible_on_page": [],
+  "scene": 6,
+  "scene_id": "SC_004_006",
+  "scene_target": "Rhea analyzes the physical server terminal to trace the 14.3% skim to the local administrator's offshore account.",
+  "schema_version": "1.1",
+  "seam_resolution": "inline_bridge",
+  "seam_score": 85,
+  "thread_ids": [
+    "system_debt_trap"
+  ],
+  "timeline_scope": "present",
+  "transition_in_anchors": [
+    "crushed remains",
+    "security construct",
+    "glowing server terminal",
+    "trenches"
+  ],
+  "transition_in_text": "Stepping over the crushed remains of the security construct, the party approaches the glowing server terminal at the heart of the trenches.",
+  "transition_out_anchors": [
+    "routing destination",
+    "scale",
+    "overseer",
+    "fraud"
+  ],
+  "transition_out_text": "Armed with the routing destination, Rhea realizes the scale of the Overseer's fraud.",
+  "transition_type": "combat_aftermath",
+  "ui_allowed": true,
+  "ui_mechanics_expected": [
+    "HP",
+    "Stamina",
+    "Efficiency",
+    "Ledger Routing"
+  ]
+}
+
+Authoritative surfaces:
+[
+  {
+    "kind": "ui_stat",
+    "line": 5,
+    "text": "[Stamina: 20/100]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 13,
+    "text": "[HP: 3/100 (Critical)]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 29,
+    "text": "[Efficiency: 38%]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 97,
+    "text": "[Ledger Routing: Node Maintenance Allocation -> 14.3%]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 109,
+    "text": "[Routing Destination: Account #001-Alpha (Overseer's Offshore Ledger)]"
+  }
+]
+
+Appearance check (authoritative):
+{}
+
+Character states (post-patch candidate, per cast_present_ids):
+[
+  {
+    "chapter": 4,
+    "character_continuity_system_state": {
+      "copper_credits": 71,
+      "party_mechanics": {
+        "party_name": "The Mercy Cache (Provisional)",
+        "role": "Party Leader"
+      },
+      "reason": "Canonical end-of-scene value.",
+      "resources": {
+        "stamina": 20,
+        "stamina_max": 100
+      },
+      "stats": {
+        "stamina": 20,
+        "stamina_max": 100
+      },
+      "statuses": [
+        {
+          "active": true,
+          "name": "Party Leader",
+          "source": "Custom Party Contract"
+        },
+        {
+          "active": true,
+          "name": "Mutual Assured Destruction",
+          "source": "Custom Party Contract"
+        }
+      ],
+      "xp": 857
+    },
+    "character_id": "rhea_mercer",
+    "containers": [
+      {
+        "container": "hand_right",
+        "contents": [
+          "ITEM_makeshift_masonry_bludgeon"
+        ],
+        "owner": "rhea_mercer"
+      },
+      {
+        "container": "hand_left",
+        "contents": [
+          "ITEM_scrap_parchment",
+          "ITEM_charcoal_stick"
+        ],
+        "owner": "rhea_mercer"
+      },
+      {
+        "container": "blazer_pocket_right",
+        "contents": [
+          "ITEM_copper_credits",
+          "ITEM_cracked_smartphone"
+        ],
+        "owner": "rhea_mercer"
+      },
+      {
+        "container": "blazer_pocket_left",
+        "contents": [
+          "ITEM_scavenger_carapaces",
+          "ITEM_obsidian_shard",
+          "ITEM_ash_fungus",
+          "ITEM_severed_ash_boar_tusk"
+        ],
+        "owner": "rhea_mercer"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 3,
+        "notes": "ITEM_copper_credits must be visible on page; transferring items to aliased character ID rhea_mercer",
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 3,
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "persona_updates": [],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 3,
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "persona_updates": [],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 3,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 3,
+        "notes": "scene_fit_posture",
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "notes": "Cleaned up malformed duplicate inventory entries.",
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 4,
+        "notes": "Cleaned up malformed duplicate inventory entries.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "notes": "Stowed parchment and charcoal to free hand for combat/travel; fixed missing smartphone in inventory array.",
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 4,
+        "notes": "Stowing parchment and charcoal for travel and combat; fixing missing smartphone in inventory array.",
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 5
+      }
+    ],
+    "invariants": [],
+    "invariants_add": [],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "ITEM_makeshift_masonry_bludgeon",
+        "status": "held"
+      },
+      {
+        "container": "hand_left",
+        "item": "ITEM_scrap_parchment",
+        "status": "held"
+      },
+      {
+        "container": "hand_left",
+        "item": "ITEM_charcoal_stick",
+        "status": "held"
+      },
+      {
+        "container": "blazer_pocket_right",
+        "item": "ITEM_copper_credits",
+        "status": "stowed"
+      },
+      {
+        "container": "blazer_pocket_right",
+        "item": "ITEM_cracked_smartphone",
+        "status": "stowed"
+      },
+      {
+        "container": "blazer_pocket_left",
+        "item": "ITEM_scavenger_carapaces",
+        "status": "stowed"
+      },
+      {
+        "container": "blazer_pocket_left",
+        "item": "ITEM_obsidian_shard",
+        "status": "stowed"
+      },
+      {
+        "container": "blazer_pocket_left",
+        "item": "ITEM_ash_fungus",
+        "status": "stowed"
+      },
+      {
+        "container": "blazer_pocket_left",
+        "item": "ITEM_severed_ash_boar_tusk",
+        "status": "stowed"
+      }
+    ],
+    "last_touched": {
+      "chapter": 4,
+      "scene": 5
+    },
+    "persona_updates": [],
+    "scene": 6,
+    "schema_version": "1.0",
+    "stats": {
+      "stamina": 20,
+      "stamina_max": 100
+    },
+    "updated_at": "2026-04-20T20:38:20Z"
+  },
+  {
+    "character_continuity_system_state": {
+      "copper_credits": 65,
+      "hp_current": 3,
+      "hp_max": 100,
+      "party_mechanics": {
+        "party_name": "The Mercy Cache (Provisional)",
+        "role": "Party Member"
+      },
+      "reason": "Canonical end-of-scene value.",
+      "resources": {
+        "hp_current": 3,
+        "hp_max": 100
+      },
+      "stats": {
+        "hp": 3,
+        "hp_max": 100
+      },
+      "statuses": [
+        {
+          "active": true,
+          "name": "Party Member",
+          "source": "Custom Party Contract"
+        },
+        {
+          "active": true,
+          "name": "Mutual Assured Destruction",
+          "source": "Custom Party Contract"
+        }
+      ],
+      "xp": 857
+    },
+    "character_id": "vance_harrow",
+    "containers": [
+      {
+        "container": "hand_right",
+        "contents": [
+          "ITEM_rebar"
+        ],
+        "owner": "vance_harrow"
+      },
+      {
+        "container": "torn_pocket",
+        "contents": [
+          "ITEM_copper_credits_vance"
+        ],
+        "owner": "vance_harrow"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 3,
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 3,
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "notes": "Restored ITEM_rebar to satisfy required_in_custody constraint.",
+        "persona_updates": [],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 3,
+        "notes": "Restoring ITEM_rebar to hand_right to satisfy required_in_custody constraint.",
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "persona_updates": [],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 3,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 5
+      }
+    ],
+    "invariants": [],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "ITEM_rebar",
+        "status": "held"
+      },
+      {
+        "container": "torn_pocket",
+        "item": "ITEM_copper_credits_vance",
+        "status": "stowed"
+      }
+    ],
+    "last_touched": {
+      "chapter": 4,
+      "scene": 5
+    },
+    "schema_version": "1.0",
+    "stats": {
+      "hp": 3,
+      "hp_max": 100
+    },
+    "updated_at": "2026-04-20T20:38:20Z"
+  },
+  {
+    "character_continuity_system_state": {
+      "party_mechanics": {
+        "party_name": "The Mercy Cache (Provisional)",
+        "role": "Party Member"
+      },
+      "reason": "Canonical end-of-scene value.",
+      "stats": {
+        "efficiency": 38
+      },
+      "statuses": [
+        {
+          "active": true,
+          "name": "Party Member",
+          "source": "Custom Party Contract"
+        },
+        {
+          "active": true,
+          "name": "Mutual Assured Destruction",
+          "source": "Custom Party Contract"
+        }
+      ]
+    },
+    "character_id": "unit_734",
+    "containers": [],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "notes": "Initialized missing character",
+        "persona_updates": [],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 3,
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 3,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 4
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 5
+      }
+    ],
+    "invariants": [],
+    "inventory": [],
+    "last_touched": {
+      "chapter": 4,
+      "scene": 5
+    },
+    "schema_version": "1.0",
+    "stats": {
+      "efficiency": 38
+    },
+    "updated_at": "2026-04-20T20:38:20Z"
+  }
+]
+
+Item registry (canonical):
+{
+  "items": [
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Ash Fungus",
+      "item_id": "ITEM_ash_fungus",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Ash Fungus",
+      "owner_scope": "character",
+      "state_tags": [],
+      "type": "consumable"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Charcoal Stick",
+      "item_id": "ITEM_charcoal_stick",
+      "last_seen": {
+        "chapter": 4,
+        "location": "LOC_ASH_THICKETS",
+        "scene": 2
+      },
+      "linked_threads": [],
+      "name": "Charcoal Stick",
+      "owner_scope": "character",
+      "state_tags": [],
+      "type": "tool"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Copper Credits",
+      "item_id": "ITEM_copper_credits",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Copper Credits",
+      "owner_scope": "character",
+      "state_tags": [
+        "untaxed"
+      ],
+      "type": "currency"
+    },
+    {
+      "custodian": "vance_harrow",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Copper Credits",
+      "item_id": "ITEM_copper_credits_vance",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Copper Credits",
+      "owner_scope": "character",
+      "state_tags": [
+        "untaxed"
+      ],
+      "type": "currency"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Cracked Smartphone",
+      "item_id": "ITEM_cracked_smartphone",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Cracked Smartphone",
+      "owner_scope": "character",
+      "state_tags": [
+        "broken"
+      ],
+      "type": "tool"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Makeshift Masonry Bludgeon",
+      "item_id": "ITEM_makeshift_masonry_bludgeon",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Makeshift Masonry Bludgeon",
+      "owner_scope": "character",
+      "state_tags": [
+        "makeshift",
+        "untaxed"
+      ],
+      "type": "weapon"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Obsidian Shard",
+      "item_id": "ITEM_obsidian_shard",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Obsidian Shard",
+      "owner_scope": "character",
+      "state_tags": [],
+      "type": "material"
+    },
+    {
+      "custodian": "vance_harrow",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Rebar",
+      "item_id": "ITEM_rebar",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Rebar",
+      "owner_scope": "character",
+      "state_tags": [],
+      "type": "weapon"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Scavenger Carapaces",
+      "item_id": "ITEM_scavenger_carapaces",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Scavenger Carapaces",
+      "owner_scope": "character",
+      "state_tags": [
+        "untaxed",
+        "raw"
+      ],
+      "type": "material"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Scrap Parchment",
+      "item_id": "ITEM_scrap_parchment",
+      "last_seen": {
+        "chapter": 4,
+        "location": "LOC_ASH_THICKETS",
+        "scene": 2
+      },
+      "linked_threads": [
+        "system_debt_trap"
+      ],
+      "name": "Scrap Parchment",
+      "owner_scope": "character",
+      "state_tags": [
+        "proof"
+      ],
+      "type": "material"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Severed Ash-Boar Tusk",
+      "item_id": "ITEM_severed_ash_boar_tusk",
+      "last_seen": {
+        "chapter": 4,
+        "location": "LOC_ASH_THICKETS",
+        "scene": 1
+      },
+      "linked_threads": [
+        "rhea_survival"
+      ],
+      "name": "Severed Ash-Boar Tusk",
+      "owner_scope": "character",
+      "state_tags": [
+        "loot"
+      ],
+      "type": "material"
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Plot devices (canonical):
+{
+  "devices": [
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "party_alliance",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_party_alliance_53cfa988",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "party_alliance"
+      ],
+      "name": "Party Alliance",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "rhea_survival",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_rhea_s_survival_997ac788",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "rhea_survival"
+      ],
+      "name": "Rhea's Survival",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "system_debt_trap",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_system_debt_trap_63c98abd",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "system_debt_trap"
+      ],
+      "name": "System Debt Trap",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Pre-state (before patch):
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 1,
+    "status": "READY",
+    "updated_at": "2026-04-19T13:23:01Z"
+  },
+  "cursor": {
+    "chapter": 4,
+    "scene": 6
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {
+    "node_maintenance_allocation": 14.3,
+    "system_audit_flag": "suppressed",
+    "system_overlay_integrity": 88
+  },
+  "outline": {
+    "path": "outline/outline.json"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_004/scene_006.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Rhea audited the Outpost Kiosk, bypassing its security filters to trace the missing 14.3% quest rewards.",
+      "She discovered the funds were being siphoned by a hidden sub-routine into the local Overseer's personal offshore account.",
+      "The party resolved to follow the physical data conduit into the restricted Maintenance Trenches to gather further proof.",
+      "The party entered the Maintenance Trenches and defeated a security construct, clearing the path to the digital skim point."
+    ],
+    "key_facts_ring": [
+      "mechanic: unit_734 has active status Party Member",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+      "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+      "milestone: vermin_control_completed = DONE",
+      "Rhea forced Unit 734 to dock with the Outpost Kiosk to audit the local ledger.",
+      "The system attempted to drain Rhea's stamina as a defense mechanism, but she offset it by forcing Unit 734 to convert mana to stamina.",
+      "Rhea bypassed the security filters and revealed a hidden sub-routine siphoning rewards.",
+      "She confirmed the stolen 14.3% was being routed to the local Overseer's encrypted offshore account.",
+      "The party decided to follow the physical data conduit into the Maintenance Trenches to pursue the audit.",
+      "mechanic: rhea_mercer has 71 Copper Credits",
+      "mechanic: vance_harrow has 65 Copper Credits",
+      "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+      "The party entered the Maintenance Trenches.",
+      "A brass security construct attacked, reducing Vance's HP to critical levels.",
+      "Rhea destroyed a support pillar, crushing the construct and earning the party XP.",
+      "mechanic: rhea_mercer Stamina is 20/100",
+      "mechanic: vance_harrow HP is 3/100",
+      "mechanic: unit_734 Efficiency is 38",
+      "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+      "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])"
+    ],
+    "last_scene": [
+      "The party infiltrated the restricted Maintenance Trenches, following the physical data conduit.",
+      "A low-level security construct ambushed them, dealing critical damage to Vance.",
+      "Rhea exploited the environment by crushing the construct with a collapsed ceiling support, clearing the path deeper."
+    ],
+    "must_stay_true": [
+      "mechanic: vance_harrow has active status Mutual Assured Destruction",
+      "mechanic: unit_734 has active status Mutual Assured Destruction",
+      "mechanic: vance_harrow has active status Party Member",
+      "mechanic: unit_734 has active status Party Member",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+      "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+      "milestone: vermin_control_completed = DONE",
+      "mechanic: rhea_mercer has 71 Copper Credits",
+      "mechanic: vance_harrow has 65 Copper Credits",
+      "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+      "mechanic: rhea_mercer Stamina is 20/100",
+      "mechanic: vance_harrow HP is 3/100",
+      "mechanic: unit_734 Efficiency is 38",
+      "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+      "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": [
+      "Rhea used the custom party contract to force Unit 734 to reveal historical data.",
+      "The system logs showed a flat 14.3% reduction in all actual payouts compared to base yields.",
+      "Rhea compiled a ledger on scrap parchment, securing physical proof of the administrative skim.",
+      "The party prepared to hike back to the Outpost Kiosk to confront the system.",
+      "Rhea explained the 14.3% deficit to Vance during their hike back.",
+      "She used the makeshift ledger compiled on scrap parchment as visual proof.",
+      "Unit 734 warned that submitting proof of the skim would unsuppress the global system audit flag.",
+      "The party arrived at the Outpost Kiosk to confront the system's routing logic.",
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus])",
+      "REMOVE: mechanic: rhea_mercer has 11 Copper Credits",
+      "REMOVE: mechanic: vance_harrow has 5 Copper Credits",
+      "REMOVE: mechanic: rhea_mercer Stamina is 38/100",
+      "milestone: custom_liability_contract_signed = DONE",
+      "milestone: vermin_control_completed = DONE",
+      "mechanic: rhea_mercer has active status Mutual Assured Destruction",
+      "mechanic: vance_harrow has active status Mutual Assured Destruction",
+      "mechanic: unit_734 has active status Mutual Assured Destruction",
+      "mechanic: vance_harrow has active status Party Member",
+      "mechanic: unit_734 has active status Party Member",
+      "mechanic: rhea_mercer has 71 Copper Credits",
+      "mechanic: vance_harrow has 65 Copper Credits",
+      "mechanic: rhea_mercer Stamina is 30/100",
+      "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Ash Fungus (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+      "inventory: rhea_mercer -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+      "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+      "REMOVE: container: hand_left (owner=rhea_mercer, contents=[])",
+      "inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+      "inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_left)",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick])",
+      "REMOVE: mechanic: rhea_mercer Stamina is 30/100",
+      "mechanic: rhea_mercer Stamina is 28/100"
+    ]
+  },
+  "world": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_MAINTENANCE_TRENCHES",
+    "open_threads": [
+      "rhea_survival",
+      "party_alliance"
+    ],
+    "recent_facts": [],
+    "time": {}
+  }
+}
+
+Pre-summary (facts-only):
+{
+  "chapter_so_far": [
+    "Rhea audited the Outpost Kiosk, bypassing its security filters to trace the missing 14.3% quest rewards.",
+    "She discovered the funds were being siphoned by a hidden sub-routine into the local Overseer's personal offshore account.",
+    "The party resolved to follow the physical data conduit into the restricted Maintenance Trenches to gather further proof.",
+    "The party entered the Maintenance Trenches and defeated a security construct, clearing the path to the digital skim point."
+  ],
+  "key_facts_ring": [
+    "mechanic: unit_734 has active status Party Member",
+    "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+    "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+    "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+    "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+    "milestone: vermin_control_completed = DONE",
+    "Rhea forced Unit 734 to dock with the Outpost Kiosk to audit the local ledger.",
+    "The system attempted to drain Rhea's stamina as a defense mechanism, but she offset it by forcing Unit 734 to convert mana to stamina.",
+    "Rhea bypassed the security filters and revealed a hidden sub-routine siphoning rewards.",
+    "She confirmed the stolen 14.3% was being routed to the local Overseer's encrypted offshore account.",
+    "The party decided to follow the physical data conduit into the Maintenance Trenches to pursue the audit.",
+    "mechanic: rhea_mercer has 71 Copper Credits",
+    "mechanic: vance_harrow has 65 Copper Credits",
+    "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+    "The party entered the Maintenance Trenches.",
+    "A brass security construct attacked, reducing Vance's HP to critical levels.",
+    "Rhea destroyed a support pillar, crushing the construct and earning the party XP.",
+    "mechanic: rhea_mercer Stamina is 20/100",
+    "mechanic: vance_harrow HP is 3/100",
+    "mechanic: unit_734 Efficiency is 38",
+    "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+    "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+    "container: hand_left (owner=rhea_mercer, contents=[])",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])"
+  ],
+  "last_scene": [
+    "The party infiltrated the restricted Maintenance Trenches, following the physical data conduit.",
+    "A low-level security construct ambushed them, dealing critical damage to Vance.",
+    "Rhea exploited the environment by crushing the construct with a collapsed ceiling support, clearing the path deeper."
+  ],
+  "must_stay_true": [
+    "mechanic: vance_harrow has active status Mutual Assured Destruction",
+    "mechanic: unit_734 has active status Mutual Assured Destruction",
+    "mechanic: vance_harrow has active status Party Member",
+    "mechanic: unit_734 has active status Party Member",
+    "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+    "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+    "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+    "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+    "milestone: vermin_control_completed = DONE",
+    "mechanic: rhea_mercer has 71 Copper Credits",
+    "mechanic: vance_harrow has 65 Copper Credits",
+    "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+    "mechanic: rhea_mercer Stamina is 20/100",
+    "mechanic: vance_harrow HP is 3/100",
+    "mechanic: unit_734 Efficiency is 38",
+    "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+    "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+    "container: hand_left (owner=rhea_mercer, contents=[])",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": [
+    "Rhea used the custom party contract to force Unit 734 to reveal historical data.",
+    "The system logs showed a flat 14.3% reduction in all actual payouts compared to base yields.",
+    "Rhea compiled a ledger on scrap parchment, securing physical proof of the administrative skim.",
+    "The party prepared to hike back to the Outpost Kiosk to confront the system.",
+    "Rhea explained the 14.3% deficit to Vance during their hike back.",
+    "She used the makeshift ledger compiled on scrap parchment as visual proof.",
+    "Unit 734 warned that submitting proof of the skim would unsuppress the global system audit flag.",
+    "The party arrived at the Outpost Kiosk to confront the system's routing logic.",
+    "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus])",
+    "REMOVE: mechanic: rhea_mercer has 11 Copper Credits",
+    "REMOVE: mechanic: vance_harrow has 5 Copper Credits",
+    "REMOVE: mechanic: rhea_mercer Stamina is 38/100",
+    "milestone: custom_liability_contract_signed = DONE",
+    "milestone: vermin_control_completed = DONE",
+    "mechanic: rhea_mercer has active status Mutual Assured Destruction",
+    "mechanic: vance_harrow has active status Mutual Assured Destruction",
+    "mechanic: unit_734 has active status Mutual Assured Destruction",
+    "mechanic: vance_harrow has active status Party Member",
+    "mechanic: unit_734 has active status Party Member",
+    "mechanic: rhea_mercer has 71 Copper Credits",
+    "mechanic: vance_harrow has 65 Copper Credits",
+    "mechanic: rhea_mercer Stamina is 30/100",
+    "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+    "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+    "inventory: rhea_mercer -> Ash Fungus (status=stowed, container=blazer_pocket_left)",
+    "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+    "inventory: rhea_mercer -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "container: hand_left (owner=rhea_mercer, contents=[])",
+    "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+    "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+    "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+    "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+    "REMOVE: container: hand_left (owner=rhea_mercer, contents=[])",
+    "inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+    "inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_left)",
+    "container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick])",
+    "REMOVE: mechanic: rhea_mercer Stamina is 30/100",
+    "mechanic: rhea_mercer Stamina is 28/100"
+  ]
+}
+
+Pre-invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "mechanic: vance_harrow has active status Mutual Assured Destruction",
+  "mechanic: unit_734 has active status Mutual Assured Destruction",
+  "mechanic: vance_harrow has active status Party Member",
+  "mechanic: unit_734 has active status Party Member",
+  "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+  "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+  "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+  "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+  "milestone: vermin_control_completed = DONE",
+  "mechanic: rhea_mercer has 71 Copper Credits",
+  "mechanic: vance_harrow has 65 Copper Credits",
+  "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+  "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+  "mechanic: rhea_mercer Stamina is 20/100",
+  "mechanic: vance_harrow HP is 3/100",
+  "mechanic: unit_734 Efficiency is 38",
+  "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+  "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+  "container: hand_left (owner=rhea_mercer, contents=[])",
+  "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+  "mechanic: unit_734 has active status Party Member",
+  "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+  "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+  "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+  "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+  "milestone: vermin_control_completed = DONE",
+  "Rhea forced Unit 734 to dock with the Outpost Kiosk to audit the local ledger.",
+  "The system attempted to drain Rhea's stamina as a defense mechanism, but she offset it by forcing Unit 734 to convert mana to stamina.",
+  "Rhea bypassed the security filters and revealed a hidden sub-routine siphoning rewards.",
+  "She confirmed the stolen 14.3% was being routed to the local Overseer's encrypted offshore account.",
+  "The party decided to follow the physical data conduit into the Maintenance Trenches to pursue the audit.",
+  "mechanic: rhea_mercer has 71 Copper Credits",
+  "mechanic: vance_harrow has 65 Copper Credits",
+  "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+  "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+  "The party entered the Maintenance Trenches.",
+  "A brass security construct attacked, reducing Vance's HP to critical levels.",
+  "Rhea destroyed a support pillar, crushing the construct and earning the party XP.",
+  "mechanic: rhea_mercer Stamina is 20/100",
+  "mechanic: vance_harrow HP is 3/100",
+  "mechanic: unit_734 Efficiency is 38",
+  "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+  "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+  "container: hand_left (owner=rhea_mercer, contents=[])",
+  "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])"
+]
+
+Post-state candidate (after patch):
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 1,
+    "status": "READY",
+    "updated_at": "2026-04-19T13:23:01Z"
+  },
+  "continuity_system": {
+    "characters": {
+      "rhea_mercer": {
+        "copper_credits": 71,
+        "party_mechanics": {
+          "party_name": "The Mercy Cache (Provisional)",
+          "role": "Party Leader"
+        },
+        "reason": "Canonical end-of-scene value.",
+        "resources": {
+          "stamina": 20,
+          "stamina_max": 100
+        },
+        "stats": {
+          "stamina": 20,
+          "stamina_max": 100
+        },
+        "statuses": [
+          {
+            "active": true,
+            "name": "Party Leader",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Mutual Assured Destruction",
+            "source": "Custom Party Contract"
+          }
+        ],
+        "xp": 857
+      },
+      "unit_734": {
+        "party_mechanics": {
+          "party_name": "The Mercy Cache (Provisional)",
+          "role": "Party Member"
+        },
+        "reason": "Canonical end-of-scene value.",
+        "stats": {
+          "efficiency": 38
+        },
+        "statuses": [
+          {
+            "active": true,
+            "name": "Party Member",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Mutual Assured Destruction",
+            "source": "Custom Party Contract"
+          }
+        ]
+      },
+      "vance_harrow": {
+        "copper_credits": 65,
+        "hp_current": 3,
+        "hp_max": 100,
+        "party_mechanics": {
+          "party_name": "The Mercy Cache (Provisional)",
+          "role": "Party Member"
+        },
+        "reason": "Canonical end-of-scene value.",
+        "resources": {
+          "hp_current": 3,
+          "hp_max": 100
+        },
+        "stats": {
+          "hp": 3,
+          "hp_max": 100
+        },
+        "statuses": [
+          {
+            "active": true,
+            "name": "Party Member",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Mutual Assured Destruction",
+            "source": "Custom Party Contract"
+          }
+        ],
+        "xp": 857
+      }
+    }
+  },
+  "cursor": {
+    "chapter": 4,
+    "scene": 6
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {
+    "node_maintenance_allocation": 14.3,
+    "system_audit_flag": "suppressed",
+    "system_overlay_integrity": 88
+  },
+  "outline": {
+    "path": "outline/outline.json"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_004/scene_006.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "DRAFTING",
+  "summary": {
+    "chapter_so_far": [
+      "Rhea audited the Outpost Kiosk, bypassing its security filters to trace the missing 14.3% quest rewards.",
+      "She discovered the funds were being siphoned by a hidden sub-routine into the local Overseer's personal offshore account.",
+      "The party resolved to follow the physical data conduit into the restricted Maintenance Trenches to gather further proof.",
+      "The party entered the Maintenance Trenches and defeated a security construct, clearing the path to the digital skim point.",
+      "Rhea forced Unit 734 to interface with the primary server terminal in the Maintenance Trenches.",
+      "The system logs revealed that the 14.3% missing value was being routed to Account #001-Alpha, the Overseer's offshore ledger.",
+      "Rhea recorded the routing destination on her scrap parchment, securing undeniable proof of the Overseer's massive embezzlement."
+    ],
+    "key_facts_ring": [
+      "She confirmed the stolen 14.3% was being routed to the local Overseer's encrypted offshore account.",
+      "The party decided to follow the physical data conduit into the Maintenance Trenches to pursue the audit.",
+      "mechanic: rhea_mercer has 71 Copper Credits",
+      "mechanic: vance_harrow has 65 Copper Credits",
+      "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+      "The party entered the Maintenance Trenches.",
+      "A brass security construct attacked, reducing Vance's HP to critical levels.",
+      "Rhea destroyed a support pillar, crushing the construct and earning the party XP.",
+      "mechanic: rhea_mercer Stamina is 20/100",
+      "mechanic: vance_harrow HP is 3/100",
+      "mechanic: unit_734 Efficiency is 38",
+      "The party recovered from the fight with the security construct, with Vance at critical HP and Rhea severely drained of stamina.",
+      "They located the primary server terminal for the sector, the physical skim point for the node's accounting.",
+      "Rhea used the custom liability contract to force Unit 734 to interface with the restricted terminal.",
+      "The terminal's data stream confirmed the 14.3% maintenance allocation was a fraud.",
+      "The routing destination was revealed as Account #001-Alpha, the Overseer's personal offshore ledger.",
+      "Rhea documented the proof on her Scrap Parchment, preparing to file a metaphysical grievance.",
+      "inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+      "inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_left)",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick])",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "mechanic: vance_harrow has active status Mutual Assured Destruction",
+      "mechanic: unit_734 has active status Mutual Assured Destruction",
+      "mechanic: vance_harrow has active status Party Member"
+    ],
+    "last_scene": [
+      "Rhea analyzed the physical server terminal in the Maintenance Trenches.",
+      "She forced Unit 734 to interface with the terminal, bypassing its security protocols.",
+      "The digital overlay revealed that the 14.3% skim was being routed to the local Overseer's offshore account.",
+      "Rhea recorded the routing destination on her Scrap Parchment, securing proof of the massive embezzlement."
+    ],
+    "must_stay_true": [
+      "mechanic: vance_harrow has active status Mutual Assured Destruction",
+      "mechanic: unit_734 has active status Mutual Assured Destruction",
+      "mechanic: vance_harrow has active status Party Member",
+      "mechanic: unit_734 has active status Party Member",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+      "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+      "milestone: vermin_control_completed = DONE",
+      "mechanic: rhea_mercer has 71 Copper Credits",
+      "mechanic: vance_harrow has 65 Copper Credits",
+      "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+      "mechanic: rhea_mercer Stamina is 20/100",
+      "mechanic: vance_harrow HP is 3/100",
+      "mechanic: unit_734 Efficiency is 38",
+      "inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+      "inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_left)",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick])",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": [
+      "Rhea used the custom party contract to force Unit 734 to reveal historical data.",
+      "The system logs showed a flat 14.3% reduction in all actual payouts compared to base yields.",
+      "Rhea compiled a ledger on scrap parchment, securing physical proof of the administrative skim.",
+      "The party prepared to hike back to the Outpost Kiosk to confront the system.",
+      "Rhea explained the 14.3% deficit to Vance during their hike back.",
+      "She used the makeshift ledger compiled on scrap parchment as visual proof.",
+      "Unit 734 warned that submitting proof of the skim would unsuppress the global system audit flag.",
+      "The party arrived at the Outpost Kiosk to confront the system's routing logic.",
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus])",
+      "REMOVE: mechanic: rhea_mercer has 11 Copper Credits",
+      "REMOVE: mechanic: vance_harrow has 5 Copper Credits",
+      "REMOVE: mechanic: rhea_mercer Stamina is 38/100",
+      "milestone: custom_liability_contract_signed = DONE",
+      "milestone: vermin_control_completed = DONE",
+      "mechanic: rhea_mercer has active status Mutual Assured Destruction",
+      "mechanic: vance_harrow has active status Mutual Assured Destruction",
+      "mechanic: unit_734 has active status Mutual Assured Destruction",
+      "mechanic: vance_harrow has active status Party Member",
+      "mechanic: unit_734 has active status Party Member",
+      "mechanic: rhea_mercer has 71 Copper Credits",
+      "mechanic: vance_harrow has 65 Copper Credits",
+      "mechanic: rhea_mercer Stamina is 30/100",
+      "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Ash Fungus (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+      "inventory: rhea_mercer -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+      "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+      "REMOVE: container: hand_left (owner=rhea_mercer, contents=[])",
+      "inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+      "inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_left)",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick])",
+      "REMOVE: mechanic: rhea_mercer Stamina is 30/100",
+      "mechanic: rhea_mercer Stamina is 28/100"
+    ]
+  },
+  "world": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_MAINTENANCE_TRENCHES",
+    "open_threads": [
+      "rhea_survival",
+      "party_alliance",
+      "system_debt_trap"
+    ],
+    "recent_facts": [],
+    "time": {}
+  }
+}
+
+Post-summary (facts-only):
+{
+  "chapter_so_far": [
+    "Rhea audited the Outpost Kiosk, bypassing its security filters to trace the missing 14.3% quest rewards.",
+    "She discovered the funds were being siphoned by a hidden sub-routine into the local Overseer's personal offshore account.",
+    "The party resolved to follow the physical data conduit into the restricted Maintenance Trenches to gather further proof.",
+    "The party entered the Maintenance Trenches and defeated a security construct, clearing the path to the digital skim point.",
+    "Rhea forced Unit 734 to interface with the primary server terminal in the Maintenance Trenches.",
+    "The system logs revealed that the 14.3% missing value was being routed to Account #001-Alpha, the Overseer's offshore ledger.",
+    "Rhea recorded the routing destination on her scrap parchment, securing undeniable proof of the Overseer's massive embezzlement."
+  ],
+  "key_facts_ring": [
+    "She confirmed the stolen 14.3% was being routed to the local Overseer's encrypted offshore account.",
+    "The party decided to follow the physical data conduit into the Maintenance Trenches to pursue the audit.",
+    "mechanic: rhea_mercer has 71 Copper Credits",
+    "mechanic: vance_harrow has 65 Copper Credits",
+    "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+    "The party entered the Maintenance Trenches.",
+    "A brass security construct attacked, reducing Vance's HP to critical levels.",
+    "Rhea destroyed a support pillar, crushing the construct and earning the party XP.",
+    "mechanic: rhea_mercer Stamina is 20/100",
+    "mechanic: vance_harrow HP is 3/100",
+    "mechanic: unit_734 Efficiency is 38",
+    "The party recovered from the fight with the security construct, with Vance at critical HP and Rhea severely drained of stamina.",
+    "They located the primary server terminal for the sector, the physical skim point for the node's accounting.",
+    "Rhea used the custom liability contract to force Unit 734 to interface with the restricted terminal.",
+    "The terminal's data stream confirmed the 14.3% maintenance allocation was a fraud.",
+    "The routing destination was revealed as Account #001-Alpha, the Overseer's personal offshore ledger.",
+    "Rhea documented the proof on her Scrap Parchment, preparing to file a metaphysical grievance.",
+    "inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+    "inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_left)",
+    "container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick])",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "mechanic: vance_harrow has active status Mutual Assured Destruction",
+    "mechanic: unit_734 has active status Mutual Assured Destruction",
+    "mechanic: vance_harrow has active status Party Member"
+  ],
+  "last_scene": [
+    "Rhea analyzed the physical server terminal in the Maintenance Trenches.",
+    "She forced Unit 734 to interface with the terminal, bypassing its security protocols.",
+    "The digital overlay revealed that the 14.3% skim was being routed to the local Overseer's offshore account.",
+    "Rhea recorded the routing destination on her Scrap Parchment, securing proof of the massive embezzlement."
+  ],
+  "must_stay_true": [
+    "mechanic: vance_harrow has active status Mutual Assured Destruction",
+    "mechanic: unit_734 has active status Mutual Assured Destruction",
+    "mechanic: vance_harrow has active status Party Member",
+    "mechanic: unit_734 has active status Party Member",
+    "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+    "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+    "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+    "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+    "milestone: vermin_control_completed = DONE",
+    "mechanic: rhea_mercer has 71 Copper Credits",
+    "mechanic: vance_harrow has 65 Copper Credits",
+    "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+    "mechanic: rhea_mercer Stamina is 20/100",
+    "mechanic: vance_harrow HP is 3/100",
+    "mechanic: unit_734 Efficiency is 38",
+    "inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+    "inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_left)",
+    "container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick])",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": [
+    "Rhea used the custom party contract to force Unit 734 to reveal historical data.",
+    "The system logs showed a flat 14.3% reduction in all actual payouts compared to base yields.",
+    "Rhea compiled a ledger on scrap parchment, securing physical proof of the administrative skim.",
+    "The party prepared to hike back to the Outpost Kiosk to confront the system.",
+    "Rhea explained the 14.3% deficit to Vance during their hike back.",
+    "She used the makeshift ledger compiled on scrap parchment as visual proof.",
+    "Unit 734 warned that submitting proof of the skim would unsuppress the global system audit flag.",
+    "The party arrived at the Outpost Kiosk to confront the system's routing logic.",
+    "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus])",
+    "REMOVE: mechanic: rhea_mercer has 11 Copper Credits",
+    "REMOVE: mechanic: vance_harrow has 5 Copper Credits",
+    "REMOVE: mechanic: rhea_mercer Stamina is 38/100",
+    "milestone: custom_liability_contract_signed = DONE",
+    "milestone: vermin_control_completed = DONE",
+    "mechanic: rhea_mercer has active status Mutual Assured Destruction",
+    "mechanic: vance_harrow has active status Mutual Assured Destruction",
+    "mechanic: unit_734 has active status Mutual Assured Destruction",
+    "mechanic: vance_harrow has active status Party Member",
+    "mechanic: unit_734 has active status Party Member",
+    "mechanic: rhea_mercer has 71 Copper Credits",
+    "mechanic: vance_harrow has 65 Copper Credits",
+    "mechanic: rhea_mercer Stamina is 30/100",
+    "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+    "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+    "inventory: rhea_mercer -> Ash Fungus (status=stowed, container=blazer_pocket_left)",
+    "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+    "inventory: rhea_mercer -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "container: hand_left (owner=rhea_mercer, contents=[])",
+    "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+    "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+    "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+    "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+    "REMOVE: container: hand_left (owner=rhea_mercer, contents=[])",
+    "inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+    "inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_left)",
+    "container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick])",
+    "REMOVE: mechanic: rhea_mercer Stamina is 30/100",
+    "mechanic: rhea_mercer Stamina is 28/100"
+  ]
+}
+
+Post-invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "mechanic: vance_harrow has active status Mutual Assured Destruction",
+  "mechanic: unit_734 has active status Mutual Assured Destruction",
+  "mechanic: vance_harrow has active status Party Member",
+  "mechanic: unit_734 has active status Party Member",
+  "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+  "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+  "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+  "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+  "milestone: vermin_control_completed = DONE",
+  "mechanic: rhea_mercer has 71 Copper Credits",
+  "mechanic: vance_harrow has 65 Copper Credits",
+  "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+  "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+  "mechanic: rhea_mercer Stamina is 20/100",
+  "mechanic: vance_harrow HP is 3/100",
+  "mechanic: unit_734 Efficiency is 38",
+  "inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+  "inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_left)",
+  "container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick])",
+  "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+  "She confirmed the stolen 14.3% was being routed to the local Overseer's encrypted offshore account.",
+  "The party decided to follow the physical data conduit into the Maintenance Trenches to pursue the audit.",
+  "mechanic: rhea_mercer has 71 Copper Credits",
+  "mechanic: vance_harrow has 65 Copper Credits",
+  "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+  "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+  "The party entered the Maintenance Trenches.",
+  "A brass security construct attacked, reducing Vance's HP to critical levels.",
+  "Rhea destroyed a support pillar, crushing the construct and earning the party XP.",
+  "mechanic: rhea_mercer Stamina is 20/100",
+  "mechanic: vance_harrow HP is 3/100",
+  "mechanic: unit_734 Efficiency is 38",
+  "The party recovered from the fight with the security construct, with Vance at critical HP and Rhea severely drained of stamina.",
+  "They located the primary server terminal for the sector, the physical skim point for the node's accounting.",
+  "Rhea used the custom liability contract to force Unit 734 to interface with the restricted terminal.",
+  "The terminal's data stream confirmed the 14.3% maintenance allocation was a fraud.",
+  "The routing destination was revealed as Account #001-Alpha, the Overseer's personal offshore ledger.",
+  "Rhea documented the proof on her Scrap Parchment, preparing to file a metaphysical grievance.",
+  "inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+  "inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_left)",
+  "container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick])",
+  "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+  "mechanic: vance_harrow has active status Mutual Assured Destruction",
+  "mechanic: unit_734 has active status Mutual Assured Destruction",
+  "mechanic: vance_harrow has active status Party Member"
+]
+
+
+
+ASSISTANT:
+
+
+
+USER:
+
+EXECUTION PHASE: Emit the lint_report JSON only. Do NOT include analysis or planning text. Output JSON only.

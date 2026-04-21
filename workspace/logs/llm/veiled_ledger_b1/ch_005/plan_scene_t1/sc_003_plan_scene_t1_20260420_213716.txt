@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_005_003",
+  "chapter": 5,
+  "scene": 3,
+  "scene_target": "The party escapes the collapsing Maintenance Trenches via the access shaft.",
+  "goal": "Survive the automated quarantine bulkheads and deletion sweeps.",
+  "conflict": "Physical exhaustion and critically low stats versus environmental hazards and closing gates.",
+  "required_callbacks": [
+    "The automated asset freeze triggered by Rhea's grievance submission."
+  ],
+  "constraints": [
+    "Vance must equip his ITEM_rebar to smash gates.",
+    "Rhea must stow ITEM_scrap_parchment and ITEM_charcoal_stick to run.",
+    "Highlight Rhea's 2/100 Stamina and Vance's 3/100 HP."
+  ],
+  "end_condition": "The party navigates the collapsing access shaft, staying one step ahead of the automated quarantine bulkheads.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_MAINTENANCE_TRENCHES",
+  "location_end_id": "LOC_ACCESS_SHAFT",
+  "location_start_label": "Maintenance Trenches",
+  "location_end_label": "Access Shaft",
+  "location_start": "Maintenance Trenches",
+  "location_end": "Access Shaft",
+  "handoff_mode": "direct_action_continuation",
+  "constraint_state": "processed",
+  "transition_in_text": "With the audit freeze initiated, the maintenance trenches begin to actively lock down.",
+  "transition_in_anchors": [
+    "audit",
+    "freeze",
+    "lock_down",
+    "trenches"
+  ],
+  "transition_out_text": "The party navigates the collapsing access shaft, staying one step ahead of the automated quarantine bulkheads.",
+  "transition_out_anchors": [
+    "navigates",
+    "collapsing",
+    "access_shaft",
+    "quarantine_bulkheads"
+  ],
+  "consumes_outcome_from": "5:2",
+  "hands_off_to": "5:4",
+  "seam_score": 95,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "rhea_survival",
+    "party_alliance"
+  ],
+  "required_in_custody": [
+    "ITEM_rebar",
+    "ITEM_scrap_parchment",
+    "ITEM_charcoal_stick"
+  ],
+  "required_scene_accessible": [
+    "ITEM_rebar"
+  ],
+  "required_visible_on_page": [
+    "ITEM_rebar"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "action_sequence",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources",
+    "statuses"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Stamina",
+    "System Warning",
+    "Deletion Sweep"
+  ]
+}

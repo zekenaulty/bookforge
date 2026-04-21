@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.1",
+  "characters": [
+    {
+      "character_id": "char_rhea",
+      "name": "Rhea",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      }
+    }
+  ],
+  "chapters": [
+    {
+      "chapter_id": 2,
+      "title": "Tariffs and Teeth",
+      "goal": "Survive the initial resource loop by identifying the hidden taxes on basic survival gear and finding a loophole in the local economy.",
+      "chapter_role": "setup",
+      "stakes_shift": "From immediate physical survival to economic viability in a rigged system.",
+      "bridge": {
+        "from_prev": "Rhea survived the drop but is starving and broke.",
+        "to_next": "Having secured a baseline, Rhea attracts the attention of others trapped in the same loop."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "steady",
+        "expected_scene_count": 6
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Cost of Breathing",
+          "intent": "Rhea attempts to gather basic resources but encounters the local tariff mechanics that drain stamina and HP.",
+          "section_role": "setup",
+          "target_scene_count": 2,
+          "status": "draftable",
+          "end_condition": "Rhea hits critical stamina levels and realizes standard gathering will bankrupt her HP before nightfall.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "type": "progression",
+              "summary": "Rhea descends from the Crater Ridge into a sparse, ash-choked forest to find water or food. She attempts to harvest a glowing, fruit-like fungus from a petrified tree, but the System immediately deducts a 'Gathering Tax' from her Stamina, causing a sharp physical backlash.",
+              "outcome": "Rhea successfully harvests one piece of fungus but loses a disproportionate amount of Stamina to a System tax, leaving her winded and cautious.",
+              "characters": [
+                "char_rhea"
+              ],
+              "location_start_label": "Crater Ridge",
+              "location_start": "Walking along the jagged upper lip of the impact crater.",
+              "location_end_label": "Petrified Ashwood",
+              "location_end": "At the base of a petrified tree in an ash-choked forest.",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Rhea leaves the glassy edge of the impact crater behind, her boots crunching down a steep incline into a valley of pale, petrified trees.",
+              "transition_in_anchors": [
+                "glassy crater edge",
+                "steep ash incline",
+                "pale petrified trees"
+              ],
+              "transition_out_text": "Clutching the glowing fungus to her chest, Rhea leans heavily against the petrified bark, her lungs burning as the System notification flashes its stamina deduction.",
+              "transition_out_anchors": [
+                "glowing fungus",
+                "petrified bark",
+                "flashing stamina notification"
+              ],
+              "consumes_outcome_from": "1:6",
+              "hands_off_to": "2:2"
+            },
+            {
+              "scene_id": 2,
+              "type": "progression",
+              "summary": "Desperate to offset the stamina loss, Rhea tries to gather loose branches for a fire and scavenge more fungus, but every interaction triggers a micro-tax. The compounding stamina drain begins eating into her HP, forcing her to stop before she kills herself through basic survival tasks.",
+              "outcome": "Rhea stops gathering entirely as her HP drops, realizing the System's economy is rigged to kill anyone who plays by the standard rules.",
+              "characters": [
+                "char_rhea"
+              ],
+              "location_start_label": "Petrified Ashwood",
+              "location_start": "At the base of a petrified tree in an ash-choked forest.",
+              "location_end_label": "Ashwood Riverbed",
+              "location_end": "Slumped against a jagged boulder near a dry riverbed.",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "Pushing off the petrified bark, Rhea stumbles deeper into the pale forest, her eyes scanning the ground for loose branches that might not trigger the System's predatory ledger.",
+              "transition_in_anchors": [
+                "petrified bark",
+                "pale forest floor",
+                "loose gray branches"
+              ],
+              "transition_out_text": "Rhea collapses against a jagged boulder by the dry riverbed, watching her health bar tick downward as the realization of the rigged economy sets in.",
+              "transition_out_anchors": [
+                "jagged boulder",
+                "dry riverbed",
+                "ticking health bar"
+              ],
+              "consumes_outcome_from": "2:1",
+              "hands_off_to": "2:3",
+              "end_condition_echo": "Rhea hits critical stamina levels and realizes standard gathering will bankrupt her HP before nightfall."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Physics vs. The System",
+          "intent": "Rhea observes local mob behavior and loot drop rules, spotting a discrepancy between physics and System taxation.",
+          "section_role": "action",
+          "target_scene_count": 2,
+          "status": "stub",
+          "end_condition": "Rhea successfully forces a mob to drop untaxed raw materials by exploiting a collision between environmental damage and loot generation.",
+          "scenes": []
+        },
+        {
+          "section_id": 3,
+          "title": "Establishing a Baseline",
+          "intent": "Rhea converts the untaxed materials into usable sustenance and currency, securing her immediate survival.",
+          "section_role": "resolution",
+          "target_scene_count": 2,
+          "status": "stub",
+          "end_condition": "Rhea secures a positive daily resource yield and banks her first untaxed copper credits.",
+          "scenes": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "character_id": "char_rhea",
+      "set": {
+        "resources": {
+          "soul_debt": {
+            "current": 100000,
+            "max": 100000
+          }
+        },
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 100
+          },
+          "mp": {
+            "current": 10,
+            "max": 10
+          },
+          "stamina": {
+            "current": 5,
+            "max": 50
+          }
+        },
+        "statuses": [
+          {
+            "duration": "00:05:00",
+            "effect": "Prevents fatal impact damage.",
+            "name": "Tutorial Grace Period"
+          },
+          {
+            "duration": "permanent",
+            "effect": "Immobilized until debris is removed.",
+            "name": "Pinned"
+          }
+        ],
+        "titles": [
+          {
+            "active": true,
+            "name": "Indentured Soul",
+            "source": "system_onboarding"
+          }
+        ]
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "char_rhea",
+      "containers": [
+        {
+          "container": "blazer_pocket_right",
+          "contents": [
+            "ITEM_cracked_smartphone"
+          ],
+          "owner": "char_rhea"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "blazer_pocket_right",
+          "item": "ITEM_cracked_smartphone",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": []
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Rhea died in a fatal car crash and woke up mid-freefall over an alien wasteland.",
+      "She survived the terminal impact due to a System-enforced Tutorial Grace Period, leaving her with 1 HP.",
+      "Pinned under obsidian debris, she was confronted by a System notification demanding she acknowledge her Indenture Status and a 100,000 Credit Soul Debt."
+    ],
+    "key_events": [
+      "Rhea transitioned from a fatal car crash into a mid-air freefall.",
+      "She survived a terminal velocity impact thanks to the Tutorial Grace Period.",
+      "She discovered she is pinned under heavy obsidian debris.",
+      "The System assigned her the title Indentured Soul and a starting Soul Debt of 100,000.",
+      "A glowing blue System notification appeared, blocking her vision and demanding acknowledgment of her Indenture Status."
+    ],
+    "last_scene": [
+      "Rhea died in a fatal car crash and immediately woke up mid-freefall over an alien landscape.",
+      "She plummeted into an ash-covered wasteland, surviving the terminal impact due to a System-enforced grace period.",
+      "Now pinned under obsidian debris with exactly 1 HP, she is confronted by an intrusive, glowing blue notification demanding she acknowledge her Indenture Status and a massive Soul Debt."
+    ],
+    "must_stay_true": [
+      "REMOVE: injury: char_rhea pinned under debris",
+      "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+      "injury: char_rhea pinned under heavy obsidian debris",
+      "mechanic: char_rhea HP is 1/100",
+      "mechanic: char_rhea has active status Tutorial Grace Period",
+      "mechanic: char_rhea has active status Pinned",
+      "mechanic: char_rhea has active title Indentured Soul",
+      "mechanic: char_rhea has 100,000 Soul Debt"
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "char_rhea"
+    ],
+    "location": "LOC_TUTORIAL_WASTELAND_DROP_ZONE",
+    "open_threads": []
+  }
+}

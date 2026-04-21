@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_007_002",
+  "chapter": 7,
+  "scene": 2,
+  "scene_target": "Rhea bypasses the compliance checks by feeding the system junk data, opening the path to the inner sanctum.",
+  "goal": "Survive the lethal laser-grid 'compliance checks' and unlock the path forward.",
+  "conflict": "The foyer locks down with lethal traps, and a regenerating guard attacks Vance while Rhea solves the puzzle.",
+  "required_callbacks": [],
+  "constraints": [
+    "target_words: 1800",
+    "Rhea must sacrifice available inventory items (like the Obsidian Shard or Vance's Copper Credits) to satisfy the compliance checks."
+  ],
+  "end_condition": "The compliance checks are bypassed, and the path to the Audit Corridor opens.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_SANCTUM_FOYER",
+  "location_end_id": "LOC_AUDIT_CORRIDOR",
+  "location_start_label": "Sanctum Foyer",
+  "location_end_label": "Audit Corridor",
+  "location_start": "Sanctum Foyer",
+  "location_end": "Audit Corridor",
+  "handoff_mode": "hard_cut",
+  "constraint_state": "processed",
+  "transition_in_text": "The shattered foyer doors seal shut behind them, immediately triggering a lockdown and activating the compliance grid.",
+  "transition_in_anchors": [
+    "foyer",
+    "seal shut",
+    "lockdown",
+    "compliance grid"
+  ],
+  "transition_out_text": "With the compliance checks satisfied by junk data, the path to the Audit Corridor unlocks, allowing them to escape the regenerating guard.",
+  "transition_out_anchors": [
+    "compliance checks",
+    "junk data",
+    "Audit Corridor",
+    "escape"
+  ],
+  "seam_score": 85,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "rhea_survival",
+    "system_debt_trap"
+  ],
+  "required_in_custody": [
+    "ITEM_null_value_token",
+    "ITEM_rebar",
+    "ITEM_copper_credits_vance",
+    "ITEM_obsidian_shard"
+  ],
+  "required_scene_accessible": [
+    "ITEM_copper_credits_vance",
+    "ITEM_obsidian_shard"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "combat_aftermath",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "inventory",
+    "hp",
+    "statuses"
+  ],
+  "ui_mechanics_expected": [
+    "Compliance Check",
+    "Inventory Transfer",
+    "HP",
+    "Regeneration"
+  ]
+}

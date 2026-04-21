@@ -1,0 +1,253 @@
+COMPLIANCE:
+Scene ID: SC_004_002
+Allowed events: Rhea compiles a ledger of missing XP and loot, proving a mathematical discrepancy in the local node.
+Forbidden milestones: None in this scene.
+
+Current arm-side / inventory facts: 
+- vance_harrow holds Rebar in hand_right.
+- rhea_mercer holds Makeshift Masonry Bludgeon in hand_right.
+
+Durable changes committed: 
+- rhea_mercer acquires Scrap Parchment and Charcoal Stick in hand_left.
+
+APPEARANCE_CHECK:
+- rhea_mercer: No current marks or atoms defined in state.
+- vance_harrow: No current marks or atoms defined in state.
+- unit_734: No current marks or atoms defined in state.
+
+PROSE:
+The party remained standing in the gray dirt of the Ash Thickets as Rhea immediately turned and demanded the raw historical data from Unit 734. Vance leaned against a petrified root, his Rebar resting over his shoulder as he wiped boar blood from his face, while the drone hovered nervously, its optical sensor whirring.
+
+"I need the last fifty local quest logs," Rhea said, tapping the head of her Makeshift Masonry Bludgeon against the ground. "Project them against that tree."
+
+"Query: Authorization?" Unit 734 buzzed, its chassis dipping defensively. "Historical telemetry is restricted to local administrative oversight."
+
+"We are a registered party under a custom liability contract," Rhea shot back, leaning in. "Clause four, subsection B. Full transparency of operational hazards. The local skim is a hazard. Project it."
+
+The drone emitted a sound like grinding gears before complying. A green holographic window snapped into existence against a charred tree trunk.
+
+[Historical Log 41: Vermin Control (Local). Base Yield: 1000 XP. Actual Payout: 857 XP.]
+
+[Historical Log 42: Foraging (Minor). Base Yield: 500 XP. Actual Payout: 428.5 XP.]
+
+[Historical Log 43: Perimeter Defense. Base Yield: 2000 XP. Actual Payout: 1714 XP.]
+
+Rhea knelt by the roots of the tree, snatching up a loose piece of scrap parchment that had blown into the thicket from a previous dead arrival, and snapped a charcoal stick off a nearby burned branch. She started scribbling furiously, cross-referencing the projected loot yields against the raw System formulas she had memorized from the contract screen.
+
+"Every single one," Rhea muttered, her charcoal stick snapping against the parchment. "It's exactly 14.3 percent. Across the board. XP, copper, crafting materials. The system isn't glitching. It's taxing us silently."
+
+"So the house always wins," Vance said, shifting his grip on the Rebar. "What else is new?"
+
+"The house is supposed to post its odds," Rhea said, standing up and rolling the document tight. "This isn't a tax. It's a leak. Someone is manually routing the deficit."
+
+Unit 734’s optical lens dilated. 
+
+[Warning: Accusations of administrative fraud carry a penalty of immediate indenture.]
+
+"Only if we can't prove it," Rhea said. Armed with the undeniable proof on the scrap parchment, the party prepared to hike back out of the thickets toward the Outpost Kiosk.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_ASH_THICKETS",
+    "open_threads": [
+      "system_debt_trap",
+      "party_alliance"
+    ]
+  },
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_scrap_parchment",
+      "set": {
+        "name": "Scrap Parchment",
+        "display_name": "Scrap Parchment",
+        "type": "material",
+        "owner_scope": "character",
+        "custodian": "rhea_mercer",
+        "linked_threads": [
+          "system_debt_trap"
+        ],
+        "state_tags": [
+          "proof"
+        ],
+        "last_seen": {
+          "chapter": 4,
+          "scene": 2,
+          "location": "LOC_ASH_THICKETS"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_charcoal_stick",
+      "set": {
+        "name": "Charcoal Stick",
+        "display_name": "Charcoal Stick",
+        "type": "tool",
+        "owner_scope": "character",
+        "custodian": "rhea_mercer",
+        "linked_threads": [],
+        "state_tags": [],
+        "last_seen": {
+          "chapter": 4,
+          "scene": 2,
+          "location": "LOC_ASH_THICKETS"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_scrap_parchment",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "rhea_mercer"
+      },
+      "reason": "scavenged from environment"
+    },
+    {
+      "item_id": "ITEM_charcoal_stick",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "rhea_mercer"
+      },
+      "reason": "scavenged from environment"
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 4,
+      "scene": 2,
+      "inventory": [
+        {
+          "item": "ITEM_makeshift_masonry_bludgeon",
+          "container": "hand_right",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_scrap_parchment",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_charcoal_stick",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_copper_credits",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_scavenger_carapaces",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_ash_fungus",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_severed_ash_boar_tusk",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_makeshift_masonry_bludgeon"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_scrap_parchment",
+            "ITEM_charcoal_stick"
+          ]
+        },
+        {
+          "container": "blazer_pocket_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_cracked_smartphone",
+            "ITEM_copper_credits"
+          ]
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_scavenger_carapaces",
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus",
+            "ITEM_severed_ash_boar_tusk"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": []
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Rhea forced Unit 734 to project historical quest logs.",
+      "She scavenged a piece of scrap parchment and a charcoal stick to compile a makeshift ledger.",
+      "The math proved a consistent 14.3% deficit across all rewards, confirming the local node was mathematically skimming off the top."
+    ],
+    "key_events": [
+      "Rhea used the custom party contract to force Unit 734 to reveal historical data.",
+      "The system logs showed a flat 14.3% reduction in all actual payouts compared to base yields.",
+      "Rhea compiled a ledger on scrap parchment, securing physical proof of the administrative skim.",
+      "The party prepared to hike back to the Outpost Kiosk to confront the system."
+    ],
+    "must_stay_true": [
+      "REMOVE: container: hand_left (owner=rhea_mercer, contents=[])",
+      "inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+      "inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_left)",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick])",
+      "inventory: rhea_mercer -> Ash Fungus (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "milestone: custom_liability_contract_signed = DONE",
+      "mechanic: rhea_mercer has active status Mutual Assured Destruction",
+      "mechanic: vance_harrow has active status Mutual Assured Destruction",
+      "mechanic: unit_734 has active status Mutual Assured Destruction",
+      "mechanic: vance_harrow has active status Party Member",
+      "mechanic: unit_734 has active status Party Member",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+      "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+      "milestone: vermin_control_completed = DONE",
+      "mechanic: rhea_mercer has 71 Copper Credits",
+      "mechanic: vance_harrow has 65 Copper Credits",
+      "mechanic: rhea_mercer Stamina is 30/100",
+      "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])"
+    ],
+    "chapter_so_far_add": [
+      "Rhea compiled a makeshift ledger on scrap parchment, securing hard proof of the 14.3% administrative skim."
+    ]
+  }
+}

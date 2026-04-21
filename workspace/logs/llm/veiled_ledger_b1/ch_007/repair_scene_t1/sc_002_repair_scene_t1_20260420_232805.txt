@@ -1,0 +1,190 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "location": "LOC_SANCTUM_INNER_CORRIDOR",
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "open_threads": [
+      "rhea_survival",
+      "party_alliance",
+      "system_debt_trap"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "inventory": [
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed"
+        },
+        {
+          "container": "system_inventory",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "hand_left",
+          "item": "ITEM_null_value_token",
+          "status": "held"
+        },
+        {
+          "container": "hand_right",
+          "item": "ITEM_obsidian_shard",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_left",
+          "contents": [
+            "ITEM_administrative_coordinate_chip"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "system_inventory",
+          "contents": [
+            "ITEM_raw_data_packet"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "hand_left",
+          "contents": [
+            "ITEM_null_value_token"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_obsidian_shard"
+          ],
+          "owner": "rhea_mercer"
+        }
+      ],
+      "persona_updates": [
+        "Rhea successfully bypassed the lethal compliance checks by sacrificing abstract junk data and partially consuming her Obsidian Shard."
+      ]
+    },
+    {
+      "character_id": "vance_harrow",
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_rebar",
+          "status": "held"
+        },
+        {
+          "container": "torn_pocket",
+          "item": "ITEM_copper_credits_vance",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_rebar"
+          ],
+          "owner": "vance_harrow"
+        },
+        {
+          "container": "torn_pocket",
+          "contents": [
+            "ITEM_copper_credits_vance"
+          ],
+          "owner": "vance_harrow"
+        }
+      ],
+      "persona_updates": [
+        "Vance barely survived the regenerating guard, holding the line with only 10 HP."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "stats": {
+          "hp": 10,
+          "hp_max": 100
+        },
+        "resources": {
+          "hp_current": 10
+        }
+      }
+    },
+    {
+      "character_id": "unit_734",
+      "set": {
+        "stats": {
+          "chassis_integrity": 34
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_copper_credits",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "Sacrificed to compliance check"
+    },
+    {
+      "item_id": "ITEM_cracked_smartphone",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "Sacrificed to compliance check"
+    },
+    {
+      "item_id": "ITEM_scrap_parchment",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "Sacrificed to compliance check"
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Trapped in the foyer, Rhea bypassed the lethal laser-grid compliance checks by feeding the system junk data and partially sacrificing her Obsidian Shard.",
+      "Vance barely survived a brutal assault from a regenerating guard, holding the line with only 10 HP.",
+      "With the compliance checks passed, the heavy blast doors opened, granting the party access to the inner sanctum."
+    ],
+    "key_events": [
+      "The sanctum foyer locked down, activating lethal laser-grid compliance checks.",
+      "Vance held off a regenerating guard, taking heavy damage and dropping to 10 HP.",
+      "Rhea partially sacrificed her Obsidian Shard and liquidated abstract junk data to pass the inventory audit.",
+      "The party successfully bypassed the compliance checks and opened the path to the inner sanctum."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard, ITEM_administrative_coordinate_chip])",
+      "REMOVE: mechanic: vance_harrow HP is 10/150",
+      "mechanic: vance_harrow HP is 10/100",
+      "inventory: rhea_mercer -> Obsidian Shard (status=held, container=hand_right)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+      "container: hand_right (owner=rhea_mercer, contents=[ITEM_obsidian_shard])",
+      "milestone: compliance_checks_bypassed = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Rhea successfully bypassed the lethal compliance checks in the sanctum foyer by sacrificing abstract junk data, opening the path to the inner sanctum while Vance barely survived a regenerating guard."
+    ]
+  }
+}

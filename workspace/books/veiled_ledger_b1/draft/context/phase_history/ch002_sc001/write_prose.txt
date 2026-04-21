@@ -1,0 +1,45 @@
+Rhea leaves the Crater Ridge, descending into a sparse, ash-choked forest in search of sustenance. The landscape was a monochromatic nightmare of jagged obsidian and pale, powdery dust that clung to her clothes and coated the back of her throat. Every step down the steep incline jarred her bruised left leg, sending a jolt of pain that served as a constant, nagging reminder of her fragile mortality. 
+
+She kept her eyes locked on the hovering blue rectangle in her peripheral vision.
+
+[HP: 1/100]
+
+One hit point. It was a statistical rounding error away from a corpse. Assuming the Tutorial Grace Period didn't catch her first, a bad trip over a root could theoretically snap her neck and send her back to whatever bureaucratic hell spawned this place. 
+
+She gripped the Makeshift Masonry Bludgeon tightly in her right hand. The weapon was crude—just a heavy chunk of raw, glowing stone she had carved a handle into—but it possessed a beautiful, glitchy perfection. When she had equipped it, the System interface had flickered purple, failing to apply a tax assessment to the unregistered asset. It was her first debt-free advantage. A tiny, physical middle finger to the Indentured Soul title hovering in her status menu.
+
+But a stone club couldn't hydrate her, and she couldn't eat it. Her stomach gave a hollow, aching rumble. 
+
+She reached the bottom of the incline, her boots crunching on a bed of petrified gray leaves. The ash-choked forest stretched out before her, a graveyard of pale, dead trees that looked like they had been flash-calcified by a volcanic eruption. The air here was stagnant, smelling of sulfur and old dust. 
+
+She needed a free hand to scavenge. Rhea carefully slipped the sharp Obsidian Shard from her left hand, stowing it safely in her left blazer pocket. The Cracked Smartphone rested heavily in her right pocket, a useless brick of dead technology that she refused to discard out of sheer stubbornness. 
+
+She navigated the dead woods, scanning the bases of the petrified trunks. The silence was absolute, broken only by her own ragged breathing and the crunch of her footsteps. 
+
+After ten minutes of wandering, a faint, bioluminescent glow caught her eye. 
+
+Growing from the gray, stone-like bark of a massive petrified oak was a cluster of fruit-like fungus. It pulsed with a soft, sickly-sweet blue light, looking like a cross between a bloated mushroom and a bruised peach. It was the only living thing she had seen since the drop. 
+
+Rhea approached the tree, her eyes narrowing. She didn't trust the System. She didn't trust the glowing Starter Cache on the ridge, and she certainly didn't trust glowing forest food. But her throat was parched, and her stamina bar—currently sitting at a pristine maximum—was the only resource she had left in abundance. 
+
+[Stamina: 100/100]
+
+She reached out, her fingers closing around the spongy cap of the largest Ash-Fungus. It felt wet and cold, like raw meat. Bracing her boots against the ash, she gave it a sharp pull, tearing it free from the petrified bark with a wet, ripping sound. 
+
+Instantly, a crisp blue notification box snapped into existence, accompanied by a sound like a slamming cash register.
+
+[Gathering Action Detected: Ash-Fungus.]
+[Assessing Local Node Tariffs...]
+[Gathering Tax Applied: -85 Stamina.]
+
+A sudden, violent cramp seized her chest. 
+
+Rhea gasped, her lungs burning as if the air had been instantly sucked out of the forest. Her knees buckled. She collapsed against the petrified bark, clutching the glowing mushroom to her chest while her vision swam with dark spots. The physical backlash was immediate, a heavy, suffocating exhaustion that made her limbs feel like lead. Her muscles screamed in protest, twitching with sudden lactic acid buildup.
+
+[Stamina: 15/100]
+
+She slid down the trunk, hitting the ash-covered ground hard. She couldn't breathe. It felt like she had just sprinted a marathon while breathing through a cocktail straw. 
+
+She stared at the glowing Ash-Fungus in her hand, her breath hissing through clenched teeth as the math clicked into place. The economy here wasn't just rigged; it was actively predatory. It was designed to bankrupt new arrivals before they even understood the rules. If simply picking a mushroom cost eighty-five percent of her stamina, she would literally exhaust herself to death before she could secure enough resources to make it through the night. 
+
+Winded and cautious, Rhea realized the true cost of survival in this system.

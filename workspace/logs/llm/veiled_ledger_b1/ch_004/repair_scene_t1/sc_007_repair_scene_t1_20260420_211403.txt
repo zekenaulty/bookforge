@@ -1,0 +1,436 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_MAINTENANCE_TRENCHES",
+    "open_threads": [
+      "rhea_survival",
+      "party_alliance",
+      "system_debt_trap"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "The terminal's automated defenses triggered a localized memory wipe to destroy the skim logs.",
+      "Vance held the superheated cooling vents open, despite being at critical HP, to give Rhea access.",
+      "Rhea forced Unit 734 to divert the administrative firewall, dropping its efficiency to critical levels.",
+      "Rhea successfully extracted the Raw Data Packet just as the terminal completed its core purge."
+    ],
+    "key_events": [
+      "The terminal initiated a localized memory wipe.",
+      "Vance suffered severe burns holding the vents open.",
+      "Unit 734 diverted the firewall, suffering massive efficiency loss.",
+      "Rhea extracted the Raw Data Packet.",
+      "The terminal purged its core and shut down."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "REMOVE: container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "REMOVE: inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+      "REMOVE: container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+      "REMOVE: inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+      "REMOVE: inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_left)",
+      "REMOVE: container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick])",
+      "REMOVE: container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "mechanic: vance_harrow has active status Mutual Assured Destruction",
+      "mechanic: unit_734 has active status Mutual Assured Destruction",
+      "mechanic: vance_harrow has active status Party Member",
+      "mechanic: unit_734 has active status Party Member",
+      "milestone: vermin_control_completed = DONE",
+      "mechanic: rhea_mercer has 71 Copper Credits",
+      "mechanic: vance_harrow has 65 Copper Credits",
+      "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+      "inventory: vance_harrow -> Rebar (status=stowed, container=belt_loop)",
+      "container: belt_loop (owner=vance_harrow, contents=[ITEM_rebar])",
+      "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+      "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick, ITEM_copper_credits, ITEM_cracked_smartphone])",
+      "inventory: rhea_mercer -> Raw Data Packet (status=held, container=hand_left)",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_raw_data_packet])"
+    ],
+    "chapter_so_far_add": []
+  },
+  "character_continuity_system_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "stats": {
+          "stamina": 2,
+          "stamina_max": 100
+        }
+      },
+      "reason": "Drained by administrative firewall."
+    },
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "stats": {
+          "hp": 3,
+          "hp_max": 100
+        }
+      },
+      "reason": "Burned by cooling vents."
+    },
+    {
+      "character_id": "unit_734",
+      "set": {
+        "stats": {
+          "efficiency": 12
+        }
+      },
+      "reason": "Overriding firewall caused severe efficiency loss."
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "memory_wipe_progress": 100
+      },
+      "reason": "Terminal wiped its core."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_raw_data_packet",
+      "set": {
+        "name": "Raw Data Packet",
+        "display_name": "Raw Data Packet",
+        "type": "quest_item",
+        "owner_scope": "character",
+        "custodian": "world",
+        "linked_threads": [
+          "system_debt_trap"
+        ],
+        "state_tags": [
+          "evidence",
+          "administrative"
+        ],
+        "last_seen": {
+          "chapter": 4,
+          "scene": 7,
+          "location": "LOC_MAINTENANCE_TRENCHES"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_makeshift_masonry_bludgeon",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "Dropped to free hands"
+    },
+    {
+      "item_id": "ITEM_raw_data_packet",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "rhea_mercer"
+      },
+      "reason": "Extracted from terminal"
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_rebar",
+            "container": "belt_loop",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_copper_credits_vance",
+            "container": "torn_pocket",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "belt_loop",
+            "owner": "vance_harrow",
+            "contents": [
+              "ITEM_rebar"
+            ]
+          },
+          {
+            "container": "torn_pocket",
+            "owner": "vance_harrow",
+            "contents": [
+              "ITEM_copper_credits_vance"
+            ]
+          }
+        ]
+      },
+      "reason": "Stowed rebar to use both hands."
+    },
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_raw_data_packet",
+            "container": "hand_left",
+            "status": "held"
+          },
+          {
+            "item": "ITEM_scrap_parchment",
+            "container": "blazer_pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_charcoal_stick",
+            "container": "blazer_pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_copper_credits",
+            "container": "blazer_pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_cracked_smartphone",
+            "container": "blazer_pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_scavenger_carapaces",
+            "container": "blazer_pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_obsidian_shard",
+            "container": "blazer_pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_ash_fungus",
+            "container": "blazer_pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_severed_ash_boar_tusk",
+            "container": "blazer_pocket_left",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "hand_left",
+            "owner": "rhea_mercer",
+            "contents": [
+              "ITEM_raw_data_packet"
+            ]
+          },
+          {
+            "container": "hand_right",
+            "owner": "rhea_mercer",
+            "contents": []
+          },
+          {
+            "container": "blazer_pocket_right",
+            "owner": "rhea_mercer",
+            "contents": [
+              "ITEM_scrap_parchment",
+              "ITEM_charcoal_stick",
+              "ITEM_copper_credits",
+              "ITEM_cracked_smartphone"
+            ]
+          },
+          {
+            "container": "blazer_pocket_left",
+            "owner": "rhea_mercer",
+            "contents": [
+              "ITEM_scavenger_carapaces",
+              "ITEM_obsidian_shard",
+              "ITEM_ash_fungus",
+              "ITEM_severed_ash_boar_tusk"
+            ]
+          }
+        ]
+      },
+      "reason": "Stowed writing tools, dropped bludgeon, acquired data packet."
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "vance_harrow",
+      "chapter": 4,
+      "scene": 7,
+      "inventory": [
+        {
+          "item": "ITEM_rebar",
+          "container": "belt_loop",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_copper_credits_vance",
+          "container": "torn_pocket",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "belt_loop",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_rebar"
+          ]
+        },
+        {
+          "container": "torn_pocket",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_copper_credits_vance"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [],
+      "appearance_updates": {
+        "set": {
+          "marks_add": [
+            {
+              "name": "Blistered Hands",
+              "location": "hands",
+              "durability": "durable"
+            }
+          ]
+        },
+        "reason": "Burned hands on superheated brass vents."
+      }
+    },
+    {
+      "character_id": "unit_734",
+      "chapter": 4,
+      "scene": 7,
+      "inventory": [],
+      "containers": [],
+      "invariants_add": [],
+      "persona_updates": [],
+      "appearance_updates": {
+        "set": {
+          "marks_add": [
+            {
+              "name": "Smoking Chassis",
+              "location": "body",
+              "durability": "durable"
+            }
+          ]
+        },
+        "reason": "Overheated from firewall override."
+      }
+    },
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 4,
+      "scene": 7,
+      "inventory": [
+        {
+          "item": "ITEM_raw_data_packet",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_scrap_parchment",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_charcoal_stick",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_copper_credits",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_scavenger_carapaces",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_ash_fungus",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_severed_ash_boar_tusk",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_raw_data_packet"
+          ]
+        },
+        {
+          "container": "hand_right",
+          "owner": "rhea_mercer",
+          "contents": []
+        },
+        {
+          "container": "blazer_pocket_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_scrap_parchment",
+            "ITEM_charcoal_stick",
+            "ITEM_copper_credits",
+            "ITEM_cracked_smartphone"
+          ]
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_scavenger_carapaces",
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus",
+            "ITEM_severed_ash_boar_tusk"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [],
+      "appearance_updates": {
+        "set": {
+          "marks_add": [
+            {
+              "name": "Singed Arm Hair",
+              "location": "arms",
+              "durability": "durable"
+            }
+          ]
+        },
+        "reason": "Singed by heat from the terminal."
+      }
+    }
+  ]
+}

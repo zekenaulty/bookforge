@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_006_003",
+  "chapter": 6,
+  "scene": 3,
+  "scene_target": "Rhea analyzes the combat logs and forces Unit 734 to interface with the tollbooth terminal to trace the overseer's ledger.",
+  "goal": "Trace the origin of the debt hounds by interfacing with the tollbooth's dead terminal.",
+  "conflict": "Rhea is severely exhausted (1 Stamina) and must force a hijacked, damaged Unit 734 to interface with hostile System architecture.",
+  "required_callbacks": [
+    "Audit Tax debuff expiration",
+    "Debt Collector tether mechanics"
+  ],
+  "constraints": [
+    "target_words: 1800"
+  ],
+  "end_condition": "Rhea discovers the localized administrative hub funding the hounds, realizing the overseer has a finite budget.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_RUINED_TOLLBOOTH",
+  "location_end_id": "LOC_RUINED_TOLLBOOTH",
+  "location_start_label": "Ruined Tollbooth",
+  "location_end_label": "Ruined Tollbooth",
+  "location_start": "Ruined Tollbooth",
+  "location_end": "Ruined Tollbooth",
+  "handoff_mode": "continuous",
+  "constraint_state": "processed",
+  "transition_in_text": "With the debuff timer expired and the hounds temporarily de-rezzed, Rhea turns her attention to the tollbooth's dead terminal.",
+  "transition_in_anchors": [
+    "debuff timer expired",
+    "de-rezzed",
+    "tollbooth",
+    "dead terminal"
+  ],
+  "transition_out_text": "Rhea realizes the overseer's budget is finite and prepares to pinpoint the exact coordinates as pressure mounts outside.",
+  "transition_out_anchors": [
+    "finite budget",
+    "coordinates",
+    "pressure mounts"
+  ],
+  "seam_score": 90,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "system_debt_trap"
+  ],
+  "required_in_custody": [
+    "ITEM_rebar"
+  ],
+  "required_scene_accessible": [
+    "ITEM_rebar"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "combat_aftermath",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources"
+  ],
+  "ui_mechanics_expected": [
+    "Combat Log",
+    "Mana Ledger",
+    "HP",
+    "Stamina"
+  ]
+}

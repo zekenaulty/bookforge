@@ -1,0 +1,364 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_AUDIT_CORRIDOR",
+    "open_threads": [
+      "rhea_survival",
+      "system_debt_trap"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "The Sanctum Foyer locked down, trapping the party with a lethal compliance grid and a regenerating guard.",
+      "Vance held off the guard while Rhea fed the terminal the system value of their untaxed items.",
+      "Satisfying the compliance check, the grid deactivated, and the path to the Audit Corridor opened."
+    ],
+    "key_events": [
+      "The Sanctum Foyer locked down, activating a lethal compliance grid.",
+      "A dismantled gilded construct began regenerating to attack the party.",
+      "Vance drew the guard's aggro, surviving on minimal HP.",
+      "Rhea deposited the Obsidian Shard and Vance's Copper Credits into the terminal.",
+      "The terminal extracted the items' system value but returned the physical, devalued items.",
+      "The compliance check was satisfied, deactivating the grid and opening the Audit Corridor."
+    ],
+    "must_stay_true": [
+      "REMOVE: mechanic: vance_harrow HP is 2/150",
+      "mechanic: vance_harrow HP is 2/100",
+      "inventory: vance_harrow -> Copper Credits (status=stowed, container=torn_pocket)",
+      "container: torn_pocket (owner=vance_harrow, contents=[ITEM_copper_credits_vance])",
+      "milestone: compliance_checks_bypassed = DONE"
+    ],
+    "chapter_so_far_add": [
+      "The party survived a lethal compliance grid in the Sanctum Foyer by feeding the terminal the system value of their untaxed items, unlocking the path to the Audit Corridor."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 7,
+      "scene": 2,
+      "inventory": [
+        {
+          "item": "ITEM_null_value_token",
+          "status": "held",
+          "container": "hand_left"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "status": "stowed",
+          "container": "blazer_pocket_left"
+        },
+        {
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed",
+          "container": "blazer_pocket_left"
+        },
+        {
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed",
+          "container": "system_inventory"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_null_value_token"
+          ]
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_obsidian_shard",
+            "ITEM_administrative_coordinate_chip"
+          ]
+        },
+        {
+          "container": "system_inventory",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_raw_data_packet"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Rhea successfully exploited the compliance grid by feeding it the raw system value of her items, retaining the physical shells."
+      ]
+    },
+    {
+      "character_id": "vance_harrow",
+      "chapter": 7,
+      "scene": 2,
+      "inventory": [
+        {
+          "item": "ITEM_rebar",
+          "status": "held",
+          "container": "hand_right"
+        },
+        {
+          "item": "ITEM_copper_credits_vance",
+          "status": "stowed",
+          "container": "torn_pocket"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_rebar"
+          ]
+        },
+        {
+          "container": "torn_pocket",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_copper_credits_vance"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Vance held the line against the regenerating guard, trusting Rhea to bypass the traps."
+      ]
+    },
+    {
+      "character_id": "unit_734",
+      "chapter": 7,
+      "scene": 2,
+      "inventory": [],
+      "containers": [],
+      "invariants_add": [],
+      "persona_updates": [
+        "Unit 734 warned the party about the lethal administrative protocols."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "stats": {
+          "stamina": 1
+        },
+        "resources": {
+          "stamina": 1
+        }
+      },
+      "reason": "Stamina is 1/150"
+    },
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "stats": {
+          "hp": 2,
+          "hp_max": 100
+        },
+        "resources": {
+          "hp_current": 2
+        }
+      },
+      "reason": "HP is 2/100"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "set": {
+        "name": "Obsidian Shard",
+        "display_name": "Obsidian Shard",
+        "type": "material",
+        "owner_scope": "character",
+        "custodian": "rhea_mercer",
+        "linked_threads": [],
+        "state_tags": [
+          "drained"
+        ],
+        "last_seen": {
+          "chapter": 7,
+          "scene": 2,
+          "location": "LOC_SANCTUM_FOYER"
+        }
+      },
+      "reason": "Value drained by terminal"
+    },
+    {
+      "item_id": "ITEM_copper_credits_vance",
+      "set": {
+        "name": "Copper Credits",
+        "display_name": "Copper Credits",
+        "type": "currency",
+        "owner_scope": "character",
+        "custodian": "vance_harrow",
+        "linked_threads": [],
+        "state_tags": [
+          "devalued"
+        ],
+        "last_seen": {
+          "chapter": 7,
+          "scene": 2,
+          "location": "LOC_SANCTUM_FOYER"
+        }
+      },
+      "reason": "Value drained by terminal"
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "Deposited into terminal"
+    },
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "rhea_mercer"
+      },
+      "reason": "Spit back out by terminal"
+    },
+    {
+      "item_id": "ITEM_copper_credits_vance",
+      "from": {
+        "character_id": "vance_harrow"
+      },
+      "to": {
+        "character_id": "rhea_mercer"
+      },
+      "reason": "Thrown to Rhea"
+    },
+    {
+      "item_id": "ITEM_copper_credits_vance",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "Deposited into terminal"
+    },
+    {
+      "item_id": "ITEM_copper_credits_vance",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "rhea_mercer"
+      },
+      "reason": "Spit back out by terminal"
+    },
+    {
+      "item_id": "ITEM_copper_credits_vance",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "character_id": "vance_harrow"
+      },
+      "reason": "Tossed back to Vance"
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_null_value_token",
+            "status": "held",
+            "container": "hand_left"
+          },
+          {
+            "item": "ITEM_obsidian_shard",
+            "status": "stowed",
+            "container": "blazer_pocket_left"
+          },
+          {
+            "item": "ITEM_administrative_coordinate_chip",
+            "status": "stowed",
+            "container": "blazer_pocket_left"
+          },
+          {
+            "item": "ITEM_raw_data_packet",
+            "status": "stowed",
+            "container": "system_inventory"
+          }
+        ],
+        "containers": [
+          {
+            "container": "hand_left",
+            "owner": "rhea_mercer",
+            "contents": [
+              "ITEM_null_value_token"
+            ]
+          },
+          {
+            "container": "blazer_pocket_left",
+            "owner": "rhea_mercer",
+            "contents": [
+              "ITEM_obsidian_shard",
+              "ITEM_administrative_coordinate_chip"
+            ]
+          },
+          {
+            "container": "system_inventory",
+            "owner": "rhea_mercer",
+            "contents": [
+              "ITEM_raw_data_packet"
+            ]
+          }
+        ]
+      },
+      "reason": "Restoring items to pockets after terminal interaction"
+    },
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_rebar",
+            "status": "held",
+            "container": "hand_right"
+          },
+          {
+            "item": "ITEM_copper_credits_vance",
+            "status": "stowed",
+            "container": "torn_pocket"
+          }
+        ],
+        "containers": [
+          {
+            "container": "hand_right",
+            "owner": "vance_harrow",
+            "contents": [
+              "ITEM_rebar"
+            ]
+          },
+          {
+            "container": "torn_pocket",
+            "owner": "vance_harrow",
+            "contents": [
+              "ITEM_copper_credits_vance"
+            ]
+          }
+        ]
+      },
+      "reason": "Caught returned pouch and stowed it"
+    }
+  ]
+}

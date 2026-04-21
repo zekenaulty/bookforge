@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_006_006",
+  "chapter": 6,
+  "scene": 6,
+  "scene_target": "Rhea crafts the Null-Value Token using her remaining high-tier materials.",
+  "goal": "Synthesize a physical exploit to crash the overseer's ledger.",
+  "conflict": "Rhea is at 1 Stamina and must execute a complex System crafting exploit without failing or drawing the attention of hub patrols.",
+  "required_callbacks": [
+    "The party's escape from the tollbooth using the pathing glitch."
+  ],
+  "constraints": [
+    "Rhea must consume the Heavy Iron Ingot and Crystallized Experience to craft the Null-Value Token.",
+    "Vance must remain at 10 HP.",
+    "Rhea must remain at 1 Stamina."
+  ],
+  "end_condition": "The Null-Value Token is successfully crafted and added to Rhea's inventory.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_ASH_WASTES",
+  "location_end_id": "LOC_ADMINISTRATIVE_HUB_OUTSKIRTS",
+  "location_start_label": "The Ash Wastes",
+  "location_end_label": "Administrative Hub Outskirts",
+  "location_start": "The Ash Wastes",
+  "location_end": "Administrative Hub Outskirts",
+  "handoff_mode": "travel_arrival",
+  "constraint_state": "processed",
+  "transition_in_text": "After navigating the treacherous Ash Wastes, the party reaches the outskirts of the administrative hub and takes cover.",
+  "transition_in_anchors": [
+    "ash_wastes",
+    "outskirts",
+    "administrative_hub",
+    "cover"
+  ],
+  "transition_out_text": "Rhea successfully crafts the Null-Value Token, consuming her high-tier materials, and the party prepares for the final breach.",
+  "transition_out_anchors": [
+    "crafts",
+    "null_value_token",
+    "materials_consumed",
+    "prepares_breach"
+  ],
+  "seam_score": 85,
+  "seam_resolution": "inline_bridge",
+  "consumes_outcome_from": "6:5",
+  "hands_off_to": "6:7",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "rhea_survival",
+    "system_debt_trap"
+  ],
+  "required_in_custody": [
+    "ITEM_heavy_iron_ingot",
+    "ITEM_crystallized_experience"
+  ],
+  "required_scene_accessible": [
+    "ITEM_heavy_iron_ingot",
+    "ITEM_crystallized_experience"
+  ],
+  "required_visible_on_page": [
+    "ITEM_heavy_iron_ingot",
+    "ITEM_crystallized_experience"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "travel_arrival",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "inventory",
+    "resources"
+  ],
+  "ui_mechanics_expected": [
+    "Crafting",
+    "System Notification",
+    "Item Created",
+    "Inventory"
+  ]
+}

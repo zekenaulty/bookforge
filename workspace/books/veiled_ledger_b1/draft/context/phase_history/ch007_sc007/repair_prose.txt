@@ -1,0 +1,73 @@
+The death of a systemic administrator was not a clean, organic process. It was a catastrophic software failure rendered in real-time, high-fidelity physics, and it was tearing the room apart. 
+
+The massive obsidian desk—the very symbol of the overseer’s bureaucratic tyranny, the literal weight of his rigged ledger—remained embedded in the cracking marble floor where Rhea and Vance had flipped it. Beneath that crushing, impossible weight, the feral, grey-muscled form of the mutated overseer was glitching out of existence. The System’s combat log was still struggling to parse the sheer absurdity of the final blow. A massive, glowing red integer hung suspended in the air above the wreckage, slowly fraying at the edges into digital static. 
+
+[14,800 Environmental Damage]
+
+The number was too large for the local frontier node to process gracefully. It was a value meant for end-game raid bosses or localized natural disasters, not a tutorial zone office dispute. The collision mesh of the room groaned under the mathematical strain, the sound like a submarine hull buckling under deep-sea pressure. The overseer did not bleed. Instead, his shattered health bar exploded into a million jagged red pixels that rained down over the ruined Inner Office, bouncing off the polished stone before evaporating into the cold, unanchored air. 
+
+The glowing white fragments of the defeated entity dissolved into the cracking floor, swept away by a frantic, automated garbage collection routine that the dying node was desperately trying to execute. But the node was failing. The textures on the mahogany walls began to stretch and tear, revealing the flat, grey wire-frame geometry of the void beneath. 
+
+[System Notification: Local Node Anchor Lost. Structural Collapse Imminent.]
+
+The glowing blue box hovered in the center of the room, its bureaucratic tone completely indifferent to the apocalyptic destruction happening around it. The text flickered, the edges of the notification window fraying into static as the system’s rendering engine began to choke on the corrupted data. 
+
+Rhea Mercer collapsed onto her hands and knees, the polished marble biting into her skin. Her stamina bar was completely empty. It wasn’t just a low number; it was a hard, mathematical zero. The System’s *Exhaustion (Severe)* debuff felt like a leaden blanket draped over her central nervous system, a physical weight that made every breath a monumental, agonizing effort. Her lungs burned with the sharp, metallic taste of total depletion. She tried to push herself up, to get her feet under her, but her muscles simply refused to fire. They were locked down by the rigid, unforgiving rules of the Ledger’s stamina economy. When the System said zero, it meant zero. 
+
+The singed hair on her bare arms prickled against the sudden rush of cold, unanchored ozone filling the chamber. The environmental controls of the Inner Office were failing. The previously pristine, climate-controlled air of the sanctum was rapidly being replaced by the raw, unfiltered atmosphere of the out-of-bounds void. It smelled like burnt copper, melting silicon, and the sharp, terrifying tang of a blown transformer. 
+
+Despite the crushing exhaustion, Rhea felt the reassuring weight in her left blazer pocket. The Administrative Coordinate Chip, the Raw Data Packet, and the Null-Value Token rested heavily against her hip. They were physical manifestations of the exploit that had just saved their lives, the hard evidence of the 14.3 percent skim that had brought the overseer down. The Null-Value Token still radiated a faint, light-swallowing chill through the fabric of her jacket, while the Raw Data Packet pulsed with a critical durability warning, its crystal housing fractured but holding. They had done it. They had taken the System’s rigged rules, found the mathematical flaw in the overseer’s ledger, and weaponized it to trigger a catastrophic default. 
+
+A few feet away, Vance Harrow was in even worse shape. He was leaning heavily against the splintered remains of a mahogany pillar, his chest heaving with wet, ragged gasps. His health bar was a terrifying, microscopic sliver of red hovering just at the edge of his peripheral vision. 
+
+Two hit points. Out of a hundred. 
+
+Two percent of a human life. It was a state of existence that defied biology, sustained entirely by the System's arbitrary grace. His capillaries were bursting, his breathing was shallow, and his skin was a pale, waxy grey. A stiff breeze, a falling piece of plaster, or a particularly aggressive system notification could kill him instantly. He was gripping his Rebar with heavily blistered hands, the durable, angry red welts a testament to the sheer friction and heat of the brutal melee. The Rebar itself was a wreck, bent and deeply scored by the overseer's mana-infused strikes, its durability meter hovering at a precarious fifty-eight percent. He was suffering from *Heavy Blunt-Force Trauma*, a debuff that made his every movement stiff, jerky, and agonizing. 
+
+"Did we..." Vance coughed, spitting a glob of dark, pixelated blood onto the cracking marble. He stared at the overturned obsidian desk, his eyes wide with a mixture of shock, adrenaline, and profound disbelief. "Did we just drop a desk on a god?"
+
+"He wasn't a god," Rhea managed to croak, her throat raw and dry. She forced her head up, glaring at the dissolving white fragments of the administrator. "He was middle management. And his math was sloppy."
+
+Vance let out a breathless, wheezing laugh that quickly turned into another violent coughing fit. He tightened his blistered grip on the Rebar, using it as a crutch to keep himself upright. "Remind me never to let you do my taxes, Mercer. Jesus. Two HP. I can feel my own heartbeat trying to break my ribs."
+
+Above them, Unit 734 was faring no better. The mechanical construct was a flying disaster. Its metallic body was a smoking chassis, venting thick, acrid plumes of dark smoke from its internal cooling ports. The drone’s optical lens was cracked down the center, flickering erratically between an angry, targeting red and a dead, glassy black. The System had tagged the drone with a *Critical System Failure Imminent* status, and it showed. The anti-gravity drives whined in high-pitched, grinding protest, struggling to keep the heavy chassis aloft as it hovered in jagged, unpredictable lurches. 
+
+The room shook harder, a violent, lateral tremor that knocked Vance to his knees. He hit the floor with a grunt, his two hit points flashing a warning amber, but holding. The polished marble floor split open with a deafening crack, revealing a yawning, digital void beneath the frontier node. It wasn't darkness down there; it was an endless, repeating pattern of raw hexadecimal code scrolling into infinity. 
+
+Rhea forced herself to move. The zero-stamina lock was agonizing, a sensation like trying to drag her body through setting concrete, but the survival instinct was stronger than the debuff. She dragged her body across the cracking floor toward the overturned obsidian desk, using her elbows and knees to pull herself forward. Every inch scraped her skin against the rough, broken stone, but she kept her eyes locked on the space where the overseer had died. 
+
+The System owed them a payout. You don't kill a boss and walk away empty-handed, even if the boss was a corrupt accountant and the weapon was office furniture. 
+
+As she reached the edge of the massive desk, the air above the rubble shimmered. It wasn't a standard wooden chest or a glowing loot bag. It was an administrative extraction point, a raw tear in the local ledger's code that bled a harsh, actinic light. 
+
+[Loot Window: Overseer's Sanctum Desk]
+
+The holographic interface flickered to life over the ruin. It was glitching heavily, the standard gold trim of the Ledger’s UI replaced by raw, unformatted green text. The System was desperately trying to calculate the reward for defeating a corrupted, feral administrator while the node itself was actively dying. The interface stuttered, froze for a terrifying second as a massive chunk of the ceiling caved in nearby, and then finally spat out two physical objects, rendering them into reality with a sharp, concussive crack of displaced air. 
+
+Rhea reached out with a trembling, exhausted hand. Her fingers brushed the first object, and a jolt of pure, unadulterated systemic value shot up her arm. She grabbed it. It was a heavy, glowing roll of parchment, bound in a ribbon of pure, solidified purple mana. The material felt warm to the touch, vibrating with latent energy that pushed back against the cold void of the collapsing room. 
+
+[Item Description: Mercy Cache Coordinates - Mythic. The location of the frontier node's off-ledger vault. Warning: Highly volatile data. Do not expose to standard audit sweeps.]
+
+Rhea stared at the word *Mythic*. The sheer, undeniable weight of the rarity tag made her zero-stamina heart skip a beat. The text wasn't just purple; it was a deep, pulsing violet that seemed to absorb the ambient light. This was it. This was the skim. This was the physical location of every stolen experience point, every skimmed copper credit, and every piece of untaxed loot the overseer had siphoned from the frontier zone. It was the ultimate prize, the culmination of their desperate, suicidal audit. It was the bank vault, and she had just looted the map. 
+
+Without hesitating, she snatched the second item from the fading holographic interface. It was a jagged piece of purple code-glass, roughly the size of her palm. It felt unnaturally heavy, the edges sharp enough to cut, and it hummed with a deep, resonant frequency of stolen authority. 
+
+[Item Description: Administrative Residue Token - High-Tier. Permanent illicit system access bypass. Grants the bearer localized override privileges. Soul-bound upon extraction.]
+
+The token pulsed in her hand, casting a sickly purple light over her singed arm hair. This wasn't just loot; this was a skeleton key to the Ledger's backend. It was the proof they needed, the undeniable residue of the overseer's corruption, and the tool that would let them bypass the standard gates of the civic layer. The moment her fingers closed around it, a sharp, cold sensation pierced her palm, a digital tether locking the item to her character ID. Soul-bound. It couldn't be dropped, traded, or stolen. It was hers. 
+
+Behind her, Vance Harrow coughed violently again, the sound wet and desperate. His blistered hands slipped on the Rebar, and he barely caught himself before face-planting into the cracking marble. He looked up, his eyes wide with raw panic as a massive chunk of the ceiling tore away. Beyond the falling masonry, there was no sky, only the violent, glitching purple expanse of the out-of-bounds zone. The stars were missing, replaced by cascading errors. 
+
+"We need to move, Mercer! Now!" Vance roared, his voice cracking under the strain. "The whole damn floor is dropping!"
+
+As if on cue, Unit 734’s smoking chassis sparked violently, a shower of hot copper raining down on the floor. A deafening klaxon suddenly overrode the drone's internal audio, a sound so loud and piercing it vibrated directly in Rhea's teeth. It wasn't a standard alarm; it was the sound of a server rack being physically crushed. The drone’s cracked optical lens projected a massive, burning red timer directly into the center of the collapsing room, the numbers hovering in the air like a death sentence. 
+
+[Critical Failure: Frontier Zone Purge Initiated in 00:00:30]
+
+The numbers began to tick down with terrifying, mechanical speed. Twenty-nine. Twenty-eight. Twenty-seven. 
+
+Chunks of heavy masonry began to rain from the ceiling in earnest, shattering against the polished marble floor and sending deadly shrapnel flying through the air. The mahogany double doors they had kicked in earlier were suddenly sucked backward into the void as the Audit Corridor outside completely collapsed, consumed by the expanding digital nothingness. The walls were peeling away, the floor was giving out, and the air was turning to static. 
+
+Rhea didn't waste another second. She shoved the heavy parchment of the Mercy Cache Coordinates and the jagged purple glass of the Administrative Residue Token deep into her left blazer pocket, packing them tightly alongside the Administrative Coordinate Chip, the Raw Data Packet, and the Null-Value Token. The pocket bulged with the sheer weight of the exploited loot, a heavy, physical anchor of survival in a world that was tearing itself apart. 
+
+The System broadcast a critical failure across the entire frontier zone, the sound a sustained, digital scream that drowned out the grinding destruction of the Inner Office. The timer hit twenty-five. The node was dead. It was time to run.

@@ -1,0 +1,206 @@
+{
+  "schema_version": "1.0",
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "scene": 1,
+      "chapter": 7,
+      "persona_updates": [
+        "Rhea successfully breached the sanctum doors using the Null-Value Token, proving her exploit works against high-tier administrative locks."
+      ],
+      "invariants_add": [
+        "milestone: sanctum_foyer_breached = DONE"
+      ],
+      "inventory": [
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_obsidian_shard",
+          "status": "stowed"
+        },
+        {
+          "container": "system_inventory",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "hand_left",
+          "item": "ITEM_null_value_token",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_obsidian_shard",
+            "ITEM_administrative_coordinate_chip"
+          ]
+        },
+        {
+          "container": "system_inventory",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_raw_data_packet"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_null_value_token"
+          ]
+        }
+      ]
+    },
+    {
+      "character_id": "vance_harrow",
+      "scene": 1,
+      "chapter": 7,
+      "persona_updates": [
+        "Vance survived the elite guards' assault but took severe damage, dropping to 2 HP and gaining a Heavy Blunt-Force Trauma status."
+      ],
+      "invariants_add": [
+        "milestone: elite_guards_defeated = DONE"
+      ],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_rebar",
+          "status": "held"
+        },
+        {
+          "container": "torn_pocket",
+          "item": "ITEM_copper_credits_vance",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_rebar"
+          ]
+        },
+        {
+          "container": "torn_pocket",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_copper_credits_vance"
+          ]
+        }
+      ]
+    },
+    {
+      "character_id": "unit_734",
+      "scene": 1,
+      "chapter": 7,
+      "persona_updates": [
+        "Unit 734 followed the party into the Sanctum Foyer, its chassis still smoking and heavily degraded."
+      ],
+      "invariants_add": [],
+      "inventory": [],
+      "containers": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "vance_harrow",
+      "scene": 1,
+      "chapter": 7,
+      "set": {
+        "stats": {
+          "hp": 2
+        },
+        "resources": {
+          "hp_current": 2
+        },
+        "reason": "Vance took heavy damage from the elite guards' stamp-hammer and gained XP from their defeat."
+      },
+      "delta": {
+        "xp": 150
+      },
+      "remove": []
+    },
+    {
+      "character_id": "rhea_mercer",
+      "scene": 1,
+      "chapter": 7,
+      "set": {
+        "reason": "Rhea gained XP from defeating the elite guards."
+      },
+      "delta": {
+        "xp": 150
+      },
+      "remove": []
+    }
+  ],
+  "world_updates": {
+    "location": "LOC_SANCTUM_FOYER",
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "open_threads": [
+      "rhea_survival",
+      "party_alliance",
+      "system_debt_trap"
+    ],
+    "recent_facts": [
+      "Vance drew the aggro of the elite guards using his Rebar.",
+      "Rhea used the Null-Value Token to trigger a fatal exception in the sanctum doors.",
+      "The party breached the Sanctum Foyer and defeated the first wave of elite guards.",
+      "Vance sustained Heavy Blunt-Force Trauma and dropped to 2 HP."
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "The party breached the sanctum doors using the Null-Value Token, shattering the entrance with a localized physics glitch.",
+      "Vance drew the aggro of the elite guards, taking severe damage but allowing Rhea to execute the exploit.",
+      "They defeated the first wave of guards and sealed themselves inside the Sanctum Foyer, with Vance surviving on a mere 2 HP."
+    ],
+    "key_events": [
+      "Vance used his Rebar to draw the aggro of the elite guards at the sanctum entrance.",
+      "Rhea slammed the Null-Value Token into the locking mechanism, triggering a fatal exception that shattered the doors.",
+      "The party fought their way into the Sanctum Foyer, defeating the gilded constructs.",
+      "Vance sustained Heavy Blunt-Force Trauma from a stamp-hammer, dropping his HP to 2."
+    ],
+    "must_stay_true": [
+      "mechanic: unit_734 has active status Hostile Environment Marker",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "REMOVE: mechanic: vance_harrow HP is 10/150",
+      "mechanic: vance_harrow HP is 2/150",
+      "mechanic: vance_harrow has active status Heavy Blunt-Force Trauma",
+      "mechanic: rhea_mercer Stamina is 1/150",
+      "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+      "milestone: overseer_budget_discovered = DONE",
+      "milestone: administrative_hub_coordinates_acquired = DONE",
+      "milestone: administrative_hub_coordinates_decrypted = DONE",
+      "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Administrative Coordinate Chip (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard, ITEM_administrative_coordinate_chip])",
+      "milestone: tollbooth_escape_completed = DONE",
+      "inventory: rhea_mercer -> Null-Value Token (status=held, container=hand_left)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_null_value_token])",
+      "milestone: null_value_token_crafted = DONE",
+      "milestone: sanctum_threshold_reached = DONE",
+      "mechanic: vance_harrow has active status Aggro Target",
+      "mechanic: unit_734 has active status Critical System Failure Imminent",
+      "milestone: sanctum_foyer_breached = DONE",
+      "milestone: elite_guards_defeated = DONE"
+    ],
+    "chapter_so_far_add": [
+      "The party breached the administrative sanctum using the Null-Value Token, defeating the elite guards at the entrance.",
+      "Vance took heavy damage during the breach, surviving on only 2 HP as they sealed themselves inside the foyer."
+    ]
+  }
+}

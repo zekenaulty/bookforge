@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "The party stood before a massive firewall of deletion code at the edge of the frontier zone, the purge wave closing in behind them.",
+      "Rhea used the Administrative Residue Token to force a breach in the boundary's interface node.",
+      "The party dove through the gap just as the frontier zone collapsed, landing safely on the cold, paved stone of the Civic Layer Outskirts."
+    ],
+    "key_events": [
+      "The deletion wave closed in on the party at the frontier boundary.",
+      "Rhea used the Administrative Residue Token to override the firewall.",
+      "Vance and Unit 734 escaped through the breach.",
+      "Rhea dove through just as the firewall closed, successfully entering the Civic Layer Outskirts."
+    ],
+    "must_stay_true": [
+      "REMOVE: milestone: frontier_boundary_reached = DONE",
+      "milestone: frontier_zone_exited = DONE",
+      "milestone: civic_layer_entered = DONE",
+      "milestone: formal_dispute_initiated = DONE",
+      "mechanic: rhea_mercer Stamina is 0/150",
+      "milestone: catastrophic_default_triggered = DONE",
+      "milestone: overseer_shields_stripped = DONE",
+      "inventory: rhea_mercer -> Raw Data Packet (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Null-Value Token (status=stowed, container=blazer_pocket_left)",
+      "container: hand_right (owner=rhea_mercer, contents=[ITEM_administrative_residue_token])",
+      "milestone: feral_overseer_defeated = DONE",
+      "milestone: debt_lock_removed = DONE",
+      "milestone: hidden_vault_opened = DONE",
+      "milestone: mercy_cache_revealed = DONE",
+      "inventory: rhea_mercer -> Administrative Residue Token (status=held, container=hand_right)",
+      "container: system_inventory (owner=rhea_mercer, contents=[])",
+      "inventory: rhea_mercer -> Mercy Cache Coordinates (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip, ITEM_raw_data_packet, ITEM_null_value_token, ITEM_mercy_cache_coordinates])",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "inventory: vance_harrow -> Restorative Consumables (status=stowed, container=cargo_pocket_right)",
+      "container: cargo_pocket_right (owner=vance_harrow, contents=[ITEM_restorative_consumables])",
+      "mechanic: vance_harrow Rebar Durability is 52%"
+    ],
+    "chapter_so_far_add": [
+      "The party reached the outer boundary of the frontier zone, their path blocked by an impenetrable firewall.",
+      "Rhea used her newly acquired Administrative Residue Token to force a breach in the firewall.",
+      "The party successfully escaped the deletion wave, tumbling out onto the paved stone of the Civic Layer Outskirts."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "scene": 4,
+      "chapter": 8,
+      "persona_updates": [
+        "Rhea successfully utilized her illicit access token to breach the frontier firewall, saving the party from deletion."
+      ],
+      "invariants_add": [
+        "milestone: civic_layer_entered = DONE"
+      ],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_administrative_residue_token",
+          "status": "held"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_mercy_cache_coordinates",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_null_value_token",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "system_inventory",
+          "contents": [],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "contents": [
+            "ITEM_administrative_coordinate_chip",
+            "ITEM_raw_data_packet",
+            "ITEM_null_value_token",
+            "ITEM_mercy_cache_coordinates"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "hand_left",
+          "contents": [],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_administrative_residue_token"
+          ],
+          "owner": "rhea_mercer"
+        }
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "scene": 4,
+      "chapter": 8,
+      "set": {
+        "resources": {
+          "stamina": 0
+        },
+        "reason": "Rhea remains at zero stamina after diving through the breach."
+      }
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "deletion_wave": "completed",
+        "frontier_zone_purge_timer": 0
+      },
+      "reason": "The frontier zone purge has concluded behind the firewall."
+    }
+  ],
+  "world_updates": {
+    "location": "LOC_CIVIC_LAYER_OUTSKIRTS",
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "open_threads": [
+      "rhea_survival",
+      "system_debt_trap",
+      "party_alliance"
+    ]
+  }
+}

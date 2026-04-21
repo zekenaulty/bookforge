@@ -1,0 +1,104 @@
+The heavy blast doors hissed open, the pneumatic seals breaking with a sound like a dying man’s last exhale. 
+
+Beyond the threshold lay the Audit Corridor. It was a masterpiece of administrative cruelty, a long, oppressive stretch of polished stone that seemed to swallow the ambient light. The architecture was deliberately designed to make the intruder feel small, insignificant, and mathematically irrelevant. High vaulted ceilings disappeared into shadows, while the floor was a seamless expanse of gray marble, pristine and cold. There was no cover. There were no alcoves. It was a perfectly calculated kill box.
+
+Lining the walls at ten-foot intervals were the automated turrets. They didn't look like standard military hardware; they looked like bureaucratic instruments of denial. Brass-plated and blocky, they resembled oversized, weaponized ink stamps. As the blast doors locked into their open position, the corridor woke up. The turrets swiveled in unison, a terrifying chorus of synchronized mechanical clicks echoing off the polished stone. Their optical sensors flared to life, casting a grid of intersecting red targeting lasers across the hallway.
+
+[Warning: Cease and Desist Protocols Engaged.]
+
+The system notification didn't just float in Rhea’s peripheral vision; it pulsed with a harsh, authoritative crimson light, demanding immediate compliance. The air in the corridor grew heavy, thick with the smell of ozone and the distinct, metallic tang of superheated copper. 
+
+"They're locking on," Rhea said, her voice tight. She stood just behind the threshold, her chest heaving. Her Stamina was entirely bottomed out, sitting at a miserable, unyielding one point. The System was screaming at her, the Exhaustion (Severe) status effect wrapping around her lungs like an iron band. Every breath felt like she was inhaling powdered glass. Her bare forearms, the skin tight and her arm hair noticeably singed from the earlier terminal bypass, prickled as the static electricity in the corridor rose. 
+
+In her left hand, she clutched the Null-Value Token. The heavy, light-swallowing coin felt like a block of lead, its corrupted data matrix humming against her palm. In her right hand, she white-knuckled the Obsidian Shard. It was partially consumed, its edges jagged and uneven, but it was the only piece of raw, untaxed material she had left to defend herself with. 
+
+"Stay behind me," Vance grunted. 
+
+He didn't hesitate. Vance Harrow stepped into the kill box first, his broad shoulders squared against the incoming storm. His hands, covered in prominent, durable blisters from hauling superheated vents and gripping crude iron, tightened around his weapon. The Rebar in his right hand was nothing more than a jagged piece of salvaged infrastructure, but in his grip, it was a bulwark against the System's wrath. 
+
+The brass-plated turrets opened fire. 
+
+They didn't shoot bullets. They fired 'Cease and Desist' bolts—glowing, concentrated packets of kinetic energy and administrative denial. The bolts tore through the air with a sound like ripping canvas. 
+
+Vance swung the heavy iron Rebar in a desperate, sweeping arc, batting away the first volley. The impact of the bolts against the iron rang out like a cracked bell. Sparks showered the polished floor. But there were too many turrets, and the crossfire was perfectly calculated. Three bolts slipped past his guard, slamming into his chest and shoulder. 
+
+The impact didn't just cause physical trauma; it erupted in bursts of red-tape static, a visual representation of his health being audited away. Vance stumbled, his boots sliding on the marble, but he dug his heels in and roared, refusing to fall. 
+
+[Vance Harrow - HP: 8/100]
+
+"Keep moving!" Rhea shouted over the deafening hum of the turrets. 
+
+She pushed forward, staying perfectly aligned behind Vance’s broad back. He was a walking meat shield, a desperate gamble of hit points and sheer stubbornness. Rhea kept her eyes locked on the turrets, her mind racing, trying to calculate the firing patterns. The turrets operated on a strict, rhythmic ledger. Fire, cycle, audit, fire. If she stepped out of Vance's shadow for even a fraction of a second, the System would instantly deduct the remainder of her life. 
+
+Behind them, Unit 734 hovered dangerously low to the ground. The mechanical construct was a liability, but a necessary one. Its chassis was a ruin of dented metal and exposed wiring. Plumes of thick, acrid smoke vented continuously from its metallic body, a durable mark of the catastrophic overheating it had suffered during the firewall override. The smoke smelled of melting copper and burning insulation, leaving a greasy residue in the air. 
+
+The drone sputtered, its anti-gravity repulsors whining in protest as it tried to keep pace with Vance's charge. A stray Cease and Desist bolt clipped its outer casing, tearing away a chunk of armor plating and sending the drone spinning wildly before it managed to stabilize. 
+
+[Unit 734 - Chassis Integrity: 29%]
+[Warning: Critical System Failure Imminent.]
+
+"Unit, stay in the slipstream!" Rhea barked, her voice cracking from the Exhaustion. "Do not let them isolate your targeting profile!"
+
+The drone emitted a series of frantic, high-pitched clicks, tucking itself tighter behind Rhea's legs. 
+
+Vance bulldozed forward. The corridor seemed to stretch on forever, a nightmare of flashing red lights and deafening impacts. He took another glancing hit to the thigh. The red-tape static flared, eating away another chunk of his rapidly depleting health pool. 
+
+[Vance Harrow - HP: 6/100]
+
+"Almost there!" Vance bellowed, spit flying from his lips. 
+
+He didn't try to dodge anymore. He couldn't. The Hostile Environment Marker and the Audit Compliance debuff weighed them down, turning the air into molasses. Instead, Vance used the Rebar offensively. As they passed the first pair of turrets, he swung the iron bar with everything he had left. The jagged metal caught the brass-plated casing of the left turret, shattering the optical sensor and ripping the mounting bracket out of the wall. 
+
+The turret exploded in a shower of blue sparks and administrative error codes, its automated voice stuttering into silence. 
+
+"One down!" Vance grunted, though the effort cost him dearly. He was panting heavily, his blistered hands bleeding freely against the rough iron of the Rebar. 
+
+Rhea didn't celebrate. The destruction of one turret only caused the others to recalibrate, their firing rate increasing to compensate for the lost node. The air was a solid wall of red energy. She could feel the heat of the bolts passing within inches of her face. Her singed arm hair stood on end, the static charge making her skin crawl. 
+
+She looked down at the Null-Value Token in her left hand. It was the key. The exploit. The only reason they were running this suicidal gauntlet. If she dropped it, if she died before she could deliver it, the entire frontier node would reset, and the overseer would win. Her grip tightened until her knuckles turned white. 
+
+"Fifty feet!" Rhea called out, her eyes fixed on the end of the corridor. 
+
+There, standing as the final barrier, were the mahogany double doors. They were massive, imposing, and completely out of place in the cold stone architecture. They looked like the entrance to a CEO's boardroom, a symbol of untouchable authority. 
+
+The turrets intensified their barrage. The crossfire became a solid grid of death. 
+
+Vance took another hit. A bolt slammed directly into his gut, doubling him over. He coughed, a spray of blood hitting the polished marble floor. 
+
+[Vance Harrow - HP: 5/100]
+
+He was one hit away from deletion. One bad roll of the System's dice. 
+
+"Vance!" Rhea screamed. 
+
+"I'm up! I'm up!" Vance snarled, forcing himself upright. He raised the Rebar, holding it horizontally across his body like a makeshift shield. The iron was glowing dull red from the absorbed energy, the metal beginning to warp under the sustained assault. 
+
+Unit 734 let out a mechanical shriek as a bolt grazed its primary sensor cluster. The drone dropped another foot, its chassis scraping against the marble floor, leaving a trail of sparks and leaking coolant. 
+
+[Unit 734 - Chassis Integrity: 15%]
+
+"Ignore the side turrets!" Rhea ordered, her tactical mind overriding her panic. "Straight down the middle! Break the line of sight!"
+
+Vance nodded once, a sharp, jerky motion. He abandoned his defensive swings and simply put his head down, charging like a wounded bull. He was a battering ram of flesh and bone, relying entirely on his Aggro Target status to keep the turrets focused on him instead of Rhea or the failing drone. 
+
+The distance closed. Thirty feet. Twenty feet. Ten feet. 
+
+The mahogany doors loomed over them, their polished surface reflecting the chaotic red light of the corridor. 
+
+"Move!" Vance roared, peeling off to the right at the very last second. He threw his entire body weight into a final, desperate swing, smashing the Rebar into the last wall-mounted turret on the right flank. The impact shattered the brass casing, the explosion throwing Vance backward onto the slick marble floor. He slid to a halt, gasping for air, his HP hovering at the absolute edge of the abyss. 
+
+With Vance out of the way, the path was clear. 
+
+Rhea didn't slow down. She channeled every ounce of forward momentum, ignoring the burning in her lungs and the screaming of her zeroed-out Stamina. She lunged forward, planting her heavy boot squarely against the center seam of the polished wood. 
+
+The impact was thunderous. 
+
+She kicked the mahogany double doors entirely off their hinges. The heavy wood splintered and cracked, the locking mechanism failing with a sharp, metallic snap. The doors crashed inward, slamming against the floor of the inner sanctum in a cloud of dust and shredded administrative paperwork. 
+
+Rhea stepped over the splintered wood, her chest heaving, the Null-Value Token pulsing in her left hand and the Obsidian Shard gripped tightly in her right. 
+
+The Overseer's Inner Office was vast, lined with towering bookshelves of bound ledgers and glowing data-streams. And there, sitting behind a massive obsidian desk, was the overseer himself. He looked up, his digital avatar flickering with genuine, uncalculated shock. 
+
+Rhea stared him down, the Exhaustion forgotten, replaced by the cold, hard thrill of the breach. 
+
+They had made it.

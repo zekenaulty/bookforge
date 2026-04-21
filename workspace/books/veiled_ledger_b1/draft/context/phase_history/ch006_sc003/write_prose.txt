@@ -1,0 +1,43 @@
+The oppressive, leaden weight of the system penalty vanished with a sharp chime. With the debuff timer expired and the wire-frame hounds temporarily de-rezzed into a flurry of dissipating red pixels, Rhea turned her attention to the ruined tollbooth's dead terminal.
+
+[Stamina: 1/150]
+[Status Effect: Exhaustion (Severe)]
+
+Living on a single point of stamina felt like trying to breathe underwater. Every micro-movement burned. Across the small, barricaded space, Vance leaned against the rotting wooden door, his blistered hands gripping a rusted length of Rebar. 
+
+[Party Member: Vance Harrow - HP: 10/150]
+
+"They're gone," Vance rasped, coughing up a lungful of ash. 
+
+"They're rebooting," Rhea corrected, dragging her boots across the cracked stone floor. She approached the dead terminal casing bolted to the wall. It was a relic of the frontier's old transit system, its screen dark and covered in grime. "The System doesn't just spawn infinite assets. Everything has a cost."
+
+She grabbed the edge of the plastic casing and pulled. With her strength stat sitting at twenty, the brittle plastic snapped off easily, revealing a nest of exposed copper wiring. 
+
+Unit 734 hovered nearby, its smoking chassis venting thick plumes of gray exhaust. The drone was still suffering from the overseer's hijacked projection, its optical lens flickering erratically. 
+
+"Drone," Rhea commanded, her voice cracking. "Interface cable. Now."
+
+"Warning: Unauthorized connection to local infrastructure carries a Class-B penalty," Unit 734 buzzed, though a mechanical tentacle extruded from its undercarriage regardless. 
+
+Rhea snatched the interface cable and jammed it into the exposed copper wiring of the terminal. Sparks showered over her singed arm hair, but she ignored the heat. 
+
+"Pull up the logs," she ordered. 
+
+The terminal screen flickered to life, bathing the ruined tollbooth in a sickly green glow. 
+
+[Combat Log: Debt Collector Entity (x3) - Spawn Cost: 450 Node Mana]
+[Combat Log: Tether Extraction - Target: rhea_mercer - Yield: 0 Mana (Resisted)]
+
+"Look at that," Rhea whispered, a grim smile cracking her dry lips. "They aren't standard mobs. They're administrative constructs."
+
+She tapped the cracked glass of the screen, forcing the drone to bypass the local firewall. 
+
+[Mana Ledger: Local Administrative Hub 04]
+[Current Balance: 1,240 / 5,000 Node Mana]
+[Expenditure: 450 Mana - Re-spawning Debt Collectors. T-Minus 40 seconds.]
+
+Rhea realized the overseer's budget was finite. He was paying for this targeted harassment out of a localized pool, and he was burning through it fast. The terminal displayed a cascading ledger of mana expenditures, all flowing from a single, heavily fortified coordinate on the grid. 
+
+Outside, the wind began to howl again. The faint, metallic scratching resumed against the exterior stone. 
+
+Rhea memorized the glowing coordinates burning on the screen as pressure mounted outside. They couldn't out-fight the system, but they could absolutely bankrupt it.

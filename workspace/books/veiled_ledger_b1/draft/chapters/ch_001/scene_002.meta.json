@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_001_002",
+  "chapter": 1,
+  "scene": 2,
+  "scene_target": "Rhea dismisses the indenture prompt, halting the passive environmental damage and freeing herself from the debris.",
+  "goal": "Read the fine print, dismiss the prompt without accepting default terms, and escape the debris.",
+  "conflict": "Ticking passive heat damage versus reading the bureaucratic fine print while at 1 HP.",
+  "required_callbacks": [],
+  "constraints": [],
+  "end_condition": "Rhea dismisses the prompt, freeing her vision, and rolls away from a collapsing rock pillar.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_TUTORIAL_WASTELAND_DROP_ZONE",
+  "location_end_id": "LOC_TUTORIAL_WASTELAND_DROP_ZONE",
+  "location_start_label": "Ash-Covered Wasteland",
+  "location_end_label": "Ash-Covered Wasteland",
+  "location_start": "Ash-Covered Wasteland",
+  "location_end": "Ash-Covered Wasteland",
+  "handoff_mode": "direct",
+  "constraint_state": "processed",
+  "transition_in_text": "Rhea is pinned under obsidian debris with a glowing blue System notification blocking her vision.",
+  "transition_in_anchors": [
+    "pinned",
+    "obsidian debris",
+    "glowing blue notification",
+    "vision blocked"
+  ],
+  "seam_score": 100,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Rhea"
+  ],
+  "cast_present_ids": [
+    "char_rhea"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [],
+  "required_in_custody": [
+    "ITEM_cracked_smartphone"
+  ],
+  "required_scene_accessible": [
+    "ITEM_cracked_smartphone"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "combat_aftermath",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "statuses"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Indenture Status",
+    "System Notification",
+    "Passive Damage"
+  ],
+  "prose_path": "draft/chapters/ch_001/scene_002.md",
+  "state_patch": {
+    "character_continuity_system_updates": [
+      {
+        "character_id": "char_rhea",
+        "set": {
+          "statuses": [
+            {
+              "duration": "00:05:00",
+              "effect": "Prevents fatal impact damage.",
+              "name": "Tutorial Grace Period"
+            }
+          ],
+          "reason": "Escaped the debris, removing the Pinned status."
+        },
+        "remove": [],
+        "delta": {},
+        "chapter": 1,
+        "scene": 2
+      }
+    ],
+    "character_updates": [
+      {
+        "appearance_updates": {
+          "reason": "Leg was pinned under heavy obsidian debris.",
+          "set": {
+            "marks_add": [
+              {
+                "durability": "durable",
+                "location": "left leg",
+                "name": "Bruised Left Leg"
+              }
+            ]
+          }
+        },
+        "character_id": "char_rhea",
+        "containers": [
+          {
+            "container": "blazer_pocket_right",
+            "contents": [
+              "ITEM_cracked_smartphone"
+            ],
+            "owner": "char_rhea"
+          }
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_cracked_smartphone",
+            "status": "stowed"
+          }
+        ],
+        "persona_updates": [],
+        "chapter": 1,
+        "scene": 2
+      }
+    ],
+    "schema_version": "1.0",
+    "summary_update": {
+      "chapter_so_far_add": [
+        "Rhea dismissed the predatory indenture contract and escaped the obsidian debris, surviving with 1 HP."
+      ],
+      "key_events": [
+        "Rhea was trapped under obsidian debris with a System prompt blocking her view.",
+        "A passive heat damage timer threatened to drain her final hit point in 12 seconds.",
+        "Rhea refused the default terms and found a hidden 'Dismiss' button in the fine print.",
+        "Dismissing the prompt canceled the environmental damage and cleared her vision.",
+        "Rhea rolled away from a collapsing rock pillar, freeing her trapped leg and removing the Pinned status."
+      ],
+      "last_scene": [
+        "Rhea woke up pinned under obsidian debris, her vision blocked by a glowing System notification demanding she accept her Indenture Status.",
+        "Facing imminent death from passive heat damage, she read the fine print and found a hidden option to dismiss the predatory contract.",
+        "Clearing her vision just in time, she rolled away from a collapsing rock pillar, surviving the trap with exactly 1 HP."
+      ],
+      "must_stay_true": [
+        "REMOVE: injury: char_rhea pinned under heavy obsidian debris",
+        "REMOVE: mechanic: char_rhea has active status Pinned",
+        "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+        "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+        "injury: char_rhea bruised left leg",
+        "mechanic: char_rhea HP is 1/100",
+        "mechanic: char_rhea has active status Tutorial Grace Period",
+        "mechanic: char_rhea has active title Indentured Soul",
+        "mechanic: char_rhea has 100,000 Soul Debt"
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "char_rhea"
+      ],
+      "location": "LOC_TUTORIAL_WASTELAND_DROP_ZONE",
+      "open_threads": []
+    }
+  },
+  "scene_summary": [
+    "Rhea woke up pinned under obsidian debris, her vision blocked by a glowing System notification demanding she accept her Indenture Status.",
+    "Facing imminent death from passive heat damage, she read the fine print and found a hidden option to dismiss the predatory contract.",
+    "Clearing her vision just in time, she rolled away from a collapsing rock pillar, surviving the trap with exactly 1 HP."
+  ],
+  "key_events": [
+    "Rhea was trapped under obsidian debris with a System prompt blocking her view.",
+    "A passive heat damage timer threatened to drain her final hit point in 12 seconds.",
+    "Rhea refused the default terms and found a hidden 'Dismiss' button in the fine print.",
+    "Dismissing the prompt canceled the environmental damage and cleared her vision.",
+    "Rhea rolled away from a collapsing rock pillar, freeing her trapped leg and removing the Pinned status."
+  ],
+  "must_stay_true": [
+    "REMOVE: injury: char_rhea pinned under heavy obsidian debris",
+    "REMOVE: mechanic: char_rhea has active status Pinned",
+    "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+    "injury: char_rhea bruised left leg",
+    "mechanic: char_rhea HP is 1/100",
+    "mechanic: char_rhea has active status Tutorial Grace Period",
+    "mechanic: char_rhea has active title Indentured Soul",
+    "mechanic: char_rhea has 100,000 Soul Debt"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "appearance_check_missing",
+        "message": "APPEARANCE_CHECK is missing for cast member char_rhea.",
+        "severity": "warning"
+      }
+    ]
+  },
+  "write_attempts": 1,
+  "updated_at": "2026-04-19T13:31:23Z"
+}

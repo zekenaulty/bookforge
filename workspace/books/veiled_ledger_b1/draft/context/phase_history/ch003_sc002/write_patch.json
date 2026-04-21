@@ -1,0 +1,197 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "char_rhea",
+      "char_vex",
+      "char_artie"
+    ],
+    "location": "LOC_ASHWOOD_DEPOSIT_NODE",
+    "open_threads": []
+  },
+  "character_continuity_system_updates": [
+    {
+      "character_id": "char_rhea",
+      "set": {
+        "statuses": [
+          {
+            "name": "Party Leader",
+            "effect": "Shared Ledger Liability"
+          }
+        ],
+        "reason": "Formed a formal System party with Vex and Artie."
+      },
+      "remove": [],
+      "delta": {},
+      "chapter": 3,
+      "scene": 2
+    },
+    {
+      "character_id": "char_artie",
+      "set": {
+        "statuses": [
+          {
+            "name": "Party Member",
+            "effect": "Shared Ledger Liability"
+          }
+        ],
+        "reason": "Joined a formal System party led by Rhea."
+      },
+      "remove": [],
+      "delta": {},
+      "chapter": 3,
+      "scene": 2
+    },
+    {
+      "character_id": "char_vex",
+      "set": {
+        "statuses": [
+          {
+            "name": "Party Member",
+            "effect": "Shared Ledger Liability"
+          }
+        ],
+        "reason": "Joined a formal System party led by Rhea."
+      },
+      "remove": [],
+      "delta": {},
+      "chapter": 3,
+      "scene": 2
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "char_rhea",
+      "invariants_add": [
+        "milestone: party_formed_rhea_vex_artie = DONE"
+      ],
+      "persona_updates": [
+        "Rhea realizes she can leverage systemic threats to force alliances, turning liabilities into assets."
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_makeshift_masonry_bludgeon"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_copper_credits"
+          ]
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus"
+          ]
+        },
+        {
+          "container": "blazer_pocket_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_cracked_smartphone"
+          ]
+        }
+      ],
+      "inventory": [
+        {
+          "item": "ITEM_makeshift_masonry_bludgeon",
+          "container": "hand_right",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_copper_credits",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_ash_fungus",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "chapter": 3,
+      "scene": 2
+    },
+    {
+      "character_id": "char_artie",
+      "invariants_add": [],
+      "persona_updates": [
+        "Artie accepts a party invite from a stranger out of pure desperation to survive."
+      ],
+      "containers": [],
+      "inventory": [],
+      "chapter": 3,
+      "scene": 2
+    },
+    {
+      "character_id": "char_vex",
+      "invariants_add": [],
+      "persona_updates": [
+        "Vex is willing to exploit gray areas in the System's rules to avoid paperwork and administrative punishment."
+      ],
+      "containers": [],
+      "inventory": [],
+      "chapter": 3,
+      "scene": 2
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Cornered at the deposit node, Rhea leveraged her exploit to force a negotiation between Vex and Artie.",
+      "She proposed a formal System party: Vex would suppress the audit flag, Artie would act as muscle, and she would provide the untaxed gathering methodology.",
+      "Both the dying arrival and the terrified clerk accepted the terms, forming a highly irregular alliance and dismissing the immediate threat of an administrative ban."
+    ],
+    "key_events": [
+      "Vex threatened Rhea with an administrative ban for her exploit, while Artie demanded to know her secret to avoid bleeding out.",
+      "Rhea realized she couldn't fight them both and proposed a joint venture to solve all their problems.",
+      "Rhea projected a party formation window, offering Vex a way to balance the ledger and Artie a way to survive.",
+      "Both Vex and Artie accepted the terms, formally binding the three of them into a System party and dismissing the immediate audit threat."
+    ],
+    "must_stay_true": [
+      "container: hand_right (owner=char_rhea, contents=[ITEM_makeshift_masonry_bludgeon])",
+      "milestone: weapon_crafted = DONE",
+      "inventory: char_rhea -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "inventory: char_rhea -> Ash-Fungus (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+      "mechanic: char_rhea HP is 25/100",
+      "mechanic: char_rhea Stamina is 40/100",
+      "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+      "milestone: first_credits_banked = DONE",
+      "mechanic: char_rhea has 4 Copper Credits",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+      "inventory: char_rhea -> Copper Credits (status=held, container=hand_left)",
+      "container: hand_left (owner=char_rhea, contents=[ITEM_copper_credits])",
+      "milestone: rhea_cornered_by_vex_and_artie = DONE",
+      "mechanic: char_artie HP is 4/100",
+      "mechanic: char_artie has active status Stage Two Systemic Shock",
+      "mechanic: char_artie has active status Minor Hemorrhage",
+      "mechanic: char_artie has active title Indentured Soul",
+      "injury: char_artie severe internal damage",
+      "injury: char_artie broken left arm",
+      "milestone: party_formed_rhea_vex_artie = DONE",
+      "mechanic: char_rhea has active status Party Leader",
+      "mechanic: char_artie has active status Party Member",
+      "mechanic: char_vex has active status Party Member"
+    ],
+    "chapter_so_far_add": [
+      "Rhea used her knowledge of the untaxed gathering exploit to negotiate a formal System party with Vex and Artie, suppressing the audit flag and securing an alliance."
+    ]
+  }
+}

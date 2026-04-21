@@ -1,0 +1,262 @@
+COMPLIANCE:
+Scene ID: SC_007_002
+Allowed events: Rhea bypasses compliance checks, Vance holds off guard, Unit 734 assists.
+Forbidden milestones: sanctum_threshold_reached = DONE
+Current arm-side / inventory facts: vance_harrow -> Rebar (held, hand_right), rhea_mercer -> Null-Value Token (held, hand_left), rhea_mercer -> Obsidian Shard (held, hand_right)
+
+APPEARANCE_CHECK:
+- rhea_mercer: female, singed hair, unadorned
+- vance_harrow: male, blistered hands
+- unit_734: robot, smoking chassis, mechanical, construct
+
+PROSE:
+The shattered doors seal behind them as the foyer locks down, trapping the party with regenerating guards and activating lethal compliance grids. Red lasers slice through the dusty air, forming a deadly, geometric web across the polished marble floor.
+
+Vance doesn't have time to catch his breath. The remains of the gilded construct he just smashed begin to twitch, the stamped metal folding back into place. The regenerating guard rises, its stamp-hammer swinging in a brutal arc. Vance brings up his Rebar, taking the kinetic force of the blow directly on his forearms.
+
+[HP: 10/100]
+
+He grunts, his blistered hands slipping on the iron. "Rhea! Little busy here!"
+
+"Working on it!" Rhea snaps. She turns to the heavy blast door blocking the corridor. A holographic terminal hovers beside it, glowing with a harsh, bureaucratic red.
+
+Unit 734 hovers over her shoulder, plumes of thick smoke venting from its metallic body. Despite its critical chassis failure, the drone extends a sparking interface cable into the terminal's port.
+
+[Chassis Integrity: 34%]
+[Warning: Critical System Failure Imminent.]
+
+The red lasers pause their sweep, and a new window projects directly into Rhea's vision.
+
+[Compliance Check Initiated.]
+[Inventory Audit required. Please deposit assets to clear the ledger.]
+
+"It wants a bribe," Rhea mutters, her chest heaving as the Exhaustion debuff makes her limbs feel like lead. "A literal paywall."
+
+Vance deflects another crushing blow from the guard, the impact dropping him to his knees. He is barely surviving the regenerating guard's attacks, his health bar flashing a critical, strobing red. 
+
+Rhea steps up to the terminal's physical deposit slot. She raises her right hand and shoves the Obsidian Shard into the grinding gears. 
+
+[Item Consumed: Obsidian Shard.]
+[Value Accepted. Audit Progress: 38%.]
+
+"Not enough!" Unit 734 whirs, its voice box crackling. "The ledger demands further liquidation!"
+
+Rhea frantically opens her system inventory. She can't risk the Null-Value Token or the Administrative Coordinate Chip. Instead, she dumps a stream of abstract junk data—cached error logs, corrupted metadata from the tollbooth, and a handful of untaxed copper credits. She physically throws her Cracked Smartphone and a piece of Scrap Parchment into the slot, watching the system devour them.
+
+[Assets Liquidated.]
+[Inventory Audit: Complete.]
+[Compliance Check: Passed.]
+
+The red laser grid fizzles out in a shower of sparks. The heavy blast door slides open with a pneumatic hiss. Rhea successfully bypasses the compliance checks, opening the path to the inner sanctum but sacrificing several pieces of looted gear.
+
+"Move!" Rhea yells, grabbing Vance by the shoulder as the regenerating guard winds up for another lethal swing.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_SANCTUM_INNER_CORRIDOR",
+    "open_threads": [
+      "party_alliance",
+      "system_debt_trap",
+      "rhea_survival"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "Trapped in the Sanctum Foyer, Rhea bypassed lethal compliance grids by sacrificing the Obsidian Shard and other junk data to an audit terminal.",
+      "Vance barely survived holding off a regenerating guard, his HP dropping to critical levels.",
+      "With the audit satisfied, the blast doors opened, allowing the party to escape into the inner sanctum corridor."
+    ],
+    "key_events": [
+      "The foyer locked down, trapping the party with regenerating guards and laser grids.",
+      "Vance took heavy damage defending the party, his HP dropping to 10/100.",
+      "Unit 734 interfaced with the blast door terminal, triggering an inventory audit.",
+      "Rhea sacrificed the Obsidian Shard, Cracked Smartphone, Scrap Parchment, and Copper Credits to the terminal.",
+      "The compliance check passed, deactivating the lasers and opening the path forward."
+    ],
+    "must_stay_true": [
+      "REMOVE: mechanic: vance_harrow HP is 10/150",
+      "REMOVE: mechanic: rhea_mercer Stamina is 1/150",
+      "REMOVE: inventory: rhea_mercer -> Obsidian Shard (status=held, container=hand_right)",
+      "REMOVE: container: hand_right (owner=rhea_mercer, contents=[ITEM_obsidian_shard])",
+      "mechanic: vance_harrow HP is 10/100",
+      "mechanic: rhea_mercer Stamina is 1/100",
+      "container: hand_right (owner=rhea_mercer, contents=[])",
+      "milestone: compliance_checks_bypassed = DONE"
+    ],
+    "chapter_so_far_add": []
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "inventory_alignment_updates": [
+        {
+          "character_id": "rhea_mercer",
+          "set": {
+            "inventory": [
+              {
+                "item": "ITEM_cracked_smartphone",
+                "status": "stowed",
+                "container": "system_inventory"
+              },
+              {
+                "item": "ITEM_scrap_parchment",
+                "status": "stowed",
+                "container": "system_inventory"
+              },
+              {
+                "item": "ITEM_copper_credits",
+                "status": "stowed",
+                "container": "system_inventory"
+              }
+            ],
+            "containers": [
+              {
+                "container": "system_inventory",
+                "owner": "rhea_mercer",
+                "contents": [
+                  "ITEM_raw_data_packet",
+                  "ITEM_cracked_smartphone",
+                  "ITEM_scrap_parchment",
+                  "ITEM_copper_credits"
+                ]
+              }
+            ]
+          },
+          "reason": "scene_fit_posture",
+          "reason_category": "time_skip_normalize",
+          "scope_override": true
+        }
+      ],
+      "transfer_updates": [
+        {
+          "item_id": "ITEM_obsidian_shard",
+          "from": {
+            "character_id": "rhea_mercer"
+          },
+          "to": {
+            "custodian": "world"
+          },
+          "reason": "sacrificed to compliance check"
+        },
+        {
+          "item_id": "ITEM_cracked_smartphone",
+          "from": {
+            "character_id": "rhea_mercer"
+          },
+          "to": {
+            "custodian": "world"
+          },
+          "reason": "sacrificed to compliance check"
+        },
+        {
+          "item_id": "ITEM_scrap_parchment",
+          "from": {
+            "character_id": "rhea_mercer"
+          },
+          "to": {
+            "custodian": "world"
+          },
+          "reason": "sacrificed to compliance check"
+        },
+        {
+          "item_id": "ITEM_copper_credits",
+          "from": {
+            "character_id": "rhea_mercer"
+          },
+          "to": {
+            "custodian": "world"
+          },
+          "reason": "sacrificed to compliance check"
+        }
+      ],
+      "persona_updates": [
+        "Rhea realizes the system's bureaucracy can be bought off with junk data if the ledger's value parameters are met."
+      ]
+    },
+    {
+      "character_id": "vance_harrow",
+      "persona_updates": [
+        "Vance is pushed to his absolute physical limit, surviving on a razor's edge of HP."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "stats": {
+          "hp": 10,
+          "hp_max": 100
+        }
+      },
+      "reason": "Vance took heavy damage from the regenerating guard."
+    },
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "stats": {
+          "stamina": 1,
+          "stamina_max": 100
+        }
+      },
+      "reason": "Rhea remains severely exhausted."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "last_seen": {
+          "chapter": 7,
+          "scene": 2,
+          "location": "LOC_SANCTUM_FOYER"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_cracked_smartphone",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "last_seen": {
+          "chapter": 7,
+          "scene": 2,
+          "location": "LOC_SANCTUM_FOYER"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_scrap_parchment",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "last_seen": {
+          "chapter": 7,
+          "scene": 2,
+          "location": "LOC_SANCTUM_FOYER"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_copper_credits",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "last_seen": {
+          "chapter": 7,
+          "scene": 2,
+          "location": "LOC_SANCTUM_FOYER"
+        }
+      }
+    }
+  ]
+}

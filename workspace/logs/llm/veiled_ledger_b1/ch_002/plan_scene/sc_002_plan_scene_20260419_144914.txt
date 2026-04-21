@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_002_002",
+  "chapter": 2,
+  "scene": 2,
+  "scene_target": "Rhea attempts to gather more resources but discovers micro-taxes threaten her remaining 1 HP, forcing her to halt.",
+  "goal": "Gather loose branches and more fungus to offset stamina loss.",
+  "conflict": "Every interaction triggers a System micro-tax, threatening to drain her last hit point.",
+  "required_callbacks": [
+    "The 85 Stamina Gathering Tax from the previous scene."
+  ],
+  "constraints": [
+    "target_words: 1800",
+    "Rhea's HP is already at 1, so the stamina drain must trigger a critical System warning threatening to deduct from HP (which would be fatal) rather than actually reducing it below 1."
+  ],
+  "end_condition": "Rhea stops gathering entirely, realizing the standard rules are a death trap.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_ASH_CHOKED_FOREST",
+  "location_end_id": "LOC_ASH_CHOKED_FOREST",
+  "location_start_label": "Ash-Choked Forest",
+  "location_end_label": "Ash-Choked Forest",
+  "location_start": "Ash-Choked Forest",
+  "location_end": "Ash-Choked Forest",
+  "handoff_mode": "direct",
+  "constraint_state": "processed",
+  "transition_in_text": "Rhea, winded and holding her single Ash-Fungus, tries to gather basic firewood to survive the environment.",
+  "transition_in_anchors": [
+    "winded",
+    "ash-fungus",
+    "firewood",
+    "survive"
+  ],
+  "transition_out_text": "Rhea sits motionless, refusing to interact with the environment to avoid fatal System taxes.",
+  "transition_out_anchors": [
+    "motionless",
+    "refusing",
+    "fatal",
+    "taxes"
+  ],
+  "consumes_outcome_from": "2:1",
+  "hands_off_to": "2:3",
+  "seam_score": 90,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Rhea"
+  ],
+  "cast_present_ids": [
+    "char_rhea"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [],
+  "required_in_custody": [
+    "ITEM_makeshift_masonry_bludgeon",
+    "ITEM_ash_fungus",
+    "ITEM_obsidian_shard",
+    "ITEM_cracked_smartphone"
+  ],
+  "required_scene_accessible": [
+    "ITEM_makeshift_masonry_bludgeon",
+    "ITEM_ash_fungus",
+    "ITEM_obsidian_shard",
+    "ITEM_cracked_smartphone"
+  ],
+  "required_visible_on_page": [
+    "ITEM_ash_fungus"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "continuous",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources",
+    "statuses"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Stamina",
+    "Gathering Tax",
+    "System Warning"
+  ]
+}

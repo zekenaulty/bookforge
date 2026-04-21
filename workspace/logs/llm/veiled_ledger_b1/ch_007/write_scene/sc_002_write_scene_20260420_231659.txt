@@ -1,0 +1,359 @@
+PROSE:
+The shattered doors seal behind them as the foyer locks down, trapping the party with regenerating guards and activating lethal compliance grids. Red lasers slice through the dusty air, forming a deadly, geometric web across the polished marble floor.
+
+Vance doesn't have time to catch his breath. The remains of the gilded construct he just smashed begin to twitch, the stamped metal folding back into place. The regenerating guard rises, its stamp-hammer swinging in a brutal arc. Vance brings up his Rebar, taking the kinetic force of the blow directly on his forearms.
+
+[HP: 10/150]
+
+He grunts, his blistered hands slipping on the iron. "Rhea! Little busy here!"
+
+"Working on it!" Rhea snaps. She turns to the heavy blast door blocking the corridor. A holographic terminal hovers beside it, glowing with a harsh, bureaucratic red.
+
+Unit 734 hovers over her shoulder, plumes of thick smoke venting from its metallic body. Despite its critical chassis failure, the drone extends a sparking interface cable into the terminal's port.
+
+[Chassis Integrity: 34%]
+[Warning: Critical System Failure Imminent.]
+
+The red lasers pause their sweep, and a new window projects directly into Rhea's vision.
+
+[Compliance Check Initiated.]
+[Inventory Audit required. Please deposit assets to clear the ledger.]
+
+"It wants a bribe," Rhea mutters, her chest heaving as the Exhaustion debuff makes her limbs feel like lead. "A literal paywall."
+
+Vance deflects another crushing blow from the guard, the impact dropping him to his knees. He is barely surviving the regenerating guard's attacks, his health bar flashing a critical, strobing red. 
+
+Rhea steps up to the terminal's physical deposit slot. She raises her right hand and shoves the Obsidian Shard into the grinding gears. 
+
+[Item Consumed: Obsidian Shard.]
+[Value Accepted. Audit Progress: 38%.]
+
+"Not enough!" Unit 734 whirs, its voice box crackling. "The ledger demands further liquidation!"
+
+Rhea frantically opens her system inventory. She can't risk the Null-Value Token or the Administrative Coordinate Chip. Instead, she dumps a stream of abstract junk data—cached error logs, corrupted metadata from the tollbooth, and a handful of untaxed copper credits. She physically throws her Cracked Smartphone and a piece of Scrap Parchment into the slot, watching the system devour them.
+
+[Assets Liquidated.]
+[Inventory Audit: Complete.]
+[Compliance Check: Passed.]
+
+The red laser grid fizzles out in a shower of sparks. The heavy blast door slides open with a pneumatic hiss. Rhea successfully bypasses the compliance checks, opening the path to the inner sanctum but sacrificing several pieces of looted gear.
+
+"Move!" Rhea yells, grabbing Vance by the shoulder as the regenerating guard winds up for another lethal swing.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_SANCTUM_INNER_CORRIDOR",
+    "open_threads": [
+      "rhea_survival",
+      "party_alliance"
+    ]
+  },
+  "inventory_alignment_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "inventory": [
+          {
+            "item": "ITEM_administrative_coordinate_chip",
+            "status": "stowed",
+            "container": "blazer_pocket_left"
+          },
+          {
+            "item": "ITEM_raw_data_packet",
+            "status": "stowed",
+            "container": "system_inventory"
+          },
+          {
+            "item": "ITEM_null_value_token",
+            "status": "held",
+            "container": "hand_left"
+          },
+          {
+            "item": "ITEM_obsidian_shard",
+            "status": "held",
+            "container": "hand_right"
+          },
+          {
+            "item": "ITEM_cracked_smartphone",
+            "status": "stowed",
+            "container": "blazer_pocket_left"
+          },
+          {
+            "item": "ITEM_scrap_parchment",
+            "status": "stowed",
+            "container": "blazer_pocket_left"
+          }
+        ],
+        "containers": [
+          {
+            "container": "blazer_pocket_left",
+            "owner": "rhea_mercer",
+            "contents": [
+              "ITEM_administrative_coordinate_chip",
+              "ITEM_cracked_smartphone",
+              "ITEM_scrap_parchment"
+            ]
+          },
+          {
+            "container": "system_inventory",
+            "owner": "rhea_mercer",
+            "contents": [
+              "ITEM_raw_data_packet"
+            ]
+          },
+          {
+            "container": "hand_left",
+            "owner": "rhea_mercer",
+            "contents": [
+              "ITEM_null_value_token"
+            ]
+          },
+          {
+            "container": "hand_right",
+            "owner": "rhea_mercer",
+            "contents": [
+              "ITEM_obsidian_shard"
+            ]
+          }
+        ]
+      },
+      "reason": "Bringing up junk items for sacrifice."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "state_tags": [
+          "consumed"
+        ]
+      }
+    },
+    {
+      "item_id": "ITEM_cracked_smartphone",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "state_tags": [
+          "consumed"
+        ]
+      }
+    },
+    {
+      "item_id": "ITEM_scrap_parchment",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "state_tags": [
+          "consumed"
+        ]
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "Sacrificed to compliance check"
+    },
+    {
+      "item_id": "ITEM_cracked_smartphone",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "Sacrificed to compliance check"
+    },
+    {
+      "item_id": "ITEM_scrap_parchment",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "Sacrificed to compliance check"
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 7,
+      "scene": 2,
+      "inventory": [
+        {
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed",
+          "container": "blazer_pocket_left"
+        },
+        {
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed",
+          "container": "system_inventory"
+        },
+        {
+          "item": "ITEM_null_value_token",
+          "status": "held",
+          "container": "hand_left"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_administrative_coordinate_chip"
+          ]
+        },
+        {
+          "container": "system_inventory",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_raw_data_packet"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_null_value_token"
+          ]
+        },
+        {
+          "container": "hand_right",
+          "owner": "rhea_mercer",
+          "contents": []
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Rhea successfully fed the compliance grid enough junk data to bypass the lock."
+      ]
+    },
+    {
+      "character_id": "vance_harrow",
+      "chapter": 7,
+      "scene": 2,
+      "inventory": [
+        {
+          "item": "ITEM_rebar",
+          "status": "held",
+          "container": "hand_right"
+        },
+        {
+          "item": "ITEM_copper_credits_vance",
+          "status": "stowed",
+          "container": "torn_pocket"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_rebar"
+          ]
+        },
+        {
+          "container": "torn_pocket",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_copper_credits_vance"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Vance barely survived the regenerating guard's attacks, proving his worth as a shield."
+      ]
+    },
+    {
+      "character_id": "unit_734",
+      "chapter": 7,
+      "scene": 2,
+      "inventory": [],
+      "containers": [],
+      "invariants_add": [],
+      "persona_updates": [
+        "Unit 734 assisted Rhea despite its critical chassis failure."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "stats": {
+          "hp": 10
+        },
+        "resources": {
+          "hp_current": 10
+        }
+      }
+    },
+    {
+      "character_id": "unit_734",
+      "set": {
+        "stats": {
+          "chassis_integrity": 34
+        }
+      }
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "The shattered doors sealed behind them as the foyer locked down. Vance barely held off a regenerating guard with 10 HP while Unit 734 interfaced with the terminal. Rhea sacrificed the Obsidian Shard and other junk data to bypass the compliance checks, opening the path to the inner sanctum."
+    ],
+    "key_events": [
+      "The foyer locked down, activating lethal compliance grids.",
+      "Vance defended against a regenerating guard, surviving on only 10 HP.",
+      "Unit 734 assisted Rhea by interfacing with the terminal despite critical chassis failure.",
+      "Rhea sacrificed the Obsidian Shard, Cracked Smartphone, and Scrap Parchment to satisfy the Inventory Audit.",
+      "The compliance checks were bypassed, opening the path to the inner sanctum."
+    ],
+    "must_stay_true": [
+      "mechanic: unit_734 has active status Hostile Environment Marker",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "mechanic: vance_harrow HP is 10/150",
+      "mechanic: rhea_mercer Stamina is 1/150",
+      "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+      "milestone: overseer_budget_discovered = DONE",
+      "milestone: administrative_hub_coordinates_acquired = DONE",
+      "milestone: administrative_hub_coordinates_decrypted = DONE",
+      "REMOVE: inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard, ITEM_administrative_coordinate_chip])",
+      "REMOVE: inventory: rhea_mercer -> Obsidian Shard (status=held, container=hand_right)",
+      "REMOVE: container: hand_right (owner=rhea_mercer, contents=[ITEM_obsidian_shard])",
+      "inventory: rhea_mercer -> Administrative Coordinate Chip (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+      "container: hand_right (owner=rhea_mercer, contents=[])",
+      "milestone: tollbooth_escape_completed = DONE",
+      "inventory: rhea_mercer -> Null-Value Token (status=held, container=hand_left)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_null_value_token])",
+      "milestone: null_value_token_crafted = DONE",
+      "milestone: sanctum_threshold_reached = DONE",
+      "mechanic: vance_harrow has active status Aggro Target",
+      "mechanic: unit_734 has active status Critical System Failure Imminent",
+      "milestone: compliance_checks_bypassed = DONE"
+    ],
+    "chapter_so_far_add": []
+  }
+}

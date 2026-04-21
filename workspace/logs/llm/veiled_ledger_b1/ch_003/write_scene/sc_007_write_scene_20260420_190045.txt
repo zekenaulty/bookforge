@@ -1,0 +1,208 @@
+PROSE:
+Vance and Unit 734 reviewed the restrictive contract syntax Rhea projected in the gloom of the Collapsed Transit Tunnel. The floating green text cast a sickly, phosphorescent light over Vance’s scarred face and the battered metallic chassis of the drone.
+
+"This is a suicide pact," Vance muttered, shifting the heavy Rebar resting on his shoulder. He pointed a grimy finger at section four of the projection. "You're waiving the standard friendly-fire indemnity. If I accidentally clip you with this during a fight, the System logs it as an intentional breach. The penalty is an immediate maximum HP default."
+
+"Then don't clip me," Rhea said. She stood with her arms crossed, the untaxed Copper Credits still clinking softly in her left hand. "The default Ledger contracts incentivize 'accidental' friendly fire so the surviving members can absorb the deceased's loot. I read the fine print. We're closing that loophole."
+
+Unit 734’s optical lens whirred, focusing and defocusing on the holographic parchment. "The unilateral reporting prohibition is highly irregular," the drone's synthesized voice buzzed, tinged with a clerk's bureaucratic disdain. "It explicitly prevents me from auditing your stamina exploit and reporting it to the local overseer for a bounty."
+
+"Exactly," Rhea said. "You want the untaxed copper? You want to survive the frontier node without bleeding out to the stamina tax? Then you sign away your right to rat me out."
+
+Vance scowled, looking at his own blinking health bar. He was barely holding together, the systemic shock and minor hemorrhage still fresh memories. He needed her exploit. The drone needed the untaxed throughput to meet its clerical quotas.
+
+[Party Contract: The Liability Accord]
+[Terms: Friendly-fire prohibited. Loot skimming prohibited. Unilateral reporting prohibited.]
+[Penalty for Breach: Immediate HP Default & Indenture Forfeiture.]
+[Awaiting Signatures: 1/3]
+
+Rhea had already signed. Her glowing blue signature sat at the bottom of the projection.
+
+"Fine," Vance spat. He reached out and pressed his thumb against the interface.
+
+[Signature Accepted: Vance Harrow.]
+[Awaiting Signatures: 2/3]
+
+Unit 734 let out a sound like a dying hard drive. A thin data-spike extended from its chassis, interfacing directly with the projection.
+
+[Signature Accepted: Unit 734.]
+
+The green text flashed blindingly white, collapsing into a dense orb of light before exploding outward in a shockwave of digital dust that washed over the three of them.
+
+[System Notification: Custom Liability Contract Accepted.]
+[Party Officially Formed.]
+[System Buff Applied: Mutual Assured Destruction (All party members share a 0% tolerance for internal damage).]
+
+Rhea exhaled, the tension in her shoulders dropping a fraction of an inch. She pocketed the Copper Credits, sliding them into her right blazer pocket next to her Cracked Smartphone. 
+
+"Alright," Rhea said, looking at her newly bound, legally terrified party members. "Let's go find out what else this node is hiding."
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+    "open_threads": [
+      "party_alliance",
+      "system_debt_trap"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "Vance and Unit 734 reviewed the restrictive custom party contract Rhea projected.",
+      "Despite balking at the strict liability clauses and lack of friendly-fire loopholes, they realized they needed her stamina exploit to survive.",
+      "Both Vance and Unit 734 signed the agreement, officially forming the party and binding them to the new terms."
+    ],
+    "key_events": [
+      "Vance and Unit 734 reviewed Rhea's custom contract.",
+      "Vance complained about the strict friendly-fire prohibition, while Unit 734 noted the irregular unilateral reporting ban.",
+      "Rhea leveraged her untaxed resource exploit to force their compliance.",
+      "Vance and Unit 734 provided their signatures to the System prompt.",
+      "The System accepted the custom contract, officially forming the party and applying the Mutual Assured Destruction buff.",
+      "Rhea stowed her Copper Credits in her right pocket."
+    ],
+    "must_stay_true": [
+      "injury: char_artie severe internal damage",
+      "injury: char_artie broken left arm",
+      "milestone: party_formed_rhea_vex_artie = DONE",
+      "mechanic: char_rhea has active status Party Leader",
+      "mechanic: char_artie has active status Party Member",
+      "mechanic: char_vex has active status Party Member",
+      "mechanic: char_rhea has 16 Copper Credits",
+      "mechanic: char_rhea Stamina is 38/100",
+      "milestone: vermin_control_completed = DONE",
+      "REMOVE: inventory: rhea_mercer -> Copper Credits (status=held, container=hand_left)",
+      "REMOVE: container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone])",
+      "REMOVE: container: hand_left (owner=rhea_mercer, contents=[ITEM_copper_credits])",
+      "inventory: rhea_mercer -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Ash Fungus (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus])",
+      "inventory: vance_harrow -> Rebar (status=held, container=shoulder)",
+      "container: shoulder (owner=vance_harrow, contents=[ITEM_rebar])",
+      "milestone: custom_party_contract_signed = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Vance and Unit 734 signed Rhea's restrictive custom liability contract, officially forming a party bound by strict non-aggression and no-skimming rules."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "inventory": [
+        {
+          "item": "ITEM_copper_credits",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_scavenger_carapaces",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_ash_fungus",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": []
+        },
+        {
+          "container": "blazer_pocket_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_cracked_smartphone",
+            "ITEM_copper_credits"
+          ]
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_scavenger_carapaces",
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "statuses": [
+          {
+            "name": "Party Leader",
+            "source": "Custom Party Contract",
+            "active": true
+          },
+          {
+            "name": "Mutual Assured Destruction",
+            "source": "Custom Party Contract",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "statuses": [
+          {
+            "name": "Party Member",
+            "source": "Custom Party Contract",
+            "active": true
+          },
+          {
+            "name": "Mutual Assured Destruction",
+            "source": "Custom Party Contract",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "character_id": "unit_734",
+      "set": {
+        "statuses": [
+          {
+            "name": "Party Member",
+            "source": "Custom Party Contract",
+            "active": true
+          },
+          {
+            "name": "Mutual Assured Destruction",
+            "source": "Custom Party Contract",
+            "active": true
+          }
+        ]
+      }
+    }
+  ]
+}

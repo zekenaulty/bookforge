@@ -1,0 +1,42 @@
+Trapped under the crushing physical weight of the unallocated rewards, the party struggled to breathe as the refund storm intensified. The sky above the Outpost Surface was glitching into a violent purple, tearing at the seams as the 14.3% withheld value rained down in a localized, apocalyptic payout.
+
+A jagged block of crystallized experience slammed into the dirt inches from Rhea’s knee. The sheer kinetic force of the audit was deafening. Her Stamina was critically low, sitting at a miserable 2/100, and every breath felt like inhaling ground glass. Beside her, Vance was in worse shape. He had just tried to block a falling XP shard with his Rebar, and the concussive damage had dropped his HP to a terrifying 2/100. 
+
+"If a copper piece hits me in the head, I'm dead!" Vance roared over the din, clutching his blistered hands around his weapon. 
+
+[System Notification: Administrative Refund Processing.]
+[Warning: Unallocated Value Exceeds Physical Capacity. Crushing Damage Imminent.]
+
+"It's a bureaucratic avalanche!" Rhea shouted, swiping frantically at the blue boxes materializing in front of her face. "The System doesn't have a queue for this much back-pay! It's just dropping it on our heads!"
+
+[Experience Threshold Met. Level Up x3.]
+[+15 Free Attribute Points available.]
+
+A heavy iron ingot materialized out of thin air, dropping directly onto Rhea's shoulder. She gasped, her knees buckling under the sudden mass. Her singed arm hair stood on end as the static electricity of raw, unprocessed data washed over them. 
+
+"Allocate your stats!" Rhea screamed, pulling up her character sheet. "Dump it all into Strength and Vitality! We need the encumbrance limit!"
+
+"I'm a finesse build!" Vance protested, dodging a shower of untaxed copper credits that hit the ground like buckshot. 
+
+"You're a dead build if you don't!" Rhea snapped. 
+
+She didn't hesitate. Survival was just an arithmetic problem, and right now, the math demanded mass. She grabbed the slider for Strength and shoved it forward.
+
+[Strength: 10 -> 20]
+[Vitality: 10 -> 15]
+[Encumbrance Limit Increased: 150kg -> 350kg]
+
+The change was instantaneous. The crushing weight on her shoulders lessened, her muscle fibers hardening just enough to push back against the physical pressure of the loot. She gasped in a breath, her Stamina ticking up slightly to 5/150 as her maximum threshold expanded, though she still hovered dangerously near empty. 
+
+[Inventory Capacity Exceeded. Auto-Stow Failed.]
+
+"Inventory space!" Rhea yelled, watching a pile of glowing pelts and heavy iron ingots threaten to bury Vance. "It's trying to physically manifest what we can't carry!"
+
+Vance cursed, his fingers flying across his own interface. He glowed faintly as his level-up processed, his HP ticking up to 15/150—just enough to pull him out of the critical red zone. "I'm expanding my slots! It costs a hundred copper!"
+
+"Loot the ground first!" Rhea ordered. She scooped up a handful of the untaxed copper credits that had just pelted her, her balance skyrocketing past the fee threshold. She rapidly purchased three new rows of system inventory and furiously tapped 'Loot All' on the immediate vicinity. 
+
+[Inventory Slot 5: Heavy Iron Ingot x4]
+[Inventory Slot 6: Crystallized Experience x12]
+
+The physical pile around them vanished into the digital ether, giving them exactly one square meter of breathing room. Rhea and Vance managed to allocate just enough stats and inventory space to keep from being crushed, though the storm still raged around them, the violent purple sky raining endless bureaucratic vengeance.

@@ -1,0 +1,239 @@
+COMPLIANCE:
+Scene ID: SC_007_003
+Allowed events: Survive automated turrets, reach inner office, confront overseer.
+Forbidden milestones: overseer_budget_discovered, administrative_hub_coordinates_acquired, administrative_hub_coordinates_decrypted, tollbooth_escape_completed, null_value_token_crafted, sanctum_threshold_reached, compliance_check_bypassed
+
+Current arm-side / inventory facts: 
+- inventory: rhea_mercer -> Null-Value Token (status=held, container=hand_left)
+- inventory: rhea_mercer -> Obsidian Shard (status=held, container=hand_right)
+- inventory: vance_harrow -> Rebar (status=held, container=hand_right)
+
+Durable changes committed: 
+- vance_harrow HP decreased to 8.
+- unit_734 Chassis Integrity decreased to 29%.
+- milestone: inner_office_breached = DONE
+- milestone: overseer_confronted = DONE
+
+APPEARANCE_CHECK:
+- rhea_mercer: singed hair
+- vance_harrow: blistered hands
+- unit_734: smoking chassis
+
+PROSE:
+The heavy blast doors hissed open, revealing the polished stone of the Audit Corridor lined with automated turrets. 
+
+The brass-plated guns didn't hesitate. They swiveled in unison, locking onto the intruders with a chorus of mechanical clicks. Glowing red bolts of energy flooded the hallway.
+
+[Warning: Cease and Desist Protocols Engaged.]
+
+Vance stepped into the kill box first. His blistered hands tightened around his Rebar, swinging the heavy iron in a desperate arc to bat away the incoming fire. The bolts that slipped past his guard slammed into his chest, erupting in sparks of administrative denial. 
+
+[Vance Harrow HP: 8/100]
+
+Unit 734 hovered dangerously low to the ground behind him, its smoking chassis venting thick gray clouds that smelled of melting copper and ozone. 
+
+[Unit 734 Chassis Integrity: 29%]
+[Critical System Failure Imminent]
+
+"Keep moving!" Rhea shouted over the deafening hum of the turrets. She stayed perfectly aligned behind Vance’s broad back, her singed hair whipping around her face. Her Stamina was entirely bottomed out, the system screaming about her Exhaustion status, but adrenaline was a hell of a secondary resource. She clutched the Null-Value Token tightly in her left hand, her right hand white-knuckling the Obsidian Shard. 
+
+Vance roared, bulldozing forward. He took another glancing hit to the shoulder but refused to slow down, using the Rebar to smash the nearest wall-mounted turret into a shower of sparks. The corridor narrowed. The polished stone floor grew slick with the drone's leaking coolant. 
+
+At the end of the hall, a set of towering mahogany double doors stood between them and the architect of their misery. 
+
+Rhea didn't slow down. As Vance peeled off to smash a final turret, she lunged forward, planted her boot against the polished wood, and kicked the mahogany double doors entirely off their hinges. She stepped over the splintered wood, her chest heaving, and stared down the overseer sitting behind his massive obsidian desk.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "location": "LOC_SANCTUM_OVERSEER_OFFICE",
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "open_threads": [
+      "rhea_survival",
+      "party_alliance",
+      "system_debt_trap"
+    ]
+  },
+  "character_continuity_system_updates": [
+    {
+      "character_id": "vance_harrow",
+      "delta": {
+        "stats": {
+          "hp": -2
+        },
+        "resources": {
+          "hp_current": -2
+        }
+      },
+      "reason": "Vance took damage from the automated turrets."
+    },
+    {
+      "character_id": "unit_734",
+      "delta": {
+        "stats": {
+          "chassis_integrity": -5
+        }
+      },
+      "reason": "Unit 734 took collateral damage in the corridor."
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 7,
+      "scene": 3,
+      "persona_updates": [
+        "Rhea has breached the inner office and is ready to confront the overseer directly."
+      ],
+      "inventory": [
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed"
+        },
+        {
+          "container": "system_inventory",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "hand_left",
+          "item": "ITEM_null_value_token",
+          "status": "held"
+        },
+        {
+          "container": "hand_right",
+          "item": "ITEM_obsidian_shard",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_left",
+          "contents": [
+            "ITEM_administrative_coordinate_chip"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "system_inventory",
+          "contents": [
+            "ITEM_raw_data_packet"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "hand_left",
+          "contents": [
+            "ITEM_null_value_token"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_obsidian_shard"
+          ],
+          "owner": "rhea_mercer"
+        }
+      ],
+      "invariants_add": []
+    },
+    {
+      "character_id": "vance_harrow",
+      "chapter": 7,
+      "scene": 3,
+      "persona_updates": [
+        "Vance sacrificed the last of his HP buffer to act as a shield, trusting Rhea to finish the job."
+      ],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_rebar",
+          "status": "held"
+        },
+        {
+          "container": "torn_pocket",
+          "item": "ITEM_copper_credits_vance",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_rebar"
+          ],
+          "owner": "vance_harrow"
+        },
+        {
+          "container": "torn_pocket",
+          "contents": [
+            "ITEM_copper_credits_vance"
+          ],
+          "owner": "vance_harrow"
+        }
+      ],
+      "invariants_add": []
+    },
+    {
+      "character_id": "unit_734",
+      "chapter": 7,
+      "scene": 3,
+      "persona_updates": [
+        "Unit 734 is actively failing, leaking coolant and venting smoke as its chassis integrity drops to critical levels."
+      ],
+      "inventory": [],
+      "containers": [],
+      "invariants_add": []
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "The party sprinted down the Audit Corridor, dodging 'cease and desist' bolts from automated turrets.",
+      "Vance used his Rebar to shield the group, taking further damage as his HP dropped to critical levels.",
+      "Rhea pushed through the barrage and kicked open the mahogany double doors, confronting the overseer in his inner office."
+    ],
+    "key_events": [
+      "The blast doors opened to reveal automated turrets firing cease and desist bolts.",
+      "Vance tanked the turret fire using his Rebar, dropping to 8 HP.",
+      "Unit 734 suffered further chassis damage, dropping to 29% integrity.",
+      "Rhea kicked down the double doors to the inner office, confronting the overseer."
+    ],
+    "must_stay_true": [
+      "REMOVE: mechanic: vance_harrow HP is 10/100",
+      "REMOVE: mechanic: unit_734 Chassis Integrity is 34%",
+      "mechanic: vance_harrow HP is 8/100",
+      "mechanic: unit_734 Chassis Integrity is 29%",
+      "milestone: inner_office_breached = DONE",
+      "milestone: overseer_confronted = DONE",
+      "mechanic: rhea_mercer Stamina is 1/150",
+      "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+      "milestone: overseer_budget_discovered = DONE",
+      "milestone: administrative_hub_coordinates_acquired = DONE",
+      "milestone: administrative_hub_coordinates_decrypted = DONE",
+      "inventory: rhea_mercer -> Administrative Coordinate Chip (status=stowed, container=blazer_pocket_left)",
+      "milestone: tollbooth_escape_completed = DONE",
+      "inventory: rhea_mercer -> Null-Value Token (status=held, container=hand_left)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_null_value_token])",
+      "milestone: null_value_token_crafted = DONE",
+      "milestone: sanctum_threshold_reached = DONE",
+      "mechanic: vance_harrow has active status Aggro Target",
+      "mechanic: unit_734 has active status Critical System Failure Imminent",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+      "inventory: rhea_mercer -> Obsidian Shard (status=held, container=hand_right)",
+      "container: hand_right (owner=rhea_mercer, contents=[ITEM_obsidian_shard])",
+      "milestone: compliance_check_bypassed = DONE"
+    ],
+    "chapter_so_far_add": [
+      "The party survived the Audit Corridor's automated turrets, with Vance tanking the damage.",
+      "Rhea breached the inner office, confronting the local overseer directly."
+    ]
+  }
+}

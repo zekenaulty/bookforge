@@ -1,0 +1,29 @@
+The party remained standing in the gray dirt of the Ash Thickets as Rhea immediately turned and demanded the raw historical data from Unit 734. Vance leaned against a petrified root, his Rebar resting over his shoulder as he wiped boar blood from his face, while the drone hovered nervously, its optical sensor whirring.
+
+"I need the last fifty local quest logs," Rhea said, tapping the head of her Makeshift Masonry Bludgeon against the ground. "Project them against that tree."
+
+"Query: Authorization?" Unit 734 buzzed, its chassis dipping defensively. "Historical telemetry is restricted to local administrative oversight."
+
+"We are a registered party under a custom liability contract," Rhea shot back, leaning in. "Clause four, subsection B. Full transparency of operational hazards. The local skim is a hazard. Project it."
+
+The drone emitted a sound like grinding gears before complying. A green holographic window snapped into existence against a charred tree trunk.
+
+[Historical Log 41: Vermin Control (Local). Base Yield: 1000 XP. Actual Payout: 857 XP.]
+
+[Historical Log 42: Foraging (Minor). Base Yield: 500 XP. Actual Payout: 428.5 XP.]
+
+[Historical Log 43: Perimeter Defense. Base Yield: 2000 XP. Actual Payout: 1714 XP.]
+
+Rhea knelt by the roots of the tree, snatching up a loose piece of scrap parchment that had blown into the thicket from a previous dead arrival, and snapped a charcoal stick off a nearby burned branch. She started scribbling furiously, cross-referencing the projected loot yields against the raw System formulas she had memorized from the contract screen.
+
+"Every single one," Rhea muttered, her charcoal stick snapping against the parchment. "It's exactly 14.3 percent. Across the board. XP, copper, crafting materials. The system isn't glitching. It's taxing us silently."
+
+"So the house always wins," Vance said, shifting his grip on the Rebar. "What else is new?"
+
+"The house is supposed to post its odds," Rhea said, standing up and rolling the document tight. "This isn't a tax. It's a leak. Someone is manually routing the deficit."
+
+Unit 734’s optical lens dilated. 
+
+[Warning: Accusations of administrative fraud carry a penalty of immediate indenture.]
+
+"Only if we can't prove it," Rhea said. Armed with the undeniable proof on the scrap parchment, the party prepared to hike back out of the thickets toward the Outpost Kiosk.

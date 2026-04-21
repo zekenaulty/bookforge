@@ -1,0 +1,231 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "chapter": 8,
+      "character_id": "rhea_mercer",
+      "scene": 1,
+      "set": {
+        "reason": "Stamina remains at 0.",
+        "stats": {
+          "stamina": 0,
+          "stamina_max": 150
+        },
+        "statuses": [
+          {
+            "active": true,
+            "name": "Exhaustion (Severe)",
+            "source": "Low Stamina"
+          }
+        ]
+      }
+    },
+    {
+      "chapter": 8,
+      "character_id": "vance_harrow",
+      "scene": 1,
+      "set": {
+        "reason": "HP remains at 2.",
+        "stats": {
+          "hp": 2,
+          "hp_max": 100,
+          "rebar_durability_percent": 58
+        },
+        "statuses": [
+          {
+            "active": true,
+            "name": "Heavy Blunt-Force Trauma",
+            "source": "Stamp-Hammer"
+          }
+        ]
+      }
+    },
+    {
+      "chapter": 8,
+      "character_id": "unit_734",
+      "scene": 1,
+      "set": {
+        "reason": "Chassis integrity remains at 34%.",
+        "stats": {
+          "chassis_integrity": 34
+        },
+        "statuses": [
+          {
+            "active": true,
+            "name": "Critical System Failure Imminent",
+            "source": "Chassis Degradation"
+          }
+        ]
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 8,
+      "character_id": "rhea_mercer",
+      "containers": [
+        {
+          "container": "hand_left",
+          "contents": [
+            "ITEM_mercy_cache_coordinates"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "hand_right",
+          "contents": [],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "contents": [
+            "ITEM_administrative_coordinate_chip",
+            "ITEM_raw_data_packet",
+            "ITEM_null_value_token",
+            "ITEM_administrative_residue_token"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "system_inventory",
+          "contents": [],
+          "owner": "rhea_mercer"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_null_value_token",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_administrative_residue_token",
+          "status": "stowed"
+        },
+        {
+          "container": "hand_left",
+          "item": "ITEM_mercy_cache_coordinates",
+          "status": "held"
+        }
+      ],
+      "persona_updates": [
+        "Rhea pushed through severe exhaustion to secure the vault access."
+      ],
+      "scene": 1
+    },
+    {
+      "chapter": 8,
+      "character_id": "vance_harrow",
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_rebar"
+          ],
+          "owner": "vance_harrow"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_rebar",
+          "status": "held"
+        }
+      ],
+      "persona_updates": [
+        "Vance used his last ounce of strength to clear the path to the terminal."
+      ],
+      "scene": 1
+    },
+    {
+      "chapter": 8,
+      "character_id": "unit_734",
+      "containers": [],
+      "invariants_add": [],
+      "inventory": [],
+      "persona_updates": [
+        "Unit 734 identified the hidden terminal despite its critical damage."
+      ],
+      "scene": 1
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "reason": "Timer stopped at 6s as the vault opened.",
+      "set": {
+        "frontier_zone_purge_timer": 6
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [],
+    "key_events": [
+      "The party survived the structural collapse of the Inner Office.",
+      "Rhea inputted the Mercy Cache Coordinates into the hidden terminal.",
+      "The Mercy Cache vault opened successfully."
+    ],
+    "last_scene": [
+      "With the feral overseer deleted and the node collapsing, the party scrambled to find the vault before the 30-second purge timer hit zero.",
+      "Rhea, suffering from zero stamina, forced herself to the wall terminal revealed by Vance.",
+      "She inputted the Mercy Cache Coordinates just as the countdown reached 6 seconds.",
+      "The hidden vault opened, revealing the Mercy Cache as the ceiling caved in."
+    ],
+    "must_stay_true": [
+      "milestone: compliance_checks_bypassed = DONE",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "milestone: inner_office_breached = DONE",
+      "container: system_inventory (owner=rhea_mercer, contents=[])",
+      "milestone: debt_lock_applied = DONE",
+      "milestone: formal_dispute_initiated = DONE",
+      "mechanic: rhea_mercer Stamina is 0/150",
+      "milestone: catastrophic_default_triggered = DONE",
+      "milestone: overseer_shields_stripped = DONE",
+      "inventory: rhea_mercer -> Raw Data Packet (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Null-Value Token (status=stowed, container=blazer_pocket_left)",
+      "container: hand_right (owner=rhea_mercer, contents=[])",
+      "mechanic: vance_harrow Rebar Durability is 58%",
+      "milestone: feral_overseer_defeated = DONE",
+      "milestone: debt_lock_removed = DONE",
+      "inventory: rhea_mercer -> Administrative Residue Token (status=stowed, container=blazer_pocket_left)",
+      "REMOVE: inventory: rhea_mercer -> Mercy Cache Coordinates (status=stowed, container=blazer_pocket_left)",
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip, ITEM_raw_data_packet, ITEM_null_value_token, ITEM_mercy_cache_coordinates, ITEM_administrative_residue_token])",
+      "REMOVE: container: hand_left (owner=rhea_mercer, contents=[])",
+      "inventory: rhea_mercer -> Mercy Cache Coordinates (status=held, container=hand_left)",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_mercy_cache_coordinates])",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip, ITEM_raw_data_packet, ITEM_null_value_token, ITEM_administrative_residue_token])",
+      "milestone: mercy_cache_vault_opened = DONE"
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_MERCY_CACHE_VAULT",
+    "open_threads": [
+      "rhea_survival",
+      "party_alliance",
+      "system_debt_trap"
+    ],
+    "recent_facts": [
+      "The party survived the collapse of the Inner Office.",
+      "Rhea successfully used the Mercy Cache Coordinates at the wall terminal.",
+      "The hidden vault opened just before the Frontier Zone Purge timer expired."
+    ]
+  }
+}

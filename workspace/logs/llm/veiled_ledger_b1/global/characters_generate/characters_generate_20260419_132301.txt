@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "characters": [
+    {
+      "character_id": "char_rhea",
+      "name": "Rhea",
+      "pronouns": "she/her",
+      "role": "protagonist",
+      "persona": {
+        "core_traits": [
+          "cynical",
+          "pragmatic",
+          "detail-oriented",
+          "stubborn"
+        ],
+        "motivations": [
+          "survive the tutorial",
+          "find a loophole in the Ledger's terms of service",
+          "void her indenture debt"
+        ],
+        "fears": [
+          "crushing weight",
+          "bureaucratic traps",
+          "loss of autonomy",
+          "dying a second time"
+        ],
+        "values": [
+          "exactness",
+          "independence",
+          "fair exchanges"
+        ],
+        "voice_notes": [
+          "dry, deadpan internal monologue",
+          "uses corporate, legal, and mathematical terminology",
+          "treats magical horrors like HR violations"
+        ],
+        "arc_hint": "Will evolve from a victim of a cosmic clerical error to a master exploiter of the System's fine print."
+      },
+      "appearance_base": {
+        "summary": "A disheveled woman in her late twenties wearing ruined business casual attire, covered in ash and sporting a glowing indenture mark.",
+        "atoms": {
+          "species": "human",
+          "sex_presentation": "female",
+          "age_band": "late twenties",
+          "height_band": "average",
+          "build": "slender",
+          "hair_color": "black",
+          "hair_style": "messy bob",
+          "eye_color": "dark brown",
+          "skin_tone": "pale"
+        },
+        "marks": [
+          {
+            "name": "System Indenture Brand",
+            "location": "left wrist",
+            "durability": "durable"
+          }
+        ],
+        "alias_map": {
+          "hair_color": [
+            "dark",
+            "raven"
+          ],
+          "eye_color": [
+            "brown",
+            "dark"
+          ]
+        }
+      },
+      "character_continuity_system_state": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 100
+          },
+          "mp": {
+            "current": 10,
+            "max": 10
+          },
+          "stamina": {
+            "current": 5,
+            "max": 50
+          }
+        },
+        "skills": {
+          "contract_analysis": 1
+        },
+        "titles": [
+          {
+            "name": "Indentured Soul",
+            "source": "system_onboarding",
+            "active": true
+          }
+        ],
+        "resources": {
+          "soul_debt": {
+            "current": 100000,
+            "max": 100000
+          }
+        },
+        "statuses": [
+          {
+            "name": "Tutorial Grace Period",
+            "duration": "00:05:00",
+            "effect": "Prevents fatal impact damage."
+          },
+          {
+            "name": "Pinned",
+            "duration": "permanent",
+            "effect": "Immobilized until debris is removed."
+          }
+        ]
+      },
+      "inventory": [
+        {
+          "item_id": "ITEM_cracked_smartphone",
+          "item_name": "Cracked Smartphone",
+          "status": "stowed",
+          "container": "blazer_pocket_right"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_right",
+          "owner": "char_rhea",
+          "location": "torso",
+          "contents": [
+            "ITEM_cracked_smartphone"
+          ]
+        }
+      ],
+      "invariants": [
+        "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+        "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+        "injury: char_rhea pinned under debris"
+      ]
+    }
+  ]
+}

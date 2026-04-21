@@ -1,0 +1,26 @@
+The violent storm of physical XP and loot finally subsides, leaving the party in a crater of their own refunded wealth. The sky above the Outpost Surface faded from a glitching, hostile purple back to a dull, indifferent gray. 
+
+Rhea Mercer lay on her back in the dirt, staring up at the empty sky. Her chest heaved, the noticeably singed hair on both of her arms scraping against the ash. The violent physical nature of the XP refund had nearly killed them. If she hadn't executed an emergency stat allocation, dumping every available point into Strength and Vitality, the sheer mass of the back-pay would have crushed her ribcage. 
+
+[Level: 7]
+[Strength: 20]
+[Vitality: 15]
+[Encumbrance Limit: 350]
+[Stamina: 5/150]
+
+"Is it over?" Vance Harrow rasped. He was slumped against a jagged slab of concrete, his chest rising and falling in shallow, painful hitches. The prominent, durable blisters covering his hands looked raw as he white-knuckled his Rebar. He had spent the last three minutes surviving a near-death experience, using that piece of rusted metal to block a massive, concussive shard of crystallized experience that had tried to take his head off.
+
+[Level: 7]
+[HP: 15/150]
+
+"It's over," Rhea confirmed, sitting up slowly. She opened her interface, verifying that the Heavy Iron Ingot and the remaining Crystallized Experience were safely tucked away in her newly expanded system inventory. The Raw Data Packet sat right beside them, its durability meter stabilized. 
+
+Unit 734 hovered nearby, its smoking chassis continuously venting plumes of thick, acrid smoke from its overworked cooling ports. 
+
+[Efficiency: 12]
+
+"We just leveled up by getting beaten half to death by a spreadsheet," Vance muttered, using the Rebar to push himself upright. 
+
+"We forced a payout," Rhea corrected, wiping soot from her forehead. "The local node couldn't process the debt imbalance, so it purged the withheld value physically."
+
+She looked toward the administrative spire looming in the distance. The klaxons had stopped, but the silence felt infinitely more dangerous. The system knew exactly what they had done. Surrounded by their newly acquired wealth, the party braces for the inevitable retaliation from the overseer.

@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "char_rhea"
+    ],
+    "location": "LOC_ASH_CHOKED_FOREST",
+    "open_threads": []
+  },
+  "summary_update": {
+    "last_scene": [
+      "Rhea managed her 0 Stamina / 1 HP state by waiting for minimal stamina regeneration to avoid fatal HP drain.",
+      "She herded an ash-crusted scavenger under a deadfall trap using a thrown stone.",
+      "Using gravity instead of a stamina-draining attack, she struck a petrified tree with her Makeshift Masonry Bludgeon.",
+      "The resulting debris crushed the scavenger and dropped untaxed resources, proving her physics exploit worked."
+    ],
+    "key_events": [
+      "Rhea waited for micro-regenerations of stamina before taking any action to avoid HP drain.",
+      "She stowed her Ash-Fungus to free her left hand.",
+      "She herded the scavenger under a precarious petrified branch using a thrown stone.",
+      "She triggered the deadfall by letting her heavy bludgeon fall against the tree, avoiding an exertion penalty.",
+      "The falling debris crushed the scavenger and dropped untaxed loot."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: char_rhea -> Ash-Fungus (status=held, container=hand_left)",
+      "REMOVE: container: hand_left (owner=char_rhea, contents=[ITEM_ash_fungus])",
+      "REMOVE: container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard])",
+      "inventory: char_rhea -> Ash-Fungus (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+      "milestone: physics_exploit_successful = DONE",
+      "mechanic: char_rhea HP is 1/100",
+      "mechanic: char_rhea Stamina is 0/100",
+      "mechanic: char_rhea has active status Exhaustion",
+      "mechanic: char_rhea has active status Tutorial Grace Period"
+    ],
+    "chapter_so_far_add": []
+  },
+  "character_updates": [
+    {
+      "character_id": "char_rhea",
+      "chapter": 2,
+      "scene": 4,
+      "inventory": [
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_ash_fungus",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_makeshift_masonry_bludgeon",
+          "container": "hand_right",
+          "status": "equipped"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_cracked_smartphone"
+          ]
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus"
+          ]
+        },
+        {
+          "container": "hand_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_makeshift_masonry_bludgeon"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "char_rhea",
+          "contents": []
+        }
+      ],
+      "persona_updates": [
+        "Rhea successfully executes a physics exploit, proving that the System's logic can be bypassed by using environmental collisions instead of direct attacks."
+      ],
+      "invariants_add": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "char_rhea",
+      "set": {
+        "stats": {
+          "xp": {
+            "current": 15
+          }
+        },
+        "reason": "Gained XP from defeating the scavenger via environmental kill."
+      },
+      "remove": [],
+      "delta": {},
+      "chapter": 2,
+      "scene": 4
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "char_rhea",
+      "set": {
+        "inventory.ITEM_ash_fungus.container": "blazer_pocket_left",
+        "inventory.ITEM_ash_fungus.status": "stowed"
+      },
+      "reason": "Stowed the fungus to free a hand for throwing a stone."
+    }
+  ]
+}

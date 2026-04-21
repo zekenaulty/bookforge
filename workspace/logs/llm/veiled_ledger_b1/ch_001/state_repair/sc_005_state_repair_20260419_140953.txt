@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "Rhea examined the locked Starter Cache pedestal and realized it was made of physical System materials.",
+      "She found an Obsidian Shard in the dirt and used it to chip away at the pedestal's base.",
+      "By breaking off a Raw Masonry Chunk through physical force, she bypassed the System's predatory contract."
+    ],
+    "key_events": [
+      "Rhea searched the debris around the locked pedestal for a tool.",
+      "She discovered and picked up an Obsidian Shard.",
+      "She used the shard to strike the glowing stone of the pedestal.",
+      "She successfully broke off a Raw Masonry Chunk without triggering a System contract."
+    ],
+    "must_stay_true": [
+      "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+      "inventory: char_rhea -> Obsidian Shard (status=held, container=hand_left)",
+      "container: hand_left (owner=char_rhea, contents=[ITEM_obsidian_shard])",
+      "inventory: char_rhea -> Raw Masonry Chunk (status=held, container=hand_right)",
+      "container: hand_right (owner=char_rhea, contents=[ITEM_raw_masonry_chunk])",
+      "mechanic: char_rhea HP is 1/100",
+      "mechanic: char_rhea has active status Tutorial Grace Period",
+      "mechanic: char_rhea has active title Indentured Soul",
+      "mechanic: char_rhea has 100,000 Soul Debt",
+      "injury: char_rhea bruised left leg",
+      "milestone: starter_cache_discovered = DONE",
+      "milestone: starter_cache_rejected = DONE",
+      "milestone: pedestal_chipped = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Rhea realized the locked Starter Cache pedestal was made of physical materials.",
+      "She found an Obsidian Shard and used it to break off a Raw Masonry Chunk, bypassing the System's contract."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "char_rhea",
+      "scene": 5,
+      "chapter": 1,
+      "persona_updates": [],
+      "invariants_add": [
+        "inventory: char_rhea -> Obsidian Shard (status=held, container=hand_left)",
+        "container: hand_left (owner=char_rhea, contents=[ITEM_obsidian_shard])",
+        "inventory: char_rhea -> Raw Masonry Chunk (status=held, container=hand_right)",
+        "container: hand_right (owner=char_rhea, contents=[ITEM_raw_masonry_chunk])",
+        "milestone: pedestal_chipped = DONE"
+      ],
+      "inventory": [
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_raw_masonry_chunk",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_cracked_smartphone"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_obsidian_shard"
+          ]
+        },
+        {
+          "container": "hand_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_raw_masonry_chunk"
+          ]
+        }
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "set": {
+        "name": "Obsidian Shard",
+        "display_name": "Obsidian Shard",
+        "type": "material",
+        "owner_scope": "world",
+        "custodian": "world",
+        "linked_threads": [],
+        "state_tags": [
+          "sharp"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 5,
+          "location": "LOC_TUTORIAL_CRATER_RIDGE"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_raw_masonry_chunk",
+      "set": {
+        "name": "Raw Masonry Chunk",
+        "display_name": "Raw Masonry Chunk",
+        "type": "material",
+        "owner_scope": "world",
+        "custodian": "world",
+        "linked_threads": [],
+        "state_tags": [
+          "warm"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 5,
+          "location": "LOC_TUTORIAL_CRATER_RIDGE"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "char_rhea"
+      },
+      "reason": "Picked up from the dirt."
+    },
+    {
+      "item_id": "ITEM_raw_masonry_chunk",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "char_rhea"
+      },
+      "reason": "Broken off the pedestal."
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "char_rhea"
+    ],
+    "location": "LOC_TUTORIAL_CRATER_RIDGE",
+    "open_threads": [],
+    "recent_facts": []
+  }
+}

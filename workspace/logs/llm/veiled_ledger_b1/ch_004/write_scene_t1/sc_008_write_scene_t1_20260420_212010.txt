@@ -1,0 +1,260 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "location": "LOC_MAINTENANCE_TRENCHES",
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "open_threads": [
+      "system_debt_trap",
+      "rhea_survival"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "The terminal's automated sweep attempted to purge the Raw Data Packet from Rhea's inventory.",
+      "Rhea used the custom party contract to designate the data as a shared Soul-Bound Liability.",
+      "Vance and Unit 734 confirmed the override, locking the crystal safely into Rhea's unalterable system inventory.",
+      "The stolen administrative logs were secured from the local overseer's reach."
+    ],
+    "key_events": [
+      "The system initiated a Reclaim Purge to delete the Raw Data Packet.",
+      "Rhea accessed the Party Contract UI to exploit the Shared Debt and Liabilities clause.",
+      "Rhea flagged the Raw Data Packet as a Soul-Bound Liability under the Mutual Assured Destruction parameters.",
+      "Vance and Unit 734 confirmed the liability transfer.",
+      "The system accepted the liability, freezing the item's durability at 1%.",
+      "The Raw Data Packet was locked into Rhea's personal system inventory, safe from deletion."
+    ],
+    "must_stay_true": [
+      "mechanic: unit_734 has active status Mutual Assured Destruction",
+      "mechanic: vance_harrow has active status Party Member",
+      "mechanic: unit_734 has active status Party Member",
+      "milestone: vermin_control_completed = DONE",
+      "mechanic: rhea_mercer has 71 Copper Credits",
+      "mechanic: vance_harrow has 65 Copper Credits",
+      "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+      "mechanic: vance_harrow HP is 3/100",
+      "inventory: vance_harrow -> Rebar (status=stowed, container=belt_loop)",
+      "container: belt_loop (owner=vance_harrow, contents=[ITEM_rebar])",
+      "container: hand_right (owner=vance_harrow, contents=[])",
+      "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+      "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+      "mechanic: rhea_mercer Stamina is 2/100",
+      "mechanic: unit_734 Efficiency is 12",
+      "REMOVE: inventory: rhea_mercer -> Raw Data Packet (status=held, container=hand_left)",
+      "REMOVE: container: hand_left (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+      "inventory: rhea_mercer -> Raw Data Packet (status=stowed, container=system_inventory)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "mechanic: rhea_mercer has active status Soul-Bound Liability: Raw Data Packet",
+      "mechanic: vance_harrow has active status Soul-Bound Liability: Raw Data Packet",
+      "mechanic: unit_734 has active status Soul-Bound Liability: Raw Data Packet",
+      "milestone: data_packet_bound = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Rhea identified a 14.3% deficit in quest rewards, proving a systemic mathematical fraud.",
+      "The party traced the missing value to a physical server terminal in the Maintenance Trenches.",
+      "Rhea extracted the Raw Data Packet containing the skim logs just as the terminal purged its memory.",
+      "To prevent the system from deleting the evidence, Rhea bound the Raw Data Packet as a Soul-Bound Liability to the party, securing the proof of the Overseer's fraud."
+    ],
+    "story_so_far_add": [
+      "Rhea identified a 14.3% deficit in quest rewards, proving a systemic mathematical fraud.",
+      "The party traced the missing value to a physical server terminal in the Maintenance Trenches.",
+      "Rhea extracted the Raw Data Packet containing the skim logs just as the terminal purged its memory.",
+      "To prevent the system from deleting the evidence, Rhea bound the Raw Data Packet as a Soul-Bound Liability to the party, securing the proof of the Overseer's fraud."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 4,
+      "scene": 8,
+      "invariants_add": [
+        "inventory: rhea_mercer -> Raw Data Packet (status=stowed, container=system_inventory)",
+        "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+        "container: hand_left (owner=rhea_mercer, contents=[])"
+      ],
+      "persona_updates": [],
+      "inventory": [
+        {
+          "container": "system_inventory",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_right",
+          "item": "ITEM_scrap_parchment",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_right",
+          "item": "ITEM_charcoal_stick",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_right",
+          "item": "ITEM_copper_credits",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_right",
+          "item": "ITEM_cracked_smartphone",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_scavenger_carapaces",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_obsidian_shard",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_ash_fungus",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_severed_ash_boar_tusk",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "system_inventory",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_raw_data_packet"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": []
+        },
+        {
+          "container": "hand_right",
+          "owner": "rhea_mercer",
+          "contents": []
+        },
+        {
+          "container": "blazer_pocket_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_cracked_smartphone",
+            "ITEM_copper_credits",
+            "ITEM_scrap_parchment",
+            "ITEM_charcoal_stick"
+          ]
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_scavenger_carapaces",
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus",
+            "ITEM_severed_ash_boar_tusk"
+          ]
+        }
+      ]
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_raw_data_packet",
+      "set": {
+        "state_tags": [
+          "evidence",
+          "administrative",
+          "soul_bound_liability",
+          "durability_critical"
+        ],
+        "last_seen": {
+          "chapter": 4,
+          "scene": 8,
+          "location": "LOC_MAINTENANCE_TRENCHES"
+        }
+      },
+      "reason": "Bound as a liability to prevent deletion."
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "statuses": [
+          {
+            "name": "Party Leader",
+            "active": true,
+            "source": "Custom Party Contract"
+          },
+          {
+            "name": "Mutual Assured Destruction",
+            "active": true,
+            "source": "Custom Party Contract"
+          },
+          {
+            "name": "Soul-Bound Liability: Raw Data Packet",
+            "active": true,
+            "source": "System Exploit"
+          }
+        ]
+      },
+      "reason": "Bound the data packet as a shared liability."
+    },
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "statuses": [
+          {
+            "name": "Party Member",
+            "active": true,
+            "source": "Custom Party Contract"
+          },
+          {
+            "name": "Mutual Assured Destruction",
+            "active": true,
+            "source": "Custom Party Contract"
+          },
+          {
+            "name": "Soul-Bound Liability: Raw Data Packet",
+            "active": true,
+            "source": "System Exploit"
+          }
+        ]
+      },
+      "reason": "Bound the data packet as a shared liability."
+    },
+    {
+      "character_id": "unit_734",
+      "set": {
+        "statuses": [
+          {
+            "name": "Party Member",
+            "active": true,
+            "source": "Custom Party Contract"
+          },
+          {
+            "name": "Mutual Assured Destruction",
+            "active": true,
+            "source": "Custom Party Contract"
+          },
+          {
+            "name": "Soul-Bound Liability: Raw Data Packet",
+            "active": true,
+            "source": "System Exploit"
+          }
+        ]
+      },
+      "reason": "Bound the data packet as a shared liability."
+    }
+  ]
+}

@@ -1,0 +1,235 @@
+COMPLIANCE:
+Scene ID: SC_006_004
+Allowed events: Rhea decrypts the coordinate data and formulates a plan to inject a corrupted ledger entry into the administrative hub.
+Forbidden milestones: overseer_override_triggered, audit_compliance_applied, overseer_budget_discovered, administrative_hub_coordinates_acquired
+Current arm-side / inventory facts: Vance holds Rebar in right hand. Rhea holds Administrative Coordinate Chip in left hand.
+
+APPEARANCE_CHECK:
+- rhea_mercer: female, singed hair, unadorned
+- vance_harrow: male, blistered hands
+- unit_734: robot, smoking chassis, mechanical, construct
+
+PROSE:
+As the hounds began to respawn outside, Vance braced against the door while Rhea focused on the newly acquired coordinate data. The heavy wooden planks of the ruined tollbooth groaned under the sudden, violent impact of wire-frame bodies throwing themselves against the exterior. Dust rained down from the ceiling.
+
+"They're back!" Vance grunted, his boots sliding an inch backward on the ash-covered floor. He shifted his grip on the heavy Rebar in his right hand, jamming the rusted length of metal under the door handle as a makeshift wedge. The friction tore at his already blistered hands, but letting go wasn't an option. 
+
+[HP: 10/150]
+[Status: Audit Compliance (Red-Tier) - Active]
+
+"Ten hit points, Mercer!" Vance yelled over the scratching of digital claws. "If a stiff breeze hits me through the cracks in this wood, my ledger closes!"
+
+"I am aware of the math, Vance," Rhea muttered, her voice tight. She stood before the gutted terminal casing, her left hand clutching the glowing Administrative Coordinate Chip. Her vision swam, the edges of her peripheral sight bleeding into a sickly, exhausted gray. 
+
+[Stamina: 1/150]
+[Status: Exhaustion (Severe) - Active]
+
+Moving her arm felt like dragging it through wet cement. Every breath was a calculated expenditure of a resource she no longer had. The System's debt mechanics were suffocating, pressing down on her lungs with the literal weight of administrative disapproval. She forced her leaden fingers to slot the Administrative Coordinate Chip into the exposed copper wiring of the tollbooth's dead terminal.
+
+Unit 734, still tethered to the console via its interface cable, let out a high-pitched mechanical whine. Plumes of acrid black smoke vented from its metallic body, filling the small room with the smell of burning ozone and melting plastic.
+
+[Chassis Integrity: 34%]
+[Warning: Catastrophic Hardware Failure Imminent.]
+
+"Unit 734, reroute all non-essential thermal sub-routines to the decryption protocol," Rhea ordered, her voice a raspy whisper. "Do not let the firewall bounce this."
+
+"Query: Does 'non-essential' include my central cooling fans?" the drone buzzed, its optical lens flickering erratically. 
+
+"Yes."
+
+"Compliance registered. I will burn for the ledger." The drone's smoking chassis shuddered violently as it dumped its remaining processing power into the chip. 
+
+The green terminal screen flared to life, casting a sickly, monochromatic glow over Rhea's pale face and singed arm hair. Lines of encrypted administrative syntax cascaded down the glass. The Overseer's local node was fighting back, throwing up automated debt-tethers to block the intrusion. 
+
+[Coordinate Decryption: In Progress...]
+[Calculating Node Routing...]
+
+"Hurry it up!" Vance shouted. The Rebar bowed under the pressure as another heavy thud rattled the door frame. "I can't hold this wedge forever. The physics engine is going to snap this metal!"
+
+"It's a finite budget," Rhea said, her eyes tracking the scrolling numbers. Her mind raced, pushing through the severe exhaustion. "The hounds aren't infinite. They cost Node Mana to spawn. The Overseer is bleeding his own local budget to keep us pinned here. If we find the hub, we don't have to fight his endless spawns. We just have to break the bank."
+
+[Coordinate Decryption: 78%]
+[Bypassing Local Firewall...]
+
+"And how do we do that?" Vance asked, his boots slipping another half-inch. 
+
+"We inject a corrupted ledger entry," Rhea said, a cold, humorless smile touching her lips. "I still have the Raw Data Packet from the maintenance trenches. It's bound to my inventory as a liability. If we jam that stolen XP log directly into his administrative hub, the conflicting data will force a localized node crash. A catastrophic default."
+
+"You want to audit the Overseer," Vance said, disbelief coloring his strained voice. 
+
+"I want to bankrupt him."
+
+[Coordinate Decryption: 100%]
+[Administrative Hub Coordinates: Locked.]
+
+The screen flashed a bright, undeniable green, burning a specific set of coordinates directly into Rhea's map interface. It wasn't far. Less than a mile through the Ash Wastes. But it was a mile of hostile, debt-ridden territory. 
+
+Rhea ripped the Administrative Coordinate Chip from the console, severing the connection. Unit 734 collapsed to the floor with a heavy clatter, its smoking chassis sparking weakly in the dust. 
+
+"Pick up the drone," Rhea said, turning toward the door. Her stamina was bottomed out, her body screaming for rest, but the numbers were finally on her side. The Overseer had a location, and he had a budget. That meant he could be broken.
+
+With the destination locked and a desperate plan formed, the party prepared to break out of the tollbooth and head for the administrative hub.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": ["rhea_mercer", "vance_harrow", "unit_734"],
+    "location": "LOC_RUINED_TOLLBOOTH",
+    "open_threads": ["system_debt_trap", "party_alliance"]
+  },
+  "summary_update": {
+    "last_scene": [
+      "Rhea forced Unit 734 to interface with the dead tollbooth terminal, risking its chassis integrity to bypass the local firewall.",
+      "Vance held the door against the respawning Debt Collectors, surviving on a critical 10 HP.",
+      "Rhea successfully decrypted the Administrative Coordinate Chip, locking in the location of the overseer's hub.",
+      "With the coordinates secured, Rhea declared her plan to inject the corrupted Raw Data Packet into the hub to bankrupt the overseer."
+    ],
+    "key_events": [
+      "Vance maintained the barricade with his Rebar, holding at 10 HP.",
+      "Rhea pushed through severe exhaustion at 1 Stamina to slot the Administrative Coordinate Chip.",
+      "Unit 734's chassis integrity held at 34% despite rerouting cooling fans to the decryption protocol.",
+      "The decryption completed, revealing the exact coordinates of the administrative hub.",
+      "Rhea formulated a plan to use the Raw Data Packet to trigger a catastrophic default."
+    ],
+    "must_stay_true": [
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+      "mechanic: rhea_mercer has active status Active Audit Target",
+      "mechanic: unit_734 has active status Hijacked Chassis",
+      "milestone: overseer_override_triggered = DONE",
+      "milestone: audit_compliance_applied = DONE",
+      "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+      "mechanic: rhea_mercer has active status Hostile Environment Marker",
+      "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+      "mechanic: vance_harrow has active status Hostile Environment Marker",
+      "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+      "mechanic: unit_734 has active status Hostile Environment Marker",
+      "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "mechanic: vance_harrow HP is 10/150",
+      "mechanic: rhea_mercer Stamina is 1/150",
+      "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard])",
+      "milestone: overseer_budget_discovered = DONE",
+      "milestone: administrative_hub_coordinates_acquired = DONE",
+      "inventory: rhea_mercer -> Administrative Coordinate Chip (status=held, container=hand_left)",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])"
+    ],
+    "chapter_so_far_add": [
+      "Rhea successfully decrypted the coordinates to the overseer's administrative hub.",
+      "The party prepared to break out of the tollbooth and launch a counter-audit using the stolen Raw Data Packet."
+    ]
+  },
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_administrative_coordinate_chip",
+      "set": {
+        "name": "Administrative Coordinate Chip",
+        "display_name": "Administrative Coordinate Chip",
+        "type": "quest_item",
+        "owner_scope": "character",
+        "custodian": "rhea_mercer",
+        "linked_threads": ["system_debt_trap"],
+        "state_tags": ["decrypted", "administrative"],
+        "last_seen": {
+          "chapter": 6,
+          "scene": 4,
+          "location": "LOC_RUINED_TOLLBOOTH"
+        }
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 6,
+      "scene": 4,
+      "inventory": [
+        {"item": "ITEM_raw_data_packet", "status": "stowed", "container": "system_inventory"},
+        {"item": "ITEM_heavy_iron_ingot", "status": "stowed", "container": "system_inventory"},
+        {"item": "ITEM_crystallized_experience", "status": "stowed", "container": "system_inventory"},
+        {"item": "ITEM_scrap_parchment", "status": "stowed", "container": "blazer_pocket_right"},
+        {"item": "ITEM_charcoal_stick", "status": "stowed", "container": "blazer_pocket_right"},
+        {"item": "ITEM_cracked_smartphone", "status": "stowed", "container": "blazer_pocket_right"},
+        {"item": "ITEM_copper_credits", "status": "stowed", "container": "blazer_pocket_right"},
+        {"item": "ITEM_obsidian_shard", "status": "stowed", "container": "blazer_pocket_left"},
+        {"item": "ITEM_administrative_coordinate_chip", "status": "held", "container": "hand_left"}
+      ],
+      "containers": [
+        {"container": "system_inventory", "owner": "rhea_mercer", "contents": ["ITEM_raw_data_packet", "ITEM_heavy_iron_ingot", "ITEM_crystallized_experience"]},
+        {"container": "blazer_pocket_right", "owner": "rhea_mercer", "contents": ["ITEM_scrap_parchment", "ITEM_charcoal_stick", "ITEM_cracked_smartphone", "ITEM_copper_credits"]},
+        {"container": "blazer_pocket_left", "owner": "rhea_mercer", "contents": ["ITEM_obsidian_shard"]},
+        {"container": "hand_left", "owner": "rhea_mercer", "contents": ["ITEM_administrative_coordinate_chip"]},
+        {"container": "hand_right", "owner": "rhea_mercer", "contents": []}
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Rhea realizes she can bankrupt the overseer by injecting the stolen Raw Data Packet into his administrative hub."
+      ]
+    },
+    {
+      "character_id": "vance_harrow",
+      "chapter": 6,
+      "scene": 4,
+      "inventory": [
+        {"item": "ITEM_rebar", "status": "held", "container": "hand_right"},
+        {"item": "ITEM_copper_credits_vance", "status": "stowed", "container": "torn_pocket"}
+      ],
+      "containers": [
+        {"container": "hand_right", "owner": "vance_harrow", "contents": ["ITEM_rebar"]},
+        {"container": "torn_pocket", "owner": "vance_harrow", "contents": ["ITEM_copper_credits_vance"]}
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Vance is holding the line at 10 HP, trusting Rhea's desperate plan to bankrupt the overseer."
+      ]
+    },
+    {
+      "character_id": "unit_734",
+      "chapter": 6,
+      "scene": 4,
+      "inventory": [],
+      "containers": [],
+      "invariants_add": [],
+      "persona_updates": [
+        "Unit 734 sacrifices its cooling systems to process the decryption, risking catastrophic hardware failure."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "stats": {
+          "hp": 10,
+          "hp_max": 150
+        }
+      }
+    },
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "stats": {
+          "stamina": 1,
+          "stamina_max": 150
+        }
+      }
+    },
+    {
+      "character_id": "unit_734",
+      "set": {
+        "stats": {
+          "chassis_integrity": 34
+        }
+      }
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "coordinate_decryption": 100
+      }
+    }
+  ]
+}

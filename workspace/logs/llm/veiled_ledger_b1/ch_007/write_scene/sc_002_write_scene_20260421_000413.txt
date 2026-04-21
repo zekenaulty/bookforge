@@ -1,0 +1,261 @@
+PROSE:
+The shattered foyer doors seal shut behind them, immediately triggering a lockdown and activating the compliance grid. The heavy metal groaned as the localized physics glitch resolved, fusing the seams back together with a hiss of pressurized air. Instantly, the Sanctum Foyer was flooded with razor-thin red lasers projecting a deadly, three-dimensional chessboard across the polished marble floor.
+
+Rhea slumped against the wall, her lungs burning. Her stamina bar hovered at a miserable 1/150. She clutched the Null-Value Token in her left hand, the heavy coin slick with sweat. 
+
+Unit 734 hovered unsteadily, thick plumes of black smoke venting from its cracked chassis. "Warning," the drone's synthesized voice buzzed. "Lethal administrative protocols engaged. The compliance grid is scanning for unregistered assets."
+
+A sharp, metallic scrape echoed across the foyer. The gilded construct they had just dismantled was twitching on the floor, drawn together by glowing threads of administrative mana.
+
+[Regeneration: Active. Reconstructing Bureaucratic Asset.]
+
+"You've got to be kidding me," Vance spat, spitting blood onto the marble. His health bar was a terrifying sliver of red. 
+
+[HP: 2/150] 
+
+He gripped his Rebar in his right hand, his blistered fingers trembling against the rusted metal. "I'll hold it," Vance said, stepping between the regenerating guard and Rhea. 
+
+[Status Effect: Aggro Target] 
+
+Rhea ignored the fight, forcing her exhausted legs to move toward the massive brass terminal built into the far wall. She ducked under a sweeping laser beam that singed the hair on her bare arms, slamming her hand against the interface plate.
+
+[Compliance Check: Initiated]
+[Please deposit approved assets to verify ledger standing. Minimum value required: 150 System Credits.]
+
+"It wants a deposit!" Rhea yelled over the deafening sound of Vance's Rebar clashing against the construct's gold-plated armor. She didn't have standard credits, but she had the untaxed Obsidian Shard in her left blazer pocket. She pulled it out and jammed the jagged glass into the terminal's physical deposit hopper.
+
+[Inventory Transfer: Obsidian Shard -> Ledger]
+
+The terminal ground its gears, trying to digest raw geology. 
+
+[Value assigned: 42 System Credits.]
+[Compliance Check: 28% Satisfied. Please deposit remaining balance.]
+
+"It's not enough!" Rhea cursed. 
+
+Vance parried a glancing blow, skidding backward. "Take it!" he yelled, reaching into his torn pocket and hurling a heavy, jingling pouch across the foyer. Rhea caught it just before it hit the floor. It was his Copper Credits.
+
+She ripped the pouch open and dumped the handful of dull, untaxed coins into the deposit slot.
+
+[Inventory Transfer: Copper Credits -> Ledger]
+[Value assigned: 115 System Credits.]
+[Total Deposited: 157 System Credits.]
+
+The terminal screen flashed a brilliant, blinding green.
+
+[Compliance Check: Satisfied.]
+
+The laser grid fizzled out in a shower of harmless sparks. Without the active compliance grid to validate its target priority, the regenerating guard froze mid-swing, powering down completely. 
+
+With the compliance checks satisfied by junk data, the path to the Audit Corridor unlocks, allowing them to escape the regenerating guard. The heavy blast door slid open, revealing the dark, polished corridor beyond.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "location": "LOC_AUDIT_CORRIDOR",
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "open_threads": [
+      "rhea_survival",
+      "system_debt_trap"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 7,
+      "scene": 2,
+      "inventory": [
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed"
+        },
+        {
+          "container": "system_inventory",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "hand_left",
+          "item": "ITEM_null_value_token",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_administrative_coordinate_chip"
+          ]
+        },
+        {
+          "container": "system_inventory",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_raw_data_packet"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_null_value_token"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Rhea successfully bypassed a lethal compliance check by feeding the system untaxed junk data."
+      ]
+    },
+    {
+      "character_id": "vance_harrow",
+      "chapter": 7,
+      "scene": 2,
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_rebar",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_rebar"
+          ]
+        },
+        {
+          "container": "torn_pocket",
+          "owner": "vance_harrow",
+          "contents": []
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Vance sacrificed his share of the copper credits to keep them alive against the regenerating guard."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "stats": {
+          "stamina": 1
+        }
+      }
+    },
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "stats": {
+          "hp": 2
+        }
+      }
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "state_tags": [
+          "deposited"
+        ]
+      }
+    },
+    {
+      "item_id": "ITEM_copper_credits_vance",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "state_tags": [
+          "untaxed",
+          "deposited"
+        ]
+      }
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "remove": [
+        "inventory.ITEM_obsidian_shard"
+      ],
+      "reason": "Deposited into terminal"
+    },
+    {
+      "character_id": "vance_harrow",
+      "remove": [
+        "inventory.ITEM_copper_credits_vance"
+      ],
+      "reason": "Thrown to Rhea"
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "Deposited into terminal"
+    },
+    {
+      "item_id": "ITEM_copper_credits_vance",
+      "from": {
+        "character_id": "vance_harrow"
+      },
+      "to": {
+        "character_id": "rhea_mercer"
+      },
+      "reason": "Thrown by Vance"
+    },
+    {
+      "item_id": "ITEM_copper_credits_vance",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "Deposited into terminal"
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "The party became trapped in the Sanctum Foyer as a lethal compliance grid activated and a defeated guard regenerated.",
+      "Vance held off the regenerating construct despite being at 2 HP, while Rhea analyzed the compliance terminal.",
+      "Rhea satisfied the terminal's checks by depositing her Obsidian Shard and Vance's Copper Credits, unlocking the path forward."
+    ],
+    "key_events": [
+      "The Sanctum Foyer locked down, trapping the party with a regenerating guard and a lethal compliance grid.",
+      "Vance used his Rebar to hold the guard's aggro.",
+      "Rhea deposited the Obsidian Shard into the compliance terminal, but its value was insufficient.",
+      "Vance threw his Copper Credits to Rhea, who deposited them to satisfy the remaining balance.",
+      "The compliance checks were satisfied, deactivating the grid and opening the blast door to the Audit Corridor."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard, ITEM_administrative_coordinate_chip])",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+      "milestone: compliance_checks_bypassed = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Trapped in the Sanctum Foyer with a regenerating guard, Rhea bypassed a lethal compliance grid by feeding the terminal untaxed junk data.",
+      "Vance sacrificed his Copper Credits to satisfy the toll, opening the path to the Audit Corridor."
+    ]
+  }
+}

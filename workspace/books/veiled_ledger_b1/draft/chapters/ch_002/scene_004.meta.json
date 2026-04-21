@@ -1,0 +1,271 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_002_004",
+  "chapter": 2,
+  "scene": 4,
+  "scene_target": "Rhea successfully forces a mob to drop untaxed raw materials by exploiting a collision between environmental damage and loot generation.",
+  "goal": "Herd the scavenger into a deadfall trap and trigger it without dying from stamina-drain HP loss.",
+  "conflict": "Rhea is at 0 Stamina and 1 HP; any misstep or overexertion risks instant death.",
+  "required_callbacks": [],
+  "constraints": [
+    "Must explicitly show Rhea managing her 0 Stamina / 1 HP state while executing the plan.",
+    "Loot dropped by the environment must not trigger a Gathering Tax notification."
+  ],
+  "end_condition": "The scavenger is crushed by debris, dropping untaxed raw materials.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_ASH_CHOKED_FOREST",
+  "location_end_id": "LOC_ASH_CHOKED_FOREST",
+  "location_start_label": "Ash-Choked Forest",
+  "location_end_label": "Ash-Choked Forest",
+  "location_start": "Ash-Choked Forest",
+  "location_end": "Ash-Choked Forest",
+  "handoff_mode": "direct",
+  "constraint_state": "processed",
+  "transition_in_text": "Rhea carefully rises from her resting spot, fighting through Exhaustion to put her physics exploit into motion.",
+  "transition_in_anchors": [
+    "rises",
+    "exhaustion",
+    "physics exploit",
+    "scavenger"
+  ],
+  "seam_score": 90,
+  "seam_resolution": "inline_bridge",
+  "consumes_outcome_from": "2:3",
+  "cast_present": [
+    "Rhea"
+  ],
+  "cast_present_ids": [
+    "char_rhea"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [],
+  "required_in_custody": [
+    "ITEM_makeshift_masonry_bludgeon",
+    "ITEM_ash_fungus",
+    "ITEM_obsidian_shard",
+    "ITEM_cracked_smartphone"
+  ],
+  "required_scene_accessible": [
+    "ITEM_makeshift_masonry_bludgeon"
+  ],
+  "required_visible_on_page": [
+    "ITEM_makeshift_masonry_bludgeon"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "continuous",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "loot"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Stamina",
+    "System Warning",
+    "Loot Drop"
+  ],
+  "prose_path": "draft/chapters/ch_002/scene_004.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "summary_update": {
+      "last_scene": [
+        "Rhea carefully managed her 0 Stamina and 1 HP to execute a physics exploit.",
+        "She herded an ash-crusted scavenger under a deadfall trap and triggered it with her Makeshift Masonry Bludgeon.",
+        "The falling debris crushed the scavenger, yielding 15 XP and untaxed raw materials.",
+        "The System failed to apply a Gathering Tax, confirming her theory that environmental collisions bypass the rigged economy."
+      ],
+      "key_events": [
+        "Rhea stowed her Ash-Fungus to free her hand.",
+        "She managed her Stamina regeneration tick by tick to avoid fatal HP drain.",
+        "She lured a scavenger into a deadfall trap using a thrown stone.",
+        "She used her Makeshift Masonry Bludgeon to trigger the deadfall without triggering a combat exertion penalty.",
+        "The scavenger was crushed, granting 15 XP.",
+        "The resulting dropped loot was untaxed by the System."
+      ],
+      "must_stay_true": [
+        "REMOVE: inventory: char_rhea -> Ash-Fungus (status=held, container=hand_left)",
+        "REMOVE: container: hand_left (owner=char_rhea, contents=[ITEM_ash_fungus])",
+        "REMOVE: container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard])",
+        "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+        "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+        "mechanic: char_rhea HP is 1/100",
+        "mechanic: char_rhea has active status Tutorial Grace Period",
+        "mechanic: char_rhea has active title Indentured Soul",
+        "mechanic: char_rhea has 100,000 Soul Debt",
+        "injury: char_rhea bruised left leg",
+        "milestone: starter_cache_discovered = DONE",
+        "milestone: starter_cache_rejected = DONE",
+        "milestone: pedestal_chipped = DONE",
+        "inventory: char_rhea -> Makeshift Masonry Bludgeon (status=equipped, container=hand_right)",
+        "container: hand_right (owner=char_rhea, contents=[ITEM_makeshift_masonry_bludgeon])",
+        "milestone: weapon_crafted = DONE",
+        "inventory: char_rhea -> Ash-Fungus (status=stowed, container=blazer_pocket_left)",
+        "inventory: char_rhea -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+        "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+        "mechanic: char_rhea Stamina is 0/100",
+        "mechanic: char_rhea has active status Exhaustion"
+      ],
+      "chapter_so_far_add": [
+        "Rhea successfully executed a physics exploit to bypass the System's gathering tax.",
+        "She crushed a scavenger with a deadfall trap, earning 15 XP and untaxed raw materials."
+      ]
+    },
+    "character_updates": [
+      {
+        "character_id": "char_rhea",
+        "scene": 4,
+        "chapter": 2,
+        "persona_updates": [
+          "Rhea successfully executes her physics exploit, confirming that environmental kills bypass the System's gathering tax."
+        ],
+        "invariants_add": [
+          "inventory: char_rhea -> Ash-Fungus (status=stowed, container=blazer_pocket_left)",
+          "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])"
+        ],
+        "inventory": [
+          {
+            "item": "ITEM_cracked_smartphone",
+            "container": "blazer_pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_obsidian_shard",
+            "container": "blazer_pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_ash_fungus",
+            "container": "blazer_pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_makeshift_masonry_bludgeon",
+            "container": "hand_right",
+            "status": "equipped"
+          }
+        ],
+        "containers": [
+          {
+            "container": "blazer_pocket_right",
+            "owner": "char_rhea",
+            "contents": [
+              "ITEM_cracked_smartphone"
+            ]
+          },
+          {
+            "container": "blazer_pocket_left",
+            "owner": "char_rhea",
+            "contents": [
+              "ITEM_obsidian_shard",
+              "ITEM_ash_fungus"
+            ]
+          },
+          {
+            "container": "hand_right",
+            "owner": "char_rhea",
+            "contents": [
+              "ITEM_makeshift_masonry_bludgeon"
+            ]
+          }
+        ]
+      }
+    ],
+    "character_continuity_system_updates": [
+      {
+        "character_id": "char_rhea",
+        "scene": 4,
+        "chapter": 2,
+        "set": {
+          "stats": {
+            "hp": {
+              "current": 1,
+              "max": 100
+            },
+            "stamina": {
+              "current": 0,
+              "max": 100
+            },
+            "xp": {
+              "current": 15
+            }
+          },
+          "reason": "Stamina fluctuated during exertion but ended at 0. Gained 15 XP from environmental kill."
+        },
+        "delta": {},
+        "remove": []
+      }
+    ],
+    "world_updates": {
+      "cast_present": [
+        "char_rhea"
+      ],
+      "location": "LOC_ASH_CHOKED_FOREST",
+      "open_threads": []
+    }
+  },
+  "scene_summary": [
+    "Rhea carefully managed her 0 Stamina and 1 HP to execute a physics exploit.",
+    "She herded an ash-crusted scavenger under a deadfall trap and triggered it with her Makeshift Masonry Bludgeon.",
+    "The falling debris crushed the scavenger, yielding 15 XP and untaxed raw materials.",
+    "The System failed to apply a Gathering Tax, confirming her theory that environmental collisions bypass the rigged economy."
+  ],
+  "key_events": [
+    "Rhea stowed her Ash-Fungus to free her hand.",
+    "She managed her Stamina regeneration tick by tick to avoid fatal HP drain.",
+    "She lured a scavenger into a deadfall trap using a thrown stone.",
+    "She used her Makeshift Masonry Bludgeon to trigger the deadfall without triggering a combat exertion penalty.",
+    "The scavenger was crushed, granting 15 XP.",
+    "The resulting dropped loot was untaxed by the System."
+  ],
+  "must_stay_true": [
+    "REMOVE: inventory: char_rhea -> Ash-Fungus (status=held, container=hand_left)",
+    "REMOVE: container: hand_left (owner=char_rhea, contents=[ITEM_ash_fungus])",
+    "REMOVE: container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard])",
+    "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+    "mechanic: char_rhea HP is 1/100",
+    "mechanic: char_rhea has active status Tutorial Grace Period",
+    "mechanic: char_rhea has active title Indentured Soul",
+    "mechanic: char_rhea has 100,000 Soul Debt",
+    "injury: char_rhea bruised left leg",
+    "milestone: starter_cache_discovered = DONE",
+    "milestone: starter_cache_rejected = DONE",
+    "milestone: pedestal_chipped = DONE",
+    "inventory: char_rhea -> Makeshift Masonry Bludgeon (status=equipped, container=hand_right)",
+    "container: hand_right (owner=char_rhea, contents=[ITEM_makeshift_masonry_bludgeon])",
+    "milestone: weapon_crafted = DONE",
+    "inventory: char_rhea -> Ash-Fungus (status=stowed, container=blazer_pocket_left)",
+    "inventory: char_rhea -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+    "mechanic: char_rhea Stamina is 0/100",
+    "mechanic: char_rhea has active status Exhaustion"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "appearance_check_missing",
+        "message": "APPEARANCE_CHECK is missing for cast member char_rhea.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_mismatch",
+        "message": "UI shows Stamina but character state has {'current': 0, 'max': 100}.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_mismatch",
+        "message": "UI shows Stamina but character state has {'current': 0, 'max': 100}.",
+        "severity": "warning"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 2,
+  "updated_at": "2026-04-19T16:25:22Z"
+}

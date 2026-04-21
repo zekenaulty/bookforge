@@ -122,6 +122,35 @@ def _normalize_item_entry_names(entry: Dict[str, Any]) -> Dict[str, Any]:
     return entry
 
 
+def _normalize_last_seen_payload(value: Any) -> Dict[str, Any]:
+    payload = value if isinstance(value, dict) else {}
+    return {
+        "chapter": max(0, _coerce_int(payload.get("chapter"))),
+        "scene": max(0, _coerce_int(payload.get("scene"))),
+        "location": str(payload.get("location") or "").strip(),
+    }
+
+
+def _normalize_item_registry_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
+    if not isinstance(entry, dict):
+        return entry
+    normalized = dict(entry)
+    normalized = _normalize_item_entry_names(normalized)
+    normalized["type"] = str(normalized.get("type") or "unclassified").strip() or "unclassified"
+    normalized["owner_scope"] = str(normalized.get("owner_scope") or "character").strip() or "character"
+    normalized["custodian"] = str(normalized.get("custodian") or "").strip()
+    linked_threads = normalized.get("linked_threads")
+    if not isinstance(linked_threads, list):
+        linked_threads = []
+    normalized["linked_threads"] = [str(item).strip() for item in linked_threads if str(item).strip()]
+    state_tags = normalized.get("state_tags")
+    if not isinstance(state_tags, list):
+        state_tags = []
+    normalized["state_tags"] = [str(item).strip() for item in state_tags if str(item).strip()]
+    normalized["last_seen"] = _normalize_last_seen_payload(normalized.get("last_seen"))
+    return normalized
+
+
 def _coerce_int(value: Any) -> int:
     try:
         return int(value)
@@ -402,7 +431,7 @@ def ensure_item_registry(book_root: Path) -> Path:
     else:
         payload = _normalize_registry(json.loads(path.read_text(encoding="utf-8")), "items")
         payload["items"] = [
-            _normalize_item_entry_names(dict(item)) if isinstance(item, dict) else item
+            _normalize_item_registry_entry(dict(item)) if isinstance(item, dict) else item
             for item in payload.get("items", [])
         ]
         validate_json(payload, "item_registry")
@@ -443,7 +472,7 @@ def load_item_registry(book_root: Path) -> Dict[str, Any]:
     ensure_durable_state_files(book_root)
     payload = _normalize_registry(json.loads(item_registry_path(book_root).read_text(encoding="utf-8")), "items")
     payload["items"] = [
-        _normalize_item_entry_names(dict(item)) if isinstance(item, dict) else item
+        _normalize_item_registry_entry(dict(item)) if isinstance(item, dict) else item
         for item in payload.get("items", [])
     ]
     validate_json(payload, "item_registry")
@@ -460,7 +489,7 @@ def load_plot_devices(book_root: Path) -> Dict[str, Any]:
 def save_item_registry(book_root: Path, payload: Dict[str, Any]) -> None:
     normalized = _normalize_registry(payload, "items")
     normalized["items"] = [
-        _normalize_item_entry_names(dict(item)) if isinstance(item, dict) else item
+        _normalize_item_registry_entry(dict(item)) if isinstance(item, dict) else item
         for item in normalized.get("items", [])
     ]
     validate_json(normalized, "item_registry")

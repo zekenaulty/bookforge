@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_006_004",
+  "chapter": 6,
+  "scene": 4,
+  "scene_target": "Rhea decrypts the coordinate data and formulates a plan to inject a corrupted ledger entry into the administrative hub.",
+  "goal": "Decrypt the coordinate data and formulate a counter-attack plan before the mob breaks through.",
+  "conflict": "Vance is at 10 HP holding the door against a respawning mob while Rhea races against time to decrypt the data with 1 Stamina.",
+  "required_callbacks": [
+    "Vance's critical 10 HP limit",
+    "Rhea's severe exhaustion at 1 Stamina",
+    "Unit 734's failing chassis integrity at 34%"
+  ],
+  "constraints": [
+    "target_words: 1800"
+  ],
+  "end_condition": "Rhea successfully decrypts the exact location and declares the plan to inject a corrupted ledger entry, preparing the party to move.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_RUINED_TOLLBOOTH",
+  "location_end_id": "LOC_RUINED_TOLLBOOTH",
+  "location_start_label": "Ruined Tollbooth",
+  "location_end_label": "Ruined Tollbooth",
+  "location_start": "Inside the ruined tollbooth.",
+  "location_end": "Inside the ruined tollbooth, preparing to leave.",
+  "handoff_mode": "continuous",
+  "constraint_state": "processed",
+  "transition_in_text": "As the hounds begin to respawn outside, Vance braces against the door while Rhea focuses on the newly acquired coordinate data.",
+  "transition_in_anchors": [
+    "respawning hounds",
+    "Vance bracing",
+    "door",
+    "coordinate data"
+  ],
+  "transition_out_text": "With the destination locked and a desperate plan formed, the party prepares to break out of the tollbooth and head for the administrative hub.",
+  "transition_out_anchors": [
+    "destination locked",
+    "desperate plan",
+    "break out",
+    "administrative hub"
+  ],
+  "consumes_outcome_from": "6:3",
+  "hands_off_to": "6:5",
+  "seam_score": 90,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "system_debt_trap",
+    "party_alliance"
+  ],
+  "required_in_custody": [
+    "ITEM_administrative_coordinate_chip",
+    "ITEM_rebar"
+  ],
+  "required_scene_accessible": [
+    "ITEM_administrative_coordinate_chip",
+    "ITEM_rebar"
+  ],
+  "required_visible_on_page": [
+    "ITEM_administrative_coordinate_chip",
+    "ITEM_rebar"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "continuous",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources",
+    "statuses"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Stamina",
+    "Chassis Integrity",
+    "Coordinate Decryption",
+    "Audit Compliance"
+  ]
+}

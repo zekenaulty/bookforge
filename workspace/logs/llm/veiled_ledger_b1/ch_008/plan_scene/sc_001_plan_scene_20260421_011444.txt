@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_008_001",
+  "chapter": 8,
+  "scene": 1,
+  "scene_target": "The party locates and opens the hidden vault, revealing the Mercy Cache before the ceiling caves in.",
+  "goal": "Navigate the collapsing Inner Office and use the looted coordinates to find the hidden vault.",
+  "conflict": "The structural collapse of the node and the 30-second Frontier Zone Purge timer.",
+  "required_callbacks": [
+    "The feral overseer's defeat",
+    "The 30-second purge timer",
+    "The looted Mercy Cache Coordinates"
+  ],
+  "constraints": [
+    "target_words: 1800",
+    "Maintain high tension due to the 30-second purge timer."
+  ],
+  "end_condition": "The hidden vault opens, revealing the Mercy Cache just as the ceiling begins to cave in.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_OVERSEER_INNER_OFFICE",
+  "location_end_id": "LOC_MERCY_CACHE_VAULT",
+  "location_start_label": "Overseer's Inner Office",
+  "location_end_label": "Hidden Vault",
+  "location_start": "Overseer's Inner Office",
+  "location_end": "Hidden Vault",
+  "handoff_mode": "direct",
+  "constraint_state": "processed",
+  "transition_in_text": "With the feral overseer deleted and the node collapsing, the party scrambles to find the vault before the 30-second purge timer hits zero.",
+  "transition_in_anchors": [
+    "overseer_deleted",
+    "node_collapsing",
+    "purge_timer",
+    "scramble"
+  ],
+  "transition_out_text": "The hidden vault opens, revealing the Mercy Cache as the ceiling caves in.",
+  "transition_out_anchors": [
+    "hidden_vault",
+    "mercy_cache",
+    "ceiling_caves_in"
+  ],
+  "seam_score": 85,
+  "seam_resolution": "inline_bridge",
+  "consumes_outcome_from": "7:7",
+  "hands_off_to": "8:2",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "rhea_survival",
+    "party_alliance"
+  ],
+  "required_in_custody": [
+    "ITEM_mercy_cache_coordinates",
+    "ITEM_administrative_residue_token",
+    "ITEM_rebar"
+  ],
+  "required_scene_accessible": [
+    "ITEM_mercy_cache_coordinates",
+    "ITEM_administrative_residue_token",
+    "ITEM_rebar"
+  ],
+  "required_visible_on_page": [
+    "ITEM_mercy_cache_coordinates"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "combat_aftermath",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources",
+    "statuses"
+  ],
+  "ui_mechanics_expected": [
+    "Frontier Zone Purge Timer",
+    "Chassis Integrity",
+    "HP",
+    "Stamina"
+  ]
+}

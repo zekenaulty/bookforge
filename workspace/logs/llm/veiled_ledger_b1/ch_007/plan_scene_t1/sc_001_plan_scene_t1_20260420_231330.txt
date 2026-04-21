@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_007_002",
+  "chapter": 7,
+  "scene": 2,
+  "scene_target": "Rhea bypasses the compliance checks by sacrificing inventory junk while Vance holds off a regenerating guard.",
+  "goal": "Survive the foyer lockdown and bypass the laser-grid compliance checks.",
+  "conflict": "Lethal laser grids demand stat/inventory audits while a regenerating guard relentlessly attacks Vance.",
+  "required_callbacks": [
+    "Vance's heavy blunt-force damage from the previous wave",
+    "The shattered entrance from the Null-Value Token"
+  ],
+  "constraints": [
+    "Vance must remain at 10 HP or lower, barely surviving the regenerating guard's attacks.",
+    "Rhea must sacrifice the ITEM_obsidian_shard and other abstract junk data to feed the compliance checks.",
+    "Unit 734 must assist Rhea despite its critical chassis failure."
+  ],
+  "end_condition": "The path to the inner sanctum opens after Rhea feeds enough junk data to the system.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_SANCTUM_FOYER",
+  "location_end_id": "LOC_SANCTUM_INNER_CORRIDOR",
+  "location_start_label": "Sanctum Foyer",
+  "location_end_label": "Inner Sanctum Corridor",
+  "location_start": "Sanctum Foyer",
+  "location_end": "Inner Sanctum Corridor",
+  "handoff_mode": "continuous",
+  "constraint_state": "processed",
+  "transition_in_text": "The shattered doors seal behind them as the foyer locks down, trapping the party with regenerating guards and activating lethal compliance grids.",
+  "transition_in_anchors": [
+    "shattered doors",
+    "foyer locks down",
+    "regenerating guards",
+    "compliance grids"
+  ],
+  "transition_out_text": "Rhea successfully bypasses the compliance checks, opening the path to the inner sanctum but sacrificing several pieces of looted gear.",
+  "transition_out_anchors": [
+    "bypasses compliance checks",
+    "opening the path",
+    "inner sanctum",
+    "sacrificing gear"
+  ],
+  "consumes_outcome_from": "7:1",
+  "hands_off_to": "7:3",
+  "seam_score": 85,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "rhea_survival",
+    "system_debt_trap"
+  ],
+  "required_in_custody": [
+    "ITEM_obsidian_shard",
+    "ITEM_administrative_coordinate_chip",
+    "ITEM_rebar",
+    "ITEM_raw_data_packet"
+  ],
+  "required_scene_accessible": [
+    "ITEM_obsidian_shard",
+    "ITEM_administrative_coordinate_chip",
+    "ITEM_rebar",
+    "ITEM_raw_data_packet"
+  ],
+  "required_visible_on_page": [
+    "ITEM_rebar",
+    "ITEM_obsidian_shard"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "combat_continuation",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "inventory",
+    "stats",
+    "hp",
+    "chassis_integrity"
+  ],
+  "ui_mechanics_expected": [
+    "Compliance Check",
+    "Inventory Audit",
+    "HP",
+    "Chassis Integrity"
+  ]
+}

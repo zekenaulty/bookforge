@@ -1,0 +1,245 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "chapter": 7,
+      "character_id": "vance_harrow",
+      "delta": {},
+      "remove": [],
+      "scene": 2,
+      "set": {
+        "reason": "Vance's HP remains at 2/100.",
+        "stats": {
+          "hp": 2,
+          "hp_max": 100
+        }
+      }
+    },
+    {
+      "chapter": 7,
+      "character_id": "rhea_mercer",
+      "delta": {},
+      "remove": [],
+      "scene": 2,
+      "set": {
+        "reason": "Rhea's stamina remains at 1/150.",
+        "stats": {
+          "stamina": 1,
+          "stamina_max": 150
+        }
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 7,
+      "character_id": "rhea_mercer",
+      "containers": [
+        {
+          "container": "blazer_pocket_left",
+          "contents": [
+            "ITEM_administrative_coordinate_chip"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "system_inventory",
+          "contents": [
+            "ITEM_raw_data_packet"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "hand_left",
+          "contents": [
+            "ITEM_null_value_token"
+          ],
+          "owner": "rhea_mercer"
+        }
+      ],
+      "invariants_add": [
+        "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])"
+      ],
+      "inventory": [
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed"
+        },
+        {
+          "container": "system_inventory",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "hand_left",
+          "item": "ITEM_null_value_token",
+          "status": "held"
+        }
+      ],
+      "persona_updates": [
+        "Rhea sacrificed her Obsidian Shard and Vance's Copper Credits to bypass the compliance checks."
+      ],
+      "scene": 2
+    },
+    {
+      "chapter": 7,
+      "character_id": "vance_harrow",
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_rebar"
+          ],
+          "owner": "vance_harrow"
+        },
+        {
+          "container": "torn_pocket",
+          "contents": [],
+          "owner": "vance_harrow"
+        }
+      ],
+      "invariants_add": [
+        "mechanic: vance_harrow HP is 2/100"
+      ],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_rebar",
+          "status": "held"
+        }
+      ],
+      "persona_updates": [
+        "Vance held off the regenerating guard and sacrificed his Copper Credits to help Rhea bypass the terminal."
+      ],
+      "scene": 2
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "set": {
+        "custodian": "world",
+        "display_name": "Obsidian Shard",
+        "last_seen": {
+          "chapter": 7,
+          "location": "LOC_SANCTUM_FOYER",
+          "scene": 2
+        },
+        "linked_threads": [],
+        "name": "Obsidian Shard",
+        "owner_scope": "world",
+        "state_tags": [
+          "sacrificed"
+        ],
+        "type": "material"
+      }
+    },
+    {
+      "item_id": "ITEM_copper_credits_vance",
+      "set": {
+        "custodian": "world",
+        "display_name": "Copper Credits",
+        "last_seen": {
+          "chapter": 7,
+          "location": "LOC_SANCTUM_FOYER",
+          "scene": 2
+        },
+        "linked_threads": [],
+        "name": "Copper Credits",
+        "owner_scope": "world",
+        "state_tags": [
+          "sacrificed"
+        ],
+        "type": "currency"
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "The Sanctum Foyer locked down with a lethal compliance grid, forcing Rhea to sacrifice her Obsidian Shard and Vance's Copper Credits to satisfy the terminal and open the path to the Audit Corridor."
+    ],
+    "key_events": [
+      "The Sanctum Foyer locked down with a laser grid.",
+      "A gilded construct began regenerating, forcing Vance to draw its aggro.",
+      "Rhea deposited her Obsidian Shard into the terminal, but it wasn't enough.",
+      "Vance threw his Copper Credits to Rhea, who deposited them to satisfy the remaining balance.",
+      "The compliance grid deactivated, powering down the guard and opening the Audit Corridor."
+    ],
+    "last_scene": [
+      "The Sanctum Foyer locked down, activating a lethal compliance grid and a regenerating guard.",
+      "Vance held off the guard while Rhea interacted with the compliance terminal.",
+      "Rhea sacrificed her Obsidian Shard and Vance's Copper Credits to satisfy the terminal's value requirements.",
+      "With the compliance checks bypassed, the grid deactivated and the path to the Audit Corridor opened."
+    ],
+    "must_stay_true": [
+      "REMOVE: mechanic: vance_harrow HP is 2/150",
+      "REMOVE: inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard, ITEM_administrative_coordinate_chip])",
+      "mechanic: rhea_mercer Stamina is 1/150",
+      "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+      "milestone: overseer_budget_discovered = DONE",
+      "milestone: administrative_hub_coordinates_acquired = DONE",
+      "milestone: administrative_hub_coordinates_decrypted = DONE",
+      "inventory: rhea_mercer -> Administrative Coordinate Chip (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+      "milestone: tollbooth_escape_completed = DONE",
+      "inventory: rhea_mercer -> Null-Value Token (status=held, container=hand_left)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_null_value_token])",
+      "milestone: null_value_token_crafted = DONE",
+      "milestone: sanctum_threshold_reached = DONE",
+      "mechanic: vance_harrow has active status Aggro Target",
+      "mechanic: unit_734 has active status Critical System Failure Imminent",
+      "mechanic: vance_harrow HP is 2/100",
+      "mechanic: vance_harrow has active status Heavy Blunt-Force Trauma",
+      "milestone: sanctum_foyer_breached = DONE",
+      "milestone: elite_guards_defeated = DONE",
+      "milestone: compliance_checks_bypassed = DONE"
+    ]
+  },
+  "transfer_updates": [
+    {
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "item_id": "ITEM_obsidian_shard",
+      "reason": "sacrificed to compliance terminal",
+      "to": {
+        "custodian": "world"
+      }
+    },
+    {
+      "from": {
+        "character_id": "vance_harrow"
+      },
+      "item_id": "ITEM_copper_credits_vance",
+      "reason": "thrown to Rhea",
+      "to": {
+        "character_id": "rhea_mercer"
+      }
+    },
+    {
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "item_id": "ITEM_copper_credits_vance",
+      "reason": "sacrificed to compliance terminal",
+      "to": {
+        "custodian": "world"
+      }
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_AUDIT_CORRIDOR",
+    "open_threads": [
+      "rhea_survival",
+      "system_debt_trap"
+    ]
+  }
+}

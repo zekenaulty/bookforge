@@ -1,0 +1,188 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "chapter": 6,
+      "character_id": "vance_harrow",
+      "delta": {},
+      "remove": [],
+      "scene": 6,
+      "set": {
+        "stats": {
+          "hp": 10
+        }
+      }
+    },
+    {
+      "chapter": 6,
+      "character_id": "rhea_mercer",
+      "delta": {},
+      "remove": [],
+      "scene": 6,
+      "set": {
+        "stats": {
+          "stamina": 1
+        }
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 6,
+      "character_id": "rhea_mercer",
+      "containers": [
+        {
+          "container": "blazer_pocket_left",
+          "contents": [
+            "ITEM_obsidian_shard",
+            "ITEM_administrative_coordinate_chip"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "system_inventory",
+          "contents": [
+            "ITEM_raw_data_packet"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "hand_left",
+          "contents": [
+            "ITEM_null_value_token"
+          ],
+          "owner": "rhea_mercer"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_obsidian_shard",
+          "status": "stowed"
+        },
+        {
+          "container": "system_inventory",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "hand_left",
+          "item": "ITEM_null_value_token",
+          "status": "held"
+        }
+      ],
+      "persona_updates": [
+        "Rhea has successfully crafted the physical exploit needed to crash the overseer's ledger."
+      ],
+      "scene": 6
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_null_value_token",
+      "set": {
+        "custodian": "rhea_mercer",
+        "display_name": "Null-Value Token",
+        "last_seen": {
+          "chapter": 6,
+          "location": "LOC_ADMINISTRATIVE_HUB_OUTSKIRTS",
+          "scene": 6
+        },
+        "linked_threads": [
+          "system_debt_trap"
+        ],
+        "name": "Null-Value Token",
+        "owner_scope": "character",
+        "state_tags": [
+          "exploit",
+          "crafted"
+        ],
+        "type": "quest_item"
+      }
+    },
+    {
+      "item_id": "ITEM_heavy_iron_ingot",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "state_tags": [
+          "consumed"
+        ]
+      }
+    },
+    {
+      "item_id": "ITEM_crystallized_experience",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "state_tags": [
+          "consumed"
+        ]
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "At the hub outskirts, Rhea consumed the Heavy Iron Ingot and Crystallized Experience to craft the Null-Value Token, a physical exploit to crash the overseer's ledger."
+    ],
+    "key_events": [
+      "The party arrived at the outskirts of the administrative hub.",
+      "Rhea accessed her system inventory and withdrew the Heavy Iron Ingot and Crystallized Experience.",
+      "Rhea forced a manual crafting synthesis, consuming the materials to create the Null-Value Token.",
+      "The party prepared for the final breach."
+    ],
+    "last_scene": [
+      "Rhea crafted the Null-Value Token using the Heavy Iron Ingot and Crystallized Experience, preparing the party to breach the administrative hub."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+      "REMOVE: inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+      "REMOVE: container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+      "REMOVE: container: hand_left (owner=rhea_mercer, contents=[])",
+      "inventory: rhea_mercer -> Null-Value Token (status=held, container=hand_left)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_null_value_token])",
+      "milestone: null_value_token_crafted = DONE"
+    ]
+  },
+  "transfer_updates": [
+    {
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "item_id": "ITEM_heavy_iron_ingot",
+      "reason": "consumed in crafting",
+      "to": {
+        "custodian": "world"
+      }
+    },
+    {
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "item_id": "ITEM_crystallized_experience",
+      "reason": "consumed in crafting",
+      "to": {
+        "custodian": "world"
+      }
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_ADMINISTRATIVE_HUB_OUTSKIRTS",
+    "open_threads": [
+      "rhea_survival",
+      "system_debt_trap"
+    ]
+  }
+}

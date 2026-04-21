@@ -1,0 +1,332 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_002_006",
+  "chapter": 2,
+  "scene": 6,
+  "scene_target": "Rhea banks her first untaxed copper credits at an automated System deposit node.",
+  "goal": "Trade untaxed scavenger parts and wood for copper credits without triggering hidden fees.",
+  "conflict": "Navigating the System's automated deposit node UI to avoid hidden transaction taxes.",
+  "required_callbacks": [],
+  "constraints": [
+    "target_words: 1800"
+  ],
+  "end_condition": "Rhea receives her first untaxed copper credits, securing a baseline of economic survival.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_ASH_CHOKED_FOREST",
+  "location_end_id": "LOC_ASH_CHOKED_FOREST",
+  "location_start_label": "Ash-Choked Forest",
+  "location_end_label": "System Deposit Node",
+  "location_start": "Ash-Choked Forest",
+  "location_end": "System Deposit Node",
+  "handoff_mode": "direct",
+  "constraint_state": "processed",
+  "transition_in_text": "With her immediate survival secured, Rhea bundles the remaining untaxed materials and locates a nearby automated System deposit node.",
+  "transition_in_anchors": [
+    "survival secured",
+    "bundles",
+    "untaxed materials",
+    "deposit node"
+  ],
+  "transition_out_text": "Rhea successfully banks her first copper credits without incurring the standard gatherer's debt.",
+  "transition_out_anchors": [
+    "banks",
+    "copper credits",
+    "without incurring",
+    "debt"
+  ],
+  "seam_score": 85,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Rhea"
+  ],
+  "cast_present_ids": [
+    "char_rhea"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [],
+  "required_in_custody": [
+    "ITEM_makeshift_masonry_bludgeon",
+    "ITEM_obsidian_shard",
+    "ITEM_ash_fungus",
+    "ITEM_cracked_smartphone"
+  ],
+  "required_scene_accessible": [
+    "ITEM_makeshift_masonry_bludgeon"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "travel_arrival",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "resources"
+  ],
+  "ui_mechanics_expected": [
+    "Copper Credits",
+    "Deposit Interface",
+    "Transaction Log",
+    "Soul Debt"
+  ],
+  "prose_path": "draft/chapters/ch_002/scene_006.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "summary_update": {
+      "last_scene": [
+        "Rhea approached an automated System deposit node to trade her untaxed materials.",
+        "She navigated the predatory UI and reclassified her deposit as 'Environmental Debris Clearance' to bypass the Stamina tax and Soul Debt garnishment.",
+        "She successfully received 4 Copper Credits, securing her first untaxed capital."
+      ],
+      "key_events": [
+        "Rhea approached an automated System deposit node and dumped her untaxed scavenger materials into the hopper.",
+        "The Deposit Interface attempted to apply a 5 Stamina tax and garnish the entire 4 Copper Credit yield toward her Soul Debt.",
+        "Rhea bypassed the default classification by finding a hidden sub-menu and selecting 'Environmental Debris Clearance'.",
+        "The reclassification reduced the tax to 0 Stamina and exempted the yield from garnishment.",
+        "Rhea successfully banked 4 Copper Credits, securing her first untaxed capital."
+      ],
+      "must_stay_true": [
+        "mechanic: char_rhea has active status Tutorial Grace Period",
+        "mechanic: char_rhea has active title Indentured Soul",
+        "mechanic: char_rhea has 100,000 Soul Debt",
+        "injury: char_rhea bruised left leg",
+        "milestone: starter_cache_discovered = DONE",
+        "milestone: starter_cache_rejected = DONE",
+        "milestone: pedestal_chipped = DONE",
+        "inventory: char_rhea -> Makeshift Masonry Bludgeon (status=equipped, container=hand_right)",
+        "container: hand_right (owner=char_rhea, contents=[ITEM_makeshift_masonry_bludgeon])",
+        "milestone: weapon_crafted = DONE",
+        "inventory: char_rhea -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+        "inventory: char_rhea -> Ash-Fungus (status=stowed, container=blazer_pocket_left)",
+        "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+        "mechanic: char_rhea HP is 25/100",
+        "mechanic: char_rhea Stamina is 40/100",
+        "REMOVE: inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+        "REMOVE: container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+        "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+        "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+        "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+        "milestone: first_credits_banked = DONE",
+        "mechanic: char_rhea has 4 Copper Credits"
+      ],
+      "chapter_so_far_add": [
+        "Rhea successfully processed her untaxed materials at a System deposit node, discovering a UI loophole to bypass the standard gathering taxes and Soul Debt garnishments, securing her first 4 Copper Credits."
+      ]
+    },
+    "character_updates": [
+      {
+        "character_id": "char_rhea",
+        "scene": 6,
+        "chapter": 2,
+        "persona_updates": [
+          "Rhea learns that the System's UI hides alternative classifications that can bypass predatory taxes, confirming that meticulous reading is her best defense."
+        ],
+        "invariants_add": [
+          "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+          "milestone: first_credits_banked = DONE",
+          "mechanic: char_rhea has 4 Copper Credits"
+        ],
+        "inventory": [
+          {
+            "item": "ITEM_cracked_smartphone",
+            "container": "blazer_pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_copper_credits",
+            "container": "blazer_pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_obsidian_shard",
+            "container": "blazer_pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_ash_fungus",
+            "container": "blazer_pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_makeshift_masonry_bludgeon",
+            "container": "hand_right",
+            "status": "equipped"
+          }
+        ],
+        "containers": [
+          {
+            "container": "blazer_pocket_right",
+            "owner": "char_rhea",
+            "contents": [
+              "ITEM_cracked_smartphone",
+              "ITEM_copper_credits"
+            ]
+          },
+          {
+            "container": "blazer_pocket_left",
+            "owner": "char_rhea",
+            "contents": [
+              "ITEM_obsidian_shard",
+              "ITEM_ash_fungus"
+            ]
+          },
+          {
+            "container": "hand_right",
+            "owner": "char_rhea",
+            "contents": [
+              "ITEM_makeshift_masonry_bludgeon"
+            ]
+          },
+          {
+            "container": "hand_left",
+            "owner": "char_rhea",
+            "contents": []
+          }
+        ]
+      }
+    ],
+    "character_continuity_system_updates": [
+      {
+        "character_id": "char_rhea",
+        "scene": 6,
+        "chapter": 2,
+        "set": {
+          "resources": {
+            "copper_credits": {
+              "current": 4,
+              "max": 999999
+            },
+            "soul_debt": {
+              "current": 100000,
+              "max": 100000
+            }
+          },
+          "reason": "Successfully banked untaxed materials without incurring standard gathering debt."
+        },
+        "delta": {},
+        "remove": []
+      }
+    ],
+    "item_registry_updates": [
+      {
+        "item_id": "ITEM_copper_credits",
+        "set": {
+          "name": "Copper Credits",
+          "display_name": "Copper Credits",
+          "type": "currency",
+          "owner_scope": "character",
+          "custodian": "char_rhea",
+          "linked_threads": [],
+          "state_tags": [
+            "untaxed"
+          ],
+          "last_seen": {
+            "chapter": 2,
+            "scene": 6,
+            "location": "LOC_ASH_CHOKED_FOREST"
+          }
+        }
+      }
+    ],
+    "transfer_updates": [
+      {
+        "item_id": "ITEM_copper_credits",
+        "from": {
+          "custodian": "world"
+        },
+        "to": {
+          "character_id": "char_rhea"
+        },
+        "reason": "dispensed by deposit node"
+      }
+    ],
+    "inventory_alignment_updates": [
+      {
+        "character_id": "char_rhea",
+        "reason": "stowed coins in pocket",
+        "set": {
+          "inventory": [
+            {
+              "item": "ITEM_copper_credits",
+              "container": "blazer_pocket_right",
+              "status": "stowed"
+            }
+          ],
+          "containers": [
+            {
+              "container": "blazer_pocket_right",
+              "owner": "char_rhea",
+              "contents": [
+                "ITEM_cracked_smartphone",
+                "ITEM_copper_credits"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "world_updates": {
+      "cast_present": [
+        "char_rhea"
+      ],
+      "open_threads": [],
+      "location": "LOC_ASH_CHOKED_FOREST"
+    }
+  },
+  "scene_summary": [
+    "Rhea approached an automated System deposit node to trade her untaxed materials.",
+    "She navigated the predatory UI and reclassified her deposit as 'Environmental Debris Clearance' to bypass the Stamina tax and Soul Debt garnishment.",
+    "She successfully received 4 Copper Credits, securing her first untaxed capital."
+  ],
+  "key_events": [
+    "Rhea approached an automated System deposit node and dumped her untaxed scavenger materials into the hopper.",
+    "The Deposit Interface attempted to apply a 5 Stamina tax and garnish the entire 4 Copper Credit yield toward her Soul Debt.",
+    "Rhea bypassed the default classification by finding a hidden sub-menu and selecting 'Environmental Debris Clearance'.",
+    "The reclassification reduced the tax to 0 Stamina and exempted the yield from garnishment.",
+    "Rhea successfully banked 4 Copper Credits, securing her first untaxed capital."
+  ],
+  "must_stay_true": [
+    "mechanic: char_rhea has active status Tutorial Grace Period",
+    "mechanic: char_rhea has active title Indentured Soul",
+    "mechanic: char_rhea has 100,000 Soul Debt",
+    "injury: char_rhea bruised left leg",
+    "milestone: starter_cache_discovered = DONE",
+    "milestone: starter_cache_rejected = DONE",
+    "milestone: pedestal_chipped = DONE",
+    "inventory: char_rhea -> Makeshift Masonry Bludgeon (status=equipped, container=hand_right)",
+    "container: hand_right (owner=char_rhea, contents=[ITEM_makeshift_masonry_bludgeon])",
+    "milestone: weapon_crafted = DONE",
+    "inventory: char_rhea -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+    "inventory: char_rhea -> Ash-Fungus (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+    "mechanic: char_rhea HP is 25/100",
+    "mechanic: char_rhea Stamina is 40/100",
+    "REMOVE: inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+    "REMOVE: container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+    "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+    "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "milestone: first_credits_banked = DONE",
+    "mechanic: char_rhea has 4 Copper Credits"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "appearance_check_missing",
+        "message": "APPEARANCE_CHECK is missing for cast member: char_rhea.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Soul Debt but no matching stat exists in state.",
+        "severity": "warning"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 1,
+  "updated_at": "2026-04-19T18:32:05Z"
+}

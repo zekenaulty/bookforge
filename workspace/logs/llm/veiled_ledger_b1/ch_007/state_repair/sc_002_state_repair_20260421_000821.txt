@@ -1,0 +1,247 @@
+{
+  "schema_version": "1.0",
+  "summary_update": {
+    "last_scene": [
+      "The foyer locked down with lethal traps, forcing Rhea to solve a compliance puzzle while Vance held off a regenerating guard.",
+      "Rhea sacrificed her Obsidian Shard and Vance's Copper Credits to satisfy the terminal's ledger requirements.",
+      "The compliance checks were bypassed, disabling the traps and opening the path to the Audit Corridor."
+    ],
+    "key_events": [
+      "The Sanctum Foyer locked down with a lethal laser grid.",
+      "Vance held off a regenerating bureaucratic guard.",
+      "Rhea deposited the Obsidian Shard and Copper Credits into the terminal.",
+      "The terminal accepted the junk data, satisfying the compliance check.",
+      "The path to the Audit Corridor opened."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard, ITEM_administrative_coordinate_chip])",
+      "REMOVE: inventory: vance_harrow -> Copper Credits (status=stowed, container=torn_pocket)",
+      "REMOVE: container: torn_pocket (owner=vance_harrow, contents=[ITEM_copper_credits_vance])",
+      "mechanic: rhea_mercer Stamina is 1/150",
+      "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+      "milestone: overseer_budget_discovered = DONE",
+      "milestone: administrative_hub_coordinates_acquired = DONE",
+      "milestone: administrative_hub_coordinates_decrypted = DONE",
+      "inventory: rhea_mercer -> Administrative Coordinate Chip (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+      "milestone: tollbooth_escape_completed = DONE",
+      "inventory: rhea_mercer -> Null-Value Token (status=held, container=hand_left)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_null_value_token])",
+      "milestone: null_value_token_crafted = DONE",
+      "milestone: sanctum_threshold_reached = DONE",
+      "mechanic: vance_harrow has active status Aggro Target",
+      "mechanic: unit_734 has active status Critical System Failure Imminent",
+      "mechanic: vance_harrow HP is 2/150",
+      "mechanic: vance_harrow has active status Heavy Blunt-Force Trauma",
+      "milestone: sanctum_foyer_breached = DONE",
+      "milestone: elite_guards_defeated = DONE",
+      "container: torn_pocket (owner=vance_harrow, contents=[])",
+      "milestone: compliance_checks_bypassed = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Rhea bypassed the sanctum's lethal compliance checks by feeding the system junk data, sacrificing her Obsidian Shard and Vance's Copper Credits to open the path to the Audit Corridor."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "scene": 2,
+      "chapter": 7,
+      "persona_updates": [
+        "Rhea successfully bypassed a lethal compliance check by exploiting the system's willingness to accept raw materials as ledger value."
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed"
+        },
+        {
+          "container": "system_inventory",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "hand_left",
+          "item": "ITEM_null_value_token",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_left",
+          "contents": [
+            "ITEM_administrative_coordinate_chip"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "system_inventory",
+          "contents": [
+            "ITEM_raw_data_packet"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "hand_left",
+          "contents": [
+            "ITEM_null_value_token"
+          ],
+          "owner": "rhea_mercer"
+        }
+      ]
+    },
+    {
+      "character_id": "vance_harrow",
+      "scene": 2,
+      "chapter": 7,
+      "persona_updates": [
+        "Vance sacrificed his hard-earned Copper Credits to keep the party alive, trusting Rhea's puzzle-solving."
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_rebar",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_rebar"
+          ],
+          "owner": "vance_harrow"
+        },
+        {
+          "container": "torn_pocket",
+          "contents": [],
+          "owner": "vance_harrow"
+        }
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "vance_harrow",
+      "scene": 2,
+      "chapter": 7,
+      "set": {
+        "reason": "Ensuring all active statuses, including Heavy Blunt-Force Trauma, are explicitly maintained.",
+        "statuses": [
+          {
+            "active": true,
+            "name": "Heavy Blunt-Force Trauma",
+            "source": "Stamp-Hammer"
+          },
+          {
+            "active": true,
+            "name": "Severe Burns",
+            "source": "Cooling Vents"
+          },
+          {
+            "active": true,
+            "name": "Party Member",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Mutual Assured Destruction",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Soul-Bound Liability: Raw Data Packet",
+            "source": "System Exploit"
+          },
+          {
+            "active": true,
+            "name": "Active Audit Target",
+            "source": "System Override"
+          },
+          {
+            "active": true,
+            "name": "Audit Compliance (Red-Tier)",
+            "source": "Administrative Disciplinary Action"
+          },
+          {
+            "active": true,
+            "name": "Hostile Environment Marker",
+            "source": "Audit Compliance Enforcement"
+          },
+          {
+            "active": true,
+            "name": "Aggro Target",
+            "source": "Combat Initiation"
+          }
+        ]
+      },
+      "delta": {},
+      "remove": []
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "last_seen": {
+          "chapter": 7,
+          "scene": 2,
+          "location": "LOC_SANCTUM_FOYER"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_copper_credits_vance",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "last_seen": {
+          "chapter": 7,
+          "scene": 2,
+          "location": "LOC_SANCTUM_FOYER"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "Deposited into the compliance terminal."
+    },
+    {
+      "item_id": "ITEM_copper_credits_vance",
+      "from": {
+        "character_id": "vance_harrow"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "Deposited into the compliance terminal."
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "open_threads": [
+      "rhea_survival",
+      "system_debt_trap"
+    ],
+    "location": "LOC_AUDIT_CORRIDOR"
+  }
+}

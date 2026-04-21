@@ -1,0 +1,210 @@
+{
+  "schema_version": "1.0",
+  "character_updates": [
+    {
+      "character_id": "char_rhea",
+      "chapter": 1,
+      "scene": 6,
+      "appearance_updates": {
+        "set": {
+          "marks_add": [
+            {
+              "name": "Bloody Hands",
+              "location": "hands",
+              "durability": "transient"
+            }
+          ]
+        },
+        "reason": "Hands cut while crafting the bludgeon with the obsidian shard."
+      },
+      "containers": [
+        {
+          "container": "blazer_pocket_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_cracked_smartphone"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_obsidian_shard"
+          ]
+        },
+        {
+          "container": "hand_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_makeshift_masonry_bludgeon"
+          ]
+        }
+      ],
+      "inventory": [
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_makeshift_masonry_bludgeon",
+          "container": "hand_right",
+          "status": "equipped"
+        }
+      ],
+      "invariants_add": [
+        "inventory: char_rhea -> Makeshift Masonry Bludgeon (status=equipped, container=hand_right)",
+        "container: hand_right (owner=char_rhea, contents=[ITEM_makeshift_masonry_bludgeon])",
+        "milestone: weapon_crafted = DONE"
+      ],
+      "persona_updates": [
+        "Rhea realizes that the System is a rigid bureaucracy that can be exploited by out-of-bounds physics interactions and unregistered asset creation."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "char_rhea",
+      "set": {
+        "statuses": [
+          {
+            "name": "Tutorial Grace Period",
+            "duration": "00:00:30",
+            "effect": "Prevents fatal impact damage."
+          }
+        ]
+      },
+      "remove": [],
+      "delta": {},
+      "chapter": 1,
+      "scene": 6
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "system_overlay_integrity": 88
+      }
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "char_rhea",
+      "remove": [
+        "inventory.ITEM_raw_masonry_chunk"
+      ],
+      "reason": "Consumed in crafting."
+    },
+    {
+      "character_id": "char_rhea",
+      "set": {
+        "inventory.ITEM_makeshift_masonry_bludgeon": {
+          "item": "ITEM_makeshift_masonry_bludgeon",
+          "container": "hand_right",
+          "status": "equipped"
+        }
+      },
+      "reason": "Crafted and equipped new weapon."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_makeshift_masonry_bludgeon",
+      "set": {
+        "name": "Makeshift Masonry Bludgeon",
+        "display_name": "Makeshift Masonry Bludgeon",
+        "type": "weapon",
+        "owner_scope": "character",
+        "custodian": "char_rhea",
+        "linked_threads": [],
+        "state_tags": [
+          "crude",
+          "heavy",
+          "unregistered"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 6,
+          "location": "LOC_TUTORIAL_CRATER_RIDGE"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_raw_masonry_chunk",
+      "set": {
+        "owner_scope": "world",
+        "custodian": "world",
+        "state_tags": [
+          "consumed"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 6,
+          "location": "LOC_TUTORIAL_CRATER_RIDGE"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_raw_masonry_chunk",
+      "from": {
+        "character_id": "char_rhea"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "Consumed in crafting"
+    }
+  ],
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Rhea used the Obsidian Shard to whittle the Raw Masonry Chunk into a crude club, suffering minor cuts to her hands.",
+      "She equipped the Makeshift Masonry Bludgeon, causing the System to glitch and recognize the unregistered asset without applying a predatory debt contract."
+    ],
+    "key_events": [
+      "Rhea sat in the ash and used the Obsidian Shard to physically carve the Raw Masonry Chunk into a handle.",
+      "She cut her hand during the process, proving that the System's 1 HP threshold does not track minor cosmetic bleeding.",
+      "Rhea successfully crafted the Makeshift Masonry Bludgeon.",
+      "She equipped the weapon, causing the System interface to glitch and flicker purple.",
+      "The System recognized the weapon as an unregistered asset and failed to apply a tax assessment, securing Rhea her first debt-free advantage."
+    ],
+    "last_scene": [
+      "Rhea used the Obsidian Shard to carve the Raw Masonry Chunk into a makeshift weapon.",
+      "She suffered minor cuts to her hands, realizing the System ignores non-lethal cosmetic damage.",
+      "By equipping the crafted item, she forced the System to recognize it as 'Discovered' rather than 'Leased', bypassing the debt contract.",
+      "The System generated glitchy, anomalous UI notifications, unable to properly tax or classify the improvised bludgeon."
+    ],
+    "must_stay_true": [
+      "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+      "mechanic: char_rhea HP is 1/100",
+      "mechanic: char_rhea has active status Tutorial Grace Period",
+      "mechanic: char_rhea has active title Indentured Soul",
+      "mechanic: char_rhea has 100,000 Soul Debt",
+      "injury: char_rhea bruised left leg",
+      "milestone: starter_cache_discovered = DONE",
+      "milestone: starter_cache_rejected = DONE",
+      "inventory: char_rhea -> Obsidian Shard (status=held, container=hand_left)",
+      "container: hand_left (owner=char_rhea, contents=[ITEM_obsidian_shard])",
+      "REMOVE: inventory: char_rhea -> Raw Masonry Chunk (status=held, container=hand_right)",
+      "REMOVE: container: hand_right (owner=char_rhea, contents=[ITEM_raw_masonry_chunk])",
+      "inventory: char_rhea -> Makeshift Masonry Bludgeon (status=equipped, container=hand_right)",
+      "container: hand_right (owner=char_rhea, contents=[ITEM_makeshift_masonry_bludgeon])",
+      "milestone: pedestal_chipped = DONE",
+      "milestone: weapon_crafted = DONE"
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "char_rhea"
+    ],
+    "location": "LOC_TUTORIAL_CRATER_RIDGE",
+    "open_threads": []
+  }
+}

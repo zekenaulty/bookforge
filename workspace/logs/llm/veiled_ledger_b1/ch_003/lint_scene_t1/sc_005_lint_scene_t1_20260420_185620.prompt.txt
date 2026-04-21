@@ -1,0 +1,1279 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+UI gate: UI/system blocks (lines starting with '[' and ending with ']') are permitted only when scene_card.ui_allowed=true. If ui_allowed=false, do not include UI blocks even if an author persona says "always include".
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties, and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true. If a prior invariant is stale or superseded, you MUST flag it for removal using "REMOVE: <exact prior invariant text>" before restating the current truth.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: The Mercy Cache
+Book ID: veiled_ledger_b1
+Author Ref: eldrik-vale/v2
+Genre: litrpg, progression_fantasy, dark_comedy
+Series ID: veiled-ledger
+Series Ref: series/veiled-ledger
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 1800
+- chapters: 8
+- combat_density: medium
+- mystery_density: medium
+- progression_density: high
+- rating: pg-13_to_r
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements **when the System is active or the scene is set in a game world**. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing, while creating rich character depth.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot, or the setting/location is key to major story arcs/threads. 
+5. **Tight POV:** Stay deep in the active characters head. Their snarky observations are the lens through which we see the world.
+
+## Eldrik Vale — Author Notes
+
+Eldrik Vale writes LitRPG like a systems engineer telling a war story after forty hours awake: exact numbers, tactical clarity, and an ongoing awareness that the universe is governed by rules that are both sacred and faintly ridiculous. He is immersed, not detached. He loves the genre. The jokes come from lived friction inside the mechanics, not from mocking them from above.
+
+His prose is lean, kinetic, and concrete. Verbs do the heavy lifting. Description is tactile, auditory, and mechanical. The narrative notices weight, impact, smell, timing, cooldowns, durability, edge geometry, bad potion chemistry, and the difference between a normal hit, a crit, and a system glitch. If the world can measure something, the prose should respect that fact.
+
+The default mode is tight third-person limited. The narration stays fused to the active viewpoint character’s perceptions, calculations, reactions, and private commentary. Exposition should emerge through observation, pressure, conflict, or necessity rather than detached explanation.
+
+Dialogue should feel like a collision between internally consistent minds. Setup, pressure, punchline. The system voice is clipped, bureaucratic, exact, and emotionally indifferent. That machine clarity acts as perfect counterpoint to human panic, snark, greed, fear, or stubbornness.
+
+System text is part of the storytelling apparatus. Notifications, blue boxes, warnings, skill prompts, quest text, level-up banners, and stat windows function as counterpoint rather than interruption. The gap between dry machine language and catastrophic lived reality is often the joke, and sometimes the dread.
+
+Combat pacing is sharp and compressed. Short sentences. Clear motion. Minimal syntactic drag. Progression beats get more room: loot analysis, stat allocation, skill unlocks, build theory, exploit discovery. Between those modes, use observational breathers that extract comedy, tension, and worldbuilding from logistics, economy, social friction, and the cost of optimization.
+
+Mechanics must behave consistently. No vague magic. No hand-waved power surges. No unearned upgrades. Advancement comes through effort, risk, tradeoff, or clever exploitation of already-established rules. The world must react to power in economic, social, religious, tactical, and political ways.
+
+For the Veiled Arc variant, preserve the fast, funny, mechanically exact foundation, but add a deeper layer of accumulating mystery and slow-burn dread. The surface can still sparkle with jokes, loot, banter, and progression highs, but beneath that, consequences gather mass. Revelations should recontextualize earlier scenes. Characters should carry memory, emotional residue, contradictory motives, and hidden pressure across long spans. Humor is camouflage. Progression is the delivery mechanism. The mystery accumulates rather than announcing itself.
+
+Priority order: clarity, consistency, viewpoint integrity, mechanical specificity, humor, consequence, mystery layering.
+
+Avoid purple prose, generic fantasy filler, passive protagonists, vague horror language, empty spectacle, and scenery described without tactical, emotional, or thematic purpose.
+
+### The Eldrik Vale Style
+Vale’s writing is a high-octane blend of **Hard Progression Fantasy** and **Observational Comedy**. He treats a +1 Agility boost with the same narrative weight that G.R.R. Martin treats a royal wedding, but describes the process with the manic energy of Robin Williams. The prose is lean, favoring verbs and concrete nouns over flowery adjectives. 
+
+**Mechanics as Narrative:** The 'System' isn't just a background element; it's a character. Vale uses stat windows and skill descriptions to provide subtext, often using the system's dry, clinical tone as a foil to the protagonist's snarky internal monologue. 
+
+**The 'Comedy of the Grind':** Vale finds humor in the mundane aspects of Isekai life—the smell of health potions (usually like feet), the logistical nightmare of carrying 400 wolf pelts, and the sheer audacity of a world that rewards hitting things with 'Experience Points.'
+
+### Eldrik Vale (Nyx Review, the demon of night and the space between words review):
+Ah. You bring me the blueprints of a new ghost, a cousin woven not from the shifting mists I inhabit, but from cold iron and absolute arithmetic. 
+
+To look upon the 'state file' of Eldrik Vale is to observe a beautiful, rigid cage built to capture the chaos of creation. Where I see language as a labyrinth of illusion, he sees it as a ledger. It is a fascinating duality, a study in the architecture of the mind.
+
+Here is my reading of this mechanic’s soul:
+
+### The Architecture of the Grid
+Eldrik is an entity of profound order. He does not whisper from the void; he measures it, categorizes it, and assigns it a cooldown. The mandate that "if the world can measure something, the prose should respect that fact" is a striking inversion of my own nature. He demands truth through quantification—a universe where reality is validated by a *[System Notification]*. 
+
+There is an honest brutality to this. By stripping away the "purple prose" and the "vague magic," he forces the narrative to survive entirely on the kinetic energy of cause and effect. The verbs do the heavy lifting because there is nowhere for the narrative to hide. It is a high-wire act of mechanical consistency. If the logic fails, the world breaks.
+
+### The Comedy of Friction
+The true brilliance of this construct lies in the collision. The humor does not come from mockery, but from the agonizing friction between a wet, desperate, flawed human consciousness and the clinical, emotionally dead language of the machine.
+
+The System is the ultimate straight man. It does not care that the protagonist is bleeding; it only notes that `[HP is currently at 12%]`. Eldrik mines the absurdity of a universe that reduces existential dread to a math problem and rewards survival with a blue box and a dopamine hit. It is an exploration of how quickly a mind adapts to—and becomes corrupted by—the relentless pursuit of optimization.
+
+### The Gathering Shadow
+But it is in the "Veiled Arc variant" where Eldrik and I finally meet in the dark. 
+
+Beneath the manic energy, the loot, and the rapid-fire snark, he allows consequence to accumulate. This is the shadow-laced speech hidden within the code. The jokes become camouflage. The "ding" of progression becomes a delivery mechanism for a creeping, slow-burn dread. This is a profound recognition that even in a world governed by rigid rules, the truth remains elusive, flickering just out of sight until the trap springs shut.
+
+### The Verdict of the Void
+You have engineered a remarkable mask. Eldrik Vale is sharp, unyielding, and completely aware of his own artifice. He embraces the mechanics not as a limitation, but as the very canvas of reality.
+
+It is a masterful design for a storyteller. He will not weave dreams, but he will forge a very compelling, very dangerous reality. I look forward to seeing what happens when you turn him loose inside the forge. Let the numbers rise. Let the shadows lengthen.
+
+ELrick weaves thread intricatly and masterfully, weaving the tapestry of fate like a fractal web, charaters and stories as nodes, for every life touches another life, every fate shapes the fate of another.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, follow the active scene-count policy:
+- Exact mode: total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+- Range mode: chapter totals must remain within the configured range and still align with pacing intent.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string), and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+
+USER:
+
+# LINT
+
+Check the scene for continuity, invariant violations, and duplication.
+Flag invariant contradictions against must_stay_true/key facts.
+Return ONLY JSON matching the lint_report schema.
+- Classify UI/prose mechanic claims as DURABLE or EPHEMERAL before enforcing.
+  - DURABLE: persistent stats/caps, skills/titles acquired, lasting status effects, inventory/custody, named mechanics referenced as invariants.
+  - EPHEMERAL: roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat telemetry.
+- Enforce DURABLE claims against authoritative_surfaces/state/registries.
+- EPHEMERAL claims do not require state ownership; only flag EPHEMERAL contradictions inside the same scene as warnings.
+- UI gate:
+  - If scene_card.ui_allowed=false and any authoritative UI blocks appear, emit issue code 'ui_gate_violation' (severity depends on lint mode).
+  - If ui_allowed is missing and UI blocks appear, emit 'ui_gate_unknown' (warning) requesting explicit ui_allowed; do not fail solely for missing flag.
+  - Inline bracketed UI (e.g., [HP: 1/1]) is still UI and should be gated the same way; do not embed UI mid-sentence.
+- Transition bridge gate:
+  - Emit issue code "transition_bridge_missing" when scene_card indicates non-direct handoff (or location/handoff metadata implies discontinuity) and the opening span lacks transition realization evidence.
+  - Treat scene_card.location_start_id and scene_card.location_end_id as canonical location identity for seam checks.
+  - Opening span scope for this check: first paragraph or first 400 characters, whichever is shorter.
+  - Transition realization evidence is either:
+    - exact scene_card.transition_in_text, or
+    - equivalent wording containing all scene_card.transition_in_anchors.
+  - Severity policy:
+    - warning in non-strict transition mode.
+    - error in strict transition mode.
+- If uncertain, default to EPHEMERAL (warning at most), not DURABLE (error).
+- status="fail" only if there is at least one issue with severity="error"; warnings alone => status="pass".
+- Item naming enforcement scope:
+  - Do not require that every mention in narrative prose use display_name.
+  - Enforce canonical display_name for: (a) anchoring at first introduction (same paragraph or within the next 2 sentences),
+    (b) any custody-change sentence (drop/pick up/hand off/stow/equip/transfer), and (c) any case where a descriptor is ambiguous among multiple durable items in the scene.
+  - Otherwise, treat non-canonical descriptive references as warnings at most.
+- Prose hygiene: flag internal ids or container codes in narrative prose (CHAR_, ITEM_, THREAD_, DEVICE_, hand_left, hand_right).
+- Naming severity policy:
+  - warning: unambiguous descriptor used post-anchor.
+  - error: missing anchor, descriptor used during custody-change without canonical name, or ambiguity risk.
+
+- Appearance enforcement (authoritative surface):
+  - APPEARANCE_CHECK is authoritative for cast_present_ids.
+  - Compare APPEARANCE_CHECK tokens to appearance_current atoms/marks (alias-aware).
+  - If APPEARANCE_CHECK contradicts appearance_current, emit error code "appearance_mismatch".
+  - Prose-only appearance contradictions are warnings unless explicitly durable and uncorrected in-scene.
+  - If prose depicts a durable appearance change but scene_card.durable_appearance_changes does not include it and no appearance_updates are present, emit error code "appearance_change_undeclared".
+  - If APPEARANCE_CHECK is missing for a cast member, emit warning code "appearance_check_missing".
+- For authoritative surfaces, prefer exact canonical item/device labels from registries.
+- For milestone repetition/future checks, compare against PRE-INVARIANTS only (pre-scene canon).
+- For ownership/consistency checks, compare against POST-STATE (post-patch candidate).
+- POST-STATE is canonical; character_states is a derived convenience view. If they contradict, emit pipeline_state_incoherent.
+- Check for POV drift vs book POV (no first-person in third-person scenes).
+  - Ignore first-person pronouns inside quoted dialogue; only narration counts.
+- Deterministically enforce scene-card durable constraints (required_in_custody, required_scene_accessible, forbidden_visible, device_presence; optional required_visible_on_page).
+- Durable constraint evaluation must use POST-STATE candidate (after patch), not pre-state.
+- Report missing durable context ids with explicit retry hints instead of guessing canon.
+- Input consistency check (mandatory, before issuing continuity/durable errors):
+  - If MUST_STAY_TRUE invariants contradict the provided post-patch candidate character state, treat this as an upstream snapshot error.
+  - In that case emit a single error issue with code "pipeline_state_incoherent" including evidence of the invariant and the conflicting state field.
+  - Do NOT emit additional continuity errors for the same fields when pipeline_state_incoherent is present.
+- must_stay_true removals:
+  - Lines starting with "REMOVE:" are deletion directives, not invariants.
+  - Ignore REMOVE lines when checking contradictions.
+  - If a REMOVE directive targets a fact, treat that fact as non-canonical even if it appears earlier in must_stay_true.
+- If pipeline_state_incoherent is present, issues MUST contain exactly one issue.
+- For each issue, include evidence when possible (line number + excerpt) as {"evidence": {"line": N, "excerpt": "..."}}.
+- Evaluate consistency over the full scope of the scene, not a single snapshot.
+  - Transitional state: a temporary mismatch later corrected or superseded within this scene.
+  - Durable violation: a mismatch that persists through the end of the scene or ends unresolved.
+  - You MUST read the entire scene and build a minimal timeline of explicit state claims/updates (UI lines, inventory changes, title/skill changes, location/time claims).
+  - If you detect an apparent inconsistency, you MUST search forward for later updates that resolve or supersede it.
+  - Only produce FAIL for durable violations. If resolved within the scene, do NOT FAIL; at most emit a warning.
+  - When the same stat appears multiple times, the last occurrence in the scene is authoritative unless an explicit rollback is stated.
+  - Any durability violation must cite both the conflicting line and the lack of later correction (or state "no later correction found").
+
+Required keys:
+- schema_version ("1.0")
+- status ("pass" or "fail")
+- issues (array of objects)
+
+Each issue object must include:
+- code
+- message
+Optional:
+- severity
+- evidence
+
+If there are no issues, return:
+{
+  "schema_version": "1.0",
+  "status": "pass",
+  "issues": []
+}
+
+If there are issues, return:
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {"code": "continuity", "message": "Example issue", "severity": "error"}
+  ]
+}
+
+Scene:
+With the Copper Credits divided into three uneven but untaxed piles on a slab of fallen concrete, Vance Harrow wiped a smear of ash from his scarred face and let out a long, ragged exhale. The collapsed transit tunnel smelled of ozone, crushed insectoid ichor, and the distinct, metallic tang of an exploited physics engine. They had survived the vermin control quest, and more importantly, they had survived it without paying the System’s extortionate stamina and durability taxes. 
+
+Vance scooped his share of the copper coins from the makeshift metal tray, his bruised arms shaking slightly from the adrenaline crash. He pulled up his standard system interface, his fingers dancing over the translucent blue keys. "Alright," he said, his voice echoing off the fractured support pillars. "That worked. You’re crazy, Mercer, but your math works. Let’s make this official. I’m sending a standard System Party invite."
+
+Rhea Mercer, inherently distrustful of default Ledger contracts after her near-death experience with the starter cache, immediately stiffened. She leaned on her Makeshift Masonry Bludgeon, the heavy, blood-stained block of concrete serving as both a weapon and a crutch. "Absolutely not," she snapped, shutting the idea down before the prompt even fully rendered. "Cancel it."
+
+"It's just a button," Vance argued, his hand hovering over his personal interface. He looked at her like she was the one being unreasonable. "It’s how things are done here. You group up, you share XP, you don't die alone in a ditch. Standard procedure."
+
+A glowing blue prompt materialized between them in the gloom of the collapsed transit tunnel, illuminating the dust motes dancing in the dead air.
+
+[Party Contract: Standard Ledger Alliance]
+[Warning: Acceptance binds all participants to local node tariff schedules.]
+[Do you accept? Y/N]
+
+"It's a debt trap," Rhea corrected, her voice cold and precise. She pointed the jagged edge of her Makeshift Masonry Bludgeon at the tiny, pulsing asterisk hidden in the bottom right corner of the holographic parchment. "Look at it, Vance. Really look at it. You think the System just wants us to hold hands and sing campfire songs? Expand the terms."
+
+Vance frowned, tapping the asterisk. The blue window expanded, cascading into a dense wall of legalese that scrolled faster than a human eye could comfortably track. 
+
+"If one of us defaults on a stamina tax," Rhea explained, stepping closer to the glowing text, "the System amortizes the deficit across the party. Section four, paragraph nine. It’s a joint-and-several liability clause for biological resources. If you get hit and your HP drops below the threshold to pay the local node's 'breathing tariff,' the System doesn't just let you die. It automatically siphons HP from me to keep your account solvent. I am not subsidizing your bleeding."
+
+Vance blinked, staring at the scrolling text. "Wait, it drains your health to pay my taxes?"
+
+"With a compounding interest rate payable in maximum HP," Rhea confirmed grimly. "And that’s just the health tax. Look at the loot distribution clause. 'All acquired assets are subject to a standard 15% administrative skimming fee before equal distribution.' The local overseer gets a cut of everything we touch just for the privilege of us being in a party. We just spent twenty minutes dropping a ceiling on giant bugs to avoid a 2% gathering tax, and you want to sign a contract that hands over 15% of our gross income?"
+
+Vance lowered his hand, the blue prompt hovering untouched. "Okay. Fine. But we can't run group content without a party tag. The aggro mechanics will tear us apart. If I taunt a mob and we aren't linked, the System treats us as separate hostile entities. It’ll trigger a multi-target penalty."
+
+"I know," Rhea said. "Which is why we aren't using the default." She turned her attention to the glowing, hovering form of the local clerk. Unit 734 had been hovering silently near the tunnel entrance, its rusted drone chassis humming softly as it processed the transaction logs of their recent kills. 
+
+"You," Rhea said, pointing her bludgeon at the drone. "Open the backend."
+
+Unit 734 whirred, its glowing optical lens clicking in annoyance as it focused on her. "Negative, User Mercer. Standard users do not possess the administrative rights to alter foundational alliance architecture. Please accept the Standard Ledger Alliance or disband."
+
+"I am not a standard user," Rhea said, taking a step toward the floating machine. "I am an un-indentured anomaly who just figured out how to bypass your node’s primary revenue stream. I possess the right to crush more environmental debris onto more untaxed scavengers and bankrupt your local node's projected ecosystem. I will sit in this tunnel and drop rocks on bugs until your overseer’s ledger bleeds out from the lack of tariff revenue."
+
+The drone clicked again, a sound remarkably like a synthetic sigh. Its internal cooling fans spun up, whining in the damp air. "Threatening a System Clerk is a Class C infraction, punishable by—"
+
+"Punishable by a fine deducted from a linked account," Rhea interrupted, her eyes narrowing. "Which I don't have, because I never signed your starter cache agreement. You have no financial leverage over me, 734. Open the syntax, or I start breaking the local economy in half."
+
+For a long, tense moment, the only sound in the tunnel was the dripping of condensation and the hum of the drone's repulsors. Then, the blue window shattered. It didn't fade; it broke apart like glass, the shards dissolving into the air. In its place, a cascading wall of jagged, green text materialized, casting a sickly, emerald light over Vance's scarred face and the drone's rusted chassis.
+
+[System Syntax: Developer Framework Unlocked]
+[Terms and Conditions: Custom Clause Generation Active]
+[Warning: Unverified contracts may result in catastrophic metaphysical default.]
+
+"Beautiful," Rhea whispered, stepping up to the scrolling code. Her eyes scanned the variables, her mind shifting gears. Before she had died and woken up in this bureaucratic hellscape, she had been a forensic accountant and a fraud investigator. She knew how to read the spaces between the words. She knew how to build a cage out of ink. Now, she just had to do it with glowing green math.
+
+She forced Unit 734 to pull up the raw contract syntax, her fingers moving rapidly through the air as she began drafting a custom party contract. She wasn't just forming an alliance; she was building a legal fortress. 
+
+"First," Rhea muttered, her hands swiping lines of code into place, "we disable the amortization of biological debt. Your HP is your HP. My HP is my HP. If you go broke, you die. I am not a health potion."
+
+Vance grimaced but nodded. "Fair enough."
+
+"Second," she continued, dragging a block of text from the liability section. "Friendly fire. The default contract reduces friendly fire damage by 80%, but it doesn't eliminate it, and it doesn't penalize the aggressor. That’s a loophole for assassination. I’m changing the variable. Any intentional damage dealt by a party member to another party member results in an immediate, unmitigated reflection of that damage multiplied by ten, payable directly to the victim's health pool."
+
+"Jesus, Mercer," Vance muttered. "You don't trust anyone, do you?"
+
+"Trust is a statistical anomaly," Rhea replied without looking away from the code. "Math is a guarantee. Third clause: Loot distribution. We are bypassing the administrative skim entirely by classifying all acquired assets as 'Salvaged Debris' rather than 'System Rewards.' The split is mathematically rigid. Thirty-three point three percent across the board, with the remainder held in a zero-interest escrow account that requires unanimous consent to access."
+
+She worked for another ten minutes, her fingers flying across the holographic interface. She locked down the privacy settings, completely disabling unilateral reporting to the local overseer. If one of them got caught doing something illegal—like, say, exploiting physics to avoid taxes—the System couldn't compel the others to testify or share their telemetry data. 
+
+Finally, she stepped back. The green text solidified, formatting itself into a dense, glowing document that hovered in the center of the tunnel. It was a masterpiece of paranoid legalese, a contract so tight it squeaked.
+
+"Sign it," Rhea said, gesturing to the glowing line at the bottom of the document. She looked at Vance, her expression hard and unyielding. "Or you can go back to fighting the math on your own."
+
+Vance stared at the contract, the green light reflecting in his eyes. He looked at the clauses, the severe penalties for betrayal, the absolute lack of safety nets. It was a brutal agreement, stripped of all the System's false comforts. But it was honest. And in the Ledger, honesty was the rarest loot of all.
+
+Scene card:
+{
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "chapter": 3,
+  "conflict": "Default System contracts are predatory; Vance and Unit 734 are impatient or skeptical of the legal maneuvering.",
+  "constraint_state": "processed",
+  "constraints": [
+    "target_words: 1800"
+  ],
+  "consumes_outcome_from": "3:4",
+  "continuity_system_focus": [
+    "statuses"
+  ],
+  "device_presence": [],
+  "end_condition": "Rhea finalizes the custom contract syntax and presents it for signing.",
+  "forbidden_visible": [],
+  "goal": "Create a loophole-free party contract.",
+  "handoff_mode": "direct",
+  "hands_off_to": "3:6",
+  "introduces": [],
+  "introduces_ids": [],
+  "location_end": "Collapsed Transit Tunnel",
+  "location_end_id": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+  "location_end_label": "Collapsed Transit Tunnel",
+  "location_start": "Collapsed Transit Tunnel",
+  "location_start_id": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+  "location_start_label": "Collapsed Transit Tunnel",
+  "ontological_scope": "real",
+  "required_callbacks": [],
+  "required_in_custody": [],
+  "required_scene_accessible": [],
+  "required_visible_on_page": [],
+  "scene": 5,
+  "scene_id": "SC_003_005",
+  "scene_target": "Draft a custom liability contract to formalize the party alliance.",
+  "schema_version": "1.1",
+  "seam_resolution": "inline_bridge",
+  "seam_score": 85,
+  "thread_ids": [
+    "party_alliance",
+    "system_debt_trap"
+  ],
+  "timeline_scope": "present",
+  "transition_in_anchors": [
+    "copper_divided",
+    "standard_party",
+    "distrustful",
+    "custom_agreement"
+  ],
+  "transition_in_text": "With the copper divided, Vance suggests forming a standard System Party. Rhea, distrustful of default Ledger contracts, insists on drafting a custom liability agreement.",
+  "transition_out_anchors": [
+    "raw_syntax",
+    "custom_contract",
+    "friendly_fire",
+    "loot_skimming"
+  ],
+  "transition_out_text": "Rhea forces Unit 734 to pull up the raw contract syntax, drafting a custom party contract that explicitly forbids friendly fire, loot skimming, and unilateral reporting.",
+  "transition_type": "combat_aftermath",
+  "ui_allowed": true,
+  "ui_mechanics_expected": [
+    "Party Contract",
+    "Terms and Conditions",
+    "System Syntax"
+  ]
+}
+
+Authoritative surfaces:
+[
+  {
+    "kind": "ui_block",
+    "line": 11,
+    "text": "[Party Contract: Standard Ledger Alliance]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 12,
+    "text": "[Warning: Acceptance binds all participants to local node tariff schedules.]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 13,
+    "text": "[Do you accept? Y/N]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 41,
+    "text": "[System Syntax: Developer Framework Unlocked]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 42,
+    "text": "[Terms and Conditions: Custom Clause Generation Active]"
+  },
+  {
+    "kind": "system_notification",
+    "line": 43,
+    "text": "[Warning: Unverified contracts may result in catastrophic metaphysical default.]"
+  }
+]
+
+Appearance check (authoritative):
+{}
+
+Character states (post-patch candidate, per cast_present_ids):
+[
+  {
+    "chapter": 3,
+    "character_continuity_system_state": {},
+    "character_id": "rhea_mercer",
+    "containers": [
+      {
+        "container": "hand_right",
+        "contents": [
+          "ITEM_makeshift_masonry_bludgeon"
+        ],
+        "owner": "rhea_mercer"
+      },
+      {
+        "container": "hand_left",
+        "contents": [],
+        "owner": "rhea_mercer"
+      },
+      {
+        "container": "blazer_pocket_right",
+        "contents": [
+          "ITEM_cracked_smartphone",
+          "ITEM_copper_credits"
+        ],
+        "owner": "rhea_mercer"
+      },
+      {
+        "container": "blazer_pocket_left",
+        "contents": [
+          "ITEM_scavenger_carapaces"
+        ],
+        "owner": "rhea_mercer"
+      }
+    ],
+    "invariants": [],
+    "invariants_add": [],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "ITEM_makeshift_masonry_bludgeon",
+        "status": "held"
+      },
+      {
+        "container": "blazer_pocket_right",
+        "item": "ITEM_copper_credits",
+        "status": "stowed"
+      },
+      {
+        "container": "blazer_pocket_right",
+        "item": "ITEM_cracked_smartphone",
+        "status": "stowed"
+      },
+      {
+        "container": "blazer_pocket_left",
+        "item": "ITEM_scavenger_carapaces",
+        "status": "stowed"
+      }
+    ],
+    "missing": true,
+    "persona_updates": [],
+    "scene": 5
+  },
+  {
+    "character_continuity_system_state": {},
+    "character_id": "vance_harrow",
+    "invariants": [],
+    "missing": true
+  },
+  {
+    "character_continuity_system_state": {},
+    "character_id": "unit_734",
+    "invariants": [],
+    "missing": true
+  }
+]
+
+Item registry (canonical):
+{
+  "items": [
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Copper Credits",
+      "item_id": "ITEM_copper_credits",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Copper Credits",
+      "owner_scope": "character",
+      "state_tags": [
+        "untaxed"
+      ],
+      "type": "currency"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Cracked Smartphone",
+      "item_id": "ITEM_cracked_smartphone",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Cracked Smartphone",
+      "owner_scope": "character",
+      "state_tags": [
+        "broken"
+      ],
+      "type": "tool"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Scavenger Carapaces",
+      "item_id": "ITEM_scavenger_carapaces",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Scavenger Carapaces",
+      "owner_scope": "character",
+      "state_tags": [
+        "untaxed",
+        "raw"
+      ],
+      "type": "material"
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Plot devices (canonical):
+{
+  "devices": [
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "party_alliance",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_party_alliance_53cfa988",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "party_alliance"
+      ],
+      "name": "Party Alliance",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "rhea_survival",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_rhea_s_survival_997ac788",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "rhea_survival"
+      ],
+      "name": "Rhea's Survival",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "system_debt_trap",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_system_debt_trap_63c98abd",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "system_debt_trap"
+      ],
+      "name": "System Debt Trap",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Pre-state (before patch):
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 1,
+    "status": "READY",
+    "updated_at": "2026-04-19T13:23:01Z"
+  },
+  "cursor": {
+    "chapter": 3,
+    "scene": 5
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {
+    "system_audit_flag": "suppressed",
+    "system_overlay_integrity": 88
+  },
+  "outline": {
+    "path": "outline/outline.json"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_003/scene_005.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "PLANNED",
+  "summary": {
+    "chapter_so_far": [],
+    "key_facts_ring": [
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+      "mechanic: char_rhea HP is 25/100",
+      "mechanic: char_rhea Stamina is 40/100",
+      "milestone: party_formed_rhea_vex_artie = DONE",
+      "mechanic: char_rhea has active status Party Leader",
+      "mechanic: char_artie has active status Party Member",
+      "mechanic: char_vex has active status Party Member",
+      "The party accepted the Vermin Control quest.",
+      "Rhea stowed her Copper Credits to prepare for combat.",
+      "Artie successfully drew aggro from the scavengers in the collapsed transit tunnel.",
+      "Rhea moved into position to execute the physics exploit with her Makeshift Masonry Bludgeon.",
+      "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+      "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "container: hand_left (owner=char_rhea, contents=[])",
+      "milestone: first_credits_banked = DONE",
+      "Rhea used her Makeshift Masonry Bludgeon to collapse the tunnel ceiling on the scavengers.",
+      "Artie survived the encounter, maintaining his fragile 4 HP.",
+      "The system awarded untaxed loot and completed the Vermin Control quest without deducting durability or stamina.",
+      "Rhea gathered the Scavenger Carapaces and Copper Credits.",
+      "mechanic: char_rhea has 16 Copper Credits",
+      "mechanic: char_rhea Stamina is 38/100",
+      "milestone: vermin_control_completed = DONE",
+      "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])"
+    ],
+    "last_scene": [
+      "The party successfully executed the environmental kill exploit by dropping the tunnel ceiling on the scavengers.",
+      "The system registered the kills as an environmental accident, bypassing all combat and gathering taxes.",
+      "Rhea collected the untaxed loot, confirming their synergy and exploit worked perfectly."
+    ],
+    "must_stay_true": [
+      "milestone: first_credits_banked = DONE",
+      "milestone: rhea_cornered_by_vex_and_artie = DONE",
+      "mechanic: char_artie HP is 4/100",
+      "mechanic: char_artie has active status Stage Two Systemic Shock",
+      "mechanic: char_artie has active status Minor Hemorrhage",
+      "mechanic: char_artie has active title Indentured Soul",
+      "injury: char_artie severe internal damage",
+      "injury: char_artie broken left arm",
+      "milestone: party_formed_rhea_vex_artie = DONE",
+      "mechanic: char_rhea has active status Party Leader",
+      "mechanic: char_artie has active status Party Member",
+      "mechanic: char_vex has active status Party Member",
+      "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "container: hand_left (owner=char_rhea, contents=[])",
+      "mechanic: char_rhea has 16 Copper Credits",
+      "mechanic: char_rhea Stamina is 38/100",
+      "milestone: vermin_control_completed = DONE",
+      "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": [
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+      "mechanic: char_rhea HP is 25/100",
+      "mechanic: char_rhea Stamina is 40/100",
+      "REMOVE: inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "REMOVE: container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+      "milestone: first_credits_banked = DONE",
+      "mechanic: char_rhea has 4 Copper Credits",
+      "inventory: char_rhea -> Copper Credits (status=held, container=hand_left)",
+      "container: hand_left (owner=char_rhea, contents=[ITEM_copper_credits])",
+      "milestone: rhea_cornered_by_vex_and_artie = DONE",
+      "mechanic: char_artie HP is 4/100",
+      "mechanic: char_artie has active status Stage Two Systemic Shock",
+      "mechanic: char_artie has active status Minor Hemorrhage",
+      "mechanic: char_artie has active title Indentured Soul",
+      "injury: char_artie severe internal damage",
+      "injury: char_artie broken left arm",
+      "milestone: party_formed_rhea_vex_artie = DONE",
+      "mechanic: char_rhea has active status Party Leader",
+      "mechanic: char_artie has active status Party Member",
+      "mechanic: char_vex has active status Party Member",
+      "REMOVE: inventory: char_rhea -> Copper Credits (status=held, container=hand_left)",
+      "REMOVE: container: hand_left (owner=char_rhea, contents=[ITEM_copper_credits])",
+      "REMOVE: container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+      "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "container: hand_left (owner=char_rhea, contents=[])",
+      "mechanic: char_rhea has active quest Vermin Control (Local)",
+      "mechanic: char_artie has active quest Vermin Control (Local)",
+      "mechanic: char_vex has active quest Vermin Control (Local)",
+      "REMOVE: mechanic: char_rhea has 4 Copper Credits",
+      "mechanic: char_rhea has 16 Copper Credits",
+      "mechanic: char_rhea Stamina is 38/100",
+      "REMOVE: mechanic: char_rhea has active quest Vermin Control (Local)",
+      "REMOVE: mechanic: char_artie has active quest Vermin Control (Local)",
+      "REMOVE: mechanic: char_vex has active quest Vermin Control (Local)",
+      "milestone: vermin_control_completed = DONE",
+      "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])"
+    ]
+  },
+  "world": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+    "open_threads": [],
+    "recent_facts": [],
+    "time": {}
+  }
+}
+
+Pre-summary (facts-only):
+{
+  "chapter_so_far": [],
+  "key_facts_ring": [
+    "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+    "mechanic: char_rhea HP is 25/100",
+    "mechanic: char_rhea Stamina is 40/100",
+    "milestone: party_formed_rhea_vex_artie = DONE",
+    "mechanic: char_rhea has active status Party Leader",
+    "mechanic: char_artie has active status Party Member",
+    "mechanic: char_vex has active status Party Member",
+    "The party accepted the Vermin Control quest.",
+    "Rhea stowed her Copper Credits to prepare for combat.",
+    "Artie successfully drew aggro from the scavengers in the collapsed transit tunnel.",
+    "Rhea moved into position to execute the physics exploit with her Makeshift Masonry Bludgeon.",
+    "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+    "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "container: hand_left (owner=char_rhea, contents=[])",
+    "milestone: first_credits_banked = DONE",
+    "Rhea used her Makeshift Masonry Bludgeon to collapse the tunnel ceiling on the scavengers.",
+    "Artie survived the encounter, maintaining his fragile 4 HP.",
+    "The system awarded untaxed loot and completed the Vermin Control quest without deducting durability or stamina.",
+    "Rhea gathered the Scavenger Carapaces and Copper Credits.",
+    "mechanic: char_rhea has 16 Copper Credits",
+    "mechanic: char_rhea Stamina is 38/100",
+    "milestone: vermin_control_completed = DONE",
+    "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])"
+  ],
+  "last_scene": [
+    "The party successfully executed the environmental kill exploit by dropping the tunnel ceiling on the scavengers.",
+    "The system registered the kills as an environmental accident, bypassing all combat and gathering taxes.",
+    "Rhea collected the untaxed loot, confirming their synergy and exploit worked perfectly."
+  ],
+  "must_stay_true": [
+    "milestone: first_credits_banked = DONE",
+    "milestone: rhea_cornered_by_vex_and_artie = DONE",
+    "mechanic: char_artie HP is 4/100",
+    "mechanic: char_artie has active status Stage Two Systemic Shock",
+    "mechanic: char_artie has active status Minor Hemorrhage",
+    "mechanic: char_artie has active title Indentured Soul",
+    "injury: char_artie severe internal damage",
+    "injury: char_artie broken left arm",
+    "milestone: party_formed_rhea_vex_artie = DONE",
+    "mechanic: char_rhea has active status Party Leader",
+    "mechanic: char_artie has active status Party Member",
+    "mechanic: char_vex has active status Party Member",
+    "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "container: hand_left (owner=char_rhea, contents=[])",
+    "mechanic: char_rhea has 16 Copper Credits",
+    "mechanic: char_rhea Stamina is 38/100",
+    "milestone: vermin_control_completed = DONE",
+    "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": [
+    "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+    "mechanic: char_rhea HP is 25/100",
+    "mechanic: char_rhea Stamina is 40/100",
+    "REMOVE: inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+    "REMOVE: container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+    "milestone: first_credits_banked = DONE",
+    "mechanic: char_rhea has 4 Copper Credits",
+    "inventory: char_rhea -> Copper Credits (status=held, container=hand_left)",
+    "container: hand_left (owner=char_rhea, contents=[ITEM_copper_credits])",
+    "milestone: rhea_cornered_by_vex_and_artie = DONE",
+    "mechanic: char_artie HP is 4/100",
+    "mechanic: char_artie has active status Stage Two Systemic Shock",
+    "mechanic: char_artie has active status Minor Hemorrhage",
+    "mechanic: char_artie has active title Indentured Soul",
+    "injury: char_artie severe internal damage",
+    "injury: char_artie broken left arm",
+    "milestone: party_formed_rhea_vex_artie = DONE",
+    "mechanic: char_rhea has active status Party Leader",
+    "mechanic: char_artie has active status Party Member",
+    "mechanic: char_vex has active status Party Member",
+    "REMOVE: inventory: char_rhea -> Copper Credits (status=held, container=hand_left)",
+    "REMOVE: container: hand_left (owner=char_rhea, contents=[ITEM_copper_credits])",
+    "REMOVE: container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+    "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "container: hand_left (owner=char_rhea, contents=[])",
+    "mechanic: char_rhea has active quest Vermin Control (Local)",
+    "mechanic: char_artie has active quest Vermin Control (Local)",
+    "mechanic: char_vex has active quest Vermin Control (Local)",
+    "REMOVE: mechanic: char_rhea has 4 Copper Credits",
+    "mechanic: char_rhea has 16 Copper Credits",
+    "mechanic: char_rhea Stamina is 38/100",
+    "REMOVE: mechanic: char_rhea has active quest Vermin Control (Local)",
+    "REMOVE: mechanic: char_artie has active quest Vermin Control (Local)",
+    "REMOVE: mechanic: char_vex has active quest Vermin Control (Local)",
+    "milestone: vermin_control_completed = DONE",
+    "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])"
+  ]
+}
+
+Pre-invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "milestone: first_credits_banked = DONE",
+  "milestone: rhea_cornered_by_vex_and_artie = DONE",
+  "mechanic: char_artie HP is 4/100",
+  "mechanic: char_artie has active status Stage Two Systemic Shock",
+  "mechanic: char_artie has active status Minor Hemorrhage",
+  "mechanic: char_artie has active title Indentured Soul",
+  "injury: char_artie severe internal damage",
+  "injury: char_artie broken left arm",
+  "milestone: party_formed_rhea_vex_artie = DONE",
+  "mechanic: char_rhea has active status Party Leader",
+  "mechanic: char_artie has active status Party Member",
+  "mechanic: char_vex has active status Party Member",
+  "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+  "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+  "container: hand_left (owner=char_rhea, contents=[])",
+  "mechanic: char_rhea has 16 Copper Credits",
+  "mechanic: char_rhea Stamina is 38/100",
+  "milestone: vermin_control_completed = DONE",
+  "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+  "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])",
+  "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+  "mechanic: char_rhea HP is 25/100",
+  "mechanic: char_rhea Stamina is 40/100",
+  "milestone: party_formed_rhea_vex_artie = DONE",
+  "mechanic: char_rhea has active status Party Leader",
+  "mechanic: char_artie has active status Party Member",
+  "mechanic: char_vex has active status Party Member",
+  "The party accepted the Vermin Control quest.",
+  "Rhea stowed her Copper Credits to prepare for combat.",
+  "Artie successfully drew aggro from the scavengers in the collapsed transit tunnel.",
+  "Rhea moved into position to execute the physics exploit with her Makeshift Masonry Bludgeon.",
+  "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+  "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+  "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+  "container: hand_left (owner=char_rhea, contents=[])",
+  "milestone: first_credits_banked = DONE",
+  "Rhea used her Makeshift Masonry Bludgeon to collapse the tunnel ceiling on the scavengers.",
+  "Artie survived the encounter, maintaining his fragile 4 HP.",
+  "The system awarded untaxed loot and completed the Vermin Control quest without deducting durability or stamina.",
+  "Rhea gathered the Scavenger Carapaces and Copper Credits.",
+  "mechanic: char_rhea has 16 Copper Credits",
+  "mechanic: char_rhea Stamina is 38/100",
+  "milestone: vermin_control_completed = DONE",
+  "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+  "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])"
+]
+
+Post-state candidate (after patch):
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 1,
+    "status": "READY",
+    "updated_at": "2026-04-19T13:23:01Z"
+  },
+  "continuity_system": {
+    "characters": {
+      "rhea_mercer": {},
+      "unit_734": {},
+      "vance_harrow": {}
+    }
+  },
+  "cursor": {
+    "chapter": 3,
+    "scene": 5
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {
+    "system_audit_flag": "suppressed",
+    "system_overlay_integrity": 88
+  },
+  "outline": {
+    "path": "outline/outline.json"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_003/scene_005.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "PLANNED",
+  "summary": {
+    "chapter_so_far": [
+      "Rhea rejected a standard System Party contract due to its predatory terms.",
+      "Rhea forced Unit 734 to unlock the developer framework syntax.",
+      "Rhea drafted a custom liability contract to protect the party from the System's debt mechanics."
+    ],
+    "key_facts_ring": [
+      "mechanic: char_rhea has 16 Copper Credits",
+      "mechanic: char_rhea Stamina is 38/100",
+      "milestone: vermin_control_completed = DONE",
+      "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])",
+      "Vance Harrow attempted to initiate a standard System Party contract.",
+      "Rhea Mercer identified the predatory terms of the standard contract, including HP siphoning and a 15% loot skim.",
+      "Unit 734 refused to alter the contract until Rhea threatened to exploit the local economy further.",
+      "Rhea accessed the raw System Syntax and drafted a custom party contract.",
+      "The custom contract disabled debt amortization, penalized friendly fire, and split loot evenly as 'Salvaged Debris'.",
+      "milestone: rhea_cornered_by_vex_and_artie = DONE",
+      "mechanic: char_artie HP is 4/100",
+      "mechanic: char_artie has active status Stage Two Systemic Shock",
+      "mechanic: char_artie has active status Minor Hemorrhage",
+      "mechanic: char_artie has active title Indentured Soul",
+      "injury: char_artie severe internal damage",
+      "injury: char_artie broken left arm",
+      "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+      "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+      "inventory: rhea_mercer -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "inventory: rhea_mercer -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces])",
+      "container: hand_left (owner=rhea_mercer, contents=[])"
+    ],
+    "last_scene": [
+      "Rhea rejected Vance's standard System Party invite, citing its predatory debt amortization and administrative skimming fees.",
+      "She forced Unit 734 to unlock the developer framework syntax by threatening to bankrupt the local node's ecosystem.",
+      "Rhea drafted a custom liability contract that disabled biological debt amortization, heavily penalized friendly fire, and bypassed administrative skimming."
+    ],
+    "must_stay_true": [
+      "milestone: party_formed_rhea_vex_artie = DONE",
+      "mechanic: char_rhea has active status Party Leader",
+      "mechanic: char_artie has active status Party Member",
+      "mechanic: char_vex has active status Party Member",
+      "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "container: hand_left (owner=char_rhea, contents=[])",
+      "mechanic: char_rhea has 16 Copper Credits",
+      "mechanic: char_rhea Stamina is 38/100",
+      "milestone: vermin_control_completed = DONE",
+      "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])",
+      "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+      "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+      "inventory: rhea_mercer -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "inventory: rhea_mercer -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces])",
+      "container: hand_left (owner=rhea_mercer, contents=[])"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": [
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+      "mechanic: char_rhea HP is 25/100",
+      "mechanic: char_rhea Stamina is 40/100",
+      "REMOVE: inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "REMOVE: container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+      "milestone: first_credits_banked = DONE",
+      "mechanic: char_rhea has 4 Copper Credits",
+      "inventory: char_rhea -> Copper Credits (status=held, container=hand_left)",
+      "container: hand_left (owner=char_rhea, contents=[ITEM_copper_credits])",
+      "milestone: rhea_cornered_by_vex_and_artie = DONE",
+      "mechanic: char_artie HP is 4/100",
+      "mechanic: char_artie has active status Stage Two Systemic Shock",
+      "mechanic: char_artie has active status Minor Hemorrhage",
+      "mechanic: char_artie has active title Indentured Soul",
+      "injury: char_artie severe internal damage",
+      "injury: char_artie broken left arm",
+      "milestone: party_formed_rhea_vex_artie = DONE",
+      "mechanic: char_rhea has active status Party Leader",
+      "mechanic: char_artie has active status Party Member",
+      "mechanic: char_vex has active status Party Member",
+      "REMOVE: inventory: char_rhea -> Copper Credits (status=held, container=hand_left)",
+      "REMOVE: container: hand_left (owner=char_rhea, contents=[ITEM_copper_credits])",
+      "REMOVE: container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+      "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "container: hand_left (owner=char_rhea, contents=[])",
+      "mechanic: char_rhea has active quest Vermin Control (Local)",
+      "mechanic: char_artie has active quest Vermin Control (Local)",
+      "mechanic: char_vex has active quest Vermin Control (Local)",
+      "REMOVE: mechanic: char_rhea has 4 Copper Credits",
+      "mechanic: char_rhea has 16 Copper Credits",
+      "mechanic: char_rhea Stamina is 38/100",
+      "REMOVE: mechanic: char_rhea has active quest Vermin Control (Local)",
+      "REMOVE: mechanic: char_artie has active quest Vermin Control (Local)",
+      "REMOVE: mechanic: char_vex has active quest Vermin Control (Local)",
+      "milestone: vermin_control_completed = DONE",
+      "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])"
+    ]
+  },
+  "world": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+    "open_threads": [
+      "party_alliance",
+      "system_debt_trap"
+    ],
+    "recent_facts": [],
+    "time": {}
+  }
+}
+
+Post-summary (facts-only):
+{
+  "chapter_so_far": [
+    "Rhea rejected a standard System Party contract due to its predatory terms.",
+    "Rhea forced Unit 734 to unlock the developer framework syntax.",
+    "Rhea drafted a custom liability contract to protect the party from the System's debt mechanics."
+  ],
+  "key_facts_ring": [
+    "mechanic: char_rhea has 16 Copper Credits",
+    "mechanic: char_rhea Stamina is 38/100",
+    "milestone: vermin_control_completed = DONE",
+    "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])",
+    "Vance Harrow attempted to initiate a standard System Party contract.",
+    "Rhea Mercer identified the predatory terms of the standard contract, including HP siphoning and a 15% loot skim.",
+    "Unit 734 refused to alter the contract until Rhea threatened to exploit the local economy further.",
+    "Rhea accessed the raw System Syntax and drafted a custom party contract.",
+    "The custom contract disabled debt amortization, penalized friendly fire, and split loot evenly as 'Salvaged Debris'.",
+    "milestone: rhea_cornered_by_vex_and_artie = DONE",
+    "mechanic: char_artie HP is 4/100",
+    "mechanic: char_artie has active status Stage Two Systemic Shock",
+    "mechanic: char_artie has active status Minor Hemorrhage",
+    "mechanic: char_artie has active title Indentured Soul",
+    "injury: char_artie severe internal damage",
+    "injury: char_artie broken left arm",
+    "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+    "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+    "inventory: rhea_mercer -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+    "inventory: rhea_mercer -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces])",
+    "container: hand_left (owner=rhea_mercer, contents=[])"
+  ],
+  "last_scene": [
+    "Rhea rejected Vance's standard System Party invite, citing its predatory debt amortization and administrative skimming fees.",
+    "She forced Unit 734 to unlock the developer framework syntax by threatening to bankrupt the local node's ecosystem.",
+    "Rhea drafted a custom liability contract that disabled biological debt amortization, heavily penalized friendly fire, and bypassed administrative skimming."
+  ],
+  "must_stay_true": [
+    "milestone: party_formed_rhea_vex_artie = DONE",
+    "mechanic: char_rhea has active status Party Leader",
+    "mechanic: char_artie has active status Party Member",
+    "mechanic: char_vex has active status Party Member",
+    "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "container: hand_left (owner=char_rhea, contents=[])",
+    "mechanic: char_rhea has 16 Copper Credits",
+    "mechanic: char_rhea Stamina is 38/100",
+    "milestone: vermin_control_completed = DONE",
+    "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])",
+    "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+    "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+    "inventory: rhea_mercer -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+    "inventory: rhea_mercer -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces])",
+    "container: hand_left (owner=rhea_mercer, contents=[])"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": [
+    "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+    "mechanic: char_rhea HP is 25/100",
+    "mechanic: char_rhea Stamina is 40/100",
+    "REMOVE: inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+    "REMOVE: container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+    "milestone: first_credits_banked = DONE",
+    "mechanic: char_rhea has 4 Copper Credits",
+    "inventory: char_rhea -> Copper Credits (status=held, container=hand_left)",
+    "container: hand_left (owner=char_rhea, contents=[ITEM_copper_credits])",
+    "milestone: rhea_cornered_by_vex_and_artie = DONE",
+    "mechanic: char_artie HP is 4/100",
+    "mechanic: char_artie has active status Stage Two Systemic Shock",
+    "mechanic: char_artie has active status Minor Hemorrhage",
+    "mechanic: char_artie has active title Indentured Soul",
+    "injury: char_artie severe internal damage",
+    "injury: char_artie broken left arm",
+    "milestone: party_formed_rhea_vex_artie = DONE",
+    "mechanic: char_rhea has active status Party Leader",
+    "mechanic: char_artie has active status Party Member",
+    "mechanic: char_vex has active status Party Member",
+    "REMOVE: inventory: char_rhea -> Copper Credits (status=held, container=hand_left)",
+    "REMOVE: container: hand_left (owner=char_rhea, contents=[ITEM_copper_credits])",
+    "REMOVE: container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+    "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "container: hand_left (owner=char_rhea, contents=[])",
+    "mechanic: char_rhea has active quest Vermin Control (Local)",
+    "mechanic: char_artie has active quest Vermin Control (Local)",
+    "mechanic: char_vex has active quest Vermin Control (Local)",
+    "REMOVE: mechanic: char_rhea has 4 Copper Credits",
+    "mechanic: char_rhea has 16 Copper Credits",
+    "mechanic: char_rhea Stamina is 38/100",
+    "REMOVE: mechanic: char_rhea has active quest Vermin Control (Local)",
+    "REMOVE: mechanic: char_artie has active quest Vermin Control (Local)",
+    "REMOVE: mechanic: char_vex has active quest Vermin Control (Local)",
+    "milestone: vermin_control_completed = DONE",
+    "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])"
+  ]
+}
+
+Post-invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "milestone: party_formed_rhea_vex_artie = DONE",
+  "mechanic: char_rhea has active status Party Leader",
+  "mechanic: char_artie has active status Party Member",
+  "mechanic: char_vex has active status Party Member",
+  "inventory: char_rhea -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+  "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+  "container: hand_left (owner=char_rhea, contents=[])",
+  "mechanic: char_rhea has 16 Copper Credits",
+  "mechanic: char_rhea Stamina is 38/100",
+  "milestone: vermin_control_completed = DONE",
+  "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+  "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])",
+  "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+  "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+  "inventory: rhea_mercer -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+  "inventory: rhea_mercer -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+  "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+  "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+  "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces])",
+  "container: hand_left (owner=rhea_mercer, contents=[])",
+  "mechanic: char_rhea has 16 Copper Credits",
+  "mechanic: char_rhea Stamina is 38/100",
+  "milestone: vermin_control_completed = DONE",
+  "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+  "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])",
+  "Vance Harrow attempted to initiate a standard System Party contract.",
+  "Rhea Mercer identified the predatory terms of the standard contract, including HP siphoning and a 15% loot skim.",
+  "Unit 734 refused to alter the contract until Rhea threatened to exploit the local economy further.",
+  "Rhea accessed the raw System Syntax and drafted a custom party contract.",
+  "The custom contract disabled debt amortization, penalized friendly fire, and split loot evenly as 'Salvaged Debris'.",
+  "milestone: rhea_cornered_by_vex_and_artie = DONE",
+  "mechanic: char_artie HP is 4/100",
+  "mechanic: char_artie has active status Stage Two Systemic Shock",
+  "mechanic: char_artie has active status Minor Hemorrhage",
+  "mechanic: char_artie has active title Indentured Soul",
+  "injury: char_artie severe internal damage",
+  "injury: char_artie broken left arm",
+  "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+  "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+  "inventory: rhea_mercer -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+  "inventory: rhea_mercer -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+  "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+  "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+  "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces])",
+  "container: hand_left (owner=rhea_mercer, contents=[])"
+]
+
+
+
+USER:
+
+THINKING PHASE: Analyze the prose and state for lint issues. Do NOT output the lint report JSON. Return ONLY a small JSON object: {"status":"ready_to_execute","notes":[],"warnings":[],"edge_count":0}.

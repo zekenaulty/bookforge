@@ -1,0 +1,204 @@
+{
+  "schema_version": "1.0",
+  "character_continuity_system_updates": [
+    {
+      "chapter": 3,
+      "character_id": "char_rhea",
+      "scene": 4,
+      "set": {
+        "quests": [
+          {
+            "name": "Vermin Control (Local)",
+            "status": "completed"
+          }
+        ],
+        "resources": {
+          "copper_credits": {
+            "current": 16,
+            "max": 999999
+          }
+        },
+        "stats": {
+          "hp": {
+            "current": 25,
+            "max": 100
+          },
+          "stamina": {
+            "current": 38,
+            "max": 100
+          }
+        },
+        "reason": "Completed quest, gained untaxed loot, bypassed durability tax."
+      },
+      "remove": [],
+      "delta": {}
+    },
+    {
+      "chapter": 3,
+      "character_id": "char_vex",
+      "scene": 4,
+      "set": {
+        "quests": [
+          {
+            "name": "Vermin Control (Local)",
+            "status": "completed"
+          }
+        ],
+        "reason": "Party completed quest."
+      },
+      "remove": [],
+      "delta": {}
+    },
+    {
+      "chapter": 3,
+      "character_id": "char_artie",
+      "scene": 4,
+      "set": {
+        "quests": [
+          {
+            "name": "Vermin Control (Local)",
+            "status": "completed"
+          }
+        ],
+        "reason": "Party completed quest."
+      },
+      "remove": [],
+      "delta": {}
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 3,
+      "character_id": "char_rhea",
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_makeshift_masonry_bludgeon"
+          ],
+          "owner": "char_rhea"
+        },
+        {
+          "container": "hand_left",
+          "contents": [],
+          "owner": "char_rhea"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "contents": [
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus",
+            "ITEM_scavenger_carapaces"
+          ],
+          "owner": "char_rhea"
+        },
+        {
+          "container": "blazer_pocket_right",
+          "contents": [
+            "ITEM_cracked_smartphone",
+            "ITEM_copper_credits"
+          ],
+          "owner": "char_rhea"
+        }
+      ],
+      "invariants_add": [
+        "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+        "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])"
+      ],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_makeshift_masonry_bludgeon",
+          "status": "equipped"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_obsidian_shard",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_ash_fungus",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_scavenger_carapaces",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_right",
+          "item": "ITEM_cracked_smartphone",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_right",
+          "item": "ITEM_copper_credits",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": [
+        "Rhea confirms that her environmental exploit scales to party combat, allowing them to bypass the system's predatory taxes entirely."
+      ],
+      "scene": 4
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_scavenger_carapaces",
+      "set": {
+        "custodian": "char_rhea",
+        "display_name": "Scavenger Carapaces",
+        "last_seen": {
+          "chapter": 3,
+          "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+          "scene": 4
+        },
+        "linked_threads": [],
+        "name": "Scavenger Carapaces",
+        "owner_scope": "character",
+        "state_tags": [
+          "untaxed",
+          "raw"
+        ],
+        "type": "material"
+      }
+    }
+  ],
+  "summary_update": {
+    "chapter_so_far_add": [
+      "The party successfully completed the Vermin Control quest by exploiting environmental damage, securing untaxed loot and proving their synergy."
+    ],
+    "key_events": [
+      "Rhea used her Makeshift Masonry Bludgeon to collapse the tunnel ceiling on the scavengers.",
+      "Artie survived the encounter, maintaining his fragile 4 HP.",
+      "The system awarded untaxed loot and completed the Vermin Control quest without deducting durability or stamina.",
+      "Rhea gathered the Scavenger Carapaces and Copper Credits."
+    ],
+    "last_scene": [
+      "The party successfully executed the environmental kill exploit by dropping the tunnel ceiling on the scavengers.",
+      "The system registered the kills as an environmental accident, bypassing all combat and gathering taxes.",
+      "Rhea collected the untaxed loot, confirming their synergy and exploit worked perfectly."
+    ],
+    "must_stay_true": [
+      "REMOVE: mechanic: char_rhea has 4 Copper Credits",
+      "mechanic: char_rhea has 16 Copper Credits",
+      "mechanic: char_rhea Stamina is 38/100",
+      "REMOVE: mechanic: char_rhea has active quest Vermin Control (Local)",
+      "REMOVE: mechanic: char_artie has active quest Vermin Control (Local)",
+      "REMOVE: mechanic: char_vex has active quest Vermin Control (Local)",
+      "milestone: vermin_control_completed = DONE",
+      "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])"
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "char_rhea",
+      "char_vex",
+      "char_artie"
+    ],
+    "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+    "open_threads": []
+  }
+}

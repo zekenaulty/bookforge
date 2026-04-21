@@ -14,6 +14,9 @@ from .errors import LLMRequestError, QuotaViolation
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_MAX_RETRY_DELAY_SECONDS = 60.0
+DEFAULT_MAX_TOTAL_RETRY_DELAY_SECONDS = 300.0
+
 def split_system_messages(messages: Iterable[Message]) -> Tuple[str, List[Message]]:
     system_parts: List[str] = []
     non_system: List[Message] = []
@@ -87,11 +90,31 @@ def post_json(
     timeout: int = 30,
     max_retries: int = 0,
     retry_backoff: float = 1.0,
+    max_retry_delay: float = DEFAULT_MAX_RETRY_DELAY_SECONDS,
+    max_total_retry_delay: float = DEFAULT_MAX_TOTAL_RETRY_DELAY_SECONDS,
 ) -> dict:
+    total_retry_sleep = 0.0
+
+    def _bounded_delay(delay: float) -> float:
+        nonlocal total_retry_sleep
+        bounded = max(0.0, delay)
+        if max_retry_delay > 0:
+            bounded = min(bounded, max_retry_delay)
+        if max_total_retry_delay > 0:
+            remaining = max_total_retry_delay - total_retry_sleep
+            if remaining <= 0:
+                return -1.0
+            bounded = min(bounded, remaining)
+        return bounded
+
     def _retry_transport(reason: str, attempt_index: int) -> None:
-        delay = retry_backoff * (2 ** attempt_index)
+        nonlocal total_retry_sleep
+        delay = _bounded_delay(retry_backoff * (2 ** attempt_index))
+        if delay < 0:
+            raise RuntimeError(f"Retry budget exhausted calling {url} due to {reason}")
         logger.warning("Retrying after %.2fs due to %s", delay, reason)
         time.sleep(delay)
+        total_retry_sleep += delay
 
     def _retry_delay_with_jitter(base_delay: float, status_code: int) -> float:
         if base_delay <= 0:
@@ -119,8 +142,12 @@ def post_json(
                 if delay is None:
                     delay = retry_backoff * (2 ** attempt)
                 delay = _retry_delay_with_jitter(delay, exc.code)
+                delay = _bounded_delay(delay)
+                if delay < 0:
+                    raise err from exc
                 logger.warning("Retrying after %.2fs due to HTTP %s", delay, exc.code)
                 time.sleep(delay)
+                total_retry_sleep += delay
                 attempt += 1
                 continue
             raise err from exc

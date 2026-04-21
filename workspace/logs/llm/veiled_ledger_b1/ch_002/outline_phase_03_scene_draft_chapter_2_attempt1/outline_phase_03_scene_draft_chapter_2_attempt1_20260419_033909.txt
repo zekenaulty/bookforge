@@ -1,0 +1,280 @@
+{
+  "schema_version": "1.1",
+  "chapters": [
+    {
+      "chapter_id": 2,
+      "title": "Tariffs and Teeth",
+      "goal": "Survive the initial resource loop by identifying the hidden taxes on basic survival gear and finding a loophole in the local economy.",
+      "chapter_role": "setup",
+      "stakes_shift": "From immediate physical survival to economic viability in a rigged system.",
+      "bridge": {
+        "from_prev": "Rhea survived the drop but is starving and broke.",
+        "to_next": "Having secured a baseline, Rhea attracts the attention of others trapped in the same loop."
+      },
+      "pacing": {
+        "intensity": 3,
+        "tempo": "steady",
+        "expected_scene_count": 6
+      },
+      "sections": [
+        {
+          "section_id": 1,
+          "title": "The Cost of Breathing",
+          "intent": "Rhea attempts to gather basic resources but encounters the local tariff mechanics that drain stamina and HP.",
+          "end_condition": "Rhea hits critical stamina levels and realizes standard gathering will bankrupt her HP before nightfall.",
+          "scenes": [
+            {
+              "scene_id": 1,
+              "type": "investigation",
+              "outcome": "Rhea attempts to harvest a glowing root using the System's prompt, resulting in a severe stamina drain and a 'Gathering Tax' notification.",
+              "summary": "Exiting the tutorial corridor, Rhea finds herself in the ash-covered Frontier Outskirts. Starving, she tries to pull a glowing root from the ground using the standard System interaction, only to be hit with a massive stamina penalty.",
+              "characters": [
+                "rhea_mercer"
+              ],
+              "threads": [
+                "rhea_survival",
+                "system_debt_trap"
+              ],
+              "location_start_label": "Tutorial Corridor Exit",
+              "location_end_label": "Frontier Outskirts",
+              "location_start": "Tutorial Corridor Exit",
+              "location_end": "Frontier Outskirts",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Rhea pushes through the heavy iron exit door, her bare feet stepping onto the ash-covered soil of the frontier.",
+              "transition_in_anchors": [
+                "heavy iron exit door",
+                "ash-covered soil",
+                "grey sky",
+                "glowing root"
+              ],
+              "transition_out_text": "She wraps her fingers around the glowing root, pulling upward just as a red penalty prompt flashes across her vision.",
+              "transition_out_anchors": [
+                "glowing root",
+                "red penalty prompt",
+                "ashy dirt",
+                "straining fingers"
+              ],
+              "hands_off_to": "2:2"
+            },
+            {
+              "scene_id": 2,
+              "type": "puzzle",
+              "outcome": "Rhea identifies that the 'Standard Gathering' action is a rigged mechanic designed to convert player stamina into System revenue, leaving her near death.",
+              "summary": "Gasping for breath, Rhea reviews her status screen and the fine print of the Gathering Tax. She realizes that using the System's intended harvesting methods will drain her HP to zero before she can gather enough food to survive.",
+              "characters": [
+                "rhea_mercer"
+              ],
+              "threads": [
+                "rhea_survival",
+                "system_debt_trap"
+              ],
+              "consumes_outcome_from": "2:1",
+              "location_start_label": "Frontier Outskirts",
+              "location_end_label": "Frontier Outskirts",
+              "location_start": "Frontier Outskirts",
+              "location_end": "Frontier Outskirts",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The red prompt pulses in Rhea's vision, accompanied by a sharp, burning ache in her chest as her stamina bar plummets.",
+              "transition_in_anchors": [
+                "pulsing red prompt",
+                "stamina bar",
+                "burning chest",
+                "uprooted glowing plant"
+              ],
+              "transition_out_text": "She drops the useless root, clutching her ribs as she scans the jagged treeline for an alternative to the rigged mechanics.",
+              "transition_out_anchors": [
+                "discarded root",
+                "jagged treeline",
+                "heaving chest",
+                "iron bludgeon"
+              ],
+              "hands_off_to": "2:3",
+              "end_condition_echo": "Rhea hits critical stamina levels and realizes standard gathering will bankrupt her HP before nightfall."
+            }
+          ]
+        },
+        {
+          "section_id": 2,
+          "title": "Physics vs. The System",
+          "intent": "Rhea observes local mob behavior and loot drop rules, spotting a discrepancy between physics and System taxation.",
+          "end_condition": "Rhea successfully forces a mob to drop untaxed raw materials by exploiting a collision between environmental damage and loot generation.",
+          "scenes": [
+            {
+              "scene_id": 3,
+              "type": "investigation",
+              "outcome": "Rhea observes a Scavenger Rat being crushed by a falling branch and notes that the resulting loot drop lacks the 'System Tax' tag.",
+              "summary": "Limping toward a rocky ravine, Rhea watches a low-level Scavenger Rat forage. When a dead branch falls and crushes the rat, Rhea inspects the corpse and realizes environmental deaths bypass the System's combat and gathering taxes.",
+              "characters": [
+                "rhea_mercer"
+              ],
+              "threads": [
+                "rhea_survival"
+              ],
+              "consumes_outcome_from": "2:2",
+              "location_start_label": "Frontier Outskirts",
+              "location_end_label": "Outskirts Ravine",
+              "location_start": "Frontier Outskirts",
+              "location_end": "Outskirts Ravine",
+              "handoff_mode": "arrival_checkpoint",
+              "constraint_state": "free",
+              "transition_in_text": "Rhea limps toward the edge of a rocky ravine, her breath shallow as she watches a scavenger rat scurry beneath a dead tree.",
+              "transition_in_anchors": [
+                "rocky ravine edge",
+                "scavenger rat",
+                "dead tree",
+                "loose gravel"
+              ],
+              "transition_out_text": "She hefts her makeshift iron bludgeon, eyeing a loose boulder perched precariously above the rat's patrol path.",
+              "transition_out_anchors": [
+                "iron bludgeon",
+                "loose boulder",
+                "rat patrol path",
+                "steep incline"
+              ],
+              "hands_off_to": "2:4"
+            },
+            {
+              "scene_id": 4,
+              "type": "action",
+              "outcome": "Rhea uses her iron bludgeon to trigger a rockslide, crushing a rat and securing untaxed meat and hide.",
+              "summary": "Instead of engaging the rat in taxed System combat, Rhea strikes the loose boulder with her iron gear. The resulting rockslide crushes the rat, generating 'Environmental Damage' and dropping untaxed raw materials.",
+              "characters": [
+                "rhea_mercer"
+              ],
+              "threads": [
+                "rhea_survival",
+                "system_debt_trap"
+              ],
+              "consumes_outcome_from": "2:3",
+              "location_start_label": "Outskirts Ravine",
+              "location_end_label": "Outskirts Ravine",
+              "location_start": "Outskirts Ravine",
+              "location_end": "Outskirts Ravine",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "Rhea swings the heavy iron gear, striking the base of the loose boulder with a loud, echoing crack.",
+              "transition_in_anchors": [
+                "heavy iron gear",
+                "loose boulder",
+                "echoing crack",
+                "falling rocks"
+              ],
+              "transition_out_text": "She scrambles down the slope, her bare feet sliding on the loose gravel as she reaches the crushed rat and its glowing loot.",
+              "transition_out_anchors": [
+                "loose gravel",
+                "crushed rat",
+                "glowing loot orb",
+                "dust cloud"
+              ],
+              "hands_off_to": "2:5",
+              "end_condition_echo": "Rhea successfully forces a mob to drop untaxed raw materials by exploiting a collision between environmental damage and loot generation."
+            }
+          ]
+        },
+        {
+          "section_id": 3,
+          "title": "Establishing a Baseline",
+          "intent": "Rhea converts the untaxed materials into usable sustenance and currency, securing her immediate survival.",
+          "end_condition": "Rhea secures a positive daily resource yield and banks her first untaxed copper credits.",
+          "scenes": [
+            {
+              "scene_id": 5,
+              "type": "puzzle",
+              "outcome": "Rhea discovers a manual deposit chute on an automated kiosk, bypassing the taxed 'Sell' interface.",
+              "summary": "Hauling the untaxed rat carcass to a glowing Outpost Kiosk, Rhea realizes the standard 'Sell' button includes a 40% transaction fee. She inspects the machine and finds a physical maintenance chute, deciding to manually deposit the items.",
+              "characters": [
+                "rhea_mercer"
+              ],
+              "threads": [
+                "rhea_survival",
+                "system_debt_trap"
+              ],
+              "consumes_outcome_from": "2:4",
+              "location_start_label": "Outskirts Ravine",
+              "location_end_label": "Outpost Kiosk",
+              "location_start": "Outskirts Ravine",
+              "location_end": "Outpost Kiosk",
+              "handoff_mode": "time_skip",
+              "constraint_state": "free",
+              "transition_in_text": "Rhea hauls the bloody rat carcass out of the ravine, dragging it toward a glowing automated kiosk standing alone in the ash.",
+              "transition_in_anchors": [
+                "bloody rat carcass",
+                "glowing automated kiosk",
+                "ashy ground",
+                "digital interface screen"
+              ],
+              "transition_out_text": "She ignores the glowing 'Sell' button on the screen, instead shoving the raw meat directly into the rusted manual deposit chute at the base.",
+              "transition_out_anchors": [
+                "glowing sell button",
+                "raw meat",
+                "rusted manual chute",
+                "metal flap"
+              ],
+              "hands_off_to": "2:6"
+            },
+            {
+              "scene_id": 6,
+              "type": "progression",
+              "outcome": "The kiosk processes the manual deposit as an 'Unsanctioned Barter', dispensing untaxed copper credits and a nutrient paste tube.",
+              "summary": "The kiosk's internal gears grind as it processes the physical deposit. Lacking a digital contract to tax, the machine defaults to a raw material exchange rate, spitting out untaxed copper coins and a tube of nutrient paste, stabilizing Rhea's HP.",
+              "characters": [
+                "rhea_mercer"
+              ],
+              "threads": [
+                "rhea_survival",
+                "system_debt_trap"
+              ],
+              "consumes_outcome_from": "2:5",
+              "location_start_label": "Outpost Kiosk",
+              "location_end_label": "Outpost Kiosk",
+              "location_start": "Outpost Kiosk",
+              "location_end": "Outpost Kiosk",
+              "handoff_mode": "direct_continuation",
+              "constraint_state": "free",
+              "transition_in_text": "The manual deposit chute grinds loudly, internal gears turning as the kiosk struggles to process the unsanctioned physical input.",
+              "transition_in_anchors": [
+                "grinding gears",
+                "rusted chute",
+                "kiosk screen",
+                "dispenser slot"
+              ],
+              "transition_out_text": "She pockets the copper coins, the cool metal a stark contrast to the warm nutrient paste tube she cracks open with her teeth.",
+              "transition_out_anchors": [
+                "copper coins",
+                "warm nutrient paste tube",
+                "kiosk dispenser",
+                "ashy wind"
+              ],
+              "end_condition_echo": "Rhea secures a positive daily resource yield and banks her first untaxed copper credits."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "characters": [
+    {
+      "character_id": "rhea_mercer",
+      "name": "Rhea Mercer",
+      "role": "protagonist",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      }
+    }
+  ],
+  "threads": [
+    {
+      "thread_id": "rhea_survival",
+      "label": "Rhea's Survival",
+      "status": "open"
+    },
+    {
+      "thread_id": "system_debt_trap",
+      "label": "System Debt Trap",
+      "status": "open"
+    }
+  ]
+}

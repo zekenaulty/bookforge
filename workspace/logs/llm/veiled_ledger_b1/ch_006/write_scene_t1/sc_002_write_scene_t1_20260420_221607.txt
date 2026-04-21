@@ -1,0 +1,269 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_RUINED_TOLLBOOTH",
+    "open_threads": [
+      "rhea_survival",
+      "system_debt_trap"
+    ],
+    "recent_facts": [
+      "The party survived an Audit Tax debuff and a second wave of Debt Collectors inside the Ruined Tollbooth.",
+      "Rhea's stamina was drained to 1/150, and she lost her Scavenger Carapaces to a Debt Collector tether.",
+      "Vance successfully defended the barricade, maintaining his 10 HP."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 6,
+      "scene": 2,
+      "inventory": [
+        {
+          "container": "system_inventory",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "system_inventory",
+          "item": "ITEM_heavy_iron_ingot",
+          "status": "stowed"
+        },
+        {
+          "container": "system_inventory",
+          "item": "ITEM_crystallized_experience",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_right",
+          "item": "ITEM_scrap_parchment",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_right",
+          "item": "ITEM_charcoal_stick",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_right",
+          "item": "ITEM_cracked_smartphone",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_right",
+          "item": "ITEM_copper_credits",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_obsidian_shard",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "system_inventory",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_raw_data_packet",
+            "ITEM_heavy_iron_ingot",
+            "ITEM_crystallized_experience"
+          ]
+        },
+        {
+          "container": "blazer_pocket_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_cracked_smartphone",
+            "ITEM_copper_credits",
+            "ITEM_scrap_parchment",
+            "ITEM_charcoal_stick"
+          ]
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_obsidian_shard"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": []
+        },
+        {
+          "container": "hand_right",
+          "owner": "rhea_mercer",
+          "contents": []
+        }
+      ],
+      "invariants_add": [
+        "mechanic: rhea_mercer Stamina is 1/150"
+      ],
+      "persona_updates": [
+        "Rhea realizes that standing still is a death sentence; they must counter-audit the overseer."
+      ]
+    },
+    {
+      "character_id": "vance_harrow",
+      "chapter": 6,
+      "scene": 2,
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_rebar",
+          "status": "held"
+        },
+        {
+          "container": "torn_pocket",
+          "item": "ITEM_copper_credits_vance",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_rebar"
+          ]
+        },
+        {
+          "container": "belt_loop",
+          "owner": "vance_harrow",
+          "contents": []
+        },
+        {
+          "container": "torn_pocket",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_copper_credits_vance"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Vance survives on 10 HP, realizing they are trapped in a war of attrition."
+      ]
+    },
+    {
+      "character_id": "unit_734",
+      "chapter": 6,
+      "scene": 2,
+      "inventory": [],
+      "containers": [],
+      "invariants_add": [],
+      "persona_updates": [
+        "Unit 734's chassis continues to degrade, acting as an early warning system for administrative attacks."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "resources": {
+          "stamina": 1,
+          "stamina_max": 150
+        },
+        "stats": {
+          "stamina": 1,
+          "stamina_max": 150,
+          "strength": 20,
+          "vitality": 15
+        }
+      },
+      "reason": "Stamina drained by Audit Tax and Debt Collector tethers."
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_scavenger_carapaces",
+      "set": {
+        "name": "Scavenger Carapaces",
+        "type": "material",
+        "owner_scope": "world",
+        "custodian": "world",
+        "linked_threads": [],
+        "state_tags": [
+          "untaxed",
+          "raw",
+          "seized"
+        ],
+        "last_seen": {
+          "chapter": 6,
+          "scene": 2,
+          "location": "LOC_RUINED_TOLLBOOTH"
+        },
+        "display_name": "Scavenger Carapaces"
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_scavenger_carapaces",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "Seized by Debt Collector tether."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Fleeing the initial ambush, the party was hit by an Audit Tax debuff that halved their movement and drained their stamina.",
+      "They barricaded themselves inside a ruined tollbooth while Unit 734 warned of a second wave of Debt Collectors.",
+      "Vance defended the door with his Rebar, surviving on exactly 10 HP, while Rhea sacrificed her Scavenger Carapaces to a tether to protect her health.",
+      "The party survived the timer inside the barricaded tollbooth, exhausted but alive, realizing they had to counter-attack the overseer."
+    ],
+    "key_events": [
+      "The party was hit by an Audit Tax debuff that drastically reduced movement speed and drained stamina.",
+      "They barricaded themselves inside a Ruined Tollbooth to wait out the debuff timer.",
+      "A second wave of Debt Collectors attacked, using tethers to try and drain HP and inventory.",
+      "Rhea's stamina was drained to 1/150, and she lost her Scavenger Carapaces to a tether.",
+      "Vance successfully defended the door, maintaining his 10 HP until the debuff timer expired and the hounds de-rezzed."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard])",
+      "REMOVE: mechanic: rhea_mercer Stamina is 3/150",
+      "mechanic: rhea_mercer Stamina is 1/150",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard])",
+      "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+      "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+      "mechanic: rhea_mercer has active status Active Audit Target",
+      "mechanic: unit_734 has active status Hijacked Chassis",
+      "milestone: overseer_override_triggered = DONE",
+      "milestone: audit_compliance_applied = DONE",
+      "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+      "mechanic: rhea_mercer has active status Hostile Environment Marker",
+      "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+      "mechanic: vance_harrow has active status Hostile Environment Marker",
+      "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+      "mechanic: unit_734 has active status Hostile Environment Marker",
+      "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "mechanic: vance_harrow HP is 10/150"
+    ],
+    "chapter_so_far_add": [
+      "The party was hit by an Audit Tax debuff that drastically reduced movement speed and drained stamina.",
+      "They barricaded themselves inside a Ruined Tollbooth to wait out the debuff timer.",
+      "A second wave of Debt Collectors attacked, using tethers to try and drain HP and inventory.",
+      "Rhea's stamina was drained to 1/150, and she lost her Scavenger Carapaces to a tether.",
+      "Vance successfully defended the door, maintaining his 10 HP until the debuff timer expired and the hounds de-rezzed."
+    ]
+  },
+  "threads_touched": [
+    "rhea_survival",
+    "system_debt_trap"
+  ]
+}

@@ -356,9 +356,9 @@ def _normalize_scene_card(
 ) -> Dict[str, Any]:
     if "schema_version" not in card:
         card["schema_version"] = SCENE_CARD_SCHEMA_VERSION
-    card.setdefault("scene_id", _scene_id(chapter, scene))
-    card.setdefault("chapter", chapter)
-    card.setdefault("scene", scene)
+    card["scene_id"] = _scene_id(chapter, scene)
+    card["chapter"] = chapter
+    card["scene"] = scene
     scene_target_value = card.get("scene_target")
     if scene_target_value is None or scene_target_value == "":
         card["scene_target"] = scene_target
@@ -576,6 +576,7 @@ def plan_scene(
 
     retries = _json_retry_count()
     parse_attempt = 0
+    retry_message: Optional[str] = None
     while True:
         t2_messages = list(base_messages)
         if t1_parts and str(getattr(client, "provider", "")).lower() == "gemini":
@@ -586,6 +587,8 @@ def plan_scene(
                 "role": "user",
                 "content": "Return ONLY the JSON object. No prose, no markdown, no commentary.",
             })
+        if retry_message:
+            t2_messages.append({"role": "user", "content": retry_message})
         request = {"model": model, "temperature": 0.4, "max_tokens": max_tokens}
         try:
             response = client.chat(
@@ -604,6 +607,24 @@ def plan_scene(
             log_path = log_llm_response(workspace, label, response, request=request, messages=t2_messages, extra={**log_extra, "turn_id": "T2"})
         try:
             card = _extract_json(response.text)
+            returned_chapter = int(card.get("chapter", chapter_num) or chapter_num)
+            returned_scene = int(card.get("scene", scene_num) or scene_num)
+            if returned_chapter != chapter_num or returned_scene != scene_num:
+                if parse_attempt >= retries:
+                    if not log_path:
+                        log_path = log_llm_response(workspace, "plan_scene", response, request=request, messages=t2_messages, extra={**log_extra, "turn_id": "T2"})
+                    raise ValueError(
+                        f"Scene card returned wrong target scene "
+                        f"(expected ch{chapter_num:03d} sc{scene_num:03d}, got ch{returned_chapter:03d} sc{returned_scene:03d}) "
+                        f"(raw response logged to {log_path})"
+                    )
+                parse_attempt += 1
+                retry_message = (
+                    f"The requested target is EXACTLY chapter {chapter_num} scene {scene_num}. "
+                    f"Return a scene card for that exact scene only. "
+                    f"Set chapter={chapter_num}, scene={scene_num}, and scene_id={_scene_id(chapter_num, scene_num)}."
+                )
+                continue
             break
         except ValueError as exc:
             if parse_attempt >= retries:
@@ -614,6 +635,7 @@ def plan_scene(
                     extra_msg = f" Model output hit MAX_TOKENS ({max_tokens}); increase BOOKFORGE_PLAN_MAX_TOKENS."
                 raise ValueError(f"{exc}{extra_msg} (raw response logged to {log_path})") from exc
             parse_attempt += 1
+            retry_message = None
 
     # Fill cast ids from model response if outline window had none.
     if not cast_present_ids:

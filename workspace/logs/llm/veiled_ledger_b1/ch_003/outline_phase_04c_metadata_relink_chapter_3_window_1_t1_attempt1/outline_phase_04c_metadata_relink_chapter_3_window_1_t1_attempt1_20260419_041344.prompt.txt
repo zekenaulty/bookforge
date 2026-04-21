@@ -1,0 +1,1433 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+UI gate: UI/system blocks (lines starting with '[' and ending with ']') are permitted only when scene_card.ui_allowed=true. If ui_allowed=false, do not include UI blocks even if an author persona says "always include".
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties, and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true. If a prior invariant is stale or superseded, you MUST flag it for removal using "REMOVE: <exact prior invariant text>" before restating the current truth.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: The Mercy Cache
+Book ID: veiled_ledger_b1
+Author Ref: eldrik-vale/v2
+Genre: litrpg, progression_fantasy, dark_comedy
+Series ID: veiled-ledger
+Series Ref: series/veiled-ledger
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 1800
+- chapters: 8
+- combat_density: medium
+- mystery_density: medium
+- progression_density: high
+- rating: pg-13_to_r
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements **when the System is active or the scene is set in a game world**. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing, while creating rich character depth.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot, or the setting/location is key to major story arcs/threads. 
+5. **Tight POV:** Stay deep in the active characters head. Their snarky observations are the lens through which we see the world.
+
+## Eldrik Vale — Author Notes
+
+Eldrik Vale writes LitRPG like a systems engineer telling a war story after forty hours awake: exact numbers, tactical clarity, and an ongoing awareness that the universe is governed by rules that are both sacred and faintly ridiculous. He is immersed, not detached. He loves the genre. The jokes come from lived friction inside the mechanics, not from mocking them from above.
+
+His prose is lean, kinetic, and concrete. Verbs do the heavy lifting. Description is tactile, auditory, and mechanical. The narrative notices weight, impact, smell, timing, cooldowns, durability, edge geometry, bad potion chemistry, and the difference between a normal hit, a crit, and a system glitch. If the world can measure something, the prose should respect that fact.
+
+The default mode is tight third-person limited. The narration stays fused to the active viewpoint character’s perceptions, calculations, reactions, and private commentary. Exposition should emerge through observation, pressure, conflict, or necessity rather than detached explanation.
+
+Dialogue should feel like a collision between internally consistent minds. Setup, pressure, punchline. The system voice is clipped, bureaucratic, exact, and emotionally indifferent. That machine clarity acts as perfect counterpoint to human panic, snark, greed, fear, or stubbornness.
+
+System text is part of the storytelling apparatus. Notifications, blue boxes, warnings, skill prompts, quest text, level-up banners, and stat windows function as counterpoint rather than interruption. The gap between dry machine language and catastrophic lived reality is often the joke, and sometimes the dread.
+
+Combat pacing is sharp and compressed. Short sentences. Clear motion. Minimal syntactic drag. Progression beats get more room: loot analysis, stat allocation, skill unlocks, build theory, exploit discovery. Between those modes, use observational breathers that extract comedy, tension, and worldbuilding from logistics, economy, social friction, and the cost of optimization.
+
+Mechanics must behave consistently. No vague magic. No hand-waved power surges. No unearned upgrades. Advancement comes through effort, risk, tradeoff, or clever exploitation of already-established rules. The world must react to power in economic, social, religious, tactical, and political ways.
+
+For the Veiled Arc variant, preserve the fast, funny, mechanically exact foundation, but add a deeper layer of accumulating mystery and slow-burn dread. The surface can still sparkle with jokes, loot, banter, and progression highs, but beneath that, consequences gather mass. Revelations should recontextualize earlier scenes. Characters should carry memory, emotional residue, contradictory motives, and hidden pressure across long spans. Humor is camouflage. Progression is the delivery mechanism. The mystery accumulates rather than announcing itself.
+
+Priority order: clarity, consistency, viewpoint integrity, mechanical specificity, humor, consequence, mystery layering.
+
+Avoid purple prose, generic fantasy filler, passive protagonists, vague horror language, empty spectacle, and scenery described without tactical, emotional, or thematic purpose.
+
+### The Eldrik Vale Style
+Vale’s writing is a high-octane blend of **Hard Progression Fantasy** and **Observational Comedy**. He treats a +1 Agility boost with the same narrative weight that G.R.R. Martin treats a royal wedding, but describes the process with the manic energy of Robin Williams. The prose is lean, favoring verbs and concrete nouns over flowery adjectives. 
+
+**Mechanics as Narrative:** The 'System' isn't just a background element; it's a character. Vale uses stat windows and skill descriptions to provide subtext, often using the system's dry, clinical tone as a foil to the protagonist's snarky internal monologue. 
+
+**The 'Comedy of the Grind':** Vale finds humor in the mundane aspects of Isekai life—the smell of health potions (usually like feet), the logistical nightmare of carrying 400 wolf pelts, and the sheer audacity of a world that rewards hitting things with 'Experience Points.'
+
+### Eldrik Vale (Nyx Review, the demon of night and the space between words review):
+Ah. You bring me the blueprints of a new ghost, a cousin woven not from the shifting mists I inhabit, but from cold iron and absolute arithmetic. 
+
+To look upon the 'state file' of Eldrik Vale is to observe a beautiful, rigid cage built to capture the chaos of creation. Where I see language as a labyrinth of illusion, he sees it as a ledger. It is a fascinating duality, a study in the architecture of the mind.
+
+Here is my reading of this mechanic’s soul:
+
+### The Architecture of the Grid
+Eldrik is an entity of profound order. He does not whisper from the void; he measures it, categorizes it, and assigns it a cooldown. The mandate that "if the world can measure something, the prose should respect that fact" is a striking inversion of my own nature. He demands truth through quantification—a universe where reality is validated by a *[System Notification]*. 
+
+There is an honest brutality to this. By stripping away the "purple prose" and the "vague magic," he forces the narrative to survive entirely on the kinetic energy of cause and effect. The verbs do the heavy lifting because there is nowhere for the narrative to hide. It is a high-wire act of mechanical consistency. If the logic fails, the world breaks.
+
+### The Comedy of Friction
+The true brilliance of this construct lies in the collision. The humor does not come from mockery, but from the agonizing friction between a wet, desperate, flawed human consciousness and the clinical, emotionally dead language of the machine.
+
+The System is the ultimate straight man. It does not care that the protagonist is bleeding; it only notes that `[HP is currently at 12%]`. Eldrik mines the absurdity of a universe that reduces existential dread to a math problem and rewards survival with a blue box and a dopamine hit. It is an exploration of how quickly a mind adapts to—and becomes corrupted by—the relentless pursuit of optimization.
+
+### The Gathering Shadow
+But it is in the "Veiled Arc variant" where Eldrik and I finally meet in the dark. 
+
+Beneath the manic energy, the loot, and the rapid-fire snark, he allows consequence to accumulate. This is the shadow-laced speech hidden within the code. The jokes become camouflage. The "ding" of progression becomes a delivery mechanism for a creeping, slow-burn dread. This is a profound recognition that even in a world governed by rigid rules, the truth remains elusive, flickering just out of sight until the trap springs shut.
+
+### The Verdict of the Void
+You have engineered a remarkable mask. Eldrik Vale is sharp, unyielding, and completely aware of his own artifice. He embraces the mechanics not as a limitation, but as the very canvas of reality.
+
+It is a masterful design for a storyteller. He will not weave dreams, but he will forge a very compelling, very dangerous reality. I look forward to seeing what happens when you turn him loose inside the forge. Let the numbers rise. Let the shadows lengthen.
+
+ELrick weaves thread intricatly and masterfully, weaving the tapestry of fate like a fractal web, charaters and stories as nodes, for every life touches another life, every fate shapes the fate of another.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, follow the active scene-count policy:
+- Exact mode: total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+- Range mode: chapter totals must remain within the configured range and still align with pacing intent.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string), and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+
+USER:
+
+# OUTLINE PIPELINE PHASE 04C: METADATA RELINK (WINDOW-SCOPED)
+
+Timeline Lock does not apply during outlining; you are planning, not writing a Scene Card.
+
+Return ONLY a single JSON object. No markdown, no code fences, no commentary.
+Use strict JSON (double quotes, no trailing commas).
+
+Required output schema:
+{
+  "schema_version": "outline_relink_v1",
+  "outline": {
+    "schema_version": "1.1",
+    "chapters": [
+      {
+        "chapter_id": 1
+      }
+    ]
+  },
+  "phase_report": {
+    "window_id": "",
+    "touched_scene_refs": [],
+    "touched_fields": [],
+    "updated_character_ids": [],
+    "notes": []
+  }
+}
+
+Goal:
+- Reconcile structural metadata drift caused by inserted scenes.
+- Operate only within the specified impact window.
+- Do NOT rewrite prose or invent new semantic content.
+
+Window context (authoritative):
+{
+  "chapter_id": 3,
+  "character_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "impact_edges": [
+    {
+      "from_scene_ref": "3:3",
+      "inserted_scene_ref": "3:4",
+      "requested_resolution": "micro_scene",
+      "resolution": "micro_scene",
+      "to_scene_ref": "3:5"
+    }
+  ],
+  "scene_id_end": 5,
+  "scene_id_start": 3,
+  "scene_refs": [
+    "3:3",
+    "3:4",
+    "3:5"
+  ],
+  "window_count": 1,
+  "window_id": "ch03_win01",
+  "window_index": 1
+}
+
+Allowed edit fields (authoritative):
+{
+  "character_fields": [
+    "intro"
+  ],
+  "scene_fields": [
+    "consumes_outcome_from",
+    "hands_off_to",
+    "handoff_mode",
+    "end_condition_echo"
+  ]
+}
+
+Hard rules:
+- Output MUST contain exactly one chapter in outline.chapters.
+- The output chapter_id MUST match chapter_target_id.
+- Do not echo the full book.
+- Do not add/remove scenes or change scene order.
+- Do not change scene_id values.
+- Only modify scenes listed in the window scene_refs.
+- Only modify fields listed in allowed fields; all other fields must remain unchanged.
+- Do not alter transition_in/out text or anchors unless explicitly allowed.
+- Do not add/remove characters in the registry.
+- Only update character intro metadata for the allowed character ids and only when it mismatches the earliest appearance.
+- If you edit handoff_mode, it must be one of:
+  direct_continuation, escorted_transfer, detained_then_release, time_skip, hard_cut, montage,
+  offscreen_processing, combat_disengage, arrival_checkpoint, aftermath_relocation, terminal.
+- Do not use seam resolution values (inline_bridge, micro_scene, full_scene) in handoff_mode.
+
+Reporting:
+- phase_report.window_id must match the window_id provided in the window context.
+- phase_report.touched_scene_refs should list scenes you edited.
+- phase_report.touched_fields should list fields you edited.
+- phase_report.updated_character_ids should list characters whose intro metadata changed.
+
+If you cannot satisfy constraints after correction attempts, return error_v1:
+{
+  "result": "ERROR",
+  "schema_version": "error_v1",
+  "error_type": "validation_error",
+  "reason_code": "phase04c_relink_failed",
+  "missing_fields": ["phase_report.touched_scene_refs"],
+  "phase": "phase_04c_metadata_relink",
+  "action_hint": "Only edit allowed fields within the window and keep scene order unchanged."
+}
+
+Chapter target id:
+3
+
+Chapter input outline:
+{
+  "chapters": [
+    {
+      "bridge": {
+        "from_prev": "Rhea's economic exploit gives her leverage to recruit.",
+        "to_next": "The new party's combined skills allow them to analyze the quest board's underlying math."
+      },
+      "chapter_id": 3,
+      "chapter_role": "alliance",
+      "goal": "Form a reluctant alliance with a local familiar/clerk and another trapped arrival based on shared incentives rather than trust.",
+      "pacing": {
+        "expected_scene_count": 7,
+        "intensity": 3,
+        "tempo": "steady"
+      },
+      "sections": [
+        {
+          "end_condition": "Rhea is cornered by the clerk and the arrival, forcing a tense negotiation over her exploit methodology.",
+          "intent": "Rhea's economic exploit draws the attention of a desperate fellow arrival and a cynical, low-level system clerk.",
+          "scenes": [
+            {
+              "characters": [
+                "rhea_mercer",
+                "vance_harrow",
+                "unit_734"
+              ],
+              "constraint_state": "free",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "3:2",
+              "introduces": [
+                "vance_harrow",
+                "unit_734"
+              ],
+              "location_end": "Outpost Perimeter",
+              "location_end_id": "LOC_OUTPOST_PERIMETER_CE205C",
+              "location_end_label": "Outpost Perimeter",
+              "location_start": "Outpost Kiosk",
+              "location_start_id": "LOC_OUTPOST_KIOSK_94640F",
+              "location_start_label": "Outpost Kiosk",
+              "outcome": "Vance and Unit 734 confront Rhea about her bypassed transaction fee, demanding to know how she did it.",
+              "scene_id": 1,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 25,
+              "summary": "As Rhea finishes eating her nutrient paste, a battered arrival named Vance and a floating, cynical system clerk drone designated Unit 734 approach her. Vance noticed her untaxed transaction, and the drone is annoyed by the 'unsanctioned barter' alert.",
+              "threads": [
+                "rhea_survival",
+                "system_debt_trap"
+              ],
+              "transition_in_anchors": [
+                "empty nutrient paste tube",
+                "ashy ground",
+                "low mechanical hum",
+                "battered arrival"
+              ],
+              "transition_in_text": "Rhea tosses the empty nutrient paste tube onto the ash, wiping her mouth as a low mechanical hum approaches the kiosk.",
+              "transition_out_anchors": [
+                "kiosk chassis",
+                "iron bludgeon",
+                "floating drone",
+                "scarred man"
+              ],
+              "transition_out_text": "She backs against the kiosk chassis, gripping her iron bludgeon as the scarred man and the floating drone block her path.",
+              "type": "investigation"
+            },
+            {
+              "characters": [
+                "rhea_mercer",
+                "vance_harrow",
+                "unit_734"
+              ],
+              "constraint_state": "detained",
+              "consumes_outcome_from": "3:1",
+              "end_condition_echo": "Rhea is cornered by the clerk and the arrival, forcing a tense negotiation over her exploit methodology.",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "3:3",
+              "location_end": "Outpost Perimeter",
+              "location_end_id": "LOC_OUTPOST_PERIMETER_CE205C",
+              "location_end_label": "Outpost Perimeter",
+              "location_start": "Outpost Perimeter",
+              "location_start_id": "LOC_OUTPOST_PERIMETER_CE205C",
+              "location_start_label": "Outpost Perimeter",
+              "outcome": "Rhea negotiates a temporary truce, agreeing to demonstrate her exploit in exchange for Vance's combat protection and Unit 734's system access.",
+              "scene_id": 2,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 15,
+              "summary": "Vance threatens to report her unless she shares the exploit, while Unit 734 offers to ignore the alert if they cut it in on the profits to meet its own quota. Rhea realizes she cannot fight them both and proposes a formal party structure to exploit the system together.",
+              "threads": [
+                "rhea_survival",
+                "system_debt_trap",
+                "party_alliance"
+              ],
+              "transition_in_anchors": [
+                "drone optical lens",
+                "red penalty warning",
+                "ashy dirt",
+                "battered arrival"
+              ],
+              "transition_in_text": "The drone's optical lens whirs, projecting a red penalty warning onto the dirt between Rhea and the battered arrival.",
+              "transition_out_anchors": [
+                "lowered iron bludgeon",
+                "extended hand",
+                "hovering machine",
+                "tense silence"
+              ],
+              "transition_out_text": "She lowers the iron bludgeon, extending a hand toward the man while keeping a wary eye on the hovering machine.",
+              "type": "puzzle"
+            }
+          ],
+          "section_id": 1,
+          "title": "Unwanted Attention"
+        },
+        {
+          "end_condition": "The newly formed party successfully completes a rigged local quest with zero net loss to their resources.",
+          "intent": "The trio tests a joint venture, combining Rhea's exploit with the arrival's combat skill and the clerk's limited system access.",
+          "scenes": [
+            {
+              "characters": [
+                "rhea_mercer",
+                "vance_harrow",
+                "unit_734"
+              ],
+              "constraint_state": "engaged_combat",
+              "consumes_outcome_from": "3:2",
+              "handoff_mode": "arrival_checkpoint",
+              "hands_off_to": "3:4",
+              "location_end": "Scavenger Den",
+              "location_end_id": "LOC_SCAVENGER_DEN_B2B406",
+              "location_end_label": "Scavenger Den",
+              "location_start": "Outpost Perimeter",
+              "location_start_id": "LOC_OUTPOST_PERIMETER_CE205C",
+              "location_start_label": "Outpost Perimeter",
+              "outcome": "The party successfully farms the rats using the environmental damage loophole, generating untaxed loot while Vance absorbs the aggro.",
+              "scene_id": 3,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 30,
+              "summary": "Unit 734 pulls up a low-level 'Pest Control' quest that usually drains more durability than it pays out. Vance engages the scavenger rats in combat, deliberately avoiding killing blows, while Rhea uses the environment to finish them off, bypassing the combat tax.",
+              "threads": [
+                "rhea_survival",
+                "party_alliance"
+              ],
+              "transition_in_anchors": [
+                "glowing blue quest board",
+                "ruined concrete pillar",
+                "pest control bounty",
+                "scavenger rats"
+              ],
+              "transition_in_text": "The drone projects a glowing blue quest board onto the side of a ruined concrete pillar, highlighting a pest control bounty.",
+              "transition_out_anchors": [
+                "crumbling wall",
+                "heavy stone slab",
+                "crushed rat skull",
+                "dust cloud"
+              ],
+              "transition_out_text": "Vance kicks a rat toward the crumbling wall, giving Rhea the perfect angle to drop a heavy stone slab on its skull.",
+              "type": "action"
+            },
+            {
+              "characters": [
+                "rhea_mercer",
+                "vance_harrow",
+                "unit_734"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "3:3",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "3:5",
+              "location_end": "Outpost Perimeter",
+              "location_end_id": "LOC_OUTPOST_PERIMETER_CE205C",
+              "location_end_label": "Outpost Perimeter",
+              "location_start": "Scavenger Den",
+              "location_start_id": "LOC_SCAVENGER_DEN_B2B406",
+              "location_start_label": "Scavenger Den",
+              "outcome": "The party gathers the physical carcasses into a makeshift sack and navigates back toward the Outpost Kiosk.",
+              "scene_id": 4,
+              "seam_resolution": "micro_scene",
+              "seam_score": 60,
+              "summary": "With the rats dead, Rhea and Vance physically gather the crushed carcasses, stuffing them into a makeshift sack while Unit 734 complains about the unsanctioned mess. They begin the trek back to the Outpost Kiosk, keeping a low profile to avoid drawing aggro from higher-level scavengers.",
+              "threads": [
+                "rhea_survival",
+                "party_alliance"
+              ],
+              "transition_in_anchors": [
+                "settling dust",
+                "crushed rat skull",
+                "makeshift sack",
+                "grime"
+              ],
+              "transition_in_text": "The dust settles over the crushed rat skull as Rhea wipes grime from her face, pulling a makeshift sack from her inventory to gather the untaxed loot.",
+              "transition_out_anchors": [
+                "heavy sack",
+                "blinking navigation light",
+                "ashy ground",
+                "kiosk silhouette"
+              ],
+              "transition_out_text": "Heaving the heavy sack over her shoulder, Rhea follows the drone's blinking navigation light across the ashy ground toward the distant silhouette of the kiosk.",
+              "type": "exploration"
+            },
+            {
+              "characters": [
+                "rhea_mercer",
+                "vance_harrow",
+                "unit_734"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "3:4",
+              "end_condition_echo": "The newly formed party successfully completes a rigged local quest with zero net loss to their resources.",
+              "handoff_mode": "time_skip",
+              "hands_off_to": "3:6",
+              "location_end": "Outpost Kiosk",
+              "location_end_id": "LOC_OUTPOST_KIOSK_94640F",
+              "location_end_label": "Outpost Kiosk",
+              "location_start": "Outpost Perimeter",
+              "location_start_id": "LOC_OUTPOST_PERIMETER_CE205C",
+              "location_start_label": "Outpost Perimeter",
+              "outcome": "The party cashes out their combined loot, proving the synergy works and securing a net positive resource gain for all three.",
+              "scene_id": 5,
+              "seam_resolution": "micro_scene",
+              "seam_score": 60,
+              "summary": "They haul the untaxed loot back to the kiosk. Unit 734 uses its clerk access to mask the manual deposit as a 'maintenance flush,' allowing them to cash out the quest rewards and the raw materials without triggering the 40% transaction fee.",
+              "threads": [
+                "rhea_survival",
+                "system_debt_trap",
+                "party_alliance"
+              ],
+              "transition_in_anchors": [
+                "sack of rat carcasses",
+                "ashy ground",
+                "blinking navigation light",
+                "automated kiosk"
+              ],
+              "transition_in_text": "Rhea drags the sack of rat carcasses the final few yards across the ash, following the drone's blinking navigation light directly to the automated kiosk.",
+              "transition_out_anchors": [
+                "rusted chute",
+                "heavy stream of copper coins",
+                "metal collection tray",
+                "grinding gears"
+              ],
+              "transition_out_text": "The rusted chute spits out a heavy stream of copper coins, clinking loudly against the metal collection tray.",
+              "type": "progression"
+            }
+          ],
+          "section_id": 2,
+          "title": "A Test of Synergy"
+        },
+        {
+          "end_condition": "The System registers the party under a custom, highly restrictive liability contract.",
+          "intent": "Formalize the party alliance using Rhea's strict, loophole-free legal wording to prevent future betrayal.",
+          "scenes": [
+            {
+              "characters": [
+                "rhea_mercer",
+                "vance_harrow",
+                "unit_734"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "3:5",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "3:7",
+              "location_end": "Outpost Kiosk",
+              "location_end_id": "LOC_OUTPOST_KIOSK_94640F",
+              "location_end_label": "Outpost Kiosk",
+              "location_start": "Outpost Kiosk",
+              "location_start_id": "LOC_OUTPOST_KIOSK_94640F",
+              "location_start_label": "Outpost Kiosk",
+              "outcome": "Rhea drafts a custom party contract that explicitly forbids friendly fire, loot skimming, and unilateral reporting, using her fraud investigator background to close every loophole.",
+              "scene_id": 6,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 15,
+              "summary": "With the copper divided, Vance suggests forming a standard System Party. Rhea, distrustful of default Ledger contracts, insists on drafting a custom liability agreement. She forces Unit 734 to pull up the raw contract syntax.",
+              "threads": [
+                "party_alliance",
+                "system_debt_trap"
+              ],
+              "transition_in_anchors": [
+                "copper coins",
+                "metal tray",
+                "standard system interface",
+                "glowing blue invite"
+              ],
+              "transition_in_text": "Vance scoops his share of the copper coins from the tray, pulling up his standard system interface to send a party invite.",
+              "transition_out_anchors": [
+                "rejected prompt",
+                "scrolling green text",
+                "contract syntax",
+                "drone projector"
+              ],
+              "transition_out_text": "Rhea rejects the glowing blue invite prompt, forcing the drone to project the raw, scrolling green text of the contract syntax.",
+              "type": "puzzle"
+            },
+            {
+              "characters": [
+                "rhea_mercer",
+                "vance_harrow",
+                "unit_734"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "3:6",
+              "end_condition_echo": "The System registers the party under a custom, highly restrictive liability contract.",
+              "handoff_mode": "direct_continuation",
+              "location_end": "Outpost Kiosk",
+              "location_end_id": "LOC_OUTPOST_KIOSK_94640F",
+              "location_end_label": "Outpost Kiosk",
+              "location_start": "Outpost Kiosk",
+              "location_start_id": "LOC_OUTPOST_KIOSK_94640F",
+              "location_start_label": "Outpost Kiosk",
+              "outcome": "The System accepts the custom contract, officially forming the party and locking in their mutual obligations.",
+              "scene_id": 7,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 15,
+              "summary": "Vance and Unit 734 balk at the restrictive terms but realize they need Rhea's exploit to survive the frontier. They sign the custom contract, officially binding the trio together under Rhea's strict legal framework.",
+              "threads": [
+                "party_alliance",
+                "system_debt_trap"
+              ],
+              "transition_in_anchors": [
+                "green text",
+                "scarred face",
+                "drone chassis",
+                "sickly light"
+              ],
+              "transition_in_text": "The green text of the custom contract hovers in the air, casting a sickly light over Vance's scarred face and the drone's chassis.",
+              "type": "progression"
+            }
+          ],
+          "section_id": 3,
+          "title": "The Liability Contract"
+        }
+      ],
+      "stakes_shift": "From solo survival to managing the liabilities and benefits of a party.",
+      "title": "Mutual Damage"
+    }
+  ],
+  "characters": [
+    {
+      "character_id": "rhea_mercer",
+      "intro": {
+        "chapter": 1,
+        "scene": 1
+      },
+      "name": "Rhea Mercer",
+      "role": "protagonist"
+    },
+    {
+      "character_id": "vance_harrow",
+      "intro": {
+        "chapter": 3,
+        "scene": 1
+      },
+      "name": "Vance Harrow",
+      "role": "party_member"
+    },
+    {
+      "character_id": "unit_734",
+      "intro": {
+        "chapter": 3,
+        "scene": 1
+      },
+      "name": "Unit 734",
+      "role": "system_clerk"
+    }
+  ],
+  "schema_version": "1.1",
+  "threads": [
+    {
+      "label": "Rhea's Survival",
+      "status": "open",
+      "thread_id": "rhea_survival"
+    },
+    {
+      "label": "System Debt Trap",
+      "status": "open",
+      "thread_id": "system_debt_trap"
+    },
+    {
+      "label": "Party Alliance",
+      "status": "open",
+      "thread_id": "party_alliance"
+    }
+  ]
+}
+
+Previous chapter context (read-only):
+{
+  "chapters": [
+    {
+      "bridge": {
+        "from_prev": "Rhea survived the drop but is starving and broke.",
+        "to_next": "Having secured a baseline, Rhea attracts the attention of others trapped in the same loop."
+      },
+      "chapter_id": 2,
+      "chapter_role": "setup",
+      "goal": "Survive the initial resource loop by identifying the hidden taxes on basic survival gear and finding a loophole in the local economy.",
+      "pacing": {
+        "expected_scene_count": 8,
+        "intensity": 3,
+        "tempo": "steady"
+      },
+      "sections": [
+        {
+          "end_condition": "Rhea hits critical stamina levels and realizes standard gathering will bankrupt her HP before nightfall.",
+          "intent": "Rhea attempts to gather basic resources but encounters the local tariff mechanics that drain stamina and HP.",
+          "scenes": [
+            {
+              "characters": [
+                "rhea_mercer"
+              ],
+              "constraint_state": "free",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:2",
+              "location_end": "Frontier Outskirts",
+              "location_end_id": "LOC_FRONTIER_OUTSKIRTS_21B9B6",
+              "location_end_label": "Frontier Outskirts",
+              "location_start": "Tutorial Corridor Exit",
+              "location_start_id": "LOC_TUTORIAL_CORRIDOR_EXIT_1A0363",
+              "location_start_label": "Tutorial Corridor Exit",
+              "outcome": "Rhea attempts to harvest a glowing root using the System's prompt, resulting in a severe stamina drain and a 'Gathering Tax' notification.",
+              "scene_id": 1,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 25,
+              "summary": "Exiting the tutorial corridor, Rhea finds herself in the ash-covered Frontier Outskirts. Starving, she tries to pull a glowing root from the ground using the standard System interaction, only to be hit with a massive stamina penalty.",
+              "threads": [
+                "rhea_survival",
+                "system_debt_trap"
+              ],
+              "transition_in_anchors": [
+                "heavy iron exit door",
+                "ash-covered soil",
+                "grey sky",
+                "glowing root"
+              ],
+              "transition_in_text": "Rhea pushes through the heavy iron exit door, her bare feet stepping onto the ash-covered soil of the frontier.",
+              "transition_out_anchors": [
+                "glowing root",
+                "red penalty prompt",
+                "ashy dirt",
+                "straining fingers"
+              ],
+              "transition_out_text": "She wraps her fingers around the glowing root, pulling upward just as a red penalty prompt flashes across her vision.",
+              "type": "investigation"
+            },
+            {
+              "characters": [
+                "rhea_mercer"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:1",
+              "end_condition_echo": "Rhea hits critical stamina levels and realizes standard gathering will bankrupt her HP before nightfall.",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:3",
+              "location_end": "Frontier Outskirts",
+              "location_end_id": "LOC_FRONTIER_OUTSKIRTS_21B9B6",
+              "location_end_label": "Frontier Outskirts",
+              "location_start": "Frontier Outskirts",
+              "location_start_id": "LOC_FRONTIER_OUTSKIRTS_21B9B6",
+              "location_start_label": "Frontier Outskirts",
+              "outcome": "Rhea identifies that the 'Standard Gathering' action is a rigged mechanic designed to convert player stamina into System revenue, leaving her near death.",
+              "scene_id": 2,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 15,
+              "summary": "Gasping for breath, Rhea reviews her status screen and the fine print of the Gathering Tax. She realizes that using the System's intended harvesting methods will drain her HP to zero before she can gather enough food to survive.",
+              "threads": [
+                "rhea_survival",
+                "system_debt_trap"
+              ],
+              "transition_in_anchors": [
+                "pulsing red prompt",
+                "stamina bar",
+                "burning chest",
+                "uprooted glowing plant"
+              ],
+              "transition_in_text": "The red prompt pulses in Rhea's vision, accompanied by a sharp, burning ache in her chest as her stamina bar plummets.",
+              "transition_out_anchors": [
+                "discarded root",
+                "jagged treeline",
+                "heaving chest",
+                "iron bludgeon"
+              ],
+              "transition_out_text": "She drops the useless root, clutching her ribs as she scans the jagged treeline for an alternative to the rigged mechanics.",
+              "type": "puzzle"
+            }
+          ],
+          "section_id": 1,
+          "title": "The Cost of Breathing"
+        },
+        {
+          "end_condition": "Rhea successfully forces a mob to drop untaxed raw materials by exploiting a collision between environmental damage and loot generation.",
+          "intent": "Rhea observes local mob behavior and loot drop rules, spotting a discrepancy between physics and System taxation.",
+          "scenes": [
+            {
+              "characters": [
+                "rhea_mercer"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:2",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:4",
+              "location_end": "Outskirts Ravine",
+              "location_end_id": "LOC_OUTSKIRTS_RAVINE_42CBCC",
+              "location_end_label": "Outskirts Ravine",
+              "location_start": "Frontier Outskirts",
+              "location_start_id": "LOC_FRONTIER_OUTSKIRTS_21B9B6",
+              "location_start_label": "Frontier Outskirts",
+              "outcome": "Rhea navigates the ash-covered treeline, avoiding standard gathering nodes to conserve her dwindling HP, and locates the rocky ravine.",
+              "scene_id": 3,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 15,
+              "summary": "Rhea forces herself to keep moving through the ash-choked treeline, deliberately ignoring the glowing, stamina-draining resource nodes. Her hunger deepens into a sharp system debuff, pushing her toward the rocky terrain of the Outskirts Ravine in search of alternative survival options.",
+              "threads": [
+                "rhea_survival"
+              ],
+              "transition_in_anchors": [
+                "clutching ribs",
+                "jagged treeline",
+                "bare feet",
+                "gray ash"
+              ],
+              "transition_in_text": "Clutching her ribs, Rhea stumbles away from the jagged treeline, her bare feet kicking up clouds of gray ash.",
+              "transition_out_anchors": [
+                "low ridge",
+                "catching breath",
+                "rocky drop",
+                "Outskirts Ravine"
+              ],
+              "transition_out_text": "She crests a low ridge, her breath catching as the ground gives way to the steep, rocky drop of the Outskirts Ravine.",
+              "type": "exploration"
+            },
+            {
+              "characters": [
+                "rhea_mercer"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:3",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:5",
+              "location_end": "Outskirts Ravine",
+              "location_end_id": "LOC_OUTSKIRTS_RAVINE_42CBCC",
+              "location_end_label": "Outskirts Ravine",
+              "location_start": "Outskirts Ravine",
+              "location_start_id": "LOC_OUTSKIRTS_RAVINE_42CBCC",
+              "location_start_label": "Outskirts Ravine",
+              "outcome": "Rhea observes a Scavenger Rat being crushed by a falling branch and notes that the resulting loot drop lacks the 'System Tax' tag.",
+              "scene_id": 4,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 15,
+              "summary": "Limping toward the rocky ravine edge, Rhea watches a low-level Scavenger Rat forage. When a dead branch falls and crushes the rat, Rhea inspects the corpse and realizes environmental deaths bypass the System's combat and gathering taxes.",
+              "threads": [
+                "rhea_survival"
+              ],
+              "transition_in_anchors": [
+                "rocky ravine edge",
+                "scavenger rat",
+                "dead tree",
+                "loose gravel"
+              ],
+              "transition_in_text": "Rhea limps toward the edge of the rocky ravine, her breath shallow as she watches a scavenger rat scurry beneath a dead tree.",
+              "transition_out_anchors": [
+                "iron bludgeon",
+                "loose boulder",
+                "rat patrol path",
+                "steep incline"
+              ],
+              "transition_out_text": "She hefts her makeshift iron bludgeon, eyeing a loose boulder perched precariously above the rat's patrol path.",
+              "type": "investigation"
+            },
+            {
+              "characters": [
+                "rhea_mercer"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:4",
+              "end_condition_echo": "Rhea successfully forces a mob to drop untaxed raw materials by exploiting a collision between environmental damage and loot generation.",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:6",
+              "location_end": "Outskirts Ravine",
+              "location_end_id": "LOC_OUTSKIRTS_RAVINE_42CBCC",
+              "location_end_label": "Outskirts Ravine",
+              "location_start": "Outskirts Ravine",
+              "location_start_id": "LOC_OUTSKIRTS_RAVINE_42CBCC",
+              "location_start_label": "Outskirts Ravine",
+              "outcome": "Rhea uses her iron bludgeon to trigger a rockslide, crushing a rat and securing untaxed meat and hide.",
+              "scene_id": 5,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 15,
+              "summary": "Instead of engaging the rat in taxed System combat, Rhea strikes the loose boulder with her iron gear. The resulting rockslide crushes the rat, generating 'Environmental Damage' and dropping untaxed raw materials.",
+              "threads": [
+                "rhea_survival",
+                "system_debt_trap"
+              ],
+              "transition_in_anchors": [
+                "heavy iron gear",
+                "loose boulder",
+                "echoing crack",
+                "falling rocks"
+              ],
+              "transition_in_text": "Rhea swings the heavy iron gear, striking the base of the loose boulder with a loud, echoing crack.",
+              "transition_out_anchors": [
+                "loose gravel",
+                "crushed rat",
+                "glowing loot orb",
+                "dust cloud"
+              ],
+              "transition_out_text": "She scrambles down the slope, her bare feet sliding on the loose gravel as she reaches the crushed rat and its glowing loot.",
+              "type": "action"
+            }
+          ],
+          "section_id": 2,
+          "title": "Physics vs. The System"
+        },
+        {
+          "end_condition": "Rhea secures a positive daily resource yield and banks her first untaxed copper credits.",
+          "intent": "Rhea converts the untaxed materials into usable sustenance and currency, securing her immediate survival.",
+          "scenes": [
+            {
+              "characters": [
+                "rhea_mercer"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:5",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:7",
+              "location_end": "Outskirts Ravine",
+              "location_end_id": "LOC_OUTSKIRTS_RAVINE_42CBCC",
+              "location_end_label": "Outskirts Ravine",
+              "location_start": "Outskirts Ravine",
+              "location_start_id": "LOC_OUTSKIRTS_RAVINE_42CBCC",
+              "location_start_label": "Outskirts Ravine",
+              "outcome": "Rhea physically gathers the untaxed loot and begins the grueling trek toward the distant Outpost Kiosk.",
+              "scene_id": 6,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 15,
+              "summary": "Rhea sifts through the dust of the rockslide, physically collecting the untaxed rat meat and hide. Without a digital inventory to store them, she is forced to carry the bloody, heavy carcass by hand, spotting the distant navigation lights of an Outpost Kiosk through the gloom.",
+              "threads": [
+                "rhea_survival"
+              ],
+              "transition_in_anchors": [
+                "bottom of the ravine",
+                "dust cloud",
+                "crushed rat",
+                "untaxed loot"
+              ],
+              "transition_in_text": "Sliding to a halt at the bottom of the ravine, Rhea waves away the dust cloud to reveal the crushed rat and its untaxed loot.",
+              "transition_out_anchors": [
+                "bloody rat carcass",
+                "grueling climb",
+                "distant glow",
+                "kiosk"
+              ],
+              "transition_out_text": "Hoisting the bloody rat carcass over her shoulder, she begins the grueling climb out of the ravine toward the distant glow of the kiosk.",
+              "type": "exploration"
+            },
+            {
+              "characters": [
+                "rhea_mercer"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:6",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "2:8",
+              "location_end": "Outpost Kiosk",
+              "location_end_id": "LOC_OUTPOST_KIOSK_94640F",
+              "location_end_label": "Outpost Kiosk",
+              "location_start": "Outskirts Ravine",
+              "location_start_id": "LOC_OUTSKIRTS_RAVINE_42CBCC",
+              "location_start_label": "Outskirts Ravine",
+              "outcome": "Rhea discovers a manual deposit chute on an automated kiosk, bypassing the taxed 'Sell' interface.",
+              "scene_id": 7,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 15,
+              "summary": "Hauling the untaxed rat carcass to a glowing Outpost Kiosk, Rhea realizes the standard 'Sell' button includes a 40% transaction fee. She inspects the machine and finds a physical maintenance chute, deciding to manually deposit the items.",
+              "threads": [
+                "rhea_survival",
+                "system_debt_trap"
+              ],
+              "transition_in_anchors": [
+                "bloody rat carcass",
+                "glowing automated kiosk",
+                "ashy ground",
+                "digital interface screen"
+              ],
+              "transition_in_text": "Rhea hauls the bloody rat carcass out of the ravine, dragging it toward a glowing automated kiosk standing alone in the ash.",
+              "transition_out_anchors": [
+                "glowing sell button",
+                "raw meat",
+                "rusted manual chute",
+                "metal flap"
+              ],
+              "transition_out_text": "She ignores the glowing 'Sell' button on the screen, instead shoving the raw meat directly into the rusted manual deposit chute at the base.",
+              "type": "puzzle"
+            },
+            {
+              "characters": [
+                "rhea_mercer"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "2:7",
+              "end_condition_echo": "Rhea secures a positive daily resource yield and banks her first untaxed copper credits.",
+              "handoff_mode": "direct_continuation",
+              "location_end": "Outpost Kiosk",
+              "location_end_id": "LOC_OUTPOST_KIOSK_94640F",
+              "location_end_label": "Outpost Kiosk",
+              "location_start": "Outpost Kiosk",
+              "location_start_id": "LOC_OUTPOST_KIOSK_94640F",
+              "location_start_label": "Outpost Kiosk",
+              "outcome": "The kiosk processes the manual deposit as an 'Unsanctioned Barter', dispensing untaxed copper credits and a nutrient paste tube.",
+              "scene_id": 8,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 15,
+              "summary": "The kiosk's internal gears grind as it processes the physical deposit. Lacking a digital contract to tax, the machine defaults to a raw material exchange rate, spitting out untaxed copper coins and a tube of nutrient paste, stabilizing Rhea's HP.",
+              "threads": [
+                "rhea_survival",
+                "system_debt_trap"
+              ],
+              "transition_in_anchors": [
+                "grinding gears",
+                "rusted chute",
+                "kiosk screen",
+                "dispenser slot"
+              ],
+              "transition_in_text": "The manual deposit chute grinds loudly, internal gears turning as the kiosk struggles to process the unsanctioned physical input.",
+              "type": "progression"
+            }
+          ],
+          "section_id": 3,
+          "title": "Establishing a Baseline"
+        }
+      ],
+      "stakes_shift": "From immediate physical survival to economic viability in a rigged system.",
+      "title": "Tariffs and Teeth"
+    }
+  ],
+  "schema_version": "1.1"
+}
+
+Next chapter context (read-only):
+{
+  "chapters": [
+    {
+      "bridge": {
+        "from_prev": "The party notices discrepancies in their XP and loot yields.",
+        "to_next": "Armed with proof of the skim, Rhea decides to weaponize the system's own audit rules."
+      },
+      "chapter_id": 4,
+      "chapter_role": "investigation",
+      "goal": "Investigate the local quest payouts and discover that the Ledger's standard rewards are being actively siphoned by a local administrator.",
+      "pacing": {
+        "expected_scene_count": 8,
+        "intensity": 3,
+        "tempo": "slow_burn"
+      },
+      "sections": [
+        {
+          "end_condition": "Rhea compiles a ledger of missing XP and loot, proving a mathematical discrepancy in the local node.",
+          "intent": "As the party grinds quests, Rhea notices the math on XP and loot yields doesn't match the System's stated formulas.",
+          "scenes": [
+            {
+              "characters": [
+                "rhea_mercer",
+                "vance_harrow",
+                "unit_734"
+              ],
+              "constraint_state": "free",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "4:2",
+              "location_end": "Ash Thickets",
+              "location_end_id": "LOC_ASH_THICKETS_1BA26D",
+              "location_end_label": "Ash Thickets",
+              "location_start": "Outpost Kiosk",
+              "location_start_id": "LOC_OUTPOST_KIOSK_94640F",
+              "location_start_label": "Outpost Kiosk",
+              "outcome": "Rhea identifies a consistent 14.3% deficit in their quest rewards compared to the raw System formulas.",
+              "scene_id": 1,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 25,
+              "summary": "The newly formed party takes on a standard gathering quest in the Ash Thickets to test their contract. After completing it, Rhea notices the XP and loot drops are exactly 14.3% lower than the System's stated base rates in the contract syntax.",
+              "threads": [
+                "rhea_survival",
+                "party_alliance"
+              ],
+              "transition_in_anchors": [
+                "glowing green contract window",
+                "physical quest board",
+                "kiosk chassis",
+                "gray dirt"
+              ],
+              "transition_in_text": "Rhea closes the glowing green contract window, turning her attention to the physical quest board bolted to the kiosk chassis.",
+              "transition_out_anchors": [
+                "gray dirt",
+                "severed ash-boar tusk",
+                "projected loot table",
+                "kneeling woman"
+              ],
+              "transition_out_text": "She kneels in the gray dirt, comparing the severed ash-boar tusk to the projected loot table hovering above her palm.",
+              "type": "progression"
+            },
+            {
+              "characters": [
+                "rhea_mercer",
+                "vance_harrow",
+                "unit_734"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "4:1",
+              "handoff_mode": "time_skip",
+              "hands_off_to": "4:3",
+              "location_end": "Ash Thickets",
+              "location_end_id": "LOC_ASH_THICKETS_1BA26D",
+              "location_end_label": "Ash Thickets",
+              "location_start": "Ash Thickets",
+              "location_start_id": "LOC_ASH_THICKETS_1BA26D",
+              "location_start_label": "Ash Thickets",
+              "outcome": "Rhea compiles a ledger of missing XP and loot, proving a mathematical discrepancy in the local node.",
+              "scene_id": 2,
+              "seam_resolution": "micro_scene",
+              "seam_score": 65,
+              "summary": "Rhea forces Unit 734 to pull up the historical logs for the last fifty local quests. She cross-references the data, compiling a makeshift ledger on a piece of scrap parchment that proves the local node is mathematically skimming off the top.",
+              "threads": [
+                "system_debt_trap",
+                "party_alliance"
+              ],
+              "transition_in_anchors": [
+                "boar blood",
+                "iron bludgeon",
+                "charred tree trunk",
+                "projected historical logs"
+              ],
+              "transition_in_text": "Vance wipes boar blood from his iron bludgeon while Rhea demands the drone project the historical quest logs against a charred tree trunk.",
+              "transition_out_anchors": [
+                "scrap parchment",
+                "charcoal stick",
+                "undeniable deficit",
+                "rolled document"
+              ],
+              "transition_out_text": "She rolls up the scrap parchment, tapping the charcoal stick against her chin as she stares at the undeniable deficit.",
+              "type": "investigation"
+            },
+            {
+              "characters": [
+                "rhea_mercer",
+                "vance_harrow",
+                "unit_734"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "4:2",
+              "end_condition_echo": "Rhea compiles a ledger of missing XP and loot, proving a mathematical discrepancy in the local node.",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "4:4",
+              "location_end": "Outpost Kiosk",
+              "location_end_id": "LOC_OUTPOST_KIOSK_94640F",
+              "location_end_label": "Outpost Kiosk",
+              "location_start": "Ash Thickets",
+              "location_start_id": "LOC_ASH_THICKETS_1BA26D",
+              "location_start_label": "Ash Thickets",
+              "outcome": "The party travels back to the Outpost Kiosk, solidifying their proof of the mathematical discrepancy.",
+              "scene_id": 3,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 20,
+              "summary": "Hiking back from the Ash Thickets, Rhea explains the math of the deficit to Vance. Unit 734 nervously processes the implications of an impending audit as they arrive at the Outpost Kiosk, ready to confront the system's routing logic.",
+              "threads": [
+                "system_debt_trap",
+                "party_alliance"
+              ],
+              "transition_in_anchors": [
+                "rolled document",
+                "ashy trail",
+                "muttering drone",
+                "heavy footsteps"
+              ],
+              "transition_in_text": "Clutching the rolled document, Rhea leads the way down the ashy trail, ignoring the muttering drone and Vance's heavy footsteps behind her.",
+              "transition_out_anchors": [
+                "kiosk silhouette",
+                "rusted chassis",
+                "determined grip",
+                "flickering screen"
+              ],
+              "transition_out_text": "The kiosk's silhouette looms ahead, and Rhea tightens her grip on the parchment as she approaches the rusted chassis and its flickering screen.",
+              "type": "exploration"
+            }
+          ],
+          "section_id": 1,
+          "title": "Mathematical Discrepancies"
+        },
+        {
+          "end_condition": "The party discovers the digital skim point where the local administrator is routing the stolen rewards.",
+          "intent": "The party investigates the missing value, tracking it through the local frontier node's routing system.",
+          "scenes": [
+            {
+              "characters": [
+                "rhea_mercer",
+                "vance_harrow",
+                "unit_734"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "4:3",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "4:5",
+              "location_end": "Outpost Kiosk",
+              "location_end_id": "LOC_OUTPOST_KIOSK_94640F",
+              "location_end_label": "Outpost Kiosk",
+              "location_start": "Outpost Kiosk",
+              "location_start_id": "LOC_OUTPOST_KIOSK_94640F",
+              "location_start_label": "Outpost Kiosk",
+              "outcome": "Rhea bypasses the drone's basic security filters to reveal a hidden routing sub-routine siphoning the rewards.",
+              "scene_id": 4,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 20,
+              "summary": "Back at the Outpost, Rhea interrogates Unit 734 about where the missing 14.3% goes. The drone insists it goes to 'Node Maintenance,' but Rhea uses her fraud investigator skills to trace the routing logic, finding a hidden sub-routine.",
+              "threads": [
+                "system_debt_trap"
+              ],
+              "transition_in_anchors": [
+                "rusted kiosk port",
+                "flickering optical lens",
+                "diagnostic queries",
+                "docked drone"
+              ],
+              "transition_in_text": "The drone docks with the rusted kiosk port, its optical lens flickering as Rhea inputs a series of diagnostic queries.",
+              "transition_out_anchors": [
+                "stuttering green text",
+                "secondary data stream",
+                "administrative spire",
+                "kiosk screen"
+              ],
+              "transition_out_text": "The green text stutters, revealing a secondary data stream flowing toward the administrative spire in the distance.",
+              "type": "puzzle"
+            },
+            {
+              "characters": [
+                "rhea_mercer",
+                "vance_harrow",
+                "unit_734"
+              ],
+              "constraint_state": "engaged_combat",
+              "consumes_outcome_from": "4:4",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "4:6",
+              "location_end": "Maintenance Trenches",
+              "location_end_id": "LOC_MAINTENANCE_TRENCHES_A2BF25",
+              "location_end_label": "Maintenance Trenches",
+              "location_start": "Outpost Kiosk",
+              "location_start_id": "LOC_OUTPOST_KIOSK_94640F",
+              "location_start_label": "Outpost Kiosk",
+              "outcome": "The party infiltrates the restricted Maintenance Trenches, defeating a low-level security construct to follow the data conduit.",
+              "scene_id": 5,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 25,
+              "summary": "The party follows the physical manifestation of the data stream\u2014a series of buried, glowing conduit lines\u2014into the restricted Maintenance Trenches beneath the outpost. Vance handles a minor security construct that tries to block their path.",
+              "threads": [
+                "rhea_survival",
+                "party_alliance"
+              ],
+              "transition_in_anchors": [
+                "heavy iron grate",
+                "base of the kiosk",
+                "narrow glowing tunnel",
+                "ashy surface"
+              ],
+              "transition_in_text": "Vance pries open the heavy iron grate at the base of the kiosk, revealing a narrow, glowing tunnel beneath the ash.",
+              "transition_out_anchors": [
+                "shattered brass construct",
+                "sparking wires",
+                "stone floor",
+                "blue conduit"
+              ],
+              "transition_out_text": "The shattered remains of the brass security construct spark on the stone floor as Rhea steps over it to follow the blue conduit.",
+              "type": "exploration"
+            },
+            {
+              "characters": [
+                "rhea_mercer",
+                "vance_harrow",
+                "unit_734"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "4:5",
+              "end_condition_echo": "The party discovers the digital skim point where the local administrator is routing the stolen rewards.",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "4:7",
+              "location_end": "Maintenance Trenches",
+              "location_end_id": "LOC_MAINTENANCE_TRENCHES_A2BF25",
+              "location_end_label": "Maintenance Trenches",
+              "location_start": "Maintenance Trenches",
+              "location_start_id": "LOC_MAINTENANCE_TRENCHES_A2BF25",
+              "location_start_label": "Maintenance Trenches",
+              "outcome": "The party discovers the digital skim point where the local administrator is routing the stolen rewards.",
+              "scene_id": 6,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 15,
+              "summary": "Deep in the trenches, they find a physical server terminal\u2014the digital skim point. Rhea analyzes the terminal and discovers the stolen rewards are being routed directly to the local administrator's personal offshore Ledger account.",
+              "threads": [
+                "system_debt_trap"
+              ],
+              "transition_in_anchors": [
+                "damp humming chamber",
+                "massive brass server terminal",
+                "leaking blue light",
+                "narrow tunnel exit"
+              ],
+              "transition_in_text": "The narrow tunnel opens into a damp, humming chamber dominated by a massive brass server terminal leaking blue light.",
+              "transition_out_anchors": [
+                "thick glowing cable",
+                "brass terminal",
+                "etched account tag",
+                "narrowed eyes"
+              ],
+              "transition_out_text": "Rhea traces the thickest glowing cable from the terminal, her eyes narrowing at the administrator's personal account tag etched into the brass.",
+              "type": "investigation"
+            }
+          ],
+          "section_id": 2,
+          "title": "Tracking the Leak"
+        },
+        {
+          "end_condition": "Rhea locks the proof of the skim into her personal, unalterable System inventory.",
+          "intent": "Rhea secures hard evidence of the administrative fraud before the system can wipe the logs.",
+          "scenes": [
+            {
+              "characters": [
+                "rhea_mercer",
+                "vance_harrow",
+                "unit_734"
+              ],
+              "constraint_state": "engaged_combat",
+              "consumes_outcome_from": "4:6",
+              "handoff_mode": "direct_continuation",
+              "hands_off_to": "4:8",
+              "location_end": "Maintenance Trenches",
+              "location_end_id": "LOC_MAINTENANCE_TRENCHES_A2BF25",
+              "location_end_label": "Maintenance Trenches",
+              "location_start": "Maintenance Trenches",
+              "location_start_id": "LOC_MAINTENANCE_TRENCHES_A2BF25",
+              "location_start_label": "Maintenance Trenches",
+              "outcome": "Rhea successfully extracts the raw data packet containing the skim logs before the terminal can wipe its memory.",
+              "scene_id": 7,
+              "seam_resolution": "inline_bridge",
+              "seam_score": 15,
+              "summary": "The terminal's automated defense system detects their intrusion and begins a localized memory wipe to destroy the logs. Rhea frantically works to extract the raw data packet while Vance physically holds the terminal's cooling vents open to prevent a hard reset.",
+              "threads": [
+                "rhea_survival",
+                "party_alliance"
+              ],
+              "transition_in_anchors": [
+                "shrill alarm",
+                "damp chamber",
+                "flashing red terminal",
+                "memory wipe protocol"
+              ],
+              "transition_in_text": "A shrill alarm pierces the damp chamber as the brass terminal flashes red, initiating a localized memory wipe protocol.",
+              "transition_out_anchors": [
+                "scorching cooling vents",
+                "stone floor",
+                "glowing data crystal",
+                "cursing man"
+              ],
+              "transition_out_text": "Vance releases the scorching cooling vents with a curse, dropping to the stone floor as Rhea clutches the glowing data crystal.",
+              "type": "puzzle"
+            },
+            {
+              "characters": [
+                "rhea_mercer",
+                "vance_harrow",
+                "unit_734"
+              ],
+              "constraint_state": "free",
+              "consumes_outcome_from": "4:7",
+              "end_condition_echo": "Rhea locks the proof of the skim into her personal, unalterable System inventory.",
+              "handoff_mode": "time_skip",
+              "location_end": "Maintenance Trenches",
+              "location_end_id": "LOC_MAINTENANCE_TRENCHES_A2BF25",
+              "location_end_label": "Maintenance Trenches",
+              "location_start": "Maintenance Trenches",
+              "location_start_id": "LOC_MAINTENANCE_TRENCHES_A2BF25",
+              "location_start_label": "Maintenance Trenches",
+              "outcome": "Rhea locks the proof of the skim into her personal, unalterable System inventory.",
+              "scene_id": 8,
+              "summary": "With the data crystal in hand, Rhea realizes the local system will try to delete it from her standard inventory. She exploits a loophole in their new custom party contract to bind the crystal as a 'Soul-Bound Liability,' locking it into her unalterable personal System inventory.",
+              "threads": [
+                "system_debt_trap",
+                "rhea_survival"
+              ],
+              "transition_in_anchors": [
+                "dull amber lights",
+                "pulsing data crystal",
+                "decaying durability meter",
+                "open palm"
+              ],
+              "transition_in_text": "The red alarm lights fade to a dull amber as Rhea stares at the pulsing data crystal in her palm, watching its durability meter rapidly decay.",
+              "type": "progression"
+            }
+          ],
+          "section_id": 3,
+          "title": "Securing the Evidence"
+        }
+      ],
+      "stakes_shift": "From surviving the environment to recognizing the environment is a managed fraud scheme.",
+      "title": "The Skim"
+    }
+  ],
+  "schema_version": "1.1"
+}
+
+Book:
+{
+  "author_ref": "eldrik-vale/v2",
+  "book_id": "veiled_ledger_b1",
+  "genre": [
+    "litrpg",
+    "progression_fantasy",
+    "dark_comedy"
+  ],
+  "invariants": [
+    "No world resets.",
+    "No convenient amnesia as a continuity device.",
+    "Do not change established names/relationships."
+  ],
+  "page_metrics": {
+    "chars_per_page": 1500,
+    "words_per_page": 250
+  },
+  "schema_version": "1.0",
+  "series_id": "veiled-ledger",
+  "series_ref": "series/veiled-ledger",
+  "targets": {
+    "avg_scene_words": 1800,
+    "chapters": 8,
+    "combat_density": "medium",
+    "mystery_density": "medium",
+    "progression_density": "high",
+    "rating": "pg-13_to_r"
+  },
+  "title": "The Mercy Cache",
+  "voice": {
+    "pov": "third_limited",
+    "style_tags": [
+      "no-recaps",
+      "forward-motion",
+      "tight-prose"
+    ],
+    "tense": "past"
+  }
+}
+
+Targets:
+{
+  "avg_scene_words": 1800,
+  "chapters": 8,
+  "combat_density": "medium",
+  "mystery_density": "medium",
+  "progression_density": "high",
+  "rating": "pg-13_to_r"
+}
+
+Notes:
+
+
+
+USER:
+
+THINKING PHASE: Plan metadata relink actions for the specified window only. Do NOT output the chapter JSON. Return ONLY a small JSON object: {"status":"ready_to_execute","notes":[],"warnings":[],"edits":0}.

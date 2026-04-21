@@ -1,0 +1,241 @@
+COMPLIANCE:
+Scene ID: SC_008_003
+Allowed events: The party escapes the collapsing sanctum and reaches the outer boundary of the frontier zone.
+Forbidden milestones: sanctum_threshold_reached, sanctum_foyer_breached, inner_office_breached, elite_guards_defeated, catastrophic_default_triggered, overseer_shields_stripped, hidden_vault_opened, mercy_cache_revealed, frontier_zone_exited (from prior scenes/future scenes).
+Current arm-side / inventory facts: Rhea has Administrative Residue Token stowed in system_inventory. Vance holds Rebar in hand_right.
+
+APPEARANCE_CHECK:
+- rhea_mercer: female, singed hair, unadorned
+- vance_harrow: male, blistered hands
+- unit_734: robot, smoking chassis, mechanical, construct
+
+PROSE:
+The vault collapsed behind them with a deafening crack of buckling stone, but the entire sanctum was now actively purging, forcing a desperate sprint through the disintegrating architecture. 
+
+[System Alert: Hard Purge Protocol Initiated.]
+
+The polished marble corridors of the administrative hub weren't just crumbling; they were unspooling. Solid walls fractured into cascading streams of raw, red deletion code. The floor beneath their boots vibrated with the frantic hum of a server wiping its own hard drive. 
+
+Rhea ran. She didn't have the biological currency for it, but she ran anyway. 
+
+[Stamina: 0/150]
+[Status Effect: Exhaustion (Severe) - Movement Speed Reduced by 40%. Pain Receptors Overridden.]
+
+Her lungs burned with a dry, metallic friction, and the singed hair on her bare arms stood on end as static electricity flooded the collapsing hallway. Every step was a negotiation with gravity. The System was violently repoing the environment, and it didn't care if a few unauthorized organic assets were caught in the sweep.
+
+"Keep moving!" Vance roared over the grinding din. He took point, his blistered hands wrapped tightly around his heavy iron Rebar. 
+
+[Warning: Deletion Wave Incoming.]
+
+A sweeping wall of crimson static surged down the intersecting hallway to their left, consuming a row of ornamental pillars and leaving nothing but a void of empty blue gridlines in its wake. Vance didn't slow down. As a massive chunk of ceiling masonry—half stone, half glitching code—plummeted toward them, he swung the Rebar like a baseball bat. 
+
+The iron connected with a jarring crunch, shattering the debris into harmless digital dust. 
+
+[Item: Rebar Durability decreased to 52%.]
+[HP: 45/100]
+
+Vance grunted, shaking off the impact, and kept charging forward. "Don't look at it! Just run!"
+
+Trailing behind them, Unit 734 was faring significantly worse. The drone's smoking chassis vented thick plumes of acrid, black exhaust, its optical lens flickering erratically as it struggled to process the collapsing navigational mesh. 
+
+[Chassis Integrity: 28%]
+[Status: Critical System Failure Imminent.]
+
+"Navigational anchors failing," the drone broadcasted, its synthetic voice clipping. "Physical architecture scrubbing at 88% efficiency. Probability of deletion: statistically absolute."
+
+"I am not getting deleted by a bureaucratic technicality!" Rhea snapped, clutching her side as she forced her legs to pump faster. "Calculate the shortest vector to the exit!"
+
+"Calculating. Turn right."
+
+Vance hooked the corner, his boots skidding on a patch of floor that was rapidly turning translucent. Rhea followed, nearly losing her footing as the ground gave way to an expanse of gray ash. The claustrophobic walls of the sanctum vanished, replaced by the howling wind of the wasteland. 
+
+They burst out of the disintegrating archway, spilling onto the jagged edge of the zone. 
+
+Vance skidded to a halt, raising his Rebar defensively. Rhea stumbled up beside him, her chest heaving as she stared at the sheer drop-off. They had reached the outer boundary, only to find their path blocked. The edge of the frontier zone wasn't just a line in the dirt; it was a towering, impenetrable firewall of cascading red deletion code. 
+
+There was nowhere left to run. They were forced to halt.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_FRONTIER_ZONE_BOUNDARY",
+    "open_threads": [
+      "rhea_survival",
+      "party_alliance"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 8,
+      "scene": 3,
+      "persona_updates": [
+        "Rhea pushed herself past absolute physical exhaustion to outrun the system's deletion wave."
+      ],
+      "inventory": [
+        {
+          "container": "system_inventory",
+          "item": "ITEM_administrative_residue_token",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_mercy_cache_coordinates",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_null_value_token",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "system_inventory",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_administrative_residue_token"
+          ]
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_administrative_coordinate_chip",
+            "ITEM_raw_data_packet",
+            "ITEM_null_value_token",
+            "ITEM_mercy_cache_coordinates"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": []
+        },
+        {
+          "container": "hand_right",
+          "owner": "rhea_mercer",
+          "contents": []
+        }
+      ],
+      "invariants_add": []
+    },
+    {
+      "character_id": "vance_harrow",
+      "chapter": 8,
+      "scene": 3,
+      "persona_updates": [
+        "Vance used his physical strength to clear a path through the collapsing architecture, protecting the party."
+      ],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_rebar",
+          "status": "held"
+        },
+        {
+          "container": "cargo_pocket_right",
+          "item": "ITEM_restorative_consumables",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_rebar"
+          ]
+        },
+        {
+          "container": "cargo_pocket_right",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_restorative_consumables"
+          ]
+        }
+      ],
+      "invariants_add": []
+    },
+    {
+      "character_id": "unit_734",
+      "chapter": 8,
+      "scene": 3,
+      "persona_updates": [
+        "Unit 734 suffered critical chassis degradation while navigating the collapsing mesh."
+      ],
+      "inventory": [],
+      "containers": [],
+      "invariants_add": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "stats": {
+          "stamina": 0,
+          "stamina_max": 150
+        }
+      },
+      "reason": "Rhea is running on zero stamina during the escape."
+    },
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "stats": {
+          "hp_current": 45,
+          "hp_max": 100,
+          "rebar_durability_percent": 52
+        }
+      },
+      "reason": "Vance used his rebar to smash falling debris, degrading its durability, and his HP stabilized at 45."
+    },
+    {
+      "character_id": "unit_734",
+      "set": {
+        "stats": {
+          "chassis_integrity": 28
+        }
+      },
+      "reason": "Unit 734 suffered critical chassis degradation during the escape."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "The party sprinted through the collapsing sanctum as the hard purge protocol initiated.",
+      "Vance used his Rebar to clear falling debris, while Unit 734 struggled with critical chassis degradation.",
+      "They reached the outer boundary of the frontier zone, only to find their path blocked by a massive firewall of deletion code."
+    ],
+    "key_events": [
+      "The sanctum initiated a hard purge protocol, dissolving the physical architecture.",
+      "Vance used his Rebar to shatter falling debris, degrading its durability.",
+      "The party reached the outer boundary of the frontier zone, halting before the final deletion firewall."
+    ],
+    "must_stay_true": [
+      "REMOVE: mechanic: rhea_mercer Stamina is 0/150",
+      "REMOVE: mechanic: vance_harrow Rebar Durability is 55%",
+      "REMOVE: mechanic: vance_harrow HP is 45/100",
+      "milestone: frontier_zone_boundary_reached = DONE"
+    ],
+    "chapter_so_far_add": [
+      "The party escaped the collapsing sanctum and reached the outer boundary of the frontier zone, but their path was blocked by a deletion firewall."
+    ]
+  }
+}

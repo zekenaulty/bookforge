@@ -1,0 +1,390 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_006_003",
+  "chapter": 6,
+  "scene": 3,
+  "scene_target": "Rhea analyzes the combat logs and forces Unit 734 to interface with the tollbooth terminal to trace the overseer's ledger.",
+  "goal": "Trace the origin of the debt hounds by interfacing with the tollbooth's dead terminal.",
+  "conflict": "Rhea is severely exhausted (1 Stamina) and must force a hijacked, damaged Unit 734 to interface with hostile System architecture.",
+  "required_callbacks": [
+    "Audit Tax debuff expiration",
+    "Debt Collector tether mechanics"
+  ],
+  "constraints": [
+    "target_words: 1800"
+  ],
+  "end_condition": "Rhea discovers the localized administrative hub funding the hounds, realizing the overseer has a finite budget.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_RUINED_TOLLBOOTH",
+  "location_end_id": "LOC_RUINED_TOLLBOOTH",
+  "location_start_label": "Ruined Tollbooth",
+  "location_end_label": "Ruined Tollbooth",
+  "location_start": "Ruined Tollbooth",
+  "location_end": "Ruined Tollbooth",
+  "handoff_mode": "continuous",
+  "constraint_state": "processed",
+  "transition_in_text": "With the debuff timer expired and the hounds temporarily de-rezzed, Rhea turns her attention to the tollbooth's dead terminal.",
+  "transition_in_anchors": [
+    "debuff timer expired",
+    "de-rezzed",
+    "tollbooth",
+    "dead terminal"
+  ],
+  "transition_out_text": "Rhea realizes the overseer's budget is finite and prepares to pinpoint the exact coordinates as pressure mounts outside.",
+  "transition_out_anchors": [
+    "finite budget",
+    "coordinates",
+    "pressure mounts"
+  ],
+  "consumes_outcome_from": "6:2",
+  "hands_off_to": "6:4",
+  "seam_score": 90,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "system_debt_trap"
+  ],
+  "required_in_custody": [
+    "ITEM_rebar"
+  ],
+  "required_scene_accessible": [
+    "ITEM_rebar"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "combat_aftermath",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources"
+  ],
+  "ui_mechanics_expected": [
+    "Combat Log",
+    "Mana Ledger",
+    "HP",
+    "Stamina"
+  ],
+  "prose_path": "draft/chapters/ch_006/scene_003.md",
+  "state_patch": {
+    "character_continuity_system_updates": [
+      {
+        "character_id": "rhea_mercer",
+        "set": {
+          "resources": {
+            "stamina": 1,
+            "stamina_max": 150
+          },
+          "stats": {
+            "stamina": 1,
+            "stamina_max": 150
+          }
+        },
+        "remove": [],
+        "delta": {},
+        "chapter": 6,
+        "scene": 3
+      },
+      {
+        "character_id": "vance_harrow",
+        "set": {
+          "resources": {
+            "hp_current": 10,
+            "hp_max": 150
+          },
+          "stats": {
+            "hp": 10,
+            "hp_max": 150
+          }
+        },
+        "remove": [],
+        "delta": {},
+        "chapter": 6,
+        "scene": 3
+      }
+    ],
+    "character_updates": [
+      {
+        "character_id": "rhea_mercer",
+        "containers": [
+          {
+            "container": "system_inventory",
+            "contents": [
+              "ITEM_raw_data_packet",
+              "ITEM_heavy_iron_ingot",
+              "ITEM_crystallized_experience"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "contents": [
+              "ITEM_scrap_parchment",
+              "ITEM_charcoal_stick",
+              "ITEM_cracked_smartphone",
+              "ITEM_copper_credits"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "contents": [
+              "ITEM_obsidian_shard"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "hand_left",
+            "contents": [],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "hand_right",
+            "contents": [],
+            "owner": "rhea_mercer"
+          }
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "container": "system_inventory",
+            "item": "ITEM_raw_data_packet",
+            "status": "stowed"
+          },
+          {
+            "container": "system_inventory",
+            "item": "ITEM_heavy_iron_ingot",
+            "status": "stowed"
+          },
+          {
+            "container": "system_inventory",
+            "item": "ITEM_crystallized_experience",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_scrap_parchment",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_charcoal_stick",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_cracked_smartphone",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_copper_credits",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_obsidian_shard",
+            "status": "stowed"
+          }
+        ],
+        "persona_updates": [
+          "Rhea realizes the overseer's harassment is bound by a finite mana budget, giving her a tactical target."
+        ],
+        "chapter": 6,
+        "scene": 3
+      },
+      {
+        "character_id": "vance_harrow",
+        "containers": [
+          {
+            "container": "hand_right",
+            "contents": [
+              "ITEM_rebar"
+            ],
+            "owner": "vance_harrow"
+          },
+          {
+            "container": "torn_pocket",
+            "contents": [
+              "ITEM_copper_credits_vance"
+            ],
+            "owner": "vance_harrow"
+          }
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "container": "hand_right",
+            "item": "ITEM_rebar",
+            "status": "held"
+          },
+          {
+            "container": "torn_pocket",
+            "item": "ITEM_copper_credits_vance",
+            "status": "stowed"
+          }
+        ],
+        "persona_updates": [
+          "Vance holds the door, surviving on a sliver of HP while Rhea works the terminal."
+        ],
+        "chapter": 6,
+        "scene": 3
+      },
+      {
+        "character_id": "unit_734",
+        "containers": [],
+        "invariants_add": [],
+        "inventory": [],
+        "persona_updates": [
+          "Unit 734 is forced to interface with the dead tollbooth terminal, exposing its systems to further strain."
+        ],
+        "chapter": 6,
+        "scene": 3
+      }
+    ],
+    "global_continuity_system_updates": [
+      {
+        "set": {
+          "overseer_node_mana_current": 1240,
+          "overseer_node_mana_max": 5000
+        }
+      }
+    ],
+    "schema_version": "1.0",
+    "summary_update": {
+      "chapter_so_far_add": [
+        "Inside the tollbooth, Rhea forced Unit 734 to interface with a dead terminal, discovering the overseer's finite mana budget and the coordinates to his administrative hub."
+      ],
+      "key_events": [
+        "Rhea accessed the tollbooth's dead terminal using Unit 734's interface cable.",
+        "She analyzed the combat logs, confirming the Debt Collectors were administrative constructs costing Node Mana.",
+        "She accessed the Mana Ledger, proving the overseer had a finite budget for his targeted harassment.",
+        "Rhea acquired the coordinates for the local administrative hub funding the attacks."
+      ],
+      "last_scene": [
+        "Rhea ripped the casing off the ruined tollbooth's dead terminal.",
+        "She forced Unit 734 to interface with the exposed wiring to bypass the local firewall.",
+        "Reviewing the combat logs and mana ledger, she discovered the overseer was funding the Debt Collectors from a finite local budget.",
+        "Rhea pinpointed the coordinates of the administrative hub just as the hounds began to respawn outside."
+      ],
+      "must_stay_true": [
+        "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+        "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+        "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+        "mechanic: rhea_mercer has active status Active Audit Target",
+        "mechanic: unit_734 has active status Hijacked Chassis",
+        "milestone: overseer_override_triggered = DONE",
+        "milestone: audit_compliance_applied = DONE",
+        "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+        "mechanic: rhea_mercer has active status Hostile Environment Marker",
+        "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+        "mechanic: vance_harrow has active status Hostile Environment Marker",
+        "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+        "mechanic: unit_734 has active status Hostile Environment Marker",
+        "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+        "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+        "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+        "mechanic: vance_harrow HP is 10/150",
+        "mechanic: rhea_mercer Stamina is 1/150",
+        "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+        "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard])",
+        "milestone: overseer_budget_discovered = DONE",
+        "milestone: administrative_hub_coordinates_acquired = DONE"
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "rhea_mercer",
+        "vance_harrow",
+        "unit_734"
+      ],
+      "location": "LOC_RUINED_TOLLBOOTH",
+      "open_threads": [
+        "system_debt_trap"
+      ],
+      "recent_facts": [
+        "Rhea interfaced Unit 734 with the dead tollbooth terminal.",
+        "The combat logs revealed the Debt Collectors cost Node Mana to spawn.",
+        "Rhea accessed the Mana Ledger and discovered the overseer's finite budget.",
+        "Rhea acquired the coordinates to the local administrative hub funding the attacks."
+      ]
+    }
+  },
+  "scene_summary": [
+    "Rhea ripped the casing off the ruined tollbooth's dead terminal.",
+    "She forced Unit 734 to interface with the exposed wiring to bypass the local firewall.",
+    "Reviewing the combat logs and mana ledger, she discovered the overseer was funding the Debt Collectors from a finite local budget.",
+    "Rhea pinpointed the coordinates of the administrative hub just as the hounds began to respawn outside."
+  ],
+  "key_events": [
+    "Rhea accessed the tollbooth's dead terminal using Unit 734's interface cable.",
+    "She analyzed the combat logs, confirming the Debt Collectors were administrative constructs costing Node Mana.",
+    "She accessed the Mana Ledger, proving the overseer had a finite budget for his targeted harassment.",
+    "Rhea acquired the coordinates for the local administrative hub funding the attacks."
+  ],
+  "must_stay_true": [
+    "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+    "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+    "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+    "mechanic: rhea_mercer has active status Active Audit Target",
+    "mechanic: unit_734 has active status Hijacked Chassis",
+    "milestone: overseer_override_triggered = DONE",
+    "milestone: audit_compliance_applied = DONE",
+    "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+    "mechanic: rhea_mercer has active status Hostile Environment Marker",
+    "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+    "mechanic: vance_harrow has active status Hostile Environment Marker",
+    "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+    "mechanic: unit_734 has active status Hostile Environment Marker",
+    "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+    "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+    "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+    "mechanic: vance_harrow HP is 10/150",
+    "mechanic: rhea_mercer Stamina is 1/150",
+    "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard])",
+    "milestone: overseer_budget_discovered = DONE",
+    "milestone: administrative_hub_coordinates_acquired = DONE"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "appearance_check_missing",
+        "message": "APPEARANCE_CHECK is missing for cast members: rhea_mercer, vance_harrow, unit_734.",
+        "severity": "warning"
+      },
+      {
+        "code": "prose_hygiene",
+        "message": "Internal ID 'rhea_mercer' used in UI block text. While not strictly narrative prose, human-readable names are preferred.",
+        "severity": "warning",
+        "evidence": {
+          "line": 29,
+          "excerpt": "[Combat Log: Tether Extraction - Target: rhea_mercer - Yield: 0 Mana (Resisted)]"
+        }
+      },
+      {
+        "code": "stat_mismatch",
+        "message": "UI shows Stamina but character state has 1.",
+        "severity": "warning"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 1,
+  "updated_at": "2026-04-20T22:22:58Z"
+}

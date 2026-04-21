@@ -1,0 +1,231 @@
+COMPLIANCE:
+Scene ID: SC_003_006
+Allowed events: The System finalizes the custom party contract, locking in the Mutual Assured Destruction buff and forcing the newly formed party to confront their shared liability. The party UI is fully established and the trio prepares to move deeper into the frontier.
+Forbidden milestones: custom_liability_contract_signed (already DONE)
+
+Current arm-side / inventory facts: 
+mechanic: char_rhea has 16 Copper Credits
+inventory: rhea_mercer -> Copper Credits (status=stowed, container=blazer_pocket_right)
+container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])
+inventory: vance_harrow -> Rebar (status=held, container=shoulder)
+container: shoulder (owner=vance_harrow, contents=[ITEM_rebar])
+
+Durable changes committed: Party UI established, Mutual Assured Destruction status affirmed.
+
+APPEARANCE_CHECK:
+- rhea_mercer: right pocket of her blazer
+- vance_harrow: scarred face, torn pocket
+- unit_734: drone chassis, sickly light
+
+PROSE:
+The System chimes, finalizing the contract signatures from the previous moment. The green text of the custom liability agreement flashed once, searing itself into the retinas of everyone present before dissolving into the stale air of the Collapsed Transit Tunnel.
+
+[Party Formed: The Mercy Cache (Provisional)]
+[Status Effect Applied: Mutual Assured Destruction. (Duration: Indefinite)]
+[Warning: Friendly fire will result in immediate geometric debt reflection. Unilateral reporting will incur a 100% HP tax.]
+
+Rhea Mercer patted the right pocket of her blazer, feeling the reassuring weight of her Copper Credits and her Cracked Smartphone. The math was finally on her side. She looked at Vance Harrow, who stood with his Rebar resting against his shoulder, his scarred face illuminated by the lingering glow of the party interface.
+
+"Well," Vance said, his voice a low rumble over the distant shifting of debris. "That's a hell of a leash." He shoved his own meager share of Copper Credits deeper into his torn pocket.
+
+[Party Leader: Rhea Mercer]
+[Party Member: Vance Harrow]
+[Party Member: Unit 734]
+
+Unit 734 hovered nearby, its drone chassis humming a slightly elevated pitch. The sickly light of its projector flickered as it processed the new operational parameters. It didn't have lungs to sigh, but the mechanical whir sounded distinctly resigned.
+
+"It's not a leash, it's an insurance policy," Rhea corrected, adjusting the weight of her makeshift weapon. "The Ledger wants us dead or indebted. We just made it mathematically unprofitable for any of us to betray the others."
+
+Vance grunted, adjusting his grip on the Rebar. "Just means if one of us screws up, we all burn."
+
+"Then don't screw up," Rhea said, her eyes tracking the green party telemetry window that hovered in her peripheral vision.
+
+The party UI settled into a neat, unobtrusive list at the edge of her sight, the Mutual Assured Destruction icon pulsing with a faint, warning red. It was a terrifying amount of shared liability, but it was the only way to survive the frontier node's predatory economy.
+
+Bound by the new strictures, the party turns their attention to the path ahead.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+    "open_threads": [
+      "party_alliance",
+      "system_debt_trap"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "The System finalized the custom party contract, officially binding Rhea, Vance, and Unit 734 together.",
+      "The Mutual Assured Destruction buff was applied to all party members, ensuring severe penalties for betrayal.",
+      "With their shared liability established via the new party UI, the trio prepared to venture deeper into the transit tunnel."
+    ],
+    "key_events": [
+      "The System finalized the party contract.",
+      "The Mutual Assured Destruction status was locked in for all party members.",
+      "The party UI was fully established."
+    ],
+    "must_stay_true": [
+      "mechanic: char_rhea has 16 Copper Credits",
+      "mechanic: char_rhea Stamina is 38/100",
+      "milestone: vermin_control_completed = DONE",
+      "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Ash Fungus (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus])",
+      "inventory: vance_harrow -> Rebar (status=held, container=shoulder)",
+      "container: shoulder (owner=vance_harrow, contents=[ITEM_rebar])",
+      "inventory: rhea_mercer -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "milestone: custom_liability_contract_signed = DONE",
+      "mechanic: rhea_mercer has active status Mutual Assured Destruction",
+      "mechanic: vance_harrow has active status Mutual Assured Destruction",
+      "mechanic: unit_734 has active status Mutual Assured Destruction",
+      "mechanic: rhea_mercer has active status Party Leader",
+      "mechanic: vance_harrow has active status Party Member",
+      "mechanic: unit_734 has active status Party Member"
+    ],
+    "chapter_so_far_add": [
+      "The System finalized the custom party contract, legally binding Rhea, Vance, and Unit 734 under the Mutual Assured Destruction buff."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 3,
+      "scene": 6,
+      "inventory": [
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_copper_credits",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_scavenger_carapaces",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_ash_fungus",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_cracked_smartphone",
+            "ITEM_copper_credits"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": []
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_scavenger_carapaces",
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": []
+    },
+    {
+      "character_id": "vance_harrow",
+      "chapter": 3,
+      "scene": 6,
+      "inventory": [
+        {
+          "item": "ITEM_copper_credits_vance",
+          "container": "torn_pocket",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_rebar",
+          "container": "shoulder",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "torn_pocket",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_copper_credits_vance"
+          ]
+        },
+        {
+          "container": "shoulder",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_rebar"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": []
+    },
+    {
+      "character_id": "unit_734",
+      "chapter": 3,
+      "scene": 6,
+      "inventory": [],
+      "containers": [],
+      "invariants_add": [],
+      "persona_updates": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "party_mechanics": {
+          "party_name": "The Mercy Cache (Provisional)",
+          "role": "Party Leader"
+        }
+      }
+    },
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "party_mechanics": {
+          "party_name": "The Mercy Cache (Provisional)",
+          "role": "Party Member"
+        }
+      }
+    },
+    {
+      "character_id": "unit_734",
+      "set": {
+        "party_mechanics": {
+          "party_name": "The Mercy Cache (Provisional)",
+          "role": "Party Member"
+        }
+      }
+    }
+  ]
+}

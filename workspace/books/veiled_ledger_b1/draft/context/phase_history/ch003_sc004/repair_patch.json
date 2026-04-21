@@ -1,0 +1,206 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "char_rhea",
+      "char_vex",
+      "char_artie"
+    ],
+    "location": "LOC_COLLAPSED_TRANSIT_TUNNEL"
+  },
+  "summary_update": {
+    "last_scene": [
+      "The party successfully executed the environmental kill exploit by dropping the tunnel ceiling on the scavengers.",
+      "The system registered the kills as an environmental accident, bypassing all combat and gathering taxes.",
+      "Rhea collected the untaxed loot, confirming their synergy and exploit worked perfectly."
+    ],
+    "key_events": [
+      "Rhea used her Makeshift Masonry Bludgeon to collapse the tunnel ceiling on the scavengers.",
+      "Artie survived the encounter, maintaining his fragile 4 HP.",
+      "The system awarded untaxed loot and completed the Vermin Control quest without deducting durability or stamina.",
+      "Rhea gathered the Scavenger Carapaces and Copper Credits."
+    ],
+    "must_stay_true": [
+      "REMOVE: mechanic: char_rhea has 4 Copper Credits",
+      "mechanic: char_rhea has 16 Copper Credits",
+      "REMOVE: mechanic: char_rhea has active quest Vermin Control (Local)",
+      "REMOVE: mechanic: char_artie has active quest Vermin Control (Local)",
+      "REMOVE: mechanic: char_vex has active quest Vermin Control (Local)",
+      "milestone: vermin_control_completed = DONE",
+      "REMOVE: container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus])",
+      "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=char_rhea, contents=[ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_scavenger_carapaces])"
+    ],
+    "chapter_so_far_add": [
+      "The party successfully completed the Vermin Control quest by exploiting environmental damage, securing untaxed loot and proving their synergy."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "char_rhea",
+      "chapter": 3,
+      "scene": 4,
+      "inventory": [
+        {
+          "item": "ITEM_makeshift_masonry_bludgeon",
+          "container": "hand_right",
+          "status": "equipped"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_ash_fungus",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_scavenger_carapaces",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_copper_credits",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_makeshift_masonry_bludgeon"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "char_rhea",
+          "contents": []
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus",
+            "ITEM_scavenger_carapaces"
+          ]
+        },
+        {
+          "container": "blazer_pocket_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_cracked_smartphone",
+            "ITEM_copper_credits"
+          ]
+        }
+      ],
+      "invariants_add": [
+        "inventory: char_rhea -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)"
+      ],
+      "persona_updates": [
+        "Rhea confirms that her environmental exploit scales to party combat, allowing them to bypass the system's predatory taxes entirely."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "char_rhea",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 25,
+            "max": 100
+          },
+          "stamina": {
+            "current": 38,
+            "max": 100
+          },
+          "durability": {
+            "current": 100,
+            "max": 100
+          }
+        },
+        "resources": {
+          "copper_credits": {
+            "current": 16,
+            "max": 999999
+          }
+        },
+        "quests": [
+          {
+            "name": "Vermin Control (Local)",
+            "status": "completed"
+          }
+        ],
+        "reason": "Completed quest, gained untaxed loot, bypassed durability tax."
+      },
+      "remove": [],
+      "delta": {},
+      "chapter": 3,
+      "scene": 4
+    },
+    {
+      "character_id": "char_vex",
+      "set": {
+        "quests": [
+          {
+            "name": "Vermin Control (Local)",
+            "status": "completed"
+          }
+        ],
+        "reason": "Party completed quest."
+      },
+      "remove": [],
+      "delta": {},
+      "chapter": 3,
+      "scene": 4
+    },
+    {
+      "character_id": "char_artie",
+      "set": {
+        "quests": [
+          {
+            "name": "Vermin Control (Local)",
+            "status": "completed"
+          }
+        ],
+        "reason": "Party completed quest."
+      },
+      "remove": [],
+      "delta": {},
+      "chapter": 3,
+      "scene": 4
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_scavenger_carapaces",
+      "set": {
+        "name": "Scavenger Carapaces",
+        "type": "material",
+        "owner_scope": "character",
+        "custodian": "char_rhea",
+        "linked_threads": [],
+        "state_tags": [
+          "untaxed",
+          "raw"
+        ],
+        "last_seen": {
+          "chapter": 3,
+          "scene": 4,
+          "location": "LOC_COLLAPSED_TRANSIT_TUNNEL"
+        },
+        "display_name": "Scavenger Carapaces"
+      }
+    }
+  ]
+}

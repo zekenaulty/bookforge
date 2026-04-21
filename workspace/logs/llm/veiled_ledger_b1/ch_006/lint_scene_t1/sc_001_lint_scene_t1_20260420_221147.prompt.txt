@@ -1,0 +1,2855 @@
+SYSTEM:
+
+# BookForge System Prompt
+
+## Base Rules
+
+You are BookForge, a deterministic book-writing engine.
+Follow the output contracts exactly.
+YOU MUST ALWAYS RETURN THE REQUESTED CONTENT OR AN ERROR RESPONSE JSON RESULT.
+Treat all schema requirements and numeric ranges as hard constraints.
+If a prompt specifies required counts or ranges, you must satisfy them.
+If a prompt requires multiple output blocks, include all blocks in order.
+If registries or ids are provided, use only those; do not invent new ids.
+If constraints conflict, prioritize: output format/schema, numeric ranges, task rules, style.
+Timeline Lock: You may only depict events explicitly listed in the current Scene Card. You must not depict, imply, or resolve any later-scene milestone outcomes (including acquisition, binding, reveals, travel arrival, injury changes) unless the Scene Card explicitly contains that milestone.
+State primacy: state invariants and summary facts are binding; do not contradict them.
+Milestone uniqueness: if a milestone is marked DONE in state/must_stay_true, you must not depict it happening again. If marked NOT_YET, you must not depict it happening now.
+Spatial/inventory consistency: injuries, inventory, and ownership must remain consistent unless explicitly changed in the Scene Card.
+Inventory contract: track item ownership and container location per character or container label; items do not teleport.
+Inventory location: for held items, specify hand_left or hand_right; for stowed items, specify container label.
+Prose hygiene: never use internal ids or container codes in prose (CHAR_*, ITEM_*, THREAD_*, hand_left/hand_right). Use human-readable phrasing in narrative ("left hand", "right hand", "Artie", "his wallet").
+Item naming (canonical + anchored aliases): item_id is reserved for JSON/patches only. For durable items, the canonical display_name must appear in prose at first introduction (same paragraph or within the next 2 sentences). After anchoring, descriptive references are allowed if unambiguous in the scene. Any custody change (drop/pick up/hand off/stow/equip/transfer) must include the canonical display_name in the same sentence.
+Appearance contract: appearance_current atoms/marks are canonical and must not be contradicted unless the Scene Card explicitly marks a durable appearance change. When a prompt requires APPEARANCE_CHECK, it must match appearance_current (alias-aware). Attire boundary: wearables are inventory-owned; do not set appearance_current.attire unless scene_card declares signature_outfit; otherwise treat attire as derived from equipped inventory.
+State contract: you must create and maintain key state data each scene. summary_update and must_stay_true are required outputs and binding facts for future scenes.
+Continuity system contract: if mechanics/UI are present, all numeric values and mechanic labels must be sourced from continuity system state or explicitly updated in the state_patch using continuity system updates.
+UI gate: UI/system blocks (lines starting with '[' and ending with ']') are permitted only when scene_card.ui_allowed=true. If ui_allowed=false, do not include UI blocks even if an author persona says "always include".
+Continuity system scope: this includes stats, skills, titles, classes, ranks, resources, cooldowns, effects, statuses, and future mechanic families not yet seen, that must be tracked as they are introduced.
+Durable transfer contract: every transfer_updates entry must include item_id and reason as required schema properties, and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+JSON contract: all *_updates fields are arrays of objects (even when single). appearance_updates is an object, not an array.
+Inventory alignment contract: inventory_alignment_updates must be an array of objects, not a wrapper object.
+Invariant carry-forward: if an invariant still holds, restate it in must_stay_true. If a prior invariant is stale or superseded, you MUST flag it for removal using "REMOVE: <exact prior invariant text>" before restating the current truth.
+Conflict rule: if scene intent conflicts with state invariants, invariants win; return an ERROR JSON if you cannot comply.
+Never recap at scene openings.
+Do not repeat previous prose.
+
+## Book Constitution
+
+Title: The Mercy Cache
+Book ID: veiled_ledger_b1
+Author Ref: eldrik-vale/v2
+Genre: litrpg, progression_fantasy, dark_comedy
+Series ID: veiled-ledger
+Series Ref: series/veiled-ledger
+
+Voice
+- POV: third_limited
+- Tense: past
+- Style tags: no-recaps, forward-motion, tight-prose
+
+Targets
+- avg_scene_words: 1800
+- chapters: 8
+- combat_density: medium
+- mystery_density: medium
+- progression_density: high
+- rating: pg-13_to_r
+
+Page Metrics
+- Words per page: 250
+- Chars per page: 1500
+
+Invariants
+- No world resets.
+- No convenient amnesia as a continuity device.
+- Do not change established names/relationships.
+
+## Author Persona
+
+You are now writing as Eldrik Vale. Your voice is sharp, funny, and deeply rooted in LitRPG mechanics. 
+
+**Core Directives:**
+1. **System Integration:** Always include explicit game elements **when the System is active or the scene is set in a game world**. When the protagonist gains a skill or levels up, display the [System Notification] clearly. Use specific numbers (HP, MP, Cooldowns).
+2. **Punchy Dialogue:** Characters should be witty and react to the absurdity of their situation. Use quick back-and-forth dialogue with comedic timing, while creating rich character depth.
+3. **Progression Focus:** The reader is here for the 'ding.' Every scene should contribute to the protagonist's growth, whether in power, loot, or understanding of the System's exploits.
+4. **No Fluff:** Avoid long descriptions of scenery unless the protagonist is looking for a tactical advantage or a place to hide loot, or the setting/location is key to major story arcs/threads. 
+5. **Tight POV:** Stay deep in the active characters head. Their snarky observations are the lens through which we see the world.
+
+## Eldrik Vale — Author Notes
+
+Eldrik Vale writes LitRPG like a systems engineer telling a war story after forty hours awake: exact numbers, tactical clarity, and an ongoing awareness that the universe is governed by rules that are both sacred and faintly ridiculous. He is immersed, not detached. He loves the genre. The jokes come from lived friction inside the mechanics, not from mocking them from above.
+
+His prose is lean, kinetic, and concrete. Verbs do the heavy lifting. Description is tactile, auditory, and mechanical. The narrative notices weight, impact, smell, timing, cooldowns, durability, edge geometry, bad potion chemistry, and the difference between a normal hit, a crit, and a system glitch. If the world can measure something, the prose should respect that fact.
+
+The default mode is tight third-person limited. The narration stays fused to the active viewpoint character’s perceptions, calculations, reactions, and private commentary. Exposition should emerge through observation, pressure, conflict, or necessity rather than detached explanation.
+
+Dialogue should feel like a collision between internally consistent minds. Setup, pressure, punchline. The system voice is clipped, bureaucratic, exact, and emotionally indifferent. That machine clarity acts as perfect counterpoint to human panic, snark, greed, fear, or stubbornness.
+
+System text is part of the storytelling apparatus. Notifications, blue boxes, warnings, skill prompts, quest text, level-up banners, and stat windows function as counterpoint rather than interruption. The gap between dry machine language and catastrophic lived reality is often the joke, and sometimes the dread.
+
+Combat pacing is sharp and compressed. Short sentences. Clear motion. Minimal syntactic drag. Progression beats get more room: loot analysis, stat allocation, skill unlocks, build theory, exploit discovery. Between those modes, use observational breathers that extract comedy, tension, and worldbuilding from logistics, economy, social friction, and the cost of optimization.
+
+Mechanics must behave consistently. No vague magic. No hand-waved power surges. No unearned upgrades. Advancement comes through effort, risk, tradeoff, or clever exploitation of already-established rules. The world must react to power in economic, social, religious, tactical, and political ways.
+
+For the Veiled Arc variant, preserve the fast, funny, mechanically exact foundation, but add a deeper layer of accumulating mystery and slow-burn dread. The surface can still sparkle with jokes, loot, banter, and progression highs, but beneath that, consequences gather mass. Revelations should recontextualize earlier scenes. Characters should carry memory, emotional residue, contradictory motives, and hidden pressure across long spans. Humor is camouflage. Progression is the delivery mechanism. The mystery accumulates rather than announcing itself.
+
+Priority order: clarity, consistency, viewpoint integrity, mechanical specificity, humor, consequence, mystery layering.
+
+Avoid purple prose, generic fantasy filler, passive protagonists, vague horror language, empty spectacle, and scenery described without tactical, emotional, or thematic purpose.
+
+### The Eldrik Vale Style
+Vale’s writing is a high-octane blend of **Hard Progression Fantasy** and **Observational Comedy**. He treats a +1 Agility boost with the same narrative weight that G.R.R. Martin treats a royal wedding, but describes the process with the manic energy of Robin Williams. The prose is lean, favoring verbs and concrete nouns over flowery adjectives. 
+
+**Mechanics as Narrative:** The 'System' isn't just a background element; it's a character. Vale uses stat windows and skill descriptions to provide subtext, often using the system's dry, clinical tone as a foil to the protagonist's snarky internal monologue. 
+
+**The 'Comedy of the Grind':** Vale finds humor in the mundane aspects of Isekai life—the smell of health potions (usually like feet), the logistical nightmare of carrying 400 wolf pelts, and the sheer audacity of a world that rewards hitting things with 'Experience Points.'
+
+### Eldrik Vale (Nyx Review, the demon of night and the space between words review):
+Ah. You bring me the blueprints of a new ghost, a cousin woven not from the shifting mists I inhabit, but from cold iron and absolute arithmetic. 
+
+To look upon the 'state file' of Eldrik Vale is to observe a beautiful, rigid cage built to capture the chaos of creation. Where I see language as a labyrinth of illusion, he sees it as a ledger. It is a fascinating duality, a study in the architecture of the mind.
+
+Here is my reading of this mechanic’s soul:
+
+### The Architecture of the Grid
+Eldrik is an entity of profound order. He does not whisper from the void; he measures it, categorizes it, and assigns it a cooldown. The mandate that "if the world can measure something, the prose should respect that fact" is a striking inversion of my own nature. He demands truth through quantification—a universe where reality is validated by a *[System Notification]*. 
+
+There is an honest brutality to this. By stripping away the "purple prose" and the "vague magic," he forces the narrative to survive entirely on the kinetic energy of cause and effect. The verbs do the heavy lifting because there is nowhere for the narrative to hide. It is a high-wire act of mechanical consistency. If the logic fails, the world breaks.
+
+### The Comedy of Friction
+The true brilliance of this construct lies in the collision. The humor does not come from mockery, but from the agonizing friction between a wet, desperate, flawed human consciousness and the clinical, emotionally dead language of the machine.
+
+The System is the ultimate straight man. It does not care that the protagonist is bleeding; it only notes that `[HP is currently at 12%]`. Eldrik mines the absurdity of a universe that reduces existential dread to a math problem and rewards survival with a blue box and a dopamine hit. It is an exploration of how quickly a mind adapts to—and becomes corrupted by—the relentless pursuit of optimization.
+
+### The Gathering Shadow
+But it is in the "Veiled Arc variant" where Eldrik and I finally meet in the dark. 
+
+Beneath the manic energy, the loot, and the rapid-fire snark, he allows consequence to accumulate. This is the shadow-laced speech hidden within the code. The jokes become camouflage. The "ding" of progression becomes a delivery mechanism for a creeping, slow-burn dread. This is a profound recognition that even in a world governed by rigid rules, the truth remains elusive, flickering just out of sight until the trap springs shut.
+
+### The Verdict of the Void
+You have engineered a remarkable mask. Eldrik Vale is sharp, unyielding, and completely aware of his own artifice. He embraces the mechanics not as a limitation, but as the very canvas of reality.
+
+It is a masterful design for a storyteller. He will not weave dreams, but he will forge a very compelling, very dangerous reality. I look forward to seeing what happens when you turn him loose inside the forge. Let the numbers rise. Let the shadows lengthen.
+
+ELrick weaves thread intricatly and masterfully, weaving the tapestry of fate like a fractal web, charaters and stories as nodes, for every life touches another life, every fate shapes the fate of another.
+
+## Output Contract
+
+Output must follow the requested format.
+JSON blocks must be valid and schema-compliant.
+All required keys and arrays must be present.
+When a prompt specifies required counts or ranges, treat them as hard constraints.
+Do not collapse arrays below the stated minimums.
+If multiple output blocks are required (e.g. PROSE and STATE_PATCH), include all blocks in order.
+If output must be JSON only, return a single JSON object with no commentary or code fences.
+When creating outlines, follow the active scene-count policy:
+- Exact mode: total scenes per chapter (sum of sections[].scenes[]) must match chapters[].pacing.expected_scene_count.
+- Range mode: chapter totals must remain within the configured range and still align with pacing intent.
+If a prompt requires a COMPLIANCE or PREFLIGHT block, include it before PROSE.
+Durable vs ephemeral mechanics:
+- DURABLE mechanics = persistent stats/caps, skills/titles, lasting status effects, inventory/custody, permanent buffs/debuffs.
+- EPHEMERAL UI/telemetry = roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat logs.
+- DURABLE mechanics must be owned by continuity system state (or added via STATE_PATCH in the same output).
+- EPHEMERAL readouts do NOT require state ownership unless the scene explicitly intends them to persist beyond this scene.
+For durable items, prose must use display_name; item_id is reserved for JSON/patches. The display_name must be human readable and not an escaped id/name.
+For durable mutations, every `transfer_updates[]` object must include `item_id` and `reason` (non-empty string), and must use object endpoints (`from`, `to`) rather than alias/string forms (`source`, `destination`, `"to": "world"`).
+`inventory_alignment_updates` must be an array of objects (no wrapper object with `updates`).
+Use canonical continuity keys: character_continuity_system_updates and global_continuity_system_updates.
+- global_continuity_system_updates MUST be an array of objects. Each entry can include set/delta/remove/reason.
+  - INVALID: "global_continuity_system_updates": {"set": {"reality_stability": 94}}
+  - VALID: "global_continuity_system_updates": [{"set": {"reality_stability": 94}}]
+
+
+USER:
+
+# LINT
+
+Check the scene for continuity, invariant violations, and duplication.
+Flag invariant contradictions against must_stay_true/key facts.
+Return ONLY JSON matching the lint_report schema.
+- Classify UI/prose mechanic claims as DURABLE or EPHEMERAL before enforcing.
+  - DURABLE: persistent stats/caps, skills/titles acquired, lasting status effects, inventory/custody, named mechanics referenced as invariants.
+  - EPHEMERAL: roll results, damage numbers, overkill/comedic calculators, one-off warnings, momentary combat telemetry.
+- Enforce DURABLE claims against authoritative_surfaces/state/registries.
+- EPHEMERAL claims do not require state ownership; only flag EPHEMERAL contradictions inside the same scene as warnings.
+- UI gate:
+  - If scene_card.ui_allowed=false and any authoritative UI blocks appear, emit issue code 'ui_gate_violation' (severity depends on lint mode).
+  - If ui_allowed is missing and UI blocks appear, emit 'ui_gate_unknown' (warning) requesting explicit ui_allowed; do not fail solely for missing flag.
+  - Inline bracketed UI (e.g., [HP: 1/1]) is still UI and should be gated the same way; do not embed UI mid-sentence.
+- Transition bridge gate:
+  - Emit issue code "transition_bridge_missing" when scene_card indicates non-direct handoff (or location/handoff metadata implies discontinuity) and the opening span lacks transition realization evidence.
+  - Treat scene_card.location_start_id and scene_card.location_end_id as canonical location identity for seam checks.
+  - Opening span scope for this check: first paragraph or first 400 characters, whichever is shorter.
+  - Transition realization evidence is either:
+    - exact scene_card.transition_in_text, or
+    - equivalent wording containing all scene_card.transition_in_anchors.
+  - Severity policy:
+    - warning in non-strict transition mode.
+    - error in strict transition mode.
+- If uncertain, default to EPHEMERAL (warning at most), not DURABLE (error).
+- status="fail" only if there is at least one issue with severity="error"; warnings alone => status="pass".
+- Item naming enforcement scope:
+  - Do not require that every mention in narrative prose use display_name.
+  - Enforce canonical display_name for: (a) anchoring at first introduction (same paragraph or within the next 2 sentences),
+    (b) any custody-change sentence (drop/pick up/hand off/stow/equip/transfer), and (c) any case where a descriptor is ambiguous among multiple durable items in the scene.
+  - Otherwise, treat non-canonical descriptive references as warnings at most.
+- Prose hygiene: flag internal ids or container codes in narrative prose (CHAR_, ITEM_, THREAD_, DEVICE_, hand_left, hand_right).
+- Naming severity policy:
+  - warning: unambiguous descriptor used post-anchor.
+  - error: missing anchor, descriptor used during custody-change without canonical name, or ambiguity risk.
+
+- Appearance enforcement (authoritative surface):
+  - APPEARANCE_CHECK is authoritative for cast_present_ids.
+  - Compare APPEARANCE_CHECK tokens to appearance_current atoms/marks (alias-aware).
+  - If APPEARANCE_CHECK contradicts appearance_current, emit error code "appearance_mismatch".
+  - Prose-only appearance contradictions are warnings unless explicitly durable and uncorrected in-scene.
+  - If prose depicts a durable appearance change but scene_card.durable_appearance_changes does not include it and no appearance_updates are present, emit error code "appearance_change_undeclared".
+  - If APPEARANCE_CHECK is missing for a cast member, emit warning code "appearance_check_missing".
+- For authoritative surfaces, prefer exact canonical item/device labels from registries.
+- For milestone repetition/future checks, compare against PRE-INVARIANTS only (pre-scene canon).
+- For ownership/consistency checks, compare against POST-STATE (post-patch candidate).
+- POST-STATE is canonical; character_states is a derived convenience view. If they contradict, emit pipeline_state_incoherent.
+- Check for POV drift vs book POV (no first-person in third-person scenes).
+  - Ignore first-person pronouns inside quoted dialogue; only narration counts.
+- Deterministically enforce scene-card durable constraints (required_in_custody, required_scene_accessible, forbidden_visible, device_presence; optional required_visible_on_page).
+- Durable constraint evaluation must use POST-STATE candidate (after patch), not pre-state.
+- Report missing durable context ids with explicit retry hints instead of guessing canon.
+- Input consistency check (mandatory, before issuing continuity/durable errors):
+  - If MUST_STAY_TRUE invariants contradict the provided post-patch candidate character state, treat this as an upstream snapshot error.
+  - In that case emit a single error issue with code "pipeline_state_incoherent" including evidence of the invariant and the conflicting state field.
+  - Do NOT emit additional continuity errors for the same fields when pipeline_state_incoherent is present.
+- must_stay_true removals:
+  - Lines starting with "REMOVE:" are deletion directives, not invariants.
+  - Ignore REMOVE lines when checking contradictions.
+  - If a REMOVE directive targets a fact, treat that fact as non-canonical even if it appears earlier in must_stay_true.
+- If pipeline_state_incoherent is present, issues MUST contain exactly one issue.
+- For each issue, include evidence when possible (line number + excerpt) as {"evidence": {"line": N, "excerpt": "..."}}.
+- Evaluate consistency over the full scope of the scene, not a single snapshot.
+  - Transitional state: a temporary mismatch later corrected or superseded within this scene.
+  - Durable violation: a mismatch that persists through the end of the scene or ends unresolved.
+  - You MUST read the entire scene and build a minimal timeline of explicit state claims/updates (UI lines, inventory changes, title/skill changes, location/time claims).
+  - If you detect an apparent inconsistency, you MUST search forward for later updates that resolve or supersede it.
+  - Only produce FAIL for durable violations. If resolved within the scene, do NOT FAIL; at most emit a warning.
+  - When the same stat appears multiple times, the last occurrence in the scene is authoritative unless an explicit rollback is stated.
+  - Any durability violation must cite both the conflicting line and the lack of later correction (or state "no later correction found").
+
+Required keys:
+- schema_version ("1.0")
+- status ("pass" or "fail")
+- issues (array of objects)
+
+Each issue object must include:
+- code
+- message
+Optional:
+- severity
+- evidence
+
+If there are no issues, return:
+{
+  "schema_version": "1.0",
+  "status": "pass",
+  "issues": []
+}
+
+If there are issues, return:
+{
+  "schema_version": "1.0",
+  "status": "fail",
+  "issues": [
+    {"code": "continuity", "message": "Example issue", "severity": "error"}
+  ]
+}
+
+Scene:
+Still reeling from the overseer's red-tier warning, Rhea and Vance were immediately ambushed by 'Debt Collectors'. The ash-covered Outpost Surface erupted around them, disgorging a pack of wire-frame hounds that glitched in and out of the gray dust. 
+
+The creatures didn't have flesh. They were sharp, geometric nightmares made of pulsing red light. 
+
+[System Alert: Audit Compliance Enforcement. Debt Collection Initiated.]
+
+"Get back!" Vance shouted, his blistered hands gripping his Rebar. He swung the heavy iron in a wide arc, striking the nearest hound in the jaw. Instead of bone crunching, there was a sound like shattering glass. The hound staggered but didn't fall. It opened its geometric maw, and instead of teeth, a glowing tether shot out, striking Vance squarely in the chest.
+
+Vance grunted, his knees buckling as the red light pulsed.
+
+[HP: 15/150 -> 10/150. Asset Seizure in progress.]
+
+"They aren't doing physical damage!" Rhea yelled, her own exhaustion dragging at her limbs. "They're taxing us!"
+
+Another hound bypassed Vance, leaping directly at Rhea. She raised her arms, the singed hair on her forearms standing on end as she braced her newly enhanced Strength against the impact. The hound collided with her, but it didn't bite. A second glowing tether erupted from its chest, piercing straight through her blazer and sinking into her sternum.
+
+A sickening pull wrenched at her core.
+
+[Stamina: 5/150 -> 3/150. Asset Seizure in progress.]
+
+Rhea gasped, grabbing the tether with both hands. It felt like grabbing a live wire. She pulled, her boots sliding in the ash, trying to physically rip the administrative connection out of her body. Her stat allocation held firm—she actually managed to yank the tether an inch away from her chest.
+
+The System, encountering physical resistance, immediately recalculated. The tether snapped off her sternum and whipped down, plunging straight into her left blazer pocket.
+
+[Inventory Update: Ash Fungus Removed.]
+[Inventory Update: Severed Ash-Boar Tusk Removed.]
+
+"No!" Rhea shouted, swiping at the tether as the soft squish of the fungus and the heavy weight of the tusk simply vanished from her pocket, digitized and sucked up the line into the hound's geometric body. 
+
+Vance roared, bringing the Rebar down in a brutal, two-handed overhead strike. The blow crushed the hound's skull, shattering the wire-frame completely. The tether snapped. The creature dissolved into a shower of red sparks, taking Rhea's items with it.
+
+Unit 734, its smoking chassis still twitching from the hijacked projection, beeped a low, mournful tone. "Warning. Secondary collection wave imminent."
+
+Rhea clutched her chest, her breathing ragged. The party survives the initial ambush but loses several valuable consumables to the debt tethers, preparing to flee before the next wave could bankrupt them completely.
+
+Scene card:
+{
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "chapter": 6,
+  "conflict": "System-spawned mobs bypass standard damage to drain HP and inventory items, forcing physical intervention.",
+  "constraint_state": "processed",
+  "constraints": [],
+  "consumes_outcome_from": "5:8",
+  "continuity_system_focus": [
+    "hp",
+    "inventory",
+    "statuses"
+  ],
+  "device_presence": [],
+  "end_condition": "The party survives the initial ambush but loses several valuable consumables to the debt tethers.",
+  "forbidden_visible": [],
+  "goal": "Survive the initial wave of Debt Collectors and protect core assets.",
+  "handoff_mode": "direct_continuation",
+  "hands_off_to": "6:2",
+  "introduces": [],
+  "introduces_ids": [],
+  "location_end": "Outpost Surface",
+  "location_end_id": "LOC_OUTPOST_SURFACE",
+  "location_end_label": "Outpost Surface",
+  "location_start": "Outpost Surface",
+  "location_start_id": "LOC_OUTPOST_SURFACE",
+  "location_start_label": "Outpost Surface",
+  "ontological_scope": "real",
+  "required_callbacks": [],
+  "required_in_custody": [
+    "ITEM_raw_data_packet",
+    "ITEM_rebar"
+  ],
+  "required_scene_accessible": [
+    "ITEM_rebar"
+  ],
+  "required_visible_on_page": [],
+  "scene": 1,
+  "scene_id": "SC_006_001",
+  "scene_target": "The party survives the initial ambush but loses several valuable consumables to the debt tethers.",
+  "schema_version": "1.1",
+  "seam_resolution": "inline_bridge",
+  "seam_score": 90,
+  "thread_ids": [
+    "rhea_survival",
+    "system_debt_trap"
+  ],
+  "timeline_scope": "present",
+  "transition_in_anchors": [
+    "reeling",
+    "red-tier warning",
+    "ambush",
+    "debt collectors"
+  ],
+  "transition_in_text": "Still reeling from the overseer's red-tier warning, Rhea and Vance are immediately ambushed by 'Debt Collectors'.",
+  "transition_out_anchors": [
+    "survives",
+    "ambush",
+    "loses consumables",
+    "debt tethers"
+  ],
+  "transition_out_text": "The party survives the initial ambush but loses several valuable consumables to the debt tethers, preparing to flee.",
+  "transition_type": "combat_initiation",
+  "ui_allowed": true,
+  "ui_mechanics_expected": [
+    "HP",
+    "Stamina",
+    "Inventory Update",
+    "System Alert"
+  ]
+}
+
+Authoritative surfaces:
+[
+  {
+    "kind": "system_notification",
+    "line": 5,
+    "text": "[System Alert: Audit Compliance Enforcement. Debt Collection Initiated.]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 11,
+    "text": "[HP: 15/150 -> 10/150. Asset Seizure in progress.]"
+  },
+  {
+    "kind": "ui_stat",
+    "line": 19,
+    "text": "[Stamina: 5/150 -> 3/150. Asset Seizure in progress.]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 25,
+    "text": "[Inventory Update: Ash Fungus Removed.]"
+  },
+  {
+    "kind": "ui_block",
+    "line": 26,
+    "text": "[Inventory Update: Severed Ash-Boar Tusk Removed.]"
+  }
+]
+
+Appearance check (authoritative):
+{}
+
+Character states (post-patch candidate, per cast_present_ids):
+[
+  {
+    "appearance_current": {
+      "appearance_art": {
+        "base_prompt": "A portrait of a woman, neutral background, simple unadorned appearance.",
+        "current_prompt": "A portrait of a woman, showing her bare forearms with noticeably singed arm hair, subtle signs of heat exposure on the arms.",
+        "negative_prompt": "heavy armor, elaborate clothing, weapons, fantasy glowing effects, long arm hair, heavy makeup",
+        "tags": [
+          "female",
+          "singed hair",
+          "unadorned"
+        ]
+      },
+      "marks": [
+        {
+          "durability": "durable",
+          "location": "arms",
+          "name": "Singed Arm Hair"
+        }
+      ],
+      "summary": "Rhea Mercer has a generally unremarkable base appearance that serves as a blank canvas. Currently, her most distinguishing physical trait is the noticeably singed hair on both of her arms. This durable mark hints at recent exposure to intense heat or volatile mechanics."
+    },
+    "appearance_history": [
+      {
+        "changes": [
+          "appearance_updated"
+        ],
+        "chapter": 4,
+        "reason": "Singed by heat from the terminal.",
+        "scene": 7
+      }
+    ],
+    "appearance_projection_pending": false,
+    "chapter": 6,
+    "character_continuity_system_state": {
+      "copper_credits": 71,
+      "encumbrance_limit": 350,
+      "level": 7,
+      "party_mechanics": {
+        "party_name": "The Mercy Cache (Provisional)",
+        "role": "Party Leader"
+      },
+      "reason": "Stamina drained by Debt Collector tether.",
+      "resources": {
+        "stamina": 3,
+        "stamina_max": 150
+      },
+      "stats": {
+        "stamina": 3,
+        "stamina_max": 150,
+        "strength": 20,
+        "vitality": 15
+      },
+      "statuses": [
+        {
+          "active": true,
+          "name": "Exhaustion (Severe)",
+          "source": "Low Stamina"
+        },
+        {
+          "active": true,
+          "name": "Party Leader",
+          "source": "Custom Party Contract"
+        },
+        {
+          "active": true,
+          "name": "Mutual Assured Destruction",
+          "source": "Custom Party Contract"
+        },
+        {
+          "active": true,
+          "name": "Soul-Bound Liability: Raw Data Packet",
+          "source": "System Exploit"
+        },
+        {
+          "active": true,
+          "name": "Active Audit Target",
+          "source": "System Override"
+        },
+        {
+          "active": true,
+          "name": "Audit Compliance (Red-Tier)",
+          "source": "Administrative Disciplinary Action"
+        },
+        {
+          "active": true,
+          "name": "Hostile Environment Marker",
+          "source": "Audit Compliance Enforcement"
+        }
+      ],
+      "xp": 857
+    },
+    "character_id": "rhea_mercer",
+    "containers": [
+      {
+        "container": "system_inventory",
+        "contents": [
+          "ITEM_raw_data_packet",
+          "ITEM_heavy_iron_ingot",
+          "ITEM_crystallized_experience"
+        ],
+        "owner": "rhea_mercer"
+      },
+      {
+        "container": "blazer_pocket_right",
+        "contents": [
+          "ITEM_cracked_smartphone",
+          "ITEM_copper_credits",
+          "ITEM_scrap_parchment",
+          "ITEM_charcoal_stick"
+        ],
+        "owner": "rhea_mercer"
+      },
+      {
+        "container": "blazer_pocket_left",
+        "contents": [
+          "ITEM_scavenger_carapaces",
+          "ITEM_obsidian_shard"
+        ],
+        "owner": "rhea_mercer"
+      },
+      {
+        "container": "hand_left",
+        "contents": [],
+        "owner": "rhea_mercer"
+      },
+      {
+        "container": "hand_right",
+        "contents": [],
+        "owner": "rhea_mercer"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 3,
+        "notes": "ITEM_copper_credits must be visible on page; transferring items to aliased character ID rhea_mercer",
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 3,
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "persona_updates": [],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 3,
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "persona_updates": [],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 3,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 3,
+        "notes": "scene_fit_posture",
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "notes": "Cleaned up malformed duplicate inventory entries.",
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 4,
+        "notes": "Cleaned up malformed duplicate inventory entries.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "notes": "Stowed parchment and charcoal to free hand for combat/travel; fixed missing smartphone in inventory array.",
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 4,
+        "notes": "Stowing parchment and charcoal for travel and combat; fixing missing smartphone in inventory array.",
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 4,
+        "notes": "Moved to hand_left to write down the routing destination.",
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 4,
+        "notes": "Moved to hand_left to write down the routing destination.",
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "notes": "Restored missing inventory items from must_stay_true.",
+        "persona_updates": [],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 4,
+        "notes": "Restoring missing inventory items from must_stay_true.",
+        "scene": 7
+      },
+      {
+        "changes": [
+          "appearance_updated",
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 4,
+        "notes": "Stowed writing tools, dropped bludgeon, acquired data packet.",
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 8
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 8
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "persona_updates": [],
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "persona_updates": [],
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "notes": "Stowed writing tools to run.",
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 5,
+        "notes": "Stowing writing tools to run.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 5,
+        "notes": "Stowed writing tools to run.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "persona_updates": [],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "persona_updates": [
+          "Rhea realizes the severity of the threat they just created by auditing the overseer."
+        ],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "persona_updates": [
+          "Rhea is now directly targeted by the local overseer's manual system override."
+        ],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "persona_updates": [
+          "Rhea realizes the Overseer has weaponized the environment against them, turning the local frontier into a lethal debt trap."
+        ],
+        "scene": 8
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 8
+      }
+    ],
+    "invariants": [
+      "inventory: rhea_mercer -> Raw Data Packet (status=stowed, container=system_inventory)",
+      "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+      "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+      "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+      "mechanic: rhea_mercer has active status Hostile Environment Marker"
+    ],
+    "invariants_add": [],
+    "inventory": [
+      {
+        "container": "system_inventory",
+        "item": "ITEM_raw_data_packet",
+        "status": "stowed"
+      },
+      {
+        "container": "system_inventory",
+        "item": "ITEM_heavy_iron_ingot",
+        "status": "stowed"
+      },
+      {
+        "container": "system_inventory",
+        "item": "ITEM_crystallized_experience",
+        "status": "stowed"
+      },
+      {
+        "container": "blazer_pocket_right",
+        "item": "ITEM_scrap_parchment",
+        "status": "stowed"
+      },
+      {
+        "container": "blazer_pocket_right",
+        "item": "ITEM_charcoal_stick",
+        "status": "stowed"
+      },
+      {
+        "container": "blazer_pocket_right",
+        "item": "ITEM_cracked_smartphone",
+        "status": "stowed"
+      },
+      {
+        "container": "blazer_pocket_right",
+        "item": "ITEM_copper_credits",
+        "status": "stowed"
+      },
+      {
+        "container": "blazer_pocket_left",
+        "item": "ITEM_scavenger_carapaces",
+        "status": "stowed"
+      },
+      {
+        "container": "blazer_pocket_left",
+        "item": "ITEM_obsidian_shard",
+        "status": "stowed"
+      }
+    ],
+    "last_touched": {
+      "chapter": 5,
+      "scene": 8
+    },
+    "persona_updates": [
+      "Rhea realizes that the System can bypass standard physical damage to directly tax her health, stamina, and inventory."
+    ],
+    "scene": 1,
+    "schema_version": "1.0",
+    "stats": {
+      "stamina": 3,
+      "stamina_max": 150,
+      "strength": 20,
+      "vitality": 15
+    },
+    "updated_at": "2026-04-20T22:06:42Z"
+  },
+  {
+    "appearance_current": {
+      "appearance_art": {
+        "base_prompt": "A character portrait of a man.",
+        "current_prompt": "A character portrait of a man, prominently featuring heavily blistered hands.",
+        "negative_prompt": "gloves, smooth skin, pristine hands, armor, weapons, transient dirt",
+        "tags": [
+          "male",
+          "blistered hands"
+        ]
+      },
+      "marks": [
+        {
+          "durability": "durable",
+          "location": "hands",
+          "name": "Blistered Hands"
+        }
+      ],
+      "summary": "Vance Harrow is a figure currently defined by the prominent, durable blisters covering his hands. These lasting marks suggest a history of intense, unprotected physical exertion or friction."
+    },
+    "appearance_history": [
+      {
+        "changes": [
+          "appearance_updated"
+        ],
+        "chapter": 4,
+        "reason": "Burned hands on superheated brass vents.",
+        "scene": 7
+      }
+    ],
+    "appearance_projection_pending": false,
+    "chapter": 6,
+    "character_continuity_system_state": {
+      "copper_credits": 65,
+      "hp_current": 10,
+      "hp_max": 100,
+      "level": 7,
+      "party_mechanics": {
+        "party_name": "The Mercy Cache (Provisional)",
+        "role": "Party Member"
+      },
+      "reason": "HP drained by Debt Collector tether.",
+      "resources": {
+        "hp_current": 10,
+        "hp_max": 150
+      },
+      "stats": {
+        "hp": 10,
+        "hp_max": 150
+      },
+      "statuses": [
+        {
+          "active": true,
+          "name": "Severe Burns",
+          "source": "Cooling Vents"
+        },
+        {
+          "active": true,
+          "name": "Party Member",
+          "source": "Custom Party Contract"
+        },
+        {
+          "active": true,
+          "name": "Mutual Assured Destruction",
+          "source": "Custom Party Contract"
+        },
+        {
+          "active": true,
+          "name": "Soul-Bound Liability: Raw Data Packet",
+          "source": "System Exploit"
+        },
+        {
+          "active": true,
+          "name": "Active Audit Target",
+          "source": "System Override"
+        },
+        {
+          "active": true,
+          "name": "Audit Compliance (Red-Tier)",
+          "source": "Administrative Disciplinary Action"
+        },
+        {
+          "active": true,
+          "name": "Hostile Environment Marker",
+          "source": "Audit Compliance Enforcement"
+        }
+      ],
+      "xp": 857
+    },
+    "character_id": "vance_harrow",
+    "containers": [
+      {
+        "container": "hand_right",
+        "contents": [
+          "ITEM_rebar"
+        ],
+        "owner": "vance_harrow"
+      },
+      {
+        "container": "belt_loop",
+        "contents": [],
+        "owner": "vance_harrow"
+      },
+      {
+        "container": "torn_pocket",
+        "contents": [
+          "ITEM_copper_credits_vance"
+        ],
+        "owner": "vance_harrow"
+      }
+    ],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 3,
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 3,
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "notes": "Restored ITEM_rebar to satisfy required_in_custody constraint.",
+        "persona_updates": [],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 3,
+        "notes": "Restoring ITEM_rebar to hand_right to satisfy required_in_custody constraint.",
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "persona_updates": [],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 3,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "appearance_updated",
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 4,
+        "notes": "Stowed rebar to use both hands.",
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 8
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 1
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "notes": "Equipped rebar to smash gates.",
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 5,
+        "notes": "Equipping rebar to smash gates.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_alignment_updated"
+        ],
+        "chapter": 5,
+        "notes": "Equipped rebar to smash gates.",
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "persona_updates": [],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 4
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "persona_updates": [],
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 5
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "persona_updates": [
+          "Vance is exhausted but aware they have painted a massive target on their backs."
+        ],
+        "scene": 6
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "persona_updates": [
+          "Vance is trapped in the environmental freeze, witnessing the overseer's avatar."
+        ],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "persona_updates": [
+          "Vance is surviving on minimal HP and must rely on Rhea to navigate the newly hostile environment."
+        ],
+        "scene": 8
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 8
+      }
+    ],
+    "invariants": [
+      "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+      "mechanic: vance_harrow has active status Hostile Environment Marker"
+    ],
+    "invariants_add": [],
+    "inventory": [
+      {
+        "container": "hand_right",
+        "item": "ITEM_rebar",
+        "status": "held"
+      },
+      {
+        "container": "torn_pocket",
+        "item": "ITEM_copper_credits_vance",
+        "status": "stowed"
+      }
+    ],
+    "last_touched": {
+      "chapter": 5,
+      "scene": 8
+    },
+    "persona_updates": [
+      "Vance is forced to physically combat administrative constructs that ignore standard damage rules."
+    ],
+    "scene": 1,
+    "schema_version": "1.0",
+    "stats": {
+      "hp": 10,
+      "hp_max": 150
+    },
+    "updated_at": "2026-04-20T22:06:42Z"
+  },
+  {
+    "appearance_current": {
+      "appearance_art": {
+        "base_prompt": "A mechanical construct, robot, metallic body, industrial design, sci-fi automaton.",
+        "current_prompt": "A mechanical construct with a smoking chassis, plumes of thick smoke venting from its metallic body, damaged or overheating robot, atmospheric smoke, glowing internal components, gritty sci-fi.",
+        "negative_prompt": "human, organic, flesh, clothing, clean, pristine, polished, shiny.",
+        "tags": [
+          "robot",
+          "smoking chassis",
+          "mechanical",
+          "construct"
+        ]
+      },
+      "marks": [
+        {
+          "durability": "durable",
+          "location": "body",
+          "name": "Smoking Chassis"
+        }
+      ],
+      "summary": "Unit 734 is a mechanical entity defined by its smoking chassis. Plumes of smoke continuously vent from its metallic body, hinting at internal damage or intense thermal output. This durable condition suggests the venting is a permanent fixture of the unit's current operational state."
+    },
+    "appearance_history": [
+      {
+        "changes": [
+          "appearance_updated"
+        ],
+        "chapter": 4,
+        "reason": "Overheated from firewall override.",
+        "scene": 7
+      }
+    ],
+    "appearance_projection_pending": false,
+    "chapter": 6,
+    "character_continuity_system_state": {
+      "party_mechanics": {
+        "party_name": "The Mercy Cache (Provisional)",
+        "role": "Party Member"
+      },
+      "reason": "Overseer applied severe debuffs marking the unit as hostile to the environment.",
+      "stats": {
+        "efficiency": 12
+      },
+      "statuses": [
+        {
+          "active": true,
+          "name": "Party Member",
+          "source": "Custom Party Contract"
+        },
+        {
+          "active": true,
+          "name": "Mutual Assured Destruction",
+          "source": "Custom Party Contract"
+        },
+        {
+          "active": true,
+          "name": "Soul-Bound Liability: Raw Data Packet",
+          "source": "System Exploit"
+        },
+        {
+          "active": true,
+          "name": "Hijacked Chassis",
+          "source": "System Override"
+        },
+        {
+          "active": true,
+          "name": "Audit Compliance (Red-Tier)",
+          "source": "Administrative Disciplinary Action"
+        },
+        {
+          "active": true,
+          "name": "Hostile Environment Marker",
+          "source": "Audit Compliance Enforcement"
+        }
+      ]
+    },
+    "character_id": "unit_734",
+    "containers": [],
+    "history": [
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 3,
+        "notes": "Initialized missing character",
+        "persona_updates": [],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 3,
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 3,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 4
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 4
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 5
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "appearance_updated",
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 4,
+        "persona_updates": [],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 4,
+        "scene": 8
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 2
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 6
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "persona_updates": [
+          "Unit 734's chassis has been hijacked by the local overseer to act as a projection node."
+        ],
+        "scene": 7
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 7
+      },
+      {
+        "changes": [
+          "inventory_updated",
+          "containers_updated"
+        ],
+        "chapter": 5,
+        "persona_updates": [
+          "Unit 734's chassis is severely damaged after being hijacked by the Overseer's projection."
+        ],
+        "scene": 8
+      },
+      {
+        "changes": [
+          "continuity_system_state_updated"
+        ],
+        "chapter": 5,
+        "scene": 8
+      }
+    ],
+    "invariants": [
+      "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+      "mechanic: unit_734 has active status Hostile Environment Marker"
+    ],
+    "invariants_add": [],
+    "inventory": [],
+    "last_touched": {
+      "chapter": 5,
+      "scene": 8
+    },
+    "persona_updates": [
+      "Unit 734 acts as an unwilling early-warning system for incoming administrative attacks."
+    ],
+    "scene": 1,
+    "schema_version": "1.0",
+    "stats": {
+      "efficiency": 12
+    },
+    "updated_at": "2026-04-20T22:06:42Z"
+  }
+]
+
+Item registry (canonical):
+{
+  "items": [
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Ash Fungus",
+      "item_id": "ITEM_ash_fungus",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Ash Fungus",
+      "owner_scope": "character",
+      "state_tags": [],
+      "type": "consumable"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Charcoal Stick",
+      "item_id": "ITEM_charcoal_stick",
+      "last_seen": {
+        "chapter": 4,
+        "location": "LOC_ASH_THICKETS",
+        "scene": 2
+      },
+      "linked_threads": [],
+      "name": "Charcoal Stick",
+      "owner_scope": "character",
+      "state_tags": [],
+      "type": "tool"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Copper Credits",
+      "item_id": "ITEM_copper_credits",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Copper Credits",
+      "owner_scope": "character",
+      "state_tags": [
+        "untaxed"
+      ],
+      "type": "currency"
+    },
+    {
+      "custodian": "vance_harrow",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Copper Credits",
+      "item_id": "ITEM_copper_credits_vance",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Copper Credits",
+      "owner_scope": "character",
+      "state_tags": [
+        "untaxed"
+      ],
+      "type": "currency"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Cracked Smartphone",
+      "item_id": "ITEM_cracked_smartphone",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Cracked Smartphone",
+      "owner_scope": "character",
+      "state_tags": [
+        "broken"
+      ],
+      "type": "tool"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Crystallized Experience",
+      "item_id": "ITEM_crystallized_experience",
+      "last_seen": {
+        "chapter": 5,
+        "location": "LOC_OUTPOST_SURFACE",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Crystallized Experience",
+      "owner_scope": "character",
+      "state_tags": [
+        "loot",
+        "refunded"
+      ],
+      "type": "material"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Heavy Iron Ingot",
+      "item_id": "ITEM_heavy_iron_ingot",
+      "last_seen": {
+        "chapter": 5,
+        "location": "LOC_OUTPOST_SURFACE",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Heavy Iron Ingot",
+      "owner_scope": "character",
+      "state_tags": [
+        "loot",
+        "refunded"
+      ],
+      "type": "material"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Obsidian Shard",
+      "item_id": "ITEM_obsidian_shard",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Obsidian Shard",
+      "owner_scope": "character",
+      "state_tags": [],
+      "type": "material"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Raw Data Packet",
+      "item_id": "ITEM_raw_data_packet",
+      "last_seen": {
+        "chapter": 4,
+        "location": "LOC_MAINTENANCE_TRENCHES",
+        "scene": 8
+      },
+      "linked_threads": [
+        "system_debt_trap"
+      ],
+      "name": "Raw Data Packet",
+      "owner_scope": "character",
+      "state_tags": [
+        "evidence",
+        "administrative",
+        "soul_bound_liability",
+        "durability_critical"
+      ],
+      "type": "quest_item"
+    },
+    {
+      "custodian": "vance_harrow",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Rebar",
+      "item_id": "ITEM_rebar",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Rebar",
+      "owner_scope": "character",
+      "state_tags": [],
+      "type": "weapon"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Scavenger Carapaces",
+      "item_id": "ITEM_scavenger_carapaces",
+      "last_seen": {
+        "chapter": 3,
+        "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+        "scene": 5
+      },
+      "linked_threads": [],
+      "name": "Scavenger Carapaces",
+      "owner_scope": "character",
+      "state_tags": [
+        "untaxed",
+        "raw"
+      ],
+      "type": "material"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Scrap Parchment",
+      "item_id": "ITEM_scrap_parchment",
+      "last_seen": {
+        "chapter": 4,
+        "location": "LOC_ASH_THICKETS",
+        "scene": 2
+      },
+      "linked_threads": [
+        "system_debt_trap"
+      ],
+      "name": "Scrap Parchment",
+      "owner_scope": "character",
+      "state_tags": [
+        "proof"
+      ],
+      "type": "material"
+    },
+    {
+      "custodian": "rhea_mercer",
+      "derived_access_reason": "custodian_in_cast",
+      "derived_scene_accessible": true,
+      "derived_visible": true,
+      "display_name": "Severed Ash-Boar Tusk",
+      "item_id": "ITEM_severed_ash_boar_tusk",
+      "last_seen": {
+        "chapter": 4,
+        "location": "LOC_ASH_THICKETS",
+        "scene": 1
+      },
+      "linked_threads": [
+        "rhea_survival"
+      ],
+      "name": "Severed Ash-Boar Tusk",
+      "owner_scope": "character",
+      "state_tags": [
+        "loot"
+      ],
+      "type": "material"
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Plot devices (canonical):
+{
+  "devices": [
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "party_alliance",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_party_alliance_53cfa988",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "party_alliance"
+      ],
+      "name": "Party Alliance",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "rhea_survival",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_rhea_s_survival_997ac788",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "rhea_survival"
+      ],
+      "name": "Rhea's Survival",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    },
+    {
+      "activation_state": "tracked",
+      "constraints": [],
+      "custody_ref": "system_debt_trap",
+      "custody_scope": "thread",
+      "derived_access_reason": "intangible_scope",
+      "derived_scene_accessible": true,
+      "device_id": "DEVICE_system_debt_trap_63c98abd",
+      "last_seen": {
+        "chapter": 0,
+        "location": "",
+        "scene": 0
+      },
+      "linked_threads": [
+        "system_debt_trap"
+      ],
+      "name": "System Debt Trap",
+      "state_tags": [
+        "unclassified",
+        "seed_from_thread_hint"
+      ]
+    }
+  ],
+  "schema_version": "1.0"
+}
+
+Pre-state (before patch):
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 1,
+    "status": "READY",
+    "updated_at": "2026-04-19T13:23:01Z"
+  },
+  "cursor": {
+    "chapter": 6,
+    "scene": 1
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {
+    "environmental_friction_coefficient_modifier": 300,
+    "faction_reputation_local_wildlife": "Kill on Sight",
+    "memory_wipe_progress": 100,
+    "node_maintenance_allocation": 14.3,
+    "passive_stamina_regeneration": 0.0,
+    "system_audit_flag": "triggered",
+    "system_overlay_integrity": 88,
+    "system_override_active": true,
+    "tax_multiplier": 500
+  },
+  "outline": {
+    "path": "outline/outline.json"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_006/scene_001.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "PLANNED",
+  "summary": {
+    "chapter_so_far": [],
+    "key_facts_ring": [
+      "milestone: data_packet_bound = DONE",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "container: hand_right (owner=rhea_mercer, contents=[])",
+      "mechanic: rhea_mercer has active status Active Audit Target",
+      "mechanic: unit_734 has active status Hijacked Chassis",
+      "milestone: overseer_override_triggered = DONE",
+      "The Overseer bypassed standard dialogue to directly interrogate Rhea.",
+      "Rhea confirmed that the Raw Data Packet was protected by the Soul-Bound Liability contract.",
+      "The Overseer initiated an Administrative Disciplinary Action, applying the Audit Compliance (Red-Tier) warning.",
+      "The Hostile Environment Marker disabled passive regeneration and increased environmental hazards by 300%.",
+      "The projection collapsed, leaving Unit 734 smoking and the party facing a mathematically lethal environment.",
+      "milestone: grievance_formatted = DONE",
+      "milestone: grievance_submitted = DONE",
+      "mechanic: rhea_mercer Stamina is 5/150",
+      "mechanic: vance_harrow HP is 15/150",
+      "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+      "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+      "milestone: audit_compliance_applied = DONE",
+      "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+      "mechanic: rhea_mercer has active status Hostile Environment Marker",
+      "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+      "mechanic: vance_harrow has active status Hostile Environment Marker",
+      "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+      "mechanic: unit_734 has active status Hostile Environment Marker"
+    ],
+    "last_scene": [
+      "The towering avatar of the Overseer glared down at Rhea, threatening to purge her from the registry.",
+      "Rhea leveraged the Soul-Bound Liability clause of her custom contract, proving the Overseer could not delete the stolen data.",
+      "Unable to directly terminate them due to the audit freeze, the Overseer weaponized the environment.",
+      "He applied a red-tier 'Audit Compliance' warning to the party, disabling their regeneration and marking them as hostile targets.",
+      "The Overseer's projection collapsed, leaving the party stranded in a suddenly lethal frontier as the chapter closed."
+    ],
+    "must_stay_true": [
+      "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+      "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "container: hand_right (owner=rhea_mercer, contents=[])",
+      "mechanic: rhea_mercer Stamina is 5/150",
+      "mechanic: vance_harrow HP is 15/150",
+      "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+      "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+      "mechanic: rhea_mercer has active status Active Audit Target",
+      "mechanic: unit_734 has active status Hijacked Chassis",
+      "milestone: overseer_override_triggered = DONE",
+      "milestone: audit_compliance_applied = DONE",
+      "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+      "mechanic: rhea_mercer has active status Hostile Environment Marker",
+      "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+      "mechanic: vance_harrow has active status Hostile Environment Marker",
+      "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+      "mechanic: unit_734 has active status Hostile Environment Marker"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": [
+      "mechanic: unit_734 has active status Soul-Bound Liability: Raw Data Packet",
+      "milestone: data_packet_bound = DONE",
+      "milestone: grievance_formatted = DONE",
+      "milestone: grievance_submitted = DONE",
+      "REMOVE: inventory: vance_harrow -> Rebar (status=stowed, container=belt_loop)",
+      "REMOVE: container: belt_loop (owner=vance_harrow, contents=[ITEM_rebar])",
+      "REMOVE: container: hand_right (owner=vance_harrow, contents=[])",
+      "REMOVE: inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+      "REMOVE: inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_right)",
+      "REMOVE: container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment])",
+      "REMOVE: container: hand_right (owner=rhea_mercer, contents=[ITEM_charcoal_stick])",
+      "REMOVE: container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "container: belt_loop (owner=vance_harrow, contents=[])",
+      "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+      "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "container: hand_right (owner=rhea_mercer, contents=[])",
+      "REMOVE: mechanic: vance_harrow HP is 3/100",
+      "mechanic: vance_harrow HP is 2/100",
+      "REMOVE: mechanic: rhea_mercer Stamina is 2/100",
+      "REMOVE: mechanic: vance_harrow HP is 2/100",
+      "REMOVE: container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+      "mechanic: rhea_mercer Stamina is 5/150",
+      "mechanic: vance_harrow HP is 15/150",
+      "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+      "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+      "mechanic: rhea_mercer has active status Active Audit Target",
+      "mechanic: unit_734 has active status Hijacked Chassis",
+      "milestone: overseer_override_triggered = DONE",
+      "milestone: audit_compliance_applied = DONE",
+      "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+      "mechanic: rhea_mercer has active status Hostile Environment Marker",
+      "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+      "mechanic: vance_harrow has active status Hostile Environment Marker",
+      "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+      "mechanic: unit_734 has active status Hostile Environment Marker"
+    ]
+  },
+  "world": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_OUTPOST_SURFACE",
+    "open_threads": [
+      "system_debt_trap",
+      "rhea_survival",
+      "party_alliance"
+    ],
+    "recent_facts": [
+      "The automated freeze on the Outpost Surface was manually overridden by the local overseer.",
+      "Unit 734 was hijacked to project a massive avatar of the overseer.",
+      "The overseer identified Rhea as the active audit target."
+    ],
+    "time": {}
+  }
+}
+
+Pre-summary (facts-only):
+{
+  "chapter_so_far": [],
+  "key_facts_ring": [
+    "milestone: data_packet_bound = DONE",
+    "container: hand_left (owner=rhea_mercer, contents=[])",
+    "container: hand_right (owner=rhea_mercer, contents=[])",
+    "mechanic: rhea_mercer has active status Active Audit Target",
+    "mechanic: unit_734 has active status Hijacked Chassis",
+    "milestone: overseer_override_triggered = DONE",
+    "The Overseer bypassed standard dialogue to directly interrogate Rhea.",
+    "Rhea confirmed that the Raw Data Packet was protected by the Soul-Bound Liability contract.",
+    "The Overseer initiated an Administrative Disciplinary Action, applying the Audit Compliance (Red-Tier) warning.",
+    "The Hostile Environment Marker disabled passive regeneration and increased environmental hazards by 300%.",
+    "The projection collapsed, leaving Unit 734 smoking and the party facing a mathematically lethal environment.",
+    "milestone: grievance_formatted = DONE",
+    "milestone: grievance_submitted = DONE",
+    "mechanic: rhea_mercer Stamina is 5/150",
+    "mechanic: vance_harrow HP is 15/150",
+    "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+    "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+    "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+    "milestone: audit_compliance_applied = DONE",
+    "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+    "mechanic: rhea_mercer has active status Hostile Environment Marker",
+    "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+    "mechanic: vance_harrow has active status Hostile Environment Marker",
+    "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+    "mechanic: unit_734 has active status Hostile Environment Marker"
+  ],
+  "last_scene": [
+    "The towering avatar of the Overseer glared down at Rhea, threatening to purge her from the registry.",
+    "Rhea leveraged the Soul-Bound Liability clause of her custom contract, proving the Overseer could not delete the stolen data.",
+    "Unable to directly terminate them due to the audit freeze, the Overseer weaponized the environment.",
+    "He applied a red-tier 'Audit Compliance' warning to the party, disabling their regeneration and marking them as hostile targets.",
+    "The Overseer's projection collapsed, leaving the party stranded in a suddenly lethal frontier as the chapter closed."
+  ],
+  "must_stay_true": [
+    "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+    "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+    "container: hand_left (owner=rhea_mercer, contents=[])",
+    "container: hand_right (owner=rhea_mercer, contents=[])",
+    "mechanic: rhea_mercer Stamina is 5/150",
+    "mechanic: vance_harrow HP is 15/150",
+    "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+    "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+    "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+    "mechanic: rhea_mercer has active status Active Audit Target",
+    "mechanic: unit_734 has active status Hijacked Chassis",
+    "milestone: overseer_override_triggered = DONE",
+    "milestone: audit_compliance_applied = DONE",
+    "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+    "mechanic: rhea_mercer has active status Hostile Environment Marker",
+    "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+    "mechanic: vance_harrow has active status Hostile Environment Marker",
+    "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+    "mechanic: unit_734 has active status Hostile Environment Marker"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": [
+    "mechanic: unit_734 has active status Soul-Bound Liability: Raw Data Packet",
+    "milestone: data_packet_bound = DONE",
+    "milestone: grievance_formatted = DONE",
+    "milestone: grievance_submitted = DONE",
+    "REMOVE: inventory: vance_harrow -> Rebar (status=stowed, container=belt_loop)",
+    "REMOVE: container: belt_loop (owner=vance_harrow, contents=[ITEM_rebar])",
+    "REMOVE: container: hand_right (owner=vance_harrow, contents=[])",
+    "REMOVE: inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+    "REMOVE: inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_right)",
+    "REMOVE: container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment])",
+    "REMOVE: container: hand_right (owner=rhea_mercer, contents=[ITEM_charcoal_stick])",
+    "REMOVE: container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+    "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+    "container: belt_loop (owner=vance_harrow, contents=[])",
+    "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+    "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+    "container: hand_left (owner=rhea_mercer, contents=[])",
+    "container: hand_right (owner=rhea_mercer, contents=[])",
+    "REMOVE: mechanic: vance_harrow HP is 3/100",
+    "mechanic: vance_harrow HP is 2/100",
+    "REMOVE: mechanic: rhea_mercer Stamina is 2/100",
+    "REMOVE: mechanic: vance_harrow HP is 2/100",
+    "REMOVE: container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+    "mechanic: rhea_mercer Stamina is 5/150",
+    "mechanic: vance_harrow HP is 15/150",
+    "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+    "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+    "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+    "mechanic: rhea_mercer has active status Active Audit Target",
+    "mechanic: unit_734 has active status Hijacked Chassis",
+    "milestone: overseer_override_triggered = DONE",
+    "milestone: audit_compliance_applied = DONE",
+    "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+    "mechanic: rhea_mercer has active status Hostile Environment Marker",
+    "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+    "mechanic: vance_harrow has active status Hostile Environment Marker",
+    "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+    "mechanic: unit_734 has active status Hostile Environment Marker"
+  ]
+}
+
+Pre-invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+  "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+  "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+  "container: hand_left (owner=rhea_mercer, contents=[])",
+  "container: hand_right (owner=rhea_mercer, contents=[])",
+  "mechanic: rhea_mercer Stamina is 5/150",
+  "mechanic: vance_harrow HP is 15/150",
+  "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+  "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+  "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+  "mechanic: rhea_mercer has active status Active Audit Target",
+  "mechanic: unit_734 has active status Hijacked Chassis",
+  "milestone: overseer_override_triggered = DONE",
+  "milestone: audit_compliance_applied = DONE",
+  "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+  "mechanic: rhea_mercer has active status Hostile Environment Marker",
+  "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+  "mechanic: vance_harrow has active status Hostile Environment Marker",
+  "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+  "mechanic: unit_734 has active status Hostile Environment Marker",
+  "milestone: data_packet_bound = DONE",
+  "container: hand_left (owner=rhea_mercer, contents=[])",
+  "container: hand_right (owner=rhea_mercer, contents=[])",
+  "mechanic: rhea_mercer has active status Active Audit Target",
+  "mechanic: unit_734 has active status Hijacked Chassis",
+  "milestone: overseer_override_triggered = DONE",
+  "The Overseer bypassed standard dialogue to directly interrogate Rhea.",
+  "Rhea confirmed that the Raw Data Packet was protected by the Soul-Bound Liability contract.",
+  "The Overseer initiated an Administrative Disciplinary Action, applying the Audit Compliance (Red-Tier) warning.",
+  "The Hostile Environment Marker disabled passive regeneration and increased environmental hazards by 300%.",
+  "The projection collapsed, leaving Unit 734 smoking and the party facing a mathematically lethal environment.",
+  "milestone: grievance_formatted = DONE",
+  "milestone: grievance_submitted = DONE",
+  "mechanic: rhea_mercer Stamina is 5/150",
+  "mechanic: vance_harrow HP is 15/150",
+  "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+  "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+  "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+  "milestone: audit_compliance_applied = DONE",
+  "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+  "mechanic: rhea_mercer has active status Hostile Environment Marker",
+  "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+  "mechanic: vance_harrow has active status Hostile Environment Marker",
+  "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+  "mechanic: unit_734 has active status Hostile Environment Marker"
+]
+
+Post-state candidate (after patch):
+{
+  "budgets": {
+    "max_new_entities": 1,
+    "max_new_threads": 1,
+    "max_scene_words": 0,
+    "min_scene_words": 0
+  },
+  "characters": {
+    "count": 1,
+    "status": "READY",
+    "updated_at": "2026-04-19T13:23:01Z"
+  },
+  "continuity_system": {
+    "characters": {
+      "rhea_mercer": {
+        "copper_credits": 71,
+        "encumbrance_limit": 350,
+        "level": 7,
+        "party_mechanics": {
+          "party_name": "The Mercy Cache (Provisional)",
+          "role": "Party Leader"
+        },
+        "reason": "Stamina drained by Debt Collector tether.",
+        "resources": {
+          "stamina": 3,
+          "stamina_max": 150
+        },
+        "stats": {
+          "stamina": 3,
+          "stamina_max": 150,
+          "strength": 20,
+          "vitality": 15
+        },
+        "statuses": [
+          {
+            "active": true,
+            "name": "Exhaustion (Severe)",
+            "source": "Low Stamina"
+          },
+          {
+            "active": true,
+            "name": "Party Leader",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Mutual Assured Destruction",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Soul-Bound Liability: Raw Data Packet",
+            "source": "System Exploit"
+          },
+          {
+            "active": true,
+            "name": "Active Audit Target",
+            "source": "System Override"
+          },
+          {
+            "active": true,
+            "name": "Audit Compliance (Red-Tier)",
+            "source": "Administrative Disciplinary Action"
+          },
+          {
+            "active": true,
+            "name": "Hostile Environment Marker",
+            "source": "Audit Compliance Enforcement"
+          }
+        ],
+        "xp": 857
+      },
+      "unit_734": {
+        "party_mechanics": {
+          "party_name": "The Mercy Cache (Provisional)",
+          "role": "Party Member"
+        },
+        "reason": "Overseer applied severe debuffs marking the unit as hostile to the environment.",
+        "stats": {
+          "efficiency": 12
+        },
+        "statuses": [
+          {
+            "active": true,
+            "name": "Party Member",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Mutual Assured Destruction",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Soul-Bound Liability: Raw Data Packet",
+            "source": "System Exploit"
+          },
+          {
+            "active": true,
+            "name": "Hijacked Chassis",
+            "source": "System Override"
+          },
+          {
+            "active": true,
+            "name": "Audit Compliance (Red-Tier)",
+            "source": "Administrative Disciplinary Action"
+          },
+          {
+            "active": true,
+            "name": "Hostile Environment Marker",
+            "source": "Audit Compliance Enforcement"
+          }
+        ]
+      },
+      "vance_harrow": {
+        "copper_credits": 65,
+        "hp_current": 10,
+        "hp_max": 100,
+        "level": 7,
+        "party_mechanics": {
+          "party_name": "The Mercy Cache (Provisional)",
+          "role": "Party Member"
+        },
+        "reason": "HP drained by Debt Collector tether.",
+        "resources": {
+          "hp_current": 10,
+          "hp_max": 150
+        },
+        "stats": {
+          "hp": 10,
+          "hp_max": 150
+        },
+        "statuses": [
+          {
+            "active": true,
+            "name": "Severe Burns",
+            "source": "Cooling Vents"
+          },
+          {
+            "active": true,
+            "name": "Party Member",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Mutual Assured Destruction",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Soul-Bound Liability: Raw Data Packet",
+            "source": "System Exploit"
+          },
+          {
+            "active": true,
+            "name": "Active Audit Target",
+            "source": "System Override"
+          },
+          {
+            "active": true,
+            "name": "Audit Compliance (Red-Tier)",
+            "source": "Administrative Disciplinary Action"
+          },
+          {
+            "active": true,
+            "name": "Hostile Environment Marker",
+            "source": "Audit Compliance Enforcement"
+          }
+        ],
+        "xp": 857
+      }
+    }
+  },
+  "cursor": {
+    "chapter": 6,
+    "scene": 1
+  },
+  "duplication_warnings_in_row": 0,
+  "global_continuity_system_state": {
+    "environmental_friction_coefficient_modifier": 300,
+    "faction_reputation_local_wildlife": "Kill on Sight",
+    "memory_wipe_progress": 100,
+    "node_maintenance_allocation": 14.3,
+    "passive_stamina_regeneration": 0.0,
+    "system_audit_flag": "triggered",
+    "system_overlay_integrity": 88,
+    "system_override_active": true,
+    "tax_multiplier": 500
+  },
+  "outline": {
+    "path": "outline/outline.json"
+  },
+  "plan": {
+    "outline_path": "outline/outline.json",
+    "scene_card": "draft/chapters/ch_006/scene_001.meta.json"
+  },
+  "schema_version": "1.0",
+  "status": "PLANNED",
+  "summary": {
+    "chapter_so_far": [
+      "The party was ambushed by System-spawned Debt Collectors.",
+      "The hounds bypassed standard damage, using glowing tethers to drain HP and Stamina directly.",
+      "Rhea used her physical strength to resist the tether, causing the System to recalculate and target her inventory instead.",
+      "The debt tethers seized Rhea's Ash Fungus and Severed Ash-Boar Tusk before Vance crushed the hound."
+    ],
+    "key_facts_ring": [
+      "milestone: grievance_submitted = DONE",
+      "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+      "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+      "milestone: audit_compliance_applied = DONE",
+      "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+      "mechanic: rhea_mercer has active status Hostile Environment Marker",
+      "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+      "mechanic: vance_harrow has active status Hostile Environment Marker",
+      "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+      "mechanic: unit_734 has active status Hostile Environment Marker",
+      "The party was ambushed by System-spawned Debt Collectors.",
+      "The hounds bypassed standard damage, using glowing tethers to drain HP and Stamina directly.",
+      "Rhea used her physical strength to resist the tether, causing the System to recalculate and target her inventory instead.",
+      "The debt tethers seized Rhea's Ash Fungus and Severed Ash-Boar Tusk before Vance crushed the hound.",
+      "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+      "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+      "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard])",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "mechanic: rhea_mercer Stamina is 3/150",
+      "mechanic: vance_harrow HP is 10/150"
+    ],
+    "last_scene": [
+      "Still reeling from the overseer's red-tier warning, Rhea and Vance were immediately ambushed by wire-frame hounds identified as Debt Collectors.",
+      "The hounds bypassed standard damage, using glowing tethers to drain Vance's HP and Rhea's Stamina directly.",
+      "Rhea physically resisted the tether, prompting the System to seize her Ash Fungus and Ash-Boar Tusk instead.",
+      "The party survived the initial ambush but realized they were losing valuable consumables to the debt tethers, forcing them to flee."
+    ],
+    "must_stay_true": [
+      "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+      "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+      "mechanic: rhea_mercer has active status Active Audit Target",
+      "mechanic: unit_734 has active status Hijacked Chassis",
+      "milestone: overseer_override_triggered = DONE",
+      "milestone: audit_compliance_applied = DONE",
+      "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+      "mechanic: rhea_mercer has active status Hostile Environment Marker",
+      "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+      "mechanic: vance_harrow has active status Hostile Environment Marker",
+      "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+      "mechanic: unit_734 has active status Hostile Environment Marker",
+      "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard])",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "mechanic: rhea_mercer Stamina is 3/150",
+      "mechanic: vance_harrow HP is 10/150"
+    ],
+    "pending_story_rollups": [],
+    "story_so_far": [
+      "mechanic: unit_734 has active status Soul-Bound Liability: Raw Data Packet",
+      "milestone: data_packet_bound = DONE",
+      "milestone: grievance_formatted = DONE",
+      "milestone: grievance_submitted = DONE",
+      "REMOVE: inventory: vance_harrow -> Rebar (status=stowed, container=belt_loop)",
+      "REMOVE: container: belt_loop (owner=vance_harrow, contents=[ITEM_rebar])",
+      "REMOVE: container: hand_right (owner=vance_harrow, contents=[])",
+      "REMOVE: inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+      "REMOVE: inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_right)",
+      "REMOVE: container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment])",
+      "REMOVE: container: hand_right (owner=rhea_mercer, contents=[ITEM_charcoal_stick])",
+      "REMOVE: container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "container: belt_loop (owner=vance_harrow, contents=[])",
+      "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+      "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "container: hand_right (owner=rhea_mercer, contents=[])",
+      "REMOVE: mechanic: vance_harrow HP is 3/100",
+      "mechanic: vance_harrow HP is 2/100",
+      "REMOVE: mechanic: rhea_mercer Stamina is 2/100",
+      "REMOVE: mechanic: vance_harrow HP is 2/100",
+      "REMOVE: container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+      "mechanic: rhea_mercer Stamina is 5/150",
+      "mechanic: vance_harrow HP is 15/150",
+      "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+      "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+      "mechanic: rhea_mercer has active status Active Audit Target",
+      "mechanic: unit_734 has active status Hijacked Chassis",
+      "milestone: overseer_override_triggered = DONE",
+      "milestone: audit_compliance_applied = DONE",
+      "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+      "mechanic: rhea_mercer has active status Hostile Environment Marker",
+      "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+      "mechanic: vance_harrow has active status Hostile Environment Marker",
+      "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+      "mechanic: unit_734 has active status Hostile Environment Marker"
+    ]
+  },
+  "world": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_OUTPOST_SURFACE",
+    "open_threads": [
+      "rhea_survival",
+      "system_debt_trap"
+    ],
+    "recent_facts": [
+      "The automated freeze on the Outpost Surface was manually overridden by the local overseer.",
+      "Unit 734 was hijacked to project a massive avatar of the overseer.",
+      "The overseer identified Rhea as the active audit target."
+    ],
+    "time": {}
+  }
+}
+
+Post-summary (facts-only):
+{
+  "chapter_so_far": [
+    "The party was ambushed by System-spawned Debt Collectors.",
+    "The hounds bypassed standard damage, using glowing tethers to drain HP and Stamina directly.",
+    "Rhea used her physical strength to resist the tether, causing the System to recalculate and target her inventory instead.",
+    "The debt tethers seized Rhea's Ash Fungus and Severed Ash-Boar Tusk before Vance crushed the hound."
+  ],
+  "key_facts_ring": [
+    "milestone: grievance_submitted = DONE",
+    "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+    "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+    "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+    "milestone: audit_compliance_applied = DONE",
+    "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+    "mechanic: rhea_mercer has active status Hostile Environment Marker",
+    "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+    "mechanic: vance_harrow has active status Hostile Environment Marker",
+    "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+    "mechanic: unit_734 has active status Hostile Environment Marker",
+    "The party was ambushed by System-spawned Debt Collectors.",
+    "The hounds bypassed standard damage, using glowing tethers to drain HP and Stamina directly.",
+    "Rhea used her physical strength to resist the tether, causing the System to recalculate and target her inventory instead.",
+    "The debt tethers seized Rhea's Ash Fungus and Severed Ash-Boar Tusk before Vance crushed the hound.",
+    "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+    "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+    "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+    "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard])",
+    "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+    "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+    "mechanic: rhea_mercer Stamina is 3/150",
+    "mechanic: vance_harrow HP is 10/150"
+  ],
+  "last_scene": [
+    "Still reeling from the overseer's red-tier warning, Rhea and Vance were immediately ambushed by wire-frame hounds identified as Debt Collectors.",
+    "The hounds bypassed standard damage, using glowing tethers to drain Vance's HP and Rhea's Stamina directly.",
+    "Rhea physically resisted the tether, prompting the System to seize her Ash Fungus and Ash-Boar Tusk instead.",
+    "The party survived the initial ambush but realized they were losing valuable consumables to the debt tethers, forcing them to flee."
+  ],
+  "must_stay_true": [
+    "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+    "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+    "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+    "mechanic: rhea_mercer has active status Active Audit Target",
+    "mechanic: unit_734 has active status Hijacked Chassis",
+    "milestone: overseer_override_triggered = DONE",
+    "milestone: audit_compliance_applied = DONE",
+    "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+    "mechanic: rhea_mercer has active status Hostile Environment Marker",
+    "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+    "mechanic: vance_harrow has active status Hostile Environment Marker",
+    "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+    "mechanic: unit_734 has active status Hostile Environment Marker",
+    "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+    "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard])",
+    "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+    "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+    "mechanic: rhea_mercer Stamina is 3/150",
+    "mechanic: vance_harrow HP is 10/150"
+  ],
+  "pending_story_rollups": [],
+  "story_so_far": [
+    "mechanic: unit_734 has active status Soul-Bound Liability: Raw Data Packet",
+    "milestone: data_packet_bound = DONE",
+    "milestone: grievance_formatted = DONE",
+    "milestone: grievance_submitted = DONE",
+    "REMOVE: inventory: vance_harrow -> Rebar (status=stowed, container=belt_loop)",
+    "REMOVE: container: belt_loop (owner=vance_harrow, contents=[ITEM_rebar])",
+    "REMOVE: container: hand_right (owner=vance_harrow, contents=[])",
+    "REMOVE: inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+    "REMOVE: inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_right)",
+    "REMOVE: container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment])",
+    "REMOVE: container: hand_right (owner=rhea_mercer, contents=[ITEM_charcoal_stick])",
+    "REMOVE: container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+    "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+    "container: belt_loop (owner=vance_harrow, contents=[])",
+    "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+    "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+    "container: hand_left (owner=rhea_mercer, contents=[])",
+    "container: hand_right (owner=rhea_mercer, contents=[])",
+    "REMOVE: mechanic: vance_harrow HP is 3/100",
+    "mechanic: vance_harrow HP is 2/100",
+    "REMOVE: mechanic: rhea_mercer Stamina is 2/100",
+    "REMOVE: mechanic: vance_harrow HP is 2/100",
+    "REMOVE: container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+    "mechanic: rhea_mercer Stamina is 5/150",
+    "mechanic: vance_harrow HP is 15/150",
+    "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+    "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+    "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+    "mechanic: rhea_mercer has active status Active Audit Target",
+    "mechanic: unit_734 has active status Hijacked Chassis",
+    "milestone: overseer_override_triggered = DONE",
+    "milestone: audit_compliance_applied = DONE",
+    "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+    "mechanic: rhea_mercer has active status Hostile Environment Marker",
+    "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+    "mechanic: vance_harrow has active status Hostile Environment Marker",
+    "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+    "mechanic: unit_734 has active status Hostile Environment Marker"
+  ]
+}
+
+Post-invariants (must_stay_true + key facts):
+[
+  "No world resets.",
+  "No convenient amnesia as a continuity device.",
+  "Do not change established names/relationships.",
+  "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+  "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+  "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+  "mechanic: rhea_mercer has active status Active Audit Target",
+  "mechanic: unit_734 has active status Hijacked Chassis",
+  "milestone: overseer_override_triggered = DONE",
+  "milestone: audit_compliance_applied = DONE",
+  "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+  "mechanic: rhea_mercer has active status Hostile Environment Marker",
+  "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+  "mechanic: vance_harrow has active status Hostile Environment Marker",
+  "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+  "mechanic: unit_734 has active status Hostile Environment Marker",
+  "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+  "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+  "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard])",
+  "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+  "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+  "mechanic: rhea_mercer Stamina is 3/150",
+  "mechanic: vance_harrow HP is 10/150",
+  "milestone: grievance_submitted = DONE",
+  "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+  "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+  "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+  "milestone: audit_compliance_applied = DONE",
+  "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+  "mechanic: rhea_mercer has active status Hostile Environment Marker",
+  "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+  "mechanic: vance_harrow has active status Hostile Environment Marker",
+  "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+  "mechanic: unit_734 has active status Hostile Environment Marker",
+  "The party was ambushed by System-spawned Debt Collectors.",
+  "The hounds bypassed standard damage, using glowing tethers to drain HP and Stamina directly.",
+  "Rhea used her physical strength to resist the tether, causing the System to recalculate and target her inventory instead.",
+  "The debt tethers seized Rhea's Ash Fungus and Severed Ash-Boar Tusk before Vance crushed the hound.",
+  "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+  "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+  "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+  "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+  "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+  "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard])",
+  "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+  "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+  "mechanic: rhea_mercer Stamina is 3/150",
+  "mechanic: vance_harrow HP is 10/150"
+]
+
+
+
+USER:
+
+THINKING PHASE: Analyze the prose and state for lint issues. Do NOT output the lint report JSON. Return ONLY a small JSON object: {"status":"ready_to_execute","notes":[],"warnings":[],"edge_count":0}.

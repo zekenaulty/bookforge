@@ -1713,6 +1713,10 @@ def _extract_chapter_patch_from_response(
 
     chapters = outline_payload.get("chapters") if isinstance(outline_payload.get("chapters"), list) else []
     if len(chapters) != 1:
+        merged_fragment = _coalesce_chapter_scoped_fragments(chapters, target_chapter_id=chapter_id)
+        if isinstance(merged_fragment, dict):
+            chapters = [merged_fragment]
+    if len(chapters) != 1:
         raise ValueError(
             f"{step_id} chapter-scoped output must include exactly one chapter; received {len(chapters)}"
         )
@@ -1740,6 +1744,138 @@ def _extract_chapter_patch_from_response(
             chapter_report=chapter_report,
         )
     return chapter_patch, chapter_report, registry_updates
+
+
+def _merge_scene_fragments(base_scene: Dict[str, Any], incoming_scene: Dict[str, Any]) -> Dict[str, Any]:
+    merged = deepcopy(base_scene)
+    for key, value in incoming_scene.items():
+        if key == "scene_id":
+            continue
+        if isinstance(value, list):
+            if value:
+                merged[key] = deepcopy(value)
+        elif isinstance(value, dict):
+            if value:
+                existing = merged.get(key) if isinstance(merged.get(key), dict) else {}
+                combined = deepcopy(existing)
+                combined.update(deepcopy(value))
+                merged[key] = combined
+        elif value not in (None, ""):
+            merged[key] = deepcopy(value)
+    return merged
+
+
+def _merge_section_fragments(base_section: Dict[str, Any], incoming_section: Dict[str, Any]) -> Dict[str, Any]:
+    merged = deepcopy(base_section)
+    for key, value in incoming_section.items():
+        if key in {"section_id", "scenes"}:
+            continue
+        if isinstance(value, list):
+            if value:
+                merged[key] = deepcopy(value)
+        elif isinstance(value, dict):
+            if value:
+                existing = merged.get(key) if isinstance(merged.get(key), dict) else {}
+                combined = deepcopy(existing)
+                combined.update(deepcopy(value))
+                merged[key] = combined
+        elif value not in (None, ""):
+            merged[key] = deepcopy(value)
+
+    base_scenes = merged.get("scenes") if isinstance(merged.get("scenes"), list) else []
+    scene_map: Dict[int, Dict[str, Any]] = {}
+    scene_order: List[int] = []
+    for scene in base_scenes:
+        if not isinstance(scene, dict):
+            continue
+        scene_id = _to_int(scene.get("scene_id"))
+        if scene_id is None:
+            continue
+        if scene_id not in scene_map:
+            scene_order.append(scene_id)
+        scene_map[scene_id] = deepcopy(scene)
+
+    incoming_scenes = incoming_section.get("scenes") if isinstance(incoming_section.get("scenes"), list) else []
+    for scene in incoming_scenes:
+        if not isinstance(scene, dict):
+            continue
+        scene_id = _to_int(scene.get("scene_id"))
+        if scene_id is None:
+            continue
+        if scene_id in scene_map:
+            scene_map[scene_id] = _merge_scene_fragments(scene_map[scene_id], scene)
+        else:
+            scene_order.append(scene_id)
+            scene_map[scene_id] = deepcopy(scene)
+
+    if scene_map:
+        merged["scenes"] = [scene_map[scene_id] for scene_id in sorted(scene_order)]
+    return merged
+
+
+def _coalesce_chapter_scoped_fragments(
+    chapters: List[Any],
+    *,
+    target_chapter_id: int,
+) -> Optional[Dict[str, Any]]:
+    if len(chapters) <= 1:
+        if len(chapters) == 1 and isinstance(chapters[0], dict):
+            return deepcopy(chapters[0])
+        return None
+    if not all(isinstance(chapter, dict) for chapter in chapters):
+        return None
+
+    normalized_ids = [_chapter_id_from_chapter(chapter, target_chapter_id) for chapter in chapters]
+    if any(chapter_id != int(target_chapter_id) for chapter_id in normalized_ids):
+        return None
+
+    merged = deepcopy(chapters[0])
+    for chapter in chapters[1:]:
+        for key, value in chapter.items():
+            if key in {"chapter_id", "sections"}:
+                continue
+            if isinstance(value, list):
+                if value:
+                    merged[key] = deepcopy(value)
+            elif isinstance(value, dict):
+                if value:
+                    existing = merged.get(key) if isinstance(merged.get(key), dict) else {}
+                    combined = deepcopy(existing)
+                    combined.update(deepcopy(value))
+                    merged[key] = combined
+            elif value not in (None, ""):
+                merged[key] = deepcopy(value)
+
+        base_sections = merged.get("sections") if isinstance(merged.get("sections"), list) else []
+        section_map: Dict[int, Dict[str, Any]] = {}
+        section_order: List[int] = []
+        for section in base_sections:
+            if not isinstance(section, dict):
+                continue
+            section_id = _to_int(section.get("section_id"))
+            if section_id is None:
+                continue
+            if section_id not in section_map:
+                section_order.append(section_id)
+            section_map[section_id] = deepcopy(section)
+
+        incoming_sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
+        for section in incoming_sections:
+            if not isinstance(section, dict):
+                continue
+            section_id = _to_int(section.get("section_id"))
+            if section_id is None:
+                continue
+            if section_id in section_map:
+                section_map[section_id] = _merge_section_fragments(section_map[section_id], section)
+            else:
+                section_order.append(section_id)
+                section_map[section_id] = deepcopy(section)
+
+        if section_map:
+            merged["sections"] = [section_map[section_id] for section_id in sorted(section_order)]
+
+    return merged
 
 
 def _outline_from_step_payload(step_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:

@@ -1,0 +1,51 @@
+The shattered foyer doors seal shut behind them, immediately triggering a lockdown and activating the compliance grid. The heavy metal groaned as the localized physics glitch resolved, fusing the seams back together with a hiss of pressurized air. Instantly, the Sanctum Foyer was flooded with razor-thin red lasers projecting a deadly, three-dimensional chessboard across the polished marble floor.
+
+Rhea slumped against the wall, her lungs burning. Her stamina bar hovered at a miserable fraction. She clutched the Null-Value Token in her left hand, the heavy coin slick with sweat. 
+
+[Stamina: 1/150]
+
+Unit 734 hovered unsteadily, thick plumes of black smoke venting from its cracked chassis. "Warning," the drone's synthesized voice buzzed. "Lethal administrative protocols engaged. The compliance grid is scanning for unregistered assets."
+
+A sharp, metallic scrape echoed across the foyer. The gilded construct they had just dismantled was twitching on the floor, drawn together by glowing threads of administrative mana.
+
+[Regeneration: Active. Reconstructing Bureaucratic Asset.]
+
+"You've got to be kidding me," Vance spat, spitting blood onto the marble. His health bar was a terrifying sliver of red. 
+
+[HP: 2/100] 
+
+He gripped his Rebar in his right hand, his blistered fingers trembling against the rusted metal. "I'll hold it," Vance said, stepping between the regenerating guard and Rhea. 
+
+[Status Effect: Aggro Target] 
+
+Rhea ignored the fight, forcing her exhausted legs to move toward the massive brass terminal built into the far wall. She ducked under a sweeping laser beam that singed the hair on her bare arms, slamming her hand against the interface plate.
+
+[Compliance Check: Initiated]
+[Please deposit approved assets to verify ledger standing. Minimum value required: 150 System Credits.]
+
+"It wants a deposit!" Rhea yelled over the deafening sound of Vance's Rebar clashing against the construct's gold-plated armor. She didn't have standard credits, but she had the untaxed Obsidian Shard in her left blazer pocket. She pulled the Obsidian Shard out and jammed the jagged glass into the terminal's physical deposit hopper.
+
+[Inventory Transfer: Obsidian Shard -> Ledger]
+
+The terminal ground its gears, extracting the untaxed system value from the raw geology and consuming the physical Obsidian Shard entirely. 
+
+[Value assigned: 42 System Credits.]
+[Compliance Check: 28% Satisfied. Please deposit remaining balance.]
+
+"It's not enough!" Rhea cursed. 
+
+Vance parried a glancing blow, skidding backward. "Take it!" he yelled, reaching into his torn pocket and hurling a heavy, jingling pouch across the foyer. Rhea caught the Copper Credits just before it hit the floor.
+
+She dumped the handful of Copper Credits into the deposit slot.
+
+[Inventory Transfer: Copper Credits -> Ledger]
+
+The terminal flashed, siphoning the currency's ledger weight and disintegrating the Copper Credits into blue sparks. 
+
+[Value assigned: 115 System Credits.]
+[Total Deposited: 157 System Credits.]
+[Compliance Check: Satisfied.]
+
+The laser grid fizzled out in a shower of harmless sparks. Without the active compliance grid to validate its target priority, the regenerating guard froze mid-swing, powering down completely. 
+
+With the compliance checks satisfied by junk data, the path to the Audit Corridor unlocked, allowing them to escape the regenerating guard. The heavy blast door slid open, revealing the dark, polished corridor beyond.

@@ -1,0 +1,40 @@
+As the system begins its review of the dispute, the enraged overseer attempts a manual override, launching a physical attack on Rhea. 
+
+[Formal Dispute Status: Active. System Review Initiated.]
+
+The bloated avatar of administrative code roared, his form flaring with a violent, unstable purple light. He didn't bother casting a spell; he simply vaulted over the massive obsidian desk, his fist trailing thick ribbons of raw mana. 
+
+Rhea tried to move, but her muscles screamed in protest. With exactly one point of Stamina remaining, her body felt like it was submerged in wet concrete. The Severe Exhaustion status effect blurred the edges of her vision, turning the charging overseer into a smeared nightmare of violet and gold. She threw her weight backward, her boots slipping on the polished marble floor, and collapsed hard onto her shoulder just as the overseer’s fist pulverized the spot where she had been standing. 
+
+[Overseer Manual Override: Mana Expenditure - 500. Attack Initiated.]
+
+Marble shrapnel peppered her blazer. "Section four, paragraph nine!" Rhea gasped, her lungs burning as she scrambled backward like a crab. She thrust her right hand upward, brandishing the pulsing Raw Data Packet like a holy symbol against a vampire. "A local node administrator cannot levy a tax exceeding the baseline yield of a frontier zone!"
+
+The overseer snarled, pulling his fist from the cratered floor. "I dictate the yield!" he boomed, the sound vibrating the teeth in Rhea's skull. He raised a foot to stomp her into paste. 
+
+A few yards away, Vance strained against the glowing tethers binding his limbs. He gripped his Rebar in his right hand, the knuckles white, but the magical Debt Lock held him entirely frozen. He couldn't even shout a warning. In the corner, Unit 734 sparked weakly, its chassis venting thick black smoke as its imminent critical system failure ticked closer. Rhea was entirely on her own.
+
+[System Review: 45% Complete. Cross-referencing Routing Sub-routines.]
+
+Rhea rolled desperately to the side, burning her very last fraction of a stamina point. The overseer's boot cracked the floor beside her ear. 
+
+"You skimmed exactly fourteen point three percent off every transaction!" Rhea shouted, ignoring the agonizing cramp seizing her calf. She waved the Raw Data Packet again, the durability meter on the crystal flashing a warning amber. "This packet proves the routing logic! You funneled it to an offshore account to fund your own debt-collection mobs! That’s a direct violation of the Ledger's core tenets!"
+
+The overseer paused, his glowing eyes narrowing. He raised both hands, drawing the ambient mana of the room into a swirling, deadly sphere above his head. "The system does not care about your math, anomaly. I am the authority here."
+
+"And to hide it," Rhea sneered, forcing herself up to one knee. Her body trembled violently. She opened her left hand, revealing the heavy, light-swallowing Null-Value Token resting in her palm. "You bypassed the core tenets by assigning zero-value assets to active ledgers. You created a mathematical vacuum. A divide-by-zero error in your own contract!"
+
+[System Review: 99% Complete. Analyzing Null-Value Token Residual Code.]
+
+"I AM THE LEDGER!" the overseer bellowed, hurling the massive sphere of purple mana directly at her face. 
+
+Rhea didn't even try to dodge. She just stared him down. "You're a bad accountant."
+
+A sharp, pristine chime echoed through the inner office, slicing through the roar of the incoming magic. The massive mana sphere froze in mid-air, inches from Rhea's nose, before dissolving into harmless blue sparks. 
+
+The system accepts Rhea's proof, triggering a catastrophic default that strips the overseer's administrative shields. 
+
+[Catastrophic Default Confirmed.]
+[Administrative Shields: Offline.]
+
+The golden, interlocking barriers that had hovered inches from the overseer's skin suddenly fractured. With a sound like breaking glass, the shields shattered into digital dust, raining down over the obsidian desk and leaving the bloated administrator completely, utterly exposed.

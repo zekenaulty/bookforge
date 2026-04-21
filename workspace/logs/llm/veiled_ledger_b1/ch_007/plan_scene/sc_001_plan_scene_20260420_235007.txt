@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_007_002",
+  "chapter": 7,
+  "scene": 2,
+  "scene_target": "Rhea bypasses the compliance checks by feeding the system junk data.",
+  "goal": "Bypass the lethal laser-grid 'compliance checks' while Vance holds off a regenerating guard.",
+  "conflict": "The trap-laden architecture audits intruders' stats, and Vance is barely surviving at 10 HP.",
+  "required_callbacks": [],
+  "constraints": [
+    "target_words: 1800"
+  ],
+  "end_condition": "Rhea successfully bypasses the compliance checks, opening the path to the inner sanctum but sacrificing several pieces of looted gear.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_SANCTUM_FOYER",
+  "location_end_id": "LOC_INNER_SANCTUM_THRESHOLD",
+  "location_start_label": "Sanctum Foyer",
+  "location_end_label": "Inner Sanctum Threshold",
+  "location_start": "Sanctum Foyer",
+  "location_end": "Inner Sanctum Threshold",
+  "handoff_mode": "action_continuation",
+  "constraint_state": "processed",
+  "transition_in_text": "The party breaches the foyer and destroys the first wave of elite guards, though Vance takes heavy blunt-force damage.",
+  "transition_in_anchors": [
+    "breaches",
+    "foyer",
+    "destroys",
+    "guards",
+    "blunt-force"
+  ],
+  "transition_out_text": "Rhea successfully bypasses the compliance checks, opening the path to the inner sanctum but sacrificing several pieces of looted gear.",
+  "transition_out_anchors": [
+    "bypasses",
+    "compliance",
+    "checks",
+    "inner sanctum",
+    "sacrificing"
+  ],
+  "seam_score": 85,
+  "seam_resolution": "inline_bridge",
+  "consumes_outcome_from": "7:1",
+  "hands_off_to": "7:3",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "rhea_survival",
+    "system_debt_trap"
+  ],
+  "required_in_custody": [
+    "ITEM_obsidian_shard",
+    "ITEM_administrative_coordinate_chip",
+    "ITEM_raw_data_packet",
+    "ITEM_rebar"
+  ],
+  "required_scene_accessible": [
+    "ITEM_obsidian_shard",
+    "ITEM_administrative_coordinate_chip",
+    "ITEM_raw_data_packet",
+    "ITEM_rebar"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "combat_continuation",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "inventory",
+    "hp"
+  ],
+  "ui_mechanics_expected": [
+    "Compliance Check",
+    "HP",
+    "Inventory Audit",
+    "Chassis Integrity"
+  ]
+}

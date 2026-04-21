@@ -1,0 +1,407 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_005_003",
+  "chapter": 5,
+  "scene": 3,
+  "scene_target": "The party escapes the collapsing Maintenance Trenches via the access shaft.",
+  "goal": "Survive the automated quarantine bulkheads and deletion sweeps.",
+  "conflict": "Physical exhaustion and critically low stats versus environmental hazards and closing gates.",
+  "required_callbacks": [
+    "The automated asset freeze triggered by Rhea's grievance submission."
+  ],
+  "constraints": [
+    "Vance must equip his ITEM_rebar to smash gates.",
+    "Rhea must stow ITEM_scrap_parchment and ITEM_charcoal_stick to run.",
+    "Highlight Rhea's 2/100 Stamina and Vance's 3/100 HP."
+  ],
+  "end_condition": "The party navigates the collapsing access shaft, staying one step ahead of the automated quarantine bulkheads.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_MAINTENANCE_TRENCHES",
+  "location_end_id": "LOC_ACCESS_SHAFT",
+  "location_start_label": "Maintenance Trenches",
+  "location_end_label": "Access Shaft",
+  "location_start": "Maintenance Trenches",
+  "location_end": "Access Shaft",
+  "handoff_mode": "direct_action_continuation",
+  "constraint_state": "processed",
+  "transition_in_text": "With the audit freeze initiated, the maintenance trenches begin to actively lock down.",
+  "transition_in_anchors": [
+    "audit",
+    "freeze",
+    "lock_down",
+    "trenches"
+  ],
+  "transition_out_text": "The party navigates the collapsing access shaft, staying one step ahead of the automated quarantine bulkheads.",
+  "transition_out_anchors": [
+    "navigates",
+    "collapsing",
+    "access_shaft",
+    "quarantine_bulkheads"
+  ],
+  "consumes_outcome_from": "5:2",
+  "hands_off_to": "5:4",
+  "seam_score": 95,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "rhea_survival",
+    "party_alliance"
+  ],
+  "required_in_custody": [
+    "ITEM_rebar",
+    "ITEM_scrap_parchment",
+    "ITEM_charcoal_stick"
+  ],
+  "required_scene_accessible": [
+    "ITEM_rebar"
+  ],
+  "required_visible_on_page": [
+    "ITEM_rebar"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "action_sequence",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources",
+    "statuses"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Stamina",
+    "System Warning",
+    "Deletion Sweep"
+  ],
+  "prose_path": "draft/chapters/ch_005/scene_003.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "character_continuity_system_updates": [
+      {
+        "chapter": 5,
+        "character_id": "rhea_mercer",
+        "delta": {},
+        "remove": [],
+        "scene": 3,
+        "set": {
+          "stats": {
+            "stamina": 2,
+            "stamina_max": 100
+          }
+        }
+      },
+      {
+        "chapter": 5,
+        "character_id": "vance_harrow",
+        "delta": {},
+        "remove": [],
+        "scene": 3,
+        "set": {
+          "stats": {
+            "hp": 3,
+            "hp_max": 100
+          }
+        }
+      }
+    ],
+    "character_updates": [
+      {
+        "chapter": 5,
+        "character_id": "rhea_mercer",
+        "containers": [
+          {
+            "container": "system_inventory",
+            "contents": [
+              "ITEM_raw_data_packet"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "hand_left",
+            "contents": [],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "hand_right",
+            "contents": [],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "contents": [
+              "ITEM_cracked_smartphone",
+              "ITEM_copper_credits",
+              "ITEM_scrap_parchment",
+              "ITEM_charcoal_stick"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "contents": [
+              "ITEM_scavenger_carapaces",
+              "ITEM_obsidian_shard",
+              "ITEM_ash_fungus",
+              "ITEM_severed_ash_boar_tusk"
+            ],
+            "owner": "rhea_mercer"
+          }
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "container": "system_inventory",
+            "item": "ITEM_raw_data_packet",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_scrap_parchment",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_charcoal_stick",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_copper_credits",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_cracked_smartphone",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_scavenger_carapaces",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_obsidian_shard",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_ash_fungus",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_severed_ash_boar_tusk",
+            "status": "stowed"
+          }
+        ],
+        "persona_updates": [],
+        "scene": 3
+      },
+      {
+        "chapter": 5,
+        "character_id": "vance_harrow",
+        "containers": [
+          {
+            "container": "belt_loop",
+            "contents": [],
+            "owner": "vance_harrow"
+          },
+          {
+            "container": "torn_pocket",
+            "contents": [
+              "ITEM_copper_credits_vance"
+            ],
+            "owner": "vance_harrow"
+          },
+          {
+            "container": "hand_right",
+            "contents": [
+              "ITEM_rebar"
+            ],
+            "owner": "vance_harrow"
+          }
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "container": "hand_right",
+            "item": "ITEM_rebar",
+            "status": "held"
+          },
+          {
+            "container": "torn_pocket",
+            "item": "ITEM_copper_credits_vance",
+            "status": "stowed"
+          }
+        ],
+        "persona_updates": [],
+        "scene": 3
+      }
+    ],
+    "inventory_alignment_updates": [
+      {
+        "character_id": "rhea_mercer",
+        "reason": "Stowed writing tools to run.",
+        "set": {
+          "inventory": [
+            {
+              "container": "blazer_pocket_right",
+              "item": "ITEM_scrap_parchment",
+              "status": "stowed"
+            },
+            {
+              "container": "blazer_pocket_right",
+              "item": "ITEM_charcoal_stick",
+              "status": "stowed"
+            }
+          ]
+        }
+      },
+      {
+        "character_id": "vance_harrow",
+        "reason": "Equipped rebar to smash gates.",
+        "set": {
+          "inventory": [
+            {
+              "container": "hand_right",
+              "item": "ITEM_rebar",
+              "status": "held"
+            }
+          ]
+        }
+      }
+    ],
+    "summary_update": {
+      "chapter_so_far_add": [],
+      "key_events": [
+        "The maintenance trenches began actively locking down.",
+        "Rhea stowed the Scrap Parchment and Charcoal Stick to keep her hands free.",
+        "Vance equipped the Rebar and used it to smash through a descending security gate.",
+        "The party dodged a localized deletion sweep.",
+        "They navigated the collapsing access shaft to escape the quarantine bulkheads."
+      ],
+      "last_scene": [
+        "The maintenance trenches locked down due to the audit freeze.",
+        "Rhea stowed her writing tools, and Vance equipped his Rebar to force open security gates.",
+        "The party fled into the access shaft, dodging automated deletion sweeps."
+      ],
+      "must_stay_true": [
+        "REMOVE: inventory: vance_harrow -> Rebar (status=stowed, container=belt_loop)",
+        "REMOVE: container: belt_loop (owner=vance_harrow, contents=[ITEM_rebar])",
+        "REMOVE: container: hand_right (owner=vance_harrow, contents=[])",
+        "REMOVE: inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+        "REMOVE: inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_right)",
+        "REMOVE: container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment])",
+        "REMOVE: container: hand_right (owner=rhea_mercer, contents=[ITEM_charcoal_stick])",
+        "REMOVE: container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+        "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+        "mechanic: vance_harrow HP is 3/100",
+        "mechanic: rhea_mercer Stamina is 2/100",
+        "mechanic: unit_734 Efficiency is 12",
+        "inventory: rhea_mercer -> Raw Data Packet (status=stowed, container=system_inventory)",
+        "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+        "mechanic: rhea_mercer has active status Soul-Bound Liability: Raw Data Packet",
+        "mechanic: vance_harrow has active status Soul-Bound Liability: Raw Data Packet",
+        "mechanic: unit_734 has active status Soul-Bound Liability: Raw Data Packet",
+        "milestone: data_packet_bound = DONE",
+        "milestone: grievance_formatted = DONE",
+        "milestone: grievance_submitted = DONE",
+        "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+        "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+        "container: belt_loop (owner=vance_harrow, contents=[])",
+        "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+        "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+        "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+        "container: hand_left (owner=rhea_mercer, contents=[])",
+        "container: hand_right (owner=rhea_mercer, contents=[])"
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "rhea_mercer",
+        "vance_harrow",
+        "unit_734"
+      ],
+      "location": "LOC_ACCESS_SHAFT",
+      "open_threads": [
+        "rhea_survival",
+        "party_alliance"
+      ]
+    }
+  },
+  "scene_summary": [
+    "The maintenance trenches locked down due to the audit freeze.",
+    "Rhea stowed her writing tools, and Vance equipped his Rebar to force open security gates.",
+    "The party fled into the access shaft, dodging automated deletion sweeps."
+  ],
+  "key_events": [
+    "The maintenance trenches began actively locking down.",
+    "Rhea stowed the Scrap Parchment and Charcoal Stick to keep her hands free.",
+    "Vance equipped the Rebar and used it to smash through a descending security gate.",
+    "The party dodged a localized deletion sweep.",
+    "They navigated the collapsing access shaft to escape the quarantine bulkheads."
+  ],
+  "must_stay_true": [
+    "REMOVE: inventory: vance_harrow -> Rebar (status=stowed, container=belt_loop)",
+    "REMOVE: container: belt_loop (owner=vance_harrow, contents=[ITEM_rebar])",
+    "REMOVE: container: hand_right (owner=vance_harrow, contents=[])",
+    "REMOVE: inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+    "REMOVE: inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_right)",
+    "REMOVE: container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment])",
+    "REMOVE: container: hand_right (owner=rhea_mercer, contents=[ITEM_charcoal_stick])",
+    "REMOVE: container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+    "mechanic: vance_harrow HP is 3/100",
+    "mechanic: rhea_mercer Stamina is 2/100",
+    "mechanic: unit_734 Efficiency is 12",
+    "inventory: rhea_mercer -> Raw Data Packet (status=stowed, container=system_inventory)",
+    "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+    "mechanic: rhea_mercer has active status Soul-Bound Liability: Raw Data Packet",
+    "mechanic: vance_harrow has active status Soul-Bound Liability: Raw Data Packet",
+    "mechanic: unit_734 has active status Soul-Bound Liability: Raw Data Packet",
+    "milestone: data_packet_bound = DONE",
+    "milestone: grievance_formatted = DONE",
+    "milestone: grievance_submitted = DONE",
+    "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+    "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+    "container: belt_loop (owner=vance_harrow, contents=[])",
+    "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+    "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+    "container: hand_left (owner=rhea_mercer, contents=[])",
+    "container: hand_right (owner=rhea_mercer, contents=[])"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "stat_mismatch",
+        "message": "UI shows Stamina but character state has 2.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_mismatch",
+        "message": "UI shows HP but character state has 3.",
+        "severity": "warning"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 1,
+  "updated_at": "2026-04-20T21:41:49Z"
+}

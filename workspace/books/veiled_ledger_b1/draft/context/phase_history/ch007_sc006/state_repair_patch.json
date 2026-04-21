@@ -1,0 +1,260 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "character_id": "vance_harrow",
+      "remove": [
+        "statuses.Debt Lock"
+      ],
+      "set": {
+        "stats": {
+          "hp": 2,
+          "hp_max": 100,
+          "rebar_durability_percent": 58
+        }
+      },
+      "delta": {},
+      "chapter": 7,
+      "scene": 6
+    },
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "stats": {
+          "stamina": 0,
+          "stamina_max": 150
+        }
+      },
+      "remove": [],
+      "delta": {},
+      "chapter": 7,
+      "scene": 6
+    },
+    {
+      "character_id": "unit_734",
+      "set": {
+        "stats": {
+          "chassis_integrity": 34
+        }
+      },
+      "remove": [],
+      "delta": {},
+      "chapter": 7,
+      "scene": 6
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "containers": [
+        {
+          "container": "hand_left",
+          "contents": [],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "hand_right",
+          "contents": [],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "contents": [
+            "ITEM_administrative_coordinate_chip",
+            "ITEM_raw_data_packet",
+            "ITEM_null_value_token"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "system_inventory",
+          "contents": [],
+          "owner": "rhea_mercer"
+        }
+      ],
+      "invariants_add": [
+        "inventory: rhea_mercer -> Raw Data Packet (status=stowed, container=blazer_pocket_left)",
+        "inventory: rhea_mercer -> Null-Value Token (status=stowed, container=blazer_pocket_left)",
+        "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip, ITEM_raw_data_packet, ITEM_null_value_token])",
+        "container: hand_left (owner=rhea_mercer, contents=[])",
+        "container: hand_right (owner=rhea_mercer, contents=[])"
+      ],
+      "inventory": [
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_null_value_token",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": [
+        "Rhea successfully utilized environmental physics to defeat a vastly superior enemy when her stamina was completely depleted."
+      ],
+      "chapter": 7,
+      "scene": 6
+    },
+    {
+      "character_id": "vance_harrow",
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_rebar"
+          ],
+          "owner": "vance_harrow"
+        }
+      ],
+      "invariants_add": [
+        "mechanic: vance_harrow Rebar Durability is 58%"
+      ],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_rebar",
+          "status": "held"
+        }
+      ],
+      "persona_updates": [
+        "Vance survived the boss encounter despite being at 2 HP, proving his resilience and tactical timing."
+      ],
+      "chapter": 7,
+      "scene": 6
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "reason": "Boss encounter initiated and concluded via environmental crush damage.",
+      "set": {
+        "environmental_damage_last_hit": 14800,
+        "feral_overseer_hp": 0,
+        "feral_overseer_hp_max": 15000
+      }
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "reason": "Stowed items to free hands for pushing the desk.",
+      "reason_category": "scene_fit_posture",
+      "set": {
+        "containers": [
+          {
+            "container": "hand_left",
+            "contents": [],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "hand_right",
+            "contents": [],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "contents": [
+              "ITEM_administrative_coordinate_chip",
+              "ITEM_raw_data_packet",
+              "ITEM_null_value_token"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "system_inventory",
+            "contents": [],
+            "owner": "rhea_mercer"
+          }
+        ],
+        "inventory": [
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_administrative_coordinate_chip",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_raw_data_packet",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_null_value_token",
+            "status": "stowed"
+          }
+        ]
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "The overseer mutated into a feral boss monster after his shields were stripped.",
+      "Vance and Rhea used the office's massive obsidian desk to crush the overseer, securing the kill via environmental damage."
+    ],
+    "key_events": [
+      "The overseer mutated into a feral boss monster.",
+      "Vance's Debt Lock status effect was removed.",
+      "Rhea stowed the Raw Data Packet and Null-Value Token in her blazer pocket to free her hands.",
+      "Vance struck the overseer with his Rebar, dealing a critical hit and reducing the weapon's durability.",
+      "The party flipped the massive obsidian desk onto the overseer, dealing 14,800 environmental damage.",
+      "The feral overseer was killed, and the room began to shake as the node destabilized."
+    ],
+    "last_scene": [
+      "The overseer's administrative shields shattered, causing him to mutate into a feral, grey-muscled boss monster.",
+      "Vance's Debt Lock was removed, allowing him to strike the beast's knee with his Rebar, throwing the monster off balance.",
+      "Rhea and Vance used a shattered mahogany pillar as a lever to flip the massive obsidian desk onto the overseer.",
+      "The crushing weight of the desk dealt massive environmental damage, reducing the boss's HP to zero and securing the kill."
+    ],
+    "must_stay_true": [
+      "REMOVE: mechanic: vance_harrow has active status Debt Lock",
+      "REMOVE: inventory: rhea_mercer -> Raw Data Packet (status=held, container=hand_right)",
+      "REMOVE: container: hand_right (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+      "REMOVE: inventory: rhea_mercer -> Null-Value Token (status=held, container=hand_left)",
+      "REMOVE: container: hand_left (owner=rhea_mercer, contents=[ITEM_null_value_token])",
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+      "REMOVE: mechanic: vance_harrow Rebar Durability is 60%",
+      "mechanic: unit_734 has active status Critical System Failure Imminent",
+      "mechanic: vance_harrow has active status Heavy Blunt-Force Trauma",
+      "milestone: sanctum_foyer_breached = DONE",
+      "milestone: elite_guards_defeated = DONE",
+      "mechanic: vance_harrow HP is 2/100",
+      "milestone: compliance_checks_bypassed = DONE",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "milestone: inner_office_breached = DONE",
+      "container: system_inventory (owner=rhea_mercer, contents=[])",
+      "milestone: debt_lock_applied = DONE",
+      "milestone: formal_dispute_initiated = DONE",
+      "mechanic: rhea_mercer Stamina is 0/150",
+      "milestone: catastrophic_default_triggered = DONE",
+      "milestone: overseer_shields_stripped = DONE",
+      "inventory: rhea_mercer -> Raw Data Packet (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Null-Value Token (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip, ITEM_raw_data_packet, ITEM_null_value_token])",
+      "container: hand_right (owner=rhea_mercer, contents=[])",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "mechanic: vance_harrow Rebar Durability is 58%",
+      "milestone: feral_overseer_defeated = DONE",
+      "milestone: debt_lock_removed = DONE"
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_OVERSEER_INNER_OFFICE",
+    "open_threads": [
+      "rhea_survival",
+      "system_debt_trap",
+      "party_alliance"
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+The party burst from the collapsing access shaft onto the Outpost Surface just as the sky glitched into a violent purple and the refund began.
+
+There was no majestic chime, no gentle shower of golden light. The local node had been forced into an immediate, catastrophic payout by Rhea’s grievance, and the System did not possess the bandwidth to make it pretty. The atmosphere above the ash-choked plains tore open with a sound like ripping canvas, revealing a bruised, pixelated void.
+
+[System Notification: Audit Resolution Initiated. Disbursing 14.3% Withheld Value.]
+
+Then, the math fell out of the sky.
+
+Experience points didn't manifest as abstract concepts; they materialized as dense, jagged shards of crystallized amethyst data, dropping at terminal velocity. They hit the ground like artillery shells, cratering the gray dirt and throwing up plumes of ash. Mixed within the lethal hail of XP was the raw physical loot: heavy iron ingots, bundled scavenger carapaces, and loose copper coins that tore through the air like buckshot.
+
+"Cover!" Vance roared. He planted his boots in the dirt and swung his heavy iron Rebar, his blistered hands gripping the makeshift weapon like a baseball bat.
+
+A jagged shard of crystallized experience points roughly the size of a cinderblock plummeted toward Rhea. Vance intercepted it, bringing the Rebar up in a desperate parry. The shard shattered against the iron, exploding into a blinding spray of blue light and kinetic force that knocked Vance backward into the scattered dirt.
+
+[HP Warning: Vance Harrow - HP: 2/100. Structural Failure Imminent.]
+
+Vance groaned, spitting ash as he struggled to rise. Behind him, Unit 734’s smoking chassis sparked violently as a rain of untaxed copper coins pinged off its metallic casing, driving its efficiency rating deeper into the red.
+
+Rhea dropped to her knees, her lungs burning. She tried to scramble toward the meager shelter of a rusted kiosk, but her legs refused to cooperate.
+
+[Stamina Warning: Rhea Mercer - Stamina: 2/100. Motor Functions Impaired.]
+
+Another wave of heavy, unrefined loot materialized twenty feet above them—stacks of petrified wood and raw scavenger meat. The sheer volume of the back-paid rewards was turning the Outpost Surface into a meat grinder. The System was violently correcting its ledger, and the sheer physical mass and velocity of the back-paid rewards threatened to crush the party, who were already at critical health and stamina.
+
+The air grew thick with the static charge of unallocated power. The physical weight and concussive force of the XP and loot began to crush them, demanding immediate allocation to survive.

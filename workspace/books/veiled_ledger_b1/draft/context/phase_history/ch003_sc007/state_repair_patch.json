@@ -1,0 +1,172 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "chapter": 3,
+      "character_id": "rhea_mercer",
+      "scene": 7,
+      "set": {
+        "statuses": [
+          {
+            "active": true,
+            "name": "Party Leader",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Mutual Assured Destruction",
+            "source": "Custom Party Contract"
+          }
+        ]
+      },
+      "remove": [],
+      "delta": {}
+    },
+    {
+      "chapter": 3,
+      "character_id": "vance_harrow",
+      "scene": 7,
+      "set": {
+        "statuses": [
+          {
+            "active": true,
+            "name": "Party Member",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Mutual Assured Destruction",
+            "source": "Custom Party Contract"
+          }
+        ]
+      },
+      "remove": [],
+      "delta": {}
+    },
+    {
+      "chapter": 3,
+      "character_id": "unit_734",
+      "scene": 7,
+      "set": {
+        "statuses": [
+          {
+            "active": true,
+            "name": "Party Member",
+            "source": "Custom Party Contract"
+          },
+          {
+            "active": true,
+            "name": "Mutual Assured Destruction",
+            "source": "Custom Party Contract"
+          }
+        ]
+      },
+      "remove": [],
+      "delta": {}
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 3,
+      "character_id": "rhea_mercer",
+      "containers": [
+        {
+          "container": "blazer_pocket_right",
+          "contents": [
+            "ITEM_cracked_smartphone",
+            "ITEM_copper_credits"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "hand_left",
+          "contents": [],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "contents": [
+            "ITEM_scavenger_carapaces",
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus"
+          ],
+          "owner": "rhea_mercer"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "blazer_pocket_right",
+          "item": "ITEM_cracked_smartphone",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_right",
+          "item": "ITEM_copper_credits",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_scavenger_carapaces",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_obsidian_shard",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_ash_fungus",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": [],
+      "scene": 7
+    }
+  ],
+  "global_continuity_system_updates": [],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Vance and Unit 734 signed Rhea's restrictive custom party contract, officially forming the party under the threat of Mutual Assured Destruction."
+    ],
+    "key_events": [
+      "Vance Harrow signed the Custom Liability Contract.",
+      "Unit 734 signed the Custom Liability Contract.",
+      "The System officially formed the party and applied the Mutual Assured Destruction buff to all members.",
+      "Rhea stowed her Copper Credits in her right blazer pocket."
+    ],
+    "last_scene": [
+      "Vance and Unit 734 reviewed Rhea's restrictive custom party contract.",
+      "Despite their reservations about the severe penalties for friendly fire and reporting, both agreed to sign.",
+      "The System accepted the contract, officially forming the party and applying the Mutual Assured Destruction buff.",
+      "Rhea stowed her Copper Credits, ready to explore the rest of the frontier node."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: rhea_mercer -> Copper Credits (status=held, container=hand_left)",
+      "REMOVE: container: hand_left (owner=rhea_mercer, contents=[ITEM_copper_credits])",
+      "REMOVE: container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone])",
+      "inventory: rhea_mercer -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "milestone: custom_liability_contract_signed = DONE",
+      "mechanic: rhea_mercer has active status Mutual Assured Destruction",
+      "mechanic: vance_harrow has active status Mutual Assured Destruction",
+      "mechanic: unit_734 has active status Mutual Assured Destruction",
+      "mechanic: vance_harrow has active status Party Member",
+      "mechanic: unit_734 has active status Party Member"
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_COLLAPSED_TRANSIT_TUNNEL",
+    "open_threads": [
+      "party_alliance",
+      "system_debt_trap"
+    ]
+  }
+}

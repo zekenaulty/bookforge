@@ -1,0 +1,229 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_FRONTIER_ZONE_EXIT",
+    "open_threads": [
+      "rhea_survival",
+      "system_debt_trap"
+    ],
+    "recent_facts": [
+      "Rhea stowed the Administrative Residue Token in her System Inventory.",
+      "Vance looted High-Tier Restorative Consumables from the vault.",
+      "Vance consumed a potion, restoring his HP and curing his blunt-force trauma.",
+      "The vault collapsed entirely as the node deleted itself.",
+      "The party successfully escaped the tutorial and entered the Civic Layer."
+    ]
+  },
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_restorative_consumables",
+      "set": {
+        "name": "Restorative Consumables",
+        "display_name": "Restorative Consumables",
+        "type": "consumable",
+        "owner_scope": "character",
+        "custodian": "vance_harrow",
+        "state_tags": [
+          "high_tier",
+          "loot"
+        ],
+        "linked_threads": [
+          "rhea_survival"
+        ],
+        "last_seen": {
+          "chapter": 8,
+          "scene": 2,
+          "location": "LOC_MERCY_CACHE_VAULT"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_restorative_consumables",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "vance_harrow"
+      },
+      "reason": "Looted from vault cabinet"
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "remove": [
+        "inventory.ITEM_administrative_residue_token",
+        "inventory.ITEM_mercy_cache_coordinates"
+      ],
+      "reason": "Stowed items into system inventory and pockets for escape."
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 8,
+      "scene": 2,
+      "inventory": [
+        {
+          "container": "system_inventory",
+          "item": "ITEM_administrative_residue_token",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_mercy_cache_coordinates",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_null_value_token",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "system_inventory",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_administrative_residue_token"
+          ]
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_administrative_coordinate_chip",
+            "ITEM_raw_data_packet",
+            "ITEM_null_value_token",
+            "ITEM_mercy_cache_coordinates"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": []
+        },
+        {
+          "container": "hand_right",
+          "owner": "rhea_mercer",
+          "contents": []
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Rhea successfully secured the illicit system access token, binding it to her personal inventory to protect it from environmental loss."
+      ]
+    },
+    {
+      "character_id": "vance_harrow",
+      "chapter": 8,
+      "scene": 2,
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_rebar",
+          "status": "held"
+        },
+        {
+          "container": "cargo_pocket_right",
+          "item": "ITEM_restorative_consumables",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_rebar"
+          ]
+        },
+        {
+          "container": "cargo_pocket_right",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_restorative_consumables"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Vance secured high-tier restorative consumables and successfully healed his critical injuries before the vault collapse."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "stats": {
+          "hp": 45,
+          "rebar_durability_percent": 55
+        }
+      },
+      "remove": [
+        "statuses.Heavy Blunt-Force Trauma"
+      ],
+      "reason": "Vance consumed a high-tier restorative consumable, restoring HP and removing his trauma status, and deflected a falling rock with his rebar."
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "frontier_zone_purge_timer": 0
+      },
+      "reason": "Purge completed as the vault collapses."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Inside the collapsing Mercy Cache, Rhea secured the Administrative Residue Token in her System Inventory.",
+      "Vance looted high-tier restorative consumables, using one to heal his critical injuries.",
+      "The party sprinted through the vault as it deleted itself, escaping through the Frontier Zone Exit just as the room collapsed."
+    ],
+    "key_events": [
+      "Rhea bound the Administrative Residue Token to her personal System Inventory.",
+      "Vance looted Restorative Consumables and healed to 45 HP.",
+      "Unit 734 forced the exit door open before the node scrubbed the physical architecture.",
+      "The party escaped the collapsing vault and successfully exited the Frontier Zone."
+    ],
+    "must_stay_true": [
+      "REMOVE: inventory: rhea_mercer -> Administrative Residue Token (status=stowed, container=blazer_pocket_left)",
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip, ITEM_raw_data_packet, ITEM_null_value_token, ITEM_administrative_residue_token])",
+      "REMOVE: container: system_inventory (owner=rhea_mercer, contents=[])",
+      "REMOVE: inventory: rhea_mercer -> Mercy Cache Coordinates (status=held, container=hand_left)",
+      "REMOVE: container: hand_left (owner=rhea_mercer, contents=[ITEM_mercy_cache_coordinates])",
+      "REMOVE: mechanic: vance_harrow Rebar Durability is 58%",
+      "inventory: rhea_mercer -> Administrative Residue Token (status=stowed, container=system_inventory)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_administrative_residue_token])",
+      "inventory: rhea_mercer -> Mercy Cache Coordinates (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip, ITEM_raw_data_packet, ITEM_null_value_token, ITEM_mercy_cache_coordinates])",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "inventory: vance_harrow -> Restorative Consumables (status=stowed, container=cargo_pocket_right)",
+      "container: cargo_pocket_right (owner=vance_harrow, contents=[ITEM_restorative_consumables])",
+      "mechanic: vance_harrow Rebar Durability is 55%",
+      "milestone: frontier_zone_exited = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Rhea secured the Administrative Residue Token in her System Inventory.",
+      "The party escaped the collapsing Mercy Cache and successfully exited the Frontier Zone."
+    ]
+  }
+}

@@ -1,0 +1,231 @@
+{
+  "schema_version": "1.0",
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "persona_updates": [
+        "Rhea realizes the system's bureaucracy can be bought off with junk data if the ledger's value parameters are met."
+      ]
+    },
+    {
+      "character_id": "vance_harrow",
+      "persona_updates": [
+        "Vance is pushed to his absolute physical limit, surviving on a razor's edge of HP."
+      ]
+    },
+    {
+      "character_id": "unit_734",
+      "persona_updates": [
+        "Unit 734 assists Rhea despite its critical chassis failure."
+      ]
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "reason": "scene_fit_posture",
+      "reason_category": "time_skip_normalize",
+      "scope_override": true,
+      "set": {
+        "containers": [
+          {
+            "container": "system_inventory",
+            "contents": [
+              "ITEM_raw_data_packet",
+              "ITEM_cracked_smartphone",
+              "ITEM_scrap_parchment",
+              "ITEM_copper_credits"
+            ],
+            "owner": "rhea_mercer"
+          }
+        ],
+        "inventory": [
+          {
+            "container": "system_inventory",
+            "item": "ITEM_cracked_smartphone",
+            "status": "stowed"
+          },
+          {
+            "container": "system_inventory",
+            "item": "ITEM_scrap_parchment",
+            "status": "stowed"
+          },
+          {
+            "container": "system_inventory",
+            "item": "ITEM_copper_credits",
+            "status": "stowed"
+          }
+        ]
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "sacrificed to compliance check"
+    },
+    {
+      "item_id": "ITEM_cracked_smartphone",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "sacrificed to compliance check"
+    },
+    {
+      "item_id": "ITEM_scrap_parchment",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "sacrificed to compliance check"
+    },
+    {
+      "item_id": "ITEM_copper_credits",
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "to": {
+        "custodian": "world"
+      },
+      "reason": "sacrificed to compliance check"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "last_seen": {
+          "chapter": 7,
+          "scene": 2,
+          "location": "LOC_SANCTUM_FOYER"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_cracked_smartphone",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "last_seen": {
+          "chapter": 7,
+          "scene": 2,
+          "location": "LOC_SANCTUM_FOYER"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_scrap_parchment",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "last_seen": {
+          "chapter": 7,
+          "scene": 2,
+          "location": "LOC_SANCTUM_FOYER"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_copper_credits",
+      "set": {
+        "custodian": "world",
+        "owner_scope": "world",
+        "last_seen": {
+          "chapter": 7,
+          "scene": 2,
+          "location": "LOC_SANCTUM_FOYER"
+        }
+      }
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "stats": {
+          "hp": 10,
+          "hp_max": 100
+        },
+        "resources": {
+          "hp_current": 10
+        },
+        "reason": "Vance took heavy damage from the regenerating guard."
+      }
+    },
+    {
+      "character_id": "unit_734",
+      "set": {
+        "stats": {
+          "chassis_integrity": 34
+        },
+        "reason": "Unit 734's chassis integrity is at 34%."
+      }
+    }
+  ],
+  "summary_update": {
+    "chapter_so_far_add": [],
+    "key_events": [
+      "The foyer locked down, trapping the party with regenerating guards and laser grids.",
+      "Vance took heavy damage defending the party, his HP dropping to 10/100.",
+      "Unit 734 interfaced with the blast door terminal, triggering an inventory audit.",
+      "Rhea sacrificed the Obsidian Shard, Cracked Smartphone, Scrap Parchment, and Copper Credits to the terminal.",
+      "The compliance check passed, deactivating the lasers and opening the path forward."
+    ],
+    "last_scene": [
+      "Trapped in the Sanctum Foyer, Rhea bypassed lethal compliance grids by sacrificing the Obsidian Shard and other junk data to an audit terminal.",
+      "Vance barely survived holding off a regenerating guard, his HP dropping to critical levels.",
+      "With the audit satisfied, the blast doors opened, allowing the party to escape into the inner sanctum corridor."
+    ],
+    "must_stay_true": [
+      "mechanic: unit_734 has active status Hostile Environment Marker",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "REMOVE: mechanic: vance_harrow HP is 10/150",
+      "mechanic: vance_harrow HP is 10/100",
+      "mechanic: rhea_mercer Stamina is 1/150",
+      "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+      "milestone: overseer_budget_discovered = DONE",
+      "milestone: administrative_hub_coordinates_acquired = DONE",
+      "milestone: administrative_hub_coordinates_decrypted = DONE",
+      "REMOVE: inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Administrative Coordinate Chip (status=stowed, container=blazer_pocket_left)",
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard, ITEM_administrative_coordinate_chip])",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+      "milestone: tollbooth_escape_completed = DONE",
+      "inventory: rhea_mercer -> Null-Value Token (status=held, container=hand_left)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_null_value_token])",
+      "milestone: null_value_token_crafted = DONE",
+      "milestone: sanctum_threshold_reached = DONE",
+      "mechanic: vance_harrow has active status Aggro Target",
+      "mechanic: unit_734 has active status Critical System Failure Imminent",
+      "milestone: compliance_checks_bypassed = DONE"
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_SANCTUM_INNER_CORRIDOR",
+    "open_threads": [
+      "party_alliance",
+      "system_debt_trap",
+      "rhea_survival"
+    ]
+  }
+}

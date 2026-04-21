@@ -1,0 +1,21 @@
+Rhea stood before the darkened pedestal, her breath pluming in the cold ash wind. The cache was permanently locked, but she was already looking for another way to extract value from the stubborn block of stone. The System had presented her with a digital choice, but it had made the mistake of placing that choice in a physical world. 
+
+[HP: 1/100]
+
+One hit point. A stiff breeze or a bad stumble could theoretically kill her, sending her back to whatever void she'd fallen out of. She needed a weapon. She needed a tool. She dropped to her knees, wincing as the bruised meat of her left leg protested the movement, and began sifting through the debris at the base of the structure. Her fingers closed over a jagged, wedge-shaped piece of black glass. She pulled the Obsidian Shard free from the dirt. It was sharp enough to slice her thumb, drawing a bead of bright crimson. No blue box appeared to claim ownership of the rock.
+
+Perfect. 
+
+She turned her attention back to the pedestal. It was smooth, glowing faintly at the seams, built from some proprietary architectural asset the System used to enforce its rules. But it was still matter. It still occupied space.
+
+Rhea gripped the Obsidian Shard tightly in her left hand. She brought it down hard against the corner of the pedestal's base. 
+
+*Clack.*
+
+The impact vibrated up her arm, jarring her teeth, but the stone didn't shatter. She swung again, putting the meager weight of her shoulders into the strike. Physics didn't require a signature. Physics didn't charge compounding interest.
+
+*Crack.*
+
+A fracture spiderwebbed across the glowing stone. With a final, desperate pry of the obsidian wedge, a piece of the architecture snapped loose and tumbled into the ash. 
+
+Rhea scooped up the Raw Masonry Chunk with her right hand, feeling its latent warmth as she successfully bypassed the contract.

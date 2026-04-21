@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "char_rhea"
+    ],
+    "location": "LOC_TUTORIAL_CRATER_RIDGE"
+  },
+  "character_updates": [
+    {
+      "character_id": "char_rhea",
+      "chapter": 1,
+      "scene": 4,
+      "inventory": [
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_cracked_smartphone"
+          ]
+        }
+      ],
+      "invariants_add": [
+        "milestone: starter_cache_rejected = DONE"
+      ],
+      "persona_updates": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "char_rhea",
+      "set": {
+        "stats": {
+          "hp": {
+            "current": 1,
+            "max": 100
+          }
+        },
+        "resources": {
+          "soul_debt": {
+            "current": 100000,
+            "max": 100000
+          }
+        },
+        "skills": {
+          "contract_analysis": 1
+        },
+        "reason": "System readouts confirmed current HP and Soul Debt; Contract Analysis triggered to reveal hidden terms."
+      },
+      "remove": [],
+      "delta": {},
+      "chapter": 1,
+      "scene": 4
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Rhea paused before accepting the starter gear, noticing a hidden asterisk on the System prompt.",
+      "Tapping it revealed a massive legal document detailing a predatory debt trap payable in maximum HP and forced labor.",
+      "She explicitly rejected the terms, locking the cache and avoiding further enslavement."
+    ],
+    "key_events": [
+      "Rhea investigated the microscopic asterisk on the System prompt.",
+      "She uncovered a compounding interest rate payable in maximum HP and forced labor.",
+      "She explicitly rejected the terms, causing the Starter Cache pedestal to lock and go dark."
+    ],
+    "must_stay_true": [
+      "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+      "mechanic: char_rhea HP is 1/100",
+      "mechanic: char_rhea has active status Tutorial Grace Period",
+      "mechanic: char_rhea has active title Indentured Soul",
+      "mechanic: char_rhea has 100,000 Soul Debt",
+      "injury: char_rhea bruised left leg",
+      "milestone: starter_cache_discovered = DONE",
+      "milestone: starter_cache_rejected = DONE"
+    ],
+    "chapter_so_far_add": []
+  },
+  "_appearance_check": {
+    "CHAR_RHEA": [
+      "pale",
+      "skin",
+      "slender",
+      "build",
+      "black",
+      "hair",
+      "messy",
+      "bob",
+      "dark",
+      "brown",
+      "eyes",
+      "System",
+      "Indenture",
+      "Brand",
+      "left",
+      "wrist",
+      "bruised",
+      "left",
+      "leg."
+    ]
+  }
+}

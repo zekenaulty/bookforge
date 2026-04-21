@@ -602,6 +602,7 @@ def validate_phase_02(
     errors: List[Dict[str, Any]] = []
     warnings: List[Dict[str, Any]] = []
     metrics: Dict[str, Any] = {}
+    subset_ids: Optional[Set[int]] = None
 
     if _norm_text(payload.get("schema_version")) != "sections_v1":
         errors.append(

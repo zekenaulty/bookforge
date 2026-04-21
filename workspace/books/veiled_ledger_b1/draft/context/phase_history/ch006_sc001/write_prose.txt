@@ -1,0 +1,34 @@
+Still reeling from the overseer's red-tier warning, Rhea and Vance were immediately ambushed by 'Debt Collectors'. The ash-covered Outpost Surface erupted around them, disgorging a pack of wire-frame hounds that glitched in and out of the gray dust. 
+
+The creatures didn't have flesh. They were sharp, geometric nightmares made of pulsing red light. 
+
+[System Alert: Audit Compliance Enforcement. Debt Collection Initiated.]
+
+"Get back!" Vance shouted, his blistered hands gripping his Rebar. He swung the heavy iron in a wide arc, striking the nearest hound in the jaw. Instead of bone crunching, there was a sound like shattering glass. The hound staggered but didn't fall. It opened its geometric maw, and instead of teeth, a glowing tether shot out, striking Vance squarely in the chest.
+
+Vance grunted, his knees buckling as the red light pulsed.
+
+[HP: 15/150 -> 10/150. Asset Seizure in progress.]
+
+"They aren't doing physical damage!" Rhea yelled, her own exhaustion dragging at her limbs. "They're taxing us!"
+
+Another hound bypassed Vance, leaping directly at Rhea. She raised her arms, the singed hair on her forearms standing on end as she braced her newly enhanced Strength against the impact. The hound collided with her, but it didn't bite. A second glowing tether erupted from its chest, piercing straight through her blazer and sinking into her sternum.
+
+A sickening pull wrenched at her core.
+
+[Stamina: 5/150 -> 3/150. Asset Seizure in progress.]
+
+Rhea gasped, grabbing the tether with both hands. It felt like grabbing a live wire. She pulled, her boots sliding in the ash, trying to physically rip the administrative connection out of her body. Her stat allocation held firm—she actually managed to yank the tether an inch away from her chest.
+
+The System, encountering physical resistance, immediately recalculated. The tether snapped off her sternum and whipped down, plunging straight into her left blazer pocket.
+
+[Inventory Update: Ash Fungus Removed.]
+[Inventory Update: Severed Ash-Boar Tusk Removed.]
+
+"No!" Rhea shouted, swiping at the tether as the soft squish of the fungus and the heavy weight of the tusk simply vanished from her pocket, digitized and sucked up the line into the hound's geometric body. 
+
+Vance roared, bringing the Rebar down in a brutal, two-handed overhead strike. The blow crushed the hound's skull, shattering the wire-frame completely. The tether snapped. The creature dissolved into a shower of red sparks, taking Rhea's items with it.
+
+Unit 734, its smoking chassis still twitching from the hijacked projection, beeped a low, mournful tone. "Warning. Secondary collection wave imminent."
+
+Rhea clutched her chest, her breathing ragged. The party survives the initial ambush but loses several valuable consumables to the debt tethers, preparing to flee before the next wave could bankrupt them completely.

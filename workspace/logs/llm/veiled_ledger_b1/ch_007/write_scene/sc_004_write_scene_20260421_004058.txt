@@ -1,0 +1,245 @@
+COMPLIANCE:
+Scene ID: SC_007_004
+Allowed events: The overseer attempts to enforce a lethal predatory contract, freezing Vance in place with a 'debt lock'. Rhea counters by presenting the corrupted ledger data and the Null-Value Token's residual code, initiating a formal dispute.
+Forbidden milestones: overseer_default_triggered, administrative_shields_stripped, local_node_crashed
+
+Current arm-side / inventory facts: 
+- inventory: rhea_mercer -> Null-Value Token (status=held, container=hand_left)
+- inventory: rhea_mercer -> Raw Data Packet (status=held, container=hand_right)
+- inventory: vance_harrow -> Rebar (status=held, container=hand_right)
+
+Durable changes committed: 
+- mechanic: vance_harrow has active status Debt Lock
+- milestone: debt_lock_applied = DONE
+- milestone: formal_dispute_initiated = DONE
+
+APPEARANCE_CHECK:
+- rhea_mercer: noticeably singed hair on both of her arms
+- vance_harrow: prominently featuring heavily blistered hands
+- unit_734: smoking chassis, plumes of thick smoke venting
+
+PROSE:
+The splintered remains of the mahogany double doors clattered against the polished marble floor as the party breached the inner office, bringing their desperate confrontation directly to the overseer. 
+
+The room beyond the threshold was a jarring shift from the chaotic, trap-laden architecture of the Audit Corridor. It was a cavernous, perfectly symmetrical space that smelled of ozone and freshly printed parchment. At the far end of the room sat a massive obsidian desk, and rising from behind it was the overseer. He wasn't a man. He was a bloated entity constructed of pure administrative code, his form radiating a thick, suffocating aura of glowing purple mana that cast long, unnatural shadows across the marble. 
+
+Vance stepped through the ruined doorway first, his blistered hands gripping the length of his battered Rebar tightly in his right hand. He was breathing in shallow, ragged gasps, his posture screaming of the heavy blunt-force trauma he had sustained tanking the automated turrets outside. 
+
+[HP: 2/100]
+
+He was running on pure spite and a terrifying lack of self-preservation. By stepping into the room first, Vance had drawn the room's immediate hostility, cementing his status as the primary aggro target. 
+
+Behind him, Unit 734 dragged its smoking chassis over the threshold. Plumes of thick, acrid smoke vented from the drone's metallic body, its internal gears grinding in a terrifying rhythm. A red warning light flashed rhythmically on its central optical lens.
+
+[System Warning: Critical System Failure Imminent.]
+
+Rhea stepped in last. Every movement was an agony of mathematical precision. 
+
+[Stamina: 1/150]
+
+Her lungs burned, and the noticeably singed hair on both of her arms prickled as the ambient purple mana in the room reacted to her presence. The severe exhaustion debuff felt like a physical weight pressing down on her shoulders, threatening to drive her into the polished floor. But she couldn't stop. Her left hand was clamped tightly around the heavy, light-swallowing mass of the Null-Value Token. Her right hand clutched the pulsing, crystalline structure of the Raw Data Packet. 
+
+The overseer did not draw a weapon. He didn't need to. He simply raised a hand composed of shifting ledger entries and pointed a single, glowing finger directly at Vance's chest. 
+
+"Account in default," the overseer's voice boomed, sounding less like speech and more like the grinding of a massive, subterranean vault door. "Immediate liquidation authorized."
+
+A beam of concentrated, bureaucratic purple mana shot from the overseer's fingertip, striking Vance dead center. It didn't deal physical damage. It didn't need to. The mana wrapped around Vance's limbs like glowing chains, sinking into his flesh and anchoring him to the floor. 
+
+[Status Effect: Debt Lock applied.]
+
+Vance grunted, his muscles straining against the magical bindings, but the Rebar in his right hand didn't so much as twitch. He was completely immobilized, his remaining hit points held hostage by a predatory contract enforcement. The overseer raised his hand higher, the purple mana gathering into a dense, lethal spike above Vance's head, preparing for the final execution strike. 
+
+Rhea moved. 
+
+Ignoring the screaming protests of her depleted stamina, she forced her leaden legs to carry her across the expansive marble floor. The overseer didn't even look at her; his aggro was entirely locked onto Vance's pending liquidation. 
+
+Reaching the edge of the massive obsidian desk, Rhea slammed her right hand down, driving the Raw Data Packet into the polished stone with a sharp, resonant crack. At the exact same moment, she pushed the residual code of the Null-Value Token in her left hand forward, letting its localized physics glitch bleed into the overseer's pristine mana field. 
+
+"I contest the balance," Rhea gasped, her voice hoarse but echoing with absolute, legalistic certainty. 
+
+The purple execution spike hovering over Vance's head wavered. The raw data packet on the desk flared with a blinding blue light, its corrupted ledger data violently interfacing with the room's administrative core. 
+
+[System Notification]
+[Action Recognized: Formal Dispute]
+
+The system's absolute adherence to its own rigid rules kicked in, superseding the local overseer's manual override. Rhea initiates a formal dispute, stalling the overseer's lethal attack and forcing the system to review the contract.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_OVERSEER_INNER_OFFICE",
+    "open_threads": [
+      "rhea_survival",
+      "party_alliance",
+      "system_debt_trap"
+    ],
+    "recent_facts": [
+      "The party breached the inner office, confronting the overseer.",
+      "The overseer applied a Debt Lock to Vance, freezing him in place for liquidation.",
+      "Rhea slammed the Raw Data Packet onto the obsidian desk and invoked a Formal Dispute.",
+      "The system recognized the dispute, stalling the overseer's lethal attack."
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "The party breached the inner office, bringing their confrontation directly to the overseer.",
+      "The overseer ignored standard combat, applying a magical Debt Lock to Vance to freeze him for immediate execution.",
+      "Rhea countered by slamming the Raw Data Packet onto the overseer's desk, initiating a Formal Dispute that forced the system to halt the attack and review the contract."
+    ],
+    "key_events": [
+      "The party successfully breached the inner office.",
+      "Vance drew the overseer's aggro but was immediately frozen by a Debt Lock.",
+      "Rhea utilized the Raw Data Packet and the residual code of the Null-Value Token to contest the overseer's action.",
+      "The system recognized the Formal Dispute, stalling the execution."
+    ],
+    "must_stay_true": [
+      "milestone: administrative_hub_coordinates_decrypted = DONE",
+      "inventory: rhea_mercer -> Administrative Coordinate Chip (status=stowed, container=blazer_pocket_left)",
+      "milestone: tollbooth_escape_completed = DONE",
+      "inventory: rhea_mercer -> Null-Value Token (status=held, container=hand_left)",
+      "container: system_inventory (owner=rhea_mercer, contents=[])",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_null_value_token])",
+      "milestone: null_value_token_crafted = DONE",
+      "milestone: sanctum_threshold_reached = DONE",
+      "mechanic: vance_harrow has active status Aggro Target",
+      "mechanic: unit_734 has active status Critical System Failure Imminent",
+      "mechanic: vance_harrow has active status Heavy Blunt-Force Trauma",
+      "milestone: sanctum_foyer_breached = DONE",
+      "milestone: elite_guards_defeated = DONE",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+      "mechanic: vance_harrow HP is 2/100",
+      "milestone: compliance_checks_bypassed = DONE",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "mechanic: vance_harrow Rebar Durability is 60%",
+      "milestone: inner_office_breached = DONE",
+      "inventory: rhea_mercer -> Raw Data Packet (status=held, container=hand_right)",
+      "container: hand_right (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+      "mechanic: vance_harrow has active status Debt Lock",
+      "milestone: debt_lock_applied = DONE",
+      "milestone: formal_dispute_initiated = DONE"
+    ],
+    "chapter_so_far_add": []
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 7,
+      "scene": 4,
+      "inventory": [
+        {
+          "item": "ITEM_null_value_token",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_administrative_coordinate_chip",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_raw_data_packet",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_null_value_token"
+          ]
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_administrative_coordinate_chip"
+          ]
+        },
+        {
+          "container": "system_inventory",
+          "owner": "rhea_mercer",
+          "contents": []
+        },
+        {
+          "container": "hand_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_raw_data_packet"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Rhea successfully leveraged her knowledge of the system's legal framework to stall a lethal attack."
+      ]
+    },
+    {
+      "character_id": "vance_harrow",
+      "chapter": 7,
+      "scene": 4,
+      "inventory": [
+        {
+          "item": "ITEM_rebar",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_rebar"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Vance is completely immobilized by the overseer's Debt Lock, relying entirely on Rhea to resolve the dispute."
+      ]
+    },
+    {
+      "character_id": "unit_734",
+      "chapter": 7,
+      "scene": 4,
+      "inventory": [],
+      "containers": [],
+      "invariants_add": [],
+      "persona_updates": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "statuses": [
+          {
+            "active": true,
+            "name": "Heavy Blunt-Force Trauma",
+            "source": "Stamp-Hammer"
+          },
+          {
+            "active": true,
+            "name": "Aggro Target",
+            "source": "Combat Initiation"
+          },
+          {
+            "active": true,
+            "name": "Debt Lock",
+            "source": "Overseer"
+          }
+        ]
+      },
+      "reason": "Vance was targeted by the Overseer's Debt Lock ability."
+    }
+  ]
+}

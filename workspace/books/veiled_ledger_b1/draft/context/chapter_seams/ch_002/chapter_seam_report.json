@@ -1,0 +1,99 @@
+{
+  "schema_version": "chapter_seam_report_v1",
+  "chapter_id": 2,
+  "generated_at": "2026-04-21T04:33:50Z",
+  "status": "finalized",
+  "provisional_path": "draft/chapters/ch_002.provisional.md",
+  "final_path": "draft/chapters/ch_002.md",
+  "candidate_path": null,
+  "repair_actions": [
+    {
+      "code": "restart_energy_overlap",
+      "from_scene_ref": "2:2",
+      "target_scene_ref": "2:3",
+      "action": "drop_first_sentence",
+      "removed_text": "Sitting motionless against a jagged boulder to avoid fatal stamina drain, Rhea watched an ash-crusted scavenger mob interact with the petrified environment.",
+      "resulting_opening": "She didn't dare blink too hard."
+    },
+    {
+      "code": "restart_energy_overlap",
+      "from_scene_ref": "2:3",
+      "target_scene_ref": "2:4",
+      "action": "drop_first_sentence",
+      "removed_text": "Rhea carefully rose from her resting spot, fighting through Exhaustion to put her physics exploit into motion.",
+      "resulting_opening": "A few yards away, an ash-crusted scavenger was still scraping at the dry riverbed, its brittle claws oblivious to her presence."
+    },
+    {
+      "code": "restart_energy_overlap",
+      "from_scene_ref": "2:4",
+      "target_scene_ref": "2:5",
+      "action": "drop_first_sentence",
+      "removed_text": "With the scavenger crushed and untaxed loot secured, Rhea turned her attention to the raw materials.",
+      "resulting_opening": "The creature\u2019s brittle carapace had shattered under the heavy deadfall, leaving behind splintered wood and several glowing, fruit-like nodes of fungus."
+    }
+  ],
+  "before": {
+    "schema_version": "chapter_seam_report_v1",
+    "chapter_id": 2,
+    "generated_at": "2026-04-21T04:33:50Z",
+    "status": "fail",
+    "issue_counts": {
+      "error": 3,
+      "warning": 0,
+      "total": 3
+    },
+    "issues": [
+      {
+        "code": "restart_energy_overlap",
+        "severity": "error",
+        "message": "Opening paragraph partially restates the prior scene instead of advancing.",
+        "chapter_id": 2,
+        "to_scene_ref": "2:3",
+        "evidence": {
+          "previous_paragraph": "Rhea slumped against a jagged boulder by the dry riverbed and slid down until she hit the ash. She sat perfectly motionless, clutching her single mushroom, refusing to interact with the environment, refusing to trigger the fatal taxes that governed every inch of this miserable world.",
+          "current_paragraph": "Sitting motionless against a jagged boulder to avoid fatal stamina drain, Rhea watched an ash-crusted scavenger mob interact with the petrified environment.",
+          "similarity": 0.26
+        },
+        "from_scene_ref": "2:2"
+      },
+      {
+        "code": "restart_energy_overlap",
+        "severity": "error",
+        "message": "Opening paragraph partially restates the prior scene instead of advancing.",
+        "chapter_id": 2,
+        "to_scene_ref": "2:4",
+        "evidence": {
+          "previous_paragraph": "Gripping her heavy bludgeon just enough to use it as a walking cane, Rhea formulated a plan to exploit the physics engine, preparing to herd the mob.",
+          "current_paragraph": "Rhea carefully rose from her resting spot, fighting through Exhaustion to put her physics exploit into motion. A few yards away, an ash-crusted scavenger was still scraping at the dry riverbed, its brittle claws oblivious to her presence.",
+          "similarity": 0.135
+        },
+        "from_scene_ref": "2:3"
+      },
+      {
+        "code": "restart_energy_overlap",
+        "severity": "error",
+        "message": "Opening paragraph partially restates the prior scene instead of advancing.",
+        "chapter_id": 2,
+        "to_scene_ref": "2:5",
+        "evidence": {
+          "previous_paragraph": "Panting heavily, Rhea stood over the crushed scavenger, staring down at the pile of glowing fungus and splintered wood that the System registered as untaxed environmental debris.",
+          "current_paragraph": "With the scavenger crushed and untaxed loot secured, Rhea turned her attention to the raw materials. The creature\u2019s brittle carapace had shattered under the heavy deadfall, leaving behind splintered wood and several glowing, fruit-like nodes of fungus.",
+          "similarity": 0.224
+        },
+        "from_scene_ref": "2:4"
+      }
+    ]
+  },
+  "after": {
+    "schema_version": "chapter_seam_report_v1",
+    "chapter_id": 2,
+    "generated_at": "2026-04-21T04:33:50Z",
+    "status": "pass",
+    "issue_counts": {
+      "error": 0,
+      "warning": 0,
+      "total": 0
+    },
+    "issues": []
+  }
+}

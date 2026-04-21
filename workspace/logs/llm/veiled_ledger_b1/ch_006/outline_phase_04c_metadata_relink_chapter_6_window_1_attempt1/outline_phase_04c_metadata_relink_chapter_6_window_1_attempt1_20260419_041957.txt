@@ -1,0 +1,344 @@
+{
+  "schema_version": "outline_relink_v1",
+  "outline": {
+    "schema_version": "1.1",
+    "chapters": [
+      {
+        "bridge": {
+          "from_prev": "The overseer flags Rhea's party for 'audit compliance' encounters.",
+          "to_next": "Pushed to the brink, Rhea prepares a counter-audit to crash the local node."
+        },
+        "chapter_id": 6,
+        "chapter_role": "pressure",
+        "goal": "Survive the overseer's targeted harassment, which uses debt logic and rigged encounters to try and bankrupt Rhea's HP and resources.",
+        "pacing": {
+          "expected_scene_count": 7,
+          "intensity": 4,
+          "tempo": "rush"
+        },
+        "sections": [
+          {
+            "end_condition": "The party barely escapes the first wave of rigged encounters, their resources heavily drained.",
+            "intent": "The overseer weaponizes the environment, spawning debt-collecting mobs and applying severe administrative debuffs.",
+            "scenes": [
+              {
+                "characters": [
+                  "rhea_mercer",
+                  "vance_harrow",
+                  "unit_734"
+                ],
+                "constraint_state": "engaged_combat",
+                "handoff_mode": "combat_disengage",
+                "hands_off_to": "6:2",
+                "location_end": "Ash Wastes",
+                "location_end_id": "LOC_ASH_WASTES_BB153F",
+                "location_end_label": "Ash Wastes",
+                "location_start": "Outpost Surface",
+                "location_start_id": "LOC_OUTPOST_SURFACE_20637F",
+                "location_start_label": "Outpost Surface",
+                "outcome": "The party survives the initial ambush but loses several valuable consumables to the debt tethers.",
+                "scene_id": 1,
+                "seam_resolution": "inline_bridge",
+                "seam_score": 35,
+                "summary": "Still reeling from the overseer's red-tier warning, Rhea and Vance are immediately ambushed by 'Debt Collectors'\u2014system-spawned mobs that drain HP and inventory items instead of dealing standard damage. Rhea has to use her newly acquired stats to physically block the extraction tethers.",
+                "threads": [
+                  "rhea_survival",
+                  "system_debt_trap"
+                ],
+                "transition_in_anchors": [
+                  "burning crimson warning icon",
+                  "ash-covered ground",
+                  "wire-frame hounds",
+                  "pulsing vision"
+                ],
+                "transition_in_text": "The burning crimson warning icon pulses in Rhea's vision just as the ash-covered ground erupts, disgorging three wire-frame hounds.",
+                "transition_out_anchors": [
+                  "crushed hound skull",
+                  "iron bludgeon",
+                  "glowing tether",
+                  "stolen health potions"
+                ],
+                "transition_out_text": "Vance crushes the last hound's skull with his iron bludgeon, but not before a glowing tether yanks three health potions from Rhea's belt.",
+                "type": "action"
+              },
+              {
+                "characters": [
+                  "rhea_mercer",
+                  "vance_harrow",
+                  "unit_734"
+                ],
+                "constraint_state": "sheltered",
+                "consumes_outcome_from": "6:1",
+                "end_condition_echo": "The party barely escapes the first wave of rigged encounters, their resources heavily drained.",
+                "handoff_mode": "direct_continuation",
+                "hands_off_to": "6:3",
+                "location_end": "Ruined Tollbooth",
+                "location_end_id": "LOC_RUINED_TOLLBOOTH_CEEB90",
+                "location_end_label": "Ruined Tollbooth",
+                "location_start": "Ash Wastes",
+                "location_start_id": "LOC_ASH_WASTES_BB153F",
+                "location_start_label": "Ash Wastes",
+                "outcome": "The party barely escapes the first wave of rigged encounters, their resources heavily drained.",
+                "scene_id": 2,
+                "seam_resolution": "inline_bridge",
+                "seam_score": 15,
+                "summary": "Fleeing into the Ash Wastes to break line of sight, the party is hit by a localized 'Audit Tax' debuff that halves their movement speed and drains stamina. They are forced to barricade themselves inside a ruined tollbooth to wait out the debuff timer while fending off a second wave of collectors.",
+                "threads": [
+                  "rhea_survival",
+                  "system_debt_trap"
+                ],
+                "transition_in_anchors": [
+                  "leaden boots",
+                  "gray dunes",
+                  "crumbling stone archway",
+                  "ruined tollbooth"
+                ],
+                "transition_in_text": "Dragging her suddenly leaden boots through the gray dunes, Rhea shoves Vance toward the crumbling stone archway of a ruined tollbooth.",
+                "transition_out_anchors": [
+                  "rotting wooden door",
+                  "rusted iron bar",
+                  "scratching debt hounds",
+                  "exterior stone"
+                ],
+                "transition_out_text": "Rhea slams the rotting wooden door shut, sliding a rusted iron bar into place as the debt hounds begin scratching at the exterior stone.",
+                "type": "action"
+              }
+            ],
+            "section_id": 1,
+            "title": "Weaponized Bureaucracy"
+          },
+          {
+            "end_condition": "Rhea identifies the specific administrative hub powering the overseer's targeted harassment.",
+            "intent": "Rhea realizes they cannot out-fight the system's infinite resources and must attack the overseer's mana/debt ledger directly.",
+            "scenes": [
+              {
+                "characters": [
+                  "rhea_mercer",
+                  "vance_harrow",
+                  "unit_734"
+                ],
+                "constraint_state": "sheltered",
+                "consumes_outcome_from": "6:2",
+                "handoff_mode": "direct_continuation",
+                "hands_off_to": "6:4",
+                "location_end": "Ruined Tollbooth",
+                "location_end_id": "LOC_RUINED_TOLLBOOTH_CEEB90",
+                "location_end_label": "Ruined Tollbooth",
+                "location_start": "Ruined Tollbooth",
+                "location_start_id": "LOC_RUINED_TOLLBOOTH_CEEB90",
+                "location_start_label": "Ruined Tollbooth",
+                "outcome": "Rhea discovers that the debt mobs are being funded by a localized administrative hub, meaning the overseer has a finite budget for his harassment.",
+                "scene_id": 3,
+                "seam_resolution": "inline_bridge",
+                "seam_score": 15,
+                "summary": "Inside the tollbooth, Rhea analyzes the combat log and realizes the debt hounds aren't normal mobs; they are physical manifestations of the overseer's mana ledger. She forces Unit 734 to interface with the tollbooth's dead terminal to trace the hounds' spawn origin.",
+                "threads": [
+                  "system_debt_trap"
+                ],
+                "transition_in_anchors": [
+                  "frantic scratching",
+                  "dead terminal casing",
+                  "interface cable",
+                  "exposed copper wiring"
+                ],
+                "transition_in_text": "Ignoring the frantic scratching at the door, Rhea rips the casing off the tollbooth's dead terminal and jams Unit 734's interface cable into the exposed copper wiring.",
+                "transition_out_anchors": [
+                  "flickering terminal screen",
+                  "cascading ledger",
+                  "mana expenditures",
+                  "fortified coordinate"
+                ],
+                "transition_out_text": "The terminal screen flickers to life, displaying a cascading ledger of mana expenditures flowing from a single, heavily fortified coordinate.",
+                "type": "puzzle"
+              },
+              {
+                "characters": [
+                  "rhea_mercer",
+                  "vance_harrow",
+                  "unit_734"
+                ],
+                "constraint_state": "engaged_combat",
+                "consumes_outcome_from": "6:3",
+                "end_condition_echo": "Rhea identifies the specific administrative hub powering the overseer's targeted harassment.",
+                "handoff_mode": "combat_disengage",
+                "hands_off_to": "6:5",
+                "location_end": "Ruined Tollbooth",
+                "location_end_id": "LOC_RUINED_TOLLBOOTH_CEEB90",
+                "location_end_label": "Ruined Tollbooth",
+                "location_start": "Ruined Tollbooth",
+                "location_start_id": "LOC_RUINED_TOLLBOOTH_CEEB90",
+                "location_start_label": "Ruined Tollbooth",
+                "outcome": "Rhea identifies the specific administrative hub powering the overseer's targeted harassment.",
+                "scene_id": 4,
+                "seam_resolution": "micro_scene",
+                "seam_score": 45,
+                "summary": "Vance holds the door against the escalating mob pressure while Rhea decrypts the coordinate data. She pinpoints the exact location of the local administrative hub and realizes that if they can inject a corrupted ledger entry there, the overseer's debt system will crash.",
+                "threads": [
+                  "system_debt_trap",
+                  "party_alliance"
+                ],
+                "transition_in_anchors": [
+                  "splintering wood",
+                  "braced shoulder",
+                  "glowing green terminal",
+                  "decryption commands"
+                ],
+                "transition_in_text": "Vance braces his shoulder against the splintering wood as Rhea frantically types decryption commands into the glowing green terminal.",
+                "transition_out_anchors": [
+                  "glowing coordinate chip",
+                  "console slot",
+                  "map interface",
+                  "grinning face"
+                ],
+                "transition_out_text": "She extracts the glowing coordinate chip from the console, grinning as the location of the administrative hub burns into her map interface.",
+                "type": "progression"
+              }
+            ],
+            "section_id": 2,
+            "title": "Targeting the Ledger"
+          },
+          {
+            "end_condition": "The party stands at the threshold of the administrative sanctum, fully equipped for the breach.",
+            "intent": "The party prepares a counter-audit, gathering the specific items and exploits needed to crash the local node.",
+            "scenes": [
+              {
+                "characters": [
+                  "rhea_mercer",
+                  "vance_harrow",
+                  "unit_734"
+                ],
+                "constraint_state": "fleeing",
+                "consumes_outcome_from": "6:4",
+                "handoff_mode": "direct_continuation",
+                "hands_off_to": "6:6",
+                "location_end": "Ash Wastes",
+                "location_end_id": "LOC_ASH_WASTES_BB153F",
+                "location_end_label": "Ash Wastes",
+                "location_start": "Ruined Tollbooth",
+                "location_start_id": "LOC_RUINED_TOLLBOOTH_CEEB90",
+                "location_start_label": "Ruined Tollbooth",
+                "outcome": "The party breaks out of the tollbooth, evading the immediate mob threat and navigating the treacherous Ash Wastes toward the hub coordinates.",
+                "scene_id": 5,
+                "seam_resolution": "inline_bridge",
+                "seam_score": 20,
+                "summary": "Armed with the hub's coordinates, Rhea signals Vance to drop the barricade. They burst out of the ruined tollbooth, using a localized physics exploit with Unit 734 to temporarily stun the debt hounds, and sprint into the Ash Wastes, putting distance between themselves and the immediate mob threat.",
+                "threads": [
+                  "rhea_survival",
+                  "party_alliance"
+                ],
+                "transition_in_anchors": [
+                  "splintering wood",
+                  "dropped barricade",
+                  "snarling hounds",
+                  "bursting outward"
+                ],
+                "transition_in_text": "Vance drops his shoulder from the splintering wood, swinging his iron bludgeon as the door finally gives way to the snarling debt hounds.",
+                "transition_out_anchors": [
+                  "gray dunes",
+                  "trudging",
+                  "jagged obsidian spires",
+                  "ashy wind"
+                ],
+                "transition_out_text": "The tollbooth shrinks in the distance as they trudge through the gray dunes, the jagged obsidian spires of the Hub Perimeter finally coming into view through the ash.",
+                "type": "action"
+              },
+              {
+                "characters": [
+                  "rhea_mercer",
+                  "vance_harrow"
+                ],
+                "constraint_state": "free",
+                "consumes_outcome_from": "6:5",
+                "handoff_mode": "direct_continuation",
+                "hands_off_to": "6:7",
+                "location_end": "Hub Perimeter",
+                "location_end_id": "LOC_HUB_PERIMETER_682141",
+                "location_end_label": "Hub Perimeter",
+                "location_start": "Ash Wastes",
+                "location_start_id": "LOC_ASH_WASTES_BB153F",
+                "location_start_label": "Ash Wastes",
+                "outcome": "Rhea successfully crafts the Null-Value Token, consuming the last of their high-tier crafting materials.",
+                "scene_id": 6,
+                "seam_resolution": "inline_bridge",
+                "seam_score": 30,
+                "summary": "Having navigated the treacherous path through the Ash Wastes, the party reaches the outskirts of the hub. Crouched behind cover, Rhea uses the remaining refunded loot to craft a 'Null-Value Token'\u2014a physical exploit designed to trigger a divide-by-zero error in the overseer's ledger.",
+                "threads": [
+                  "rhea_survival",
+                  "system_debt_trap"
+                ],
+                "transition_in_anchors": [
+                  "jagged obsidian spires",
+                  "Hub Perimeter",
+                  "ashy wind",
+                  "basalt boulder"
+                ],
+                "transition_in_text": "Reaching the jagged obsidian spires of the Hub Perimeter, Vance clears a path through the settling ash, allowing Rhea to slide behind a massive basalt boulder.",
+                "transition_out_anchors": [
+                  "basalt boulder",
+                  "silver coin",
+                  "corrupted data shard",
+                  "light-swallowing token"
+                ],
+                "transition_out_text": "Crouched behind the basalt boulder, Rhea fuses a silver coin with a corrupted data shard, producing a heavy, light-swallowing token.",
+                "type": "progression"
+              },
+              {
+                "characters": [
+                  "rhea_mercer",
+                  "vance_harrow",
+                  "unit_734"
+                ],
+                "constraint_state": "free",
+                "consumes_outcome_from": "6:6",
+                "end_condition_echo": "The party stands at the threshold of the administrative sanctum, fully equipped for the breach.",
+                "handoff_mode": "direct_continuation",
+                "location_end": "Sanctum Threshold",
+                "location_end_id": "LOC_SANCTUM_THRESHOLD_00D184",
+                "location_end_label": "Sanctum Threshold",
+                "location_start": "Hub Perimeter",
+                "location_start_id": "LOC_HUB_PERIMETER_682141",
+                "location_start_label": "Hub Perimeter",
+                "outcome": "The party stands at the threshold of the administrative sanctum, fully equipped for the breach.",
+                "scene_id": 7,
+                "summary": "The party arrives at the heavily guarded entrance of the administrative sanctum. Vance equips his upgraded gear to draw the aggro of the elite bureaucratic guards, while Rhea readies the Null-Value Token for the breach.",
+                "threads": [
+                  "party_alliance",
+                  "system_debt_trap"
+                ],
+                "transition_in_anchors": [
+                  "basalt boulders",
+                  "polished marble steps",
+                  "Sanctum Threshold",
+                  "gold-plated sentinels"
+                ],
+                "transition_in_text": "Creeping past the basalt boulders, the party reaches the polished marble steps of the Sanctum Threshold, where two towering, gold-plated sentinels stand guard.",
+                "type": "dramatic"
+              }
+            ],
+            "section_id": 3,
+            "title": "Preparing the Counter-Audit"
+          }
+        ],
+        "stakes_shift": "From flying under the radar to fighting a defensive war against the system's bureaucracy.",
+        "title": "Administrative Cruelty"
+      }
+    ]
+  },
+  "phase_report": {
+    "window_id": "ch06_win01",
+    "touched_scene_refs": [
+      "6:4",
+      "6:5",
+      "6:6"
+    ],
+    "touched_fields": [
+      "consumes_outcome_from",
+      "hands_off_to",
+      "handoff_mode"
+    ],
+    "updated_character_ids": [],
+    "notes": [
+      "Verified and relinked sequence 6:4 -> 6:5 -> 6:6."
+    ]
+  }
+}

@@ -1,0 +1,44 @@
+- The party survived the physical XP refund.
+- Rhea and Vance consolidated their new stats and loot.
+- The automated freeze on the Outpost Surface was manually overridden by the local overseer.
+- Unit 734 was hijacked to project a massive avatar of the overseer.
+- The overseer identified Rhea as the active audit target.
+- The party survived an Audit Tax debuff and a second wave of Debt Collectors inside the Ruined Tollbooth.
+- Rhea's stamina was drained to 1/150, and she lost her Scavenger Carapaces to a Debt Collector tether.
+- Vance successfully defended the barricade, maintaining his 10 HP.
+- Rhea interfaced Unit 734 with the dead tollbooth terminal.
+- The combat logs revealed the Debt Collectors cost Node Mana to spawn.
+- Rhea accessed the Mana Ledger and discovered the overseer's finite budget.
+- Rhea acquired the coordinates to the local administrative hub funding the attacks.
+- Vance drew the aggro of the elite guards using his Rebar.
+- Rhea used the Null-Value Token to trigger a fatal exception in the sanctum doors.
+- The party breached the Sanctum Foyer and defeated the first wave of elite guards.
+- Vance sustained Heavy Blunt-Force Trauma and dropped to 2 HP.
+- The Sanctum Foyer locked down with a lethal compliance grid.
+- Vance held off a regenerating bureaucratic guard while Rhea accessed the terminal.
+- Rhea and Vance sacrificed the Obsidian Shard and Copper Credits to satisfy the compliance check.
+- The compliance grid deactivated, powering down the guard and opening the path to the Audit Corridor.
+- The party breached the inner office, confronting the overseer.
+- The overseer applied a Debt Lock to Vance, freezing him in place for liquidation.
+- Rhea slammed the Raw Data Packet onto the obsidian desk and invoked a Formal Dispute.
+- The system recognized the dispute, stalling the overseer's lethal attack.
+- Rhea verbally dissected the overseer's contract while dodging his physical, mana-infused attacks.
+- Rhea presented the Raw Data Packet and the Null-Value Token as hard evidence of the overseer's mathematical fraud.
+- The system accepted Rhea's proof and finalized the Formal Dispute.
+- The overseer suffered a catastrophic default, instantly stripping his administrative shields.
+- The feral overseer was completely deleted by the System following the 14,800 environmental damage blow.
+- The local frontier node lost its anchor and began a catastrophic structural collapse.
+- Rhea looted the Overseer's Sanctum Desk, securing the Mythic-tier Mercy Cache Coordinates and the High-Tier Administrative Residue Token.
+- The System initiated a 30-second Frontier Zone Purge, broadcasting a critical failure across the zone.
+- The party survived the 30-second Frontier Zone Purge timer.
+- Rhea successfully used the Mercy Cache Coordinates to bypass the wall terminal.
+- The hidden vault opened, revealing the Mercy Cache just as the Inner Office collapsed.
+- Rhea stowed the Administrative Residue Token in her System Inventory.
+- Vance looted High-Tier Restorative Consumables from the vault.
+- Vance consumed a potion, restoring his HP and curing his blunt-force trauma.
+- The vault collapsed entirely as the node deleted itself.
+- The party successfully escaped the tutorial and entered the Civic Layer.
+- The local frontier node initiated a hard purge protocol, dissolving physical architecture into deletion code.
+- Vance used his Rebar to shatter falling debris, degrading its durability to 52%.
+- Unit 734's chassis integrity dropped to 28% as it struggled to navigate the collapsing mesh.
+- The party reached the outer boundary of the frontier zone but found their path blocked by a firewall of deletion code.

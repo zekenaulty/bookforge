@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_004_007",
+  "chapter": 4,
+  "scene": 7,
+  "scene_target": "Extract the raw data packet before the terminal wipes its memory.",
+  "goal": "Prevent the terminal from hard-resetting and extract the skim logs.",
+  "conflict": "Automated defense system triggers a memory wipe; Vance struggles to hold the cooling vents open while at critical HP.",
+  "required_callbacks": [
+    "Vance is at 3/100 HP, making physical exertion extremely dangerous.",
+    "Rhea's stamina is severely depleted (20/100)."
+  ],
+  "constraints": [
+    "target_words: 1800",
+    "Vance must not die, but the physical strain should highlight his critical HP.",
+    "The data packet must be extracted as a physical or digital item by the end."
+  ],
+  "end_condition": "Rhea extracts the raw data packet containing the skim logs.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_MAINTENANCE_TRENCHES",
+  "location_end_id": "LOC_MAINTENANCE_TRENCHES",
+  "location_start_label": "Maintenance Trenches - Server Terminal",
+  "location_end_label": "Maintenance Trenches - Server Terminal",
+  "location_start": "Maintenance Trenches - Server Terminal",
+  "location_end": "Maintenance Trenches - Server Terminal",
+  "handoff_mode": "direct_continuation",
+  "constraint_state": "processed",
+  "transition_in_text": "Immediately following the discovery of the routing destination, the terminal's automated defenses trigger a localized memory wipe.",
+  "transition_in_anchors": [
+    "terminal",
+    "defenses",
+    "memory_wipe",
+    "routing_destination"
+  ],
+  "transition_out_text": "Rhea holds the extracted raw data packet as the terminal finally crashes, securing the evidence.",
+  "transition_out_anchors": [
+    "extracted",
+    "data_packet",
+    "terminal_crashes",
+    "evidence"
+  ],
+  "consumes_outcome_from": "4:6",
+  "hands_off_to": "4:8",
+  "seam_score": 90,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "rhea_survival",
+    "party_alliance"
+  ],
+  "required_in_custody": [
+    "ITEM_scrap_parchment",
+    "ITEM_charcoal_stick",
+    "ITEM_rebar"
+  ],
+  "required_scene_accessible": [
+    "ITEM_scrap_parchment",
+    "ITEM_charcoal_stick",
+    "ITEM_rebar"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "direct_continuation",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "resources",
+    "hp",
+    "stamina"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Stamina",
+    "System Warning",
+    "Memory Wipe Progress"
+  ]
+}

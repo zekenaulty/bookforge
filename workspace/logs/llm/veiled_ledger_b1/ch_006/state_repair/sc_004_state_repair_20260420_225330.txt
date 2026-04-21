@@ -1,0 +1,132 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "chapter": 6,
+      "character_id": "rhea_mercer",
+      "scene": 4,
+      "set": {
+        "reason": "Rhea successfully decrypted the coordinates.",
+        "resources": {
+          "coordinate_decryption": 100
+        }
+      }
+    },
+    {
+      "chapter": 6,
+      "character_id": "vance_harrow",
+      "scene": 4,
+      "set": {
+        "reason": "Vance maintains his 10 HP while bracing the door.",
+        "stats": {
+          "hp": 10,
+          "hp_max": 150
+        }
+      }
+    },
+    {
+      "chapter": 6,
+      "character_id": "unit_734",
+      "scene": 4,
+      "set": {
+        "reason": "Unit 734 maintains its degraded chassis integrity after the firewall bypass.",
+        "stats": {
+          "chassis_integrity": 34
+        }
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 6,
+      "character_id": "rhea_mercer",
+      "invariants_add": [],
+      "persona_updates": [
+        "Rhea formulates a desperate plan to bankrupt the overseer by injecting a corrupted ledger entry."
+      ],
+      "scene": 4
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_administrative_coordinate_chip",
+      "set": {
+        "custodian": "rhea_mercer",
+        "display_name": "Administrative Coordinate Chip",
+        "last_seen": {
+          "chapter": 6,
+          "location": "LOC_RUINED_TOLLBOOTH",
+          "scene": 4
+        },
+        "linked_threads": [
+          "system_debt_trap"
+        ],
+        "name": "Administrative Coordinate Chip",
+        "owner_scope": "character",
+        "state_tags": [
+          "decrypted",
+          "administrative"
+        ],
+        "type": "quest_item"
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Rhea successfully decrypted the administrative hub coordinates and formulated a plan to inject a corrupted ledger entry to bankrupt the overseer."
+    ],
+    "key_events": [
+      "Vance successfully defended the door with 10 HP.",
+      "Rhea decrypted the administrative hub coordinates using the Red-Tier Audit Compliance tag as a bypass.",
+      "Unit 734's chassis integrity remained at a critical 34% during the decryption.",
+      "Rhea retrieved the Administrative Coordinate Chip.",
+      "The party prepared to leave the tollbooth and attack the administrative hub."
+    ],
+    "last_scene": [
+      "Vance held the door against the respawning hounds, his HP critically low.",
+      "Rhea forced Unit 734 to bypass the firewall, risking its chassis integrity to decrypt the coordinates.",
+      "With the decryption complete, Rhea secured the Administrative Coordinate Chip and declared her plan to crash the local node using the stolen data packet."
+    ],
+    "must_stay_true": [
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+      "mechanic: rhea_mercer has active status Active Audit Target",
+      "mechanic: unit_734 has active status Hijacked Chassis",
+      "milestone: overseer_override_triggered = DONE",
+      "milestone: audit_compliance_applied = DONE",
+      "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+      "mechanic: rhea_mercer has active status Hostile Environment Marker",
+      "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+      "mechanic: vance_harrow has active status Hostile Environment Marker",
+      "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+      "mechanic: unit_734 has active status Hostile Environment Marker",
+      "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "mechanic: vance_harrow HP is 10/150",
+      "mechanic: rhea_mercer Stamina is 1/150",
+      "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard])",
+      "milestone: overseer_budget_discovered = DONE",
+      "milestone: administrative_hub_coordinates_acquired = DONE",
+      "inventory: rhea_mercer -> Administrative Coordinate Chip (status=held, container=hand_left)",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+      "milestone: administrative_hub_coordinates_decrypted = DONE"
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_RUINED_TOLLBOOTH",
+    "open_threads": [
+      "system_debt_trap",
+      "party_alliance"
+    ],
+    "recent_facts": [
+      "Rhea successfully decrypted the coordinates to the administrative hub.",
+      "The party formulated a plan to inject a corrupted ledger entry to bankrupt the overseer."
+    ]
+  }
+}

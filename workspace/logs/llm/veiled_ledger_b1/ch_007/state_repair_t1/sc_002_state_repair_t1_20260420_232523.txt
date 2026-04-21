@@ -1,0 +1,244 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "stats": {
+          "hp": 10,
+          "hp_max": 100
+        }
+      }
+    },
+    {
+      "character_id": "unit_734",
+      "set": {
+        "stats": {
+          "chassis_integrity": 34
+        }
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "containers": [
+        {
+          "container": "blazer_pocket_left",
+          "contents": [
+            "ITEM_administrative_coordinate_chip"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "system_inventory",
+          "contents": [
+            "ITEM_raw_data_packet"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "hand_left",
+          "contents": [
+            "ITEM_null_value_token"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "hand_right",
+          "contents": [],
+          "owner": "rhea_mercer"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed"
+        },
+        {
+          "container": "system_inventory",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "hand_left",
+          "item": "ITEM_null_value_token",
+          "status": "held"
+        }
+      ],
+      "persona_updates": [
+        "Rhea sacrificed her gathered junk materials to bypass the sanctum's compliance checks."
+      ]
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "reason": "Consumed by terminal",
+      "remove": [
+        "inventory.ITEM_obsidian_shard",
+        "inventory.ITEM_copper_credits",
+        "inventory.ITEM_cracked_smartphone",
+        "inventory.ITEM_scrap_parchment"
+      ]
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "set": {
+        "custodian": "world",
+        "last_seen": {
+          "chapter": 7,
+          "location": "LOC_SANCTUM_FOYER",
+          "scene": 2
+        },
+        "linked_threads": [],
+        "name": "Obsidian Shard",
+        "owner_scope": "world",
+        "state_tags": [
+          "consumed"
+        ],
+        "type": "material"
+      }
+    },
+    {
+      "item_id": "ITEM_copper_credits",
+      "set": {
+        "custodian": "world",
+        "last_seen": {
+          "chapter": 7,
+          "location": "LOC_SANCTUM_FOYER",
+          "scene": 2
+        },
+        "linked_threads": [],
+        "name": "Copper Credits",
+        "owner_scope": "world",
+        "state_tags": [
+          "untaxed",
+          "consumed"
+        ],
+        "type": "currency"
+      }
+    },
+    {
+      "item_id": "ITEM_cracked_smartphone",
+      "set": {
+        "custodian": "world",
+        "last_seen": {
+          "chapter": 7,
+          "location": "LOC_SANCTUM_FOYER",
+          "scene": 2
+        },
+        "linked_threads": [],
+        "name": "Cracked Smartphone",
+        "owner_scope": "world",
+        "state_tags": [
+          "broken",
+          "consumed"
+        ],
+        "type": "tool"
+      }
+    },
+    {
+      "item_id": "ITEM_scrap_parchment",
+      "set": {
+        "custodian": "world",
+        "last_seen": {
+          "chapter": 7,
+          "location": "LOC_SANCTUM_FOYER",
+          "scene": 2
+        },
+        "linked_threads": [
+          "system_debt_trap"
+        ],
+        "name": "Scrap Parchment",
+        "owner_scope": "world",
+        "state_tags": [
+          "proof",
+          "consumed"
+        ],
+        "type": "material"
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [],
+    "key_events": [
+      "The party was trapped in the sanctum foyer with regenerating guards and lethal compliance grids.",
+      "Vance used his Rebar to defend against the guards, dropping to 10 HP.",
+      "Rhea fed the Obsidian Shard, Copper Credits, Cracked Smartphone, and Scrap Parchment into the terminal to satisfy the inventory audit.",
+      "The compliance check was passed, opening the heavy blast doors to the inner sanctum."
+    ],
+    "last_scene": [
+      "Trapped in the sanctum foyer, Rhea bypassed a lethal laser-grid compliance check by sacrificing the Obsidian Shard and other junk items from her inventory.",
+      "Vance barely survived the onslaught of a regenerating guard, holding it off with his Rebar while Rhea worked the terminal.",
+      "With the compliance check passed, the path to the inner sanctum opened, allowing the party to advance."
+    ],
+    "must_stay_true": [
+      "REMOVE: mechanic: vance_harrow HP is 10/150",
+      "REMOVE: inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard, ITEM_administrative_coordinate_chip])",
+      "mechanic: vance_harrow HP is 10/100",
+      "mechanic: unit_734 Chassis Integrity is 34%",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+      "milestone: compliance_check_bypassed = DONE"
+    ]
+  },
+  "transfer_updates": [
+    {
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "item_id": "ITEM_obsidian_shard",
+      "reason": "Consumed by terminal",
+      "to": {
+        "custodian": "world"
+      }
+    },
+    {
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "item_id": "ITEM_copper_credits",
+      "reason": "Consumed by terminal",
+      "to": {
+        "custodian": "world"
+      }
+    },
+    {
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "item_id": "ITEM_cracked_smartphone",
+      "reason": "Consumed by terminal",
+      "to": {
+        "custodian": "world"
+      }
+    },
+    {
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "item_id": "ITEM_scrap_parchment",
+      "reason": "Consumed by terminal",
+      "to": {
+        "custodian": "world"
+      }
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_SANCTUM_INNER_CORRIDOR",
+    "open_threads": [
+      "rhea_survival",
+      "party_alliance"
+    ]
+  }
+}

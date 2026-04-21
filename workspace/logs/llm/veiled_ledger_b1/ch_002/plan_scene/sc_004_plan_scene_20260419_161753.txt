@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_002_004",
+  "chapter": 2,
+  "scene": 4,
+  "scene_target": "Rhea successfully forces a mob to drop untaxed raw materials by exploiting a collision between environmental damage and loot generation.",
+  "goal": "Herd the scavenger into a deadfall trap and trigger it without dying from stamina-drain HP loss.",
+  "conflict": "Rhea is at 0 Stamina and 1 HP; any misstep or overexertion risks instant death.",
+  "required_callbacks": [],
+  "constraints": [
+    "Must explicitly show Rhea managing her 0 Stamina / 1 HP state while executing the plan.",
+    "Loot dropped by the environment must not trigger a Gathering Tax notification."
+  ],
+  "end_condition": "The scavenger is crushed by debris, dropping untaxed raw materials.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_ASH_CHOKED_FOREST",
+  "location_end_id": "LOC_ASH_CHOKED_FOREST",
+  "location_start_label": "Ash-Choked Forest",
+  "location_end_label": "Ash-Choked Forest",
+  "location_start": "Ash-Choked Forest",
+  "location_end": "Ash-Choked Forest",
+  "handoff_mode": "direct",
+  "constraint_state": "processed",
+  "transition_in_text": "Rhea carefully rises from her resting spot, fighting through Exhaustion to put her physics exploit into motion.",
+  "transition_in_anchors": [
+    "rises",
+    "exhaustion",
+    "physics exploit",
+    "scavenger"
+  ],
+  "seam_score": 90,
+  "seam_resolution": "inline_bridge",
+  "consumes_outcome_from": "2:3",
+  "cast_present": [
+    "Rhea"
+  ],
+  "cast_present_ids": [
+    "char_rhea"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [],
+  "required_in_custody": [
+    "ITEM_makeshift_masonry_bludgeon",
+    "ITEM_ash_fungus",
+    "ITEM_obsidian_shard",
+    "ITEM_cracked_smartphone"
+  ],
+  "required_scene_accessible": [
+    "ITEM_makeshift_masonry_bludgeon"
+  ],
+  "required_visible_on_page": [
+    "ITEM_makeshift_masonry_bludgeon"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "continuous",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "loot"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Stamina",
+    "System Warning",
+    "Loot Drop"
+  ]
+}

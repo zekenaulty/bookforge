@@ -1,0 +1,194 @@
+COMPLIANCE:
+Scene ID: SC_001_005
+Allowed events: Rhea breaks off a piece of the pedestal and holds the raw material.
+Forbidden milestones: starter_cache_discovered = DONE, starter_cache_rejected = DONE
+Current arm-side / inventory facts: Cracked Smartphone (stowed, blazer_pocket_right)
+
+APPEARANCE_CHECK:
+- char_rhea: pale, slender, black hair, messy bob, dark brown eyes, branded wrist, bruised leg
+
+PROSE:
+Rhea stood before the darkened pedestal, her breath pluming in the cold ash wind. The cache was permanently locked, but she was already looking for another way to extract value from the stubborn block of stone. The System had presented her with a digital choice, but it had made the mistake of placing that choice in a physical world. 
+
+[HP: 1/100]
+
+One hit point. A stiff breeze or a bad stumble could theoretically kill her, sending her back to whatever void she'd fallen out of. She needed a weapon. She needed a tool. She dropped to her knees, wincing as the bruised meat of her left leg protested the movement, and began sifting through the debris at the base of the structure. Her fingers closed over a jagged, wedge-shaped piece of black glass. She pulled the Obsidian Shard free from the dirt. It was sharp enough to slice her thumb, drawing a bead of bright crimson. No blue box appeared to claim ownership of the rock.
+
+Perfect. 
+
+She turned her attention back to the pedestal. It was smooth, glowing faintly at the seams, built from some proprietary architectural asset the System used to enforce its rules. But it was still matter. It still occupied space.
+
+Rhea gripped the Obsidian Shard tightly in her left hand. She brought it down hard against the corner of the pedestal's base. 
+
+*Clack.*
+
+The impact vibrated up her arm, jarring her teeth, but the stone didn't shatter. She swung again, putting the meager weight of her shoulders into the strike. Physics didn't require a signature. Physics didn't charge compounding interest.
+
+*Crack.*
+
+A fracture spiderwebbed across the glowing stone. With a final, desperate pry of the obsidian wedge, a piece of the architecture snapped loose and tumbled into the ash. 
+
+Rhea scooped up the Raw Masonry Chunk with her right hand, feeling its latent warmth as she successfully bypassed the contract.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "char_rhea"
+    ],
+    "location": "LOC_TUTORIAL_CRATER_RIDGE",
+    "open_threads": [],
+    "recent_facts": []
+  },
+  "summary_update": {
+    "last_scene": [
+      "Rhea examined the locked Starter Cache pedestal and realized it was made of physical System materials.",
+      "She found an Obsidian Shard in the dirt and used it to chip away at the pedestal's base.",
+      "By breaking off a Raw Masonry Chunk through physical force, she bypassed the System's predatory contract."
+    ],
+    "key_events": [
+      "Rhea searched the debris around the locked pedestal for a tool.",
+      "She discovered and picked up an Obsidian Shard.",
+      "She used the shard to strike the glowing stone of the pedestal.",
+      "She successfully broke off a Raw Masonry Chunk without triggering a System contract."
+    ],
+    "must_stay_true": [
+      "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+      "inventory: char_rhea -> Obsidian Shard (status=held, container=hand_left)",
+      "container: hand_left (owner=char_rhea, contents=[ITEM_obsidian_shard])",
+      "inventory: char_rhea -> Raw Masonry Chunk (status=held, container=hand_right)",
+      "container: hand_right (owner=char_rhea, contents=[ITEM_raw_masonry_chunk])",
+      "mechanic: char_rhea HP is 1/100",
+      "mechanic: char_rhea has active status Tutorial Grace Period",
+      "mechanic: char_rhea has active title Indentured Soul",
+      "mechanic: char_rhea has 100,000 Soul Debt",
+      "injury: char_rhea bruised left leg",
+      "milestone: starter_cache_discovered = DONE",
+      "milestone: starter_cache_rejected = DONE",
+      "milestone: pedestal_chipped = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Rhea realized the locked Starter Cache pedestal was made of physical materials.",
+      "She found an Obsidian Shard and used it to break off a Raw Masonry Chunk, bypassing the System's contract."
+    ]
+  },
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "set": {
+        "name": "Obsidian Shard",
+        "display_name": "Obsidian Shard",
+        "type": "material",
+        "owner_scope": "world",
+        "custodian": "world",
+        "linked_threads": [],
+        "state_tags": [
+          "sharp"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 5,
+          "location": "LOC_TUTORIAL_CRATER_RIDGE"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_raw_masonry_chunk",
+      "set": {
+        "name": "Raw Masonry Chunk",
+        "display_name": "Raw Masonry Chunk",
+        "type": "material",
+        "owner_scope": "world",
+        "custodian": "world",
+        "linked_threads": [],
+        "state_tags": [
+          "warm"
+        ],
+        "last_seen": {
+          "chapter": 1,
+          "scene": 5,
+          "location": "LOC_TUTORIAL_CRATER_RIDGE"
+        }
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "char_rhea"
+      },
+      "reason": "Picked up from the dirt."
+    },
+    {
+      "item_id": "ITEM_raw_masonry_chunk",
+      "from": {
+        "custodian": "world"
+      },
+      "to": {
+        "character_id": "char_rhea"
+      },
+      "reason": "Broken off the pedestal."
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "char_rhea",
+      "chapter": 1,
+      "scene": 5,
+      "inventory": [
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "hand_left",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_raw_masonry_chunk",
+          "container": "hand_right",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_cracked_smartphone"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_obsidian_shard"
+          ]
+        },
+        {
+          "container": "hand_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_raw_masonry_chunk"
+          ]
+        }
+      ],
+      "invariants_add": [
+        "inventory: char_rhea -> Obsidian Shard (status=held, container=hand_left)",
+        "container: hand_left (owner=char_rhea, contents=[ITEM_obsidian_shard])",
+        "inventory: char_rhea -> Raw Masonry Chunk (status=held, container=hand_right)",
+        "container: hand_right (owner=char_rhea, contents=[ITEM_raw_masonry_chunk])",
+        "milestone: pedestal_chipped = DONE"
+      ],
+      "persona_updates": []
+    }
+  ]
+}

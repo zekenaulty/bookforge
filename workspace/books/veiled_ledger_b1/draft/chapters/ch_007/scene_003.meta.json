@@ -1,0 +1,353 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_007_003",
+  "chapter": 7,
+  "scene": 3,
+  "scene_target": "The party breaches the inner office, confronting the overseer directly.",
+  "goal": "Survive the Audit Corridor's automated defenses and breach the final doors.",
+  "conflict": "Automated turrets fire 'cease and desist' bolts, and Vance must tank the barrage with only 2 HP using his rebar as a shield.",
+  "required_callbacks": [
+    "Vance's critical 2 HP state and Heavy Blunt-Force Trauma",
+    "Unit 734's critical system failure imminent state"
+  ],
+  "constraints": [
+    "target_words: 1800"
+  ],
+  "end_condition": "Rhea kicks open the inner office doors, bringing the party face-to-face with the overseer.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_AUDIT_CORRIDOR",
+  "location_end_id": "LOC_OVERSEER_INNER_OFFICE",
+  "location_start_label": "Audit Corridor",
+  "location_end_label": "Overseer's Inner Office",
+  "location_start": "Audit Corridor",
+  "location_end": "Overseer's Inner Office",
+  "handoff_mode": "action_to_confrontation",
+  "constraint_state": "processed",
+  "transition_in_text": "The blast doors open into the Audit Corridor, immediately triggering a barrage of automated 'cease and desist' bolts.",
+  "transition_in_anchors": [
+    "blast_doors",
+    "audit_corridor",
+    "automated_barrage",
+    "cease_and_desist"
+  ],
+  "seam_score": 85,
+  "seam_resolution": "inline_bridge",
+  "consumes_outcome_from": "7:2",
+  "hands_off_to": "7:4",
+  "transition_out_text": "Rhea kicks open the inner office doors, stepping through to confront the overseer directly.",
+  "transition_out_anchors": [
+    "kick_open",
+    "inner_office_doors",
+    "confront",
+    "overseer"
+  ],
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "rhea_survival",
+    "party_alliance"
+  ],
+  "required_in_custody": [
+    "ITEM_rebar",
+    "ITEM_null_value_token"
+  ],
+  "required_scene_accessible": [
+    "ITEM_rebar",
+    "ITEM_null_value_token"
+  ],
+  "required_visible_on_page": [
+    "ITEM_rebar"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "combat_push",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "hp",
+    "chassis_integrity",
+    "durability"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Damage",
+    "Cease and Desist",
+    "Aggro",
+    "Durability"
+  ],
+  "prose_path": "draft/chapters/ch_007/scene_003.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "character_continuity_system_updates": [
+      {
+        "character_id": "vance_harrow",
+        "set": {
+          "reason": "Vance maintained his critical HP and statuses while tanking the turrets, suffering significant durability loss to his Rebar.",
+          "stats": {
+            "hp": 2,
+            "hp_max": 100,
+            "rebar_durability_percent": 60
+          },
+          "resources": {
+            "hp_current": 2
+          },
+          "statuses": [
+            {
+              "active": true,
+              "name": "Heavy Blunt-Force Trauma",
+              "source": "Stamp-Hammer"
+            },
+            {
+              "active": true,
+              "name": "Aggro Target",
+              "source": "Combat Initiation"
+            }
+          ]
+        },
+        "remove": [],
+        "delta": {},
+        "chapter": 7,
+        "scene": 3
+      },
+      {
+        "character_id": "rhea_mercer",
+        "set": {
+          "reason": "Rhea's stamina remains critically low.",
+          "stats": {
+            "stamina": 1,
+            "stamina_max": 150
+          },
+          "resources": {
+            "stamina": 1
+          },
+          "statuses": [
+            {
+              "active": true,
+              "name": "Exhaustion (Severe)",
+              "source": "Low Stamina"
+            }
+          ]
+        },
+        "remove": [],
+        "delta": {},
+        "chapter": 7,
+        "scene": 3
+      },
+      {
+        "character_id": "unit_734",
+        "set": {
+          "reason": "Unit 734 is on the verge of breakdown with 34% chassis integrity.",
+          "stats": {
+            "chassis_integrity": 34
+          },
+          "statuses": [
+            {
+              "active": true,
+              "name": "Critical System Failure Imminent",
+              "source": "Chassis Degradation"
+            }
+          ]
+        },
+        "remove": [],
+        "delta": {},
+        "chapter": 7,
+        "scene": 3
+      }
+    ],
+    "character_updates": [
+      {
+        "character_id": "rhea_mercer",
+        "containers": [
+          {
+            "container": "hand_left",
+            "contents": [
+              "ITEM_null_value_token"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "contents": [
+              "ITEM_administrative_coordinate_chip"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "system_inventory",
+            "contents": [
+              "ITEM_raw_data_packet"
+            ],
+            "owner": "rhea_mercer"
+          }
+        ],
+        "invariants_add": [
+          "milestone: inner_office_breached = DONE"
+        ],
+        "inventory": [
+          {
+            "container": "hand_left",
+            "item": "ITEM_null_value_token",
+            "status": "held"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_administrative_coordinate_chip",
+            "status": "stowed"
+          },
+          {
+            "container": "system_inventory",
+            "item": "ITEM_raw_data_packet",
+            "status": "stowed"
+          }
+        ],
+        "persona_updates": [
+          "Rhea successfully breached the inner office, ready to confront the overseer."
+        ],
+        "chapter": 7,
+        "scene": 3
+      },
+      {
+        "character_id": "vance_harrow",
+        "containers": [
+          {
+            "container": "hand_right",
+            "contents": [
+              "ITEM_rebar"
+            ],
+            "owner": "vance_harrow"
+          }
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "container": "hand_right",
+            "item": "ITEM_rebar",
+            "status": "held"
+          }
+        ],
+        "persona_updates": [
+          "Vance tanked the automated barrage, surviving on pure willpower and 2 HP."
+        ],
+        "chapter": 7,
+        "scene": 3
+      }
+    ],
+    "summary_update": {
+      "chapter_so_far_add": [
+        "The party survived the Audit Corridor's automated defenses, with Vance tanking the lethal barrage at 2 HP.",
+        "Rhea kicked open the inner office doors, initiating the final confrontation with the overseer."
+      ],
+      "key_events": [
+        "The party entered the Audit Corridor and was immediately targeted by automated turrets.",
+        "Vance blocked the incoming bureaucratic bolts with his Rebar, suffering severe durability loss.",
+        "Unit 734 warned of its impending critical system failure.",
+        "Rhea breached the final mahogany doors to confront the overseer."
+      ],
+      "last_scene": [
+        "The party sprinted down the Audit Corridor under heavy fire from automated turrets.",
+        "Vance used his Rebar to tank the 'cease and desist' bolts, surviving on a mere 2 HP.",
+        "Rhea kicked open the inner office doors, bringing them face-to-face with the overseer."
+      ],
+      "must_stay_true": [
+        "mechanic: rhea_mercer Stamina is 1/150",
+        "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+        "milestone: overseer_budget_discovered = DONE",
+        "milestone: administrative_hub_coordinates_acquired = DONE",
+        "milestone: administrative_hub_coordinates_decrypted = DONE",
+        "inventory: rhea_mercer -> Administrative Coordinate Chip (status=stowed, container=blazer_pocket_left)",
+        "milestone: tollbooth_escape_completed = DONE",
+        "inventory: rhea_mercer -> Null-Value Token (status=held, container=hand_left)",
+        "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+        "container: hand_left (owner=rhea_mercer, contents=[ITEM_null_value_token])",
+        "milestone: null_value_token_crafted = DONE",
+        "milestone: sanctum_threshold_reached = DONE",
+        "mechanic: vance_harrow has active status Aggro Target",
+        "mechanic: unit_734 has active status Critical System Failure Imminent",
+        "mechanic: vance_harrow has active status Heavy Blunt-Force Trauma",
+        "milestone: sanctum_foyer_breached = DONE",
+        "milestone: elite_guards_defeated = DONE",
+        "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+        "mechanic: vance_harrow HP is 2/100",
+        "milestone: compliance_checks_bypassed = DONE",
+        "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+        "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+        "mechanic: vance_harrow Rebar Durability is 60%",
+        "milestone: inner_office_breached = DONE"
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "rhea_mercer",
+        "vance_harrow",
+        "unit_734"
+      ],
+      "location": "LOC_OVERSEER_INNER_OFFICE",
+      "open_threads": [
+        "rhea_survival",
+        "party_alliance",
+        "system_debt_trap"
+      ]
+    }
+  },
+  "scene_summary": [
+    "The party sprinted down the Audit Corridor under heavy fire from automated turrets.",
+    "Vance used his Rebar to tank the 'cease and desist' bolts, surviving on a mere 2 HP.",
+    "Rhea kicked open the inner office doors, bringing them face-to-face with the overseer."
+  ],
+  "key_events": [
+    "The party entered the Audit Corridor and was immediately targeted by automated turrets.",
+    "Vance blocked the incoming bureaucratic bolts with his Rebar, suffering severe durability loss.",
+    "Unit 734 warned of its impending critical system failure.",
+    "Rhea breached the final mahogany doors to confront the overseer."
+  ],
+  "must_stay_true": [
+    "mechanic: rhea_mercer Stamina is 1/150",
+    "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+    "milestone: overseer_budget_discovered = DONE",
+    "milestone: administrative_hub_coordinates_acquired = DONE",
+    "milestone: administrative_hub_coordinates_decrypted = DONE",
+    "inventory: rhea_mercer -> Administrative Coordinate Chip (status=stowed, container=blazer_pocket_left)",
+    "milestone: tollbooth_escape_completed = DONE",
+    "inventory: rhea_mercer -> Null-Value Token (status=held, container=hand_left)",
+    "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+    "container: hand_left (owner=rhea_mercer, contents=[ITEM_null_value_token])",
+    "milestone: null_value_token_crafted = DONE",
+    "milestone: sanctum_threshold_reached = DONE",
+    "mechanic: vance_harrow has active status Aggro Target",
+    "mechanic: unit_734 has active status Critical System Failure Imminent",
+    "mechanic: vance_harrow has active status Heavy Blunt-Force Trauma",
+    "milestone: sanctum_foyer_breached = DONE",
+    "milestone: elite_guards_defeated = DONE",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+    "mechanic: vance_harrow HP is 2/100",
+    "milestone: compliance_checks_bypassed = DONE",
+    "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+    "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+    "mechanic: vance_harrow Rebar Durability is 60%",
+    "milestone: inner_office_breached = DONE"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "appearance_check_missing",
+        "message": "APPEARANCE_CHECK block is missing or empty for cast members.",
+        "severity": "warning"
+      }
+    ]
+  },
+  "write_attempts": 2,
+  "updated_at": "2026-04-21T00:37:54Z"
+}

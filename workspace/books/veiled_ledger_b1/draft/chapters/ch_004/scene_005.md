@@ -1,0 +1,31 @@
+Following the physical manifestation of the data stream, the party descended from the Outpost Kiosk into the buried, glowing conduit lines of the Maintenance Trenches.
+
+Vance led the way, gripping his Rebar tightly in his right hand. The rusted iron scraped against the narrow stone walls as they moved, echoing in the damp air. Rhea followed close behind, her heavy Makeshift Masonry Bludgeon resting against her shoulder. She patted her right blazer pocket, ensuring the Scrap Parchment and Charcoal Stick were safely stowed. She needed her left hand free if things went sideways in the dark. 
+
+Unit 734 floated behind them, its drone chassis humming nervously as the blue light of the conduit illuminated the enclosed space. 
+
+A shadow detached itself from the ceiling ahead. A jagged, brass security construct dropped onto the floor, its multiple joints sparking with exposed wires. Its optical sensor flared a harsh, angry red as it locked onto the intruders.
+
+[System Warning: Unauthorized Access Detected. Initiating Purge Protocol.]
+
+Vance stepped forward, swinging the Rebar to deflect the construct's initial lunge. The metal-on-metal impact jarred his arms, and he stumbled backward, gritting his teeth against the shock.
+
+[Vance Harrow HP: 3/100 (Critical)]
+
+"Watch the health pool, Harrow!" Rhea barked, her Stamina ticking down just from the exertion of a quick dash to flank the machine.
+
+[Rhea Mercer Stamina: 25/100]
+
+The construct whirled, its bladed appendages targeting Rhea. Unit 734 hovered near the ceiling, its voice entirely devoid of panic. "Efficiency dropping to thirty-eight. Please conclude this altercation before my battery fails, or I will be forced to bill you for a recharge."
+
+Rhea didn't bother with a standard attack. Her bludgeon was slow, and the construct was fast. Instead, she looked past the brass machine and saw a fractured support strut holding up a section of loose concrete ceiling. She swung her weapon, not at the enemy, but at the weakened pillar beside it. 
+
+The heavy stone impact shuddered through her arms, draining her reserves further.
+
+[Stamina: 20/100]
+
+The ceiling groaned, and a massive slab of concrete collapsed, crushing the brass construct against the stone floor with a deafening crunch.
+
+[Experience Threshold Met. Party XP +45.]
+
+Rhea leaned against her bludgeon, catching her breath as the dust settled. With the security construct defeated, the path deeper into the restricted trenches was clear.

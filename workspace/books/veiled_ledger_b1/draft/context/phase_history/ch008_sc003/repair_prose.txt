@@ -1,0 +1,44 @@
+The vault collapsed behind them with a deafening crack of buckling stone, but the entire sanctum was now actively purging, forcing a desperate sprint through the disintegrating architecture. 
+
+[System Alert: Hard Purge Protocol Initiated.]
+
+The polished marble corridors of the administrative hub weren't just crumbling; they were unspooling. Solid walls fractured into cascading streams of raw, red deletion code. The floor beneath their boots vibrated with the frantic hum of a server wiping its own hard drive. 
+
+Rhea ran. She didn't have the biological currency for it, but she ran anyway. 
+
+[Stamina: 0/150]
+[Status Effect: Exhaustion (Severe) - Movement Speed Reduced by 40%. Pain Receptors Overridden.]
+
+Her lungs burned with a dry, metallic friction, and the singed hair on her bare arms stood on end as static electricity flooded the collapsing hallway. Every step was a negotiation with gravity. The System was violently repoing the environment, and it didn't care if a few unauthorized organic assets were caught in the sweep.
+
+"Keep moving!" Vance roared over the grinding din. He took point, his blistered hands wrapped tightly around his heavy iron Rebar. 
+
+[Warning: Deletion Wave Incoming.]
+
+A sweeping wall of crimson static surged down the intersecting hallway to their left, consuming a row of ornamental pillars and leaving nothing but a void of empty blue gridlines in its wake. Vance didn't slow down. As a massive chunk of ceiling masonry—half stone, half glitching code—plummeted toward them, he swung the Rebar like a baseball bat. 
+
+The iron connected with a jarring crunch, shattering the debris into harmless digital dust. 
+
+[Item: Rebar Durability decreased to 52%.]
+[HP: 45/100]
+
+Vance grunted, shaking off the impact, and kept charging forward. "Don't look at it! Just run!"
+
+Trailing behind them, Unit 734 was faring significantly worse. The drone's smoking chassis vented thick plumes of acrid, black exhaust, its optical lens flickering erratically as it struggled to process the collapsing navigational mesh. 
+
+[Chassis Integrity: 28%]
+[Status: Critical System Failure Imminent.]
+
+"Navigational anchors failing," the drone broadcasted, its synthetic voice clipping. "Physical architecture scrubbing at 88% efficiency. Probability of deletion: statistically absolute."
+
+"I am not getting deleted by a bureaucratic technicality!" Rhea snapped, clutching her side as she forced her legs to pump faster. "Calculate the shortest vector to the exit!"
+
+"Calculating. Turn right."
+
+Vance hooked the corner, his boots skidding on a patch of floor that was rapidly turning translucent. Rhea followed, nearly losing her footing as the ground gave way to an expanse of gray ash. The claustrophobic walls of the sanctum vanished, replaced by the howling wind of the wasteland. 
+
+They burst out of the disintegrating archway, spilling onto the jagged edge of the zone. 
+
+Vance skidded to a halt, raising his Rebar defensively. Rhea stumbled up beside him, her chest heaving as she stared at the sheer drop-off. They had reached the outer boundary, only to find their path blocked. The edge of the frontier zone wasn't just a line in the dirt; it was a towering, impenetrable firewall of cascading red deletion code. 
+
+There was nowhere left to run. They were forced to halt.

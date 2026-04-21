@@ -1,0 +1,49 @@
+Rhea carefully rose from her resting spot, fighting through Exhaustion to put her physics exploit into motion. A few yards away, an ash-crusted scavenger was still scraping at the dry riverbed, its brittle claws oblivious to her presence.
+
+A glowing blue box flickered in her periphery, clinically indifferent to her suffering.
+
+[Warning: Stamina Depleted. Further exertion will consume HP.]
+
+She stared at the numbers.
+
+[HP: 1/100]
+[Stamina: 0/100]
+
+She couldn't afford a single misstep. At one hit point, a stumble, a heavy cough, or a swung weapon was a fatal event. She waited, her lungs burning, leaning against a petrified root until the merciless System ledger finally ticked over.
+
+[Stamina: 1/100]
+
+With agonizing slowness, she slipped the glowing Ash-Fungus into her left blazer pocket, freeing her hand. She crouched lower behind the thick root, her right hand gripping the rough, heavy handle of her Makeshift Masonry Bludgeon. The weapon was crude, heavy, and delightfully unregistered. 
+
+She picked up a loose stone from the ash. The UI flashed an immediate update.
+
+[Stamina: 0/100]
+
+Rhea froze, her heart hammering against her ribs. She didn't throw it. She couldn't. She held her breath, waiting for the invisible timer to cycle again.
+
+[Stamina: 1/100]
+
+She hurled the stone. It clattered against the jagged rocks near the tree line. The scavenger hissed, its brittle body pivoting toward the sound. It scurried away from the riverbed, moving directly beneath a cluster of glowing fungus and a massive, precariously balanced petrified branch.
+
+Rhea crept forward. Every step was calculated to avoid the System's exertion threshold. She positioned herself next to the petrified tree's trunk. The scavenger chittered right under the deadfall.
+
+She didn't have the stamina to swing the Makeshift Masonry Bludgeon. A full-force attack would trigger a combat exertion penalty, drain her last HP, and kill her instantly. Instead, she lifted the heavy masonry chunk just enough to let gravity do the work.
+
+[Stamina: 0/100]
+[Warning: Exertion threshold impending.]
+
+She let go of the tension in her arm, guiding the bludgeon's heavy head and letting its sheer, unbranded mass fall forward like a pendulum. 
+
+The bludgeon slammed into the brittle trunk. 
+
+Physics took over. The petrified wood cracked. The vibration traveled upward, snapping the massive dead branch loose. It plummeted, striking the scavenger with a sickening crunch and pinning the creature to the ash. A cloud of gray dust plumed outward. Splintered wood and chunks of glowing fungus rained down around the crushed mob.
+
+[Scavenger Defeated. +15 Experience Points.]
+
+Rhea squeezed her eyes shut, waiting for the blue flash of a Gathering Tax. 
+
+Nothing happened. 
+
+The System didn't register the fallen fungus and wood as a harvested resource. Because she hadn't actively gathered them, they were just environmental debris, knocked loose by a physical collision.
+
+Panting heavily, Rhea stood over the crushed scavenger, staring down at the pile of glowing fungus and splintered wood that the System registered as untaxed environmental debris.

@@ -1,0 +1,394 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_005_002",
+  "chapter": 5,
+  "scene": 2,
+  "scene_target": "Rhea submits the grievance, triggering a System freeze and audit state.",
+  "goal": "Execute the submission and survive the immediate systemic backlash.",
+  "conflict": "The local node attempts to reject the audit, resulting in environmental hazards and lockdowns.",
+  "required_callbacks": [],
+  "constraints": [
+    "target_words: 1800"
+  ],
+  "end_condition": "The environment shifts into an active audit state with warning klaxons blaring.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_MAINTENANCE_TRENCHES",
+  "location_end_id": "LOC_MAINTENANCE_TRENCHES",
+  "location_start_label": "Maintenance Trenches",
+  "location_end_label": "Maintenance Trenches",
+  "location_start": "Maintenance Trenches",
+  "location_end": "Maintenance Trenches",
+  "handoff_mode": "direct",
+  "constraint_state": "processed",
+  "transition_in_text": "With the grievance formatted, Rhea executes the final submission command at the terminal.",
+  "transition_in_anchors": [
+    "grievance formatted",
+    "submission command",
+    "terminal"
+  ],
+  "transition_out_text": "The terminal locks down as the system initiates an automated freeze, plunging the trenches into an active audit state.",
+  "transition_out_anchors": [
+    "terminal locks down",
+    "automated freeze",
+    "active audit state"
+  ],
+  "seam_score": 90,
+  "seam_resolution": "inline_bridge",
+  "consumes_outcome_from": "5:1",
+  "hands_off_to": "5:3",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "system_debt_trap",
+    "rhea_survival"
+  ],
+  "required_in_custody": [
+    "ITEM_scrap_parchment",
+    "ITEM_charcoal_stick",
+    "ITEM_raw_data_packet"
+  ],
+  "required_scene_accessible": [
+    "ITEM_scrap_parchment",
+    "ITEM_charcoal_stick",
+    "ITEM_raw_data_packet"
+  ],
+  "required_visible_on_page": [
+    "ITEM_scrap_parchment"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "direct_continuation",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "statuses",
+    "system_audit_flag",
+    "system_overlay_integrity"
+  ],
+  "ui_mechanics_expected": [
+    "System Notification",
+    "Audit State",
+    "Asset Freeze"
+  ],
+  "prose_path": "draft/chapters/ch_005/scene_002.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "summary_update": {
+      "last_scene": [
+        "Rhea submitted the metaphysical grievance using the brass terminal.",
+        "The system acknowledged the discrepancy and initiated an automated asset freeze.",
+        "The Maintenance Trenches locked down, entering an active audit state with blaring klaxons."
+      ],
+      "key_events": [
+        "Rhea executed the final submission command for the grievance.",
+        "The local node identified the undocumented maintenance allocation.",
+        "An automated asset freeze was triggered, locking down the Maintenance Trenches.",
+        "The environment shifted into an active audit state."
+      ],
+      "must_stay_true": [
+        "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+        "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+        "mechanic: vance_harrow HP is 3/100",
+        "inventory: vance_harrow -> Rebar (status=stowed, container=belt_loop)",
+        "container: belt_loop (owner=vance_harrow, contents=[ITEM_rebar])",
+        "container: hand_right (owner=vance_harrow, contents=[])",
+        "mechanic: rhea_mercer Stamina is 2/100",
+        "mechanic: unit_734 Efficiency is 12",
+        "inventory: rhea_mercer -> Raw Data Packet (status=stowed, container=system_inventory)",
+        "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+        "mechanic: rhea_mercer has active status Soul-Bound Liability: Raw Data Packet",
+        "mechanic: vance_harrow has active status Soul-Bound Liability: Raw Data Packet",
+        "mechanic: unit_734 has active status Soul-Bound Liability: Raw Data Packet",
+        "milestone: data_packet_bound = DONE",
+        "inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+        "inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_right)",
+        "container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment])",
+        "container: hand_right (owner=rhea_mercer, contents=[ITEM_charcoal_stick])",
+        "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+        "milestone: grievance_formatted = DONE",
+        "milestone: grievance_submitted = DONE"
+      ],
+      "chapter_so_far_add": [
+        "Rhea successfully submitted the grievance, triggering an automated System freeze and plunging the local node into an active audit state."
+      ]
+    },
+    "character_updates": [
+      {
+        "character_id": "rhea_mercer",
+        "scene": 2,
+        "chapter": 5,
+        "persona_updates": [],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "container": "system_inventory",
+            "item": "ITEM_raw_data_packet",
+            "status": "stowed"
+          },
+          {
+            "container": "hand_left",
+            "item": "ITEM_scrap_parchment",
+            "status": "held"
+          },
+          {
+            "container": "hand_right",
+            "item": "ITEM_charcoal_stick",
+            "status": "held"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_copper_credits",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_cracked_smartphone",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_scavenger_carapaces",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_obsidian_shard",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_ash_fungus",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_severed_ash_boar_tusk",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "system_inventory",
+            "contents": [
+              "ITEM_raw_data_packet"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "hand_left",
+            "contents": [
+              "ITEM_scrap_parchment"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "hand_right",
+            "contents": [
+              "ITEM_charcoal_stick"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "contents": [
+              "ITEM_cracked_smartphone",
+              "ITEM_copper_credits"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "contents": [
+              "ITEM_scavenger_carapaces",
+              "ITEM_obsidian_shard",
+              "ITEM_ash_fungus",
+              "ITEM_severed_ash_boar_tusk"
+            ],
+            "owner": "rhea_mercer"
+          }
+        ]
+      }
+    ],
+    "character_continuity_system_updates": [
+      {
+        "character_id": "rhea_mercer",
+        "scene": 2,
+        "chapter": 5,
+        "set": {
+          "reason": "Node entered active audit state.",
+          "statuses": [
+            {
+              "active": true,
+              "name": "Exhaustion (Severe)",
+              "source": "Low Stamina"
+            },
+            {
+              "active": true,
+              "name": "Party Leader",
+              "source": "Custom Party Contract"
+            },
+            {
+              "active": true,
+              "name": "Mutual Assured Destruction",
+              "source": "Custom Party Contract"
+            },
+            {
+              "active": true,
+              "name": "Soul-Bound Liability: Raw Data Packet",
+              "source": "System Exploit"
+            },
+            {
+              "active": true,
+              "name": "Active Audit Target",
+              "source": "System Override"
+            }
+          ]
+        },
+        "delta": {},
+        "remove": []
+      },
+      {
+        "character_id": "vance_harrow",
+        "scene": 2,
+        "chapter": 5,
+        "set": {
+          "reason": "Node entered active audit state.",
+          "statuses": [
+            {
+              "active": true,
+              "name": "Severe Burns",
+              "source": "Cooling Vents"
+            },
+            {
+              "active": true,
+              "name": "Party Member",
+              "source": "Custom Party Contract"
+            },
+            {
+              "active": true,
+              "name": "Mutual Assured Destruction",
+              "source": "Custom Party Contract"
+            },
+            {
+              "active": true,
+              "name": "Soul-Bound Liability: Raw Data Packet",
+              "source": "System Exploit"
+            },
+            {
+              "active": true,
+              "name": "Active Audit Target",
+              "source": "System Override"
+            }
+          ]
+        },
+        "delta": {},
+        "remove": []
+      },
+      {
+        "character_id": "unit_734",
+        "scene": 2,
+        "chapter": 5,
+        "set": {
+          "reason": "Node entered active audit state.",
+          "statuses": [
+            {
+              "active": true,
+              "name": "Party Member",
+              "source": "Custom Party Contract"
+            },
+            {
+              "active": true,
+              "name": "Mutual Assured Destruction",
+              "source": "Custom Party Contract"
+            },
+            {
+              "active": true,
+              "name": "Soul-Bound Liability: Raw Data Packet",
+              "source": "System Exploit"
+            },
+            {
+              "active": true,
+              "name": "Active Audit Target",
+              "source": "System Override"
+            }
+          ]
+        },
+        "delta": {},
+        "remove": []
+      }
+    ],
+    "global_continuity_system_updates": [
+      {
+        "set": {
+          "system_audit_flag": "triggered",
+          "system_overlay_integrity": 88
+        },
+        "reason": "Grievance submitted, triggering automated asset freeze."
+      }
+    ],
+    "world_updates": {
+      "cast_present": [
+        "rhea_mercer",
+        "vance_harrow",
+        "unit_734"
+      ],
+      "location": "LOC_MAINTENANCE_TRENCHES",
+      "open_threads": [
+        "system_debt_trap",
+        "rhea_survival"
+      ]
+    }
+  },
+  "scene_summary": [
+    "Rhea submitted the metaphysical grievance using the brass terminal.",
+    "The system acknowledged the discrepancy and initiated an automated asset freeze.",
+    "The Maintenance Trenches locked down, entering an active audit state with blaring klaxons."
+  ],
+  "key_events": [
+    "Rhea executed the final submission command for the grievance.",
+    "The local node identified the undocumented maintenance allocation.",
+    "An automated asset freeze was triggered, locking down the Maintenance Trenches.",
+    "The environment shifted into an active audit state."
+  ],
+  "must_stay_true": [
+    "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+    "mechanic: vance_harrow HP is 3/100",
+    "inventory: vance_harrow -> Rebar (status=stowed, container=belt_loop)",
+    "container: belt_loop (owner=vance_harrow, contents=[ITEM_rebar])",
+    "container: hand_right (owner=vance_harrow, contents=[])",
+    "mechanic: rhea_mercer Stamina is 2/100",
+    "mechanic: unit_734 Efficiency is 12",
+    "inventory: rhea_mercer -> Raw Data Packet (status=stowed, container=system_inventory)",
+    "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+    "mechanic: rhea_mercer has active status Soul-Bound Liability: Raw Data Packet",
+    "mechanic: vance_harrow has active status Soul-Bound Liability: Raw Data Packet",
+    "mechanic: unit_734 has active status Soul-Bound Liability: Raw Data Packet",
+    "milestone: data_packet_bound = DONE",
+    "inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+    "inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_right)",
+    "container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment])",
+    "container: hand_right (owner=rhea_mercer, contents=[ITEM_charcoal_stick])",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "milestone: grievance_formatted = DONE",
+    "milestone: grievance_submitted = DONE"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": []
+  },
+  "write_attempts": 3,
+  "updated_at": "2026-04-20T21:36:28Z"
+}

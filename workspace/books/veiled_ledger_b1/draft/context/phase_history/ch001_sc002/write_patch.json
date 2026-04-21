@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "char_rhea"
+    ],
+    "location": "LOC_TUTORIAL_WASTELAND_DROP_ZONE"
+  },
+  "character_updates": [
+    {
+      "character_id": "char_rhea",
+      "chapter": 1,
+      "scene": 2,
+      "inventory": [
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_right",
+          "owner": "char_rhea",
+          "contents": [
+            "ITEM_cracked_smartphone"
+          ]
+        }
+      ],
+      "appearance_updates": {
+        "set": {
+          "marks_add": [
+            {
+              "name": "Bruised Left Leg",
+              "location": "left leg",
+              "durability": "durable"
+            }
+          ]
+        },
+        "reason": "Leg was pinned under heavy obsidian debris."
+      },
+      "invariants_add": [],
+      "persona_updates": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "char_rhea",
+      "remove": [
+        "statuses[]=Pinned"
+      ],
+      "delta": {
+        "stats": {
+          "stamina": {
+            "current": -1
+          }
+        }
+      },
+      "set": {
+        "reason": "Escaped the debris and used stamina to roll away."
+      },
+      "chapter": 1,
+      "scene": 2
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Rhea woke up pinned under obsidian debris, her vision blocked by a glowing System notification demanding she accept her Indenture Status.",
+      "Facing imminent death from passive heat damage, she read the fine print and found a hidden option to dismiss the predatory contract.",
+      "Clearing her vision just in time, she rolled away from a collapsing rock pillar, surviving the trap with exactly 1 HP."
+    ],
+    "key_events": [
+      "Rhea was trapped under obsidian debris with a System prompt blocking her view.",
+      "A passive heat damage timer threatened to drain her final hit point in 12 seconds.",
+      "Rhea refused the default terms and found a hidden 'Dismiss' button in the fine print.",
+      "Dismissing the prompt canceled the environmental damage and cleared her vision.",
+      "Rhea rolled away from a collapsing rock pillar, freeing her trapped leg and removing the Pinned status."
+    ],
+    "must_stay_true": [
+      "REMOVE: injury: char_rhea pinned under heavy obsidian debris",
+      "REMOVE: mechanic: char_rhea has active status Pinned",
+      "inventory: char_rhea -> Cracked Smartphone (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=char_rhea, contents=[ITEM_cracked_smartphone])",
+      "injury: char_rhea bruised left leg",
+      "mechanic: char_rhea HP is 1/100",
+      "mechanic: char_rhea has active status Tutorial Grace Period",
+      "mechanic: char_rhea has active title Indentured Soul",
+      "mechanic: char_rhea has 100,000 Soul Debt"
+    ],
+    "chapter_so_far_add": []
+  }
+}

@@ -1,0 +1,251 @@
+COMPLIANCE:
+Scene ID: SC_006_007
+Allowed events: The party arrives at the sanctum entrance, Vance draws aggro at 10 HP, Rhea prepares the Null-Value Token.
+Forbidden milestones: null_value_token_crafted (already DONE), overseer_budget_discovered (already DONE).
+
+Current arm-side / inventory facts: 
+- Vance holds Rebar in right hand.
+- Rhea holds Null-Value Token in left hand.
+
+Durable changes committed: 
+- Added milestone: sanctum_threshold_reached = DONE.
+- Added status: Aggro Target to Vance.
+
+APPEARANCE_CHECK:
+- rhea_mercer: singed arm hair
+- vance_harrow: blistered hands
+- unit_734: smoking chassis
+
+PROSE:
+Rhea clutched the Null-Value Token in her left hand as the party slipped out of the jagged outskirts, their boots crunching softly until they reached the polished marble steps of the sanctum entrance, where two towering, gold-plated guards stood watch. The token felt impossibly heavy, a localized void of light and logic resting against her palm.
+
+[Stamina: 1/150]
+[Status Effect: Exhaustion (Severe) - Movement speed reduced by 90%.]
+
+Every breath felt like inhaling ground glass. She leaned against a basalt pillar, her singed arm hair brushing the rough stone. Beside her, Vance tightened his grip on his rusted Rebar. His heavily blistered hands bled sluggishly over the iron, a testament to the brutal attrition of the last hour.
+
+[HP: 10/150]
+[Status Effect: Audit Compliance (Red-Tier) active.]
+
+"I step up, they look at me," Vance muttered, his voice barely a rasp. "You do the math."
+
+Behind them, Unit 734 let out a metallic wheeze. Plumes of thick gray exhaust vented from its smoking chassis, the drone struggling to remain hovering.
+
+[Chassis Integrity: 34%]
+[Warning: Critical Failure Imminent.]
+
+"Just keep them focused on you," Rhea said, her voice shaking. "If they scan my inventory before I trigger the exploit, the node will delete us both."
+
+The elite bureaucratic guards were perfectly symmetrical, their gold-plated armor etched with scrolling ledgers of System law. They held halberds that hummed with administrative violence.
+
+Vance didn't hesitate. He rolled his shoulders, stepped out from behind the pillar, and slammed the Rebar against the marble stairs. The sharp, metallic crack echoed across the courtyard.
+
+Both guards snapped their featureless visors toward him.
+
+[Aggro Generated: Vance Harrow.]
+[Threat Assessment: Hostile. Lethal Force Authorized.]
+
+The air pressure dropped as the guards raised their weapons, their targeting lasers painting Vance's chest. He planted his feet at the threshold, drawing their full aggro, while Rhea stepped out from the shadows, raising the token for the final breach.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_ADMINISTRATIVE_SANCTUM_ENTRANCE",
+    "open_threads": [
+      "party_alliance",
+      "system_debt_trap"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "The party arrived at the sanctum entrance. Vance drew the guards' aggro while surviving on 10 HP, allowing Rhea to position herself with the Null-Value Token for the final breach."
+    ],
+    "key_events": [
+      "The party transitioned from the outskirts to the sanctum entrance.",
+      "Vance used his Rebar to draw the aggro of the elite guards.",
+      "Rhea prepared the Null-Value Token to breach the sanctum."
+    ],
+    "must_stay_true": [
+      "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+      "mechanic: vance_harrow has active status Hostile Environment Marker",
+      "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+      "mechanic: unit_734 has active status Hostile Environment Marker",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "mechanic: vance_harrow HP is 10/150",
+      "mechanic: rhea_mercer Stamina is 1/150",
+      "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+      "milestone: overseer_budget_discovered = DONE",
+      "milestone: administrative_hub_coordinates_acquired = DONE",
+      "milestone: administrative_hub_coordinates_decrypted = DONE",
+      "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Administrative Coordinate Chip (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard, ITEM_administrative_coordinate_chip])",
+      "milestone: tollbooth_escape_completed = DONE",
+      "inventory: rhea_mercer -> Null-Value Token (status=held, container=hand_left)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+      "container: hand_left (owner=rhea_mercer, contents=[ITEM_null_value_token])",
+      "milestone: null_value_token_crafted = DONE",
+      "milestone: sanctum_threshold_reached = DONE",
+      "mechanic: vance_harrow has active status Aggro Target"
+    ],
+    "chapter_so_far_add": [
+      "At the sanctum entrance, Vance drew the aggro of the elite guards, giving Rhea the opening she needed to deploy the Null-Value Token."
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 6,
+      "scene": 7,
+      "persona_updates": [
+        "Rhea is completely exhausted but resolute, trusting Vance to hold the line while she executes the final exploit."
+      ],
+      "inventory": [
+        {
+          "item": "ITEM_administrative_coordinate_chip",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_raw_data_packet",
+          "container": "system_inventory",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_null_value_token",
+          "container": "hand_left",
+          "status": "held"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_obsidian_shard",
+            "ITEM_administrative_coordinate_chip"
+          ]
+        },
+        {
+          "container": "system_inventory",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_raw_data_packet"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_null_value_token"
+          ]
+        }
+      ],
+      "invariants_add": [
+        "mechanic: rhea_mercer Stamina is 1/150",
+        "mechanic: rhea_mercer has active status Exhaustion (Severe)"
+      ]
+    },
+    {
+      "character_id": "vance_harrow",
+      "chapter": 6,
+      "scene": 7,
+      "persona_updates": [
+        "Vance accepts his role as the meat shield, fully aware that drawing aggro at 10 HP is a near-suicidal gamble."
+      ],
+      "inventory": [
+        {
+          "item": "ITEM_rebar",
+          "container": "hand_right",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_copper_credits_vance",
+          "container": "torn_pocket",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_rebar"
+          ]
+        },
+        {
+          "container": "torn_pocket",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_copper_credits_vance"
+          ]
+        }
+      ],
+      "invariants_add": [
+        "mechanic: vance_harrow HP is 10/150",
+        "mechanic: vance_harrow has active status Aggro Target"
+      ]
+    },
+    {
+      "character_id": "unit_734",
+      "chapter": 6,
+      "scene": 7,
+      "persona_updates": [
+        "Unit 734 is on the verge of critical failure, its chassis heavily damaged from the sustained systemic abuse."
+      ],
+      "inventory": [],
+      "containers": [],
+      "invariants_add": []
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "stats": {
+          "stamina": 1,
+          "stamina_max": 150
+        }
+      },
+      "reason": "Rhea's stamina remains critically low due to severe exhaustion."
+    },
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "stats": {
+          "hp": 10,
+          "hp_max": 150
+        },
+        "statuses": [
+          {
+            "name": "Aggro Target",
+            "active": true,
+            "source": "Combat Initiation"
+          }
+        ]
+      },
+      "reason": "Vance generated aggro against the elite guards while at 10 HP."
+    },
+    {
+      "character_id": "unit_734",
+      "set": {
+        "stats": {
+          "chassis_integrity": 34
+        }
+      },
+      "reason": "Unit 734's chassis is smoking and venting exhaust."
+    }
+  ]
+}

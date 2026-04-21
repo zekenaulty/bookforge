@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_ASH_THICKETS",
+    "open_threads": [
+      "rhea_survival",
+      "party_alliance"
+    ]
+  },
+  "summary_update": {
+    "last_scene": [
+      "The party completed a gathering quest in the Ash Thickets.",
+      "Rhea discovered a discrepancy between the System's stated base rewards and the actual payout.",
+      "She calculated a silent 14.3% deficit in both XP and loot, indicating a systemic skim."
+    ],
+    "key_events": [
+      "The party defeated an ash-boar during a standard gathering quest.",
+      "Rhea obtained a Severed Ash-Boar Tusk and 60 Copper Credits.",
+      "Vance also received 60 Copper Credits.",
+      "Rhea compared the actual payout to the raw System Formulas.",
+      "She identified a hidden 14.3% skim on all quest rewards."
+    ],
+    "must_stay_true": [
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus])",
+      "REMOVE: mechanic: rhea_mercer has 11 Copper Credits",
+      "REMOVE: mechanic: vance_harrow has 5 Copper Credits",
+      "REMOVE: mechanic: rhea_mercer Stamina is 38/100",
+      "milestone: custom_liability_contract_signed = DONE",
+      "milestone: vermin_control_completed = DONE",
+      "mechanic: rhea_mercer has active status Mutual Assured Destruction",
+      "mechanic: vance_harrow has active status Mutual Assured Destruction",
+      "mechanic: unit_734 has active status Mutual Assured Destruction",
+      "mechanic: vance_harrow has active status Party Member",
+      "mechanic: unit_734 has active status Party Member",
+      "mechanic: rhea_mercer has 71 Copper Credits",
+      "mechanic: vance_harrow has 65 Copper Credits",
+      "mechanic: rhea_mercer Stamina is 30/100",
+      "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Ash Fungus (status=stowed, container=blazer_pocket_left)",
+      "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+      "inventory: rhea_mercer -> Copper Credits (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+      "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])"
+    ],
+    "chapter_so_far_add": [
+      "The party completed a gathering quest in the Ash Thickets, where Rhea discovered a mathematical discrepancy in the System's payouts.",
+      "She identified a hidden 14.3% skim on all XP and loot yields, setting up an investigation into the local node's routing."
+    ]
+  },
+  "character_continuity_system_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "copper_credits": 71,
+        "xp": 857
+      },
+      "delta": {
+        "resources": {
+          "stamina": -8
+        }
+      },
+      "reason": "Quest completion rewards and stamina drain"
+    },
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "copper_credits": 65,
+        "xp": 857
+      },
+      "reason": "Quest completion rewards"
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_severed_ash_boar_tusk",
+      "set": {
+        "name": "Severed Ash-Boar Tusk",
+        "display_name": "Severed Ash-Boar Tusk",
+        "type": "material",
+        "owner_scope": "character",
+        "custodian": "rhea_mercer",
+        "linked_threads": [
+          "rhea_survival"
+        ],
+        "state_tags": [
+          "loot"
+        ],
+        "last_seen": {
+          "chapter": 4,
+          "scene": 1,
+          "location": "LOC_ASH_THICKETS"
+        }
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 4,
+      "scene": 1,
+      "inventory": [
+        {
+          "item": "ITEM_makeshift_masonry_bludgeon",
+          "container": "hand_right",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_copper_credits",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_scavenger_carapaces",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_ash_fungus",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_severed_ash_boar_tusk",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_makeshift_masonry_bludgeon"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": []
+        },
+        {
+          "container": "blazer_pocket_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_cracked_smartphone",
+            "ITEM_copper_credits"
+          ]
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_scavenger_carapaces",
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus",
+            "ITEM_severed_ash_boar_tusk"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": []
+    }
+  ]
+}

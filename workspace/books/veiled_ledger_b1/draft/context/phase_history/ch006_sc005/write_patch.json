@@ -1,0 +1,258 @@
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "location": "LOC_ASH_WASTES",
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "open_threads": [
+      "rhea_survival",
+      "party_alliance",
+      "system_debt_trap"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 6,
+      "scene": 5,
+      "inventory": [
+        {
+          "item": "ITEM_administrative_coordinate_chip",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_raw_data_packet",
+          "container": "system_inventory",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_heavy_iron_ingot",
+          "container": "system_inventory",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_crystallized_experience",
+          "container": "system_inventory",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_scrap_parchment",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_charcoal_stick",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_cracked_smartphone",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_copper_credits",
+          "container": "blazer_pocket_right",
+          "status": "stowed"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "container": "blazer_pocket_left",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_obsidian_shard",
+            "ITEM_administrative_coordinate_chip"
+          ]
+        },
+        {
+          "container": "system_inventory",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_raw_data_packet",
+            "ITEM_heavy_iron_ingot",
+            "ITEM_crystallized_experience"
+          ]
+        },
+        {
+          "container": "blazer_pocket_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_scrap_parchment",
+            "ITEM_charcoal_stick",
+            "ITEM_cracked_smartphone",
+            "ITEM_copper_credits"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": []
+        },
+        {
+          "container": "hand_right",
+          "owner": "rhea_mercer",
+          "contents": []
+        }
+      ],
+      "invariants_add": [
+        "inventory: rhea_mercer -> Administrative Coordinate Chip (status=stowed, container=blazer_pocket_left)",
+        "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard, ITEM_administrative_coordinate_chip])"
+      ],
+      "persona_updates": [
+        "Rhea successfully utilized a physics and pathing glitch to bypass an impossible combat encounter."
+      ]
+    },
+    {
+      "character_id": "vance_harrow",
+      "chapter": 6,
+      "scene": 5,
+      "inventory": [
+        {
+          "item": "ITEM_rebar",
+          "container": "hand_right",
+          "status": "held"
+        },
+        {
+          "item": "ITEM_copper_credits_vance",
+          "container": "torn_pocket",
+          "status": "stowed"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_rebar"
+          ]
+        },
+        {
+          "container": "torn_pocket",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_copper_credits_vance"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": [
+        "Vance narrowly survived the tollbooth siege and trusts Rhea's exploit tactics."
+      ]
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "delta": {
+        "resources": {
+          "stamina": 0
+        }
+      },
+      "remove": [],
+      "set": {
+        "reason": "Stamina remains at 1."
+      },
+      "chapter": 6,
+      "scene": 5
+    },
+    {
+      "character_id": "vance_harrow",
+      "delta": {
+        "resources": {
+          "hp_current": 0
+        }
+      },
+      "remove": [],
+      "set": {
+        "reason": "HP remains at 10."
+      },
+      "chapter": 6,
+      "scene": 5
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "inventory.ITEM_administrative_coordinate_chip": {
+          "status": "stowed",
+          "container": "blazer_pocket_left"
+        }
+      },
+      "reason": "Stowed the chip to run."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Rhea used a physics exploit, jamming Unit 734 into the tollbooth door to break the hounds' pathing AI.",
+      "Vance dropped the barricade, and the party slipped past the glitched enemies.",
+      "The party successfully broke out of the tollbooth and sprinted into the Ash Wastes."
+    ],
+    "key_events": [
+      "Vance held the door at 10 HP while Rhea formulated an escape plan.",
+      "Rhea realized the hounds, as administrative constructs, could not damage Unit 734 due to friendly-fire restrictions.",
+      "Rhea shoved Unit 734 into the doorway, causing a collision geometry error that froze the debt hounds in place.",
+      "Rhea stowed the Administrative Coordinate Chip and the party fled.",
+      "The party sprinted into the Ash Wastes, escaping the immediate mob threat."
+    ],
+    "must_stay_true": [
+      "milestone: overseer_override_triggered = DONE",
+      "milestone: audit_compliance_applied = DONE",
+      "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+      "mechanic: rhea_mercer has active status Hostile Environment Marker",
+      "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+      "mechanic: vance_harrow has active status Hostile Environment Marker",
+      "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+      "mechanic: unit_734 has active status Hostile Environment Marker",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "mechanic: vance_harrow HP is 10/150",
+      "mechanic: rhea_mercer Stamina is 1/150",
+      "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+      "milestone: overseer_budget_discovered = DONE",
+      "milestone: administrative_hub_coordinates_acquired = DONE",
+      "milestone: administrative_hub_coordinates_decrypted = DONE",
+      "REMOVE: inventory: rhea_mercer -> Administrative Coordinate Chip (status=held, container=hand_left)",
+      "REMOVE: container: hand_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard])",
+      "inventory: rhea_mercer -> Administrative Coordinate Chip (status=stowed, container=blazer_pocket_left)",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard, ITEM_administrative_coordinate_chip])",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "milestone: tollbooth_escape_completed = DONE"
+    ],
+    "chapter_so_far_add": [
+      "Trapped in a ruined tollbooth, Rhea exploited the System's pathing logic by using Unit 734 as an invincible roadblock, allowing them to escape into the Ash Wastes."
+    ]
+  },
+  "_appearance_check": {
+    "rhea_mercer": [
+      "singed",
+      "hair",
+      "unadorned",
+      "bare",
+      "forearms"
+    ],
+    "vance_harrow": [
+      "blistered",
+      "hands",
+      "severe",
+      "burns"
+    ],
+    "unit_734": [
+      "smoking",
+      "chassis",
+      "mechanical",
+      "construct"
+    ]
+  }
+}

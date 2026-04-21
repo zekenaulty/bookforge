@@ -1,0 +1,438 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_006_001",
+  "chapter": 6,
+  "scene": 1,
+  "scene_target": "The party survives the initial ambush but loses several valuable consumables to the debt tethers.",
+  "goal": "Survive the initial wave of Debt Collectors and protect core assets.",
+  "conflict": "System-spawned mobs bypass standard damage to drain HP and inventory items, forcing physical intervention.",
+  "required_callbacks": [],
+  "constraints": [],
+  "end_condition": "The party survives the initial ambush but loses several valuable consumables to the debt tethers.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_OUTPOST_SURFACE",
+  "location_end_id": "LOC_OUTPOST_SURFACE",
+  "location_start_label": "Outpost Surface",
+  "location_end_label": "Outpost Surface",
+  "location_start": "Outpost Surface",
+  "location_end": "Outpost Surface",
+  "handoff_mode": "direct_continuation",
+  "constraint_state": "processed",
+  "transition_in_text": "Still reeling from the overseer's red-tier warning, Rhea and Vance are immediately ambushed by 'Debt Collectors'.",
+  "transition_in_anchors": [
+    "reeling",
+    "red-tier warning",
+    "ambush",
+    "debt collectors"
+  ],
+  "transition_out_text": "The party survives the initial ambush but loses several valuable consumables to the debt tethers, preparing to flee.",
+  "transition_out_anchors": [
+    "survives",
+    "ambush",
+    "loses consumables",
+    "debt tethers"
+  ],
+  "consumes_outcome_from": "5:8",
+  "hands_off_to": "6:2",
+  "seam_score": 90,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "rhea_survival",
+    "system_debt_trap"
+  ],
+  "required_in_custody": [
+    "ITEM_raw_data_packet",
+    "ITEM_rebar"
+  ],
+  "required_scene_accessible": [
+    "ITEM_rebar"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "combat_initiation",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "hp",
+    "inventory",
+    "statuses"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Stamina",
+    "Inventory Update",
+    "System Alert"
+  ],
+  "prose_path": "draft/chapters/ch_006/scene_001.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "summary_update": {
+      "chapter_so_far_add": [
+        "The party was ambushed by System-spawned Debt Collectors.",
+        "The hounds bypassed standard damage, using glowing tethers to drain HP and Stamina directly.",
+        "Rhea used her physical strength to resist the tether, causing the System to recalculate and target her inventory instead.",
+        "The debt tethers seized Rhea's Ash Fungus and Severed Ash-Boar Tusk before Vance crushed the hound."
+      ],
+      "key_events": [
+        "The party was ambushed by System-spawned Debt Collectors.",
+        "The hounds bypassed standard damage, using glowing tethers to drain HP and Stamina directly.",
+        "Rhea used her physical strength to resist the tether, causing the System to recalculate and target her inventory instead.",
+        "The debt tethers seized Rhea's Ash Fungus and Severed Ash-Boar Tusk before Vance crushed the hound."
+      ],
+      "last_scene": [
+        "Still reeling from the overseer's red-tier warning, Rhea and Vance were immediately ambushed by wire-frame hounds identified as Debt Collectors.",
+        "The hounds bypassed standard damage, using glowing tethers to drain Vance's HP and Rhea's Stamina directly.",
+        "Rhea physically resisted the tether, prompting the System to seize her Ash Fungus and Ash-Boar Tusk instead.",
+        "The party survived the initial ambush but realized they were losing valuable consumables to the debt tethers, forcing them to flee."
+      ],
+      "must_stay_true": [
+        "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+        "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+        "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+        "container: hand_left (owner=rhea_mercer, contents=[])",
+        "container: hand_right (owner=rhea_mercer, contents=[])",
+        "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+        "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+        "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+        "REMOVE: inventory: rhea_mercer -> Ash Fungus (status=stowed, container=blazer_pocket_left)",
+        "REMOVE: inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+        "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+        "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+        "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+        "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard])",
+        "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+        "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+        "REMOVE: mechanic: rhea_mercer Stamina is 5/150",
+        "REMOVE: mechanic: vance_harrow HP is 15/150",
+        "mechanic: rhea_mercer Stamina is 3/150",
+        "mechanic: vance_harrow HP is 10/150",
+        "mechanic: rhea_mercer has active status Active Audit Target",
+        "mechanic: unit_734 has active status Hijacked Chassis",
+        "milestone: overseer_override_triggered = DONE",
+        "milestone: audit_compliance_applied = DONE",
+        "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+        "mechanic: rhea_mercer has active status Hostile Environment Marker",
+        "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+        "mechanic: vance_harrow has active status Hostile Environment Marker",
+        "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+        "mechanic: unit_734 has active status Hostile Environment Marker"
+      ]
+    },
+    "character_updates": [
+      {
+        "character_id": "rhea_mercer",
+        "scene": 1,
+        "chapter": 6,
+        "persona_updates": [
+          "Rhea realizes that the System can bypass standard physical damage to directly tax her health, stamina, and inventory."
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "item": "ITEM_raw_data_packet",
+            "container": "system_inventory",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_heavy_iron_ingot",
+            "container": "system_inventory",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_crystallized_experience",
+            "container": "system_inventory",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_scrap_parchment",
+            "container": "blazer_pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_charcoal_stick",
+            "container": "blazer_pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_cracked_smartphone",
+            "container": "blazer_pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_copper_credits",
+            "container": "blazer_pocket_right",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_scavenger_carapaces",
+            "container": "blazer_pocket_left",
+            "status": "stowed"
+          },
+          {
+            "item": "ITEM_obsidian_shard",
+            "container": "blazer_pocket_left",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "system_inventory",
+            "owner": "rhea_mercer",
+            "contents": [
+              "ITEM_raw_data_packet",
+              "ITEM_heavy_iron_ingot",
+              "ITEM_crystallized_experience"
+            ]
+          },
+          {
+            "container": "blazer_pocket_right",
+            "owner": "rhea_mercer",
+            "contents": [
+              "ITEM_cracked_smartphone",
+              "ITEM_copper_credits",
+              "ITEM_scrap_parchment",
+              "ITEM_charcoal_stick"
+            ]
+          },
+          {
+            "container": "blazer_pocket_left",
+            "owner": "rhea_mercer",
+            "contents": [
+              "ITEM_scavenger_carapaces",
+              "ITEM_obsidian_shard"
+            ]
+          },
+          {
+            "container": "hand_left",
+            "owner": "rhea_mercer",
+            "contents": []
+          },
+          {
+            "container": "hand_right",
+            "owner": "rhea_mercer",
+            "contents": []
+          }
+        ]
+      },
+      {
+        "character_id": "vance_harrow",
+        "scene": 1,
+        "chapter": 6,
+        "persona_updates": [
+          "Vance is forced to physically combat administrative constructs that ignore standard damage rules."
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "item": "ITEM_rebar",
+            "container": "hand_right",
+            "status": "held"
+          },
+          {
+            "item": "ITEM_copper_credits_vance",
+            "container": "torn_pocket",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "hand_right",
+            "owner": "vance_harrow",
+            "contents": [
+              "ITEM_rebar"
+            ]
+          },
+          {
+            "container": "belt_loop",
+            "owner": "vance_harrow",
+            "contents": []
+          },
+          {
+            "container": "torn_pocket",
+            "owner": "vance_harrow",
+            "contents": [
+              "ITEM_copper_credits_vance"
+            ]
+          }
+        ]
+      },
+      {
+        "character_id": "unit_734",
+        "scene": 1,
+        "chapter": 6,
+        "persona_updates": [
+          "Unit 734 acts as an unwilling early-warning system for incoming administrative attacks."
+        ],
+        "invariants_add": [],
+        "inventory": [],
+        "containers": []
+      }
+    ],
+    "character_continuity_system_updates": [
+      {
+        "character_id": "rhea_mercer",
+        "scene": 1,
+        "chapter": 6,
+        "set": {
+          "resources": {
+            "stamina": 3,
+            "stamina_max": 150
+          },
+          "stats": {
+            "stamina": 3,
+            "stamina_max": 150,
+            "strength": 20,
+            "vitality": 15
+          },
+          "reason": "Stamina drained by Debt Collector tether."
+        },
+        "delta": {},
+        "remove": []
+      },
+      {
+        "character_id": "vance_harrow",
+        "scene": 1,
+        "chapter": 6,
+        "set": {
+          "hp_current": 10,
+          "resources": {
+            "hp_current": 10,
+            "hp_max": 150
+          },
+          "stats": {
+            "hp": 10,
+            "hp_max": 150
+          },
+          "reason": "HP drained by Debt Collector tether."
+        },
+        "delta": {},
+        "remove": []
+      }
+    ],
+    "inventory_alignment_updates": [
+      {
+        "character_id": "rhea_mercer",
+        "remove": [
+          "inventory.ITEM_ash_fungus",
+          "inventory.ITEM_severed_ash_boar_tusk"
+        ],
+        "reason": "Items seized by Debt Collectors"
+      }
+    ],
+    "transfer_updates": [
+      {
+        "item_id": "ITEM_ash_fungus",
+        "from": {
+          "character_id": "rhea_mercer"
+        },
+        "to": {
+          "custodian": "world"
+        },
+        "reason": "Seized by Debt Collectors"
+      },
+      {
+        "item_id": "ITEM_severed_ash_boar_tusk",
+        "from": {
+          "character_id": "rhea_mercer"
+        },
+        "to": {
+          "custodian": "world"
+        },
+        "reason": "Seized by Debt Collectors"
+      }
+    ],
+    "world_updates": {
+      "cast_present": [
+        "rhea_mercer",
+        "vance_harrow",
+        "unit_734"
+      ],
+      "open_threads": [
+        "rhea_survival",
+        "system_debt_trap"
+      ],
+      "location": "LOC_OUTPOST_SURFACE"
+    }
+  },
+  "scene_summary": [
+    "Still reeling from the overseer's red-tier warning, Rhea and Vance were immediately ambushed by wire-frame hounds identified as Debt Collectors.",
+    "The hounds bypassed standard damage, using glowing tethers to drain Vance's HP and Rhea's Stamina directly.",
+    "Rhea physically resisted the tether, prompting the System to seize her Ash Fungus and Ash-Boar Tusk instead.",
+    "The party survived the initial ambush but realized they were losing valuable consumables to the debt tethers, forcing them to flee."
+  ],
+  "key_events": [
+    "The party was ambushed by System-spawned Debt Collectors.",
+    "The hounds bypassed standard damage, using glowing tethers to drain HP and Stamina directly.",
+    "Rhea used her physical strength to resist the tether, causing the System to recalculate and target her inventory instead.",
+    "The debt tethers seized Rhea's Ash Fungus and Severed Ash-Boar Tusk before Vance crushed the hound."
+  ],
+  "must_stay_true": [
+    "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+    "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+    "container: hand_left (owner=rhea_mercer, contents=[])",
+    "container: hand_right (owner=rhea_mercer, contents=[])",
+    "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+    "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+    "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+    "REMOVE: inventory: rhea_mercer -> Ash Fungus (status=stowed, container=blazer_pocket_left)",
+    "REMOVE: inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+    "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+    "inventory: rhea_mercer -> Scavenger Carapaces (status=stowed, container=blazer_pocket_left)",
+    "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard])",
+    "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+    "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+    "REMOVE: mechanic: rhea_mercer Stamina is 5/150",
+    "REMOVE: mechanic: vance_harrow HP is 15/150",
+    "mechanic: rhea_mercer Stamina is 3/150",
+    "mechanic: vance_harrow HP is 10/150",
+    "mechanic: rhea_mercer has active status Active Audit Target",
+    "mechanic: unit_734 has active status Hijacked Chassis",
+    "milestone: overseer_override_triggered = DONE",
+    "milestone: audit_compliance_applied = DONE",
+    "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+    "mechanic: rhea_mercer has active status Hostile Environment Marker",
+    "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+    "mechanic: vance_harrow has active status Hostile Environment Marker",
+    "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+    "mechanic: unit_734 has active status Hostile Environment Marker"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "appearance_check_missing",
+        "message": "APPEARANCE_CHECK is missing for cast member rhea_mercer.",
+        "severity": "warning"
+      },
+      {
+        "code": "appearance_check_missing",
+        "message": "APPEARANCE_CHECK is missing for cast member vance_harrow.",
+        "severity": "warning"
+      },
+      {
+        "code": "appearance_check_missing",
+        "message": "APPEARANCE_CHECK is missing for cast member unit_734.",
+        "severity": "warning"
+      }
+    ]
+  },
+  "write_attempts": 1,
+  "updated_at": "2026-04-20T22:12:04Z"
+}

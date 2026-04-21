@@ -1,0 +1,353 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_007_003",
+  "chapter": 7,
+  "scene": 3,
+  "scene_target": "The party breaches the inner office, confronting the overseer directly.",
+  "goal": "Survive the final gauntlet of automated turrets and reach the inner office.",
+  "conflict": "Automated turrets firing 'cease and desist' bolts while Vance is at critical HP.",
+  "required_callbacks": [],
+  "constraints": [
+    "target_words: 1800"
+  ],
+  "end_condition": "Rhea kicks open the inner office doors, confronting the overseer.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_SANCTUM_INNER_CORRIDOR",
+  "location_end_id": "LOC_SANCTUM_OVERSEER_OFFICE",
+  "location_start_label": "Audit Corridor",
+  "location_end_label": "Overseer's Inner Office",
+  "location_start": "Audit Corridor",
+  "location_end": "Overseer's Inner Office",
+  "handoff_mode": "door_breach",
+  "constraint_state": "processed",
+  "transition_in_text": "The blast doors open, revealing the Audit Corridor lined with automated turrets.",
+  "transition_in_anchors": [
+    "blast doors",
+    "corridor",
+    "turrets"
+  ],
+  "seam_score": 85,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "rhea_survival",
+    "party_alliance"
+  ],
+  "required_in_custody": [
+    "ITEM_rebar",
+    "ITEM_null_value_token"
+  ],
+  "required_scene_accessible": [
+    "ITEM_rebar",
+    "ITEM_null_value_token"
+  ],
+  "required_visible_on_page": [
+    "ITEM_rebar"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "combat_push",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Cease and Desist",
+    "Chassis Integrity"
+  ],
+  "prose_path": "draft/chapters/ch_007/scene_003.md",
+  "state_patch": {
+    "character_continuity_system_updates": [
+      {
+        "chapter": 7,
+        "character_id": "vance_harrow",
+        "scene": 3,
+        "set": {
+          "hp_current": 5,
+          "reason": "Vance absorbed multiple Cease and Desist bolts from the automated turrets.",
+          "resources": {
+            "hp_current": 5
+          },
+          "stats": {
+            "hp": 5
+          }
+        },
+        "remove": [],
+        "delta": {}
+      },
+      {
+        "chapter": 7,
+        "character_id": "unit_734",
+        "scene": 3,
+        "set": {
+          "reason": "Unit 734 took collateral damage from the turrets in the Audit Corridor.",
+          "stats": {
+            "chassis_integrity": 15
+          }
+        },
+        "remove": [],
+        "delta": {}
+      }
+    ],
+    "character_updates": [
+      {
+        "chapter": 7,
+        "character_id": "vance_harrow",
+        "containers": [
+          {
+            "container": "hand_right",
+            "contents": [
+              "ITEM_rebar"
+            ],
+            "owner": "vance_harrow"
+          },
+          {
+            "container": "torn_pocket",
+            "contents": [
+              "ITEM_copper_credits_vance"
+            ],
+            "owner": "vance_harrow"
+          }
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "container": "hand_right",
+            "item": "ITEM_rebar",
+            "status": "held"
+          },
+          {
+            "container": "torn_pocket",
+            "item": "ITEM_copper_credits_vance",
+            "status": "stowed"
+          }
+        ],
+        "persona_updates": [
+          "Vance acted as a human shield, absorbing massive damage to ensure Rhea could breach the inner office."
+        ],
+        "scene": 3
+      },
+      {
+        "chapter": 7,
+        "character_id": "unit_734",
+        "containers": [],
+        "invariants_add": [],
+        "inventory": [],
+        "persona_updates": [
+          "Unit 734 barely survived the corridor, its chassis integrity dropping to critical levels."
+        ],
+        "scene": 3
+      },
+      {
+        "chapter": 7,
+        "character_id": "rhea_mercer",
+        "containers": [
+          {
+            "container": "blazer_pocket_left",
+            "contents": [
+              "ITEM_administrative_coordinate_chip"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "system_inventory",
+            "contents": [
+              "ITEM_raw_data_packet"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "hand_left",
+            "contents": [
+              "ITEM_null_value_token"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "hand_right",
+            "contents": [
+              "ITEM_obsidian_shard"
+            ],
+            "owner": "rhea_mercer"
+          }
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_administrative_coordinate_chip",
+            "status": "stowed"
+          },
+          {
+            "container": "system_inventory",
+            "item": "ITEM_raw_data_packet",
+            "status": "stowed"
+          },
+          {
+            "container": "hand_left",
+            "item": "ITEM_null_value_token",
+            "status": "held"
+          },
+          {
+            "container": "hand_right",
+            "item": "ITEM_obsidian_shard",
+            "status": "held"
+          }
+        ],
+        "persona_updates": [
+          "Rhea successfully navigated the final gauntlet, kicking down the doors to confront the overseer."
+        ],
+        "scene": 3
+      }
+    ],
+    "schema_version": "1.0",
+    "summary_update": {
+      "chapter_so_far_add": [
+        "The party survived a brutal gauntlet of automated turrets in the Audit Corridor.",
+        "Rhea breached the inner office, bringing her face-to-face with the local overseer."
+      ],
+      "key_events": [
+        "The blast doors opened to reveal the heavily defended Audit Corridor.",
+        "Vance Harrow tanked multiple turret bolts, his HP dropping from 10 to 5.",
+        "Unit 734's chassis integrity dropped from 29% to 15% due to grazing hits.",
+        "Vance destroyed the final flanking turret with his Rebar.",
+        "Rhea kicked the mahogany doors off their hinges, confronting the overseer."
+      ],
+      "last_scene": [
+        "The party sprinted down the Audit Corridor, facing a gauntlet of automated turrets firing 'Cease and Desist' bolts.",
+        "Vance used his Rebar to deflect incoming fire, acting as a meat shield while his HP dropped to a critical 5/100.",
+        "Unit 734 suffered severe collateral damage, its chassis integrity falling to 15%.",
+        "Rhea pushed through the crossfire and kicked open the mahogany double doors, successfully breaching the Overseer's Inner Office."
+      ],
+      "must_stay_true": [
+        "mechanic: rhea_mercer Stamina is 1/150",
+        "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+        "milestone: overseer_budget_discovered = DONE",
+        "milestone: administrative_hub_coordinates_acquired = DONE",
+        "milestone: administrative_hub_coordinates_decrypted = DONE",
+        "inventory: rhea_mercer -> Administrative Coordinate Chip (status=stowed, container=blazer_pocket_left)",
+        "milestone: tollbooth_escape_completed = DONE",
+        "inventory: rhea_mercer -> Null-Value Token (status=held, container=hand_left)",
+        "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+        "container: hand_left (owner=rhea_mercer, contents=[ITEM_null_value_token])",
+        "milestone: null_value_token_crafted = DONE",
+        "milestone: sanctum_threshold_reached = DONE",
+        "mechanic: vance_harrow has active status Aggro Target",
+        "mechanic: unit_734 has active status Critical System Failure Imminent",
+        "REMOVE: mechanic: vance_harrow HP is 10/100",
+        "mechanic: vance_harrow HP is 5/100",
+        "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+        "REMOVE: mechanic: unit_734 Chassis Integrity is 34%",
+        "mechanic: unit_734 Chassis Integrity is 15%",
+        "inventory: rhea_mercer -> Obsidian Shard (status=held, container=hand_right)",
+        "container: hand_right (owner=rhea_mercer, contents=[ITEM_obsidian_shard])",
+        "milestone: compliance_check_bypassed = DONE",
+        "milestone: inner_office_breached = DONE",
+        "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+        "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])"
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "rhea_mercer",
+        "vance_harrow",
+        "unit_734"
+      ],
+      "location": "LOC_SANCTUM_OVERSEER_OFFICE",
+      "open_threads": [
+        "rhea_survival",
+        "party_alliance",
+        "system_debt_trap"
+      ]
+    }
+  },
+  "scene_summary": [
+    "The party sprinted down the Audit Corridor, facing a gauntlet of automated turrets firing 'Cease and Desist' bolts.",
+    "Vance used his Rebar to deflect incoming fire, acting as a meat shield while his HP dropped to a critical 5/100.",
+    "Unit 734 suffered severe collateral damage, its chassis integrity falling to 15%.",
+    "Rhea pushed through the crossfire and kicked open the mahogany double doors, successfully breaching the Overseer's Inner Office."
+  ],
+  "key_events": [
+    "The blast doors opened to reveal the heavily defended Audit Corridor.",
+    "Vance Harrow tanked multiple turret bolts, his HP dropping from 10 to 5.",
+    "Unit 734's chassis integrity dropped from 29% to 15% due to grazing hits.",
+    "Vance destroyed the final flanking turret with his Rebar.",
+    "Rhea kicked the mahogany doors off their hinges, confronting the overseer."
+  ],
+  "must_stay_true": [
+    "mechanic: rhea_mercer Stamina is 1/150",
+    "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+    "milestone: overseer_budget_discovered = DONE",
+    "milestone: administrative_hub_coordinates_acquired = DONE",
+    "milestone: administrative_hub_coordinates_decrypted = DONE",
+    "inventory: rhea_mercer -> Administrative Coordinate Chip (status=stowed, container=blazer_pocket_left)",
+    "milestone: tollbooth_escape_completed = DONE",
+    "inventory: rhea_mercer -> Null-Value Token (status=held, container=hand_left)",
+    "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+    "container: hand_left (owner=rhea_mercer, contents=[ITEM_null_value_token])",
+    "milestone: null_value_token_crafted = DONE",
+    "milestone: sanctum_threshold_reached = DONE",
+    "mechanic: vance_harrow has active status Aggro Target",
+    "mechanic: unit_734 has active status Critical System Failure Imminent",
+    "REMOVE: mechanic: vance_harrow HP is 10/100",
+    "mechanic: vance_harrow HP is 5/100",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+    "REMOVE: mechanic: unit_734 Chassis Integrity is 34%",
+    "mechanic: unit_734 Chassis Integrity is 15%",
+    "inventory: rhea_mercer -> Obsidian Shard (status=held, container=hand_right)",
+    "container: hand_right (owner=rhea_mercer, contents=[ITEM_obsidian_shard])",
+    "milestone: compliance_check_bypassed = DONE",
+    "milestone: inner_office_breached = DONE",
+    "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+    "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Vance Harrow - HP but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Unit 734 - Chassis Integrity but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Vance Harrow - HP but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Vance Harrow - HP but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Unit 734 - Chassis Integrity but no matching stat exists in state.",
+        "severity": "warning"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 2,
+  "updated_at": "2026-04-20T23:39:54Z"
+}

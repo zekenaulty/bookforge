@@ -1,0 +1,217 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "chapter": 7,
+      "character_id": "vance_harrow",
+      "delta": {},
+      "remove": [],
+      "scene": 2,
+      "set": {
+        "reason": "Asserting correct HP max and current HP.",
+        "stats": {
+          "hp": 2,
+          "hp_max": 100
+        }
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 7,
+      "character_id": "rhea_mercer",
+      "containers": [
+        {
+          "container": "blazer_pocket_left",
+          "contents": [
+            "ITEM_administrative_coordinate_chip"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "system_inventory",
+          "contents": [
+            "ITEM_raw_data_packet"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "hand_left",
+          "contents": [
+            "ITEM_null_value_token"
+          ],
+          "owner": "rhea_mercer"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed"
+        },
+        {
+          "container": "system_inventory",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "hand_left",
+          "item": "ITEM_null_value_token",
+          "status": "held"
+        }
+      ],
+      "persona_updates": [
+        "Rhea successfully bypassed the lethal compliance grid by sacrificing her untaxed inventory items."
+      ],
+      "scene": 2
+    },
+    {
+      "chapter": 7,
+      "character_id": "vance_harrow",
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_rebar"
+          ],
+          "owner": "vance_harrow"
+        },
+        {
+          "container": "torn_pocket",
+          "contents": [],
+          "owner": "vance_harrow"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_rebar",
+          "status": "held"
+        }
+      ],
+      "persona_updates": [
+        "Vance sacrificed his remaining Copper Credits to help Rhea satisfy the compliance check."
+      ],
+      "scene": 2
+    }
+  ],
+  "inventory_alignment_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "reason": "Consumed by terminal.",
+      "remove": [
+        "inventory.ITEM_obsidian_shard"
+      ]
+    },
+    {
+      "character_id": "vance_harrow",
+      "reason": "Consumed by terminal.",
+      "remove": [
+        "inventory.ITEM_copper_credits_vance"
+      ]
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "set": {
+        "custodian": "world",
+        "last_seen": {
+          "chapter": 7,
+          "location": "LOC_SANCTUM_FOYER",
+          "scene": 2
+        },
+        "linked_threads": [],
+        "name": "Obsidian Shard",
+        "owner_scope": "world",
+        "state_tags": [
+          "consumed"
+        ],
+        "type": "material"
+      }
+    },
+    {
+      "item_id": "ITEM_copper_credits_vance",
+      "set": {
+        "custodian": "world",
+        "last_seen": {
+          "chapter": 7,
+          "location": "LOC_SANCTUM_FOYER",
+          "scene": 2
+        },
+        "linked_threads": [],
+        "name": "Copper Credits",
+        "owner_scope": "world",
+        "state_tags": [
+          "untaxed",
+          "consumed"
+        ],
+        "type": "currency"
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Rhea bypassed a lethal compliance grid in the Sanctum Foyer by sacrificing their untaxed inventory items, opening the path to the Audit Corridor."
+    ],
+    "key_events": [
+      "The Sanctum Foyer sealed shut, activating a lethal laser grid.",
+      "A destroyed gilded construct began regenerating to attack the party.",
+      "Vance drew aggro with his Rebar, surviving on 2 HP.",
+      "Rhea deposited the Obsidian Shard and Vance's Copper Credits into the brass terminal.",
+      "The terminal consumed the items, satisfying the 150 System Credit requirement.",
+      "The compliance grid deactivated, and the path to the Audit Corridor opened."
+    ],
+    "last_scene": [
+      "The Sanctum Foyer locked down, trapping the party with a lethal compliance grid and a regenerating guard.",
+      "Vance held off the guard while Rhea fed the Obsidian Shard and Vance's Copper Credits into the terminal.",
+      "The junk data satisfied the compliance check, disabling the grid and opening the path to the Audit Corridor."
+    ],
+    "must_stay_true": [
+      "REMOVE: mechanic: vance_harrow HP is 2/150",
+      "REMOVE: inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard, ITEM_administrative_coordinate_chip])",
+      "mechanic: vance_harrow HP is 2/100",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+      "container: torn_pocket (owner=vance_harrow, contents=[])",
+      "milestone: compliance_checks_bypassed = DONE"
+    ]
+  },
+  "transfer_updates": [
+    {
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "item_id": "ITEM_obsidian_shard",
+      "reason": "Sacrificed to the compliance terminal.",
+      "to": {
+        "custodian": "world"
+      }
+    },
+    {
+      "from": {
+        "character_id": "vance_harrow"
+      },
+      "item_id": "ITEM_copper_credits_vance",
+      "reason": "Sacrificed to the compliance terminal.",
+      "to": {
+        "custodian": "world"
+      }
+    }
+  ],
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_AUDIT_CORRIDOR",
+    "open_threads": [
+      "rhea_survival",
+      "party_alliance",
+      "system_debt_trap"
+    ]
+  }
+}

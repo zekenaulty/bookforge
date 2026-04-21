@@ -1,0 +1,440 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_006_004",
+  "chapter": 6,
+  "scene": 4,
+  "scene_target": "Rhea decrypts the coordinate data and formulates a plan to inject a corrupted ledger entry into the administrative hub.",
+  "goal": "Decrypt the coordinate data and formulate a counter-attack plan before the mob breaks through.",
+  "conflict": "Vance is at 10 HP holding the door against a respawning mob while Rhea races against time to decrypt the data with 1 Stamina.",
+  "required_callbacks": [
+    "Vance's critical 10 HP limit",
+    "Rhea's severe exhaustion at 1 Stamina",
+    "Unit 734's failing chassis integrity at 34%"
+  ],
+  "constraints": [
+    "target_words: 1800"
+  ],
+  "end_condition": "Rhea successfully decrypts the exact location and declares the plan to inject a corrupted ledger entry, preparing the party to move.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_RUINED_TOLLBOOTH",
+  "location_end_id": "LOC_RUINED_TOLLBOOTH",
+  "location_start_label": "Ruined Tollbooth",
+  "location_end_label": "Ruined Tollbooth",
+  "location_start": "Inside the ruined tollbooth.",
+  "location_end": "Inside the ruined tollbooth, preparing to leave.",
+  "handoff_mode": "continuous",
+  "constraint_state": "processed",
+  "transition_in_text": "As the hounds begin to respawn outside, Vance braces against the door while Rhea focuses on the newly acquired coordinate data.",
+  "transition_in_anchors": [
+    "respawning hounds",
+    "Vance bracing",
+    "door",
+    "coordinate data"
+  ],
+  "transition_out_text": "With the destination locked and a desperate plan formed, the party prepares to break out of the tollbooth and head for the administrative hub.",
+  "transition_out_anchors": [
+    "destination locked",
+    "desperate plan",
+    "break out",
+    "administrative hub"
+  ],
+  "consumes_outcome_from": "6:3",
+  "hands_off_to": "6:5",
+  "seam_score": 90,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "system_debt_trap",
+    "party_alliance"
+  ],
+  "required_in_custody": [
+    "ITEM_administrative_coordinate_chip",
+    "ITEM_rebar"
+  ],
+  "required_scene_accessible": [
+    "ITEM_administrative_coordinate_chip",
+    "ITEM_rebar"
+  ],
+  "required_visible_on_page": [
+    "ITEM_administrative_coordinate_chip",
+    "ITEM_rebar"
+  ],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "continuous",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources",
+    "statuses"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Stamina",
+    "Chassis Integrity",
+    "Coordinate Decryption",
+    "Audit Compliance"
+  ],
+  "prose_path": "draft/chapters/ch_006/scene_004.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "character_continuity_system_updates": [
+      {
+        "character_id": "rhea_mercer",
+        "set": {
+          "stats": {
+            "stamina": 1
+          }
+        },
+        "remove": [],
+        "delta": {},
+        "chapter": 6,
+        "scene": 4
+      },
+      {
+        "character_id": "vance_harrow",
+        "set": {
+          "stats": {
+            "hp": 10
+          }
+        },
+        "remove": [],
+        "delta": {},
+        "chapter": 6,
+        "scene": 4
+      },
+      {
+        "character_id": "unit_734",
+        "set": {
+          "stats": {
+            "chassis_integrity": 34
+          }
+        },
+        "remove": [],
+        "delta": {},
+        "chapter": 6,
+        "scene": 4
+      }
+    ],
+    "global_continuity_system_updates": [
+      {
+        "set": {
+          "coordinate_decryption_progress": 100
+        }
+      }
+    ],
+    "character_updates": [
+      {
+        "character_id": "rhea_mercer",
+        "containers": [
+          {
+            "container": "system_inventory",
+            "contents": [
+              "ITEM_raw_data_packet",
+              "ITEM_heavy_iron_ingot",
+              "ITEM_crystallized_experience"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "contents": [
+              "ITEM_scrap_parchment",
+              "ITEM_charcoal_stick",
+              "ITEM_cracked_smartphone",
+              "ITEM_copper_credits"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "contents": [
+              "ITEM_obsidian_shard"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "hand_left",
+            "contents": [
+              "ITEM_administrative_coordinate_chip"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "hand_right",
+            "contents": [],
+            "owner": "rhea_mercer"
+          }
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "container": "system_inventory",
+            "item": "ITEM_raw_data_packet",
+            "status": "stowed"
+          },
+          {
+            "container": "system_inventory",
+            "item": "ITEM_heavy_iron_ingot",
+            "status": "stowed"
+          },
+          {
+            "container": "system_inventory",
+            "item": "ITEM_crystallized_experience",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_scrap_parchment",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_charcoal_stick",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_cracked_smartphone",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_copper_credits",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_obsidian_shard",
+            "status": "stowed"
+          },
+          {
+            "container": "hand_left",
+            "item": "ITEM_administrative_coordinate_chip",
+            "status": "held"
+          }
+        ],
+        "persona_updates": [
+          "Rhea realizes she can weaponize the overseer's Audit Compliance tag to bypass the hub's firewall and crash the local node."
+        ],
+        "chapter": 6,
+        "scene": 4
+      },
+      {
+        "character_id": "vance_harrow",
+        "containers": [
+          {
+            "container": "hand_right",
+            "contents": [
+              "ITEM_rebar"
+            ],
+            "owner": "vance_harrow"
+          },
+          {
+            "container": "torn_pocket",
+            "contents": [
+              "ITEM_copper_credits_vance"
+            ],
+            "owner": "vance_harrow"
+          }
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "container": "hand_right",
+            "item": "ITEM_rebar",
+            "status": "held"
+          },
+          {
+            "container": "torn_pocket",
+            "item": "ITEM_copper_credits_vance",
+            "status": "stowed"
+          }
+        ],
+        "persona_updates": [
+          "Vance is surviving on a razor's edge, trusting Rhea's insane plan to crash the system because it's his only chance of survival."
+        ],
+        "chapter": 6,
+        "scene": 4
+      }
+    ],
+    "item_registry_updates": [
+      {
+        "item_id": "ITEM_administrative_coordinate_chip",
+        "set": {
+          "custodian": "rhea_mercer",
+          "display_name": "Administrative Coordinate Chip",
+          "last_seen": {
+            "chapter": 6,
+            "location": "LOC_RUINED_TOLLBOOTH",
+            "scene": 4
+          },
+          "linked_threads": [
+            "system_debt_trap"
+          ],
+          "name": "Administrative Coordinate Chip",
+          "owner_scope": "character",
+          "state_tags": [
+            "decrypted"
+          ],
+          "type": "quest_item"
+        }
+      }
+    ],
+    "summary_update": {
+      "chapter_so_far_add": [
+        "Rhea successfully decrypted the coordinates to the administrative hub and formulated a plan to inject a corrupted ledger entry to bankrupt the overseer."
+      ],
+      "key_events": [
+        "Vance braced the door with his Rebar, holding off the hounds at 10 HP.",
+        "Rhea used Unit 734 to interface with the dead terminal and decrypt the Administrative Coordinate Chip.",
+        "Rhea weaponized the Red-Tier Audit Compliance tag to bypass the secondary encryption layer.",
+        "The decryption completed, revealing the location of the administrative hub.",
+        "Rhea declared her plan to use the Raw Data Packet to trigger a catastrophic default on the overseer's ledger."
+      ],
+      "last_scene": [
+        "Rhea forced Unit 734 to bypass the local firewall using the Audit Compliance tag.",
+        "Vance held the door against the respawning hounds, surviving on 10 HP.",
+        "Rhea successfully decrypted the coordinates to the administrative hub.",
+        "With the destination locked, Rhea formulated a plan to inject the corrupted ledger entry and bankrupt the overseer."
+      ],
+      "must_stay_true": [
+        "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+        "mechanic: rhea_mercer has active status Active Audit Target",
+        "mechanic: unit_734 has active status Hijacked Chassis",
+        "milestone: overseer_override_triggered = DONE",
+        "milestone: audit_compliance_applied = DONE",
+        "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+        "mechanic: rhea_mercer has active status Hostile Environment Marker",
+        "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+        "mechanic: vance_harrow has active status Hostile Environment Marker",
+        "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+        "mechanic: unit_734 has active status Hostile Environment Marker",
+        "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+        "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+        "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+        "mechanic: vance_harrow HP is 10/150",
+        "mechanic: rhea_mercer Stamina is 1/150",
+        "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+        "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard])",
+        "milestone: overseer_budget_discovered = DONE",
+        "milestone: administrative_hub_coordinates_acquired = DONE",
+        "inventory: rhea_mercer -> Administrative Coordinate Chip (status=held, container=hand_left)",
+        "container: hand_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+        "milestone: administrative_hub_coordinates_decrypted = DONE"
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "rhea_mercer",
+        "vance_harrow",
+        "unit_734"
+      ],
+      "location": "LOC_RUINED_TOLLBOOTH",
+      "open_threads": [
+        "system_debt_trap",
+        "party_alliance"
+      ]
+    }
+  },
+  "scene_summary": [
+    "Rhea forced Unit 734 to bypass the local firewall using the Audit Compliance tag.",
+    "Vance held the door against the respawning hounds, surviving on 10 HP.",
+    "Rhea successfully decrypted the coordinates to the administrative hub.",
+    "With the destination locked, Rhea formulated a plan to inject the corrupted ledger entry and bankrupt the overseer."
+  ],
+  "key_events": [
+    "Vance braced the door with his Rebar, holding off the hounds at 10 HP.",
+    "Rhea used Unit 734 to interface with the dead terminal and decrypt the Administrative Coordinate Chip.",
+    "Rhea weaponized the Red-Tier Audit Compliance tag to bypass the secondary encryption layer.",
+    "The decryption completed, revealing the location of the administrative hub.",
+    "Rhea declared her plan to use the Raw Data Packet to trigger a catastrophic default on the overseer's ledger."
+  ],
+  "must_stay_true": [
+    "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+    "mechanic: rhea_mercer has active status Active Audit Target",
+    "mechanic: unit_734 has active status Hijacked Chassis",
+    "milestone: overseer_override_triggered = DONE",
+    "milestone: audit_compliance_applied = DONE",
+    "mechanic: rhea_mercer has active status Audit Compliance (Red-Tier)",
+    "mechanic: rhea_mercer has active status Hostile Environment Marker",
+    "mechanic: vance_harrow has active status Audit Compliance (Red-Tier)",
+    "mechanic: vance_harrow has active status Hostile Environment Marker",
+    "mechanic: unit_734 has active status Audit Compliance (Red-Tier)",
+    "mechanic: unit_734 has active status Hostile Environment Marker",
+    "inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+    "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+    "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+    "mechanic: vance_harrow HP is 10/150",
+    "mechanic: rhea_mercer Stamina is 1/150",
+    "mechanic: rhea_mercer has active status Exhaustion (Severe)",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard])",
+    "milestone: overseer_budget_discovered = DONE",
+    "milestone: administrative_hub_coordinates_acquired = DONE",
+    "inventory: rhea_mercer -> Administrative Coordinate Chip (status=held, container=hand_left)",
+    "container: hand_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+    "milestone: administrative_hub_coordinates_decrypted = DONE"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "fail",
+    "issues": [
+      {
+        "code": "appearance_check_missing",
+        "message": "APPEARANCE_CHECK is missing for cast members: rhea_mercer, vance_harrow, unit_734.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Coordinate Decryption but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Coordinate Decryption but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Coordinate Decryption but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows Coordinate Decryption but no matching stat exists in state.",
+        "severity": "warning"
+      },
+      {
+        "code": "durable_slice_missing",
+        "message": "Required item 'ITEM_administrative_coordinate_chip' is not present in the durable registry slice.",
+        "severity": "error"
+      },
+      {
+        "code": "durable_slice_missing",
+        "message": "Required item 'ITEM_administrative_coordinate_chip' is not present in the durable registry slice.",
+        "severity": "error"
+      },
+      {
+        "code": "durable_slice_missing",
+        "message": "Required item 'ITEM_administrative_coordinate_chip' is not present in the durable registry slice.",
+        "severity": "error"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 9,
+  "updated_at": "2026-04-20T22:59:54Z"
+}

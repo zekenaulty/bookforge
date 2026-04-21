@@ -1,0 +1,395 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_004_006",
+  "chapter": 4,
+  "scene": 6,
+  "scene_target": "Rhea analyzes the physical server terminal to trace the 14.3% skim to the local administrator's offshore account.",
+  "goal": "Find the digital skim point and identify where the stolen rewards are going.",
+  "conflict": "Navigating the terminal's security while managing critically low party resources.",
+  "required_callbacks": [
+    "Vance's critical HP",
+    "Rhea's low stamina",
+    "The 14.3% missing value"
+  ],
+  "constraints": [
+    "target_words: 1800"
+  ],
+  "end_condition": "Rhea confirms the destination of the stolen funds is the local Overseer's offshore account.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_MAINTENANCE_TRENCHES",
+  "location_end_id": "LOC_MAINTENANCE_TRENCHES",
+  "location_start_label": "Maintenance Trenches",
+  "location_end_label": "Maintenance Trenches - Server Terminal",
+  "location_start": "Maintenance Trenches",
+  "location_end": "Maintenance Trenches - Server Terminal",
+  "handoff_mode": "direct",
+  "constraint_state": "processed",
+  "transition_in_text": "Stepping over the crushed remains of the security construct, the party approaches the glowing server terminal at the heart of the trenches.",
+  "transition_in_anchors": [
+    "crushed remains",
+    "security construct",
+    "glowing server terminal",
+    "trenches"
+  ],
+  "transition_out_text": "Armed with the routing destination, Rhea realizes the scale of the Overseer's fraud.",
+  "transition_out_anchors": [
+    "routing destination",
+    "scale",
+    "overseer",
+    "fraud"
+  ],
+  "consumes_outcome_from": "4:5",
+  "hands_off_to": "4:7",
+  "seam_score": 85,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "system_debt_trap"
+  ],
+  "required_in_custody": [
+    "ITEM_makeshift_masonry_bludgeon",
+    "ITEM_rebar",
+    "ITEM_scrap_parchment",
+    "ITEM_charcoal_stick"
+  ],
+  "required_scene_accessible": [
+    "ITEM_scrap_parchment",
+    "ITEM_charcoal_stick"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "combat_aftermath",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Stamina",
+    "Efficiency",
+    "Ledger Routing"
+  ],
+  "prose_path": "draft/chapters/ch_004/scene_006.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "summary_update": {
+      "last_scene": [
+        "Rhea analyzed the physical server terminal in the Maintenance Trenches.",
+        "She forced Unit 734 to interface with the terminal, bypassing its security protocols.",
+        "The digital overlay revealed that the 14.3% skim was being routed to the local Overseer's offshore account.",
+        "Rhea recorded the routing destination on her Scrap Parchment, securing proof of the massive embezzlement."
+      ],
+      "key_events": [
+        "The party recovered from the fight with the security construct, with Vance at critical HP and Rhea severely drained of stamina.",
+        "They located the primary server terminal for the sector, the physical skim point for the node's accounting.",
+        "Rhea used the custom liability contract to force Unit 734 to interface with the restricted terminal.",
+        "The terminal's data stream confirmed the 14.3% maintenance allocation was a fraud.",
+        "The routing destination was revealed as Account #001-Alpha, the Overseer's personal offshore ledger.",
+        "Rhea documented the proof on her Scrap Parchment, preparing to file a metaphysical grievance."
+      ],
+      "must_stay_true": [
+        "REMOVE: mechanic: rhea_mercer Stamina is 28/100",
+        "mechanic: rhea_mercer Stamina is 20/100",
+        "REMOVE: inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+        "REMOVE: inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+        "REMOVE: container: hand_left (owner=rhea_mercer, contents=[])",
+        "REMOVE: container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+        "inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+        "inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_left)",
+        "container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick])",
+        "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+        "mechanic: vance_harrow has active status Mutual Assured Destruction",
+        "mechanic: unit_734 has active status Mutual Assured Destruction",
+        "mechanic: vance_harrow has active status Party Member",
+        "mechanic: unit_734 has active status Party Member",
+        "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+        "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+        "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+        "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+        "milestone: vermin_control_completed = DONE",
+        "mechanic: rhea_mercer has 71 Copper Credits",
+        "mechanic: vance_harrow has 65 Copper Credits",
+        "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+        "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+        "mechanic: vance_harrow HP is 3/100",
+        "mechanic: unit_734 Efficiency is 38"
+      ],
+      "chapter_so_far_add": [
+        "Rhea forced Unit 734 to interface with the primary server terminal in the Maintenance Trenches.",
+        "The system logs revealed that the 14.3% missing value was being routed to Account #001-Alpha, the Overseer's offshore ledger.",
+        "Rhea recorded the routing destination on her scrap parchment, securing undeniable proof of the Overseer's massive embezzlement."
+      ]
+    },
+    "character_updates": [
+      {
+        "character_id": "rhea_mercer",
+        "scene": 6,
+        "chapter": 4,
+        "persona_updates": [],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "container": "hand_right",
+            "item": "ITEM_makeshift_masonry_bludgeon",
+            "status": "held"
+          },
+          {
+            "container": "hand_left",
+            "item": "ITEM_scrap_parchment",
+            "status": "held"
+          },
+          {
+            "container": "hand_left",
+            "item": "ITEM_charcoal_stick",
+            "status": "held"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_copper_credits",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_cracked_smartphone",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_scavenger_carapaces",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_obsidian_shard",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_ash_fungus",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_severed_ash_boar_tusk",
+            "status": "stowed"
+          }
+        ],
+        "containers": [
+          {
+            "container": "hand_right",
+            "contents": [
+              "ITEM_makeshift_masonry_bludgeon"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "hand_left",
+            "contents": [
+              "ITEM_scrap_parchment",
+              "ITEM_charcoal_stick"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "contents": [
+              "ITEM_copper_credits",
+              "ITEM_cracked_smartphone"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "contents": [
+              "ITEM_scavenger_carapaces",
+              "ITEM_obsidian_shard",
+              "ITEM_ash_fungus",
+              "ITEM_severed_ash_boar_tusk"
+            ],
+            "owner": "rhea_mercer"
+          }
+        ]
+      }
+    ],
+    "character_continuity_system_updates": [
+      {
+        "character_id": "rhea_mercer",
+        "scene": 6,
+        "chapter": 4,
+        "set": {
+          "stats": {
+            "stamina": 20,
+            "stamina_max": 100
+          },
+          "resources": {
+            "stamina": 20,
+            "stamina_max": 100
+          },
+          "reason": "Canonical end-of-scene value."
+        },
+        "delta": {},
+        "remove": []
+      },
+      {
+        "character_id": "vance_harrow",
+        "scene": 6,
+        "chapter": 4,
+        "set": {
+          "stats": {
+            "hp": 3,
+            "hp_max": 100
+          },
+          "resources": {
+            "hp_current": 3,
+            "hp_max": 100
+          },
+          "reason": "Canonical end-of-scene value."
+        },
+        "delta": {},
+        "remove": []
+      },
+      {
+        "character_id": "unit_734",
+        "scene": 6,
+        "chapter": 4,
+        "set": {
+          "stats": {
+            "efficiency": 38
+          },
+          "reason": "Canonical end-of-scene value."
+        },
+        "delta": {},
+        "remove": []
+      }
+    ],
+    "inventory_alignment_updates": [
+      {
+        "character_id": "rhea_mercer",
+        "remove": [
+          "inventory.ITEM_scrap_parchment",
+          "inventory.ITEM_charcoal_stick"
+        ],
+        "reason": "Moved to hand_left to write down the routing destination."
+      },
+      {
+        "character_id": "rhea_mercer",
+        "set": {
+          "inventory": [
+            {
+              "container": "hand_left",
+              "item": "ITEM_scrap_parchment",
+              "status": "held"
+            },
+            {
+              "container": "hand_left",
+              "item": "ITEM_charcoal_stick",
+              "status": "held"
+            }
+          ],
+          "containers": [
+            {
+              "container": "hand_left",
+              "contents": [
+                "ITEM_scrap_parchment",
+                "ITEM_charcoal_stick"
+              ],
+              "owner": "rhea_mercer"
+            },
+            {
+              "container": "blazer_pocket_right",
+              "contents": [
+                "ITEM_copper_credits",
+                "ITEM_cracked_smartphone"
+              ],
+              "owner": "rhea_mercer"
+            }
+          ]
+        },
+        "reason": "Moved to hand_left to write down the routing destination."
+      }
+    ],
+    "world_updates": {
+      "cast_present": [
+        "rhea_mercer",
+        "vance_harrow",
+        "unit_734"
+      ],
+      "location": "LOC_MAINTENANCE_TRENCHES",
+      "open_threads": [
+        "rhea_survival",
+        "party_alliance",
+        "system_debt_trap"
+      ]
+    }
+  },
+  "scene_summary": [
+    "Rhea analyzed the physical server terminal in the Maintenance Trenches.",
+    "She forced Unit 734 to interface with the terminal, bypassing its security protocols.",
+    "The digital overlay revealed that the 14.3% skim was being routed to the local Overseer's offshore account.",
+    "Rhea recorded the routing destination on her Scrap Parchment, securing proof of the massive embezzlement."
+  ],
+  "key_events": [
+    "The party recovered from the fight with the security construct, with Vance at critical HP and Rhea severely drained of stamina.",
+    "They located the primary server terminal for the sector, the physical skim point for the node's accounting.",
+    "Rhea used the custom liability contract to force Unit 734 to interface with the restricted terminal.",
+    "The terminal's data stream confirmed the 14.3% maintenance allocation was a fraud.",
+    "The routing destination was revealed as Account #001-Alpha, the Overseer's personal offshore ledger.",
+    "Rhea documented the proof on her Scrap Parchment, preparing to file a metaphysical grievance."
+  ],
+  "must_stay_true": [
+    "REMOVE: mechanic: rhea_mercer Stamina is 28/100",
+    "mechanic: rhea_mercer Stamina is 20/100",
+    "REMOVE: inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+    "REMOVE: inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+    "REMOVE: container: hand_left (owner=rhea_mercer, contents=[])",
+    "REMOVE: container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+    "inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+    "inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_left)",
+    "container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick])",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "mechanic: vance_harrow has active status Mutual Assured Destruction",
+    "mechanic: unit_734 has active status Mutual Assured Destruction",
+    "mechanic: vance_harrow has active status Party Member",
+    "mechanic: unit_734 has active status Party Member",
+    "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+    "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+    "inventory: rhea_mercer -> Makeshift Masonry Bludgeon (status=held, container=hand_right)",
+    "container: hand_right (owner=rhea_mercer, contents=[ITEM_makeshift_masonry_bludgeon])",
+    "milestone: vermin_control_completed = DONE",
+    "mechanic: rhea_mercer has 71 Copper Credits",
+    "mechanic: vance_harrow has 65 Copper Credits",
+    "inventory: rhea_mercer -> Severed Ash-Boar Tusk (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+    "mechanic: vance_harrow HP is 3/100",
+    "mechanic: unit_734 Efficiency is 38"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "stat_mismatch",
+        "message": "UI shows Stamina but character state has 20.",
+        "severity": "warning"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 8,
+  "updated_at": "2026-04-20T21:05:20Z"
+}

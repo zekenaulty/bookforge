@@ -1,0 +1,354 @@
+COMPLIANCE:
+Scene ID: SC_005_005
+Allowed events: The party is trapped under the crushing physical weight of the unallocated rewards. Rhea and Vance rapidly allocate stats and manage inventory to survive the violent influx of rewards.
+Forbidden milestones: None explicitly forbidden.
+
+Current arm-side / inventory facts:
+Rhea Mercer -> Raw Data Packet (stowed, system_inventory)
+Vance Harrow -> Rebar (held, hand_right)
+
+Durable changes committed:
+Rhea Mercer -> Heavy Iron Ingot (stowed, system_inventory)
+Rhea Mercer -> Crystallized Experience (stowed, system_inventory)
+Rhea Mercer -> Stat allocation (Strength 20, Vitality 15, Stamina 5/150)
+Vance Harrow -> Stat allocation (HP 15/150)
+
+APPEARANCE_CHECK:
+- rhea_mercer: singed arm hair
+- vance_harrow: blistered hands
+
+PROSE:
+Trapped under the crushing physical weight of the unallocated rewards, the party struggled to breathe as the refund storm intensified. The sky above the Outpost Surface was glitching into a violent purple, tearing at the seams as the 14.3% withheld value rained down in a localized, apocalyptic payout.
+
+A jagged block of crystallized experience slammed into the dirt inches from Rhea’s knee. The sheer kinetic force of the audit was deafening. Her Stamina was critically low, sitting at a miserable 2/100, and every breath felt like inhaling ground glass. Beside her, Vance was in worse shape. He had just tried to block a falling XP shard with his Rebar, and the concussive damage had dropped his HP to a terrifying 2/100. 
+
+"If a copper piece hits me in the head, I'm dead!" Vance roared over the din, clutching his blistered hands around his weapon. 
+
+[System Notification: Administrative Refund Processing.]
+[Warning: Unallocated Value Exceeds Physical Capacity. Crushing Damage Imminent.]
+
+"It's a bureaucratic avalanche!" Rhea shouted, swiping frantically at the blue boxes materializing in front of her face. "The System doesn't have a queue for this much back-pay! It's just dropping it on our heads!"
+
+[Experience Threshold Met. Level Up x3.]
+[+15 Free Attribute Points available.]
+
+A heavy iron ingot materialized out of thin air, dropping directly onto Rhea's shoulder. She gasped, her knees buckling under the sudden mass. Her singed arm hair stood on end as the static electricity of raw, unprocessed data washed over them. 
+
+"Allocate your stats!" Rhea screamed, pulling up her character sheet. "Dump it all into Strength and Vitality! We need the encumbrance limit!"
+
+"I'm a finesse build!" Vance protested, dodging a shower of untaxed copper credits that hit the ground like buckshot. 
+
+"You're a dead build if you don't!" Rhea snapped. 
+
+She didn't hesitate. Survival was just an arithmetic problem, and right now, the math demanded mass. She grabbed the slider for Strength and shoved it forward.
+
+[Strength: 10 -> 20]
+[Vitality: 10 -> 15]
+[Encumbrance Limit Increased: 150kg -> 350kg]
+
+The change was instantaneous. The crushing weight on her shoulders lessened, her muscle fibers hardening just enough to push back against the physical pressure of the loot. She gasped in a breath, her Stamina ticking up slightly to 5/150 as her maximum threshold expanded, though she still hovered dangerously near empty. 
+
+[Inventory Capacity Exceeded. Auto-Stow Failed.]
+
+"Inventory space!" Rhea yelled, watching a pile of glowing pelts and heavy iron ingots threaten to bury Vance. "It's trying to physically manifest what we can't carry!"
+
+Vance cursed, his fingers flying across his own interface. He glowed faintly as his level-up processed, his HP ticking up to 15/150—just enough to pull him out of the critical red zone. "I'm expanding my slots! It costs a hundred copper!"
+
+"Loot the ground first!" Rhea ordered. She scooped up a handful of the untaxed copper credits that had just pelted her, her balance skyrocketing past the fee threshold. She rapidly purchased three new rows of system inventory and furiously tapped 'Loot All' on the immediate vicinity. 
+
+[Inventory Slot 5: Heavy Iron Ingot x4]
+[Inventory Slot 6: Crystallized Experience x12]
+
+The physical pile around them vanished into the digital ether, giving them exactly one square meter of breathing room. Rhea and Vance managed to allocate just enough stats and inventory space to keep from being crushed, though the storm still raged around them, the violent purple sky raining endless bureaucratic vengeance.
+
+STATE_PATCH:
+{
+  "schema_version": "1.0",
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow"
+    ],
+    "location": "LOC_OUTPOST_SURFACE",
+    "open_threads": [
+      "rhea_survival"
+    ]
+  },
+  "character_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "chapter": 5,
+      "scene": 5,
+      "inventory": [
+        {
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed",
+          "container": "system_inventory"
+        },
+        {
+          "item": "ITEM_heavy_iron_ingot",
+          "status": "stowed",
+          "container": "system_inventory"
+        },
+        {
+          "item": "ITEM_crystallized_experience",
+          "status": "stowed",
+          "container": "system_inventory"
+        },
+        {
+          "item": "ITEM_scrap_parchment",
+          "status": "stowed",
+          "container": "blazer_pocket_right"
+        },
+        {
+          "item": "ITEM_charcoal_stick",
+          "status": "stowed",
+          "container": "blazer_pocket_right"
+        },
+        {
+          "item": "ITEM_cracked_smartphone",
+          "status": "stowed",
+          "container": "blazer_pocket_right"
+        },
+        {
+          "item": "ITEM_copper_credits",
+          "status": "stowed",
+          "container": "blazer_pocket_right"
+        },
+        {
+          "item": "ITEM_scavenger_carapaces",
+          "status": "stowed",
+          "container": "blazer_pocket_left"
+        },
+        {
+          "item": "ITEM_obsidian_shard",
+          "status": "stowed",
+          "container": "blazer_pocket_left"
+        },
+        {
+          "item": "ITEM_ash_fungus",
+          "status": "stowed",
+          "container": "blazer_pocket_left"
+        },
+        {
+          "item": "ITEM_severed_ash_boar_tusk",
+          "status": "stowed",
+          "container": "blazer_pocket_left"
+        }
+      ],
+      "containers": [
+        {
+          "container": "system_inventory",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_raw_data_packet",
+            "ITEM_heavy_iron_ingot",
+            "ITEM_crystallized_experience"
+          ]
+        },
+        {
+          "container": "blazer_pocket_right",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_cracked_smartphone",
+            "ITEM_copper_credits",
+            "ITEM_scrap_parchment",
+            "ITEM_charcoal_stick"
+          ]
+        },
+        {
+          "container": "blazer_pocket_left",
+          "owner": "rhea_mercer",
+          "contents": [
+            "ITEM_scavenger_carapaces",
+            "ITEM_obsidian_shard",
+            "ITEM_ash_fungus",
+            "ITEM_severed_ash_boar_tusk"
+          ]
+        },
+        {
+          "container": "hand_left",
+          "owner": "rhea_mercer",
+          "contents": []
+        },
+        {
+          "container": "hand_right",
+          "owner": "rhea_mercer",
+          "contents": []
+        }
+      ],
+      "invariants_add": [
+        "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+        "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+        "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])"
+      ],
+      "persona_updates": []
+    },
+    {
+      "character_id": "vance_harrow",
+      "chapter": 5,
+      "scene": 5,
+      "inventory": [
+        {
+          "item": "ITEM_rebar",
+          "status": "held",
+          "container": "hand_right"
+        }
+      ],
+      "containers": [
+        {
+          "container": "hand_right",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_rebar"
+          ]
+        },
+        {
+          "container": "belt_loop",
+          "owner": "vance_harrow",
+          "contents": []
+        },
+        {
+          "container": "torn_pocket",
+          "owner": "vance_harrow",
+          "contents": [
+            "ITEM_copper_credits_vance"
+          ]
+        }
+      ],
+      "invariants_add": [],
+      "persona_updates": []
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_heavy_iron_ingot",
+      "set": {
+        "name": "Heavy Iron Ingot",
+        "display_name": "Heavy Iron Ingot",
+        "type": "material",
+        "owner_scope": "character",
+        "custodian": "rhea_mercer",
+        "state_tags": [
+          "loot",
+          "refunded"
+        ],
+        "linked_threads": [],
+        "last_seen": {
+          "chapter": 5,
+          "scene": 5,
+          "location": "LOC_OUTPOST_SURFACE"
+        }
+      }
+    },
+    {
+      "item_id": "ITEM_crystallized_experience",
+      "set": {
+        "name": "Crystallized Experience",
+        "display_name": "Crystallized Experience",
+        "type": "material",
+        "owner_scope": "character",
+        "custodian": "rhea_mercer",
+        "state_tags": [
+          "loot",
+          "refunded"
+        ],
+        "linked_threads": [],
+        "last_seen": {
+          "chapter": 5,
+          "scene": 5,
+          "location": "LOC_OUTPOST_SURFACE"
+        }
+      }
+    }
+  ],
+  "character_continuity_system_updates": [
+    {
+      "character_id": "rhea_mercer",
+      "set": {
+        "level": 7,
+        "xp": 4857,
+        "copper_credits": 500,
+        "stats": {
+          "stamina": 5,
+          "stamina_max": 150,
+          "strength": 20,
+          "vitality": 15
+        },
+        "resources": {
+          "stamina": 5,
+          "stamina_max": 150
+        },
+        "encumbrance_limit": 350
+      },
+      "reason": "Level up and stat allocation from refund."
+    },
+    {
+      "character_id": "vance_harrow",
+      "set": {
+        "level": 7,
+        "xp": 4857,
+        "copper_credits": 400,
+        "stats": {
+          "hp": 15,
+          "hp_max": 150,
+          "strength": 18,
+          "vitality": 20
+        },
+        "resources": {
+          "hp_current": 15,
+          "hp_max": 150
+        },
+        "encumbrance_limit": 300
+      },
+      "reason": "Level up and stat allocation from refund."
+    }
+  ],
+  "summary_update": {
+    "last_scene": [
+      "Trapped under the crushing physical weight of the unallocated rewards, the party struggled to breathe as the refund storm intensified.",
+      "Rhea and Vance were forced to rapidly allocate stats and expand their inventory slots to avoid being physically crushed by the back-pay.",
+      "Rhea dumped points into Strength and Vitality to increase her encumbrance limit.",
+      "Vance leveled up, pulling his HP just out of the critical red zone.",
+      "They managed to clear enough space to survive, though the storm continued to rage."
+    ],
+    "key_events": [
+      "The 14.3% withheld value rained down on the Outpost Surface as dangerous physical objects.",
+      "Rhea and Vance rapidly leveled up and allocated stat points to survive the crushing mass.",
+      "Rhea increased her Strength and Vitality, raising her encumbrance limit.",
+      "Vance's HP increased to 15/150 after leveling up.",
+      "Both characters purchased additional system inventory slots to stow the physical loot.",
+      "The party stabilized their immediate survival, but the storm continued."
+    ],
+    "must_stay_true": [
+      "REMOVE: mechanic: rhea_mercer Stamina is 2/100",
+      "REMOVE: mechanic: vance_harrow HP is 2/100",
+      "REMOVE: container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet])",
+      "mechanic: rhea_mercer Stamina is 5/150",
+      "mechanic: vance_harrow HP is 15/150",
+      "inventory: rhea_mercer -> Heavy Iron Ingot (status=stowed, container=system_inventory)",
+      "inventory: rhea_mercer -> Crystallized Experience (status=stowed, container=system_inventory)",
+      "container: system_inventory (owner=rhea_mercer, contents=[ITEM_raw_data_packet, ITEM_heavy_iron_ingot, ITEM_crystallized_experience])",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_scavenger_carapaces, ITEM_obsidian_shard, ITEM_ash_fungus, ITEM_severed_ash_boar_tusk])",
+      "mechanic: unit_734 Efficiency is 12",
+      "inventory: rhea_mercer -> Raw Data Packet (status=stowed, container=system_inventory)",
+      "mechanic: rhea_mercer has active status Soul-Bound Liability: Raw Data Packet",
+      "mechanic: vance_harrow has active status Soul-Bound Liability: Raw Data Packet",
+      "mechanic: unit_734 has active status Soul-Bound Liability: Raw Data Packet",
+      "milestone: data_packet_bound = DONE",
+      "milestone: grievance_formatted = DONE",
+      "milestone: grievance_submitted = DONE",
+      "inventory: vance_harrow -> Rebar (status=held, container=hand_right)",
+      "container: hand_right (owner=vance_harrow, contents=[ITEM_rebar])",
+      "container: belt_loop (owner=vance_harrow, contents=[])",
+      "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+      "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+      "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])",
+      "container: hand_left (owner=rhea_mercer, contents=[])",
+      "container: hand_right (owner=rhea_mercer, contents=[])"
+    ],
+    "chapter_so_far_add": [
+      "Trapped under the crushing weight of the physical refund, Rhea and Vance rapidly allocated stats and expanded their inventories to survive."
+    ]
+  }
+}

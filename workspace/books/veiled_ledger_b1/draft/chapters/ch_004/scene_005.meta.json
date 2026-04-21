@@ -1,0 +1,311 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_004_005",
+  "chapter": 4,
+  "scene": 5,
+  "scene_target": "The party infiltrates the restricted Maintenance Trenches, defeating a low-level security construct to follow the data conduit.",
+  "goal": "Follow the physical data conduit into the restricted Maintenance Trenches.",
+  "conflict": "A low-level security construct attempts to block their path.",
+  "required_callbacks": [],
+  "constraints": [],
+  "end_condition": "The party defeats the construct and gains access deeper into the trenches.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_OUTPOST_KIOSK",
+  "location_end_id": "LOC_MAINTENANCE_TRENCHES",
+  "location_start_label": "Outpost Kiosk",
+  "location_end_label": "Maintenance Trenches",
+  "location_start": "Outpost Kiosk",
+  "location_end": "Maintenance Trenches",
+  "handoff_mode": "direct",
+  "constraint_state": "processed",
+  "transition_in_text": "Following the physical manifestation of the data stream, the party descends from the Outpost Kiosk into the buried, glowing conduit lines of the Maintenance Trenches.",
+  "transition_in_anchors": [
+    "data stream",
+    "descend",
+    "kiosk",
+    "conduit lines",
+    "trenches"
+  ],
+  "transition_out_text": "With the security construct defeated, the path deeper into the restricted trenches is clear.",
+  "transition_out_anchors": [
+    "construct defeated",
+    "path clear",
+    "deeper",
+    "trenches"
+  ],
+  "consumes_outcome_from": "4:4",
+  "hands_off_to": "4:6",
+  "seam_score": 85,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "rhea_survival",
+    "party_alliance"
+  ],
+  "required_in_custody": [
+    "ITEM_makeshift_masonry_bludgeon",
+    "ITEM_rebar",
+    "ITEM_scrap_parchment",
+    "ITEM_charcoal_stick"
+  ],
+  "required_scene_accessible": [
+    "ITEM_makeshift_masonry_bludgeon",
+    "ITEM_rebar"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "travel_arrival",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources",
+    "xp"
+  ],
+  "ui_mechanics_expected": [
+    "HP",
+    "Stamina",
+    "XP",
+    "System Warning"
+  ],
+  "prose_path": "draft/chapters/ch_004/scene_005.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "character_continuity_system_updates": [
+      {
+        "chapter": 4,
+        "character_id": "rhea_mercer",
+        "delta": {
+          "stats": {
+            "xp": 45
+          }
+        },
+        "scene": 5,
+        "set": {
+          "reason": "Expended stamina to crush construct and gained party XP.",
+          "resources": {
+            "stamina": 20,
+            "stamina_max": 100
+          }
+        },
+        "remove": []
+      },
+      {
+        "chapter": 4,
+        "character_id": "vance_harrow",
+        "delta": {
+          "stats": {
+            "xp": 45
+          }
+        },
+        "scene": 5,
+        "set": {
+          "reason": "Took heavy damage from construct and gained party XP.",
+          "resources": {
+            "hp_current": 3,
+            "hp_max": 100
+          }
+        },
+        "remove": []
+      },
+      {
+        "chapter": 4,
+        "character_id": "unit_734",
+        "scene": 5,
+        "set": {
+          "reason": "Efficiency dropped during combat.",
+          "stats": {
+            "efficiency": 38
+          }
+        },
+        "remove": [],
+        "delta": {}
+      }
+    ],
+    "character_updates": [
+      {
+        "chapter": 4,
+        "character_id": "rhea_mercer",
+        "containers": [
+          {
+            "container": "hand_right",
+            "contents": [
+              "ITEM_makeshift_masonry_bludgeon"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "hand_left",
+            "contents": [],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "contents": [
+              "ITEM_cracked_smartphone",
+              "ITEM_copper_credits",
+              "ITEM_scrap_parchment",
+              "ITEM_charcoal_stick"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "contents": [
+              "ITEM_scavenger_carapaces",
+              "ITEM_obsidian_shard",
+              "ITEM_ash_fungus",
+              "ITEM_severed_ash_boar_tusk"
+            ],
+            "owner": "rhea_mercer"
+          }
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "container": "hand_right",
+            "item": "ITEM_makeshift_masonry_bludgeon",
+            "status": "held"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_copper_credits",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_cracked_smartphone",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_scrap_parchment",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_right",
+            "item": "ITEM_charcoal_stick",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_scavenger_carapaces",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_obsidian_shard",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_ash_fungus",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_severed_ash_boar_tusk",
+            "status": "stowed"
+          }
+        ],
+        "persona_updates": [],
+        "scene": 5
+      }
+    ],
+    "summary_update": {
+      "chapter_so_far_add": [
+        "The party entered the Maintenance Trenches and defeated a security construct, clearing the path to the digital skim point."
+      ],
+      "key_events": [
+        "The party entered the Maintenance Trenches.",
+        "A brass security construct attacked, reducing Vance's HP to critical levels.",
+        "Rhea destroyed a support pillar, crushing the construct and earning the party XP."
+      ],
+      "last_scene": [
+        "The party infiltrated the restricted Maintenance Trenches, following the physical data conduit.",
+        "A low-level security construct ambushed them, dealing critical damage to Vance.",
+        "Rhea exploited the environment by crushing the construct with a collapsed ceiling support, clearing the path deeper."
+      ],
+      "must_stay_true": [
+        "REMOVE: mechanic: rhea_mercer Stamina is 28/100",
+        "REMOVE: inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+        "REMOVE: inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_left)",
+        "REMOVE: container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick])",
+        "REMOVE: container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+        "mechanic: rhea_mercer Stamina is 20/100",
+        "mechanic: vance_harrow HP is 3/100",
+        "mechanic: unit_734 Efficiency is 38",
+        "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+        "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+        "container: hand_left (owner=rhea_mercer, contents=[])",
+        "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])"
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "rhea_mercer",
+        "vance_harrow",
+        "unit_734"
+      ],
+      "location": "LOC_MAINTENANCE_TRENCHES",
+      "open_threads": [
+        "rhea_survival",
+        "party_alliance"
+      ]
+    }
+  },
+  "scene_summary": [
+    "The party infiltrated the restricted Maintenance Trenches, following the physical data conduit.",
+    "A low-level security construct ambushed them, dealing critical damage to Vance.",
+    "Rhea exploited the environment by crushing the construct with a collapsed ceiling support, clearing the path deeper."
+  ],
+  "key_events": [
+    "The party entered the Maintenance Trenches.",
+    "A brass security construct attacked, reducing Vance's HP to critical levels.",
+    "Rhea destroyed a support pillar, crushing the construct and earning the party XP."
+  ],
+  "must_stay_true": [
+    "REMOVE: mechanic: rhea_mercer Stamina is 28/100",
+    "REMOVE: inventory: rhea_mercer -> Scrap Parchment (status=held, container=hand_left)",
+    "REMOVE: inventory: rhea_mercer -> Charcoal Stick (status=held, container=hand_left)",
+    "REMOVE: container: hand_left (owner=rhea_mercer, contents=[ITEM_scrap_parchment, ITEM_charcoal_stick])",
+    "REMOVE: container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits])",
+    "mechanic: rhea_mercer Stamina is 20/100",
+    "mechanic: vance_harrow HP is 3/100",
+    "mechanic: unit_734 Efficiency is 38",
+    "inventory: rhea_mercer -> Scrap Parchment (status=stowed, container=blazer_pocket_right)",
+    "inventory: rhea_mercer -> Charcoal Stick (status=stowed, container=blazer_pocket_right)",
+    "container: hand_left (owner=rhea_mercer, contents=[])",
+    "container: blazer_pocket_right (owner=rhea_mercer, contents=[ITEM_cracked_smartphone, ITEM_copper_credits, ITEM_scrap_parchment, ITEM_charcoal_stick])"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "fail",
+    "issues": [
+      {
+        "code": "pipeline_state_incoherent",
+        "message": "State snapshot for vance_harrow lacks HP stats while must_stay_true declares HP 3/100.",
+        "severity": "error",
+        "evidence": {
+          "line": 18,
+          "excerpt": "mechanic: vance_harrow HP is 3/100"
+        }
+      }
+    ]
+  },
+  "write_attempts": 9,
+  "updated_at": "2026-04-20T20:38:20Z"
+}

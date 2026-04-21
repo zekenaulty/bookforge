@@ -1,0 +1,409 @@
+{
+  "schema_version": "1.1",
+  "scene_id": "SC_008_003",
+  "chapter": 8,
+  "scene": 3,
+  "scene_target": "The party escapes the collapsing sanctum and reaches the outer boundary of the frontier zone.",
+  "goal": "Survive the hard purge protocol and reach the outer boundary.",
+  "conflict": "The environment is dissolving into raw code, dropping debris and deletion waves.",
+  "required_callbacks": [],
+  "constraints": [
+    "target_words: 1800"
+  ],
+  "end_condition": "The party reaches the outer boundary of the frontier zone, halting before the final barrier.",
+  "ui_allowed": true,
+  "location_start_id": "LOC_COLLAPSING_SANCTUM_CORRIDORS",
+  "location_end_id": "LOC_FRONTIER_ZONE_BOUNDARY",
+  "location_start_label": "Collapsing Sanctum Corridors",
+  "location_end_label": "Frontier Zone Boundary",
+  "location_start": "Collapsing Sanctum Corridors",
+  "location_end": "Frontier Zone Boundary",
+  "handoff_mode": "continuous",
+  "constraint_state": "processed",
+  "transition_in_text": "The vault collapses behind them, but the entire sanctum is now purging, forcing a desperate sprint.",
+  "transition_in_anchors": [
+    "vault",
+    "collapse",
+    "purge",
+    "sprint"
+  ],
+  "transition_out_text": "They reach the outer boundary, only to find their path blocked by the edge of the zone.",
+  "transition_out_anchors": [
+    "outer_boundary",
+    "edge",
+    "blocked",
+    "halt"
+  ],
+  "consumes_outcome_from": "8:2",
+  "hands_off_to": "8:4",
+  "seam_score": 85,
+  "seam_resolution": "inline_bridge",
+  "cast_present": [
+    "Rhea Mercer",
+    "Vance Harrow",
+    "Unit 734"
+  ],
+  "cast_present_ids": [
+    "rhea_mercer",
+    "vance_harrow",
+    "unit_734"
+  ],
+  "introduces": [],
+  "introduces_ids": [],
+  "thread_ids": [
+    "rhea_survival",
+    "party_alliance"
+  ],
+  "required_in_custody": [
+    "ITEM_administrative_residue_token",
+    "ITEM_rebar"
+  ],
+  "required_scene_accessible": [
+    "ITEM_administrative_residue_token",
+    "ITEM_rebar"
+  ],
+  "required_visible_on_page": [],
+  "forbidden_visible": [],
+  "device_presence": [],
+  "transition_type": "action_sequence",
+  "timeline_scope": "present",
+  "ontological_scope": "real",
+  "continuity_system_focus": [
+    "stats",
+    "resources",
+    "statuses"
+  ],
+  "ui_mechanics_expected": [
+    "Purge Protocol",
+    "Deletion Wave",
+    "Chassis Integrity",
+    "HP",
+    "Stamina"
+  ],
+  "prose_path": "draft/chapters/ch_008/scene_003.md",
+  "state_patch": {
+    "schema_version": "1.0",
+    "character_continuity_system_updates": [
+      {
+        "chapter": 8,
+        "character_id": "rhea_mercer",
+        "scene": 3,
+        "set": {
+          "reason": "Rhea is running on zero stamina during the escape.",
+          "stats": {
+            "stamina": 0,
+            "stamina_max": 150
+          },
+          "statuses": [
+            {
+              "active": true,
+              "name": "Exhaustion (Severe)",
+              "source": "Low Stamina"
+            },
+            {
+              "active": true,
+              "name": "Audit Compliance (Red-Tier)",
+              "source": "Overseer"
+            },
+            {
+              "active": true,
+              "name": "Hostile Environment Marker",
+              "source": "System"
+            }
+          ]
+        },
+        "remove": [],
+        "delta": {}
+      },
+      {
+        "chapter": 8,
+        "character_id": "vance_harrow",
+        "scene": 3,
+        "set": {
+          "reason": "Vance used his rebar to smash falling debris, degrading its durability, and his HP stabilized at 45.",
+          "stats": {
+            "hp_current": 45,
+            "hp_max": 100,
+            "rebar_durability_percent": 52
+          }
+        },
+        "remove": [],
+        "delta": {}
+      },
+      {
+        "chapter": 8,
+        "character_id": "unit_734",
+        "scene": 3,
+        "set": {
+          "reason": "Unit 734 suffered critical chassis degradation during the escape.",
+          "stats": {
+            "chassis_integrity": 28
+          },
+          "statuses": [
+            {
+              "active": true,
+              "name": "Critical System Failure Imminent",
+              "source": "Chassis Degradation"
+            },
+            {
+              "active": true,
+              "name": "Audit Compliance (Red-Tier)",
+              "source": "Overseer"
+            },
+            {
+              "active": true,
+              "name": "Hostile Environment Marker",
+              "source": "System"
+            }
+          ]
+        },
+        "remove": [],
+        "delta": {}
+      }
+    ],
+    "global_continuity_system_updates": [
+      {
+        "set": {
+          "hard_purge_protocol": "active",
+          "deletion_wave": "incoming"
+        }
+      }
+    ],
+    "character_updates": [
+      {
+        "chapter": 8,
+        "character_id": "rhea_mercer",
+        "containers": [
+          {
+            "container": "system_inventory",
+            "contents": [
+              "ITEM_administrative_residue_token"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "contents": [
+              "ITEM_administrative_coordinate_chip",
+              "ITEM_raw_data_packet",
+              "ITEM_null_value_token",
+              "ITEM_mercy_cache_coordinates"
+            ],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "hand_left",
+            "contents": [],
+            "owner": "rhea_mercer"
+          },
+          {
+            "container": "hand_right",
+            "contents": [],
+            "owner": "rhea_mercer"
+          }
+        ],
+        "invariants_add": [
+          "milestone: frontier_boundary_reached = DONE"
+        ],
+        "inventory": [
+          {
+            "container": "system_inventory",
+            "item": "ITEM_administrative_residue_token",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_mercy_cache_coordinates",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_administrative_coordinate_chip",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_raw_data_packet",
+            "status": "stowed"
+          },
+          {
+            "container": "blazer_pocket_left",
+            "item": "ITEM_null_value_token",
+            "status": "stowed"
+          }
+        ],
+        "persona_updates": [
+          "Rhea pushed her physical limits to zero stamina, determined not to be deleted by a bureaucratic technicality."
+        ],
+        "scene": 3
+      },
+      {
+        "chapter": 8,
+        "character_id": "vance_harrow",
+        "containers": [
+          {
+            "container": "hand_right",
+            "contents": [
+              "ITEM_rebar"
+            ],
+            "owner": "vance_harrow"
+          },
+          {
+            "container": "cargo_pocket_right",
+            "contents": [
+              "ITEM_restorative_consumables"
+            ],
+            "owner": "vance_harrow"
+          }
+        ],
+        "invariants_add": [],
+        "inventory": [
+          {
+            "container": "hand_right",
+            "item": "ITEM_rebar",
+            "status": "held"
+          },
+          {
+            "container": "cargo_pocket_right",
+            "item": "ITEM_restorative_consumables",
+            "status": "stowed"
+          }
+        ],
+        "persona_updates": [
+          "Vance acted as the vanguard during the escape, using his physical strength to clear debris despite the risk to his equipment."
+        ],
+        "scene": 3
+      },
+      {
+        "chapter": 8,
+        "character_id": "unit_734",
+        "containers": [],
+        "invariants_add": [],
+        "inventory": [],
+        "persona_updates": [
+          "Unit 734 calculated the escape vector while suffering critical chassis degradation from the collapsing navigational mesh."
+        ],
+        "scene": 3
+      }
+    ],
+    "summary_update": {
+      "chapter_so_far_add": [
+        "The local frontier node initiated a hard purge protocol, forcing the party to sprint through disintegrating corridors.",
+        "They reached the outer boundary of the frontier zone, only to find their path blocked by an impenetrable firewall of deletion code."
+      ],
+      "key_events": [
+        "The sanctum began actively purging, forcing the party to flee through collapsing corridors.",
+        "Vance used his Rebar to smash falling debris, taking a durability hit to protect the group.",
+        "Unit 734's chassis integrity reached critical levels as it calculated the escape vector.",
+        "The party arrived at the edge of the frontier zone but were halted by an impenetrable firewall."
+      ],
+      "last_scene": [
+        "The frontier zone initiated a hard purge protocol, dissolving the sanctum's architecture into raw deletion code.",
+        "The party sprinted through the disintegrating corridors, dodging falling debris and deletion waves.",
+        "They reached the outer boundary of the frontier zone, only to find their path blocked by a towering firewall of red code."
+      ],
+      "must_stay_true": [
+        "REMOVE: milestone: frontier_zone_exited = DONE",
+        "milestone: formal_dispute_initiated = DONE",
+        "mechanic: rhea_mercer Stamina is 0/150",
+        "milestone: catastrophic_default_triggered = DONE",
+        "milestone: overseer_shields_stripped = DONE",
+        "inventory: rhea_mercer -> Raw Data Packet (status=stowed, container=blazer_pocket_left)",
+        "inventory: rhea_mercer -> Null-Value Token (status=stowed, container=blazer_pocket_left)",
+        "container: hand_right (owner=rhea_mercer, contents=[])",
+        "milestone: feral_overseer_defeated = DONE",
+        "milestone: debt_lock_removed = DONE",
+        "milestone: hidden_vault_opened = DONE",
+        "milestone: mercy_cache_revealed = DONE",
+        "inventory: rhea_mercer -> Administrative Residue Token (status=stowed, container=system_inventory)",
+        "container: system_inventory (owner=rhea_mercer, contents=[ITEM_administrative_residue_token])",
+        "inventory: rhea_mercer -> Mercy Cache Coordinates (status=stowed, container=blazer_pocket_left)",
+        "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip, ITEM_raw_data_packet, ITEM_null_value_token, ITEM_mercy_cache_coordinates])",
+        "container: hand_left (owner=rhea_mercer, contents=[])",
+        "inventory: vance_harrow -> Restorative Consumables (status=stowed, container=cargo_pocket_right)",
+        "container: cargo_pocket_right (owner=vance_harrow, contents=[ITEM_restorative_consumables])",
+        "REMOVE: mechanic: vance_harrow Rebar Durability is 55%",
+        "mechanic: vance_harrow Rebar Durability is 52%",
+        "milestone: frontier_boundary_reached = DONE"
+      ]
+    },
+    "world_updates": {
+      "cast_present": [
+        "rhea_mercer",
+        "vance_harrow",
+        "unit_734"
+      ],
+      "location": "LOC_FRONTIER_ZONE_BOUNDARY",
+      "open_threads": [
+        "rhea_survival",
+        "party_alliance"
+      ],
+      "recent_facts": [
+        "The local frontier node initiated a hard purge protocol, dissolving physical architecture into deletion code.",
+        "Vance used his Rebar to shatter falling debris, degrading its durability to 52%.",
+        "Unit 734's chassis integrity dropped to 28% as it struggled to navigate the collapsing mesh.",
+        "The party reached the outer boundary of the frontier zone but found their path blocked by a firewall of deletion code."
+      ]
+    }
+  },
+  "scene_summary": [
+    "The frontier zone initiated a hard purge protocol, dissolving the sanctum's architecture into raw deletion code.",
+    "The party sprinted through the disintegrating corridors, dodging falling debris and deletion waves.",
+    "They reached the outer boundary of the frontier zone, only to find their path blocked by a towering firewall of red code."
+  ],
+  "key_events": [
+    "The sanctum began actively purging, forcing the party to flee through collapsing corridors.",
+    "Vance used his Rebar to smash falling debris, taking a durability hit to protect the group.",
+    "Unit 734's chassis integrity reached critical levels as it calculated the escape vector.",
+    "The party arrived at the edge of the frontier zone but were halted by an impenetrable firewall."
+  ],
+  "must_stay_true": [
+    "REMOVE: milestone: frontier_zone_exited = DONE",
+    "milestone: formal_dispute_initiated = DONE",
+    "mechanic: rhea_mercer Stamina is 0/150",
+    "milestone: catastrophic_default_triggered = DONE",
+    "milestone: overseer_shields_stripped = DONE",
+    "inventory: rhea_mercer -> Raw Data Packet (status=stowed, container=blazer_pocket_left)",
+    "inventory: rhea_mercer -> Null-Value Token (status=stowed, container=blazer_pocket_left)",
+    "container: hand_right (owner=rhea_mercer, contents=[])",
+    "milestone: feral_overseer_defeated = DONE",
+    "milestone: debt_lock_removed = DONE",
+    "milestone: hidden_vault_opened = DONE",
+    "milestone: mercy_cache_revealed = DONE",
+    "inventory: rhea_mercer -> Administrative Residue Token (status=stowed, container=system_inventory)",
+    "container: system_inventory (owner=rhea_mercer, contents=[ITEM_administrative_residue_token])",
+    "inventory: rhea_mercer -> Mercy Cache Coordinates (status=stowed, container=blazer_pocket_left)",
+    "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip, ITEM_raw_data_packet, ITEM_null_value_token, ITEM_mercy_cache_coordinates])",
+    "container: hand_left (owner=rhea_mercer, contents=[])",
+    "inventory: vance_harrow -> Restorative Consumables (status=stowed, container=cargo_pocket_right)",
+    "container: cargo_pocket_right (owner=vance_harrow, contents=[ITEM_restorative_consumables])",
+    "REMOVE: mechanic: vance_harrow Rebar Durability is 55%",
+    "mechanic: vance_harrow Rebar Durability is 52%",
+    "milestone: frontier_boundary_reached = DONE"
+  ],
+  "threads_touched": [],
+  "lint_report": {
+    "schema_version": "1.0",
+    "status": "pass",
+    "issues": [
+      {
+        "code": "appearance_check_missing",
+        "message": "APPEARANCE_CHECK block is missing for cast members: rhea_mercer, vance_harrow, unit_734.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_mismatch",
+        "message": "UI shows Stamina but character state has 0.",
+        "severity": "warning"
+      },
+      {
+        "code": "stat_unowned",
+        "message": "UI shows HP but no matching stat exists in state.",
+        "severity": "warning"
+      }
+    ],
+    "mode": "heuristic"
+  },
+  "write_attempts": 5,
+  "updated_at": "2026-04-21T03:43:23Z"
+}

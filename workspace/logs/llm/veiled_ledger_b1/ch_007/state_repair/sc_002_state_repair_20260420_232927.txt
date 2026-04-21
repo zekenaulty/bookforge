@@ -1,0 +1,223 @@
+{
+  "character_continuity_system_updates": [
+    {
+      "chapter": 7,
+      "character_id": "vance_harrow",
+      "scene": 2,
+      "set": {
+        "resources": {
+          "hp_current": 10
+        },
+        "stats": {
+          "hp": 10,
+          "hp_max": 100
+        }
+      }
+    },
+    {
+      "chapter": 7,
+      "character_id": "unit_734",
+      "scene": 2,
+      "set": {
+        "stats": {
+          "chassis_integrity": 34
+        }
+      }
+    },
+    {
+      "chapter": 7,
+      "character_id": "rhea_mercer",
+      "scene": 2,
+      "delta": {
+        "copper_credits": -10
+      }
+    }
+  ],
+  "global_continuity_system_updates": [
+    {
+      "set": {
+        "audit_progress": 38
+      }
+    }
+  ],
+  "character_updates": [
+    {
+      "chapter": 7,
+      "character_id": "rhea_mercer",
+      "scene": 2,
+      "containers": [
+        {
+          "container": "blazer_pocket_left",
+          "contents": [
+            "ITEM_administrative_coordinate_chip"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "system_inventory",
+          "contents": [
+            "ITEM_raw_data_packet"
+          ],
+          "owner": "rhea_mercer"
+        },
+        {
+          "container": "hand_left",
+          "contents": [
+            "ITEM_null_value_token"
+          ],
+          "owner": "rhea_mercer"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "blazer_pocket_left",
+          "item": "ITEM_administrative_coordinate_chip",
+          "status": "stowed"
+        },
+        {
+          "container": "system_inventory",
+          "item": "ITEM_raw_data_packet",
+          "status": "stowed"
+        },
+        {
+          "container": "hand_left",
+          "item": "ITEM_null_value_token",
+          "status": "held"
+        }
+      ],
+      "persona_updates": [
+        "Rhea successfully bypassed the lethal compliance checks by sacrificing abstract junk data and partially consuming her Obsidian Shard."
+      ]
+    },
+    {
+      "chapter": 7,
+      "character_id": "vance_harrow",
+      "scene": 2,
+      "containers": [
+        {
+          "container": "hand_right",
+          "contents": [
+            "ITEM_rebar"
+          ],
+          "owner": "vance_harrow"
+        },
+        {
+          "container": "torn_pocket",
+          "contents": [
+            "ITEM_copper_credits_vance"
+          ],
+          "owner": "vance_harrow"
+        }
+      ],
+      "invariants_add": [],
+      "inventory": [
+        {
+          "container": "hand_right",
+          "item": "ITEM_rebar",
+          "status": "held"
+        },
+        {
+          "container": "torn_pocket",
+          "item": "ITEM_copper_credits_vance",
+          "status": "stowed"
+        }
+      ],
+      "persona_updates": [
+        "Vance barely survived the regenerating guard, holding the line with only 10 HP."
+      ]
+    }
+  ],
+  "item_registry_updates": [
+    {
+      "item_id": "ITEM_obsidian_shard",
+      "set": {
+        "state_tags": [
+          "partially_consumed"
+        ]
+      }
+    }
+  ],
+  "transfer_updates": [
+    {
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "item_id": "ITEM_copper_credits",
+      "reason": "Sacrificed to compliance check",
+      "to": {
+        "custodian": "world"
+      }
+    },
+    {
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "item_id": "ITEM_cracked_smartphone",
+      "reason": "Sacrificed to compliance check",
+      "to": {
+        "custodian": "world"
+      }
+    },
+    {
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "item_id": "ITEM_scrap_parchment",
+      "reason": "Sacrificed to compliance check",
+      "to": {
+        "custodian": "world"
+      }
+    },
+    {
+      "from": {
+        "character_id": "rhea_mercer"
+      },
+      "item_id": "ITEM_obsidian_shard",
+      "reason": "Sacrificed to compliance check",
+      "to": {
+        "custodian": "world"
+      }
+    }
+  ],
+  "schema_version": "1.0",
+  "summary_update": {
+    "chapter_so_far_add": [
+      "Rhea successfully bypassed the lethal compliance checks in the sanctum foyer by sacrificing abstract junk data, opening the path to the inner sanctum while Vance barely survived a regenerating guard."
+    ],
+    "key_events": [
+      "The sanctum foyer locked down, activating lethal laser-grid compliance checks.",
+      "Vance held off a regenerating guard, taking heavy damage and dropping to 10 HP.",
+      "Rhea partially sacrificed her Obsidian Shard and liquidated abstract junk data to pass the inventory audit.",
+      "The party successfully bypassed the compliance checks and opened the path to the inner sanctum."
+    ],
+    "last_scene": [
+      "Trapped in the foyer, Rhea bypassed the lethal laser-grid compliance checks by feeding the system junk data and partially sacrificing her Obsidian Shard.",
+      "Vance barely survived a brutal assault from a regenerating guard, holding the line with only 10 HP.",
+      "With the compliance checks passed, the heavy blast doors opened, granting the party access to the inner sanctum."
+    ],
+    "must_stay_true": [
+      "REMOVE: mechanic: vance_harrow HP is 10/150",
+      "REMOVE: inventory: rhea_mercer -> Obsidian Shard (status=stowed, container=blazer_pocket_left)",
+      "REMOVE: container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_obsidian_shard, ITEM_administrative_coordinate_chip])",
+      "REMOVE: inventory: rhea_mercer -> Obsidian Shard (status=held, container=hand_right)",
+      "REMOVE: container: hand_right (owner=rhea_mercer, contents=[ITEM_obsidian_shard])",
+      "mechanic: vance_harrow HP is 10/100",
+      "container: blazer_pocket_left (owner=rhea_mercer, contents=[ITEM_administrative_coordinate_chip])",
+      "milestone: compliance_checks_bypassed = DONE"
+    ]
+  },
+  "world_updates": {
+    "cast_present": [
+      "rhea_mercer",
+      "vance_harrow",
+      "unit_734"
+    ],
+    "location": "LOC_SANCTUM_INNER_CORRIDOR",
+    "open_threads": [
+      "rhea_survival",
+      "party_alliance",
+      "system_debt_trap"
+    ]
+  }
+}
