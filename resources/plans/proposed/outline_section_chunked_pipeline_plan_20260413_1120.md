@@ -41,6 +41,7 @@ Progress since this state snapshot:
 - Writer-side `T2` logging now records whether it reused the prior Gemini response-content array, including count/hash/signature metadata, without building a second signature lineage system.
 - Transport logging is being reorganized under `workspace/logs/llm/{book}/{chapter}/{action_descriptor}/...` instead of a single flat folder.
 - Thought-signature state and current-thought artifacts are being split out of `workspace/logs/llm` into `workspace/thoughts/signatures/` and `workspace/thoughts/current/`.
+- Long-running writer runs now have a structured progress heartbeat under `workspace/books/<book>/logs/runs/<run_id>.progress.json` so operators can see live phase/chapter/scene progress without tailing raw transport logs.
 - A chapter seam finalization path now exists:
   - final section lock can trigger chapter seam audit/repair/finalization
   - `workflow finalize-chapter` can backfill existing locked chapters
@@ -50,6 +51,16 @@ Progress since this state snapshot:
   - trims overlap-heavy opening sentences at joins
   - emits a chapter seam report and only promotes `ch_XXX.md` when error-class seam issues are cleared
 - Full chapter state-delta validation at finalization time is still pending; current finalization is a seam-quality gate, not yet a full semantic/state gate.
+- Real forward progress is now proven on a fresh Book 1 test run (`veiled_ledger_b1`):
+  - outline pipeline completed successfully on Gemini 3.1 Pro after fixing a validator-scope defect and a chapter-fragment coalescing defect in Phase 06 extraction
+  - the full book now advances section-by-section through all 8 chapters and reaches workflow state `COMPLETE`
+  - a planner-target drift defect was found in live Chapter 7 execution, where a saved scene card could point at the wrong scene number; runner-side validation/replan now defends the requested chapter/scene cursor before downstream phases run
+  - scene-level lint/repair loops are actively doing useful work in live runs; several scenes required a single repair pass and then cleared
+  - the dominant operational instability during long runs is transient provider `HTTP 503` retry/backoff, not persistent pipeline breakage
+  - chapter seam finalization is now proven against the completed book:
+    - 7 of 8 chapters surfaced deterministic seam issues under the stricter audit
+    - 16 join issues were repaired automatically during finalization
+    - all 8 chapters re-audited cleanly after deterministic repair and promoted to final chapter markdown
 
 ## Progress Update (2026-04-17)
 Implemented and proven in the repo/workspace:
@@ -1417,6 +1428,7 @@ Before rollout reaches writing, add checks for:
 - configured-model policy respected by workflow commands
 - default lint/repair pass budget raised to `8`
 - workflow/test command wrappers use timeout windows appropriate for multi-hour runs
+- run loop updates a structured progress artifact during long-running scene execution
 
 ## Risks / Watchouts
 - Section-level insertion can still create ugly cross-section seams if boundary ownership is not enforced.

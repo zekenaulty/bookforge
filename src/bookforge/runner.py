@@ -36,7 +36,7 @@ from bookforge.pipeline.state_apply import _summary_from_state, _apply_state_pat
 from bookforge.pipeline.durable import _apply_durable_state_updates
 from bookforge.pipeline.io import _load_json, _snapshot_character_states_before_preflight, _log_scope, _write_scene_files
 from bookforge.pipeline.phase_history import _load_phase_history, _record_phase_success, _write_phase_artifact
-from bookforge.pipeline.run_logging import _current_run_id, _write_latest_run_pointer, _run_log_path, _append_run_log
+from bookforge.pipeline.run_logging import _current_run_id, _write_latest_run_pointer, _run_log_path, _append_run_log, _write_run_progress
 from bookforge.pipeline.lint import _lint_issue_entries, _lint_has_issue_code
 from bookforge.pipeline.llm_ops import _chat
 from bookforge.pipeline.prompts import _resolve_template
@@ -236,6 +236,7 @@ def _pause_on_reason(
     book_root: Path,
     state_path: Path,
     state: Optional[Dict[str, Any]],
+    run_id: Optional[str],
     phase: str,
     reason_code: str,
     message: str,
@@ -248,6 +249,25 @@ def _pause_on_reason(
             state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
         except Exception:
             pass
+    if run_id:
+        progress_payload: Dict[str, Any] = {
+            "book_id": book_root.name,
+            "status": "paused",
+            "phase": str(phase).strip(),
+            "reason_code": str(reason_code).strip(),
+            "message": str(message).strip(),
+        }
+        if scene_card:
+            chapter = _maybe_int(scene_card.get("chapter"))
+            scene = _maybe_int(scene_card.get("scene"))
+            section = _maybe_int(scene_card.get("section_id"))
+            if chapter is not None:
+                progress_payload["chapter"] = chapter
+            if scene is not None:
+                progress_payload["scene"] = scene
+            if section is not None:
+                progress_payload["section"] = section
+        _write_run_progress(book_root, run_id, progress_payload)
     _write_reason_pause_marker(book_root, phase, reason_code, message, scene_card, details)
     _status(f"Run paused ({reason_code}) in phase '{phase}': {message}")
     raise SystemExit(PAUSE_EXIT_CODE)
@@ -292,6 +312,7 @@ def _pause_on_quota(
     book_root: Path,
     state_path: Path,
     state: Optional[Dict[str, Any]],
+    run_id: Optional[str],
     phase: str,
     error: LLMRequestError,
     scene_card: Optional[Dict[str, Any]] = None,
@@ -304,6 +325,26 @@ def _pause_on_quota(
             state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
         except Exception:
             pass
+    progress_payload: Dict[str, Any] = {
+        "book_id": book_root.name,
+        "status": "paused",
+        "phase": str(phase).strip(),
+        "reason_code": "quota",
+        "message": str(error),
+        "retry_after_seconds": error.retry_after_seconds,
+    }
+    if scene_card:
+        chapter = _maybe_int(scene_card.get("chapter"))
+        scene = _maybe_int(scene_card.get("scene"))
+        section = _maybe_int(scene_card.get("section_id"))
+        if chapter is not None:
+            progress_payload["chapter"] = chapter
+        if scene is not None:
+            progress_payload["scene"] = scene
+        if section is not None:
+            progress_payload["section"] = section
+    if run_id:
+        _write_run_progress(book_root, run_id, progress_payload)
     _write_pause_marker(book_root, phase, error, scene_card)
     _status(f"Run paused due to quota in phase '{phase}': {error}")
     raise SystemExit(PAUSE_EXIT_CODE)
@@ -312,6 +353,7 @@ def _apply_durable_updates_or_pause(
     book_root: Path,
     state_path: Path,
     state: Optional[Dict[str, Any]],
+    run_id: Optional[str],
     patch: Dict[str, Any],
     chapter: int,
     scene: int,
@@ -337,6 +379,7 @@ def _apply_durable_updates_or_pause(
             book_root=book_root,
             state_path=state_path,
             state=state,
+            run_id=run_id,
             phase=f"durable_apply_{phase}",
             reason_code=code,
             message=msg,
@@ -453,11 +496,56 @@ def run_loop(
         raise FileNotFoundError(f"Missing system_v1.md: {system_path}")
 
     run_id = _current_run_id()
+    run_log_path = _run_log_path(book_root, run_id)
     _write_latest_run_pointer(book_root, run_id)
-    set_run_log_path(_run_log_path(book_root, run_id))
+    set_run_log_path(run_log_path)
     _append_run_log(book_root, run_id, f"run_id: {run_id}")
     _append_run_log(book_root, run_id, f"book_id: {book_id}")
     _append_run_log(book_root, run_id, f"started_at: {_now_iso()}")
+
+    def update_progress(
+        *,
+        status: str,
+        phase: str,
+        chapter: Optional[int] = None,
+        scene: Optional[int] = None,
+        section: Optional[int] = None,
+        turn: Optional[str] = None,
+        repair_pass: Optional[int] = None,
+        repair_pass_limit: Optional[int] = None,
+        message: Optional[str] = None,
+        artifact_path: Optional[Path] = None,
+        scene_card: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        payload: Dict[str, Any] = {
+            "book_id": book_id,
+            "status": str(status).strip(),
+            "phase": str(phase).strip(),
+            "run_log_path": _artifact_relpath(book_root, run_log_path),
+        }
+        if message:
+            payload["message"] = str(message).strip()
+        if scene_card:
+            chapter = chapter if chapter is not None else _maybe_int(scene_card.get("chapter"))
+            scene = scene if scene is not None else _maybe_int(scene_card.get("scene"))
+            section = section if section is not None else _maybe_int(scene_card.get("section_id"))
+        if chapter is not None:
+            payload["chapter"] = int(chapter)
+        if scene is not None:
+            payload["scene"] = int(scene)
+        if section is not None:
+            payload["section"] = int(section)
+        if turn:
+            payload["turn"] = str(turn).strip()
+        if repair_pass is not None:
+            payload["repair_pass"] = int(repair_pass)
+        if repair_pass_limit is not None:
+            payload["repair_pass_limit"] = int(repair_pass_limit)
+        if artifact_path is not None:
+            payload["last_artifact_path"] = _artifact_relpath(book_root, artifact_path)
+        _write_run_progress(book_root, run_id, payload)
+
+    update_progress(status="starting", phase="run_init", message="Run initialized.")
 
     book = _load_json(book_path)
     outline = _load_json(outline_path)
@@ -534,6 +622,11 @@ def run_loop(
     )
     if not force_outline_gate_bypass:
         _append_run_log(book_root, run_id, "outline_gate_bypass=false")
+    update_progress(
+        status="running",
+        phase="outline_gate",
+        message="Outline gate checks complete.",
+    )
 
     chapter_order, scene_counts = _outline_summary(outline)
     character_registry = _build_character_registry(outline)
@@ -563,7 +656,7 @@ def run_loop(
         try:
             generate_characters(workspace=workspace, book_id=book_id)
         except LLMRequestError as exc:
-            _pause_on_quota(book_root, state_path, None, "characters_generate", exc)
+            _pause_on_quota(book_root, state_path, None, run_id, "characters_generate", exc)
     writer_model = resolve_model("writer", config)
     repair_model = resolve_model("repair", config)
     state_repair_model = resolve_model("state_repair", config)
@@ -579,7 +672,12 @@ def run_loop(
             writer_model,
         )
     except LLMRequestError as exc:
-        _pause_on_quota(book_root, state_path, None, "style_anchor", exc)
+        _pause_on_quota(book_root, state_path, None, run_id, "style_anchor", exc)
+    update_progress(
+        status="running",
+        phase="style_anchor",
+        message="Style anchor ready.",
+    )
 
     while True:
         state = _load_json(state_path)
@@ -606,6 +704,13 @@ def run_loop(
         if scene_card_path is None:
             scene_card_path = _existing_scene_card(state, book_root) if resume else None
         if scene_card_path is None:
+            update_progress(
+                status="running",
+                phase="plan",
+                chapter=chapter,
+                scene=scene,
+                message="Planning next scene card.",
+            )
             _status(f"Planning chapter {chapter} scene {scene}...")
             try:
                 scene_card_path = plan_scene(
@@ -615,16 +720,51 @@ def run_loop(
                     model=planner_model,
                 )
             except LLMRequestError as exc:
-                _pause_on_quota(book_root, state_path, state, "plan_scene", exc)
+                _pause_on_quota(book_root, state_path, state, run_id, "plan_scene", exc)
             _record_phase_success(book_root, chapter, scene, "plan", {"scene_card": _artifact_relpath(book_root, scene_card_path)})
             _status(f"Planned scene card: ch{chapter:03d} sc{scene:03d} OK")
         else:
             _status(f"Using existing scene card: ch{chapter:03d} sc{scene:03d}")
         scene_card = _load_json(scene_card_path)
+        card_chapter = int(scene_card.get("chapter", chapter) or chapter)
+        card_scene = int(scene_card.get("scene", scene) or scene)
+        if card_chapter != chapter or card_scene != scene:
+            _status(
+                "Scene card target mismatch; replanning exact target "
+                + f"ch{chapter:03d} sc{scene:03d} "
+                + f"(loaded ch{card_chapter:03d} sc{card_scene:03d})..."
+            )
+            scene_card_path = plan_scene(
+                workspace,
+                book_id,
+                chapter=chapter,
+                scene=scene,
+                client=planner_client,
+                model=planner_model,
+            )
+            _record_phase_success(book_root, chapter, scene, "plan", {"scene_card": _artifact_relpath(book_root, scene_card_path)})
+            scene_card = _load_json(scene_card_path)
+            card_chapter = int(scene_card.get("chapter", chapter) or chapter)
+            card_scene = int(scene_card.get("scene", scene) or scene)
+            if card_chapter != chapter or card_scene != scene:
+                raise ValueError(
+                    "Loaded scene card still mismatched requested target "
+                    + f"(expected ch{chapter:03d} sc{scene:03d}, "
+                    + f"got ch{card_chapter:03d} sc{card_scene:03d})."
+                )
         _normalize_scene_card_ui_gate(scene_card)
         validate_json(scene_card, "scene_card")
-        chapter_num = int(scene_card.get("chapter", chapter))
-        scene_num = int(scene_card.get("scene", scene))
+        chapter_num = chapter
+        scene_num = scene
+        update_progress(
+            status="running",
+            phase="scene_ready",
+            chapter=chapter_num,
+            scene=scene_num,
+            scene_card=scene_card,
+            artifact_path=scene_card_path,
+            message="Scene card resolved.",
+        )
 
         cast_ids = scene_card.get("cast_present_ids", []) if isinstance(scene_card, dict) else []
         if not isinstance(cast_ids, list):
@@ -669,8 +809,16 @@ def run_loop(
                 if refreshed:
                     _status(f"Appearance projections refreshed: {len(refreshed)}")
             except LLMRequestError as exc:
-                _pause_on_quota(book_root, state_path, state, "appearance_projection", exc, scene_card)
+                _pause_on_quota(book_root, state_path, state, run_id, "appearance_projection", exc, scene_card)
 
+        update_progress(
+            status="running",
+            phase="preflight",
+            chapter=chapter_num,
+            scene=scene_num,
+            scene_card=scene_card,
+            message="Preflight state alignment in progress.",
+        )
         _status(f"Preflight state alignment: ch{chapter_num:03d} sc{scene_num:03d}...")
         preflight_patch = None
         if resume and phase_history:
@@ -696,7 +844,7 @@ def run_loop(
                     durable_expand_ids=sorted(durable_expand_ids),
                 )
             except LLMRequestError as exc:
-                _pause_on_quota(book_root, state_path, state, "scene_state_preflight", exc, scene_card)
+                _pause_on_quota(book_root, state_path, state, run_id, "scene_state_preflight", exc, scene_card)
             artifact_path = _write_phase_artifact(book_root, chapter_num, scene_num, "preflight_patch", preflight_patch, as_json=True)
             _record_phase_success(book_root, chapter_num, scene_num, "preflight", {"patch": _artifact_relpath(book_root, artifact_path)})
         else:
@@ -708,6 +856,7 @@ def run_loop(
             book_root=book_root,
             state_path=state_path,
             state=state,
+            run_id=run_id,
             patch=preflight_patch,
             chapter=chapter_num,
             scene=scene_num,
@@ -717,7 +866,23 @@ def run_loop(
             _status("Durable state updated (preflight) OK")
         character_states = _load_character_states(book_root, scene_card)
         _status("Preflight alignment complete OK")
+        update_progress(
+            status="running",
+            phase="preflight",
+            chapter=chapter_num,
+            scene=scene_num,
+            scene_card=scene_card,
+            message="Preflight state alignment complete.",
+        )
 
+        update_progress(
+            status="running",
+            phase="continuity_pack",
+            chapter=chapter_num,
+            scene=scene_num,
+            scene_card=scene_card,
+            message="Continuity pack generation in progress.",
+        )
         _status(f"Generating continuity pack: ch{chapter_num:03d} sc{scene_num:03d}...")
         continuity_pack = None
         if resume and phase_history:
@@ -740,15 +905,31 @@ def run_loop(
                     durable_expand_ids=sorted(durable_expand_ids),
                 )
             except LLMRequestError as exc:
-                _pause_on_quota(book_root, state_path, state, "continuity_pack", exc, scene_card)
+                _pause_on_quota(book_root, state_path, state, run_id, "continuity_pack", exc, scene_card)
             artifact_path = _write_phase_artifact(book_root, chapter_num, scene_num, "continuity_pack", continuity_pack, as_json=True)
             _record_phase_success(book_root, chapter_num, scene_num, "continuity_pack", {"pack": _artifact_relpath(book_root, artifact_path)})
         else:
             _status("Using continuity pack from phase history")
         _status("Continuity pack ready OK")
+        update_progress(
+            status="running",
+            phase="continuity_pack",
+            chapter=chapter_num,
+            scene=scene_num,
+            scene_card=scene_card,
+            message="Continuity pack ready.",
+        )
 
         base_invariants = book.get("invariants", []) if isinstance(book.get("invariants", []), list) else []
 
+        update_progress(
+            status="running",
+            phase="write",
+            chapter=chapter_num,
+            scene=scene_num,
+            scene_card=scene_card,
+            message="Scene prose generation in progress.",
+        )
         _status(f"Writing scene: ch{chapter_num:03d} sc{scene_num:03d}...")
         prose = None
         patch = None
@@ -775,14 +956,30 @@ def run_loop(
                     durable_expand_ids=sorted(durable_expand_ids),
                 )
             except LLMRequestError as exc:
-                _pause_on_quota(book_root, state_path, state, "write_scene", exc, scene_card)
+                _pause_on_quota(book_root, state_path, state, run_id, "write_scene", exc, scene_card)
             prose_path = _write_phase_artifact(book_root, chapter_num, scene_num, "write_prose", prose, as_json=False)
             patch_path = _write_phase_artifact(book_root, chapter_num, scene_num, "write_patch", patch, as_json=True)
             _record_phase_success(book_root, chapter_num, scene_num, "write", {"prose": _artifact_relpath(book_root, prose_path), "patch": _artifact_relpath(book_root, patch_path)})
         else:
             _status("Using write artifacts from phase history")
         _status("Write complete OK")
+        update_progress(
+            status="running",
+            phase="write",
+            chapter=chapter_num,
+            scene=scene_num,
+            scene_card=scene_card,
+            message="Scene prose generation complete.",
+        )
 
+        update_progress(
+            status="running",
+            phase="state_repair",
+            chapter=chapter_num,
+            scene=scene_num,
+            scene_card=scene_card,
+            message="State repair in progress.",
+        )
         _status(f"Repairing state: ch{chapter_num:03d} sc{scene_num:03d}...")
         state_repair_resumed = False
         if resume and phase_history:
@@ -813,12 +1010,20 @@ def run_loop(
                     durable_expand_ids=sorted(durable_expand_ids),
                 )
             except LLMRequestError as exc:
-                _pause_on_quota(book_root, state_path, state, "state_repair", exc, scene_card)
+                _pause_on_quota(book_root, state_path, state, run_id, "state_repair", exc, scene_card)
             patch_path = _write_phase_artifact(book_root, chapter_num, scene_num, "state_repair_patch", patch, as_json=True)
             _record_phase_success(book_root, chapter_num, scene_num, "state_repair", {"patch": _artifact_relpath(book_root, patch_path)})
         else:
             _status("Using state_repair patch from phase history")
         _status("State repair complete OK")
+        update_progress(
+            status="running",
+            phase="state_repair",
+            chapter=chapter_num,
+            scene=scene_num,
+            scene_card=scene_card,
+            message="State repair complete.",
+        )
 
         pre_lint_state = json.loads(json.dumps(state))
         pre_summary = _summary_from_state(pre_lint_state)
@@ -846,6 +1051,14 @@ def run_loop(
             _status("Linting disabled (mode=off).")
         else:
             if lint_report is None:
+                update_progress(
+                    status="running",
+                    phase="lint",
+                    chapter=chapter_num,
+                    scene=scene_num,
+                    scene_card=scene_card,
+                    message="Linting in progress.",
+                )
                 _status(f"Linting scene: ch{chapter_num:03d} sc{scene_num:03d}...")
                 try:
                     lint_report = _lint_scene(
@@ -866,10 +1079,18 @@ def run_loop(
                         durable_expand_ids=sorted(durable_expand_ids),
                     )
                 except LLMRequestError as exc:
-                    _pause_on_quota(book_root, state_path, state, "lint_scene", exc, scene_card)
+                    _pause_on_quota(book_root, state_path, state, run_id, "lint_scene", exc, scene_card)
                 report_path = _write_phase_artifact(book_root, chapter_num, scene_num, "lint_report", lint_report, as_json=True)
                 _record_phase_success(book_root, chapter_num, scene_num, "lint", {"report": _artifact_relpath(book_root, report_path)})
             _status(f"Lint status: {lint_report.get('status', 'unknown')}")
+            update_progress(
+                status="running",
+                phase="lint",
+                chapter=chapter_num,
+                scene=scene_num,
+                scene_card=scene_card,
+                message=f"Lint status: {lint_report.get('status', 'unknown')}",
+            )
 
         write_attempts = 1
         max_repair_passes = max(_lint_repair_max_passes(), durable_expand_max)
@@ -891,6 +1112,16 @@ def run_loop(
                             + ", ".join(selected)
                         )
 
+                update_progress(
+                    status="running",
+                    phase="repair",
+                    chapter=chapter_num,
+                    scene=scene_num,
+                    scene_card=scene_card,
+                    repair_pass=repair_passes + 1,
+                    repair_pass_limit=max_repair_passes,
+                    message="Repair pass in progress.",
+                )
                 _status(f"Repairing scene: ch{chapter_num:03d} sc{scene_num:03d}...")
                 try:
                     prose, patch = _repair_scene(
@@ -909,14 +1140,35 @@ def run_loop(
                         durable_expand_ids=sorted(durable_expand_ids),
                     )
                 except LLMRequestError as exc:
-                    _pause_on_quota(book_root, state_path, state, "repair_scene", exc, scene_card)
+                    _pause_on_quota(book_root, state_path, state, run_id, "repair_scene", exc, scene_card)
                 prose_path = _write_phase_artifact(book_root, chapter_num, scene_num, "repair_prose", prose, as_json=False)
                 patch_path = _write_phase_artifact(book_root, chapter_num, scene_num, "repair_patch", patch, as_json=True)
                 _record_phase_success(book_root, chapter_num, scene_num, "repair", {"prose": _artifact_relpath(book_root, prose_path), "patch": _artifact_relpath(book_root, patch_path)})
                 _status("Repair complete OK")
+                update_progress(
+                    status="running",
+                    phase="repair",
+                    chapter=chapter_num,
+                    scene=scene_num,
+                    scene_card=scene_card,
+                    repair_pass=repair_passes + 1,
+                    repair_pass_limit=max_repair_passes,
+                    artifact_path=patch_path,
+                    message="Repair pass complete.",
+                )
                 write_attempts += 1
                 repair_passes += 1
 
+                update_progress(
+                    status="running",
+                    phase="state_repair",
+                    chapter=chapter_num,
+                    scene=scene_num,
+                    scene_card=scene_card,
+                    repair_pass=repair_passes,
+                    repair_pass_limit=max_repair_passes,
+                    message="Post-repair state repair in progress.",
+                )
                 _status(f"Repairing state: ch{chapter_num:03d} sc{scene_num:03d}...")
                 try:
                     patch = _state_repair(
@@ -936,10 +1188,21 @@ def run_loop(
                         durable_expand_ids=sorted(durable_expand_ids),
                     )
                 except LLMRequestError as exc:
-                    _pause_on_quota(book_root, state_path, state, "state_repair", exc, scene_card)
+                    _pause_on_quota(book_root, state_path, state, run_id, "state_repair", exc, scene_card)
                 patch_path = _write_phase_artifact(book_root, chapter_num, scene_num, "state_repair_patch", patch, as_json=True)
                 _record_phase_success(book_root, chapter_num, scene_num, "state_repair", {"patch": _artifact_relpath(book_root, patch_path)})
                 _status("State repair complete OK")
+                update_progress(
+                    status="running",
+                    phase="state_repair",
+                    chapter=chapter_num,
+                    scene=scene_num,
+                    scene_card=scene_card,
+                    repair_pass=repair_passes,
+                    repair_pass_limit=max_repair_passes,
+                    artifact_path=patch_path,
+                    message="Post-repair state repair complete.",
+                )
 
                 pre_lint_state = json.loads(json.dumps(state))
                 pre_summary = _summary_from_state(pre_lint_state)
@@ -954,6 +1217,16 @@ def run_loop(
                 post_invariants += post_summary.get("must_stay_true", [])
                 post_invariants += post_summary.get("key_facts_ring", [])
 
+                update_progress(
+                    status="running",
+                    phase="lint",
+                    chapter=chapter_num,
+                    scene=scene_num,
+                    scene_card=scene_card,
+                    repair_pass=repair_passes,
+                    repair_pass_limit=max_repair_passes,
+                    message="Post-repair lint in progress.",
+                )
                 _status(f"Linting scene: ch{chapter_num:03d} sc{scene_num:03d}...")
                 try:
                     lint_report = _lint_scene(
@@ -974,10 +1247,21 @@ def run_loop(
                         durable_expand_ids=sorted(durable_expand_ids),
                     )
                 except LLMRequestError as exc:
-                    _pause_on_quota(book_root, state_path, state, "lint_scene", exc, scene_card)
+                    _pause_on_quota(book_root, state_path, state, run_id, "lint_scene", exc, scene_card)
                 report_path = _write_phase_artifact(book_root, chapter_num, scene_num, "lint_report", lint_report, as_json=True)
                 _record_phase_success(book_root, chapter_num, scene_num, "lint", {"report": _artifact_relpath(book_root, report_path)})
                 _status(f"Lint status: {lint_report.get('status', 'unknown')}")
+                update_progress(
+                    status="running",
+                    phase="lint",
+                    chapter=chapter_num,
+                    scene=scene_num,
+                    scene_card=scene_card,
+                    repair_pass=repair_passes,
+                    repair_pass_limit=max_repair_passes,
+                    artifact_path=report_path,
+                    message=f"Post-repair lint status: {lint_report.get('status', 'unknown')}",
+                )
 
                 if lint_report.get("status") != "fail":
                     break
@@ -997,6 +1281,7 @@ def run_loop(
                         book_root,
                         state_path,
                         state,
+                        run_id,
                         "lint_scene",
                         "durable_slice_missing",
                         "Durable canonical context is missing one or more required ids; run paused to avoid retry thrash.",
@@ -1013,6 +1298,14 @@ def run_loop(
         chapter_total = scene_counts.get(chapter_num)
         chapter_end = isinstance(chapter_total, int) and chapter_total > 0 and scene_num >= chapter_total
 
+        update_progress(
+            status="running",
+            phase="apply_state",
+            chapter=chapter_num,
+            scene=scene_num,
+            scene_card=scene_card,
+            message="Applying final state patch.",
+        )
         _status("Applying state patch...")
         state = _apply_state_patch(state, patch, chapter_end=chapter_end)
         _status("State updated OK")
@@ -1044,12 +1337,13 @@ def run_loop(
                     if refreshed:
                         _status(f"Appearance projections refreshed: {len(refreshed)}")
                 except LLMRequestError as exc:
-                    _pause_on_quota(book_root, state_path, state, "appearance_projection", exc, scene_card)
+                    _pause_on_quota(book_root, state_path, state, run_id, "appearance_projection", exc, scene_card)
 
         if _apply_durable_updates_or_pause(
             book_root=book_root,
             state_path=state_path,
             state=state,
+            run_id=run_id,
             patch=patch,
             chapter=chapter_num,
             scene=scene_num,
@@ -1071,6 +1365,14 @@ def run_loop(
                 scene_num,
             )
 
+        update_progress(
+            status="running",
+            phase="persist_scene",
+            chapter=chapter_num,
+            scene=scene_num,
+            scene_card=scene_card,
+            message="Persisting scene files.",
+        )
         _status("Persisting scene files...")
         _write_scene_files(
             book_root,
@@ -1087,6 +1389,14 @@ def run_loop(
         _update_bible(book_root, patch)
 
         if chapter_end:
+            update_progress(
+                status="running",
+                phase="compile_chapter",
+                chapter=chapter_num,
+                scene=scene_num,
+                scene_card=scene_card,
+                message="Rolling up and compiling chapter.",
+            )
             _status(f"Rolling up chapter summary: ch{chapter_num:03d}...")
             _rollup_chapter_summary(book_root, state, chapter_num)
             _status(f"Compiling chapter: ch{chapter_num:03d}...")
@@ -1094,6 +1404,14 @@ def run_loop(
             _status("Chapter compiled OK")
 
         _status(f"Advancing cursor -> ch{next_chapter:03d} sc{next_scene:03d}")
+        update_progress(
+            status="running",
+            phase="cursor_advance",
+            chapter=next_chapter,
+            scene=next_scene,
+            section=_maybe_int(scene_card.get("section_id")),
+            message="Cursor advanced to next scene.",
+        )
         state["cursor"] = {"chapter": next_chapter, "scene": next_scene}
         if completed:
             state["status"] = "COMPLETE"
@@ -1106,16 +1424,18 @@ def run_loop(
         if steps_remaining is not None:
             steps_remaining -= 1
 
+    final_state = _load_json(state_path)
+    final_cursor = final_state.get("cursor", {}) if isinstance(final_state.get("cursor"), dict) else {}
+    update_progress(
+        status="complete" if str(final_state.get("status") or "").strip().upper() == "COMPLETE" else "idle",
+        phase="run_complete",
+        chapter=_maybe_int(final_cursor.get("chapter")),
+        scene=_maybe_int(final_cursor.get("scene")),
+        message="Run loop exited cleanly.",
+    )
+
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
-
-
-
-
-
-
-
-
 
 
 

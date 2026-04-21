@@ -31,6 +31,13 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
+def _to_int(value: Any) -> Optional[int]:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -351,6 +358,151 @@ def _section_scene_range(section: Dict[str, Any]) -> Tuple[Optional[int], Option
     return min(scene_ids), max(scene_ids)
 
 
+def _chapter_scene_sequence(chapter: Dict[str, Any]) -> List[Dict[str, Any]]:
+    ordered: List[Dict[str, Any]] = []
+    sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
+    for section in sections:
+        if not isinstance(section, dict):
+            continue
+        scenes = section.get("scenes") if isinstance(section.get("scenes"), list) else []
+        sortable: List[Tuple[int, int, Dict[str, Any]]] = []
+        for index, scene in enumerate(scenes):
+            if not isinstance(scene, dict):
+                continue
+            scene_id = _to_int(scene.get("scene_id"))
+            if scene_id is None:
+                continue
+            sortable.append((scene_id, index, scene))
+        for _, _, scene in sorted(sortable, key=lambda item: (item[0], item[1])):
+            ordered.append(scene)
+    return ordered
+
+
+def _normalize_chapter_scene_graph(
+    *,
+    book_root: Path,
+    outline: Dict[str, Any],
+    registry: Dict[str, Any],
+    chapter_id: int,
+) -> bool:
+    chapter = _find_registry_chapter(registry, chapter_id)
+    outline_chapter = None
+    chapters = outline.get("chapters") if isinstance(outline.get("chapters"), list) else []
+    for item in chapters:
+        if not isinstance(item, dict):
+            continue
+        try:
+            current_chapter_id = int(item.get("chapter_id"))
+        except (TypeError, ValueError):
+            continue
+        if current_chapter_id == chapter_id:
+            outline_chapter = item
+            break
+    if not isinstance(outline_chapter, dict):
+        return False
+
+    ordered_scenes = _chapter_scene_sequence(outline_chapter)
+    if not ordered_scenes:
+        return False
+
+    old_scene_ids: List[int] = []
+    old_to_new: Dict[str, str] = {}
+    for new_id, scene in enumerate(ordered_scenes, start=1):
+        old_scene_id = _to_int(scene.get("scene_id"))
+        if old_scene_id is None:
+            continue
+        old_scene_ids.append(old_scene_id)
+        old_to_new[f"{chapter_id}:{old_scene_id}"] = f"{chapter_id}:{new_id}"
+
+    changed = old_scene_ids != list(range(1, len(old_scene_ids) + 1))
+
+    for new_id, scene in enumerate(ordered_scenes, start=1):
+        old_scene_id = _to_int(scene.get("scene_id"))
+        if old_scene_id != new_id:
+            scene["scene_id"] = new_id
+            changed = True
+
+    for index, scene in enumerate(ordered_scenes):
+        current_ref = f"{chapter_id}:{index + 1}"
+        prev_ref = f"{chapter_id}:{index}" if index > 0 else None
+        next_ref = f"{chapter_id}:{index + 2}" if index + 1 < len(ordered_scenes) else None
+
+        consumes = str(scene.get("consumes_outcome_from") or "").strip()
+        if consumes.startswith(f"{chapter_id}:"):
+            mapped = old_to_new.get(consumes)
+            desired = mapped or prev_ref or ""
+            if desired:
+                if consumes != desired:
+                    scene["consumes_outcome_from"] = desired
+                    changed = True
+            else:
+                if "consumes_outcome_from" in scene:
+                    scene.pop("consumes_outcome_from", None)
+                    changed = True
+        elif not consumes and prev_ref:
+            scene["consumes_outcome_from"] = prev_ref
+            changed = True
+
+        hands_off_to = str(scene.get("hands_off_to") or "").strip()
+        if next_ref is None or str(scene.get("handoff_mode") or "").strip() == "terminal":
+            if "hands_off_to" in scene:
+                scene.pop("hands_off_to", None)
+                changed = True
+        elif hands_off_to.startswith(f"{chapter_id}:"):
+            mapped = old_to_new.get(hands_off_to)
+            desired = mapped or next_ref
+            if hands_off_to != desired:
+                scene["hands_off_to"] = desired
+                changed = True
+        elif not hands_off_to:
+            scene["hands_off_to"] = next_ref
+            changed = True
+
+        if _to_int(scene.get("scene_id")) != index + 1:
+            scene["scene_id"] = index + 1
+            changed = True
+        if current_ref != f"{chapter_id}:{index + 1}":
+            changed = True
+
+    sections = outline_chapter.get("sections") if isinstance(outline_chapter.get("sections"), list) else []
+    for section in sections:
+        if not isinstance(section, dict):
+            continue
+        section_id = _to_int(section.get("section_id"))
+        if section_id is None:
+            continue
+        registry_section = _find_registry_section(registry, chapter_id, section_id)
+        status = str(registry_section.get("status") or section.get("status") or "stub").strip().lower()
+        scene_start, scene_end = _section_scene_range(section)
+        if status in {"frozen", "locked"} and scene_start is not None and scene_end is not None:
+            registry_section["scene_ref_start"] = f"{chapter_id}:{scene_start}"
+            registry_section["scene_ref_end"] = f"{chapter_id}:{scene_end}"
+            boundary_path = _emit_boundary_artifact(book_root, outline, chapter_id, section_id)
+            registry_section["boundary_artifact"] = _registry_relpath(book_root, boundary_path)
+        elif status == "stub":
+            registry_section["scene_ref_start"] = None
+            registry_section["scene_ref_end"] = None
+            registry_section["boundary_artifact"] = None
+
+    chapter["chapter_status"] = str(chapter.get("chapter_status") or "in_progress").strip() or "in_progress"
+    return changed
+
+
+def _ensure_cursor_for_section_run(book_root: Path, chapter_id: int, scene_start: int, scene_end: int) -> None:
+    state_path = book_root / "state.json"
+    if not state_path.exists():
+        return
+    state = _read_json(state_path)
+    cursor = state.get("cursor") if isinstance(state.get("cursor"), dict) else {}
+    current_chapter = _to_int(cursor.get("chapter")) or 0
+    current_scene = _to_int(cursor.get("scene")) or 0
+    if current_chapter == chapter_id and scene_start <= current_scene <= scene_end:
+        return
+    state["cursor"] = {"chapter": chapter_id, "scene": scene_start}
+    state["status"] = "OUTLINED"
+    _write_json(state_path, state)
+
+
 def _section_boundary_path(book_root: Path, chapter_id: int, section_id: int) -> Path:
     return _outline_dir(book_root) / "boundaries" / f"ch_{chapter_id:03d}_sec_{section_id:03d}_boundary.json"
 
@@ -665,30 +817,44 @@ def _ensure_initialized(
 
 def _find_phase03_section(run_dir: Path, chapter_id: int, section_id: int) -> Dict[str, Any]:
     artifact = run_dir / f"phase_03_scene_draft_chapter_{chapter_id:03d}_output.json"
-    if not artifact.exists():
-        raise FileNotFoundError(f"Missing chapter scene draft artifact: {artifact}")
-    payload = _read_json(artifact)
-    chapters = payload.get("chapters") if isinstance(payload.get("chapters"), list) else []
-    for chapter in chapters:
-        if not isinstance(chapter, dict):
-            continue
-        try:
-            current_chapter_id = int(chapter.get("chapter_id"))
-        except (TypeError, ValueError):
-            continue
-        if current_chapter_id != chapter_id:
-            continue
-        sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
-        for section in sections:
-            if not isinstance(section, dict):
+    candidate_payloads: List[Dict[str, Any]] = []
+    if artifact.exists():
+        candidate_payloads.append(_read_json(artifact))
+
+    for fallback_name in [
+        "outline_final_v1_1.json",
+        "outline_cast_refined_v1_1.json",
+        "outline_seams_hygiened_v1_1.json",
+        "outline_handoff_normalized_v1_1.json",
+        "outline_draft_v1_1.json",
+    ]:
+        fallback_path = run_dir / fallback_name
+        if fallback_path.exists():
+            candidate_payloads.append(_read_json(fallback_path))
+
+    for payload in candidate_payloads:
+        chapters = payload.get("chapters") if isinstance(payload.get("chapters"), list) else []
+        for chapter in chapters:
+            if not isinstance(chapter, dict):
                 continue
             try:
-                current_section_id = int(section.get("section_id"))
+                current_chapter_id = int(chapter.get("chapter_id"))
             except (TypeError, ValueError):
                 continue
-            if current_section_id == section_id:
-                return {"payload": payload, "section": deepcopy(section)}
-    raise ValueError(f"Section not found in phase 03 chapter artifact: {chapter_id}:{section_id}")
+            if current_chapter_id != chapter_id:
+                continue
+            sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
+            for section in sections:
+                if not isinstance(section, dict):
+                    continue
+                try:
+                    current_section_id = int(section.get("section_id"))
+                except (TypeError, ValueError):
+                    continue
+                if current_section_id == section_id:
+                    return {"payload": payload, "section": deepcopy(section)}
+
+    raise ValueError(f"Section not found in source run artifacts: {chapter_id}:{section_id}")
 
 
 def _section_draft_path(book_root: Path, chapter_id: int, section_id: int) -> Path:
@@ -974,8 +1140,16 @@ def freeze_section_from_phase03_artifact(
     )
     _assert_freeze_preconditions(registry, chapter_id, section_id)
     registry_section = _find_registry_section(registry, chapter_id, section_id)
+    chapter_changed = _normalize_chapter_scene_graph(
+        book_root=book_root,
+        outline=outline,
+        registry=registry,
+        chapter_id=chapter_id,
+    )
     current_status = str(registry_section.get("status") or "").strip().lower()
     if current_status == "locked":
+        if chapter_changed:
+            _write_workflow_state(book_root, outline, registry)
         return {
             "book_id": book_id,
             "run_id": resolved_run_id,
@@ -985,7 +1159,21 @@ def freeze_section_from_phase03_artifact(
             "scene_ref_start": registry_section.get("scene_ref_start"),
             "scene_ref_end": registry_section.get("scene_ref_end"),
             "boundary_artifact": registry_section.get("boundary_artifact"),
-            "updated": False,
+            "updated": chapter_changed,
+        }
+    if current_status == "frozen":
+        if chapter_changed:
+            _write_workflow_state(book_root, outline, registry)
+        return {
+            "book_id": book_id,
+            "run_id": resolved_run_id,
+            "chapter_id": chapter_id,
+            "section_id": section_id,
+            "status": "frozen",
+            "scene_ref_start": registry_section.get("scene_ref_start"),
+            "scene_ref_end": registry_section.get("scene_ref_end"),
+            "boundary_artifact": registry_section.get("boundary_artifact"),
+            "updated": chapter_changed,
         }
 
     phase03_payload: Dict[str, Any]
@@ -1058,6 +1246,12 @@ def freeze_section_from_phase03_artifact(
         list(phase03_payload.get("threads") if isinstance(phase03_payload.get("threads"), list) else []),
         "thread_id",
     )
+    _normalize_chapter_scene_graph(
+        book_root=book_root,
+        outline=outline,
+        registry=registry,
+        chapter_id=chapter_id,
+    )
 
     scene_start, scene_end = _section_scene_range(outline_section)
     if scene_start is None or scene_end is None:
@@ -1119,6 +1313,28 @@ def _chapter_all_sections_locked(registry: Dict[str, Any], chapter_id: int) -> b
     return seen
 
 
+def _workflow_is_complete(registry: Dict[str, Any]) -> bool:
+    chapters = registry.get("chapters") if isinstance(registry.get("chapters"), list) else []
+    saw_chapter = False
+    for chapter in chapters:
+        if not isinstance(chapter, dict):
+            continue
+        saw_chapter = True
+        if str(chapter.get("chapter_status") or "").strip().lower() != "finalized":
+            return False
+        sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
+        saw_section = False
+        for section in sections:
+            if not isinstance(section, dict):
+                continue
+            saw_section = True
+            if str(section.get("status") or "").strip().lower() != "locked":
+                return False
+        if not saw_section:
+            return False
+    return saw_chapter
+
+
 def _update_chapter_finalization_fields(
     registry: Dict[str, Any],
     chapter_id: int,
@@ -1142,6 +1358,12 @@ def finalize_chapter_from_locked_sections(
         raise ValueError(f"Chapter {chapter_id} is not ready for finalization; all sections must be locked first.")
     chapter_finalization = finalize_locked_chapter(book_root, outline, chapter_id)
     _update_chapter_finalization_fields(registry, chapter_id, chapter_finalization)
+    state_path = book_root / "state.json"
+    if state_path.exists():
+        state = _read_json(state_path)
+        if _workflow_is_complete(registry):
+            state["status"] = "COMPLETE"
+            _write_json(state_path, state)
     paths = _write_workflow_state(book_root, outline, registry)
     result = dict(chapter_finalization)
     result["outline_path"] = str(paths["outline"])
@@ -1214,7 +1436,7 @@ def lock_section_from_written_state(
         state = _read_json(state_path)
         next_chapter, next_scene = _next_cursor_after_section(registry, chapter_id, section_id, scene_end)
         state["cursor"] = {"chapter": next_chapter, "scene": next_scene}
-        state["status"] = "OUTLINED"
+        state["status"] = "COMPLETE" if _workflow_is_complete(registry) else "OUTLINED"
         _write_json(state_path, state)
     paths = _write_workflow_state(book_root, outline, registry)
     return {
@@ -1307,8 +1529,15 @@ def advance_section_workflow(
     scene_end_ref = str(freeze_result.get("scene_ref_end") or "").strip()
     if not scene_end_ref or ":" not in scene_end_ref:
         raise ValueError(f"Unable to resolve section end ref for {chapter_id}:{section_id}")
+    scene_start_ref = str(freeze_result.get("scene_ref_start") or "").strip()
+    if not scene_start_ref or ":" not in scene_start_ref:
+        raise ValueError(f"Unable to resolve section start ref for {chapter_id}:{section_id}")
+    _, scene_start_text = scene_start_ref.split(":", 1)
     _, scene_end_text = scene_end_ref.split(":", 1)
+    scene_start = int(scene_start_text)
     scene_end = int(scene_end_text)
+    book_root = _book_root(workspace, book_id)
+    _ensure_cursor_for_section_run(book_root, chapter_id, scene_start, scene_end)
     run_loop(
         workspace=workspace,
         book_id=book_id,

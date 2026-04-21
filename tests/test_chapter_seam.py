@@ -75,3 +75,34 @@ def test_finalize_locked_chapter_repairs_scaffold_and_overlap(tmp_path: Path) ->
     report = json.loads(seam_report_path(book_root, 1).read_text(encoding="utf-8"))
     assert report["before"]["issue_counts"]["error"] >= 1
     assert report["after"]["issue_counts"]["error"] == 0
+
+
+def test_finalize_locked_chapter_drops_overlap_without_promoting_ui_block(tmp_path: Path) -> None:
+    book_root = tmp_path / "books" / "demo"
+    chapter_dir = book_root / "draft" / "chapters" / "ch_001"
+    _write_text(
+        chapter_dir / "scene_001.md",
+        "The heavy blast door slid open, revealing the dark corridor beyond.",
+    )
+    _write_text(
+        chapter_dir / "scene_002.md",
+        "The heavy blast doors hissed open into the polished stone corridor, immediately triggering a barrage of automated bolts.\n\n"
+        "[Formal Dispute Status: Active. System Review Initiated.]\n\n"
+        "The bloated avatar of administrative code roared and launched itself over the desk.",
+    )
+
+    result = finalize_locked_chapter(book_root, _outline_payload(), 1)
+
+    assert result["status"] == "finalized"
+    report = json.loads(seam_report_path(book_root, 1).read_text(encoding="utf-8"))
+    assert report["after"]["issue_counts"]["error"] == 0
+    action = report["repair_actions"][0]
+    assert action["action"] == "drop_first_sentence"
+    assert action["removed_text"] == (
+        "The heavy blast doors hissed open into the polished stone corridor, immediately triggering a barrage of automated bolts."
+    )
+    assert action["resulting_opening"] == (
+        "The bloated avatar of administrative code roared and launched itself over the desk."
+    )
+    final_text = (book_root / "draft" / "chapters" / "ch_001.md").read_text(encoding="utf-8")
+    assert "[Formal Dispute Status: Active. System Review Initiated.]\n\nThe bloated avatar" not in final_text

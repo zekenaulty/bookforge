@@ -98,6 +98,21 @@ _TRACKED_ANCHOR_PHRASES = (
     "wallet",
     "badge",
 )
+_BOUNDARY_BRIDGE_PREFIXES = (
+    "with ",
+    "as ",
+    "armed with ",
+    "trapped under ",
+    "still ",
+    "after ",
+    "the party ",
+    "the towering ",
+    "the heavy ",
+    "the blast ",
+    "the splintered ",
+    "rhea ",
+    "vance ",
+)
 
 
 def _now_iso() -> str:
@@ -125,6 +140,13 @@ def _normalize_for_compare(text: str) -> str:
     return " ".join(lowered.split())
 
 
+def _preview_text(text: str, limit: int = 220) -> str:
+    compact = " ".join(str(text or "").split())
+    if len(compact) <= limit:
+        return compact
+    return compact[: limit - 3].rstrip() + "..."
+
+
 def _sentence_similarity(left: str, right: str) -> float:
     left_norm = _normalize_for_compare(left)
     right_norm = _normalize_for_compare(right)
@@ -145,6 +167,11 @@ def _sentence_similarity(left: str, right: str) -> float:
 
 def _split_paragraphs(text: str) -> List[str]:
     return [part.strip() for part in re.split(r"\n\s*\n", str(text or "").strip()) if part.strip()]
+
+
+def _is_ui_only_paragraph(text: str) -> bool:
+    lines = [line.strip() for line in str(text or "").splitlines() if line.strip()]
+    return bool(lines) and all(line.startswith("[") and line.endswith("]") for line in lines)
 
 
 def _split_sentences(text: str) -> List[str]:
@@ -335,6 +362,11 @@ def _anchor_regrounding_issues(chapter_num: int, previous: Dict[str, Any], curre
     return issues
 
 
+def _is_bridge_heavy_opening(sentence: str) -> bool:
+    lowered = str(sentence or "").strip().lower()
+    return any(lowered.startswith(prefix) for prefix in _BOUNDARY_BRIDGE_PREFIXES)
+
+
 def audit_chapter_seams(book_root: Path, outline: Dict[str, Any], chapter_num: int, blocks: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
     chapter_blocks = blocks if isinstance(blocks, list) else _chapter_scene_blocks(book_root, outline, chapter_num)
     issues: List[Dict[str, Any]] = []
@@ -371,7 +403,7 @@ def audit_chapter_seams(book_root: Path, outline: Dict[str, Any], chapter_num: i
 
         sentence_similarity = _sentence_similarity(previous_last_sentence, current_first_sentence)
         paragraph_similarity = _sentence_similarity(previous_last_paragraph, current_first_paragraph)
-        if sentence_similarity >= 0.78:
+        if sentence_similarity >= 0.20:
             issues.append(
                 _issue(
                     chapter_num=chapter_num,
@@ -387,7 +419,7 @@ def audit_chapter_seams(book_root: Path, outline: Dict[str, Any], chapter_num: i
                     },
                 )
             )
-        elif paragraph_similarity >= 0.82:
+        elif paragraph_similarity >= 0.20 or (sentence_similarity >= 0.14 and _is_bridge_heavy_opening(current_first_sentence)):
             issues.append(
                 _issue(
                     chapter_num=chapter_num,
@@ -457,6 +489,15 @@ def _drop_first_paragraph(text: str) -> str:
     return "\n\n".join(paragraphs[1:]).strip()
 
 
+def _drop_leading_ui_paragraph(text: str) -> str:
+    paragraphs = _split_paragraphs(text)
+    if len(paragraphs) <= 1:
+        return str(text or "").strip()
+    if not _is_ui_only_paragraph(paragraphs[0]):
+        return str(text or "").strip()
+    return "\n\n".join(paragraphs[1:]).strip()
+
+
 def _replace_first_sentence(text: str, new_sentence: str) -> str:
     paragraphs = _split_paragraphs(text)
     if not paragraphs:
@@ -494,27 +535,37 @@ def repair_chapter_seams(blocks: List[Dict[str, Any]], report: Dict[str, Any]) -
         if code == "scaffold_leakage":
             first_paragraph = _split_paragraphs(current_text)
             if first_paragraph and _is_scaffold_like_sentence(_leading_sentence(first_paragraph[0])):
+                removed_paragraph = first_paragraph[0]
                 updated = _drop_first_paragraph(current_text)
                 if updated and updated != current_text:
                     repaired[target_index]["text"] = updated
                     actions.append(
                         {
                             "code": code,
+                            "from_scene_ref": str(issue.get("from_scene_ref") or "") or None,
                             "target_scene_ref": to_scene_ref,
                             "action": "drop_first_paragraph",
+                            "removed_text": _preview_text(removed_paragraph),
+                            "resulting_opening": _preview_text(_leading_sentence(updated)),
                         }
                     )
                     continue
 
         if code in {"overlap_lead_sentence", "restart_energy_overlap"}:
+            leading_paragraphs = _split_paragraphs(current_text)
+            removed_sentence = _leading_sentence(leading_paragraphs[0]) if leading_paragraphs else _leading_sentence(current_text)
             updated = _remove_first_sentence(current_text)
+            updated = _drop_leading_ui_paragraph(updated)
             if updated and updated != current_text:
                 repaired[target_index]["text"] = updated
                 actions.append(
                     {
                         "code": code,
+                        "from_scene_ref": str(issue.get("from_scene_ref") or "") or None,
                         "target_scene_ref": to_scene_ref,
                         "action": "drop_first_sentence",
+                        "removed_text": _preview_text(removed_sentence),
+                        "resulting_opening": _preview_text(_leading_sentence(updated)),
                     }
                 )
                 continue
@@ -528,8 +579,11 @@ def repair_chapter_seams(blocks: List[Dict[str, Any]], report: Dict[str, Any]) -
                     actions.append(
                         {
                             "code": code,
+                            "from_scene_ref": str(issue.get("from_scene_ref") or "") or None,
                             "target_scene_ref": to_scene_ref,
                             "action": "convert_first_sentence_to_past",
+                            "removed_text": _preview_text(first_sentence),
+                            "resulting_opening": _preview_text(updated_sentence),
                         }
                     )
 
