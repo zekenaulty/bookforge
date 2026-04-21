@@ -4,6 +4,7 @@ from copy import deepcopy
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import shutil
 from typing import Any, Dict, List, Optional, Tuple
 
 from bookforge.config.env import load_config
@@ -221,6 +222,8 @@ def _build_snapshot_registry(book_id: str, run_id: str, outline: Dict[str, Any])
                 "title": str(chapter.get("title") or "").strip(),
                 "chapter_status": "in_progress",
                 "chapter_seam_report": None,
+                "chapter_original_markdown": None,
+                "chapter_fixed_markdown": None,
                 "chapter_provisional_markdown": None,
                 "chapter_final_markdown": None,
                 "chapter_candidate_markdown": None,
@@ -672,6 +675,8 @@ def _rebuild_views(book_root: Path, outline: Dict[str, Any], registry: Dict[str,
                 "title": str(chapter.get("title") or "").strip(),
                 "chapter_status": str(registry_chapter.get("chapter_status") or "in_progress").strip(),
                 "chapter_seam_report": registry_chapter.get("chapter_seam_report"),
+                "chapter_original_markdown": registry_chapter.get("chapter_original_markdown"),
+                "chapter_fixed_markdown": registry_chapter.get("chapter_fixed_markdown"),
                 "chapter_final_markdown": registry_chapter.get("chapter_final_markdown"),
                 "sections": toc_sections,
             }
@@ -681,6 +686,8 @@ def _rebuild_views(book_root: Path, outline: Dict[str, Any], registry: Dict[str,
                 "chapter_id": chapter_id,
                 "chapter_status": str(registry_chapter.get("chapter_status") or "in_progress").strip(),
                 "chapter_seam_report": registry_chapter.get("chapter_seam_report"),
+                "chapter_original_markdown": registry_chapter.get("chapter_original_markdown"),
+                "chapter_fixed_markdown": registry_chapter.get("chapter_fixed_markdown"),
                 "chapter_provisional_markdown": registry_chapter.get("chapter_provisional_markdown"),
                 "chapter_final_markdown": registry_chapter.get("chapter_final_markdown"),
                 "chapter_candidate_markdown": registry_chapter.get("chapter_candidate_markdown"),
@@ -749,6 +756,16 @@ def _write_workflow_state(book_root: Path, outline: Dict[str, Any], registry: Di
     return result
 
 
+def _clear_workflow_generated_artifacts(book_root: Path) -> None:
+    outline_dir = _outline_dir(book_root)
+    for path in (
+        outline_dir / SECTION_DRAFT_DIRNAME,
+        outline_dir / "boundaries",
+    ):
+        if path.exists():
+            shutil.rmtree(path)
+
+
 def _ensure_state_initialized(book_root: Path, outline_exists: bool) -> None:
     state_path = book_root / "state.json"
     if not state_path.exists():
@@ -774,6 +791,12 @@ def initialize_section_workflow(
     resolved_run_id, run_dir = _pipeline_run_dir(book_root, run_id)
     if outline_path.exists() and registry_path.exists() and not overwrite:
         outline, registry = _load_workflow_state(book_root)
+        _validate_workflow_source_alignment(
+            run_dir=run_dir,
+            resolved_run_id=resolved_run_id,
+            outline=outline,
+            registry=registry,
+        )
         views = _rebuild_views(book_root, outline, registry)
         return {
             "book_id": book_id,
@@ -783,6 +806,9 @@ def initialize_section_workflow(
             "views": {key: str(path) for key, path in views.items()},
             "initialized": False,
         }
+
+    if overwrite:
+        _clear_workflow_generated_artifacts(book_root)
 
     spine, sections = _load_spine_and_sections(run_dir)
     characters, threads = _collect_outline_registries(run_dir)
@@ -812,6 +838,12 @@ def _ensure_initialized(
         initialize_section_workflow(workspace=workspace, book_id=book_id, run_id=run_id, overwrite=False)
     resolved_run_id, run_dir = _pipeline_run_dir(book_root, run_id)
     outline, registry = _load_workflow_state(book_root)
+    _validate_workflow_source_alignment(
+        run_dir=run_dir,
+        resolved_run_id=resolved_run_id,
+        outline=outline,
+        registry=registry,
+    )
     return book_root, resolved_run_id, run_dir, outline, registry
 
 
@@ -855,6 +887,126 @@ def _find_phase03_section(run_dir: Path, chapter_id: int, section_id: int) -> Di
                     return {"payload": payload, "section": deepcopy(section)}
 
     raise ValueError(f"Section not found in source run artifacts: {chapter_id}:{section_id}")
+
+
+def _resolve_source_outline_payload(run_dir: Path) -> Dict[str, Any]:
+    for candidate_name in [
+        "outline_final_v1_1.json",
+        "outline_cast_refined_v1_1.json",
+        "outline_seams_hygiened_v1_1.json",
+        "outline_handoff_normalized_v1_1.json",
+        "outline_draft_v1_1.json",
+    ]:
+        candidate_path = run_dir / candidate_name
+        if candidate_path.exists():
+            return _read_json(candidate_path)
+    raise FileNotFoundError(f"No source outline payload found in run artifacts: {run_dir}")
+
+
+def _normalize_section_for_source_compare(section: Dict[str, Any]) -> Dict[str, Any]:
+    normalized: Dict[str, Any] = {}
+    for field in ("section_id", "title", "intent", "end_condition", "scenes"):
+        if field in section:
+            normalized[field] = deepcopy(section.get(field))
+    return normalized
+
+
+def _workflow_section_has_materialized_content(section: Dict[str, Any], registry_section: Dict[str, Any]) -> bool:
+    scenes = section.get("scenes") if isinstance(section.get("scenes"), list) else []
+    if scenes:
+        return True
+    status = str(registry_section.get("status") or section.get("status") or "").strip().lower()
+    return status in {"frozen", "locked"}
+
+
+def _validate_workflow_source_alignment(
+    *,
+    run_dir: Path,
+    resolved_run_id: str,
+    outline: Dict[str, Any],
+    registry: Dict[str, Any],
+) -> None:
+    issues: List[str] = []
+    source_run_id = str(registry.get("source_run_id") or "").strip()
+    if source_run_id and source_run_id != resolved_run_id:
+        issues.append(
+            "workflow source_run_id="
+            + source_run_id
+            + f" but requested run_id={resolved_run_id}"
+        )
+
+    try:
+        source_outline = _resolve_source_outline_payload(run_dir)
+    except Exception as exc:
+        issues.append(str(exc))
+        source_outline = {}
+
+    source_characters = source_outline.get("characters") if isinstance(source_outline.get("characters"), list) else []
+    source_character_ids = {
+        str(item.get("character_id") or "").strip()
+        for item in source_characters
+        if isinstance(item, dict) and str(item.get("character_id") or "").strip()
+    }
+    outline_characters = outline.get("characters") if isinstance(outline.get("characters"), list) else []
+    extra_character_ids = sorted(
+        {
+            str(item.get("character_id") or "").strip()
+            for item in outline_characters
+            if isinstance(item, dict) and str(item.get("character_id") or "").strip()
+        }
+        - source_character_ids
+    )
+    if extra_character_ids:
+        issues.append("outline contains character ids not present in source run: " + ", ".join(extra_character_ids))
+
+    source_threads = source_outline.get("threads") if isinstance(source_outline.get("threads"), list) else []
+    source_thread_ids = {
+        str(item.get("thread_id") or "").strip()
+        for item in source_threads
+        if isinstance(item, dict) and str(item.get("thread_id") or "").strip()
+    }
+    outline_threads = outline.get("threads") if isinstance(outline.get("threads"), list) else []
+    extra_thread_ids = sorted(
+        {
+            str(item.get("thread_id") or "").strip()
+            for item in outline_threads
+            if isinstance(item, dict) and str(item.get("thread_id") or "").strip()
+        }
+        - source_thread_ids
+    )
+    if extra_thread_ids:
+        issues.append("outline contains thread ids not present in source run: " + ", ".join(extra_thread_ids))
+
+    chapters = registry.get("chapters") if isinstance(registry.get("chapters"), list) else []
+    for chapter in chapters:
+        if not isinstance(chapter, dict):
+            continue
+        chapter_id = _to_int(chapter.get("chapter_id"))
+        if chapter_id is None:
+            continue
+        sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
+        for registry_section in sections:
+            if not isinstance(registry_section, dict):
+                continue
+            section_id = _to_int(registry_section.get("section_id"))
+            if section_id is None:
+                continue
+            outline_section = _find_outline_section(outline, chapter_id, section_id)
+            if not _workflow_section_has_materialized_content(outline_section, registry_section):
+                continue
+            source_section = _find_phase03_section(run_dir, chapter_id, section_id)["section"]
+            if _normalize_section_for_source_compare(outline_section) != _normalize_section_for_source_compare(source_section):
+                issues.append(
+                    f"materialized section {chapter_id}:{section_id} does not match source run {resolved_run_id}"
+                )
+
+    if issues:
+        joined = "; ".join(issues)
+        raise ValueError(
+            "Workflow/source alignment failure. The workflow outline is forked from its source run. "
+            + joined
+            + ". Reinitialize with --overwrite from the intended run before advancing sections."
+        )
 
 
 def _section_draft_path(book_root: Path, chapter_id: int, section_id: int) -> Path:
@@ -1343,6 +1495,8 @@ def _update_chapter_finalization_fields(
     registry_chapter = _find_registry_chapter(registry, chapter_id)
     registry_chapter["chapter_status"] = str(chapter_finalization.get("status") or "attention_required").strip()
     registry_chapter["chapter_seam_report"] = chapter_finalization.get("report_path")
+    registry_chapter["chapter_original_markdown"] = chapter_finalization.get("original_path")
+    registry_chapter["chapter_fixed_markdown"] = chapter_finalization.get("fixed_path")
     registry_chapter["chapter_provisional_markdown"] = chapter_finalization.get("provisional_path")
     registry_chapter["chapter_final_markdown"] = chapter_finalization.get("final_path")
     registry_chapter["chapter_candidate_markdown"] = chapter_finalization.get("candidate_path")
@@ -1423,6 +1577,8 @@ def lock_section_from_written_state(
     registry_chapter = _find_registry_chapter(registry, chapter_id)
     registry_chapter["chapter_status"] = "in_progress"
     registry_chapter["chapter_seam_report"] = None
+    registry_chapter["chapter_original_markdown"] = None
+    registry_chapter["chapter_fixed_markdown"] = None
     registry_chapter["chapter_provisional_markdown"] = None
     registry_chapter["chapter_final_markdown"] = None
     registry_chapter["chapter_candidate_markdown"] = None
@@ -1501,6 +1657,8 @@ def get_section_workflow_status(
                 **chapter_row,
                 "chapter_status": str(_find_registry_chapter(registry, int(chapter_row.get("chapter_id") or 0)).get("chapter_status") or "in_progress").strip(),
                 "chapter_seam_report": _find_registry_chapter(registry, int(chapter_row.get("chapter_id") or 0)).get("chapter_seam_report"),
+                "chapter_original_markdown": _find_registry_chapter(registry, int(chapter_row.get("chapter_id") or 0)).get("chapter_original_markdown"),
+                "chapter_fixed_markdown": _find_registry_chapter(registry, int(chapter_row.get("chapter_id") or 0)).get("chapter_fixed_markdown"),
                 "chapter_final_markdown": _find_registry_chapter(registry, int(chapter_row.get("chapter_id") or 0)).get("chapter_final_markdown"),
                 "chapter_candidate_markdown": _find_registry_chapter(registry, int(chapter_row.get("chapter_id") or 0)).get("chapter_candidate_markdown"),
             }

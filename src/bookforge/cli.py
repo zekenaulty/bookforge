@@ -232,6 +232,8 @@ def _workflow_status(args: argparse.Namespace) -> int:
         if chapter.get("chapter_seam_report"):
             sys.stdout.write(
                 f"  seam_report={chapter.get('chapter_seam_report')} "
+                f"original={chapter.get('chapter_original_markdown')} "
+                f"fixed={chapter.get('chapter_fixed_markdown')} "
                 f"final={chapter.get('chapter_final_markdown') or chapter.get('chapter_candidate_markdown')}\n"
             )
         sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
@@ -348,6 +350,8 @@ def _workflow_finalize_chapter(args: argparse.Namespace) -> int:
         f"Chapter finalized: ch{int(args.chapter):03d}\n"
         f"Status: {result.get('status')}\n"
         f"Report: {result.get('report_path')}\n"
+        f"Original: {result.get('original_path')}\n"
+        f"Fixed: {result.get('fixed_path')}\n"
         f"Final: {result.get('final_path') or result.get('candidate_path')}\n"
     )
     return 0
@@ -757,11 +761,19 @@ def build_parser() -> argparse.ArgumentParser:
 
     workflow_finalize = workflow_sub.add_parser(
         "finalize-chapter",
-        help="Run chapter seam finalization for a chapter whose sections are already locked.",
+        help="Run pairwise LLM seam repair and chapter finalization for a chapter whose sections are already locked.",
     )
     workflow_finalize.add_argument("--book", required=True, help="Book id.")
     workflow_finalize.add_argument("--chapter", required=True, type=int, help="Chapter id.")
     workflow_finalize.set_defaults(func=_workflow_finalize_chapter)
+
+    workflow_seam = workflow_sub.add_parser(
+        "seam-chapter",
+        help="Run pairwise LLM seam repair for a fully written chapter and emit original/fixed/final chapter artifacts.",
+    )
+    workflow_seam.add_argument("--book", required=True, help="Book id.")
+    workflow_seam.add_argument("--chapter", required=True, type=int, help="Chapter id.")
+    workflow_seam.set_defaults(func=_workflow_finalize_chapter)
 
     workflow_advance = workflow_sub.add_parser(
         "advance-section",

@@ -65,6 +65,8 @@ PROMPT_TEMPLATE_FILES = [
     "write.md",
     "lint.md",
     "repair.md",
+    "chapter_seam_lint.md",
+    "chapter_seam_repair.md",
     "state_repair.md",
     "continuity_pack.md",
     "characters_generate.md",
@@ -228,7 +230,10 @@ def _copy_prompt_templates(book_root: Path) -> None:
     templates_dir = book_root / "prompts" / "templates"
     templates_dir.mkdir(parents=True, exist_ok=True)
     for name in PROMPT_TEMPLATE_FILES:
-        shutil.copyfile(prompt_src / name, templates_dir / name)
+        source_path = prompt_src / name
+        if not source_path.exists():
+            source_path = root / "resources" / "prompt_templates" / name
+        shutil.copyfile(source_path, templates_dir / name)
 
     if prompt_src.exists():
         shutil.rmtree(prompt_src)
@@ -413,14 +418,19 @@ def _clear_workspace_logs(workspace: Path, book_id: str, logs_scope: str, report
     deleted = 0
     if logs_root is not None:
         if logs_scope == "all":
+            deleted = sum(1 for path in logs_root.rglob("*") if path.is_file())
             shutil.rmtree(logs_root)
             logs_root.mkdir(parents=True, exist_ok=True)
-            report["all_log_files_deleted"] = int(report.get("all_log_files_deleted", 0)) + 1
+            report["all_log_files_deleted"] = int(report.get("all_log_files_deleted", 0)) + deleted
         else:
             book_log_dir = logs_root / book_id
             if book_log_dir.exists() and book_log_dir.is_dir():
+                deleted += sum(1 for path in book_log_dir.rglob("*") if path.is_file())
                 shutil.rmtree(book_log_dir)
-                deleted += 1
+            for legacy_path in logs_root.glob(f"{book_id}_*.json"):
+                if legacy_path.is_file():
+                    legacy_path.unlink()
+                    deleted += 1
             report["book_log_files_deleted"] = int(report.get("book_log_files_deleted", 0)) + deleted
 
     report["files_deleted"] = int(report.get("files_deleted", 0)) + deleted
@@ -513,6 +523,9 @@ def _collect_reset_archive_targets(
                 book_log_dir = logs_root / book_id
                 if book_log_dir.exists():
                     targets.append(book_log_dir)
+                for legacy_path in logs_root.glob(f"{book_id}_*.json"):
+                    if legacy_path.exists():
+                        targets.append(legacy_path)
         current_root = current_thoughts_dir(workspace)
         if current_root.exists() and current_root.is_dir():
             if logs_scope == 'all':
