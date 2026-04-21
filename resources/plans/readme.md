@@ -23,12 +23,14 @@ This repo is mid-migration.
 
 Current planning roots:
 - `resources/plans/Drafts`
+- `resources/plans/InProgress`
 - `resources/plans/_Pinned`
 - `resources/plans/compile-plan.py`
 - `resources/plans/readme.md`
 
 Meaning:
 - `Drafts/` is the source-of-truth home for new folderized plans.
+- `InProgress/` is now a live execution-stage root for promoted folderized plans.
 - `_Pinned/` holds older loose-file plans, historical material, and reference planning context that still matters during migration.
 - New active planning work should not be started inside `_Pinned/`.
 
@@ -51,7 +53,7 @@ Default flow:
 3. `InProgress`
 4. `Completed`
 
-Until that normalization is complete, treat `Drafts/` as the active stage root and `_Pinned/` as legacy reference.
+Until the full stage model is normalized, treat `Drafts/` and `InProgress/` as the live stage roots and `_Pinned/` as legacy reference.
 
 ## Plan Folder Rules
 Each new active plan folder should contain:
@@ -107,8 +109,9 @@ Good:
 ### Drafts -> InProgress
 - Requires explicit user approval.
 - Freeze the draft as the planning baseline.
-- If the repo later adds a real `InProgress/` stage, create a fresh execution-shaped folder there.
-- Until then, keep the draft folder as the source plan and track execution in the step content and validation artifacts.
+- Create a fresh execution-shaped folder under `resources/plans/InProgress/`.
+- Add `promotion.md` with source draft path, source commit, and transformation summary.
+- Keep the draft folder as the frozen review baseline unless a later archival step says otherwise.
 
 ### InProgress -> Completed
 - Move only after implementation and validation evidence exist.

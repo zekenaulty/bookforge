@@ -1,7 +1,7 @@
 # BookForge Supervisable Engine
 
-Status: Draft
-Stage: Drafts
+Status: In Progress
+Stage: InProgress
 Owner: BookForge engine workstream
 Last Updated: 2026-04-21
 
