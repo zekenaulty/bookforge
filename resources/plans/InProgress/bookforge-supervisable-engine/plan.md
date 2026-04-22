@@ -3,17 +3,19 @@
 Status: In Progress
 Stage: InProgress
 Owner: BookForge engine workstream
-Last Updated: 2026-04-21
+Last Updated: 2026-04-22
 
 ## Objective
 - Make BookForge truthful and supervisable by Nanda without moving prose generation or canonical state mutation out of BookForge.
 - Convert the current section workflow, write loop, lint/repair loop, recovery paths, and future fan-out/fan-in work into explicit engine-owned contracts that can be queried, verified, resumed, and isolated safely.
+- Evolve the current command-shaped workflow wrappers toward a smaller engine execution surface that Nanda can compose as author-directed paths without forcing orchestration logic to live in CLI-only flows.
 
 ## Why Now
 - The section workflow is now real, but the runtime still blurs thin outline, deep outline, section-local work, and recovery import in ways that allow scope drift.
 - `veiled_ledger_b1` exposed the exact failure class this plan needs to prevent: a valid engine continuing against mixed lineage and overscoped recovery artifacts.
 - Nanda planning has stabilized enough that the shared boundary is now clear: BookForge must emit truthful scope, lineage, pause, and result surfaces instead of forcing the operator layer to infer them from raw files.
 - The next architectural pressure is not just safer reruns. It is safe concurrency. If the contract model cannot distinguish canonical state, isolated rerun branches, and future parallel section branches, the same chimera class will return under a different name.
+- The next pressure after truthful supervision is controllable composition. Nanda will eventually need to steer outlining, writing, linting, and repair as smaller author moves instead of only invoking large fixed command chains.
 - The current repo already has the right raw materials:
   - section workflow lifecycle
   - immutable outline run artifacts
@@ -125,6 +127,27 @@ class TimelineNodeRef:
 - Neither side should internalize the other's private addressing model. They share the coordinate system and the contract objects.
 - `ObserverView` is a Nanda-side projection, not a BookForge-owned shared contract object.
 
+### Execution Surface Evolution
+- The current CLI commands are transitional workflow wrappers, not the long-term orchestration boundary.
+- The long-term stable seam is a smaller engine action surface that exposes:
+  - narrowly scoped executable actions
+  - branch policy and lineage requirements per action
+  - receipts and reconciliation output per action
+  - legal next actions from the current node
+- Nanda should eventually be able to run BookForge as a choose-your-own-adventure author loop:
+  - observe current node and integrity
+  - ask BookForge what actions are legal next
+  - choose one narrow action
+  - inspect the resulting receipt
+  - continue without depending on a monolithic command path
+- The important boundary rule does not change:
+  - BookForge still owns prose generation and canonical state mutation
+  - Nanda chooses among legal engine actions and evaluates the outcomes
+- This means the medium-term API shape is:
+  - query surfaces for truth and legal-next-action discovery
+  - execution actions for narrow engine moves
+  - macro workflow commands as wrappers over those same actions, not a separate logic layer
+
 ### Result Mapping
 | Branch Lifecycle State | Execution Result / Public Status | Canonical Change |
 | --- | --- | --- |
@@ -164,6 +187,7 @@ class TimelineNodeRef:
 - Support isolated branch reruns and fork-group fan-out/fan-in through the same coordinate system and branch invariants.
 - Reconcile and validate lineage before returning control to the caller.
 - Align help docs and command labels with actual runtime semantics.
+- Prepare the runtime for a later action-catalog extraction so outlining, writing, linting, and repair can be composed from smaller API-facing steps.
 
 ## Non-Goals
 - No Nanda supervisor logic in this repo.
@@ -171,6 +195,7 @@ class TimelineNodeRef:
 - No generic agent framework.
 - No rewrite of the entire outline or write pipeline.
 - No attempt to build a full generic scheduler for all future branches in the first slice.
+- No long-term commitment to CLI commands as the only orchestration surface.
 - No silent fallback between workflow families.
 - No use of mutable compatibility views such as `outline.json` as implicit canonical lineage anchors when immutable run artifacts exist.
 - No duplicate thought-signature lineage system unless existing carry paths prove insufficient.
@@ -185,13 +210,18 @@ class TimelineNodeRef:
 - `src/bookforge/query/characters.py`
 - `src/bookforge/query/continuity.py`
 - `src/bookforge/contracts/__init__.py`
+- `src/bookforge/contracts/branch_manifest.py`
 - `src/bookforge/contracts/timeline_node.py`
 - `src/bookforge/contracts/scope_selector.py`
 - `src/bookforge/contracts/state_surface.py`
 - `src/bookforge/contracts/issue_ticket.py`
 - `src/bookforge/contracts/execution_request.py`
 - `src/bookforge/contracts/execution_result.py`
+- `src/bookforge/branching.py`
+- Future extraction target:
+  - a smaller execution action catalog under `src/bookforge/execution/` or equivalent
 - Query and contract tests
+- Branching and fork-group tests
 - One narrow execution adapter backed by the existing workflow/write surfaces
 - Branch-aware reconciliation and promotion helpers
 - Help and command-surface updates that tell the truth about scope and recovery
@@ -209,6 +239,7 @@ class TimelineNodeRef:
 - Section materialization can be traced to immutable source runs or frozen chapter projections instead of mutable merged outline views.
 - Reconciliation and lineage validation run before control returns to the caller on `main`, and before promotion/assembly returns content to canonical state.
 - Help docs stop implying scope that the runtime does not actually execute.
+- The plan preserves a path to replace macro command orchestration with smaller API-facing execution actions without changing the shared truth model.
 
 ## Constraints
 - BookForge keeps ownership of prose generation and canonical workspace mutation.
@@ -227,6 +258,7 @@ class TimelineNodeRef:
 - The section-chunked workflow remains the primary runtime spine.
 - Current chapter seam audit/finalization work remains a dependency, not a replacement for these contracts.
 - The Nanda operator plan depends on this plan's steps `0010-0045`.
+- The future Nanda author-loop work depends on a later extraction step that turns the workflow wrappers into a smaller choose-your-own-adventure execution surface.
 
 ## Step Outline
 - See `steps/index.md` and the numbered step folders for execution-shaped stories.

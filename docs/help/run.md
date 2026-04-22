@@ -3,7 +3,8 @@
 Purpose
 - Run the scene generation loop (plan -> preflight -> write -> repair -> state_repair -> lint -> commit).
 - This is the lower-level writer loop.
-- In the section workflow model, `run` is typically invoked indirectly by `bookforge workflow advance-section` after a section has been frozen.
+- In the section workflow model, `run` is typically invoked indirectly by `bookforge workflow write-section`, `bookforge workflow advance-section`, or `bookforge workflow resume-paused-section` after a section has been frozen.
+- Runtime family: `section_write`.
 
 Usage
 - bookforge run --book <id> [--steps <n>] [--until chapter:N | chapter:N:scene:M] [--resume] [--ack-outline-attention-items] [--force-outline-gate-bypass]
@@ -37,6 +38,10 @@ Outline write gate
 - `--force-outline-gate-bypass` is intended for controlled testing only.
 - In the transitional section workflow implementation, `--force-outline-gate-bypass` may still be needed when writing against workflow-frozen sections derived from older non-success outline runs.
 
+Lineage note
+- `run` consumes the currently materialized section/scene scope. It does not choose deep-outline lineage on its own.
+- If you need to establish or repair outline lineage, do that through `bookforge workflow ...` or `bookforge outline generate`, not by treating `run` as an outline-resume surface.
+
 Outputs
 - draft/chapters/ch_###/scene_###.md (scene prose)
 - draft/chapters/ch_###.md (compiled chapter output; may be provisional when only some chapter sections are locked)
@@ -46,6 +51,17 @@ Outputs
 - draft/context/phase_history/ch###_sc###/* (per-phase prompts, patches, and lint reports)
 - workspace/books/<book>/logs/runs/run_<timestamp>.log
 - workspace/logs/llm (when BOOKFORGE_LOG_LLM=1; includes quota error logs)
+
+Supervised result surface
+- When the supervision surface is active, `run` emits a main-branch execution result with:
+  - the public outcome status
+  - `pre_reconciliation_status`
+  - `state_change_status`
+  - `canonical_change_status`
+  - `integrity_change`
+  - `pre_revision_id`
+  - `post_revision_id`
+- This makes quota pauses, clean exits, and integrity-degraded outcomes observable without reconstructing them from raw logs.
 
 
 Environment
@@ -75,4 +91,6 @@ Examples
 Related commands
 - `bookforge workflow init`
 - `bookforge workflow freeze-section`
+- `bookforge workflow write-section`
 - `bookforge workflow advance-section`
+- `bookforge workflow resume-paused-section`

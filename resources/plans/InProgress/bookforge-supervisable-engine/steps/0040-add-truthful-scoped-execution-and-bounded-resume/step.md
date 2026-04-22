@@ -1,6 +1,6 @@
 # 0040 Add Truthful Scoped Execution And Bounded Resume
 
-Status: draft
+Status: completed
 
 ## Goal
 - Support one narrow `ExecutionRequest -> ExecutionResult` path on `main` without pretending BookForge already has a generic agent runtime.

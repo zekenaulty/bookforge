@@ -1,6 +1,6 @@
 # 0020 Add Read-Only Query Surface
 
-Status: draft
+Status: completed
 
 ## Goal
 - Expose stable, small, testable read APIs over current BookForge workflow state, lineage anchors, integrity evidence, and current execution coordinates.
@@ -69,3 +69,7 @@ Status: draft
 
 ## Notes
 - This is the step that lets Nanda stop depending on raw workspace scraping as its only observation seam.
+- Completed 2026-04-21 with:
+  - read-only query modules under `src/bookforge/query/`
+  - current-node, workflow snapshot, lineage lookup, continuity, character, and integrity helpers
+  - fixture-backed tests for healthy and mixed-lineage workspaces

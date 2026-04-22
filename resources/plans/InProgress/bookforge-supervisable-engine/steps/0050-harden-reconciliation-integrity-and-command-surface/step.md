@@ -1,6 +1,6 @@
 # 0050 Harden Reconciliation, Integrity, And Command Surface
 
-Status: draft
+Status: completed
 
 ## Goal
 - Make the supervised paths safe enough for repeated use and difficult to misuse through misleading docs, stale artifacts, partial reconciliation, or incorrect branch merge behavior.
@@ -36,9 +36,16 @@ Status: draft
 - Keep new helpers small and split by concern.
 
 ## Files Likely Touched
+- `src/bookforge/supervision/reconcile.py`
 - `src/bookforge/query/integrity.py`
 - `src/bookforge/query/lineage.py`
+- `src/bookforge/execution/scoped.py`
+- `src/bookforge/branching.py`
+- `src/bookforge/branching_fork.py`
+- `src/bookforge/branching_execution.py`
+- `src/bookforge/branching_lifecycle.py`
 - `src/bookforge/section_workflow.py`
+- `src/bookforge/runner.py`
 - `src/bookforge/workspace.py`
 - `src/bookforge/cli.py`
 - `docs/help/workflow.md`
@@ -50,6 +57,13 @@ Status: draft
 - `python -m pytest tests/test_query_integrity.py tests/test_workspace_init.py tests/test_section_workflow.py tests/test_runner_targeting.py`
 - Add targeted reconciliation/no-op coverage if needed, for example `tests/test_reconciliation.py`
 - Add merge-path reconciliation coverage if branch promotion or assembly helpers are introduced, for example `tests/test_branch_reconciliation.py`
+- Current executed validation:
+  - `python -m pytest --basetemp .pytest_tmp_integrity_slice tests/test_query_integrity.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scope_contracts.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0050c tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_0050_branch_receipts tests/test_branch_execution.py tests/test_fork_group_assembly.py tests/test_branch_promotion.py tests/test_supervision_emit.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0050d tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_0050_integrity_plus tests/test_query_integrity.py tests/test_supervision_emit.py tests/test_scoped_execution.py tests/test_query_workspace.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0050f tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
 
 ## Definition Of Done
 - Every supported execution result can be classified as `success`, `no_op`, `retryable_pause`, `hard_fail`, `integrity_degraded`, or `promotion_required`.
@@ -62,3 +76,17 @@ Status: draft
 
 ## Notes
 - This story is where the command/help surface finally becomes trustworthy enough for external orchestration.
+- Current implemented slice:
+  - main-branch reconciliation snapshots and before/after diff details
+  - branch-local reconciliation snapshots and before/after diff details for off-main mutation paths
+  - promotion now emits a reconciled main-branch result instead of only a derived-branch result
+  - ambiguous reconciliation field renamed to `pre_reconciliation_status`
+  - revision-only expected-node drift is classified as `stale_write`
+  - structural integrity now detects `workflow_family_contamination`, `stale_parent`, and `overscoped_recovery`
+  - branch-control logic has been split into smaller files before further 0050 growth
+  - branch receipts now emit `branch_change_status` without claiming canonical mutation
+  - branch revision tokens now use microsecond precision to avoid same-second node collisions during rapid branch activity
+  - workflow and run help now describe the public reconciliation fields
+- Follow-on work:
+  - future integrity detectors beyond the current chimera/mutable-source/workflow-family/stale-parent/overscoped slice can land as later stories without blocking 0050 completion
+  - additional command/help alignment for newly extracted execution actions now belongs to `0060`

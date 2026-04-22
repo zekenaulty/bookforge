@@ -1,6 +1,6 @@
 # 0010 Freeze Scope, Lineage, And Contract Vocabulary
 
-Status: draft
+Status: completed
 
 ## Goal
 - Freeze the BookForge-owned runtime vocabulary and coordinate system before more code lands on top of accidental behavior.
@@ -80,3 +80,7 @@ Status: draft
 
 ## Notes
 - This step is intentionally contract-heavy and code-light. The output is a boundary that later stories can implement against.
+- Completed 2026-04-21 with:
+  - `src/bookforge/contracts/` vocabulary, coordinate, selector, and source-artifact classification modules
+  - help/CLI wording aligned to `deep_outline`, `section_local_outline`, and `section_write`
+  - focused contract tests covering labels, artifact classes, `TimelineNodeRef`, and `ScopeSelector`

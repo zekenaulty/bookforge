@@ -21,3 +21,5 @@
 - `ObserverView` belongs to Nanda-side projection work, not to the BookForge-owned shared contract set.
 - Existing Gemini `T1 -> T2` carry should be preserved and instrumented lightly; do not build a second thought lineage graph unless evidence demands it.
 - Help docs are part of the contract surface. If the docs imply broader scope than the runtime actually executes, that is a defect.
+- The current CLI workflows are transitional wrappers. The long-term orchestration seam is a smaller engine action surface that both CLI and Nanda can call.
+- Legal next actions should eventually be queryable from current engine truth; Nanda should not have to infer hidden valid transitions from command docs alone.

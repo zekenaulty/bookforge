@@ -17,6 +17,7 @@ from bookforge.phases.outline import context as outline_context
 from bookforge.phases.outline import get_handler
 from bookforge.prompt.renderer import render_template_file
 from bookforge.runner import run_loop
+from bookforge.supervision import capture_main_branch_snapshot, emit_reconciled_main_branch_contracts
 from bookforge.util.json_extract import extract_json
 
 
@@ -562,6 +563,50 @@ def _registry_relpath(book_root: Path, path: Path) -> str:
     return path.relative_to(book_root).as_posix()
 
 
+def _normalize_artifact_paths(book_root: Path, artifact_paths: Optional[Dict[str, Any]]) -> Dict[str, str]:
+    normalized: Dict[str, str] = {}
+    for key, value in dict(artifact_paths or {}).items():
+        name = str(key or "").strip()
+        if not name or value is None:
+            continue
+        if isinstance(value, Path):
+            try:
+                normalized[name] = _registry_relpath(book_root, value)
+            except ValueError:
+                normalized[name] = value.as_posix()
+            continue
+        text = str(value).strip()
+        if text:
+            normalized[name] = text
+    return normalized
+
+
+def _emit_section_workflow_contracts(
+    *,
+    workspace: Path,
+    book_id: str,
+    book_root: Path,
+    before_snapshot,
+    action: str,
+    result_status: str,
+    message: str,
+    artifact_paths: Optional[Dict[str, Any]] = None,
+    details: Optional[Dict[str, Any]] = None,
+    request_id: Optional[str] = None,
+) -> None:
+    emit_reconciled_main_branch_contracts(
+        workspace=workspace,
+        book_id=book_id,
+        before_snapshot=before_snapshot,
+        action=action,
+        result_status=result_status,
+        message=message,
+        artifact_paths=_normalize_artifact_paths(book_root, artifact_paths),
+        details=dict(details or {}),
+        request_id=request_id,
+    )
+
+
 def _rebuild_views(book_root: Path, outline: Dict[str, Any], registry: Dict[str, Any]) -> Dict[str, Path]:
     outline_dir = _outline_dir(book_root)
     chapters = outline.get("chapters") if isinstance(outline.get("chapters"), list) else []
@@ -761,6 +806,7 @@ def _clear_workflow_generated_artifacts(book_root: Path) -> None:
     for path in (
         outline_dir / SECTION_DRAFT_DIRNAME,
         outline_dir / "boundaries",
+        book_root / "runtime" / "supervision",
     ):
         if path.exists():
             shutil.rmtree(path)
@@ -781,7 +827,9 @@ def initialize_section_workflow(
     book_id: str,
     run_id: Optional[str] = None,
     overwrite: bool = False,
+    request_id: Optional[str] = None,
 ) -> Dict[str, Any]:
+    before_snapshot = capture_main_branch_snapshot(workspace, book_id)
     book_root = _book_root(workspace, book_id)
     if not book_root.exists():
         raise FileNotFoundError(f"Book workspace not found: {book_root}")
@@ -798,7 +846,7 @@ def initialize_section_workflow(
             registry=registry,
         )
         views = _rebuild_views(book_root, outline, registry)
-        return {
+        result = {
             "book_id": book_id,
             "run_id": resolved_run_id,
             "outline_path": outline_path,
@@ -806,6 +854,26 @@ def initialize_section_workflow(
             "views": {key: str(path) for key, path in views.items()},
             "initialized": False,
         }
+        _emit_section_workflow_contracts(
+            workspace=workspace,
+            book_id=book_id,
+            book_root=book_root,
+            before_snapshot=before_snapshot,
+            action="initialize_section_workflow",
+            result_status="no_op",
+            message=f"Section workflow already initialized for source run {resolved_run_id}.",
+            artifact_paths={
+                "outline": outline_path,
+                "registry": registry_path,
+                "thin": views.get("thin"),
+                "toc": views.get("toc"),
+                "index": views.get("index"),
+                "appendix": views.get("appendix"),
+            },
+            details={"run_id": resolved_run_id, "initialized": False},
+            request_id=request_id,
+        )
+        return result
 
     if overwrite:
         _clear_workflow_generated_artifacts(book_root)
@@ -816,7 +884,7 @@ def initialize_section_workflow(
     registry = _build_snapshot_registry(book_id, resolved_run_id, outline)
     paths = _write_workflow_state(book_root, outline, registry)
     _ensure_state_initialized(book_root, outline_exists=True)
-    return {
+    result = {
         "book_id": book_id,
         "run_id": resolved_run_id,
         "outline_path": str(paths["outline"]),
@@ -824,6 +892,19 @@ def initialize_section_workflow(
         "views": {key: str(path) for key, path in paths.items() if key in {"thin", "toc", "index", "appendix"}},
         "initialized": True,
     }
+    _emit_section_workflow_contracts(
+        workspace=workspace,
+        book_id=book_id,
+        book_root=book_root,
+        before_snapshot=before_snapshot,
+        action="initialize_section_workflow",
+        result_status="success",
+        message=f"Section workflow initialized from source run {resolved_run_id}.",
+        artifact_paths=paths,
+        details={"run_id": resolved_run_id, "initialized": True},
+        request_id=request_id,
+    )
+    return result
 
 
 def _ensure_initialized(
@@ -1284,7 +1365,9 @@ def freeze_section_from_phase03_artifact(
     chapter_id: int,
     section_id: int,
     run_id: Optional[str] = None,
+    request_id: Optional[str] = None,
 ) -> Dict[str, Any]:
+    before_snapshot = capture_main_branch_snapshot(workspace, book_id)
     book_root, resolved_run_id, run_dir, outline, registry = _ensure_initialized(
         workspace=workspace,
         book_id=book_id,
@@ -1302,7 +1385,7 @@ def freeze_section_from_phase03_artifact(
     if current_status == "locked":
         if chapter_changed:
             _write_workflow_state(book_root, outline, registry)
-        return {
+        result = {
             "book_id": book_id,
             "run_id": resolved_run_id,
             "chapter_id": chapter_id,
@@ -1313,10 +1396,23 @@ def freeze_section_from_phase03_artifact(
             "boundary_artifact": registry_section.get("boundary_artifact"),
             "updated": chapter_changed,
         }
+        _emit_section_workflow_contracts(
+            workspace=workspace,
+            book_id=book_id,
+            book_root=book_root,
+            before_snapshot=before_snapshot,
+            action="freeze_section_from_phase03_artifact",
+            result_status="no_op",
+            message=f"Section {chapter_id}:{section_id} is already locked.",
+            artifact_paths={"outline": _outline_dir(book_root) / "outline.json", "registry": _outline_dir(book_root) / REGISTRY_FILENAME},
+            details={"chapter_id": chapter_id, "section_id": section_id, "status": "locked", "updated": chapter_changed},
+            request_id=request_id,
+        )
+        return result
     if current_status == "frozen":
         if chapter_changed:
             _write_workflow_state(book_root, outline, registry)
-        return {
+        result = {
             "book_id": book_id,
             "run_id": resolved_run_id,
             "chapter_id": chapter_id,
@@ -1327,6 +1423,19 @@ def freeze_section_from_phase03_artifact(
             "boundary_artifact": registry_section.get("boundary_artifact"),
             "updated": chapter_changed,
         }
+        _emit_section_workflow_contracts(
+            workspace=workspace,
+            book_id=book_id,
+            book_root=book_root,
+            before_snapshot=before_snapshot,
+            action="freeze_section_from_phase03_artifact",
+            result_status="no_op",
+            message=f"Section {chapter_id}:{section_id} is already frozen.",
+            artifact_paths={"outline": _outline_dir(book_root) / "outline.json", "registry": _outline_dir(book_root) / REGISTRY_FILENAME},
+            details={"chapter_id": chapter_id, "section_id": section_id, "status": "frozen", "updated": chapter_changed},
+            request_id=request_id,
+        )
+        return result
 
     phase03_payload: Dict[str, Any]
     phase03_section: Dict[str, Any]
@@ -1428,7 +1537,7 @@ def freeze_section_from_phase03_artifact(
         _write_json(state_path, state)
 
     paths = _write_workflow_state(book_root, outline, registry)
-    return {
+    result = {
         "book_id": book_id,
         "run_id": resolved_run_id,
         "chapter_id": chapter_id,
@@ -1440,6 +1549,19 @@ def freeze_section_from_phase03_artifact(
         "outline_path": str(paths["outline"]),
         "updated": True,
     }
+    _emit_section_workflow_contracts(
+        workspace=workspace,
+        book_id=book_id,
+        book_root=book_root,
+        before_snapshot=before_snapshot,
+        action="freeze_section_from_phase03_artifact",
+        result_status="success",
+        message=f"Section {chapter_id}:{section_id} frozen from source run {resolved_run_id}.",
+        artifact_paths={"outline": paths["outline"], "registry": paths["registry"], "boundary_artifact": boundary_path},
+        details={"chapter_id": chapter_id, "section_id": section_id, "run_id": resolved_run_id, "status": "frozen"},
+        request_id=request_id,
+    )
+    return result
 
 
 def _next_cursor_after_section(registry: Dict[str, Any], chapter_id: int, section_id: int, scene_end: int) -> Tuple[int, int]:
@@ -1506,7 +1628,9 @@ def finalize_chapter_from_locked_sections(
     workspace: Path,
     book_id: str,
     chapter_id: int,
+    request_id: Optional[str] = None,
 ) -> Dict[str, Any]:
+    before_snapshot = capture_main_branch_snapshot(workspace, book_id)
     book_root, _, _, outline, registry = _ensure_initialized(workspace=workspace, book_id=book_id, run_id=None)
     if not _chapter_all_sections_locked(registry, chapter_id):
         raise ValueError(f"Chapter {chapter_id} is not ready for finalization; all sections must be locked first.")
@@ -1522,6 +1646,26 @@ def finalize_chapter_from_locked_sections(
     result = dict(chapter_finalization)
     result["outline_path"] = str(paths["outline"])
     result["registry_path"] = str(paths["registry"])
+    _emit_section_workflow_contracts(
+        workspace=workspace,
+        book_id=book_id,
+        book_root=book_root,
+        before_snapshot=before_snapshot,
+        action="finalize_chapter_from_locked_sections",
+        result_status="success",
+        message=f"Chapter {chapter_id} finalized from locked sections.",
+        artifact_paths={
+            "outline": paths["outline"],
+            "registry": paths["registry"],
+            "chapter_seam_report": chapter_finalization.get("report_path"),
+            "chapter_original_markdown": chapter_finalization.get("original_path"),
+            "chapter_fixed_markdown": chapter_finalization.get("fixed_path"),
+            "chapter_candidate_markdown": chapter_finalization.get("candidate_path"),
+            "chapter_final_markdown": chapter_finalization.get("final_path"),
+        },
+        details={"chapter_id": chapter_id, "status": chapter_finalization.get("status")},
+        request_id=request_id,
+    )
     return result
 
 
@@ -1530,13 +1674,15 @@ def lock_section_from_written_state(
     book_id: str,
     chapter_id: int,
     section_id: int,
+    request_id: Optional[str] = None,
 ) -> Dict[str, Any]:
+    before_snapshot = capture_main_branch_snapshot(workspace, book_id)
     book_root, _, _, outline, registry = _ensure_initialized(workspace=workspace, book_id=book_id, run_id=None)
     registry_section = _find_registry_section(registry, chapter_id, section_id)
     outline_section = _find_outline_section(outline, chapter_id, section_id)
     status = str(registry_section.get("status") or "").strip().lower()
     if status == "locked":
-        return {
+        result = {
             "book_id": book_id,
             "chapter_id": chapter_id,
             "section_id": section_id,
@@ -1545,6 +1691,19 @@ def lock_section_from_written_state(
             "scene_ref_end": registry_section.get("scene_ref_end"),
             "updated": False,
         }
+        _emit_section_workflow_contracts(
+            workspace=workspace,
+            book_id=book_id,
+            book_root=book_root,
+            before_snapshot=before_snapshot,
+            action="lock_section_from_written_state",
+            result_status="no_op",
+            message=f"Section {chapter_id}:{section_id} is already locked.",
+            artifact_paths={"outline": _outline_dir(book_root) / "outline.json", "registry": _outline_dir(book_root) / REGISTRY_FILENAME},
+            details={"chapter_id": chapter_id, "section_id": section_id, "status": "locked"},
+            request_id=request_id,
+        )
+        return result
     if status != "frozen":
         raise ValueError(f"Section {chapter_id}:{section_id} must be frozen before it can be locked.")
     scenes = outline_section.get("scenes") if isinstance(outline_section.get("scenes"), list) else []
@@ -1595,7 +1754,7 @@ def lock_section_from_written_state(
         state["status"] = "COMPLETE" if _workflow_is_complete(registry) else "OUTLINED"
         _write_json(state_path, state)
     paths = _write_workflow_state(book_root, outline, registry)
-    return {
+    result = {
         "book_id": book_id,
         "chapter_id": chapter_id,
         "section_id": section_id,
@@ -1606,6 +1765,24 @@ def lock_section_from_written_state(
         "chapter_finalization": chapter_finalization,
         "updated": True,
     }
+    _emit_section_workflow_contracts(
+        workspace=workspace,
+        book_id=book_id,
+        book_root=book_root,
+        before_snapshot=before_snapshot,
+        action="lock_section_from_written_state",
+        result_status="success",
+        message=f"Section {chapter_id}:{section_id} locked from written scene state.",
+        artifact_paths={
+            "outline": paths["outline"],
+            "registry": paths["registry"],
+            "chapter_seam_report": chapter_finalization.get("report_path") if isinstance(chapter_finalization, dict) else None,
+            "chapter_final_markdown": chapter_finalization.get("final_path") if isinstance(chapter_finalization, dict) else None,
+        },
+        details={"chapter_id": chapter_id, "section_id": section_id, "status": "locked"},
+        request_id=request_id,
+    )
+    return result
 
 
 def get_section_workflow_status(

@@ -4,6 +4,7 @@ Purpose
 - Generate, rerun, or resume the phased outline pipeline for a book.
 - This remains the lower-level batch outline surface.
 - For the new iterative section lifecycle, prefer `bookforge workflow` and use `outline generate` to produce or refresh source outline artifacts.
+- Runtime family: `deep_outline`.
 
 Usage
 - `bookforge outline generate --book <id> [options]`
@@ -76,6 +77,12 @@ Outputs
 - Updates state.json with outline path and status when applicable.
 - In the section workflow model, these run artifacts are the source material used to initialize/freeze sections into canonical `outline/outline.json`.
 
+Artifact truth
+- Semantic handoff files inside `outline/pipeline_runs/<run_id>/...` are immutable lineage anchors.
+- `outline/outline.json` and pointer files such as `outline/pipeline_latest.json` are convenience views and discovery aids, not sufficient lineage anchors by themselves.
+- `outline/chapters/ch_###.json` and workflow-generated files such as `outline/outline.thin.json` are derived projections.
+- `thin_outline` is frozen vocabulary for a future thinner outline family, but this command does not implement it.
+
 Debugging
 - If the model returns invalid JSON, raw request/response logs are written under `workspace/logs/llm/` using phase/attempt labels.
 - When logging is enabled, prompt copies are written as `.prompt.txt`.
@@ -101,6 +108,7 @@ Examples
 Related commands
 - `bookforge workflow init` (initialize section workflow state from outline artifacts)
 - `bookforge workflow freeze-section` (promote one section into canonical outline state)
+- `bookforge workflow write-section` (run only the active frozen section through the writer loop)
 - `bookforge workflow advance-section` (freeze -> write -> lock one section end to end)
 - `bookforge outline backup` (preserve a completed run-derived outline snapshot and artifacts)
 - `bookforge outline restore` (recover `outline.json` from run id or backup snapshot)

@@ -1,6 +1,6 @@
 # 0045 Add Isolated Branch Reruns And Fork Group Assembly
 
-Status: draft
+Status: completed
 
 ## Goal
 - Add explicit branch isolation and merge semantics so reruns and future parallel section work can execute safely without contaminating canonical state.
@@ -41,26 +41,27 @@ Status: draft
 - Map those branch outcomes to public execution-result states and canonical-change status explicitly in the shared contract docs.
 - Preserve lineage traceability from main -> parent node -> branch nodes -> promotion or assembly result.
 
-## Files Likely Touched
-- `src/bookforge/contracts/timeline_node.py`
-- `src/bookforge/contracts/state_surface.py`
-- `src/bookforge/contracts/issue_ticket.py`
-- `src/bookforge/contracts/execution_request.py`
-- `src/bookforge/contracts/execution_result.py`
-- `src/bookforge/query/workflow.py`
-- `src/bookforge/query/lineage.py`
-- `src/bookforge/query/integrity.py`
-- `src/bookforge/runner.py`
-- `src/bookforge/section_workflow.py`
-- `src/bookforge/workspace.py`
-- `src/bookforge/pipeline/chapter_seam.py`
-- `docs/help/workflow.md`
-- `docs/help/run.md`
+## Files Touched
+- `src/bookforge/branching.py`
+- `src/bookforge/contracts/__init__.py`
+- `src/bookforge/contracts/branch_manifest.py`
+- `src/bookforge/contracts/vocabulary.py`
+- `src/bookforge/query/_common.py`
+- `src/bookforge/query/workspace.py`
+- `src/bookforge/supervision/__init__.py`
+- `src/bookforge/supervision/emit.py`
+- `src/bookforge/supervision/paths.py`
+- `tests/test_branch_execution.py`
+- `tests/test_branch_promotion.py`
+- `tests/test_fork_group_assembly.py`
+- `tests/test_scope_contracts.py`
 
 ## Tests
-- `python -m pytest tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_query_lineage.py tests/test_query_integrity.py`
+- `python -m pytest --basetemp .pytest_tmp_0045 tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scope_contracts.py`
+- `python -m pytest --basetemp .pytest_tmp_0045_regression tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py`
 - Add coverage for:
   - branch creation from a declared parent node
+  - branch scope preservation in manifest and current-node projection
   - refusal on silent source switching
   - discard leaving canonical state untouched
   - sibling branches sharing a `fork_group_id`
@@ -79,3 +80,4 @@ Status: draft
 
 ## Notes
 - This story defines the branching primitives broadly enough for sequential reruns and future parallel writing, even if the full fan-out scheduler lands later.
+- Assembly remains off `main`. The current implementation provides an explicit assembly branch plus validation-state recording and promotion gating; automatic seam-audit execution can plug into that branch seam later without changing the contract model.

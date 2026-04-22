@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-21T19:04:50Z`
-- Source Document Count: `12`
+- Compiled At (UTC): `2026-04-22T13:12:14Z`
+- Source Document Count: `21`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -20,7 +20,16 @@
 9. `steps/0040-add-truthful-scoped-execution-and-bounded-resume/step.md`
 10. `steps/0045-add-isolated-branch-reruns-and-fork-group-assembly/step.md`
 11. `steps/0050-harden-reconciliation-integrity-and-command-surface/step.md`
-12. `promotion.md`
+12. `steps/0060-extract-minimal-engine-execution-surface-for-nanda/step.md`
+13. `notes/2026-04-21-0010-execution.md`
+14. `notes/2026-04-21-0020-execution.md`
+15. `notes/2026-04-21-0030-execution.md`
+16. `notes/2026-04-21-0040-execution.md`
+17. `notes/2026-04-21-0045-execution.md`
+18. `notes/2026-04-21-0050-execution.md`
+19. `notes/2026-04-22-0050-execution.md`
+20. `notes/2026-04-22-0060-execution.md`
+21. `promotion.md`
 
 ---
 
@@ -31,17 +40,19 @@
 Status: In Progress
 Stage: InProgress
 Owner: BookForge engine workstream
-Last Updated: 2026-04-21
+Last Updated: 2026-04-22
 
 ## Objective
 - Make BookForge truthful and supervisable by Nanda without moving prose generation or canonical state mutation out of BookForge.
 - Convert the current section workflow, write loop, lint/repair loop, recovery paths, and future fan-out/fan-in work into explicit engine-owned contracts that can be queried, verified, resumed, and isolated safely.
+- Evolve the current command-shaped workflow wrappers toward a smaller engine execution surface that Nanda can compose as author-directed paths without forcing orchestration logic to live in CLI-only flows.
 
 ## Why Now
 - The section workflow is now real, but the runtime still blurs thin outline, deep outline, section-local work, and recovery import in ways that allow scope drift.
 - `veiled_ledger_b1` exposed the exact failure class this plan needs to prevent: a valid engine continuing against mixed lineage and overscoped recovery artifacts.
 - Nanda planning has stabilized enough that the shared boundary is now clear: BookForge must emit truthful scope, lineage, pause, and result surfaces instead of forcing the operator layer to infer them from raw files.
 - The next architectural pressure is not just safer reruns. It is safe concurrency. If the contract model cannot distinguish canonical state, isolated rerun branches, and future parallel section branches, the same chimera class will return under a different name.
+- The next pressure after truthful supervision is controllable composition. Nanda will eventually need to steer outlining, writing, linting, and repair as smaller author moves instead of only invoking large fixed command chains.
 - The current repo already has the right raw materials:
   - section workflow lifecycle
   - immutable outline run artifacts
@@ -153,6 +164,27 @@ class TimelineNodeRef:
 - Neither side should internalize the other's private addressing model. They share the coordinate system and the contract objects.
 - `ObserverView` is a Nanda-side projection, not a BookForge-owned shared contract object.
 
+### Execution Surface Evolution
+- The current CLI commands are transitional workflow wrappers, not the long-term orchestration boundary.
+- The long-term stable seam is a smaller engine action surface that exposes:
+  - narrowly scoped executable actions
+  - branch policy and lineage requirements per action
+  - receipts and reconciliation output per action
+  - legal next actions from the current node
+- Nanda should eventually be able to run BookForge as a choose-your-own-adventure author loop:
+  - observe current node and integrity
+  - ask BookForge what actions are legal next
+  - choose one narrow action
+  - inspect the resulting receipt
+  - continue without depending on a monolithic command path
+- The important boundary rule does not change:
+  - BookForge still owns prose generation and canonical state mutation
+  - Nanda chooses among legal engine actions and evaluates the outcomes
+- This means the medium-term API shape is:
+  - query surfaces for truth and legal-next-action discovery
+  - execution actions for narrow engine moves
+  - macro workflow commands as wrappers over those same actions, not a separate logic layer
+
 ### Result Mapping
 | Branch Lifecycle State | Execution Result / Public Status | Canonical Change |
 | --- | --- | --- |
@@ -192,6 +224,7 @@ class TimelineNodeRef:
 - Support isolated branch reruns and fork-group fan-out/fan-in through the same coordinate system and branch invariants.
 - Reconcile and validate lineage before returning control to the caller.
 - Align help docs and command labels with actual runtime semantics.
+- Prepare the runtime for a later action-catalog extraction so outlining, writing, linting, and repair can be composed from smaller API-facing steps.
 
 ## Non-Goals
 - No Nanda supervisor logic in this repo.
@@ -199,6 +232,7 @@ class TimelineNodeRef:
 - No generic agent framework.
 - No rewrite of the entire outline or write pipeline.
 - No attempt to build a full generic scheduler for all future branches in the first slice.
+- No long-term commitment to CLI commands as the only orchestration surface.
 - No silent fallback between workflow families.
 - No use of mutable compatibility views such as `outline.json` as implicit canonical lineage anchors when immutable run artifacts exist.
 - No duplicate thought-signature lineage system unless existing carry paths prove insufficient.
@@ -213,13 +247,18 @@ class TimelineNodeRef:
 - `src/bookforge/query/characters.py`
 - `src/bookforge/query/continuity.py`
 - `src/bookforge/contracts/__init__.py`
+- `src/bookforge/contracts/branch_manifest.py`
 - `src/bookforge/contracts/timeline_node.py`
 - `src/bookforge/contracts/scope_selector.py`
 - `src/bookforge/contracts/state_surface.py`
 - `src/bookforge/contracts/issue_ticket.py`
 - `src/bookforge/contracts/execution_request.py`
 - `src/bookforge/contracts/execution_result.py`
+- `src/bookforge/branching.py`
+- Future extraction target:
+  - a smaller execution action catalog under `src/bookforge/execution/` or equivalent
 - Query and contract tests
+- Branching and fork-group tests
 - One narrow execution adapter backed by the existing workflow/write surfaces
 - Branch-aware reconciliation and promotion helpers
 - Help and command-surface updates that tell the truth about scope and recovery
@@ -237,6 +276,7 @@ class TimelineNodeRef:
 - Section materialization can be traced to immutable source runs or frozen chapter projections instead of mutable merged outline views.
 - Reconciliation and lineage validation run before control returns to the caller on `main`, and before promotion/assembly returns content to canonical state.
 - Help docs stop implying scope that the runtime does not actually execute.
+- The plan preserves a path to replace macro command orchestration with smaller API-facing execution actions without changing the shared truth model.
 
 ## Constraints
 - BookForge keeps ownership of prose generation and canonical workspace mutation.
@@ -255,6 +295,7 @@ class TimelineNodeRef:
 - The section-chunked workflow remains the primary runtime spine.
 - Current chapter seam audit/finalization work remains a dependency, not a replacement for these contracts.
 - The Nanda operator plan depends on this plan's steps `0010-0045`.
+- The future Nanda author-loop work depends on a later extraction step that turns the workflow wrappers into a smaller choose-your-own-adventure execution surface.
 
 ## Step Outline
 - See `steps/index.md` and the numbered step folders for execution-shaped stories.
@@ -286,6 +327,8 @@ class TimelineNodeRef:
 - `ObserverView` belongs to Nanda-side projection work, not to the BookForge-owned shared contract set.
 - Existing Gemini `T1 -> T2` carry should be preserved and instrumented lightly; do not build a second thought lineage graph unless evidence demands it.
 - Help docs are part of the contract surface. If the docs imply broader scope than the runtime actually executes, that is a defect.
+- The current CLI workflows are transitional wrappers. The long-term orchestration seam is a smaller engine action surface that both CLI and Nanda can call.
+- Legal next actions should eventually be queryable from current engine truth; Nanda should not have to infer hidden valid transitions from command docs alone.
 
 ---
 
@@ -341,12 +384,13 @@ This plan is ready for promotion only when the target implementation can satisfy
 
 | Step | Status | Depends On | Outcome |
 | --- | --- | --- | --- |
-| 0010-freeze-scope-lineage-and-contract-vocabulary | draft | - | Freeze runtime vocabulary, coordinate primitives, artifact truth rules, and caller-visible scope semantics. |
-| 0020-add-read-only-query-surface | draft | 0010 | Expose workflow, lineage, integrity, character, continuity, and scope-to-node resolution through small query modules. |
-| 0030-emit-versioned-state-surfaces-and-issue-tickets | draft | 0010, 0020 | Emit book-rooted state, pause, and issue contracts that carry timeline coordinates. |
-| 0040-add-truthful-scoped-execution-and-bounded-resume | draft | 0010, 0020, 0030 | Support one narrow main-branch resume path with expected-node validation and truthful pause reporting. |
-| 0045-add-isolated-branch-reruns-and-fork-group-assembly | draft | 0030, 0040 | Add branch isolation, sibling fork groups, promotion vs assembly semantics, and validation-gated merge paths. |
-| 0050-harden-reconciliation-integrity-and-command-surface | draft | 0030, 0040, 0045 | Add post-execution and post-promotion reconciliation, stronger integrity helpers, and help-doc coherence. |
+| 0010-freeze-scope-lineage-and-contract-vocabulary | completed | - | Freeze runtime vocabulary, coordinate primitives, artifact truth rules, and caller-visible scope semantics. |
+| 0020-add-read-only-query-surface | completed | 0010 | Expose workflow, lineage, integrity, character, continuity, and scope-to-node resolution through small query modules. |
+| 0030-emit-versioned-state-surfaces-and-issue-tickets | completed | 0010, 0020 | Emit book-rooted state, pause, and issue contracts that carry timeline coordinates. |
+| 0040-add-truthful-scoped-execution-and-bounded-resume | completed | 0010, 0020, 0030 | Support one narrow main-branch resume path with expected-node validation and truthful pause reporting. |
+| 0045-add-isolated-branch-reruns-and-fork-group-assembly | completed | 0030, 0040 | Add branch isolation, sibling fork groups, promotion vs assembly semantics, and validation-gated merge paths. |
+| 0050-harden-reconciliation-integrity-and-command-surface | completed | 0030, 0040, 0045 | Add post-execution and post-promotion reconciliation, stronger integrity helpers, and help-doc coherence. |
+| 0060-extract-minimal-engine-execution-surface-for-nanda | completed | 0050 | Replace command-only orchestration with a smaller action catalog and legal-next-action API that Nanda can compose. |
 
 ---
 
@@ -354,7 +398,7 @@ This plan is ready for promotion only when the target implementation can satisfy
 
 # 0010 Freeze Scope, Lineage, And Contract Vocabulary
 
-Status: draft
+Status: completed
 
 ## Goal
 - Freeze the BookForge-owned runtime vocabulary and coordinate system before more code lands on top of accidental behavior.
@@ -434,6 +478,10 @@ Status: draft
 
 ## Notes
 - This step is intentionally contract-heavy and code-light. The output is a boundary that later stories can implement against.
+- Completed 2026-04-21 with:
+  - `src/bookforge/contracts/` vocabulary, coordinate, selector, and source-artifact classification modules
+  - help/CLI wording aligned to `deep_outline`, `section_local_outline`, and `section_write`
+  - focused contract tests covering labels, artifact classes, `TimelineNodeRef`, and `ScopeSelector`
 
 ---
 
@@ -441,7 +489,7 @@ Status: draft
 
 # 0020 Add Read-Only Query Surface
 
-Status: draft
+Status: completed
 
 ## Goal
 - Expose stable, small, testable read APIs over current BookForge workflow state, lineage anchors, integrity evidence, and current execution coordinates.
@@ -510,6 +558,10 @@ Status: draft
 
 ## Notes
 - This is the step that lets Nanda stop depending on raw workspace scraping as its only observation seam.
+- Completed 2026-04-21 with:
+  - read-only query modules under `src/bookforge/query/`
+  - current-node, workflow snapshot, lineage lookup, continuity, character, and integrity helpers
+  - fixture-backed tests for healthy and mixed-lineage workspaces
 
 ---
 
@@ -517,7 +569,7 @@ Status: draft
 
 # 0030 Emit Versioned State Surfaces And Issue Tickets
 
-Status: draft
+Status: completed
 
 ## Goal
 - Make BookForge emit engine-owned, book-rooted state, issue, and pause contracts after execution so supervision can act on explicit truth instead of inference.
@@ -611,7 +663,7 @@ Status: draft
 
 # 0040 Add Truthful Scoped Execution And Bounded Resume
 
-Status: draft
+Status: completed
 
 ## Goal
 - Support one narrow `ExecutionRequest -> ExecutionResult` path on `main` without pretending BookForge already has a generic agent runtime.
@@ -689,7 +741,7 @@ Status: draft
 
 # 0045 Add Isolated Branch Reruns And Fork Group Assembly
 
-Status: draft
+Status: completed
 
 ## Goal
 - Add explicit branch isolation and merge semantics so reruns and future parallel section work can execute safely without contaminating canonical state.
@@ -730,26 +782,27 @@ Status: draft
 - Map those branch outcomes to public execution-result states and canonical-change status explicitly in the shared contract docs.
 - Preserve lineage traceability from main -> parent node -> branch nodes -> promotion or assembly result.
 
-## Files Likely Touched
-- `src/bookforge/contracts/timeline_node.py`
-- `src/bookforge/contracts/state_surface.py`
-- `src/bookforge/contracts/issue_ticket.py`
-- `src/bookforge/contracts/execution_request.py`
-- `src/bookforge/contracts/execution_result.py`
-- `src/bookforge/query/workflow.py`
-- `src/bookforge/query/lineage.py`
-- `src/bookforge/query/integrity.py`
-- `src/bookforge/runner.py`
-- `src/bookforge/section_workflow.py`
-- `src/bookforge/workspace.py`
-- `src/bookforge/pipeline/chapter_seam.py`
-- `docs/help/workflow.md`
-- `docs/help/run.md`
+## Files Touched
+- `src/bookforge/branching.py`
+- `src/bookforge/contracts/__init__.py`
+- `src/bookforge/contracts/branch_manifest.py`
+- `src/bookforge/contracts/vocabulary.py`
+- `src/bookforge/query/_common.py`
+- `src/bookforge/query/workspace.py`
+- `src/bookforge/supervision/__init__.py`
+- `src/bookforge/supervision/emit.py`
+- `src/bookforge/supervision/paths.py`
+- `tests/test_branch_execution.py`
+- `tests/test_branch_promotion.py`
+- `tests/test_fork_group_assembly.py`
+- `tests/test_scope_contracts.py`
 
 ## Tests
-- `python -m pytest tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_query_lineage.py tests/test_query_integrity.py`
+- `python -m pytest --basetemp .pytest_tmp_0045 tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scope_contracts.py`
+- `python -m pytest --basetemp .pytest_tmp_0045_regression tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py`
 - Add coverage for:
   - branch creation from a declared parent node
+  - branch scope preservation in manifest and current-node projection
   - refusal on silent source switching
   - discard leaving canonical state untouched
   - sibling branches sharing a `fork_group_id`
@@ -768,6 +821,7 @@ Status: draft
 
 ## Notes
 - This story defines the branching primitives broadly enough for sequential reruns and future parallel writing, even if the full fan-out scheduler lands later.
+- Assembly remains off `main`. The current implementation provides an explicit assembly branch plus validation-state recording and promotion gating; automatic seam-audit execution can plug into that branch seam later without changing the contract model.
 
 ---
 
@@ -775,7 +829,7 @@ Status: draft
 
 # 0050 Harden Reconciliation, Integrity, And Command Surface
 
-Status: draft
+Status: completed
 
 ## Goal
 - Make the supervised paths safe enough for repeated use and difficult to misuse through misleading docs, stale artifacts, partial reconciliation, or incorrect branch merge behavior.
@@ -811,9 +865,16 @@ Status: draft
 - Keep new helpers small and split by concern.
 
 ## Files Likely Touched
+- `src/bookforge/supervision/reconcile.py`
 - `src/bookforge/query/integrity.py`
 - `src/bookforge/query/lineage.py`
+- `src/bookforge/execution/scoped.py`
+- `src/bookforge/branching.py`
+- `src/bookforge/branching_fork.py`
+- `src/bookforge/branching_execution.py`
+- `src/bookforge/branching_lifecycle.py`
 - `src/bookforge/section_workflow.py`
+- `src/bookforge/runner.py`
 - `src/bookforge/workspace.py`
 - `src/bookforge/cli.py`
 - `docs/help/workflow.md`
@@ -825,6 +886,13 @@ Status: draft
 - `python -m pytest tests/test_query_integrity.py tests/test_workspace_init.py tests/test_section_workflow.py tests/test_runner_targeting.py`
 - Add targeted reconciliation/no-op coverage if needed, for example `tests/test_reconciliation.py`
 - Add merge-path reconciliation coverage if branch promotion or assembly helpers are introduced, for example `tests/test_branch_reconciliation.py`
+- Current executed validation:
+  - `python -m pytest --basetemp .pytest_tmp_integrity_slice tests/test_query_integrity.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scope_contracts.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0050c tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_0050_branch_receipts tests/test_branch_execution.py tests/test_fork_group_assembly.py tests/test_branch_promotion.py tests/test_supervision_emit.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0050d tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_0050_integrity_plus tests/test_query_integrity.py tests/test_supervision_emit.py tests/test_scoped_execution.py tests/test_query_workspace.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0050f tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
 
 ## Definition Of Done
 - Every supported execution result can be classified as `success`, `no_op`, `retryable_pause`, `hard_fail`, `integrity_degraded`, or `promotion_required`.
@@ -837,10 +905,728 @@ Status: draft
 
 ## Notes
 - This story is where the command/help surface finally becomes trustworthy enough for external orchestration.
+- Current implemented slice:
+  - main-branch reconciliation snapshots and before/after diff details
+  - branch-local reconciliation snapshots and before/after diff details for off-main mutation paths
+  - promotion now emits a reconciled main-branch result instead of only a derived-branch result
+  - ambiguous reconciliation field renamed to `pre_reconciliation_status`
+  - revision-only expected-node drift is classified as `stale_write`
+  - structural integrity now detects `workflow_family_contamination`, `stale_parent`, and `overscoped_recovery`
+  - branch-control logic has been split into smaller files before further 0050 growth
+  - branch receipts now emit `branch_change_status` without claiming canonical mutation
+  - branch revision tokens now use microsecond precision to avoid same-second node collisions during rapid branch activity
+  - workflow and run help now describe the public reconciliation fields
+- Follow-on work:
+  - future integrity detectors beyond the current chimera/mutable-source/workflow-family/stale-parent/overscoped slice can land as later stories without blocking 0050 completion
+  - additional command/help alignment for newly extracted execution actions now belongs to `0060`
 
 ---
 
-## Source 12: `promotion.md`
+## Source 12: `steps/0060-extract-minimal-engine-execution-surface-for-nanda/step.md`
+
+# 0060 Extract Minimal Engine Execution Surface For Nanda
+
+Status: completed
+
+## Goal
+- Extract a smaller execution surface from the current workflow wrappers so Nanda can compose outlining, writing, linting, and repair as narrow engine actions instead of depending on large fixed command chains.
+
+## Problem
+- The current command surface is still too macro-shaped:
+  - `workflow init`
+  - `workflow freeze-section`
+  - `workflow advance-section`
+  - `workflow resume-paused-section`
+  - `run`
+- That is acceptable for transitional operator use, but it is the wrong long-term seam for an author agent.
+- Nanda will need to steer execution as a choose-your-own-adventure loop:
+  - inspect current truth
+  - discover legal next actions
+  - choose one narrow action
+  - inspect the resulting receipt
+  - continue or branch without re-encoding engine behavior outside BookForge
+- If the CLI remains the only orchestration surface, two bad things happen:
+  - BookForge logic gets trapped in wrapper commands instead of reusable engine actions
+  - Nanda is forced to infer valid transitions from docs and historical behavior instead of asking the engine directly
+
+## Detailed Work
+- Split oversized workflow-control modules before extending the execution surface further.
+  - `src/bookforge/branching.py` should be split by concern before more branch lifecycle and reconciliation logic lands.
+  - Natural seams:
+    - branch store / manifest / snapshot helpers
+    - branch execution isolation helpers
+    - branch lifecycle / promotion / assembly gating
+- Define a smaller action catalog under `src/bookforge/execution/` or equivalent.
+- Separate two layers explicitly:
+  - macro workflow wrappers for CLI/operator convenience
+  - narrow engine actions for programmatic composition
+- Define at least one shared action descriptor contract for queryable action discovery, for example:
+  - `ExecutionOption`
+  - `AvailableAction`
+  - or equivalent
+- Each narrow action should declare:
+  - supported workflow family
+  - supported branch policy
+  - required selector shape
+  - required lineage preconditions
+  - whether it may mutate canonical state
+  - emitted receipt/result contract
+  - legal next actions on success / pause / failure
+- First extraction target should cover at least one path in each family:
+  - outline/materialization:
+    - initialize workflow
+    - freeze section
+    - finalize chapter
+  - write/lint/repair:
+    - resume paused write
+    - write frozen section
+    - optional narrower scene-step actions later if the runtime split is justified
+  - branch lifecycle:
+    - create branch
+    - discard branch
+    - validate assembly
+    - promote branch
+- Add a query seam that returns legal next actions from the current engine state.
+  - Inputs:
+    - `ScopeSelector`
+    - current `TimelineNodeRef`
+    - integrity verdict
+    - branch lifecycle state when applicable
+  - Output:
+    - explicit legal action list
+    - refusal reasons for currently illegal actions
+- Keep BookForge as the authority on valid transitions.
+  - Nanda should choose among legal actions.
+  - Nanda should not own the engine transition graph.
+- Make the CLI wrappers consume the same action layer instead of duplicating orchestration logic.
+- Document the choose-your-own-adventure rule clearly:
+  - query truth
+  - query legal next actions
+  - execute one narrow action
+  - inspect receipt
+  - repeat
+
+## Files Likely Touched
+- `src/bookforge/execution/__init__.py`
+- `src/bookforge/execution/scoped.py`
+- `src/bookforge/execution/` new action modules
+- `src/bookforge/query/workflow.py`
+- `src/bookforge/query/workspace.py`
+- `src/bookforge/contracts/` new action-discovery contract if needed
+- `src/bookforge/cli.py`
+- `src/bookforge/branching.py` or its split replacements
+- `docs/help/workflow.md`
+- `docs/help/run.md`
+- `docs/help/index.md`
+
+## Tests
+- Add execution-surface tests, for example:
+  - `tests/test_execution_actions.py`
+  - `tests/test_action_discovery.py`
+  - `tests/test_branch_action_lifecycle.py`
+- Add at least one integration test that proves:
+  - query current truth
+  - query legal next actions
+  - execute a narrow action
+  - observe the next legal action set change
+- Add at least one real branch flow integration test:
+  - create branch
+  - run scoped action in branch
+  - promote branch
+  - verify canonical surface and lineage receipt on `main`
+- Current executed validation:
+  - `python -m pytest --basetemp .pytest_tmp_0060_branch_action tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_scoped_execution.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0060c tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_0060_branch_lifecycle tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0060d tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_0060_assembly_action tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0060e tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_0060_assembly_create tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0060f tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_0060_finalize tests/test_execution_actions.py tests/test_action_discovery.py tests/test_section_workflow.py tests/test_chapter_seam.py tests/test_scoped_execution.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0060g tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_chapter_seam.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_0060_lock tests/test_execution_actions.py tests/test_action_discovery.py tests/test_section_workflow.py tests/test_chapter_seam.py tests/test_scoped_execution.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0060h tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_chapter_seam.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_0060_write tests/test_execution_actions.py tests/test_action_discovery.py tests/test_scoped_execution.py tests/test_section_workflow.py tests/test_chapter_seam.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0060i tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_chapter_seam.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+
+## Definition Of Done
+- BookForge exposes a smaller execution action surface that is distinct from CLI wrappers.
+- At least one outline/materialization path and one write/resume path are callable through narrow engine actions.
+- The engine can report legal next actions from current truth without requiring Nanda to infer them externally.
+- CLI wrappers call the extracted action layer instead of retaining unique orchestration logic.
+- Branch lifecycle actions are available through the same execution-surface model.
+- The action layer preserves the current truth model:
+  - `TimelineNodeRef`
+  - `ScopeSelector`
+  - reconciliation receipts
+  - integrity and lineage enforcement
+- No new control-surface work is added by growing `branching.py` further; oversized modules are split first.
+
+## Notes
+- This is not a generic agent framework story.
+- It is a controlled extraction story: turn the existing engine into a smaller, composable action surface while keeping BookForge in charge of prose generation and canonical mutation.
+- Current implemented slice:
+  - `ExecutionOption` contract for queryable action discovery
+  - `bookforge.query.list_execution_options(...)`
+  - `bookforge.query.legal_next_actions(...)`
+  - narrow `initialize_section_workflow` execution adapter under `bookforge.execution`
+  - narrow `freeze_section_from_phase03_artifact` execution adapter under `bookforge.execution`
+  - narrow `write_frozen_section` execution adapter under `bookforge.execution`
+  - narrow `lock_section_from_written_state` execution adapter under `bookforge.execution`
+  - narrow `finalize_chapter_from_locked_sections` execution adapter under `bookforge.execution`
+  - narrow `create_assembly_branch` execution adapter under `bookforge.execution`
+  - narrow `create_branch` execution adapter under `bookforge.execution`
+  - narrow `discard_branch` execution adapter under `bookforge.execution`
+  - narrow `promote_branch_to_main` execution adapter under `bookforge.execution`
+  - narrow `record_assembly_validation` execution adapter under `bookforge.execution`
+  - existing `resume_paused_section` adapter remains the pause-aware write/resume counterpart
+  - `bookforge workflow init`, `bookforge workflow freeze-section`, `bookforge workflow write-section`, `bookforge workflow lock-section`, and `bookforge workflow finalize-chapter` now route through the extracted execution adapters
+  - `bookforge workflow legal-actions` exposes the same action-discovery seam for operator use
+  - `bookforge workflow legal-actions --branch-id <id>` now exposes derived-branch legality for discard/promotion/assembly-validation checks
+  - `bookforge workflow legal-actions --fork-group-id <id>` now exposes main-branch fork-group legality for assembly creation
+  - `bookforge workflow advance-section` now composes extracted actions instead of calling its own orchestration path
+- Follow-on work:
+  - extract deeper write/lint/repair sub-actions if the choose-your-own-adventure author loop needs per-scene or per-phase control beyond section-level write and truthful pause/resume
+  - add success/pause/failure next-action hints to the action descriptors if the current simpler descriptor stops being sufficient
+
+---
+
+## Source 13: `notes/2026-04-21-0010-execution.md`
+
+# 0010 Execution Note
+
+Date
+- 2026-04-21
+
+Scope
+- Execute story `0010-freeze-scope-lineage-and-contract-vocabulary`.
+
+Changes
+- Added `src/bookforge/contracts/vocabulary.py` for frozen workflow-family, result-status, artifact-class, branch, and pointer labels.
+- Added `src/bookforge/contracts/timeline_node.py` for `TimelineNodeRef`.
+- Added `src/bookforge/contracts/scope_selector.py` for `ScopeSelector`.
+- Added `src/bookforge/contracts/source_artifacts.py` for central source-artifact truth classification.
+- Added export surface at `src/bookforge/contracts/__init__.py`.
+- Updated help docs to state the runtime family split and lineage-truth rules:
+  - `docs/help/workflow.md`
+  - `docs/help/run.md`
+  - `docs/help/outline_generate.md`
+  - `docs/help/index.md`
+- Tightened CLI help labels in `src/bookforge/cli.py` to match the frozen vocabulary.
+- Added focused tests:
+  - `tests/test_scope_contracts.py`
+  - `tests/test_timeline_node.py`
+
+Validation
+- Ran:
+  - `python -m pytest tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_workspace_init.py tests/test_runner_outline_gate.py`
+- Result:
+  - `26 passed`
+
+Notes
+- This step intentionally froze the boundary without pretending that `StateSurface`, `IssueTicket`, or branch execution already exist.
+- `outline/pipeline_runs/<run_id>/...` is now documented as the preferred lineage-anchor family.
+- `outline/outline.json` is now documented as a mutable compatibility view, not sufficient lineage truth by itself.
+- The next story should build read-only query modules on top of these frozen contract objects instead of redefining them.
+
+---
+
+## Source 14: `notes/2026-04-21-0020-execution.md`
+
+# 0020 Execution Note
+
+Date
+- 2026-04-21
+
+Scope
+- Execute story `0020-add-read-only-query-surface`.
+
+Changes
+- Added read-only query package:
+  - `src/bookforge/query/__init__.py`
+  - `src/bookforge/query/_common.py`
+  - `src/bookforge/query/workspace.py`
+  - `src/bookforge/query/lineage.py`
+  - `src/bookforge/query/workflow.py`
+  - `src/bookforge/query/integrity.py`
+  - `src/bookforge/query/characters.py`
+  - `src/bookforge/query/continuity.py`
+- Query surface now provides:
+  - current main-branch observed node
+  - workspace status snapshot
+  - workflow family / run-mode snapshot
+  - immutable source-run lookup
+  - chapter projection lookup
+  - section-draft lineage lookup
+  - `ScopeSelector -> TimelineNodeRef` matching resolution
+  - integrity verdicts for source-run mismatch, stale drafts, duplicate names, and mutable-source materialization
+  - read access to character and continuity state
+- Added tests:
+  - `tests/test_query_workspace.py`
+  - `tests/test_query_lineage.py`
+  - `tests/test_query_integrity.py`
+
+Validation
+- Ran:
+  - `python -m pytest tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_workspace_init.py tests/test_runner_outline_gate.py`
+- Result:
+  - `34 passed`
+
+Notes
+- This story stays read-only. It does not introduce branch mutation or state/ticket emission early.
+- Branch-addressed lookup is supported as a query seam when manifests/pointers exist, but current fixtures remain main-branch only.
+- The integrity surface now exposes the `veiled_ledger_b1` class through stable helpers instead of ad hoc scripts.
+
+---
+
+## Source 15: `notes/2026-04-21-0030-execution.md`
+
+# 0030 Execution Note
+
+Date
+- 2026-04-21
+
+Scope
+- Execute story `0030-emit-versioned-state-surfaces-and-issue-tickets`.
+
+Changes
+- Finished the contract-backed supervision emission layer:
+  - `src/bookforge/supervision/__init__.py`
+  - `src/bookforge/supervision/paths.py`
+  - `src/bookforge/supervision/emit.py`
+- Completed query support needed by the emitter:
+  - emitted main-node preference for consumers
+  - live-state bypass for the emitter so it does not read stale pointers
+  - chapter status counting on workspace status
+  - supervision-aware branch path lookup
+  - broader write-phase recognition so paused writer nodes resolve truthfully
+- Wired main-branch emission into real execution paths:
+  - `initialize_section_workflow`
+  - `freeze_section_from_phase03_artifact`
+  - `lock_section_from_written_state`
+  - `finalize_chapter_from_locked_sections`
+  - writer-loop pause helpers
+  - writer-loop clean exit
+- Added emitted artifacts under `runtime/supervision/main/`:
+  - `current_node.json`
+  - `state_surface_latest.json`
+  - `state_surface_history.jsonl`
+  - `issues_latest.json`
+  - `issues_history.jsonl`
+  - `execution_results.jsonl`
+- Tightened selector semantics:
+  - `StateSurface` now emits as a branch-rooted surface
+  - integrity tickets emit as branch-rooted concerns
+  - runtime pause/result emission stays node-specific
+- Added execution coverage:
+  - `tests/test_supervision_emit.py`
+
+Validation
+- Ran:
+  - `python -m pytest --basetemp .pytest_tmp_0030 tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_supervision_emit.py`
+  - `python -m pytest --basetemp .pytest_tmp_0030b tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+- Result:
+  - `37 passed`
+
+Notes
+- The first useful supervision slice is now real: callers can consume a book-rooted `StateSurface`, categorized `IssueTicket` output, and execution-result history without reverse-engineering logs.
+- Pause visibility is now explicit for bounded retry exits. The writer loop emits `retryable_pause` results with node coordinates and ticketed reason classes instead of only leaving transport noise behind.
+- Query consumers prefer emitted node pointers by default, but the emitter explicitly recomputes from live state to avoid sealing stale coordinates back into the supervision surface.
+
+---
+
+## Source 16: `notes/2026-04-21-0040-execution.md`
+
+# 0040 Execution Note
+
+Date
+- 2026-04-21
+
+Scope
+- Execute story `0040-add-truthful-scoped-execution-and-bounded-resume`.
+
+Changes
+- Added the first narrow execution adapter:
+  - `src/bookforge/execution/__init__.py`
+  - `src/bookforge/execution/scoped.py`
+- Implemented `resume_paused_section` as a main-branch-only execution path that:
+  - requires `ExecutionRequest`
+  - requires `expected_node`
+  - refuses branch drift
+  - refuses expected-node mismatch
+  - refuses workflow-family mismatch
+  - refuses active-section mismatch
+  - resumes only the active frozen section
+  - returns `success`, `retryable_pause`, or `hard_fail` through `ExecutionResult`
+- Added a convenience request builder:
+  - `build_resume_paused_section_request(...)`
+- Added a thin CLI wrapper:
+  - `bookforge workflow resume-paused-section`
+- Tightened runtime truth during resume:
+  - `run_loop` now clears stale pause markers when a new run starts
+  - workspace family inference now treats active paused write state as authoritative and avoids stale write-family classification after lock completion
+- Extended supervision emission so adapter-level results can carry `request_id`.
+- Updated help docs:
+  - `docs/help/workflow.md`
+  - `docs/help/run.md`
+  - `docs/help/index.md`
+- Added tests:
+  - `tests/test_scoped_execution.py`
+
+Validation
+- Ran:
+  - `python -m pytest --basetemp .pytest_tmp_0040e tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py`
+- Result:
+  - `41 passed`
+
+Notes
+- This is intentionally not a generic scheduler. It is one truthful resume seam over the existing section workflow and writer loop.
+- The CLI wrapper snapshots the current expected node immediately before submission, but the real contract remains the Python `ExecutionRequest -> ExecutionResult` path.
+- `0045` can now build on stable branch/main semantics instead of implicit retry behavior.
+
+---
+
+## Source 17: `notes/2026-04-21-0045-execution.md`
+
+# 0045 Execution Note
+
+Date
+- 2026-04-21
+
+Scope
+- Execute story `0045-add-isolated-branch-reruns-and-fork-group-assembly`.
+
+Changes
+- Added explicit branch primitives:
+  - `src/bookforge/branching.py`
+  - `src/bookforge/contracts/branch_manifest.py`
+- Extended the shared contract surface:
+  - `BranchManifest` now records parent node, frozen parent revision, merge operation, lifecycle state, validation state, and scope selector.
+  - branch lifecycle to public-result mapping now lives in `src/bookforge/contracts/vocabulary.py`.
+- Extended supervision storage and emission:
+  - branch snapshot helpers in `src/bookforge/supervision/paths.py`
+  - generic `emit_branch_contracts(...)` in `src/bookforge/supervision/emit.py`
+  - branch-aware exports in `src/bookforge/supervision/__init__.py`
+- Implemented branch operations:
+  - `create_branch(...)`
+  - `rerun_freeze_section_on_branch(...)`
+  - `discard_branch(...)`
+  - `create_assembly_branch(...)`
+  - `record_assembly_validation(...)`
+  - `promote_branch_to_main(...)`
+- Enforced 0045 safety rules in code:
+  - no silent source switching inside a branch
+  - sibling fork-group branches cannot read one another
+  - fork-group assembly refuses stale main-parent drift
+  - assembly validation happens off `main`
+  - promotion and assembly remain distinct merge paths
+- Tightened branch truth in the query surface:
+  - branch status now reports lifecycle state correctly
+  - branch selector and current-node projection preserve the requested scope instead of collapsing back to the parent node
+- Added tests:
+  - `tests/test_branch_execution.py`
+  - `tests/test_branch_promotion.py`
+  - `tests/test_fork_group_assembly.py`
+  - expanded `tests/test_scope_contracts.py`
+
+Validation
+- Ran:
+  - `python -m pytest --basetemp .pytest_tmp_0045 tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scope_contracts.py`
+  - `python -m pytest --basetemp .pytest_tmp_0045_regression tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py`
+- Result:
+  - `16 passed`
+  - `37 passed`
+
+Notes
+- This step delivers the branch coordinate and isolation model, not a full parallel scheduler.
+- Assembly stays off `main`; the current implementation records validation state explicitly and blocks canonical promotion until validation passes.
+- Automatic seam-audit execution can attach to the assembly branch later without changing the branch contract or promotion rules.
+
+---
+
+## Source 18: `notes/2026-04-21-0050-execution.md`
+
+# 0050 Execution Note
+
+Date
+- 2026-04-21
+
+Scope
+- Begin story `0050-harden-reconciliation-integrity-and-command-surface`.
+
+Changes
+- Added a reconciliation layer for main-branch execution:
+  - `src/bookforge/supervision/reconcile.py`
+  - `capture_main_branch_snapshot(...)`
+  - `reconcile_main_branch_transition(...)`
+  - `emit_reconciled_main_branch_contracts(...)`
+- Wired main-branch reconciliation into:
+  - `src/bookforge/section_workflow.py`
+  - `src/bookforge/execution/scoped.py`
+  - `src/bookforge/runner.py`
+- Promotion now emits canonical reconciliation on `main` in addition to the derived-branch promotion result:
+  - `src/bookforge/branching.py`
+- Renamed the reconciliation receipt field from the ambiguous `requested_result_status` to `pre_reconciliation_status`.
+- Added the next structural/runtime classifications:
+  - `stale_write` for revision-only expected-node drift on `main`
+  - `stale_parent` for active branches derived from an out-of-date main revision
+  - `overscoped_recovery` for materialized section content that no longer matches its declared source run
+- Split branch control into smaller modules before adding more 0050 weight:
+  - `src/bookforge/branching.py` is now a thin facade
+  - `src/bookforge/branching_fork.py`
+  - `src/bookforge/branching_execution.py`
+  - `src/bookforge/branching_lifecycle.py`
+- Help/docs now describe the public reconciliation fields:
+  - `docs/help/index.md`
+  - `docs/help/workflow.md`
+  - `docs/help/run.md`
+- Expanded tests for reconciliation-facing behavior:
+  - `tests/test_supervision_emit.py`
+  - `tests/test_branch_promotion.py`
+
+Validation
+- Ran:
+  - `python -m pytest --basetemp .pytest_tmp_0050 tests/test_supervision_emit.py tests/test_branch_promotion.py tests/test_scoped_execution.py tests/test_branch_execution.py tests/test_fork_group_assembly.py tests/test_query_workspace.py tests/test_query_integrity.py tests/test_scope_contracts.py`
+  - `python -m pytest --basetemp .pytest_tmp_0050_regression tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_integrity_slice tests/test_query_integrity.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scope_contracts.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0050c tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+- Result:
+  - `27 passed`
+  - `50 passed`
+  - `27 passed`
+  - `52 passed`
+
+Notes
+- This is an in-progress slice, not the full 0050 story.
+- The implemented part makes main-branch results materially more truthful:
+  - pre-reconciliation vs final public status
+  - before/after revision ids
+  - canonical vs no-op change classification
+  - integrity-change direction
+- The branch-control split now keeps the public import surface stable while preventing `branching.py` from becoming the next oversized coordination module.
+- Remaining 0050 work is mostly deeper integrity coverage and the final branch-local reconciliation model, not a question of whether reconciliation exists at all.
+
+---
+
+## Source 19: `notes/2026-04-22-0050-execution.md`
+
+# 0050 Execution Note
+
+Date
+- 2026-04-22
+
+Scope
+- Continue story `0050-harden-reconciliation-integrity-and-command-surface`.
+- Finish the branch-local reconciliation slice for off-main mutation paths.
+
+Changes
+- Extended `src/bookforge/supervision/reconcile.py` with:
+  - `capture_surface_snapshot(...)`
+  - `reconcile_branch_transition(...)`
+  - `emit_reconciled_branch_contracts(...)`
+- Exported the branch-local reconciliation helpers through:
+  - `src/bookforge/supervision/__init__.py`
+- Wired off-main branch-local receipts into real branch mutation paths:
+  - `src/bookforge/branching_execution.py`
+    - `rerun_freeze_section_on_branch(...)`
+  - `src/bookforge/branching_lifecycle.py`
+    - `record_assembly_validation(...)`
+- Hardened branch revision generation so rapid branch activity cannot reuse the same revision token inside one second:
+  - `src/bookforge/branching_store.py`
+- Added one more structural integrity detector:
+  - `src/bookforge/query/integrity.py`
+    - `workflow_family_contamination` when the emitted main-node surface no longer matches live-derived runtime truth
+- Added focused receipt coverage:
+  - `tests/test_branch_execution.py`
+    - changed branch-local receipt after a real rerun
+    - unchanged branch-local receipt when rerun hits already-materialized state
+  - `tests/test_fork_group_assembly.py`
+    - branch-local receipt after failed assembly validation
+  - `tests/test_query_integrity.py`
+    - emitted main-node drift against live runtime truth
+
+Validation
+- Ran:
+  - `python -m pytest --basetemp .pytest_tmp_0050_branch_receipts tests/test_branch_execution.py tests/test_fork_group_assembly.py tests/test_branch_promotion.py tests/test_supervision_emit.py`
+  - `python -m pytest --basetemp .pytest_tmp_0050_integrity_plus tests/test_query_integrity.py tests/test_supervision_emit.py tests/test_scoped_execution.py tests/test_query_workspace.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0050f tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+- Result:
+  - `15 passed`
+  - `14 passed`
+  - `56 passed`
+
+Notes
+- Off-main execution now has a truthful receipt path that stays distinct from canonical reconciliation:
+  - branch-local before/after snapshot
+  - branch-only change classification via `branch_change_status`
+  - integrity movement without claiming canonical mutation
+- The new emitted-vs-live main-node detector is intentionally scoped to emitted-view integrity checks.
+  - Live reconciliation paths call `get_integrity_verdict(..., prefer_emitted=False)` so they do not self-trigger during the window before the emitted pointer is refreshed.
+- Branch creation still uses a lightweight freshness guard, not a full branch-local reconciliation pass.
+- Branch discard still emits lifecycle observability only; it does not pretend to reconcile state that never reaches canonical promotion.
+
+---
+
+## Source 20: `notes/2026-04-22-0060-execution.md`
+
+# 0060 Execution Note
+
+Date
+- 2026-04-22
+
+Scope
+- Start story `0060-extract-minimal-engine-execution-surface-for-nanda`.
+- Land the first extracted action and legal-next-action query slice.
+
+Changes
+- Added a queryable action descriptor contract:
+  - `src/bookforge/contracts/execution_option.py`
+- Added the first legal-next-action query seam:
+  - `src/bookforge/query/actions.py`
+  - `bookforge.query.list_execution_options(...)`
+  - `bookforge.query.legal_next_actions(...)`
+- Added the first outline/materialization execution adapter:
+  - `src/bookforge/execution/materialize.py`
+  - `build_initialize_workflow_request(...)`
+  - `initialize_workflow(...)`
+- Extended the materialization adapter slice:
+  - `build_freeze_section_request(...)`
+  - `freeze_section(...)`
+- Completed the main-branch section materialization/finalization slice:
+  - `build_lock_section_request(...)`
+  - `lock_section(...)`
+  - `build_finalize_chapter_request(...)`
+  - `finalize_chapter(...)`
+- Added the next write-surface action:
+  - `build_write_section_request(...)`
+  - `write_frozen_section(...)`
+- Added the first extracted branch-lifecycle action:
+  - `src/bookforge/execution/branch_actions.py`
+  - `build_create_branch_request(...)`
+  - `create_branch_action(...)`
+- Extended the branch-lifecycle extraction slice:
+  - `build_create_assembly_branch_request(...)`
+  - `create_assembly_branch_action(...)`
+  - `build_discard_branch_request(...)`
+  - `discard_branch_action(...)`
+  - `build_promote_branch_request(...)`
+  - `promote_branch_action(...)`
+  - `build_record_assembly_validation_request(...)`
+  - `record_assembly_validation_action(...)`
+- Threaded `request_id` through `create_branch(...)` branch-side emissions so the extracted action can return the emitted branch receipt:
+  - `src/bookforge/branching_fork.py`
+- Threaded `request_id` through `promote_branch_to_main(...)` emissions so the promotion adapter can return the reconciled canonical receipt instead of fabricating one:
+  - `src/bookforge/branching_lifecycle.py`
+- Threaded `request_id` through `discard_branch(...)` emissions for the same reason:
+  - `src/bookforge/branching_lifecycle.py`
+- Threaded `request_id` through `initialize_section_workflow(...)` emissions so the adapter can return the emitted `ExecutionResult` instead of fabricating a second receipt path:
+  - `src/bookforge/section_workflow.py`
+- Threaded `request_id` through `freeze_section_from_phase03_artifact(...)` emissions for the same reason:
+  - `src/bookforge/section_workflow.py`
+- Threaded `request_id` through `lock_section_from_written_state(...)` emissions for the same reason:
+  - `src/bookforge/section_workflow.py`
+- Threaded `request_id` through `finalize_chapter_from_locked_sections(...)` emissions for the same reason:
+  - `src/bookforge/section_workflow.py`
+- Routed the CLI workflow-init wrapper through the extracted action layer:
+  - `src/bookforge/cli.py`
+- Routed the CLI workflow-freeze wrapper through the extracted action layer:
+  - `src/bookforge/cli.py`
+- Routed the CLI workflow-lock wrapper through the extracted action layer:
+  - `src/bookforge/cli.py`
+- Routed the CLI workflow-finalize wrapper through the extracted action layer:
+  - `src/bookforge/cli.py`
+- Routed the CLI workflow-advance wrapper through the extracted action layer sequence:
+  - `freeze_section_from_phase03_artifact`
+  - `write_frozen_section` or `resume_paused_section`
+  - `lock_section_from_written_state`
+- Added the CLI workflow-write wrapper over the extracted write action:
+  - `bookforge workflow write-section`
+- Added an operator wrapper over the same discovery seam:
+  - `bookforge workflow legal-actions`
+- Extended the operator wrapper so legal-action discovery can target derived branches:
+  - `bookforge workflow legal-actions --branch-id <id>`
+- Extended main-branch legal-action discovery so fork-group scope can surface `create_assembly_branch`:
+  - `bookforge workflow legal-actions --fork-group-id <id>`
+- Extended derived-branch discovery to surface assembly validation when the selected branch is an active assembly branch.
+- Updated help docs to reflect the new action/discovery surface:
+  - `docs/help/workflow.md`
+  - `docs/help/index.md`
+- Added focused tests:
+  - `tests/test_execution_actions.py`
+  - `tests/test_action_discovery.py`
+
+Validation
+- Ran:
+  - `python -m pytest --basetemp .pytest_tmp_0060_branch_action tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_scoped_execution.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0060c tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_0060_branch_lifecycle tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0060d tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_0060_assembly_action tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0060e tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_0060_assembly_create tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0060f tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_0060_finalize tests/test_execution_actions.py tests/test_action_discovery.py tests/test_section_workflow.py tests/test_chapter_seam.py tests/test_scoped_execution.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0060g tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_chapter_seam.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_0060_lock tests/test_execution_actions.py tests/test_action_discovery.py tests/test_section_workflow.py tests/test_chapter_seam.py tests/test_scoped_execution.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0060h tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_chapter_seam.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+  - `python -m pytest --basetemp .pytest_tmp_0060_write tests/test_execution_actions.py tests/test_action_discovery.py tests/test_scoped_execution.py tests/test_section_workflow.py tests/test_chapter_seam.py`
+  - `python -m pytest --basetemp .pytest_tmp_regression_0060i tests/test_execution_actions.py tests/test_action_discovery.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_scoped_execution.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_scope_contracts.py tests/test_timeline_node.py tests/test_section_workflow.py tests/test_chapter_seam.py tests/test_runner_outline_gate.py tests/test_workspace_init.py`
+- Result:
+  - `19 passed`
+  - `64 passed`
+  - `28 passed`
+  - `68 passed`
+  - `30 passed`
+  - `70 passed`
+  - `32 passed`
+  - `72 passed`
+  - `29 passed`
+  - `77 passed`
+  - `31 passed`
+  - `79 passed`
+  - `34 passed`
+  - `82 passed`
+
+Notes
+- This is intentionally the smallest honest extraction slice:
+  - four outline/materialization actions
+  - one write/resume action
+  - the full current branch-lifecycle action family
+  - one query seam for legal-next-action discovery
+- The CLI no longer owns unique logic for workflow init.
+- The action descriptor is still intentionally simple. It exposes:
+  - action id
+  - summary
+  - branch policy
+  - canonical-mutation flag
+  - expected-node requirement
+  - selector requirements
+  - allowed vs blocked state
+  - refusal reason
+- Branch lifecycle extraction now covers:
+  - `create_assembly_branch`
+  - `create_branch`
+  - `discard_branch`
+  - `promote_branch_to_main`
+  - `record_assembly_validation`
+- Main-branch materialization/finalization extraction now covers:
+  - `initialize_section_workflow`
+  - `freeze_section_from_phase03_artifact`
+  - `write_frozen_section`
+  - `lock_section_from_written_state`
+  - `finalize_chapter_from_locked_sections`
+- The write-side choose-your-own-adventure seam now supports:
+  - `freeze_section_from_phase03_artifact`
+  - `write_frozen_section`
+  - `lock_section_from_written_state`
+  - `resume_paused_section`
+- `advance-section` remains available as a macro convenience wrapper, but it no longer owns unique orchestration logic.
+- The remaining obvious future gap is the deeper write/lint/repair interior if we want Nanda to steer per-scene or per-phase sub-actions instead of section-level write actions.
+
+---
+
+## Source 21: `promotion.md`
 
 # Promotion
 

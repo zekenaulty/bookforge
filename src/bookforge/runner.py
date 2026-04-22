@@ -50,6 +50,11 @@ from bookforge.pipeline.lint import _heuristic_invariant_issues, _linked_durable
 from bookforge.pipeline.durable import _durable_state_context
 from bookforge.pipeline.parse import _extract_prose_and_patch
 from bookforge.pipeline.log import _status, _now_iso, set_run_log_path
+from bookforge.supervision import (
+    RuntimeIssue,
+    capture_main_branch_snapshot,
+    emit_reconciled_main_branch_contracts,
+)
 from bookforge.util.schema import validate_json
 from bookforge.outline import (
     load_latest_outline_pipeline_report,
@@ -232,6 +237,44 @@ def _write_reason_pause_marker(
     pause_path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
     return pause_path
 
+
+def _emit_pause_contracts(
+    *,
+    book_root: Path,
+    before_snapshot,
+    phase: str,
+    message: str,
+    runtime_issue: RuntimeIssue,
+    pause_path: Path,
+    state_path: Path,
+    scene_card: Optional[Dict[str, Any]] = None,
+    details: Optional[Dict[str, Any]] = None,
+) -> None:
+    workspace = book_root.parent.parent
+    artifact_paths: Dict[str, str] = {
+        "pause_marker": _artifact_relpath(book_root, pause_path),
+        "state": _artifact_relpath(book_root, state_path),
+    }
+    if scene_card:
+        chapter = _maybe_int(scene_card.get("chapter"))
+        scene = _maybe_int(scene_card.get("scene"))
+        if chapter is not None and scene is not None:
+            prose_path = book_root / "draft" / "chapters" / f"ch_{chapter:03d}" / f"scene_{scene:03d}.md"
+            if prose_path.exists():
+                artifact_paths["scene_prose"] = _artifact_relpath(book_root, prose_path)
+    emit_reconciled_main_branch_contracts(
+        workspace=workspace,
+        book_id=book_root.name,
+        before_snapshot=before_snapshot,
+        action="run_loop",
+        result_status="retryable_pause",
+        message=message,
+        runtime_issues=[runtime_issue],
+        artifact_paths=artifact_paths,
+        details={"phase": str(phase).strip(), **dict(details or {})},
+    )
+
+
 def _pause_on_reason(
     book_root: Path,
     state_path: Path,
@@ -243,6 +286,7 @@ def _pause_on_reason(
     scene_card: Optional[Dict[str, Any]] = None,
     details: Optional[Dict[str, Any]] = None,
 ) -> None:
+    before_snapshot = capture_main_branch_snapshot(book_root.parent.parent, book_root.name)
     if state is not None:
         try:
             validate_json(state, "state")
@@ -268,7 +312,24 @@ def _pause_on_reason(
             if section is not None:
                 progress_payload["section"] = section
         _write_run_progress(book_root, run_id, progress_payload)
-    _write_reason_pause_marker(book_root, phase, reason_code, message, scene_card, details)
+    pause_path = _write_reason_pause_marker(book_root, phase, reason_code, message, scene_card, details)
+    _emit_pause_contracts(
+        book_root=book_root,
+        before_snapshot=before_snapshot,
+        phase=phase,
+        message=message,
+        runtime_issue=RuntimeIssue(
+            category="recovery_mode_required",
+            code=str(reason_code).strip() or "recovery_mode_required",
+            severity="high",
+            message=message,
+            details=dict(details or {}),
+        ),
+        pause_path=pause_path,
+        state_path=state_path,
+        scene_card=scene_card,
+        details={"reason_code": str(reason_code).strip() or None},
+    )
     _status(f"Run paused ({reason_code}) in phase '{phase}': {message}")
     raise SystemExit(PAUSE_EXIT_CODE)
 
@@ -317,6 +378,7 @@ def _pause_on_quota(
     error: LLMRequestError,
     scene_card: Optional[Dict[str, Any]] = None,
 ) -> None:
+    before_snapshot = capture_main_branch_snapshot(book_root.parent.parent, book_root.name)
     if error.status_code != 429 and not error.quota_violations:
         raise error
     if state is not None:
@@ -345,7 +407,30 @@ def _pause_on_quota(
             progress_payload["section"] = section
     if run_id:
         _write_run_progress(book_root, run_id, progress_payload)
-    _write_pause_marker(book_root, phase, error, scene_card)
+    pause_path = _write_pause_marker(book_root, phase, error, scene_card)
+    _emit_pause_contracts(
+        book_root=book_root,
+        before_snapshot=before_snapshot,
+        phase=phase,
+        message=str(error),
+        runtime_issue=RuntimeIssue(
+            category="provider_retry_exhausted",
+            code="quota_exhausted" if error.quota_violations or error.status_code == 429 else "provider_retry_exhausted",
+            severity="high",
+            message=str(error),
+            details={
+                "status_code": error.status_code,
+                "retry_after_seconds": error.retry_after_seconds,
+            },
+        ),
+        pause_path=pause_path,
+        state_path=state_path,
+        scene_card=scene_card,
+        details={
+            "status_code": error.status_code,
+            "retry_after_seconds": error.retry_after_seconds,
+        },
+    )
     _status(f"Run paused due to quota in phase '{phase}': {error}")
     raise SystemExit(PAUSE_EXIT_CODE)
 
@@ -494,6 +579,7 @@ def run_loop(
         raise FileNotFoundError(f"Missing outline.json: {outline_path}")
     if not system_path.exists():
         raise FileNotFoundError(f"Missing system_v1.md: {system_path}")
+    before_snapshot = capture_main_branch_snapshot(workspace, book_id)
 
     run_id = _current_run_id()
     run_log_path = _run_log_path(book_root, run_id)
@@ -502,6 +588,9 @@ def run_loop(
     _append_run_log(book_root, run_id, f"run_id: {run_id}")
     _append_run_log(book_root, run_id, f"book_id: {book_id}")
     _append_run_log(book_root, run_id, f"started_at: {_now_iso()}")
+    pause_marker_path = book_root / "draft" / "context" / "run_paused.json"
+    if pause_marker_path.exists():
+        pause_marker_path.unlink()
 
     def update_progress(
         *,
@@ -1433,15 +1522,27 @@ def run_loop(
         scene=_maybe_int(final_cursor.get("scene")),
         message="Run loop exited cleanly.",
     )
+    emit_reconciled_main_branch_contracts(
+        workspace=workspace,
+        book_id=book_id,
+        before_snapshot=before_snapshot,
+        action="run_loop",
+        result_status="success",
+        message="Run loop exited cleanly.",
+        artifact_paths={
+            "state": _artifact_relpath(book_root, state_path),
+            "outline": _artifact_relpath(book_root, outline_path),
+            "run_log": _artifact_relpath(book_root, run_log_path),
+        },
+        details={
+            "final_state_status": str(final_state.get("status") or "").strip(),
+            "final_chapter": _maybe_int(final_cursor.get("chapter")),
+            "final_scene": _maybe_int(final_cursor.get("scene")),
+        },
+    )
 
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
-
-
-
-
-
-
 
 
 
