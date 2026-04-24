@@ -3,6 +3,7 @@ from bookforge.contracts import (
     EXECUTION_RESULT_STATUSES,
     MAIN_BRANCH_ID,
     MERGE_OPERATIONS,
+    PRODUCED_ARTIFACT_STATUSES,
     WORKFLOW_FAMILIES,
     SourceArtifactClass,
     canonical_change_status_for_branch_lifecycle,
@@ -34,6 +35,12 @@ def test_runtime_vocabulary_is_frozen() -> None:
         "frozen_projection",
         "mutable_compatibility_view",
         "diagnostic_only",
+    )
+    assert PRODUCED_ARTIFACT_STATUSES == (
+        "authoritative",
+        "provisional",
+        "derived",
+        "diagnostic",
     )
     assert execution_result_for_branch_lifecycle("promote_ready") == "promotion_required"
     assert execution_result_for_branch_lifecycle("discard") == "hard_fail"

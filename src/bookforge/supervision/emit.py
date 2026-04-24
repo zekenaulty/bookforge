@@ -12,6 +12,7 @@ from bookforge.contracts import (
     ExecutionResult,
     IssueTicket,
     MAIN_BRANCH_ID,
+    ProducedArtifactReceipt,
     ScopeSelector,
     StateSurface,
     TimelineNodeRef,
@@ -270,6 +271,7 @@ def emit_branch_contracts(
     message: Optional[str] = None,
     runtime_issues: Optional[List[RuntimeIssue]] = None,
     artifact_paths: Optional[Dict[str, str]] = None,
+    produced_artifacts: Optional[List[ProducedArtifactReceipt]] = None,
     details: Optional[Dict[str, Any]] = None,
 ) -> EmissionBundle:
     book_root = workspace / "books" / book_id
@@ -315,6 +317,7 @@ def emit_branch_contracts(
             message=message,
             issue_ticket_ids=[ticket.ticket_id for ticket in tickets],
             artifact_paths=dict(artifact_paths or {}),
+            produced_artifacts=list(produced_artifacts or []),
             details=dict(details or {}),
             emitted_at=_now_iso(),
             request_id=request_id,
@@ -339,6 +342,7 @@ def emit_main_branch_contracts(
     message: Optional[str] = None,
     runtime_issues: Optional[List[RuntimeIssue]] = None,
     artifact_paths: Optional[Dict[str, str]] = None,
+    produced_artifacts: Optional[List[ProducedArtifactReceipt]] = None,
     details: Optional[Dict[str, Any]] = None,
 ) -> EmissionBundle:
     return emit_branch_contracts(
@@ -351,5 +355,6 @@ def emit_main_branch_contracts(
         message=message,
         runtime_issues=runtime_issues,
         artifact_paths=artifact_paths,
+        produced_artifacts=produced_artifacts,
         details=details,
     )

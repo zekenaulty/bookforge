@@ -27,6 +27,13 @@ ArtifactClassLabel = Literal[
     "diagnostic_only",
 ]
 
+ProducedArtifactStatus = Literal[
+    "authoritative",
+    "provisional",
+    "derived",
+    "diagnostic",
+]
+
 
 WORKFLOW_FAMILIES: Final[tuple[str, ...]] = (
     "thin_outline",
@@ -75,6 +82,13 @@ ARTIFACT_CLASS_LABELS: Final[tuple[str, ...]] = (
     "diagnostic_only",
 )
 
+PRODUCED_ARTIFACT_STATUSES: Final[tuple[str, ...]] = (
+    "authoritative",
+    "provisional",
+    "derived",
+    "diagnostic",
+)
+
 MAIN_BRANCH_ID: Final[str] = "main"
 ASSEMBLY_BRANCH_PREFIX: Final[str] = "assembly"
 CURRENT_NODE_FILENAME: Final[str] = "current_node.json"
@@ -83,6 +97,7 @@ BRANCH_MANIFEST_FILENAME: Final[str] = "branch_manifest.json"
 _WORKFLOW_FAMILY_SET: Final[FrozenSet[str]] = frozenset(WORKFLOW_FAMILIES)
 _EXECUTION_RESULT_STATUS_SET: Final[FrozenSet[str]] = frozenset(EXECUTION_RESULT_STATUSES)
 _ARTIFACT_CLASS_SET: Final[FrozenSet[str]] = frozenset(ARTIFACT_CLASS_LABELS)
+_PRODUCED_ARTIFACT_STATUS_SET: Final[FrozenSet[str]] = frozenset(PRODUCED_ARTIFACT_STATUSES)
 
 
 def is_valid_workflow_family(value: str) -> bool:
@@ -95,6 +110,10 @@ def is_valid_execution_result_status(value: str) -> bool:
 
 def is_valid_artifact_class(value: str) -> bool:
     return str(value or "").strip() in _ARTIFACT_CLASS_SET
+
+
+def is_valid_produced_artifact_status(value: str) -> bool:
+    return str(value or "").strip() in _PRODUCED_ARTIFACT_STATUS_SET
 
 
 def is_main_branch(branch_id: str) -> bool:

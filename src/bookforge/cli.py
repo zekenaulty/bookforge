@@ -4,17 +4,33 @@ import sys
 
 from bookforge.author import generate_author
 from bookforge.execution import (
+    apply_scene_commit,
+    build_apply_scene_commit_request,
+    build_generate_continuity_pack_request,
+    build_lint_scene_prose_request,
+    build_plan_scene_request,
+    build_preflight_scene_state_request,
+    build_repair_scene_prose_request,
+    build_state_repair_scene_patch_request,
     build_finalize_chapter_request,
     build_freeze_section_request,
     build_initialize_workflow_request,
     build_lock_section_request,
     build_resume_paused_section_request,
+    build_write_scene_prose_request,
     build_write_section_request,
     finalize_chapter,
     freeze_section,
+    generate_continuity_pack,
     initialize_workflow,
+    lint_scene_prose,
     lock_section,
+    plan_scene_action,
+    preflight_scene_state,
+    repair_scene_prose,
     resume_paused_section,
+    state_repair_scene_patch,
+    write_scene_prose,
     write_frozen_section,
 )
 from bookforge.outline import (
@@ -26,7 +42,7 @@ from bookforge.outline import (
 )
 from bookforge.runner import run_loop
 from bookforge.characters import generate_characters
-from bookforge.query import list_execution_options
+from bookforge.query import get_scene_phase_readiness, list_execution_options
 from bookforge.contracts import ScopeSelector
 from bookforge.workspace import init_book_workspace, parse_genre, parse_targets, reset_book_workspace_detailed, update_book_templates
 from bookforge.llm.thoughts import format_thought_response, list_signatures, run_current_thoughts
@@ -272,6 +288,7 @@ def _workflow_legal_actions(args: argparse.Namespace) -> int:
                 fork_group_id=getattr(args, "fork_group_id", None),
                 chapter=getattr(args, "chapter", None),
                 section=getattr(args, "section", None),
+                scene=getattr(args, "scene", None),
             ),
             prefer_emitted=False,
         )
@@ -289,6 +306,409 @@ def _workflow_legal_actions(args: argparse.Namespace) -> int:
             sys.stdout.write(f"  details={option.details}\n")
         if option.refusal_reason:
             sys.stdout.write(f"  refusal_reason={option.refusal_reason}\n")
+    return 0
+
+
+def _workflow_scene_readiness(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        readiness = get_scene_phase_readiness(
+            workspace,
+            args.book,
+            chapter_id=int(args.chapter),
+            scene_id=int(args.scene),
+            section_id=getattr(args, "section", None),
+            prefer_emitted=False,
+        )
+    except Exception as exc:
+        sys.stderr.write(f"Workflow scene-readiness failed: {exc}\n")
+        return 1
+    selector = readiness.selector
+    section_label = f"{int(selector.section):03d}" if selector.section is not None else "n/a"
+    sys.stdout.write(
+        f"Book: {readiness.book_id}\n"
+        f"Scope: ch{int(selector.chapter or 0):03d} sc{int(selector.scene or 0):03d} "
+        f"sec={section_label}\n"
+        f"Scene status: {readiness.scene_status}\n"
+        f"Recommended next action: {readiness.recommended_next_action or ''}\n"
+    )
+    if readiness.node is not None:
+        sys.stdout.write(
+            f"Node: {readiness.node.workflow_family} "
+            f"branch={readiness.node.branch_id} "
+            f"run={readiness.node.source_run_id} "
+            f"rev={readiness.node.revision_id}\n"
+        )
+    for action in readiness.actions:
+        if action.legal and action.ready:
+            status = "ready"
+        elif action.legal:
+            status = "blocked"
+        else:
+            status = "illegal"
+        sys.stdout.write(f"{action.action}: {status}\n")
+        sys.stdout.write(
+            f"  mutation_scope={action.mutation_scope} recommended={str(bool(action.recommended)).lower()}\n"
+        )
+        if action.available_inputs:
+            sys.stdout.write(f"  available_inputs={action.available_inputs}\n")
+        if action.missing_prerequisites:
+            sys.stdout.write(f"  missing_prerequisites={action.missing_prerequisites}\n")
+        for receipt in action.existing_outputs:
+            sys.stdout.write(
+                "  output="
+                f"{receipt.artifact_key} "
+                f"status={receipt.artifact_status} "
+                f"path={receipt.path} "
+                f"consumable={str(bool(receipt.consumable)).lower()} "
+                f"resumable={str(bool(receipt.resumable)).lower()} "
+                f"replaceable={str(bool(receipt.replaceable)).lower()}\n"
+            )
+        if action.refusal_reason:
+            sys.stdout.write(f"  refusal_reason={action.refusal_reason}\n")
+    return 0
+
+
+def _workflow_plan_scene(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        request = build_plan_scene_request(
+            workspace=workspace,
+            book_id=args.book,
+            chapter_id=int(args.chapter),
+            scene_id=int(args.scene),
+            section_id=getattr(args, "section", None),
+        )
+        result = plan_scene_action(workspace=workspace, request=request)
+    except Exception as exc:
+        sys.stderr.write(f"Plan scene failed: {exc}\n")
+        return 1
+    details = result.details if isinstance(result.details, dict) else {}
+    section_id = details.get("section_id")
+    section_label = f"{int(section_id):03d}" if section_id is not None else "n/a"
+    sys.stdout.write(
+        f"Request: {request.request_id}\n"
+        f"Status: {result.status}\n"
+        f"Message: {result.message or ''}\n"
+        f"Scene: ch{int(details.get('chapter_id', 0) or 0):03d} "
+        f"sc{int(details.get('scene_id', 0) or 0):03d} "
+        f"sec={section_label}\n"
+    )
+    if result.node is not None:
+        sys.stdout.write(
+            f"Node: {result.node.workflow_family} "
+            f"branch={result.node.branch_id} "
+            f"run={result.node.source_run_id} "
+            f"rev={result.node.revision_id}\n"
+        )
+    for receipt in result.produced_artifacts:
+        sys.stdout.write(
+            "Artifact: "
+            f"{receipt.artifact_key} "
+            f"status={receipt.artifact_status} "
+            f"path={receipt.path} "
+            f"consumable={str(bool(receipt.consumable)).lower()} "
+            f"resumable={str(bool(receipt.resumable)).lower()} "
+            f"replaceable={str(bool(receipt.replaceable)).lower()}\n"
+        )
+    if result.status == "retryable_pause":
+        return 75
+    if result.status in {"hard_fail", "integrity_degraded"}:
+        return 1
+    return 0
+
+
+def _workflow_preflight_scene_state(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        request = build_preflight_scene_state_request(
+            workspace=workspace,
+            book_id=args.book,
+            chapter_id=int(args.chapter),
+            scene_id=int(args.scene),
+            section_id=getattr(args, "section", None),
+        )
+        result = preflight_scene_state(workspace=workspace, request=request)
+    except Exception as exc:
+        sys.stderr.write(f"Preflight scene state failed: {exc}\n")
+        return 1
+    details = result.details if isinstance(result.details, dict) else {}
+    section_id = details.get("section_id")
+    section_label = f"{int(section_id):03d}" if section_id is not None else "n/a"
+    sys.stdout.write(
+        f"Request: {request.request_id}\n"
+        f"Status: {result.status}\n"
+        f"Message: {result.message or ''}\n"
+        f"Scene: ch{int(details.get('chapter_id', 0) or 0):03d} "
+        f"sc{int(details.get('scene_id', 0) or 0):03d} "
+        f"sec={section_label}\n"
+    )
+    if result.node is not None:
+        sys.stdout.write(
+            f"Node: {result.node.workflow_family} "
+            f"branch={result.node.branch_id} "
+            f"run={result.node.source_run_id} "
+            f"rev={result.node.revision_id}\n"
+        )
+    for receipt in result.produced_artifacts:
+        sys.stdout.write(
+            "Artifact: "
+            f"{receipt.artifact_key} "
+            f"status={receipt.artifact_status} "
+            f"path={receipt.path} "
+            f"consumable={str(bool(receipt.consumable)).lower()} "
+            f"resumable={str(bool(receipt.resumable)).lower()} "
+            f"replaceable={str(bool(receipt.replaceable)).lower()}\n"
+        )
+    if result.status == "retryable_pause":
+        return 75
+    if result.status in {"hard_fail", "integrity_degraded"}:
+        return 1
+    return 0
+
+
+def _workflow_generate_continuity_pack(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        request = build_generate_continuity_pack_request(
+            workspace=workspace,
+            book_id=args.book,
+            chapter_id=int(args.chapter),
+            scene_id=int(args.scene),
+            section_id=getattr(args, "section", None),
+        )
+        result = generate_continuity_pack(workspace=workspace, request=request)
+    except Exception as exc:
+        sys.stderr.write(f"Generate continuity pack failed: {exc}\n")
+        return 1
+    details = result.details if isinstance(result.details, dict) else {}
+    section_id = details.get("section_id")
+    section_label = f"{int(section_id):03d}" if section_id is not None else "n/a"
+    sys.stdout.write(
+        f"Request: {request.request_id}\n"
+        f"Status: {result.status}\n"
+        f"Message: {result.message or ''}\n"
+        f"Scene: ch{int(details.get('chapter_id', 0) or 0):03d} "
+        f"sc{int(details.get('scene_id', 0) or 0):03d} "
+        f"sec={section_label}\n"
+    )
+    if result.node is not None:
+        sys.stdout.write(
+            f"Node: {result.node.workflow_family} "
+            f"branch={result.node.branch_id} "
+            f"run={result.node.source_run_id} "
+            f"rev={result.node.revision_id}\n"
+        )
+    for receipt in result.produced_artifacts:
+        sys.stdout.write(
+            "Artifact: "
+            f"{receipt.artifact_key} "
+            f"status={receipt.artifact_status} "
+            f"path={receipt.path} "
+            f"consumable={str(bool(receipt.consumable)).lower()} "
+            f"resumable={str(bool(receipt.resumable)).lower()} "
+            f"replaceable={str(bool(receipt.replaceable)).lower()}\n"
+        )
+    if result.status == "retryable_pause":
+        return 75
+    if result.status in {"hard_fail", "integrity_degraded"}:
+        return 1
+    return 0
+
+
+def _workflow_state_repair_scene_patch(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        request = build_state_repair_scene_patch_request(
+            workspace=workspace,
+            book_id=args.book,
+            chapter_id=int(args.chapter),
+            scene_id=int(args.scene),
+            section_id=getattr(args, "section", None),
+        )
+        result = state_repair_scene_patch(workspace=workspace, request=request)
+    except Exception as exc:
+        sys.stderr.write(f"State repair scene patch failed: {exc}\n")
+        return 1
+    details = result.details if isinstance(result.details, dict) else {}
+    section_id = details.get("section_id")
+    section_label = f"{int(section_id):03d}" if section_id is not None else "n/a"
+    sys.stdout.write(
+        f"Request: {request.request_id}\n"
+        f"Status: {result.status}\n"
+        f"Message: {result.message or ''}\n"
+        f"Scene: ch{int(details.get('chapter_id', 0) or 0):03d} "
+        f"sc{int(details.get('scene_id', 0) or 0):03d} "
+        f"sec={section_label}\n"
+    )
+    if result.node is not None:
+        sys.stdout.write(
+            f"Node: {result.node.workflow_family} "
+            f"branch={result.node.branch_id} "
+            f"run={result.node.source_run_id} "
+            f"rev={result.node.revision_id}\n"
+        )
+    for receipt in result.produced_artifacts:
+        sys.stdout.write(
+            "Artifact: "
+            f"{receipt.artifact_key} "
+            f"status={receipt.artifact_status} "
+            f"path={receipt.path} "
+            f"consumable={str(bool(receipt.consumable)).lower()} "
+            f"resumable={str(bool(receipt.resumable)).lower()} "
+            f"replaceable={str(bool(receipt.replaceable)).lower()}\n"
+        )
+    if result.status == "retryable_pause":
+        return 75
+    if result.status in {"hard_fail", "integrity_degraded"}:
+        return 1
+    return 0
+
+
+def _workflow_lint_scene_prose(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        request = build_lint_scene_prose_request(
+            workspace=workspace,
+            book_id=args.book,
+            chapter_id=int(args.chapter),
+            scene_id=int(args.scene),
+            section_id=getattr(args, "section", None),
+        )
+        result = lint_scene_prose(workspace=workspace, request=request)
+    except Exception as exc:
+        sys.stderr.write(f"Lint scene prose failed: {exc}\n")
+        return 1
+    details = result.details if isinstance(result.details, dict) else {}
+    section_id = details.get("section_id")
+    section_label = f"{int(section_id):03d}" if section_id is not None else "n/a"
+    sys.stdout.write(
+        f"Request: {request.request_id}\n"
+        f"Status: {result.status}\n"
+        f"Message: {result.message or ''}\n"
+        f"Scene: ch{int(details.get('chapter_id', 0) or 0):03d} "
+        f"sc{int(details.get('scene_id', 0) or 0):03d} "
+        f"sec={section_label}\n"
+    )
+    if result.node is not None:
+        sys.stdout.write(
+            f"Node: {result.node.workflow_family} "
+            f"branch={result.node.branch_id} "
+            f"run={result.node.source_run_id} "
+            f"rev={result.node.revision_id}\n"
+        )
+    for receipt in result.produced_artifacts:
+        sys.stdout.write(
+            "Artifact: "
+            f"{receipt.artifact_key} "
+            f"status={receipt.artifact_status} "
+            f"path={receipt.path} "
+            f"consumable={str(bool(receipt.consumable)).lower()} "
+            f"resumable={str(bool(receipt.resumable)).lower()} "
+            f"replaceable={str(bool(receipt.replaceable)).lower()}\n"
+        )
+    if result.status == "retryable_pause":
+        return 75
+    if result.status in {"hard_fail", "integrity_degraded"}:
+        return 1
+    return 0
+
+
+def _workflow_repair_scene_prose(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        request = build_repair_scene_prose_request(
+            workspace=workspace,
+            book_id=args.book,
+            chapter_id=int(args.chapter),
+            scene_id=int(args.scene),
+            section_id=getattr(args, "section", None),
+        )
+        result = repair_scene_prose(workspace=workspace, request=request)
+    except Exception as exc:
+        sys.stderr.write(f"Repair scene prose failed: {exc}\n")
+        return 1
+    details = result.details if isinstance(result.details, dict) else {}
+    section_id = details.get("section_id")
+    section_label = f"{int(section_id):03d}" if section_id is not None else "n/a"
+    sys.stdout.write(
+        f"Request: {request.request_id}\n"
+        f"Status: {result.status}\n"
+        f"Message: {result.message or ''}\n"
+        f"Scene: ch{int(details.get('chapter_id', 0) or 0):03d} "
+        f"sc{int(details.get('scene_id', 0) or 0):03d} "
+        f"sec={section_label}\n"
+    )
+    if result.node is not None:
+        sys.stdout.write(
+            f"Node: {result.node.workflow_family} "
+            f"branch={result.node.branch_id} "
+            f"run={result.node.source_run_id} "
+            f"rev={result.node.revision_id}\n"
+        )
+    for receipt in result.produced_artifacts:
+        sys.stdout.write(
+            "Artifact: "
+            f"{receipt.artifact_key} "
+            f"status={receipt.artifact_status} "
+            f"path={receipt.path} "
+            f"consumable={str(bool(receipt.consumable)).lower()} "
+            f"resumable={str(bool(receipt.resumable)).lower()} "
+            f"replaceable={str(bool(receipt.replaceable)).lower()}\n"
+        )
+    if result.status == "retryable_pause":
+        return 75
+    if result.status in {"hard_fail", "integrity_degraded"}:
+        return 1
+    return 0
+
+
+def _workflow_apply_scene_commit(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        request = build_apply_scene_commit_request(
+            workspace=workspace,
+            book_id=args.book,
+            chapter_id=int(args.chapter),
+            scene_id=int(args.scene),
+            section_id=getattr(args, "section", None),
+        )
+        result = apply_scene_commit(workspace=workspace, request=request)
+    except Exception as exc:
+        sys.stderr.write(f"Apply scene commit failed: {exc}\n")
+        return 1
+    details = result.details if isinstance(result.details, dict) else {}
+    section_id = details.get("section_id")
+    section_label = f"{int(section_id):03d}" if section_id is not None else "n/a"
+    sys.stdout.write(
+        f"Request: {request.request_id}\n"
+        f"Status: {result.status}\n"
+        f"Message: {result.message or ''}\n"
+        f"Scene: ch{int(details.get('chapter_id', 0) or 0):03d} "
+        f"sc{int(details.get('scene_id', 0) or 0):03d} "
+        f"sec={section_label}\n"
+    )
+    if result.node is not None:
+        sys.stdout.write(
+            f"Node: {result.node.workflow_family} "
+            f"branch={result.node.branch_id} "
+            f"run={result.node.source_run_id} "
+            f"rev={result.node.revision_id}\n"
+        )
+    for receipt in result.produced_artifacts:
+        sys.stdout.write(
+            "Artifact: "
+            f"{receipt.artifact_key} "
+            f"status={receipt.artifact_status} "
+            f"path={receipt.path} "
+            f"consumable={str(bool(receipt.consumable)).lower()} "
+            f"resumable={str(bool(receipt.resumable)).lower()} "
+            f"replaceable={str(bool(receipt.replaceable)).lower()}\n"
+        )
+    if result.status == "retryable_pause":
+        return 75
+    if result.status in {"hard_fail", "integrity_degraded"}:
+        return 1
     return 0
 
 
@@ -455,6 +875,55 @@ def _workflow_write_section(args: argparse.Namespace) -> int:
         f"sec{int(details.get('section_id', 0) or 0):03d}\n"
         f"Range: {details.get('scene_ref_start')} -> {details.get('scene_ref_end')}\n"
     )
+    if result.status == "retryable_pause":
+        return 75
+    if result.status in {"hard_fail", "integrity_degraded"}:
+        return 1
+    return 0
+
+
+def _workflow_write_scene_prose(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        request = build_write_scene_prose_request(
+            workspace=workspace,
+            book_id=args.book,
+            chapter_id=int(args.chapter),
+            scene_id=int(args.scene),
+            section_id=getattr(args, "section", None),
+        )
+        result = write_scene_prose(workspace=workspace, request=request)
+    except Exception as exc:
+        sys.stderr.write(f"Write scene prose failed: {exc}\n")
+        return 1
+    details = result.details if isinstance(result.details, dict) else {}
+    section_id = details.get("section_id")
+    section_label = f"{int(section_id):03d}" if section_id is not None else "n/a"
+    sys.stdout.write(
+        f"Request: {request.request_id}\n"
+        f"Status: {result.status}\n"
+        f"Message: {result.message or ''}\n"
+        f"Scene: ch{int(details.get('chapter_id', 0) or 0):03d} "
+        f"sc{int(details.get('scene_id', 0) or 0):03d} "
+        f"sec={section_label}\n"
+    )
+    if result.node is not None:
+        sys.stdout.write(
+            f"Node: {result.node.workflow_family} "
+            f"branch={result.node.branch_id} "
+            f"run={result.node.source_run_id} "
+            f"rev={result.node.revision_id}\n"
+        )
+    for receipt in result.produced_artifacts:
+        sys.stdout.write(
+            "Artifact: "
+            f"{receipt.artifact_key} "
+            f"status={receipt.artifact_status} "
+            f"path={receipt.path} "
+            f"consumable={str(bool(receipt.consumable)).lower()} "
+            f"resumable={str(bool(receipt.resumable)).lower()} "
+            f"replaceable={str(bool(receipt.replaceable)).lower()}\n"
+        )
     if result.status == "retryable_pause":
         return 75
     if result.status in {"hard_fail", "integrity_degraded"}:
@@ -914,7 +1383,88 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_legal.add_argument("--fork-group-id", help="Optional fork-group scope for assembly discovery.")
     workflow_legal.add_argument("--chapter", type=int, help="Optional chapter scope.")
     workflow_legal.add_argument("--section", type=int, help="Optional section scope.")
+    workflow_legal.add_argument("--scene", type=int, help="Optional scene scope.")
     workflow_legal.set_defaults(func=_workflow_legal_actions)
+
+    workflow_scene_readiness = workflow_sub.add_parser(
+        "scene-readiness",
+        help="Show truthful scene-phase readiness for one scene on the current main-branch cursor path.",
+    )
+    workflow_scene_readiness.add_argument("--book", required=True, help="Book id.")
+    workflow_scene_readiness.add_argument("--chapter", required=True, type=int, help="Chapter id.")
+    workflow_scene_readiness.add_argument("--scene", required=True, type=int, help="Scene id.")
+    workflow_scene_readiness.add_argument("--section", type=int, help="Optional section id.")
+    workflow_scene_readiness.set_defaults(func=_workflow_scene_readiness)
+
+    workflow_plan_scene = workflow_sub.add_parser(
+        "plan-scene",
+        help="Generate a provisional scene card for one scene without auto-running downstream phases.",
+    )
+    workflow_plan_scene.add_argument("--book", required=True, help="Book id.")
+    workflow_plan_scene.add_argument("--chapter", required=True, type=int, help="Chapter id.")
+    workflow_plan_scene.add_argument("--scene", required=True, type=int, help="Scene id.")
+    workflow_plan_scene.add_argument("--section", type=int, help="Optional section id.")
+    workflow_plan_scene.set_defaults(func=_workflow_plan_scene)
+
+    workflow_preflight_scene = workflow_sub.add_parser(
+        "preflight-scene-state",
+        help="Generate a provisional preflight state patch for one scene without applying it.",
+    )
+    workflow_preflight_scene.add_argument("--book", required=True, help="Book id.")
+    workflow_preflight_scene.add_argument("--chapter", required=True, type=int, help="Chapter id.")
+    workflow_preflight_scene.add_argument("--scene", required=True, type=int, help="Scene id.")
+    workflow_preflight_scene.add_argument("--section", type=int, help="Optional section id.")
+    workflow_preflight_scene.set_defaults(func=_workflow_preflight_scene_state)
+
+    workflow_continuity_pack = workflow_sub.add_parser(
+        "generate-continuity-pack",
+        help="Generate a derived continuity pack for one scene without writing prose or mutating canonical state.",
+    )
+    workflow_continuity_pack.add_argument("--book", required=True, help="Book id.")
+    workflow_continuity_pack.add_argument("--chapter", required=True, type=int, help="Chapter id.")
+    workflow_continuity_pack.add_argument("--scene", required=True, type=int, help="Scene id.")
+    workflow_continuity_pack.add_argument("--section", type=int, help="Optional section id.")
+    workflow_continuity_pack.set_defaults(func=_workflow_generate_continuity_pack)
+
+    workflow_state_repair_scene = workflow_sub.add_parser(
+        "state-repair-scene-patch",
+        help="Generate a provisional corrected state patch for one scene without linting, repairing prose, or committing.",
+    )
+    workflow_state_repair_scene.add_argument("--book", required=True, help="Book id.")
+    workflow_state_repair_scene.add_argument("--chapter", required=True, type=int, help="Chapter id.")
+    workflow_state_repair_scene.add_argument("--scene", required=True, type=int, help="Scene id.")
+    workflow_state_repair_scene.add_argument("--section", type=int, help="Optional section id.")
+    workflow_state_repair_scene.set_defaults(func=_workflow_state_repair_scene_patch)
+
+    workflow_lint_scene = workflow_sub.add_parser(
+        "lint-scene-prose",
+        help="Generate a provisional lint report for one scene without repairing prose or committing.",
+    )
+    workflow_lint_scene.add_argument("--book", required=True, help="Book id.")
+    workflow_lint_scene.add_argument("--chapter", required=True, type=int, help="Chapter id.")
+    workflow_lint_scene.add_argument("--scene", required=True, type=int, help="Scene id.")
+    workflow_lint_scene.add_argument("--section", type=int, help="Optional section id.")
+    workflow_lint_scene.set_defaults(func=_workflow_lint_scene_prose)
+
+    workflow_repair_scene = workflow_sub.add_parser(
+        "repair-scene-prose",
+        help="Generate provisional repaired prose and patch artifacts for one scene without rerunning state repair, lint, or commit.",
+    )
+    workflow_repair_scene.add_argument("--book", required=True, help="Book id.")
+    workflow_repair_scene.add_argument("--chapter", required=True, type=int, help="Chapter id.")
+    workflow_repair_scene.add_argument("--scene", required=True, type=int, help="Scene id.")
+    workflow_repair_scene.add_argument("--section", type=int, help="Optional section id.")
+    workflow_repair_scene.set_defaults(func=_workflow_repair_scene_prose)
+
+    workflow_apply_scene_commit = workflow_sub.add_parser(
+        "apply-scene-commit",
+        help="Commit the active scene's latest passing provisional baseline into canonical state and authoritative scene artifacts.",
+    )
+    workflow_apply_scene_commit.add_argument("--book", required=True, help="Book id.")
+    workflow_apply_scene_commit.add_argument("--chapter", required=True, type=int, help="Chapter id.")
+    workflow_apply_scene_commit.add_argument("--scene", required=True, type=int, help="Scene id.")
+    workflow_apply_scene_commit.add_argument("--section", type=int, help="Optional section id.")
+    workflow_apply_scene_commit.set_defaults(func=_workflow_apply_scene_commit)
 
     workflow_freeze = workflow_sub.add_parser(
         "freeze-section",
@@ -946,6 +1496,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Bypass outline write gate checks while running the writer loop.",
     )
     workflow_write.set_defaults(func=_workflow_write_section)
+
+    workflow_write_scene = workflow_sub.add_parser(
+        "write-scene-prose",
+        help="Generate provisional prose for one scene without auto-running lint, repair, or commit.",
+    )
+    workflow_write_scene.add_argument("--book", required=True, help="Book id.")
+    workflow_write_scene.add_argument("--chapter", required=True, type=int, help="Chapter id.")
+    workflow_write_scene.add_argument("--scene", required=True, type=int, help="Scene id.")
+    workflow_write_scene.add_argument("--section", type=int, help="Optional section id.")
+    workflow_write_scene.set_defaults(func=_workflow_write_scene_prose)
 
     workflow_lock = workflow_sub.add_parser(
         "lock-section",

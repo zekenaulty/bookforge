@@ -7,7 +7,9 @@ import pytest
 
 from bookforge.branching import create_assembly_branch, create_branch, rerun_freeze_section_on_branch
 from bookforge.llm.errors import LLMRequestError, QuotaViolation
+from bookforge.memory.continuity import save_style_anchor, style_anchor_path
 from bookforge.pipeline.run_logging import _write_latest_run_pointer
+from bookforge.pipeline.phase_history import _record_phase_success, _write_phase_artifact
 from bookforge.query import legal_next_actions, list_execution_options
 from bookforge.contracts import ScopeSelector
 from bookforge.runner import PAUSE_EXIT_CODE, _pause_on_quota
@@ -161,6 +163,87 @@ def _write_scene_artifacts(book_root: Path, chapter_id: int, scene_id: int, *, t
     (chapter_dir / f"scene_{scene_id:03d}.meta.json").write_text(
         json.dumps({"scene_id": scene_id}, ensure_ascii=True, indent=2),
         encoding="utf-8",
+    )
+
+
+def _scene_card() -> dict:
+    return {
+        "schema_version": "1.1",
+        "scene_id": "SC_001_001",
+        "chapter": 1,
+        "scene": 1,
+        "section_id": 1,
+        "scene_target": "Rhea reaches the door.",
+        "goal": "Get inside.",
+        "conflict": "The lock resists.",
+        "required_callbacks": [],
+        "constraints": [],
+        "end_condition": "The door opens.",
+        "location_start": "Front Gate",
+        "location_end": "Front Gate",
+        "handoff_mode": "terminal",
+        "constraint_state": "free",
+        "transition_in_text": "Rhea reaches the front gate in the rain.",
+        "transition_in_anchors": ["front gate", "rain", "lock"],
+        "ui_allowed": False,
+        "ui_mechanics_expected": [],
+        "cast_present_ids": ["CHAR_protagonist"],
+        "cast_present": ["Rhea"],
+    }
+
+
+def _record_artifact(book_root: Path, chapter: int, scene: int, phase: str, name: str, payload, *, as_json: bool = True, artifact_key: str) -> None:
+    path = _write_phase_artifact(book_root, chapter, scene, name, payload, as_json=as_json)
+    _record_phase_success(
+        book_root,
+        chapter,
+        scene,
+        phase,
+        {artifact_key: path.relative_to(book_root).as_posix()},
+    )
+
+
+def _record_write_pair(book_root: Path, prose: str = "Rhea forced the lock open.") -> None:
+    prose_path = _write_phase_artifact(book_root, 1, 1, "write_prose", prose, as_json=False)
+    patch_path = _write_phase_artifact(
+        book_root,
+        1,
+        1,
+        "write_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        as_json=True,
+    )
+    _record_phase_success(
+        book_root,
+        1,
+        1,
+        "write",
+        {
+            "prose": prose_path.relative_to(book_root).as_posix(),
+            "patch": patch_path.relative_to(book_root).as_posix(),
+        },
+    )
+
+
+def _record_repair_pair(book_root: Path, prose: str = "Rhea forced the lock open cleanly.") -> None:
+    prose_path = _write_phase_artifact(book_root, 1, 1, "repair_prose", prose, as_json=False)
+    patch_path = _write_phase_artifact(
+        book_root,
+        1,
+        1,
+        "repair_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        as_json=True,
+    )
+    _record_phase_success(
+        book_root,
+        1,
+        1,
+        "repair",
+        {
+            "prose": prose_path.relative_to(book_root).as_posix(),
+            "patch": patch_path.relative_to(book_root).as_posix(),
+        },
     )
 
 
@@ -418,6 +501,510 @@ def test_list_execution_options_for_active_frozen_section_includes_write(tmp_pat
     ]
 
 
+def test_list_execution_options_for_active_scene_includes_write_scene_prose(tmp_path: Path) -> None:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root)
+    initialize_section_workflow(workspace=tmp_path, book_id="my_book", overwrite=True)
+    freeze_section_from_phase03_artifact(workspace=tmp_path, book_id="my_book", chapter_id=1, section_id=1)
+    _record_artifact(book_root, 1, 1, "plan", "scene_card", _scene_card(), artifact_key="scene_card")
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "preflight",
+        "preflight_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        artifact_key="patch",
+    )
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "continuity_pack",
+        "continuity_pack",
+        {"scene_end_anchor": "The lock clicks."},
+        artifact_key="pack",
+    )
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "continuity_pack",
+        "continuity_pack",
+        {
+            "scene_end_anchor": "The lock clicks.",
+            "constraints": [],
+            "open_threads": [],
+            "cast_present": ["Rhea"],
+            "location": "Front Gate",
+            "next_action": "Open the door.",
+            "summary": {},
+        },
+        artifact_key="pack",
+    )
+    save_style_anchor(style_anchor_path(book_root), "Tight close third-person.")
+
+    selector = ScopeSelector(book_id="my_book", branch_id="main", chapter=1, section=1, scene=1)
+    options = list_execution_options(tmp_path, selector, prefer_emitted=False)
+
+    by_action = {option.action: option for option in options}
+    assert by_action["plan_scene"].allowed is False
+    assert by_action["write_scene_prose"].allowed is True
+    assert by_action["write_scene_prose"].mutates_canonical_state is False
+    assert by_action["write_scene_prose"].requires_expected_node is True
+    assert by_action["write_scene_prose"].details["scene_status"] == "continuity_ready"
+    assert by_action["write_scene_prose"].details["recommended_next_action"] == "write_scene_prose"
+    assert by_action["write_scene_prose"].details["available_inputs"] == [
+        "scene_card",
+        "preflight_patch",
+        "continuity_pack",
+        "style_anchor",
+    ]
+
+    legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
+    assert [option.action for option in legal] == [
+        "create_branch",
+        "write_frozen_section",
+        "write_scene_prose",
+    ]
+
+
+def test_list_execution_options_for_prose_generated_scene_includes_state_repair(tmp_path: Path) -> None:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root)
+    initialize_section_workflow(workspace=tmp_path, book_id="my_book", overwrite=True)
+    freeze_section_from_phase03_artifact(workspace=tmp_path, book_id="my_book", chapter_id=1, section_id=1)
+    _record_artifact(book_root, 1, 1, "plan", "scene_card", _scene_card(), artifact_key="scene_card")
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "preflight",
+        "preflight_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        artifact_key="patch",
+    )
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "continuity_pack",
+        "continuity_pack",
+        {"scene_end_anchor": "The lock clicks."},
+        artifact_key="pack",
+    )
+    prose_path = _write_phase_artifact(book_root, 1, 1, "write_prose", "Rhea forced the lock open.", as_json=False)
+    patch_path = _write_phase_artifact(
+        book_root,
+        1,
+        1,
+        "write_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        as_json=True,
+    )
+    _record_phase_success(
+        book_root,
+        1,
+        1,
+        "write",
+        {
+            "prose": prose_path.relative_to(book_root).as_posix(),
+            "patch": patch_path.relative_to(book_root).as_posix(),
+        },
+    )
+
+    selector = ScopeSelector(book_id="my_book", branch_id="main", chapter=1, section=1, scene=1)
+    options = list_execution_options(tmp_path, selector, prefer_emitted=False)
+
+    by_action = {option.action: option for option in options}
+    assert by_action["state_repair_scene_patch"].allowed is True
+    assert by_action["state_repair_scene_patch"].mutates_canonical_state is False
+    assert by_action["state_repair_scene_patch"].requires_expected_node is True
+    assert by_action["state_repair_scene_patch"].details["scene_status"] == "prose_generated"
+    assert by_action["state_repair_scene_patch"].details["recommended_next_action"] == "state_repair_scene_patch"
+    assert by_action["state_repair_scene_patch"].details["available_inputs"] == [
+        "scene_card",
+        "preflight_patch",
+        "continuity_pack",
+        "write_prose",
+        "write_patch",
+    ]
+
+    legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
+    assert [option.action for option in legal] == [
+        "create_branch",
+        "write_frozen_section",
+        "state_repair_scene_patch",
+    ]
+
+
+def test_list_execution_options_for_state_repaired_scene_includes_lint(tmp_path: Path) -> None:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root)
+    initialize_section_workflow(workspace=tmp_path, book_id="my_book", overwrite=True)
+    freeze_section_from_phase03_artifact(workspace=tmp_path, book_id="my_book", chapter_id=1, section_id=1)
+    _record_artifact(book_root, 1, 1, "plan", "scene_card", _scene_card(), artifact_key="scene_card")
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "preflight",
+        "preflight_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        artifact_key="patch",
+    )
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "continuity_pack",
+        "continuity_pack",
+        {"scene_end_anchor": "The lock clicks."},
+        artifact_key="pack",
+    )
+    prose_path = _write_phase_artifact(book_root, 1, 1, "write_prose", "Rhea forced the lock open.", as_json=False)
+    patch_path = _write_phase_artifact(
+        book_root,
+        1,
+        1,
+        "write_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        as_json=True,
+    )
+    _record_phase_success(
+        book_root,
+        1,
+        1,
+        "write",
+        {
+            "prose": prose_path.relative_to(book_root).as_posix(),
+            "patch": patch_path.relative_to(book_root).as_posix(),
+        },
+    )
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "state_repair",
+        "state_repair_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        artifact_key="patch",
+    )
+
+    selector = ScopeSelector(book_id="my_book", branch_id="main", chapter=1, section=1, scene=1)
+    options = list_execution_options(tmp_path, selector, prefer_emitted=False)
+
+    by_action = {option.action: option for option in options}
+    assert by_action["lint_scene_prose"].allowed is True
+    assert by_action["lint_scene_prose"].mutates_canonical_state is False
+    assert by_action["lint_scene_prose"].requires_expected_node is True
+    assert by_action["lint_scene_prose"].details["scene_status"] == "state_repaired"
+    assert by_action["lint_scene_prose"].details["recommended_next_action"] == "lint_scene_prose"
+    assert by_action["lint_scene_prose"].details["available_inputs"] == [
+        "scene_card",
+        "preflight_patch",
+        "continuity_pack",
+        "write_prose",
+        "state_repair_patch",
+    ]
+
+    legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
+    assert [option.action for option in legal] == [
+        "create_branch",
+        "write_frozen_section",
+        "lint_scene_prose",
+    ]
+
+
+def test_list_execution_options_for_passing_lint_scene_includes_commit(tmp_path: Path) -> None:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root)
+    initialize_section_workflow(workspace=tmp_path, book_id="my_book", overwrite=True)
+    freeze_section_from_phase03_artifact(workspace=tmp_path, book_id="my_book", chapter_id=1, section_id=1)
+    _record_artifact(book_root, 1, 1, "plan", "scene_card", _scene_card(), artifact_key="scene_card")
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "preflight",
+        "preflight_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        artifact_key="patch",
+    )
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "continuity_pack",
+        "continuity_pack",
+        {"scene_end_anchor": "The lock clicks."},
+        artifact_key="pack",
+    )
+    _record_write_pair(book_root)
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "state_repair",
+        "state_repair_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        artifact_key="patch",
+    )
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "lint",
+        "lint_report",
+        {"schema_version": "1.0", "status": "pass", "issues": [], "mode": "llm"},
+        artifact_key="report",
+    )
+
+    selector = ScopeSelector(book_id="my_book", branch_id="main", chapter=1, section=1, scene=1)
+    options = list_execution_options(tmp_path, selector, prefer_emitted=False)
+
+    by_action = {option.action: option for option in options}
+    assert by_action["apply_scene_commit"].allowed is True
+    assert by_action["apply_scene_commit"].mutates_canonical_state is True
+    assert by_action["apply_scene_commit"].requires_expected_node is True
+    assert by_action["apply_scene_commit"].details["scene_status"] == "linted"
+    assert by_action["apply_scene_commit"].details["recommended_next_action"] == "apply_scene_commit"
+    assert by_action["apply_scene_commit"].details["available_inputs"] == [
+        "scene_card",
+        "write_prose",
+        "state_repair_patch",
+        "passing_lint_report",
+    ]
+
+    legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
+    assert [option.action for option in legal] == [
+        "create_branch",
+        "write_frozen_section",
+        "apply_scene_commit",
+    ]
+
+
+def test_list_execution_options_for_failing_lint_scene_includes_repair(tmp_path: Path) -> None:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root)
+    initialize_section_workflow(workspace=tmp_path, book_id="my_book", overwrite=True)
+    freeze_section_from_phase03_artifact(workspace=tmp_path, book_id="my_book", chapter_id=1, section_id=1)
+    _record_artifact(book_root, 1, 1, "plan", "scene_card", _scene_card(), artifact_key="scene_card")
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "preflight",
+        "preflight_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        artifact_key="patch",
+    )
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "continuity_pack",
+        "continuity_pack",
+        {"scene_end_anchor": "The lock clicks."},
+        artifact_key="pack",
+    )
+    _record_write_pair(book_root)
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "state_repair",
+        "state_repair_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        artifact_key="patch",
+    )
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "lint",
+        "lint_report",
+        {"schema_version": "1.0", "status": "fail", "issues": [{"code": "pacing_overlap"}], "mode": "llm"},
+        artifact_key="report",
+    )
+
+    selector = ScopeSelector(book_id="my_book", branch_id="main", chapter=1, section=1, scene=1)
+    options = list_execution_options(tmp_path, selector, prefer_emitted=False)
+
+    by_action = {option.action: option for option in options}
+    assert by_action["repair_scene_prose"].allowed is True
+    assert by_action["repair_scene_prose"].mutates_canonical_state is False
+    assert by_action["repair_scene_prose"].requires_expected_node is True
+    assert by_action["repair_scene_prose"].details["scene_status"] == "lint_failed"
+    assert by_action["repair_scene_prose"].details["recommended_next_action"] == "repair_scene_prose"
+    assert by_action["repair_scene_prose"].details["available_inputs"] == [
+        "scene_card",
+        "write_prose",
+        "repairable_lint_report",
+    ]
+
+    legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
+    assert [option.action for option in legal] == [
+        "create_branch",
+        "write_frozen_section",
+        "repair_scene_prose",
+    ]
+
+
+def test_list_execution_options_reopens_state_repair_after_repair_outputs(tmp_path: Path) -> None:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root)
+    initialize_section_workflow(workspace=tmp_path, book_id="my_book", overwrite=True)
+    freeze_section_from_phase03_artifact(workspace=tmp_path, book_id="my_book", chapter_id=1, section_id=1)
+    _record_artifact(book_root, 1, 1, "plan", "scene_card", _scene_card(), artifact_key="scene_card")
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "preflight",
+        "preflight_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        artifact_key="patch",
+    )
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "continuity_pack",
+        "continuity_pack",
+        {"scene_end_anchor": "The lock clicks."},
+        artifact_key="pack",
+    )
+    _record_write_pair(book_root, prose="Original draft prose.")
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "state_repair",
+        "state_repair_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        artifact_key="patch",
+    )
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "lint",
+        "lint_report",
+        {"schema_version": "1.0", "status": "fail", "issues": [{"code": "pacing_overlap"}], "mode": "llm"},
+        artifact_key="report",
+    )
+    _record_repair_pair(book_root, prose="Repaired draft prose.")
+
+    selector = ScopeSelector(book_id="my_book", branch_id="main", chapter=1, section=1, scene=1)
+    options = list_execution_options(tmp_path, selector, prefer_emitted=False)
+
+    by_action = {option.action: option for option in options}
+    assert by_action["state_repair_scene_patch"].allowed is True
+    assert by_action["state_repair_scene_patch"].details["scene_status"] == "repair_generated"
+    assert by_action["state_repair_scene_patch"].details["recommended_next_action"] == "state_repair_scene_patch"
+    assert by_action["state_repair_scene_patch"].details["available_inputs"] == [
+        "scene_card",
+        "preflight_patch",
+        "continuity_pack",
+        "repair_prose",
+        "repair_patch",
+    ]
+
+    legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
+    assert [option.action for option in legal] == [
+        "create_branch",
+        "write_frozen_section",
+        "state_repair_scene_patch",
+    ]
+
+
+def test_list_execution_options_for_unstarted_scene_includes_plan_scene(tmp_path: Path) -> None:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root)
+    initialize_section_workflow(workspace=tmp_path, book_id="my_book", overwrite=True)
+    freeze_section_from_phase03_artifact(workspace=tmp_path, book_id="my_book", chapter_id=1, section_id=1)
+
+    selector = ScopeSelector(book_id="my_book", branch_id="main", chapter=1, section=1, scene=1)
+    options = list_execution_options(tmp_path, selector, prefer_emitted=False)
+
+    by_action = {option.action: option for option in options}
+    assert by_action["plan_scene"].allowed is True
+    assert by_action["plan_scene"].mutates_canonical_state is False
+    assert by_action["plan_scene"].requires_expected_node is True
+    assert by_action["plan_scene"].details["scene_status"] == "unstarted"
+    assert by_action["plan_scene"].details["recommended_next_action"] == "plan_scene"
+
+    legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
+    assert [option.action for option in legal] == [
+        "create_branch",
+        "write_frozen_section",
+        "plan_scene",
+    ]
+
+
+def test_list_execution_options_for_planned_scene_includes_preflight_scene_state(tmp_path: Path) -> None:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root)
+    initialize_section_workflow(workspace=tmp_path, book_id="my_book", overwrite=True)
+    freeze_section_from_phase03_artifact(workspace=tmp_path, book_id="my_book", chapter_id=1, section_id=1)
+    _record_artifact(book_root, 1, 1, "plan", "scene_card", _scene_card(), artifact_key="scene_card")
+
+    selector = ScopeSelector(book_id="my_book", branch_id="main", chapter=1, section=1, scene=1)
+    options = list_execution_options(tmp_path, selector, prefer_emitted=False)
+
+    by_action = {option.action: option for option in options}
+    assert by_action["plan_scene"].allowed is False
+    assert by_action["preflight_scene_state"].allowed is True
+    assert by_action["preflight_scene_state"].mutates_canonical_state is False
+    assert by_action["preflight_scene_state"].requires_expected_node is True
+    assert by_action["preflight_scene_state"].details["scene_status"] == "planned"
+    assert by_action["preflight_scene_state"].details["recommended_next_action"] == "preflight_scene_state"
+    assert by_action["preflight_scene_state"].details["available_inputs"] == ["scene_card", "state_base"]
+
+    legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
+    assert [option.action for option in legal] == [
+        "create_branch",
+        "write_frozen_section",
+        "preflight_scene_state",
+    ]
+
+
+def test_list_execution_options_for_preflighted_scene_includes_generate_continuity_pack(tmp_path: Path) -> None:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root)
+    initialize_section_workflow(workspace=tmp_path, book_id="my_book", overwrite=True)
+    freeze_section_from_phase03_artifact(workspace=tmp_path, book_id="my_book", chapter_id=1, section_id=1)
+    _record_artifact(book_root, 1, 1, "plan", "scene_card", _scene_card(), artifact_key="scene_card")
+    _record_artifact(
+        book_root,
+        1,
+        1,
+        "preflight",
+        "preflight_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        artifact_key="patch",
+    )
+
+    selector = ScopeSelector(book_id="my_book", branch_id="main", chapter=1, section=1, scene=1)
+    options = list_execution_options(tmp_path, selector, prefer_emitted=False)
+
+    by_action = {option.action: option for option in options}
+    assert by_action["generate_continuity_pack"].allowed is True
+    assert by_action["generate_continuity_pack"].mutates_canonical_state is False
+    assert by_action["generate_continuity_pack"].requires_expected_node is True
+    assert by_action["generate_continuity_pack"].details["scene_status"] == "preflighted"
+    assert by_action["generate_continuity_pack"].details["recommended_next_action"] == "generate_continuity_pack"
+    assert by_action["generate_continuity_pack"].details["available_inputs"] == ["scene_card", "preflight_patch"]
+
+    legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
+    assert [option.action for option in legal] == [
+        "create_branch",
+        "write_frozen_section",
+        "generate_continuity_pack",
+    ]
+
+
 def test_cli_parser_accepts_workflow_legal_actions_command() -> None:
     parser = build_parser()
     args = parser.parse_args(
@@ -436,6 +1023,8 @@ def test_cli_parser_accepts_workflow_legal_actions_command() -> None:
             "1",
             "--section",
             "1",
+            "--scene",
+            "2",
         ]
     )
 
@@ -445,6 +1034,223 @@ def test_cli_parser_accepts_workflow_legal_actions_command() -> None:
     assert args.branch_id == "rerun-sec1"
     assert args.fork_group_id == "fg-1"
     assert args.chapter == 1
+    assert args.section == 1
+    assert args.scene == 2
+
+
+def test_cli_parser_accepts_workflow_scene_readiness_command() -> None:
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "scene-readiness",
+            "--book",
+            "my_book",
+            "--chapter",
+            "1",
+            "--scene",
+            "2",
+            "--section",
+            "1",
+        ]
+    )
+
+    assert args.command == "workflow"
+    assert args.workflow_command == "scene-readiness"
+    assert args.book == "my_book"
+    assert args.chapter == 1
+    assert args.scene == 2
+    assert args.section == 1
+
+
+def test_cli_parser_accepts_workflow_plan_scene_command() -> None:
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "plan-scene",
+            "--book",
+            "my_book",
+            "--chapter",
+            "1",
+            "--scene",
+            "2",
+            "--section",
+            "1",
+        ]
+    )
+
+    assert args.command == "workflow"
+    assert args.workflow_command == "plan-scene"
+    assert args.book == "my_book"
+    assert args.chapter == 1
+    assert args.scene == 2
+    assert args.section == 1
+
+
+def test_cli_parser_accepts_workflow_preflight_scene_state_command() -> None:
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "preflight-scene-state",
+            "--book",
+            "my_book",
+            "--chapter",
+            "1",
+            "--scene",
+            "2",
+            "--section",
+            "1",
+        ]
+    )
+
+    assert args.command == "workflow"
+    assert args.workflow_command == "preflight-scene-state"
+    assert args.book == "my_book"
+    assert args.chapter == 1
+    assert args.scene == 2
+    assert args.section == 1
+
+
+def test_cli_parser_accepts_workflow_generate_continuity_pack_command() -> None:
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "generate-continuity-pack",
+            "--book",
+            "my_book",
+            "--chapter",
+            "1",
+            "--scene",
+            "2",
+            "--section",
+            "1",
+        ]
+    )
+
+    assert args.command == "workflow"
+    assert args.workflow_command == "generate-continuity-pack"
+    assert args.book == "my_book"
+    assert args.chapter == 1
+    assert args.scene == 2
+    assert args.section == 1
+
+
+def test_cli_parser_accepts_workflow_state_repair_scene_patch_command() -> None:
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "state-repair-scene-patch",
+            "--book",
+            "my_book",
+            "--chapter",
+            "1",
+            "--scene",
+            "2",
+            "--section",
+            "1",
+        ]
+    )
+
+    assert args.command == "workflow"
+    assert args.workflow_command == "state-repair-scene-patch"
+    assert args.book == "my_book"
+    assert args.chapter == 1
+    assert args.scene == 2
+    assert args.section == 1
+
+
+def test_cli_parser_accepts_workflow_lint_scene_prose_command() -> None:
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "lint-scene-prose",
+            "--book",
+            "my_book",
+            "--chapter",
+            "1",
+            "--scene",
+            "2",
+            "--section",
+            "1",
+        ]
+    )
+
+    assert args.command == "workflow"
+    assert args.workflow_command == "lint-scene-prose"
+    assert args.book == "my_book"
+    assert args.chapter == 1
+    assert args.scene == 2
+    assert args.section == 1
+
+
+def test_cli_parser_accepts_workflow_repair_scene_prose_command() -> None:
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "repair-scene-prose",
+            "--book",
+            "my_book",
+            "--chapter",
+            "1",
+            "--scene",
+            "2",
+            "--section",
+            "1",
+        ]
+    )
+
+    assert args.command == "workflow"
+    assert args.workflow_command == "repair-scene-prose"
+    assert args.book == "my_book"
+    assert args.chapter == 1
+    assert args.scene == 2
+    assert args.section == 1
+
+
+def test_cli_parser_accepts_workflow_apply_scene_commit_command() -> None:
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "apply-scene-commit",
+            "--book",
+            "my_book",
+            "--chapter",
+            "1",
+            "--scene",
+            "2",
+            "--section",
+            "1",
+        ]
+    )
+
+    assert args.command == "workflow"
+    assert args.workflow_command == "apply-scene-commit"
+    assert args.book == "my_book"
+    assert args.chapter == 1
+    assert args.scene == 2
     assert args.section == 1
 
 
@@ -474,3 +1280,30 @@ def test_cli_parser_accepts_workflow_write_section_command() -> None:
     assert args.section == 1
     assert args.ack_outline_attention_items is True
     assert args.force_outline_gate_bypass is True
+
+
+def test_cli_parser_accepts_workflow_write_scene_prose_command() -> None:
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "write-scene-prose",
+            "--book",
+            "my_book",
+            "--chapter",
+            "1",
+            "--scene",
+            "2",
+            "--section",
+            "1",
+        ]
+    )
+
+    assert args.command == "workflow"
+    assert args.workflow_command == "write-scene-prose"
+    assert args.book == "my_book"
+    assert args.chapter == 1
+    assert args.scene == 2
+    assert args.section == 1

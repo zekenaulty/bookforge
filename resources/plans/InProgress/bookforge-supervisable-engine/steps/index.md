@@ -9,3 +9,5 @@
 | 0045-add-isolated-branch-reruns-and-fork-group-assembly | completed | 0030, 0040 | Add branch isolation, sibling fork groups, promotion vs assembly semantics, and validation-gated merge paths. |
 | 0050-harden-reconciliation-integrity-and-command-surface | completed | 0030, 0040, 0045 | Add post-execution and post-promotion reconciliation, stronger integrity helpers, and help-doc coherence. |
 | 0060-extract-minimal-engine-execution-surface-for-nanda | completed | 0050 | Replace command-only orchestration with a smaller action catalog and legal-next-action API that Nanda can compose. |
+| 0070-segment-section-write-into-scoped-scene-actions | in_progress | 0060 | Turn the hidden `section_write` batch flow into truthful scene-phase actions and readiness queries that Nanda can traverse as an author skill graph. |
+| 0075-extract-appearance-setting-and-context-refinement-surfaces | pending | 0070 | Make character appearance, scene background/setting, and prior-stage T1 thought-signature context explicit queryable projection layers instead of incidental prompt side effects. |

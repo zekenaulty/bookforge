@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-22T13:12:14Z`
-- Source Document Count: `21`
+- Compiled At (UTC): `2026-04-24T02:54:22Z`
+- Source Document Count: `28`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -21,15 +21,22 @@
 10. `steps/0045-add-isolated-branch-reruns-and-fork-group-assembly/step.md`
 11. `steps/0050-harden-reconciliation-integrity-and-command-surface/step.md`
 12. `steps/0060-extract-minimal-engine-execution-surface-for-nanda/step.md`
-13. `notes/2026-04-21-0010-execution.md`
-14. `notes/2026-04-21-0020-execution.md`
-15. `notes/2026-04-21-0030-execution.md`
-16. `notes/2026-04-21-0040-execution.md`
-17. `notes/2026-04-21-0045-execution.md`
-18. `notes/2026-04-21-0050-execution.md`
-19. `notes/2026-04-22-0050-execution.md`
-20. `notes/2026-04-22-0060-execution.md`
-21. `promotion.md`
+13. `steps/0070-segment-section-write-into-scoped-scene-actions/step.md`
+14. `steps/0075-extract-appearance-setting-and-context-refinement-surfaces/step.md`
+15. `notes/2026-04-21-0010-execution.md`
+16. `notes/2026-04-21-0020-execution.md`
+17. `notes/2026-04-21-0030-execution.md`
+18. `notes/2026-04-21-0040-execution.md`
+19. `notes/2026-04-21-0045-execution.md`
+20. `notes/2026-04-21-0050-execution.md`
+21. `notes/2026-04-22-0050-execution.md`
+22. `notes/2026-04-22-0060-execution.md`
+23. `notes/2026-04-23-0070-commit-slice.md`
+24. `notes/2026-04-23-0070-continuity-pack-slice.md`
+25. `notes/2026-04-23-0070-repair-slice.md`
+26. `notes/2026-04-23-0070-run-loop-wrapper-slice.md`
+27. `notes/2026-04-23-0070-section-wrapper-tightening.md`
+28. `promotion.md`
 
 ---
 
@@ -40,7 +47,7 @@
 Status: In Progress
 Stage: InProgress
 Owner: BookForge engine workstream
-Last Updated: 2026-04-22
+Last Updated: 2026-04-23
 
 ## Objective
 - Make BookForge truthful and supervisable by Nanda without moving prose generation or canonical state mutation out of BookForge.
@@ -53,6 +60,9 @@ Last Updated: 2026-04-22
 - Nanda planning has stabilized enough that the shared boundary is now clear: BookForge must emit truthful scope, lineage, pause, and result surfaces instead of forcing the operator layer to infer them from raw files.
 - The next architectural pressure is not just safer reruns. It is safe concurrency. If the contract model cannot distinguish canonical state, isolated rerun branches, and future parallel section branches, the same chimera class will return under a different name.
 - The next pressure after truthful supervision is controllable composition. Nanda will eventually need to steer outlining, writing, linting, and repair as smaller author moves instead of only invoking large fixed command chains.
+- The next pressure after the first execution-surface extraction is segmented write control. Nanda will need truthful scene-phase actions such as "prepare", "write prose", "lint", and "repair" instead of only section-level macros and hidden `run_loop` choreography.
+- The next pressure on the Nanda side is author-surface honesty. The author pane can keep voice, but it cannot claim tools or live state it does not actually receive through BookForge query and execution contracts.
+- The next projection-layer pressure is appearance and setting truth. Character appearance, scene background/setting, and prior-stage planning context must become queryable surfaces instead of hidden prompt side effects.
 - The current repo already has the right raw materials:
   - section workflow lifecycle
   - immutable outline run artifacts
@@ -93,6 +103,29 @@ Last Updated: 2026-04-22
 - `state_surface(book)` returns the full observable picture for the book.
 - `state_surface(book, chapter=3, section=2)` returns a projection through a lens over the same rooted truth model.
 - The public contract is not "many tiny section surfaces aggregated upward." Storage may normalize internally, but the caller-visible contract stays book-rooted.
+
+### Artifact Status And Projection Layers
+- Every execution-produced artifact must declare one artifact status:
+  - `authoritative`
+  - `provisional`
+  - `derived`
+  - `diagnostic`
+- Meanings:
+  - `authoritative`: canonical truth that downstream execution may safely consume without additional promotion
+  - `provisional`: produced by execution but not yet validated or promoted; may be resumable or replaceable
+  - `derived`: computed projection from other truth-bearing artifacts; useful, but not independently canonical
+  - `diagnostic`: observability or debugging material only; never an execution prerequisite by itself
+- Query surfaces must report artifact status so callers do not have to infer whether a file is safe to build on.
+- Future state families such as:
+  - scene/workflow state
+  - character appearance state
+  - deep inventory or durable state
+  - continuity and seam state
+  - thought-signature and prompt-package state
+  - character appearance projection state
+  - scene background and setting projection state
+  are projection layers over the same book-rooted coordinate system, not separate truth systems.
+- All projection layers must stay addressable by the same `TimelineNodeRef` and `ScopeSelector` vocabulary.
 
 ### TimelineNodeRef
 - Every execution point gets a coordinate.
@@ -171,6 +204,14 @@ class TimelineNodeRef:
   - branch policy and lineage requirements per action
   - receipts and reconciliation output per action
   - legal next actions from the current node
+- That execution surface must also expose readiness and artifact truth, not just executability.
+- `legal_next_actions(...)` answers what the engine allows.
+- Readiness surfaces answer what is actually possible right now, including:
+  - missing prerequisites
+  - available inputs
+  - already-produced outputs
+  - whether the action would mutate canonical or only provisional state
+  - the recommended next action from the current node
 - Nanda should eventually be able to run BookForge as a choose-your-own-adventure author loop:
   - observe current node and integrity
   - ask BookForge what actions are legal next
@@ -180,10 +221,24 @@ class TimelineNodeRef:
 - The important boundary rule does not change:
   - BookForge still owns prose generation and canonical state mutation
   - Nanda chooses among legal engine actions and evaluates the outcomes
+- For the author-pane path, this means:
+  - BookForge must expose truthful capability and readiness surfaces for scene-phase actions
+  - Nanda must assemble structured worker prompt packages from those truthful surfaces instead of improvising capability claims in persona text
 - This means the medium-term API shape is:
   - query surfaces for truth and legal-next-action discovery
+  - query surfaces for readiness and produced-artifact truth
   - execution actions for narrow engine moves
   - macro workflow commands as wrappers over those same actions, not a separate logic layer
+  - scene-phase readiness and result surfaces so the write loop can be traversed as a graph instead of only resumed as a batch
+
+### Author Capability Grounding
+- The Nanda author pane may keep voice and persona framing, but capability claims must come from actual BookForge query and execution surfaces.
+- The author surface may not imply that a tool, diagnostic pass, or mutation path exists unless:
+  - the corresponding readiness or legal-action surface says it is available
+  - and the corresponding BookForge execution path is actually wired
+- Thought signatures and persona prompts may enrich context assembly, but they are not proof of execution capability.
+- T1 thought signatures from prior workflow stages may be reused as context-management and planning-refinement inputs, but the prompt package and execution receipt must record that use explicitly.
+- Execution receipts and readiness/query surfaces remain the authority for what the author pane can honestly claim.
 
 ### Result Mapping
 | Branch Lifecycle State | Execution Result / Public Status | Canonical Change |
@@ -212,6 +267,11 @@ class TimelineNodeRef:
   - `promotion`
   - `assembly`
   - `discard`
+- Freeze artifact truth vocabulary for:
+  - `authoritative`
+  - `provisional`
+  - `derived`
+  - `diagnostic`
 - Add a read-only query surface under `src/bookforge/query/`.
 - Emit versioned engine contracts:
   - `TimelineNodeRef`
@@ -220,6 +280,7 @@ class TimelineNodeRef:
   - `IssueTicket`
   - `ExecutionRequest`
   - `ExecutionResult`
+- Prepare explicit receipt and readiness surfaces so produced artifacts, prerequisites, and recommended next actions are queryable instead of inferred from files alone.
 - Support one truthful main-branch execution path with bounded pause/resume behavior.
 - Support isolated branch reruns and fork-group fan-out/fan-in through the same coordinate system and branch invariants.
 - Reconcile and validate lineage before returning control to the caller.
@@ -254,6 +315,9 @@ class TimelineNodeRef:
 - `src/bookforge/contracts/issue_ticket.py`
 - `src/bookforge/contracts/execution_request.py`
 - `src/bookforge/contracts/execution_result.py`
+- Future or follow-on contract targets:
+  - produced-artifact receipt contract
+  - scene-phase readiness contract
 - `src/bookforge/branching.py`
 - Future extraction target:
   - a smaller execution action catalog under `src/bookforge/execution/` or equivalent
@@ -266,6 +330,7 @@ class TimelineNodeRef:
 ## Plan-Level Definition Of Done
 - A caller can query workflow family, run mode, source run, source artifact class, active section, current node, and integrity verdict through stable Python entry points.
 - BookForge emits book-rooted `StateSurface` projections and categorized `IssueTicket` output that both carry `TimelineNodeRef` coordinates.
+- A caller can tell whether a produced artifact is `authoritative`, `provisional`, `derived`, or `diagnostic` without reverse-engineering file paths or command history.
 - `current_node.json` or an equivalent contract-backed pointer identifies the active main-branch node.
 - Derived branches have branch-local current-node pointers or manifests so branch pause/resume and verification stay unambiguous.
 - Provider exhaustion resolves to `retryable_pause` or `hard_fail`, not multi-hour hidden retries as the only visible behavior.
@@ -277,6 +342,7 @@ class TimelineNodeRef:
 - Reconciliation and lineage validation run before control returns to the caller on `main`, and before promotion/assembly returns content to canonical state.
 - Help docs stop implying scope that the runtime does not actually execute.
 - The plan preserves a path to replace macro command orchestration with smaller API-facing execution actions without changing the shared truth model.
+- The plan preserves a path for Nanda to ground author-surface capability claims in actual readiness and receipt data instead of persona-only prompt behavior.
 
 ## Constraints
 - BookForge keeps ownership of prose generation and canonical workspace mutation.
@@ -284,6 +350,8 @@ class TimelineNodeRef:
 - New modules should target roughly `80-250` lines. Split aggressively at `>300`.
 - Prefer small typed data objects at the boundary instead of raw dict blobs passed through unrelated modules.
 - Do not normalize legacy accidental behavior as a contract just because live workspaces already contain it.
+- Every execution-produced artifact must declare its artifact status.
+- Thought signatures, prompt packages, and persona context may inform execution and replay, but they may not become the authoritative record of what happened.
 - Every non-main branch must declare its parent `TimelineNodeRef`.
 - No silent source switching inside a branch.
 - No promotion or assembly without explicit reconciliation and integrity validation.
@@ -296,6 +364,7 @@ class TimelineNodeRef:
 - Current chapter seam audit/finalization work remains a dependency, not a replacement for these contracts.
 - The Nanda operator plan depends on this plan's steps `0010-0045`.
 - The future Nanda author-loop work depends on a later extraction step that turns the workflow wrappers into a smaller choose-your-own-adventure execution surface.
+- The future Nanda author-pane work depends on BookForge exposing scene-phase capability/readiness receipts so persona responses can stay grounded in actual callable actions.
 
 ## Step Outline
 - See `steps/index.md` and the numbered step folders for execution-shaped stories.
@@ -391,6 +460,8 @@ This plan is ready for promotion only when the target implementation can satisfy
 | 0045-add-isolated-branch-reruns-and-fork-group-assembly | completed | 0030, 0040 | Add branch isolation, sibling fork groups, promotion vs assembly semantics, and validation-gated merge paths. |
 | 0050-harden-reconciliation-integrity-and-command-surface | completed | 0030, 0040, 0045 | Add post-execution and post-promotion reconciliation, stronger integrity helpers, and help-doc coherence. |
 | 0060-extract-minimal-engine-execution-surface-for-nanda | completed | 0050 | Replace command-only orchestration with a smaller action catalog and legal-next-action API that Nanda can compose. |
+| 0070-segment-section-write-into-scoped-scene-actions | in_progress | 0060 | Turn the hidden `section_write` batch flow into truthful scene-phase actions and readiness queries that Nanda can traverse as an author skill graph. |
+| 0075-extract-appearance-setting-and-context-refinement-surfaces | pending | 0070 | Make character appearance, scene background/setting, and prior-stage T1 thought-signature context explicit queryable projection layers instead of incidental prompt side effects. |
 
 ---
 
@@ -1092,7 +1163,599 @@ Status: completed
 
 ---
 
-## Source 13: `notes/2026-04-21-0010-execution.md`
+## Source 13: `steps/0070-segment-section-write-into-scoped-scene-actions/step.md`
+
+# 0070 Segment Section-Write Into Scoped Scene Actions
+
+Status: in_progress
+
+## Goal
+- Break the current `section_write` loop into truthful scene-phase execution actions and readiness queries so Nanda can steer write, lint, and repair as a graph of legal skills instead of only invoking section-level or batch wrappers.
+
+## Problem
+- `0060` extracted an honest section-level control surface:
+  - `freeze_section_from_phase03_artifact`
+  - `write_frozen_section`
+  - `resume_paused_section`
+  - `lock_section_from_written_state`
+  - `finalize_chapter_from_locked_sections`
+- That is enough for section-level composition, but it still hides the actual write choreography inside `run_loop`.
+- Today the engine still behaves like this:
+  - decide one section
+  - enter `run_loop`
+  - implicitly run plan -> preflight -> continuity -> write -> state_repair -> lint -> repair -> apply/commit
+  - return only when the whole scene or section segment is done or paused
+- That is too coarse for the next Nanda author loop.
+- The author system needs to be able to ask narrower questions, for example:
+  - can I write prose for this scene right now
+  - what prerequisite artifacts are missing before prose can be generated
+  - can I lint this scene yet
+  - can I repair only the prose without re-running planning
+  - what are my legal next actions from the current scene node
+- The user-facing author pane also needs a truthful capability basis.
+  - The author voice may stay expressive.
+  - The capability claims must come from actual BookForge readiness and execution receipts, not persona improvisation.
+
+## Detailed Work
+- Freeze the first scene-phase action vocabulary for the `section_write` family.
+  - Candidate first slice:
+    - `plan_scene`
+    - `preflight_scene_state`
+    - `generate_continuity_pack`
+    - `write_scene_prose`
+    - `state_repair_scene_patch`
+    - `lint_scene_prose`
+    - `repair_scene_prose`
+    - `apply_scene_commit`
+  - The first pass does not need to expose every micro-helper inside those phases.
+  - The boundary should still be phase-shaped, not internal utility-shaped.
+- Add a scene-phase readiness/query seam.
+  - A caller should be able to ask:
+    - what scene-phase actions are legal for the current node
+    - what prerequisite artifacts are present
+    - what prerequisite artifacts or prior actions are missing
+    - what the recommended next action is
+  - This can be a new contract or an extension of `ExecutionOption.details`, but it must be explicit and machine-usable.
+  - `legal_next_actions(...)` alone is not enough for this slice.
+  - The first implementation must also answer readiness questions about prerequisites, available inputs, present outputs, and mutation scope.
+- Introduce a truthful scene-phase status object.
+  - Minimum information:
+    - current scene scope
+    - current phase artifact availability
+    - whether prose exists
+    - whether lint exists
+    - whether repair exists
+    - whether the scene is committed
+    - missing prerequisites for each action
+    - current pause marker if any
+  - This should be queryable without starting execution.
+- Freeze produced-artifact truth semantics for scene-phase work.
+  - Every produced artifact in this slice must declare one status:
+    - `authoritative`
+    - `provisional`
+    - `derived`
+    - `diagnostic`
+  - The first implementation should not rely on implicit file meaning.
+  - Query surfaces and execution receipts must report artifact status explicitly.
+- Add a produced-artifact receipt surface.
+  - The first slice may implement this as a small new contract or as a typed detail structure carried by `ExecutionResult`.
+  - Minimum information per artifact:
+    - artifact id or stable label
+    - path or logical ref
+    - artifact status
+    - producing node
+    - producing action
+    - whether it is consumable, resumable, replaceable, or diagnostic-only
+- Extract the first pure prose-generation action.
+  - `write_scene_prose` must be callable without automatically triggering lint, repair, or final state commit.
+  - It should return the generated prose and the raw patch/artifact references the write phase already produces.
+  - If prerequisites are missing, it must refuse truthfully and report which prior actions are required.
+- Preserve pause/resume truth at the scene-phase level.
+  - Scene actions must emit enough node detail that a caller can tell:
+    - which scene and phase was active
+    - whether the action completed, paused, or failed
+    - what artifacts were created
+    - what the next legal action is
+- Split `runner.py` by concern before adding more action logic there.
+  - The current file is still too large and mixes:
+    - scene targeting
+    - pause handling
+    - per-phase execution
+    - state application
+    - persistence
+  - The extraction should move toward smaller modules such as:
+    - scene readiness / prerequisite evaluation
+    - scene-phase execution adapters
+    - scene commit/apply helpers
+    - pause + receipt helpers
+- Keep `run_loop` as a wrapper, not the only truthful write engine.
+  - `run_loop` may continue to exist for batch/operator use.
+  - It should progressively become a macro over extracted scene-phase actions instead of the source of truth for phase choreography.
+- Keep BookForge as the authority on skill traversal.
+  - Nanda should not infer "if prose exists then lint is legal" on its own.
+  - BookForge should answer that through legal-next-action and readiness surfaces.
+
+## Surface Refinements
+### Artifact Status Vocabulary
+- `authoritative`
+  - Canonical truth that downstream execution may safely consume.
+- `provisional`
+  - Produced by an execution action but not yet validated or promoted.
+  - May be resumable, replaceable, or discardable depending on the action contract.
+- `derived`
+  - Computed from other artifacts; useful for navigation or prompt context, but not independently canonical.
+- `diagnostic`
+  - Observability or debugging material only; never treated as an execution prerequisite by itself.
+
+### ScenePhaseReadiness
+- The first scene-phase readiness surface should answer, for each candidate action:
+  - whether it is legal now
+  - whether it is ready now
+  - which prerequisites are missing
+  - which inputs are available
+  - which outputs already exist
+  - whether the action would mutate canonical state, provisional state, or only diagnostics
+  - the recommended next action from the current scene node
+  - whether a pause marker or stale prerequisite blocks execution
+- This surface should be book-rooted and coordinate-addressable through `TimelineNodeRef` and `ScopeSelector`.
+- The first slice should prefer one readiness surface with multiple phase rows rather than many disconnected single-purpose booleans.
+
+### Partial Output Rules
+- A scene-phase action may produce useful intermediate output without reaching final scene commit.
+- The first contract rules are:
+  - incomplete but execution-produced scene-phase artifacts are `provisional`
+  - provisional outputs may be resumable or replaceable
+  - readiness must say whether a downstream action may consume a provisional output
+  - diagnostics may reference provisional outputs, but diagnostics do not promote them
+  - no downstream action may silently treat a provisional output as authoritative
+
+### Layered Query Rule
+- Scene/workflow state, appearance state, durable inventory state, continuity state, and thought-signature context must remain projection layers over the same coordinate system.
+- This step should only implement the layers required for the first code slice.
+- It should not pre-build future layer surfaces that are not yet needed.
+
+### Author Capability Grounding
+- The author pane may stay expressive, but it may only claim capabilities that correspond to actions currently reporting ready or legal status through the BookForge readiness/action surfaces.
+- Persona framing may translate capability into voice.
+- Persona framing may not invent tools, diagnostics, or mutation paths that BookForge cannot actually execute.
+
+## Nanda Impact
+- The Observe pane can already render truthful workspace, integrity, and node state.
+- The Author pane needs the next contract layer so it can stay honest while becoming more useful.
+- This step is the BookForge-side prerequisite for a Nanda-side author bus shaped like:
+  - read current `StateSurface`
+  - read scene-phase readiness / legal actions
+  - gather relevant thought signatures and artifact refs
+  - build a structured worker prompt package
+  - execute one narrow worker action
+  - translate the receipt back into author voice without claiming capabilities that are not wired
+- The author pane should not claim generic tools such as "The Forge" or "The Auditor" unless those map to real query or execution surfaces exposed by BookForge.
+- This step should leave Nanda with enough truthful structure to say:
+  - "I can write prose for scene 3 now."
+  - "I cannot lint yet because prose is missing."
+  - "I can inspect continuity state, but I cannot mutate until you choose a legal action."
+
+## Files Likely Touched
+- `src/bookforge/runner.py`
+- `src/bookforge/execution/scoped.py`
+- `src/bookforge/execution/` new scene-action modules
+- `src/bookforge/execution/scene_sequence.py`
+- `src/bookforge/section_workflow.py`
+- `src/bookforge/query/actions.py`
+- `src/bookforge/query/workspace.py`
+- `src/bookforge/query/workflow.py`
+- `src/bookforge/query/` new readiness module if needed
+- `src/bookforge/contracts/execution_option.py`
+- `src/bookforge/contracts/execution_request.py`
+- `src/bookforge/contracts/execution_result.py`
+- `src/bookforge/contracts/` new scene-readiness and produced-artifact contracts if needed
+- `src/bookforge/pipeline/phase_history.py`
+- `src/bookforge/pipeline/run_logging.py`
+- `src/bookforge/cli.py`
+- `docs/help/workflow.md`
+- `docs/help/run.md`
+- `docs/help/index.md`
+
+## Tests
+- Add scene-phase execution tests, for example:
+  - `tests/test_scene_action_execution.py`
+  - `tests/test_scene_action_readiness.py`
+- Add refusal-path tests that prove:
+  - `write_scene_prose` refuses when scene planning or continuity prerequisites are missing
+  - `lint_scene_prose` refuses until prose exists
+  - `repair_scene_prose` refuses until lint or repairable prose exists
+- Add readiness tests that prove:
+  - the readiness surface reports missing prerequisites instead of only blocked actions
+  - artifact statuses are queryable for produced scene-phase outputs
+  - provisional outputs are not silently treated as authoritative
+- Add one progression test that proves a legal-action graph transition such as:
+  - freeze section
+  - discover `plan_scene`
+  - execute `plan_scene`
+  - discover `preflight_scene_state`
+  - execute `preflight_scene_state`
+  - discover `generate_continuity_pack`
+  - execute `generate_continuity_pack`
+  - discover `write_scene_prose`
+  - execute `write_scene_prose`
+  - discover `state_repair_scene_patch`
+  - execute `state_repair_scene_patch`
+  - discover `lint_scene_prose`
+  - execute `lint_scene_prose`
+  - observe `repair_scene_prose` or `apply_scene_commit` become the next reported path based on lint result
+- Add one pause/resume test that proves a paused scene-phase action keeps a truthful phase-level node and can be resumed without silently widening scope.
+- Add one wrapper test that proves `run_loop` or a CLI wrapper can consume the extracted scene-phase actions without changing external behavior.
+
+## Definition Of Done
+- BookForge exposes at least one truthful pure prose action that does not automatically trigger lint, repair, or commit.
+- BookForge exposes a scene-phase readiness surface that tells a caller more than just allowed/blocked.
+- A caller can ask what scene-phase actions are legal next and why blocked actions are blocked.
+- A caller can ask what prerequisite artifacts or prior actions are missing before a selected scene-phase action can run.
+- A caller can tell whether produced scene-phase artifacts are `authoritative`, `provisional`, `derived`, or `diagnostic`.
+- Partial scene-phase outputs have explicit consumable/resumable/replaceable semantics instead of being implied by file presence.
+- Scene-phase actions emit receipts with enough node and artifact detail for scoped resume and author-pane reporting.
+- `run_loop` is no longer the only truthful owner of scene-phase choreography.
+- The extracted scene-phase surface is explicit enough that Nanda can build author responses around actual capabilities instead of persona theater.
+
+## Notes
+- This story is not about exposing internal chain-of-thought.
+- The Nanda-side "author bus" should be understood as a structured context assembly and worker-routing layer, not a request for raw hidden reasoning.
+- The first extracted scene-phase surface should stay narrow and truthful.
+  - Better to expose four or five reliable phase actions than a fake "full autonomous author" surface.
+- This story should prefer phase-shaped actions over one-off internal utility entry points.
+- The first code slice after this refinement should be:
+  - `ScenePhaseReadiness`
+  - `write_scene_prose`
+- Do not turn this refinement into a new doctrine cycle.
+  - The point is to give the next code slice a stable contract, not to spawn another planning branch.
+- First slice landed 2026-04-22 with:
+  - new contract objects:
+    - `ProducedArtifactReceipt`
+    - `ScenePhaseActionReadiness`
+    - `ScenePhaseReadiness`
+  - explicit produced-artifact status vocabulary:
+    - `authoritative`
+    - `provisional`
+    - `derived`
+    - `diagnostic`
+  - `ExecutionResult.produced_artifacts` so scene-phase execution can emit typed artifact receipts instead of hiding them in generic details
+  - a new query surface:
+    - `bookforge.query.get_scene_phase_readiness(...)`
+    - current slice is intentionally limited to the active cursor scene on `main`
+    - current action rows:
+      - `plan_scene`
+      - `preflight_scene_state`
+      - `generate_continuity_pack`
+      - `write_scene_prose`
+  - extracted execution actions:
+    - `build_plan_scene_request(...)`
+    - `plan_scene_action(...)`
+    - `build_preflight_scene_state_request(...)`
+    - `preflight_scene_state(...)`
+    - `build_generate_continuity_pack_request(...)`
+    - `generate_continuity_pack(...)`
+    - `build_write_scene_prose_request(...)`
+    - `write_scene_prose(...)`
+    - `build_state_repair_scene_patch_request(...)`
+    - `state_repair_scene_patch(...)`
+    - `build_lint_scene_prose_request(...)`
+    - `lint_scene_prose(...)`
+    - `build_repair_scene_prose_request(...)`
+    - `repair_scene_prose(...)`
+    - `build_apply_scene_commit_request(...)`
+    - `apply_scene_commit(...)`
+  - public surface exposure for the first slice:
+    - `bookforge workflow scene-readiness`
+    - `bookforge workflow plan-scene`
+    - `bookforge workflow preflight-scene-state`
+    - `bookforge workflow generate-continuity-pack`
+    - `bookforge workflow write-scene-prose`
+    - `bookforge workflow state-repair-scene-patch`
+    - `bookforge workflow lint-scene-prose`
+    - `bookforge workflow repair-scene-prose`
+    - `bookforge workflow apply-scene-commit`
+    - `bookforge workflow legal-actions --scene <s>` now includes extracted scene actions such as `plan_scene`, `preflight_scene_state`, `generate_continuity_pack`, `write_scene_prose`, `state_repair_scene_patch`, `lint_scene_prose`, `repair_scene_prose`, and `apply_scene_commit` when scene scope is selected
+  - guardrails on the continuity-pack slice:
+    - emits the continuity pack as `derived`
+    - applies safe preflight patch materialization only to an in-memory working state
+    - does not mutate `state.json`, character files, durable inventory/state, prose, lint, repair, or commit artifacts
+    - refuses when preflight artifacts imply provisional character or durable mutations that this slice cannot materialize truthfully yet
+  - guardrails on the first write slice:
+    - no implicit prerequisite generation
+    - no automatic lint, repair, or commit
+    - no hidden canonical mutation
+    - refusal when preflight artifacts imply provisional character or durable mutations that this slice cannot materialize truthfully yet
+  - guardrails on the state-repair slice:
+    - emits the corrected state patch as `provisional`
+    - applies safe preflight patch materialization only to an in-memory working state
+    - consumes write prose and write patch, but does not apply the resulting patch to canonical state
+    - does not run lint, prose repair, or commit
+    - refusal when preflight artifacts imply provisional character or durable mutations that this slice cannot materialize truthfully yet
+  - guardrails on the lint slice:
+    - emits the lint report as `provisional` because prose repair consumes it as an execution artifact
+    - applies safe preflight and state-repair patches only to in-memory working states
+    - consumes the latest current prose baseline, which may be `write_prose` or a newer `repair_prose`
+    - requires continuity-pack presence to preserve graph consistency even though lint itself reads prose/state inputs
+    - does not repair prose, rerun state repair, or commit
+    - refusal when preflight artifacts imply provisional character or durable mutations that this slice cannot materialize truthfully yet
+  - guardrails on the repair slice:
+    - emits `repair_prose` and `repair_patch` as `provisional`
+    - consumes the latest current prose baseline plus the latest current failing lint report
+    - does not rerun state repair, lint, or commit implicitly
+    - reopens the readiness graph so `state_repair_scene_patch` becomes the next truthful extracted action
+  - guardrails on the commit slice:
+    - consumes the latest current passing provisional baseline rather than assuming `write_*` is final
+    - mutates canonical state through the real scene apply path:
+      - state patch apply
+      - character/stat updates
+      - appearance refresh when requested
+      - durable apply
+      - scene-file persistence
+      - bible update
+      - chapter rollup/compile on chapter end
+      - cursor advance
+    - emits reconciled main-branch execution results so commit receipts carry `state_change_status` and `canonical_change_status`
+    - exposes authoritative scene artifacts as produced-artifact receipts instead of forcing callers to infer commit success from filesystem side effects
+  - readiness/source-lineage corrections in this slice:
+    - current provisional prose is now resolved from artifact lineage instead of assuming `write_*` remains current forever
+    - stale provisional `state_repair` and `lint` outputs are surfaced as superseded when a newer repair pass exists
+    - passing lint now truthfully recommends `apply_scene_commit`
+  - guardrails on the preflight slice:
+    - emits the preflight patch as `provisional`
+    - does not apply the patch to `state.json`
+    - does not apply character, stat, durable inventory, or deep-state mutations
+    - leaves continuity generation as a separate future scene-phase action
+  - validation completed:
+    - `python -m pytest tests/test_scope_contracts.py tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py -q`
+    - `python -m pytest tests/test_execution_actions.py tests/test_action_discovery.py tests/test_scoped_execution.py tests/test_query_workspace.py -q`
+    - `python -m pytest tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py -q --basetemp .pytest_tmp_0070_repair`
+    - `python -m pytest tests/test_scoped_execution.py tests/test_execution_actions.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py -q --basetemp .pytest_tmp_0070_repair_regression`
+    - `python -m pytest tests/test_supervision_emit.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py -q`
+    - `python -m pytest tests/test_scene_action_execution.py tests/test_action_discovery.py tests/test_scene_phase_readiness.py tests/test_scoped_execution.py -q`
+    - `python -m pytest tests/test_scope_contracts.py tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py -q`
+    - `python -m pytest tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py -q --basetemp .pytest_tmp_0070_commit`
+    - `python -m pytest tests/test_scope_contracts.py tests/test_execution_actions.py tests/test_scoped_execution.py tests/test_query_workspace.py -q --basetemp .pytest_tmp_0070_commit_regression`
+    - `python -m pytest tests/test_supervision_emit.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py -q --basetemp .pytest_tmp_0070_commit_supervision`
+    - `python -m pytest tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py tests/test_scoped_execution.py -q --basetemp .pytest_tmp_0070_commit_sceneplus`
+    - `python -m pytest tests/test_runner_targeting.py tests/test_scene_action_execution.py tests/test_scene_phase_readiness.py tests/test_action_discovery.py -q --basetemp .pytest_tmp_0070_runner_wrap`
+    - `python -m pytest tests/test_execution_actions.py tests/test_scoped_execution.py tests/test_runner_outline_gate.py -q --basetemp .pytest_tmp_0070_runner_wrap_scoped`
+    - `python -m pytest tests/test_scope_contracts.py tests/test_supervision_emit.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_query_workspace.py tests/test_scoped_execution.py -q --basetemp .pytest_tmp_0070_runner_wrap_regression`
+    - `python -m pytest tests/test_runner_targeting.py tests/test_runner_outline_gate.py tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py tests/test_execution_actions.py tests/test_scoped_execution.py -q --basetemp .pytest_tmp_0070_runner_wrap_full`
+    - `python -m pytest tests/test_execution_actions.py tests/test_scoped_execution.py tests/test_runner_targeting.py tests/test_runner_outline_gate.py -q --basetemp .pytest_tmp_section_range`
+    - `python -m pytest tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py tests/test_execution_actions.py tests/test_scoped_execution.py tests/test_runner_targeting.py tests/test_runner_outline_gate.py -q --basetemp .pytest_tmp_section_range_full`
+    - `python -m pytest tests/test_scope_contracts.py tests/test_supervision_emit.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_query_workspace.py tests/test_scoped_execution.py -q --basetemp .pytest_tmp_section_range_regression`
+  - wrapper/macro integration landed in this slice:
+    - `run_loop` now drives scene execution through the extracted scene-phase actions instead of owning an independent monolithic per-scene implementation
+    - the runner keeps the existing outer write gate, style-anchor bootstrap, progress heartbeat, and pause contract while delegating scene work to the scene-action sequence
+    - section-level write wrappers now route through a dedicated `run_section_range(...)` macro instead of parameterizing `run_loop(...)` directly
+    - `run_loop(...)` remains available as the batch/operator macro entry point over the same lower-level scene-phase traversal
+    - the runner-side sequence preserves the existing repair loop and durable-slice expansion policy while passing the expansion hints into extracted scene-phase actions
+    - pause conversion is now explicit:
+      - scene-phase `retryable_pause` results are translated back into the legacy `run_paused.json` surface so scoped resume and workspace observation keep working
+  - known repo-head drift outside this slice:
+    - outline tests currently fail because some dummy test clients do not accept the newer thinking arguments
+    - prompt composition checksum expectations are already stale at head
+    - skilltree artifact tests expect files that are not present in this repo state
+
+---
+
+## Source 14: `steps/0075-extract-appearance-setting-and-context-refinement-surfaces/step.md`
+
+# 0075 Extract Appearance, Setting, And Context Refinement Surfaces
+
+Status: pending
+
+## Goal
+- Make character appearance, scene background/setting, and prior-stage context refinement explicit, queryable BookForge projection layers that Nanda can use without inferring truth from prose, prompt logs, or hidden runner side effects.
+
+## Problem
+- Character appearance already exists in the runtime, but it is currently too easy for it to behave like an incidental helper inside writer execution.
+- The last observed state suggested at least one bug in the appearance flow, likely around stale, missing, or incorrectly refreshed projections.
+- Scene setting/background is also under-specified:
+  - prose may mention concrete background details that should be tracked
+  - the author LLM may also need a distinct turn to deliberately establish or refine the scene's visual/background setting before prose or seam repair
+- Thought signatures from earlier workflow stages preserve useful planning context, but they are not currently modeled as a controlled refinement input for later scene-phase actions.
+- If these remain implicit, Nanda will eventually have to guess:
+  - whether a character's visible appearance is current
+  - whether a scene has a usable background/setting projection
+  - which prior T1 planning signatures are safe and relevant context for the current author move
+
+## Detailed Work
+- Audit the current character appearance path.
+  - Likely starting points:
+    - `src/bookforge/characters.py`
+    - `src/bookforge/pipeline/scene.py`
+    - `src/bookforge/runner.py`
+    - any helpers named like `refresh_appearance_projections(...)`
+    - any helpers named like `_ensure_character_appearance_current(...)`
+  - Determine whether current appearance artifacts are:
+    - authoritative character truth
+    - derived scene projections
+    - provisional LLM outputs
+    - diagnostic only
+- Add an appearance projection query surface.
+  - Candidate module:
+    - `src/bookforge/query/appearance.py`
+  - The query should be book-rooted and narrowable by:
+    - `book_id`
+    - optional `chapter`
+    - optional `section`
+    - optional `scene`
+    - optional `character_id`
+    - optional `branch_id`
+  - It should return structured data, not raw file paths only.
+  - It should report artifact status using the shared vocabulary:
+    - `authoritative`
+    - `provisional`
+    - `derived`
+    - `diagnostic`
+- Add an extracted appearance scene-phase action.
+  - Candidate action:
+    - `refresh_character_appearance_projection`
+  - The first action should be scene/cast scoped.
+  - It should read:
+    - scene card cast
+    - character state
+    - existing appearance data
+    - current timeline node
+  - It should emit explicit `ProducedArtifactReceipt` records.
+  - It should not silently mutate canonical character state unless a later explicit apply/promote path exists.
+- Add a scene background/setting projection surface.
+  - Candidate query module:
+    - `src/bookforge/query/setting.py`
+  - Candidate execution actions:
+    - `extract_scene_setting_from_prose`
+    - `draft_scene_setting_projection`
+  - `extract_scene_setting_from_prose` should read already-produced prose and derive setting/background details from what is actually on page.
+  - `draft_scene_setting_projection` should be a distinct author-LLM turn that can establish intended scene background before prose generation or seam repair.
+  - Both paths must label outputs truthfully:
+    - prose-derived extraction is `derived`
+    - author-drafted setting projection is `provisional` until accepted by a later commit/apply action
+- Add context refinement through prior T1 thought signatures.
+  - Treat T1 thought signatures from previous workflow stages as context-management artifacts, not source of truth.
+  - Candidate query surface:
+    - `src/bookforge/query/thought_context.py`
+  - Candidate refinement behavior:
+    - select relevant prior T1 signatures by `TimelineNodeRef`, phase, scene, and workflow family
+    - expose them as candidate context inputs for the next scene-phase action
+    - record which signatures were included in the prompt package or execution receipt
+  - This is essentially reuse of previous planning work.
+  - It must not replace explicit execution receipts, state surfaces, or artifact truth.
+- Thread all three surfaces through the same coordinate model.
+  - `TimelineNodeRef`
+  - `ScopeSelector`
+  - branch id
+  - fork group id where relevant
+  - artifact status
+- Add readiness semantics.
+  - A caller should be able to ask:
+    - is appearance projection available for this scene/cast
+    - is it stale relative to current character state or current scene node
+    - is setting/background available
+    - was the setting extracted from prose or drafted by the author LLM
+    - which prior T1 thought signatures are available as refinement context
+    - whether any of these are legal inputs for the next scene-phase action
+- Keep this as projection-layer work, not canonical mutation work.
+  - 0075 should not solve character-state promotion, inventory promotion, or final scene commit.
+  - It should make projections visible, typed, and safe to reason about.
+
+## Surface Sketch
+### Appearance Projection
+- Minimum fields:
+  - `book_id`
+  - `selector`
+  - `node`
+  - `character_id`
+  - `character_name`
+  - `appearance_status`
+  - `artifact_status`
+  - `source_artifacts`
+  - `staleness_reason`
+  - `visible_scene_details`
+  - `last_refreshed_node`
+
+### Scene Setting Projection
+- Minimum fields:
+  - `book_id`
+  - `selector`
+  - `node`
+  - `setting_status`
+  - `artifact_status`
+  - `source_mode`
+  - `source_mode` values:
+    - `prose_extracted`
+    - `author_drafted`
+    - `outline_derived`
+    - `missing`
+  - `location_id`
+  - `location_label`
+  - `background_details`
+  - `sensory_anchors`
+  - `continuity_constraints`
+  - `source_artifacts`
+
+### Thought Context Refinement
+- Minimum fields:
+  - `book_id`
+  - `selector`
+  - `node`
+  - `candidate_signatures`
+  - `selected_signatures`
+  - `phase_id`
+  - `turn_id`
+  - `context_role`
+  - `context_role` values:
+    - `planning_reuse`
+    - `constraint_reminder`
+    - `style_or_voice_reference`
+    - `diagnostic_context`
+  - `artifact_status`
+  - `limitations`
+- Required limitation:
+  - thought signatures are context aids only
+  - execution receipts remain the truth of what happened
+
+## Files Likely Touched
+- `src/bookforge/characters.py`
+- `src/bookforge/pipeline/scene.py`
+- `src/bookforge/runner.py`
+- `src/bookforge/query/__init__.py`
+- `src/bookforge/query/appearance.py`
+- `src/bookforge/query/setting.py`
+- `src/bookforge/query/thought_context.py`
+- `src/bookforge/execution/scene_actions.py`
+- `src/bookforge/execution/__init__.py`
+- `src/bookforge/contracts/`
+- `src/bookforge/llm/storage.py`
+- `src/bookforge/llm/signatures.py`
+- `docs/help/workflow.md`
+- `docs/help/index.md`
+
+## Tests
+- Add appearance projection tests, for example:
+  - `tests/test_appearance_query.py`
+  - `tests/test_appearance_projection_action.py`
+- Add setting/background tests, for example:
+  - `tests/test_scene_setting_query.py`
+  - `tests/test_scene_setting_actions.py`
+- Add thought-context selection tests, for example:
+  - `tests/test_thought_context_query.py`
+- Required behavior coverage:
+  - appearance projection reports missing state without crashing
+  - appearance projection detects stale state when character state revision or node changes
+  - appearance projection emits explicit artifact status
+  - scene setting extraction from prose is `derived`
+  - author-drafted setting projection is `provisional`
+  - thought-signature context selection filters to relevant prior T1 signatures
+  - thought signatures are never reported as authoritative execution truth
+  - readiness surfaces can report appearance, setting, and thought-context availability without starting execution
+
+## Definition Of Done
+- A caller can query character appearance projection status for a book, scene, or character without inspecting raw files.
+- A caller can tell whether appearance data is current, stale, missing, derived, provisional, or authoritative.
+- A caller can trigger a scene/cast-scoped appearance projection action without accidentally mutating canonical character truth.
+- A caller can query scene background/setting status independently from prose generation.
+- A caller can distinguish prose-extracted setting details from author-drafted setting projections.
+- A caller can discover relevant prior T1 thought signatures as optional refinement context for a scene-phase action.
+- Execution receipts record when appearance, setting, or thought-context artifacts were used as inputs.
+- Nanda can present these capabilities honestly in the author pane using BookForge query results instead of persona claims.
+
+## Notes
+- This step is intentionally separate from 0070.
+- 0070 is about segmenting the write loop into phase-shaped actions.
+- 0075 is about projection-layer quality and context reuse around those actions.
+- Appearance and setting should eventually inform continuity, prose writing, seam repair, and lint/repair, but they should not be hidden inside those phases.
+- The scene background/setting work should support both:
+  - extraction from prose already written
+  - a distinct author LLM turn that drafts intended background/setting before prose or seam repair
+- Prior T1 thought signatures should be treated as controlled context reuse.
+  - They can reduce repeated planning work.
+  - They can preserve author intent between graph nodes.
+  - They cannot replace state surfaces, issue tickets, or produced-artifact receipts.
+
+---
+
+## Source 15: `notes/2026-04-21-0010-execution.md`
 
 # 0010 Execution Note
 
@@ -1132,7 +1795,7 @@ Notes
 
 ---
 
-## Source 14: `notes/2026-04-21-0020-execution.md`
+## Source 16: `notes/2026-04-21-0020-execution.md`
 
 # 0020 Execution Note
 
@@ -1180,7 +1843,7 @@ Notes
 
 ---
 
-## Source 15: `notes/2026-04-21-0030-execution.md`
+## Source 17: `notes/2026-04-21-0030-execution.md`
 
 # 0030 Execution Note
 
@@ -1236,7 +1899,7 @@ Notes
 
 ---
 
-## Source 16: `notes/2026-04-21-0040-execution.md`
+## Source 18: `notes/2026-04-21-0040-execution.md`
 
 # 0040 Execution Note
 
@@ -1287,7 +1950,7 @@ Notes
 
 ---
 
-## Source 17: `notes/2026-04-21-0045-execution.md`
+## Source 19: `notes/2026-04-21-0045-execution.md`
 
 # 0045 Execution Note
 
@@ -1345,7 +2008,7 @@ Notes
 
 ---
 
-## Source 18: `notes/2026-04-21-0050-execution.md`
+## Source 20: `notes/2026-04-21-0050-execution.md`
 
 # 0050 Execution Note
 
@@ -1409,7 +2072,7 @@ Notes
 
 ---
 
-## Source 19: `notes/2026-04-22-0050-execution.md`
+## Source 21: `notes/2026-04-22-0050-execution.md`
 
 # 0050 Execution Note
 
@@ -1468,7 +2131,7 @@ Notes
 
 ---
 
-## Source 20: `notes/2026-04-22-0060-execution.md`
+## Source 22: `notes/2026-04-22-0060-execution.md`
 
 # 0060 Execution Note
 
@@ -1626,7 +2289,347 @@ Notes
 
 ---
 
-## Source 21: `promotion.md`
+## Source 23: `notes/2026-04-23-0070-commit-slice.md`
+
+## 2026-04-23 - 0070 commit slice
+
+### Scope
+- Extract `apply_scene_commit` as the first scene-phase action that mutates canonical main-branch state.
+- Keep the action truthful to the existing runner apply path instead of exposing a fake narrow "save prose" surface.
+- Extend reconciled execution emission so canonical scene actions can carry produced-artifact receipts.
+
+### Files touched
+- `src/bookforge/supervision/emit.py`
+- `src/bookforge/supervision/reconcile.py`
+- `src/bookforge/execution/scene_actions.py`
+- `src/bookforge/execution/__init__.py`
+- `src/bookforge/query/scene_phase.py`
+- `src/bookforge/query/actions.py`
+- `src/bookforge/cli.py`
+- `tests/test_scene_phase_readiness.py`
+- `tests/test_scene_action_execution.py`
+- `tests/test_action_discovery.py`
+- `docs/help/workflow.md`
+- `docs/help/index.md`
+- `docs/help/run.md`
+- `resources/plans/InProgress/bookforge-supervisable-engine/steps/0070-segment-section-write-into-scoped-scene-actions/step.md`
+
+### What changed
+- Added `apply_scene_commit` as an extracted main-branch scene action with:
+  - request builder
+  - execution adapter
+  - CLI command
+  - execution-option discovery
+  - readiness/query support
+- Extended reconciled supervision emission so main-branch execution results can include `produced_artifacts`.
+- Updated scene readiness so a passing current lint report now opens `apply_scene_commit` instead of dead-ending.
+- Kept commit on the real canonical apply path:
+  - apply final state patch
+  - apply character and continuity-system updates
+  - refresh appearance projections when requested
+  - apply durable mutations
+  - persist scene prose/meta
+  - update bible
+  - compile chapter outputs on chapter end
+  - advance cursor and write `state.json`
+
+### Why
+- `write_scene_prose`, `state_repair_scene_patch`, `lint_scene_prose`, and `repair_scene_prose` already gave Nanda truthful provisional scene control.
+- The next missing piece was the canonical mutation boundary.
+- Without an extracted commit action:
+  - passing lint had no truthful next step,
+  - callers had to drop back to batch wrappers for the final scene mutation,
+  - and canonical scene receipts could not carry produced-artifact truth.
+- This slice closes that gap while preserving the doctrine that the engine, not the caller, defines legal mutation paths.
+
+### Validation
+- `python -m pytest tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py -q --basetemp .pytest_tmp_0070_commit`
+- `python -m pytest tests/test_scope_contracts.py tests/test_execution_actions.py tests/test_scoped_execution.py tests/test_query_workspace.py -q --basetemp .pytest_tmp_0070_commit_regression`
+- `python -m pytest tests/test_supervision_emit.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py -q --basetemp .pytest_tmp_0070_commit_supervision`
+- `python -m pytest tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py tests/test_scoped_execution.py -q --basetemp .pytest_tmp_0070_commit_sceneplus`
+
+### Follow-on
+- The next 0070 slice should be wrapper integration:
+  - teach `run_loop` / section-level wrappers to consume the extracted scene actions instead of owning the scene choreography directly
+- 0075 remains the right place for:
+  - appearance extraction/turning
+  - background setting extraction
+  - richer context reuse such as T1 thought-signature carry-forward into later refinement turns
+
+---
+
+## Source 24: `notes/2026-04-23-0070-continuity-pack-slice.md`
+
+# 0070 Continuity-Pack Slice Execution Note
+
+Date
+- 2026-04-23
+
+Scope
+- Continue story `0070-segment-section-write-into-scoped-scene-actions`.
+- Extract `generate_continuity_pack` as a truthful scene-phase action between `preflight_scene_state` and `write_scene_prose`.
+- Correct the next extraction order after tracing `run_loop`: existing pipeline truth is `write -> state_repair -> lint -> repair`, so `state_repair_scene_patch` lands before `lint_scene_prose`.
+
+Changes
+- Added the continuity-pack execution action surface:
+  - `build_generate_continuity_pack_request(...)`
+  - `generate_continuity_pack(...)`
+- Exposed the action through:
+  - `bookforge.execution`
+  - `bookforge.query.list_execution_options(...)`
+  - `bookforge.query.legal_next_actions(...)`
+  - `bookforge workflow generate-continuity-pack`
+- Kept the action narrow:
+  - requires active cursor scene on `main`
+  - requires existing `scene_card` and `preflight_patch`
+  - produces only a `derived` continuity-pack receipt
+  - does not generate prose
+  - does not lint
+  - does not repair
+  - does not commit
+  - does not mutate canonical `state.json`
+- Added a materialization guard:
+  - safe preflight summary changes are applied only to an in-memory working state
+  - provisional character, continuity-system, or durable mutations are refused until a truthful materialization surface exists
+- Updated operator docs:
+  - `docs/help/workflow.md`
+  - `docs/help/index.md`
+  - `docs/help/run.md`
+- Updated plan traceability for the landed continuity-pack guardrails.
+- Added the state-repair execution action surface:
+  - `build_state_repair_scene_patch_request(...)`
+  - `state_repair_scene_patch(...)`
+- Exposed the state-repair action through:
+  - `bookforge.execution`
+  - `bookforge.query.list_execution_options(...)`
+  - `bookforge.query.legal_next_actions(...)`
+  - `bookforge workflow state-repair-scene-patch`
+- Kept the state-repair action narrow:
+  - requires active cursor scene on `main`
+  - requires existing `scene_card`, `preflight_patch`, `continuity_pack`, `write_prose`, and `write_patch`
+  - produces only a `provisional` corrected state patch
+  - does not apply the corrected patch to canonical state
+  - does not lint
+  - does not repair prose
+  - does not commit
+- Added the lint execution action surface:
+  - `build_lint_scene_prose_request(...)`
+  - `lint_scene_prose(...)`
+- Exposed the lint action through:
+  - `bookforge.execution`
+  - `bookforge.query.list_execution_options(...)`
+  - `bookforge.query.legal_next_actions(...)`
+  - `bookforge workflow lint-scene-prose`
+- Kept the lint action narrow:
+  - requires active cursor scene on `main`
+  - requires existing `scene_card`, `preflight_patch`, `continuity_pack`, `write_prose`, and `state_repair_patch`
+  - produces only a `provisional` lint report
+  - does not repair prose
+  - does not rerun state repair
+  - does not commit
+
+Validation
+- Ran:
+  - `python -m pytest tests/test_scene_action_execution.py tests/test_action_discovery.py -q`
+  - `python -m pytest tests/test_scene_action_execution.py tests/test_action_discovery.py tests/test_scene_phase_readiness.py tests/test_scoped_execution.py -q`
+  - `python -m pytest tests/test_execution_actions.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py -q`
+  - `python -m pytest tests/test_scope_contracts.py tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py -q`
+  - `python -m pytest tests/test_scene_action_execution.py tests/test_action_discovery.py tests/test_scene_phase_readiness.py -q`
+  - `python -m pytest tests/test_scene_action_execution.py tests/test_action_discovery.py tests/test_scene_phase_readiness.py tests/test_scoped_execution.py -q`
+  - `python -m pytest tests/test_scope_contracts.py tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py -q`
+  - `python -m pytest tests/test_scene_action_execution.py tests/test_action_discovery.py tests/test_scene_phase_readiness.py -q`
+  - `python -m pytest tests/test_scene_action_execution.py tests/test_action_discovery.py tests/test_scene_phase_readiness.py tests/test_scoped_execution.py -q`
+  - `python -m pytest tests/test_execution_actions.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py -q`
+  - `python -m pytest tests/test_scope_contracts.py tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py -q`
+- Result:
+  - `31 passed`
+  - `38 passed`
+  - `28 passed`
+  - `41 passed`
+  - `39 passed`
+  - `43 passed`
+  - `46 passed`
+  - `44 passed`
+  - `48 passed`
+  - `28 passed`
+  - `51 passed`
+
+Notes
+- The scene-phase traversal path now has six extracted actions:
+  - `plan_scene`
+  - `preflight_scene_state`
+  - `generate_continuity_pack`
+  - `write_scene_prose`
+  - `state_repair_scene_patch`
+  - `lint_scene_prose`
+- The next 0070 slice should continue the post-write path:
+  - `repair_scene_prose`
+  - then apply/commit once lint/repair receipts are stable
+- Appearance and setting extraction remain intentionally deferred to `0075`.
+
+---
+
+## Source 25: `notes/2026-04-23-0070-repair-slice.md`
+
+## 2026-04-23 - 0070 repair slice
+
+### Scope
+- Extend the extracted `section_write` scene-action surface with `repair_scene_prose`.
+- Make readiness and execution resolve the latest current provisional prose baseline instead of assuming `write_*` remains current forever.
+- Reopen `state_repair_scene_patch` and `lint_scene_prose` truthfully after a newer repair pass.
+
+### Files touched
+- `src/bookforge/pipeline/scene_phase_artifacts.py`
+- `src/bookforge/query/scene_phase.py`
+- `src/bookforge/query/actions.py`
+- `src/bookforge/execution/scene_actions.py`
+- `src/bookforge/execution/__init__.py`
+- `src/bookforge/cli.py`
+- `tests/test_scene_phase_readiness.py`
+- `tests/test_scene_action_execution.py`
+- `tests/test_action_discovery.py`
+- `docs/help/workflow.md`
+- `docs/help/index.md`
+- `docs/help/run.md`
+- `resources/plans/InProgress/bookforge-supervisable-engine/steps/0070-segment-section-write-into-scoped-scene-actions/step.md`
+
+### What changed
+- Added `repair_scene_prose` as an extracted main-branch scene action with:
+  - request builder
+  - execution adapter
+  - CLI command
+  - execution-option discovery
+  - readiness/query support
+- Added shared scene artifact-state resolution so both query and execution can agree on:
+  - current prose baseline (`write_*` vs newer `repair_*`)
+  - whether `state_repair_patch` is current or superseded
+  - whether `lint_report` is current or superseded
+  - current lint status
+- Updated `state_repair_scene_patch` and `lint_scene_prose` to consume the latest current prose baseline instead of hard-coding `write_prose`.
+- Updated lint result reporting so passing lint no longer falsely points at the unextracted `apply_scene_commit` action.
+
+### Why
+- The earlier extracted slices still treated any existing `state_repair` or `lint` output as terminal.
+- That made the graph lie after a repair pass:
+  - the user could generate repaired prose,
+  - but the readiness surface would still report old downstream outputs as blocking,
+  - and the execution adapters would still read stale write artifacts.
+- This slice fixes that by making repair a first-class loop re-entry point instead of a dead end.
+
+### Validation
+- `python -m pytest tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py -q --basetemp .pytest_tmp_0070_repair`
+- `python -m pytest tests/test_scoped_execution.py tests/test_execution_actions.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py -q --basetemp .pytest_tmp_0070_repair_regression`
+- `python -m pytest tests/test_scope_contracts.py tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py -q --basetemp .pytest_tmp_0070_contracts`
+- `python -m pytest tests/test_query_workspace.py tests/test_scene_phase_readiness.py -q --basetemp .pytest_tmp_0070_query2`
+
+### Follow-on
+- Next extracted scene-phase slice is still `apply_scene_commit`.
+- That slice should consume the latest current provisional baseline and latest current lint outcome rather than assuming a single pass.
+
+---
+
+## Source 26: `notes/2026-04-23-0070-run-loop-wrapper-slice.md`
+
+# 2026-04-23 0070 Run-Loop Wrapper Slice
+
+## Summary
+- Routed `run_loop` scene execution through the extracted scene-phase action surface instead of keeping a second monolithic per-scene implementation in `runner.py`.
+- Kept the existing outer writer behavior intact:
+  - outline gate
+  - character/style-anchor bootstrap
+  - progress heartbeat
+  - pause marker / pause contract
+  - section-level wrappers at the time of this slice still called `run_loop`
+- Added a small scene-sequence adapter so the runner can execute:
+  - `plan_scene`
+  - `preflight_scene_state`
+  - `generate_continuity_pack`
+  - `write_scene_prose`
+  - `state_repair_scene_patch`
+  - `lint_scene_prose`
+  - `repair_scene_prose`
+  - `apply_scene_commit`
+
+## Why
+- `0070` is no longer just about exposing narrow scene-phase actions individually.
+- The batch writer path also needed to stop being a separate source of truth.
+- If `run_loop` kept its own internal choreography, Nanda would still be supervising one graph while production writing used another.
+
+## Key Changes
+- Added `src/bookforge/execution/scene_sequence.py`.
+  - builds live scene-phase requests against the current main-branch node
+  - allows the runner to pass durable-slice expansion hints into extracted actions
+- Updated `src/bookforge/execution/scene_actions.py`.
+  - scene-phase request builders now resolve the live node with `prefer_emitted=False`
+  - extracted phase actions now accept `durable_expand_ids` through request details and pass them to the underlying phase implementations
+- Updated `src/bookforge/runner.py`.
+  - added a runner-local scene-sequence driver
+  - translated scene-phase `retryable_pause` results back into `draft/context/run_paused.json`
+  - preserved the existing strict-mode lint failure / durable-slice pause behavior
+  - kept appearance refresh after scene-card resolution before prose generation
+
+## Validation
+- `python -m pytest tests/test_runner_targeting.py tests/test_scene_action_execution.py tests/test_scene_phase_readiness.py tests/test_action_discovery.py -q --basetemp .pytest_tmp_0070_runner_wrap`
+- `python -m pytest tests/test_execution_actions.py tests/test_scoped_execution.py tests/test_runner_outline_gate.py -q --basetemp .pytest_tmp_0070_runner_wrap_scoped`
+- `python -m pytest tests/test_scope_contracts.py tests/test_supervision_emit.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_query_workspace.py tests/test_scoped_execution.py -q --basetemp .pytest_tmp_0070_runner_wrap_regression`
+- `python -m pytest tests/test_runner_targeting.py tests/test_runner_outline_gate.py tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py tests/test_execution_actions.py tests/test_scoped_execution.py -q --basetemp .pytest_tmp_0070_runner_wrap_full`
+
+## Remaining Edge
+- At the time this slice landed, `run_loop` delegated per-scene work truthfully, but the section-level wrappers still depended on `run_loop` as the macro entry point rather than owning their own scene traversal.
+- That gap was closed later the same day in `2026-04-23-0070-section-wrapper-tightening.md` by introducing `run_section_range(...)` for section-scoped traversal.
+
+---
+
+## Source 27: `notes/2026-04-23-0070-section-wrapper-tightening.md`
+
+# 2026-04-23 0070 Section Wrapper Tightening
+
+## Summary
+- Tightened the section-level macro surface so `write_frozen_section`, `resume_paused_section`, and `advance_section_workflow` no longer depend on `run_loop(...)` as their macro entry point.
+- Added a dedicated runner surface, `run_section_range(...)`, for section-scoped traversal over the extracted scene-phase sequence.
+- Kept `run_loop(...)` as the batch/operator macro over the same lower-level write path instead of letting section wrappers parameterize the batch surface directly.
+
+## Why
+- `run_loop(...)` is the right batch/operator entry point, but it was still acting as the only macro-level path for section work.
+- That kept section wrappers one level too indirect for truthful supervision and future skill extraction.
+- The section wrappers needed a dedicated section-scoped macro so Nanda and later MCP-style capability extraction can treat section execution as a real skill boundary instead of “call the batch thing with the right arguments.”
+
+## Changes
+- `src/bookforge/runner.py`
+  - split the old public runner body into `_run_write_scope(...)`
+  - added `_set_cursor_for_scene_range(...)`
+  - added `run_section_range(...)` for section-scoped traversal
+  - kept `run_loop(...)` as a thin public wrapper over `_run_write_scope(...)`
+- `src/bookforge/execution/scoped.py`
+  - `write_frozen_section(...)` now calls `run_section_range(...)`
+  - `resume_paused_section(...)` now calls `run_section_range(...)`
+- `src/bookforge/section_workflow.py`
+  - `advance_section_workflow(...)` now calls `run_section_range(...)`
+  - removed the local cursor-reset helper that duplicated runner logic
+- `tests/test_execution_actions.py`
+  - updated the write-section adapter test to patch `run_section_range(...)`
+- `tests/test_scoped_execution.py`
+  - updated paused-resume tests to patch `run_section_range(...)`
+
+## Validation
+- `python -m pytest tests/test_execution_actions.py tests/test_scoped_execution.py tests/test_runner_targeting.py tests/test_runner_outline_gate.py -q --basetemp .pytest_tmp_section_range`
+  - `20 passed`
+- `python -m pytest tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py tests/test_execution_actions.py tests/test_scoped_execution.py tests/test_runner_targeting.py tests/test_runner_outline_gate.py -q --basetemp .pytest_tmp_section_range_full`
+  - `78 passed`
+- `python -m pytest tests/test_scope_contracts.py tests/test_supervision_emit.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_query_workspace.py tests/test_scoped_execution.py -q --basetemp .pytest_tmp_section_range_regression`
+  - `28 passed`
+
+## Result
+- Section-scoped commands now have their own truthful macro executor.
+- Batch `run` and section-scoped execution still share the same lower-level extracted scene-phase path.
+- The dependency direction is cleaner:
+  - scene actions are the atomic truth
+  - section-range execution is the section macro
+  - `run_loop(...)` is the batch/operator macro
+
+---
+
+## Source 28: `promotion.md`
 
 # Promotion
 

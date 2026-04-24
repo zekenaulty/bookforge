@@ -410,16 +410,30 @@ def test_write_section_action_returns_main_scoped_emitted_result(tmp_path: Path,
     freeze_request = build_freeze_section_request(tmp_path, "my_book", chapter_id=1, section_id=1)
     freeze_section(tmp_path, freeze_request)
 
-    def _stub_run_loop(*, workspace, book_id, until, resume, ack_outline_attention_items, force_outline_gate_bypass):
+    def _stub_run_section_range(
+        *,
+        workspace,
+        book_id,
+        chapter_id,
+        section_id,
+        scene_start,
+        scene_end,
+        resume,
+        ack_outline_attention_items,
+        force_outline_gate_bypass,
+    ):
         assert workspace == tmp_path
         assert book_id == "my_book"
-        assert until == "chapter:1:scene:1"
+        assert chapter_id == 1
+        assert section_id == 1
+        assert scene_start == 1
+        assert scene_end == 1
         assert resume is False
         assert ack_outline_attention_items is True
         assert force_outline_gate_bypass is True
         _write_scene_artifacts(book_root, 1, 1, text="Rhea crossed the threshold.")
 
-    monkeypatch.setattr("bookforge.execution.scoped.run_loop", _stub_run_loop)
+    monkeypatch.setattr("bookforge.execution.scoped.run_section_range", _stub_run_section_range)
 
     request = build_write_section_request(
         tmp_path,

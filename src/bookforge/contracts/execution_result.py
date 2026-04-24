@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from .produced_artifact import ProducedArtifactReceipt
 from .scope_selector import ScopeSelector
 from .timeline_node import TimelineNodeRef
 from .vocabulary import is_valid_execution_result_status
@@ -32,6 +33,7 @@ class ExecutionResult:
     message: Optional[str] = None
     issue_ticket_ids: List[str] = field(default_factory=list)
     artifact_paths: Dict[str, str] = field(default_factory=dict)
+    produced_artifacts: List[ProducedArtifactReceipt] = field(default_factory=list)
     details: Dict[str, Any] = field(default_factory=dict)
     emitted_at: Optional[str] = None
     request_id: Optional[str] = None
@@ -53,6 +55,10 @@ class ExecutionResult:
         object.__setattr__(self, "request_id", _clean_optional(self.request_id))
         object.__setattr__(self, "issue_ticket_ids", [str(item).strip() for item in self.issue_ticket_ids if str(item).strip()])
         object.__setattr__(self, "artifact_paths", {str(key): str(value) for key, value in dict(self.artifact_paths).items() if str(key).strip() and str(value).strip()})
+        object.__setattr__(self, "produced_artifacts", [
+            item if isinstance(item, ProducedArtifactReceipt) else ProducedArtifactReceipt.from_dict(item)
+            for item in self.produced_artifacts
+        ])
         object.__setattr__(self, "details", dict(self.details) if isinstance(self.details, dict) else {})
 
     def to_dict(self) -> Dict[str, Any]:
@@ -66,6 +72,7 @@ class ExecutionResult:
             "message": self.message,
             "issue_ticket_ids": list(self.issue_ticket_ids),
             "artifact_paths": dict(self.artifact_paths),
+            "produced_artifacts": [item.to_dict() for item in self.produced_artifacts],
             "details": dict(self.details),
             "emitted_at": self.emitted_at,
             "request_id": self.request_id,
@@ -84,6 +91,7 @@ class ExecutionResult:
             message=payload.get("message"),
             issue_ticket_ids=list(payload.get("issue_ticket_ids") or []),
             artifact_paths=payload.get("artifact_paths") or {},
+            produced_artifacts=list(payload.get("produced_artifacts") or []),
             details=payload.get("details") or {},
             emitted_at=payload.get("emitted_at"),
             request_id=payload.get("request_id"),

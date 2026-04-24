@@ -7,7 +7,7 @@ import hashlib
 
 from bookforge.contracts import ExecutionRequest, ExecutionResult, MAIN_BRANCH_ID, ScopeSelector
 from bookforge.query import current_main_node, get_workspace_status
-from bookforge.runner import PAUSE_EXIT_CODE, run_loop
+from bookforge.runner import PAUSE_EXIT_CODE, run_section_range
 from bookforge.section_workflow import get_section_workflow_status, lock_section_from_written_state
 from bookforge.supervision import (
     RuntimeIssue,
@@ -387,10 +387,13 @@ def write_frozen_section(workspace: Path, request: ExecutionRequest) -> Executio
         )
 
     try:
-        run_loop(
+        run_section_range(
             workspace=workspace,
             book_id=book_id,
-            until=f"chapter:{chapter_id}:scene:{scene_end}",
+            chapter_id=chapter_id,
+            section_id=section_id,
+            scene_start=scene_start,
+            scene_end=scene_end,
             resume=False,
             ack_outline_attention_items=bool(request.details.get("ack_outline_attention_items")),
             force_outline_gate_bypass=bool(request.details.get("force_outline_gate_bypass")),
@@ -635,10 +638,26 @@ def resume_paused_section(workspace: Path, request: ExecutionRequest) -> Executi
     scene_end = int(scene_end_text)
 
     try:
-        run_loop(
+        scene_ref_start = str(section_row.get("scene_ref_start") or "").strip()
+        if ":" not in scene_ref_start:
+            return _hard_fail(
+                workspace=workspace,
+                request=request,
+                code="section_scene_range_missing",
+                category="scope_contract_violation",
+                message="Active frozen section does not have a starting scene ref.",
+                live_node=live_node,
+            )
+        _, scene_start_text = scene_ref_start.split(":", 1)
+        scene_start = int(scene_start_text)
+
+        run_section_range(
             workspace=workspace,
             book_id=book_id,
-            until=f"chapter:{chapter_id}:scene:{scene_end}",
+            chapter_id=chapter_id,
+            section_id=section_id,
+            scene_start=scene_start,
+            scene_end=scene_end,
             resume=True,
             ack_outline_attention_items=bool(request.details.get("ack_outline_attention_items")),
             force_outline_gate_bypass=bool(request.details.get("force_outline_gate_bypass")),

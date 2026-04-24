@@ -192,6 +192,7 @@ def emit_reconciled_main_branch_contracts(
     message: str,
     runtime_issues=None,
     artifact_paths: Optional[Dict[str, str]] = None,
+    produced_artifacts=None,
     details: Optional[Dict[str, Any]] = None,
     request_id: Optional[str] = None,
 ) -> EmissionBundle:
@@ -210,6 +211,7 @@ def emit_reconciled_main_branch_contracts(
         message=message,
         runtime_issues=runtime_issues,
         artifact_paths=artifact_paths,
+        produced_artifacts=produced_artifacts,
         details=merged_details,
         request_id=request_id,
     )
@@ -226,6 +228,7 @@ def emit_reconciled_branch_contracts(
     message: str,
     runtime_issues=None,
     artifact_paths: Optional[Dict[str, str]] = None,
+    produced_artifacts=None,
     details: Optional[Dict[str, Any]] = None,
     request_id: Optional[str] = None,
 ) -> EmissionBundle:
@@ -245,6 +248,7 @@ def emit_reconciled_branch_contracts(
         message=message,
         runtime_issues=runtime_issues,
         artifact_paths=artifact_paths,
+        produced_artifacts=produced_artifacts,
         details=merged_details,
         request_id=request_id,
     )

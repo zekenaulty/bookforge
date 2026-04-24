@@ -5,6 +5,7 @@ from typing import List, Optional, Tuple
 from bookforge.contracts import BranchManifest, ExecutionOption, MAIN_BRANCH_ID, ScopeSelector
 
 from . import _common
+from .scene_phase import get_scene_phase_readiness
 from .workspace import current_main_node, get_section_status, get_workspace_status
 
 
@@ -435,6 +436,230 @@ def _evaluate_record_assembly_validation(workspace, book_id: str, selector: Scop
     }
 
 
+def _evaluate_write_scene_prose(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
+    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
+        return False, "write_scene_prose only supports main-branch execution.", {}
+    readiness = get_scene_phase_readiness(
+        workspace,
+        book_id,
+        chapter_id=selector.chapter,
+        scene_id=selector.scene,
+        section_id=selector.section,
+        prefer_emitted=prefer_emitted,
+    )
+    action_row = next((item for item in readiness.actions if item.action == "write_scene_prose"), None)
+    if action_row is None:
+        return False, "write_scene_prose readiness is unavailable for the selected scope.", {}
+    details = {
+        "chapter_id": readiness.selector.chapter,
+        "section_id": readiness.selector.section,
+        "scene_id": readiness.selector.scene,
+        "scene_status": readiness.scene_status,
+        "recommended_next_action": readiness.recommended_next_action,
+        "mutation_scope": action_row.mutation_scope,
+        "missing_prerequisites": list(action_row.missing_prerequisites),
+        "available_inputs": list(action_row.available_inputs),
+        "existing_outputs": [item.to_dict() for item in action_row.existing_outputs],
+    }
+    return bool(action_row.legal and action_row.ready), action_row.refusal_reason, details
+
+
+def _evaluate_plan_scene(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
+    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
+        return False, "plan_scene only supports main-branch execution.", {}
+    readiness = get_scene_phase_readiness(
+        workspace,
+        book_id,
+        chapter_id=selector.chapter,
+        scene_id=selector.scene,
+        section_id=selector.section,
+        prefer_emitted=prefer_emitted,
+    )
+    action_row = next((item for item in readiness.actions if item.action == "plan_scene"), None)
+    if action_row is None:
+        return False, "plan_scene readiness is unavailable for the selected scope.", {}
+    details = {
+        "chapter_id": readiness.selector.chapter,
+        "section_id": readiness.selector.section,
+        "scene_id": readiness.selector.scene,
+        "scene_status": readiness.scene_status,
+        "recommended_next_action": readiness.recommended_next_action,
+        "mutation_scope": action_row.mutation_scope,
+        "missing_prerequisites": list(action_row.missing_prerequisites),
+        "available_inputs": list(action_row.available_inputs),
+        "existing_outputs": [item.to_dict() for item in action_row.existing_outputs],
+    }
+    return bool(action_row.legal and action_row.ready), action_row.refusal_reason, details
+
+
+def _evaluate_preflight_scene_state(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
+    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
+        return False, "preflight_scene_state only supports main-branch execution.", {}
+    readiness = get_scene_phase_readiness(
+        workspace,
+        book_id,
+        chapter_id=selector.chapter,
+        scene_id=selector.scene,
+        section_id=selector.section,
+        prefer_emitted=prefer_emitted,
+    )
+    action_row = next((item for item in readiness.actions if item.action == "preflight_scene_state"), None)
+    if action_row is None:
+        return False, "preflight_scene_state readiness is unavailable for the selected scope.", {}
+    details = {
+        "chapter_id": readiness.selector.chapter,
+        "section_id": readiness.selector.section,
+        "scene_id": readiness.selector.scene,
+        "scene_status": readiness.scene_status,
+        "recommended_next_action": readiness.recommended_next_action,
+        "mutation_scope": action_row.mutation_scope,
+        "missing_prerequisites": list(action_row.missing_prerequisites),
+        "available_inputs": list(action_row.available_inputs),
+        "existing_outputs": [item.to_dict() for item in action_row.existing_outputs],
+    }
+    return bool(action_row.legal and action_row.ready), action_row.refusal_reason, details
+
+
+def _evaluate_generate_continuity_pack(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
+    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
+        return False, "generate_continuity_pack only supports main-branch execution.", {}
+    readiness = get_scene_phase_readiness(
+        workspace,
+        book_id,
+        chapter_id=selector.chapter,
+        scene_id=selector.scene,
+        section_id=selector.section,
+        prefer_emitted=prefer_emitted,
+    )
+    action_row = next((item for item in readiness.actions if item.action == "generate_continuity_pack"), None)
+    if action_row is None:
+        return False, "generate_continuity_pack readiness is unavailable for the selected scope.", {}
+    details = {
+        "chapter_id": readiness.selector.chapter,
+        "section_id": readiness.selector.section,
+        "scene_id": readiness.selector.scene,
+        "scene_status": readiness.scene_status,
+        "recommended_next_action": readiness.recommended_next_action,
+        "mutation_scope": action_row.mutation_scope,
+        "missing_prerequisites": list(action_row.missing_prerequisites),
+        "available_inputs": list(action_row.available_inputs),
+        "existing_outputs": [item.to_dict() for item in action_row.existing_outputs],
+    }
+    return bool(action_row.legal and action_row.ready), action_row.refusal_reason, details
+
+
+def _evaluate_state_repair_scene_patch(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
+    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
+        return False, "state_repair_scene_patch only supports main-branch execution.", {}
+    readiness = get_scene_phase_readiness(
+        workspace,
+        book_id,
+        chapter_id=selector.chapter,
+        scene_id=selector.scene,
+        section_id=selector.section,
+        prefer_emitted=prefer_emitted,
+    )
+    action_row = next((item for item in readiness.actions if item.action == "state_repair_scene_patch"), None)
+    if action_row is None:
+        return False, "state_repair_scene_patch readiness is unavailable for the selected scope.", {}
+    details = {
+        "chapter_id": readiness.selector.chapter,
+        "section_id": readiness.selector.section,
+        "scene_id": readiness.selector.scene,
+        "scene_status": readiness.scene_status,
+        "recommended_next_action": readiness.recommended_next_action,
+        "mutation_scope": action_row.mutation_scope,
+        "missing_prerequisites": list(action_row.missing_prerequisites),
+        "available_inputs": list(action_row.available_inputs),
+        "existing_outputs": [item.to_dict() for item in action_row.existing_outputs],
+    }
+    return bool(action_row.legal and action_row.ready), action_row.refusal_reason, details
+
+
+def _evaluate_lint_scene_prose(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
+    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
+        return False, "lint_scene_prose only supports main-branch execution.", {}
+    readiness = get_scene_phase_readiness(
+        workspace,
+        book_id,
+        chapter_id=selector.chapter,
+        scene_id=selector.scene,
+        section_id=selector.section,
+        prefer_emitted=prefer_emitted,
+    )
+    action_row = next((item for item in readiness.actions if item.action == "lint_scene_prose"), None)
+    if action_row is None:
+        return False, "lint_scene_prose readiness is unavailable for the selected scope.", {}
+    details = {
+        "chapter_id": readiness.selector.chapter,
+        "section_id": readiness.selector.section,
+        "scene_id": readiness.selector.scene,
+        "scene_status": readiness.scene_status,
+        "recommended_next_action": readiness.recommended_next_action,
+        "mutation_scope": action_row.mutation_scope,
+        "missing_prerequisites": list(action_row.missing_prerequisites),
+        "available_inputs": list(action_row.available_inputs),
+        "existing_outputs": [item.to_dict() for item in action_row.existing_outputs],
+    }
+    return bool(action_row.legal and action_row.ready), action_row.refusal_reason, details
+
+
+def _evaluate_repair_scene_prose(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
+    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
+        return False, "repair_scene_prose only supports main-branch execution.", {}
+    readiness = get_scene_phase_readiness(
+        workspace,
+        book_id,
+        chapter_id=selector.chapter,
+        scene_id=selector.scene,
+        section_id=selector.section,
+        prefer_emitted=prefer_emitted,
+    )
+    action_row = next((item for item in readiness.actions if item.action == "repair_scene_prose"), None)
+    if action_row is None:
+        return False, "repair_scene_prose readiness is unavailable for the selected scope.", {}
+    details = {
+        "chapter_id": readiness.selector.chapter,
+        "section_id": readiness.selector.section,
+        "scene_id": readiness.selector.scene,
+        "scene_status": readiness.scene_status,
+        "recommended_next_action": readiness.recommended_next_action,
+        "mutation_scope": action_row.mutation_scope,
+        "missing_prerequisites": list(action_row.missing_prerequisites),
+        "available_inputs": list(action_row.available_inputs),
+        "existing_outputs": [item.to_dict() for item in action_row.existing_outputs],
+    }
+    return bool(action_row.legal and action_row.ready), action_row.refusal_reason, details
+
+
+def _evaluate_apply_scene_commit(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
+    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
+        return False, "apply_scene_commit only supports main-branch execution.", {}
+    readiness = get_scene_phase_readiness(
+        workspace,
+        book_id,
+        chapter_id=selector.chapter,
+        scene_id=selector.scene,
+        section_id=selector.section,
+        prefer_emitted=prefer_emitted,
+    )
+    action_row = next((item for item in readiness.actions if item.action == "apply_scene_commit"), None)
+    if action_row is None:
+        return False, "apply_scene_commit readiness is unavailable for the selected scope.", {}
+    details = {
+        "chapter_id": readiness.selector.chapter,
+        "section_id": readiness.selector.section,
+        "scene_id": readiness.selector.scene,
+        "scene_status": readiness.scene_status,
+        "recommended_next_action": readiness.recommended_next_action,
+        "mutation_scope": action_row.mutation_scope,
+        "missing_prerequisites": list(action_row.missing_prerequisites),
+        "available_inputs": list(action_row.available_inputs),
+        "existing_outputs": [item.to_dict() for item in action_row.existing_outputs],
+    }
+    return bool(action_row.legal and action_row.ready), action_row.refusal_reason, details
+
+
 def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted: bool = True) -> List[ExecutionOption]:
     book_id = selector.book_id
     resolved_branch_id = _resolved_branch_id(selector)
@@ -481,6 +706,54 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
         book_id,
         selector,
     )
+    plan_scene_allowed, plan_scene_refusal, plan_scene_details = _evaluate_plan_scene(
+        workspace,
+        book_id,
+        selector,
+        prefer_emitted=prefer_emitted,
+    )
+    preflight_allowed, preflight_refusal, preflight_details = _evaluate_preflight_scene_state(
+        workspace,
+        book_id,
+        selector,
+        prefer_emitted=prefer_emitted,
+    )
+    continuity_allowed, continuity_refusal, continuity_details = _evaluate_generate_continuity_pack(
+        workspace,
+        book_id,
+        selector,
+        prefer_emitted=prefer_emitted,
+    )
+    write_scene_allowed, write_scene_refusal, write_scene_details = _evaluate_write_scene_prose(
+        workspace,
+        book_id,
+        selector,
+        prefer_emitted=prefer_emitted,
+    )
+    state_repair_allowed, state_repair_refusal, state_repair_details = _evaluate_state_repair_scene_patch(
+        workspace,
+        book_id,
+        selector,
+        prefer_emitted=prefer_emitted,
+    )
+    lint_scene_allowed, lint_scene_refusal, lint_scene_details = _evaluate_lint_scene_prose(
+        workspace,
+        book_id,
+        selector,
+        prefer_emitted=prefer_emitted,
+    )
+    repair_scene_allowed, repair_scene_refusal, repair_scene_details = _evaluate_repair_scene_prose(
+        workspace,
+        book_id,
+        selector,
+        prefer_emitted=prefer_emitted,
+    )
+    apply_scene_commit_allowed, apply_scene_commit_refusal, apply_scene_commit_details = _evaluate_apply_scene_commit(
+        workspace,
+        book_id,
+        selector,
+        prefer_emitted=prefer_emitted,
+    )
     freeze_allowed, freeze_refusal, freeze_details = _evaluate_freeze_section(workspace, book_id, selector)
     resume_allowed, resume_refusal, resume_details = _evaluate_resume_paused_section(
         workspace,
@@ -488,7 +761,7 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
         selector,
         prefer_emitted=prefer_emitted,
     )
-    return [
+    options = [
         ExecutionOption(
             action="initialize_section_workflow",
             summary="Initialize canonical workflow state from an immutable outline run.",
@@ -695,6 +968,120 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
             details=validate_assembly_details,
         ),
     ]
+    if resolved_branch_id == MAIN_BRANCH_ID and selector.scene is not None:
+        options.append(
+            ExecutionOption(
+                action="plan_scene",
+                summary="Generate a provisional scene card for the active cursor scene without auto-running downstream phases.",
+                branch_policy="main_only",
+                workflow_family="section_write",
+                mutates_canonical_state=False,
+                requires_expected_node=True,
+                allowed=plan_scene_allowed,
+                selector_requirements=["book_id", "chapter", "scene"],
+                refusal_reason=plan_scene_refusal,
+                details=plan_scene_details,
+            )
+        )
+        options.append(
+            ExecutionOption(
+                action="preflight_scene_state",
+                summary="Generate a provisional preflight state patch for the active cursor scene without applying it.",
+                branch_policy="main_only",
+                workflow_family="section_write",
+                mutates_canonical_state=False,
+                requires_expected_node=True,
+                allowed=preflight_allowed,
+                selector_requirements=["book_id", "chapter", "scene"],
+                refusal_reason=preflight_refusal,
+                details=preflight_details,
+            )
+        )
+        options.append(
+            ExecutionOption(
+                action="generate_continuity_pack",
+                summary="Generate a derived continuity pack for the active cursor scene without auto-running prose or repair.",
+                branch_policy="main_only",
+                workflow_family="section_write",
+                mutates_canonical_state=False,
+                requires_expected_node=True,
+                allowed=continuity_allowed,
+                selector_requirements=["book_id", "chapter", "scene"],
+                refusal_reason=continuity_refusal,
+                details=continuity_details,
+            )
+        )
+        options.append(
+            ExecutionOption(
+                action="write_scene_prose",
+                summary="Generate provisional prose for the active cursor scene without auto-running lint, repair, or commit.",
+                branch_policy="main_only",
+                workflow_family="section_write",
+                mutates_canonical_state=False,
+                requires_expected_node=True,
+                allowed=write_scene_allowed,
+                selector_requirements=["book_id", "chapter", "scene"],
+                refusal_reason=write_scene_refusal,
+                details=write_scene_details,
+            )
+        )
+        options.append(
+            ExecutionOption(
+                action="state_repair_scene_patch",
+                summary="Generate a provisional corrected state patch for the active cursor scene without linting, repairing prose, or committing.",
+                branch_policy="main_only",
+                workflow_family="section_write",
+                mutates_canonical_state=False,
+                requires_expected_node=True,
+                allowed=state_repair_allowed,
+                selector_requirements=["book_id", "chapter", "scene"],
+                refusal_reason=state_repair_refusal,
+                details=state_repair_details,
+            )
+        )
+        options.append(
+            ExecutionOption(
+                action="lint_scene_prose",
+                summary="Generate a provisional lint report for the active cursor scene without repairing prose or committing.",
+                branch_policy="main_only",
+                workflow_family="section_write",
+                mutates_canonical_state=False,
+                requires_expected_node=True,
+                allowed=lint_scene_allowed,
+                selector_requirements=["book_id", "chapter", "scene"],
+                refusal_reason=lint_scene_refusal,
+                details=lint_scene_details,
+            )
+        )
+        options.append(
+            ExecutionOption(
+                action="repair_scene_prose",
+                summary="Generate provisional repaired prose and patch artifacts for the active cursor scene without rerunning state repair, lint, or commit.",
+                branch_policy="main_only",
+                workflow_family="section_write",
+                mutates_canonical_state=False,
+                requires_expected_node=True,
+                allowed=repair_scene_allowed,
+                selector_requirements=["book_id", "chapter", "scene"],
+                refusal_reason=repair_scene_refusal,
+                details=repair_scene_details,
+            )
+        )
+        options.append(
+            ExecutionOption(
+                action="apply_scene_commit",
+                summary="Commit the active cursor scene's latest passing provisional baseline into canonical state and authoritative scene artifacts.",
+                branch_policy="main_only",
+                workflow_family="section_write",
+                mutates_canonical_state=True,
+                requires_expected_node=True,
+                allowed=apply_scene_commit_allowed,
+                selector_requirements=["book_id", "chapter", "scene"],
+                refusal_reason=apply_scene_commit_refusal,
+                details=apply_scene_commit_details,
+            )
+        )
+    return options
 
 
 def legal_next_actions(workspace, selector: ScopeSelector, *, prefer_emitted: bool = True) -> List[ExecutionOption]:

@@ -1,9 +1,21 @@
 # bookforge run
 
 Purpose
-- Run the scene generation loop (plan -> preflight -> write -> repair -> state_repair -> lint -> commit).
+- Run the scene generation loop (plan -> preflight -> continuity -> write -> state_repair -> lint -> repair loop -> apply/commit).
 - This is the lower-level writer loop.
+- `run` now acts as a macro over the extracted scene-phase execution actions rather than owning a separate per-scene implementation.
 - In the section workflow model, `run` is typically invoked indirectly by `bookforge workflow write-section`, `bookforge workflow advance-section`, or `bookforge workflow resume-paused-section` after a section has been frozen.
+- Those section-level commands now use a dedicated section-range macro over the same lower-level scene-phase actions rather than calling `run` as their only macro entry point.
+- For the first extracted scene-phase surface, prefer:
+  - `bookforge workflow plan-scene`
+  - `bookforge workflow preflight-scene-state`
+  - `bookforge workflow generate-continuity-pack`
+  - `bookforge workflow scene-readiness`
+  - `bookforge workflow write-scene-prose`
+  - `bookforge workflow state-repair-scene-patch`
+  - `bookforge workflow lint-scene-prose`
+  - `bookforge workflow repair-scene-prose`
+  - `bookforge workflow apply-scene-commit`
 - Runtime family: `section_write`.
 
 Usage
@@ -29,6 +41,7 @@ Defaults
 
 Resume notes
 - --resume reuses phase history and scene artifacts in draft/context/phase_history to continue without re-running completed phases.
+- When a scene-phase action pauses, `run` converts that pause back into the legacy `draft/context/run_paused.json` surface so scoped resume and workspace observation continue to work.
 
 Outline write gate
 - `bookforge run` checks the latest outline pipeline report before writing.
@@ -91,6 +104,15 @@ Examples
 Related commands
 - `bookforge workflow init`
 - `bookforge workflow freeze-section`
+- `bookforge workflow plan-scene`
+- `bookforge workflow preflight-scene-state`
+- `bookforge workflow generate-continuity-pack`
+- `bookforge workflow scene-readiness`
+- `bookforge workflow write-scene-prose`
+- `bookforge workflow state-repair-scene-patch`
+- `bookforge workflow lint-scene-prose`
+- `bookforge workflow repair-scene-prose`
+- `bookforge workflow apply-scene-commit`
 - `bookforge workflow write-section`
 - `bookforge workflow advance-section`
 - `bookforge workflow resume-paused-section`

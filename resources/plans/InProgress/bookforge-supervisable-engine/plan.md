@@ -3,7 +3,7 @@
 Status: In Progress
 Stage: InProgress
 Owner: BookForge engine workstream
-Last Updated: 2026-04-22
+Last Updated: 2026-04-23
 
 ## Objective
 - Make BookForge truthful and supervisable by Nanda without moving prose generation or canonical state mutation out of BookForge.
@@ -16,6 +16,9 @@ Last Updated: 2026-04-22
 - Nanda planning has stabilized enough that the shared boundary is now clear: BookForge must emit truthful scope, lineage, pause, and result surfaces instead of forcing the operator layer to infer them from raw files.
 - The next architectural pressure is not just safer reruns. It is safe concurrency. If the contract model cannot distinguish canonical state, isolated rerun branches, and future parallel section branches, the same chimera class will return under a different name.
 - The next pressure after truthful supervision is controllable composition. Nanda will eventually need to steer outlining, writing, linting, and repair as smaller author moves instead of only invoking large fixed command chains.
+- The next pressure after the first execution-surface extraction is segmented write control. Nanda will need truthful scene-phase actions such as "prepare", "write prose", "lint", and "repair" instead of only section-level macros and hidden `run_loop` choreography.
+- The next pressure on the Nanda side is author-surface honesty. The author pane can keep voice, but it cannot claim tools or live state it does not actually receive through BookForge query and execution contracts.
+- The next projection-layer pressure is appearance and setting truth. Character appearance, scene background/setting, and prior-stage planning context must become queryable surfaces instead of hidden prompt side effects.
 - The current repo already has the right raw materials:
   - section workflow lifecycle
   - immutable outline run artifacts
@@ -56,6 +59,29 @@ Last Updated: 2026-04-22
 - `state_surface(book)` returns the full observable picture for the book.
 - `state_surface(book, chapter=3, section=2)` returns a projection through a lens over the same rooted truth model.
 - The public contract is not "many tiny section surfaces aggregated upward." Storage may normalize internally, but the caller-visible contract stays book-rooted.
+
+### Artifact Status And Projection Layers
+- Every execution-produced artifact must declare one artifact status:
+  - `authoritative`
+  - `provisional`
+  - `derived`
+  - `diagnostic`
+- Meanings:
+  - `authoritative`: canonical truth that downstream execution may safely consume without additional promotion
+  - `provisional`: produced by execution but not yet validated or promoted; may be resumable or replaceable
+  - `derived`: computed projection from other truth-bearing artifacts; useful, but not independently canonical
+  - `diagnostic`: observability or debugging material only; never an execution prerequisite by itself
+- Query surfaces must report artifact status so callers do not have to infer whether a file is safe to build on.
+- Future state families such as:
+  - scene/workflow state
+  - character appearance state
+  - deep inventory or durable state
+  - continuity and seam state
+  - thought-signature and prompt-package state
+  - character appearance projection state
+  - scene background and setting projection state
+  are projection layers over the same book-rooted coordinate system, not separate truth systems.
+- All projection layers must stay addressable by the same `TimelineNodeRef` and `ScopeSelector` vocabulary.
 
 ### TimelineNodeRef
 - Every execution point gets a coordinate.
@@ -134,6 +160,14 @@ class TimelineNodeRef:
   - branch policy and lineage requirements per action
   - receipts and reconciliation output per action
   - legal next actions from the current node
+- That execution surface must also expose readiness and artifact truth, not just executability.
+- `legal_next_actions(...)` answers what the engine allows.
+- Readiness surfaces answer what is actually possible right now, including:
+  - missing prerequisites
+  - available inputs
+  - already-produced outputs
+  - whether the action would mutate canonical or only provisional state
+  - the recommended next action from the current node
 - Nanda should eventually be able to run BookForge as a choose-your-own-adventure author loop:
   - observe current node and integrity
   - ask BookForge what actions are legal next
@@ -143,10 +177,24 @@ class TimelineNodeRef:
 - The important boundary rule does not change:
   - BookForge still owns prose generation and canonical state mutation
   - Nanda chooses among legal engine actions and evaluates the outcomes
+- For the author-pane path, this means:
+  - BookForge must expose truthful capability and readiness surfaces for scene-phase actions
+  - Nanda must assemble structured worker prompt packages from those truthful surfaces instead of improvising capability claims in persona text
 - This means the medium-term API shape is:
   - query surfaces for truth and legal-next-action discovery
+  - query surfaces for readiness and produced-artifact truth
   - execution actions for narrow engine moves
   - macro workflow commands as wrappers over those same actions, not a separate logic layer
+  - scene-phase readiness and result surfaces so the write loop can be traversed as a graph instead of only resumed as a batch
+
+### Author Capability Grounding
+- The Nanda author pane may keep voice and persona framing, but capability claims must come from actual BookForge query and execution surfaces.
+- The author surface may not imply that a tool, diagnostic pass, or mutation path exists unless:
+  - the corresponding readiness or legal-action surface says it is available
+  - and the corresponding BookForge execution path is actually wired
+- Thought signatures and persona prompts may enrich context assembly, but they are not proof of execution capability.
+- T1 thought signatures from prior workflow stages may be reused as context-management and planning-refinement inputs, but the prompt package and execution receipt must record that use explicitly.
+- Execution receipts and readiness/query surfaces remain the authority for what the author pane can honestly claim.
 
 ### Result Mapping
 | Branch Lifecycle State | Execution Result / Public Status | Canonical Change |
@@ -175,6 +223,11 @@ class TimelineNodeRef:
   - `promotion`
   - `assembly`
   - `discard`
+- Freeze artifact truth vocabulary for:
+  - `authoritative`
+  - `provisional`
+  - `derived`
+  - `diagnostic`
 - Add a read-only query surface under `src/bookforge/query/`.
 - Emit versioned engine contracts:
   - `TimelineNodeRef`
@@ -183,6 +236,7 @@ class TimelineNodeRef:
   - `IssueTicket`
   - `ExecutionRequest`
   - `ExecutionResult`
+- Prepare explicit receipt and readiness surfaces so produced artifacts, prerequisites, and recommended next actions are queryable instead of inferred from files alone.
 - Support one truthful main-branch execution path with bounded pause/resume behavior.
 - Support isolated branch reruns and fork-group fan-out/fan-in through the same coordinate system and branch invariants.
 - Reconcile and validate lineage before returning control to the caller.
@@ -217,6 +271,9 @@ class TimelineNodeRef:
 - `src/bookforge/contracts/issue_ticket.py`
 - `src/bookforge/contracts/execution_request.py`
 - `src/bookforge/contracts/execution_result.py`
+- Future or follow-on contract targets:
+  - produced-artifact receipt contract
+  - scene-phase readiness contract
 - `src/bookforge/branching.py`
 - Future extraction target:
   - a smaller execution action catalog under `src/bookforge/execution/` or equivalent
@@ -229,6 +286,7 @@ class TimelineNodeRef:
 ## Plan-Level Definition Of Done
 - A caller can query workflow family, run mode, source run, source artifact class, active section, current node, and integrity verdict through stable Python entry points.
 - BookForge emits book-rooted `StateSurface` projections and categorized `IssueTicket` output that both carry `TimelineNodeRef` coordinates.
+- A caller can tell whether a produced artifact is `authoritative`, `provisional`, `derived`, or `diagnostic` without reverse-engineering file paths or command history.
 - `current_node.json` or an equivalent contract-backed pointer identifies the active main-branch node.
 - Derived branches have branch-local current-node pointers or manifests so branch pause/resume and verification stay unambiguous.
 - Provider exhaustion resolves to `retryable_pause` or `hard_fail`, not multi-hour hidden retries as the only visible behavior.
@@ -240,6 +298,7 @@ class TimelineNodeRef:
 - Reconciliation and lineage validation run before control returns to the caller on `main`, and before promotion/assembly returns content to canonical state.
 - Help docs stop implying scope that the runtime does not actually execute.
 - The plan preserves a path to replace macro command orchestration with smaller API-facing execution actions without changing the shared truth model.
+- The plan preserves a path for Nanda to ground author-surface capability claims in actual readiness and receipt data instead of persona-only prompt behavior.
 
 ## Constraints
 - BookForge keeps ownership of prose generation and canonical workspace mutation.
@@ -247,6 +306,8 @@ class TimelineNodeRef:
 - New modules should target roughly `80-250` lines. Split aggressively at `>300`.
 - Prefer small typed data objects at the boundary instead of raw dict blobs passed through unrelated modules.
 - Do not normalize legacy accidental behavior as a contract just because live workspaces already contain it.
+- Every execution-produced artifact must declare its artifact status.
+- Thought signatures, prompt packages, and persona context may inform execution and replay, but they may not become the authoritative record of what happened.
 - Every non-main branch must declare its parent `TimelineNodeRef`.
 - No silent source switching inside a branch.
 - No promotion or assembly without explicit reconciliation and integrity validation.
@@ -259,6 +320,7 @@ class TimelineNodeRef:
 - Current chapter seam audit/finalization work remains a dependency, not a replacement for these contracts.
 - The Nanda operator plan depends on this plan's steps `0010-0045`.
 - The future Nanda author-loop work depends on a later extraction step that turns the workflow wrappers into a smaller choose-your-own-adventure execution surface.
+- The future Nanda author-pane work depends on BookForge exposing scene-phase capability/readiness receipts so persona responses can stay grounded in actual callable actions.
 
 ## Step Outline
 - See `steps/index.md` and the numbered step folders for execution-shaped stories.

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 from bookforge.runner import run_loop
 from bookforge.workspace import init_book_workspace
@@ -156,61 +157,78 @@ def _init_book(tmp_path: Path) -> Path:
     return book_root
 
 
-def test_run_loop_replans_exact_scene_when_loaded_scene_card_mismatches(tmp_path: Path, monkeypatch) -> None:
+def test_run_loop_routes_scene_through_extracted_scene_actions(tmp_path: Path, monkeypatch) -> None:
     book_root = _init_book(tmp_path)
-    planned_calls: list[tuple[int | None, int | None]] = []
-    executed_cards: list[tuple[int, int]] = []
+    action_calls: list[str] = []
 
-    def _plan_scene(workspace, book_id, chapter=None, scene=None, client=None, model=None):
-        planned_calls.append((chapter, scene))
-        payload = _scene_card(chapter or 1, scene or 2)
-        path = book_root / "draft" / "scenes" / f"planned_{len(planned_calls):03d}.json"
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
-        return path
-
-    def _write_scene(*args, **kwargs):
-        scene_card = args[3]
-        executed_cards.append((int(scene_card["chapter"]), int(scene_card["scene"])))
-        patch = {
-            "summary_update": {},
-            "character_updates": [],
-            "character_continuity_system_updates": [],
-        }
-        return "A clean scene draft.", patch
+    def _fake_scene_action(workspace, book_id, action, *, chapter_id, scene_id, section_id=None, extra_details=None):
+        action_calls.append(action)
+        if action == "plan_scene":
+            payload = _scene_card(chapter_id, scene_id)
+            path = book_root / "draft" / "scenes" / "planned_001.json"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
+            return SimpleNamespace(
+                action=action,
+                status="success",
+                message="planned",
+                artifact_paths={"scene_card": path.relative_to(book_root).as_posix()},
+                details={},
+            )
+        if action == "lint_scene_prose":
+            report_path = book_root / "draft" / "context" / "lint_scene_001.json"
+            report_path.parent.mkdir(parents=True, exist_ok=True)
+            report_path.write_text(
+                json.dumps({"schema_version": "1.0", "status": "pass", "issues": []}, ensure_ascii=True, indent=2),
+                encoding="utf-8",
+            )
+            return SimpleNamespace(
+                action=action,
+                status="success",
+                message="linted",
+                artifact_paths={"lint_report": report_path.relative_to(book_root).as_posix()},
+                details={},
+            )
+        if action == "apply_scene_commit":
+            chapter_dir = book_root / "draft" / "chapters" / "ch_001"
+            chapter_dir.mkdir(parents=True, exist_ok=True)
+            (chapter_dir / "scene_001.md").write_text("A clean scene draft.", encoding="utf-8")
+            (chapter_dir / "scene_001.meta.json").write_text(
+                json.dumps({"chapter": 1, "scene": 1, "status": "committed"}, ensure_ascii=True, indent=2),
+                encoding="utf-8",
+            )
+            state_path = book_root / "state.json"
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            state["cursor"] = {"chapter": 2, "scene": 1}
+            state["status"] = "COMPLETE"
+            state_path.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
+        return SimpleNamespace(
+            action=action,
+            status="success",
+            message="ok",
+            artifact_paths={},
+            details={},
+        )
 
     monkeypatch.setattr("bookforge.runner.load_config", lambda: {})
     monkeypatch.setattr("bookforge.runner.get_llm_client", lambda config, phase=None: object())
     monkeypatch.setattr("bookforge.runner.resolve_model", lambda phase, config: "dummy")
     monkeypatch.setattr("bookforge.runner.characters_ready", lambda book_root_arg: True)
     monkeypatch.setattr("bookforge.runner._ensure_style_anchor", lambda *args, **kwargs: "Style anchor.")
-    monkeypatch.setattr("bookforge.runner.plan_scene", _plan_scene)
-    monkeypatch.setattr(
-        "bookforge.runner._scene_state_preflight",
-        lambda *args, **kwargs: {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
-    )
-    monkeypatch.setattr("bookforge.runner._generate_continuity_pack", lambda *args, **kwargs: {"ok": True})
-    monkeypatch.setattr("bookforge.runner._write_scene", _write_scene)
-    monkeypatch.setattr("bookforge.runner._state_repair", lambda *args, **kwargs: args[7])
-    monkeypatch.setattr(
-        "bookforge.runner._lint_scene",
-        lambda *args, **kwargs: {"schema_version": "1.0", "status": "pass", "issues": []},
-    )
-    monkeypatch.setattr("bookforge.runner._load_character_states", lambda *args, **kwargs: [])
-    monkeypatch.setattr("bookforge.runner._snapshot_character_states_before_preflight", lambda *args, **kwargs: [])
     monkeypatch.setattr("bookforge.runner.refresh_appearance_projections", lambda *args, **kwargs: [])
-    monkeypatch.setattr("bookforge.runner._apply_state_patch", lambda state, patch, chapter_end=False: state)
-    monkeypatch.setattr("bookforge.runner._apply_character_updates", lambda *args, **kwargs: None)
-    monkeypatch.setattr("bookforge.runner._apply_character_stat_updates", lambda *args, **kwargs: None)
-    monkeypatch.setattr("bookforge.runner._apply_durable_updates_or_pause", lambda *args, **kwargs: False)
-    monkeypatch.setattr("bookforge.runner._update_bible", lambda *args, **kwargs: None)
-    monkeypatch.setattr("bookforge.runner._rollup_chapter_summary", lambda *args, **kwargs: None)
-    monkeypatch.setattr("bookforge.runner._compile_chapter_markdown", lambda *args, **kwargs: None)
+    monkeypatch.setattr("bookforge.runner._dispatch_scene_phase_action", _fake_scene_action)
 
     run_loop(workspace=tmp_path, book_id="my_book", steps=1)
 
-    assert planned_calls == [(None, None), (1, 1)]
-    assert executed_cards == [(1, 1)]
+    assert action_calls == [
+        "plan_scene",
+        "preflight_scene_state",
+        "generate_continuity_pack",
+        "write_scene_prose",
+        "state_repair_scene_patch",
+        "lint_scene_prose",
+        "apply_scene_commit",
+    ]
 
     meta_path = book_root / "draft" / "chapters" / "ch_001" / "scene_001.meta.json"
     meta = json.loads(meta_path.read_text(encoding="utf-8"))

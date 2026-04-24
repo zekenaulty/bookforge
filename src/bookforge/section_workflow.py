@@ -16,7 +16,7 @@ from bookforge.pipeline.chapter_seam import finalize_locked_chapter
 from bookforge.phases.outline import context as outline_context
 from bookforge.phases.outline import get_handler
 from bookforge.prompt.renderer import render_template_file
-from bookforge.runner import run_loop
+from bookforge.runner import run_section_range
 from bookforge.supervision import capture_main_branch_snapshot, emit_reconciled_main_branch_contracts
 from bookforge.util.json_extract import extract_json
 
@@ -490,21 +490,6 @@ def _normalize_chapter_scene_graph(
 
     chapter["chapter_status"] = str(chapter.get("chapter_status") or "in_progress").strip() or "in_progress"
     return changed
-
-
-def _ensure_cursor_for_section_run(book_root: Path, chapter_id: int, scene_start: int, scene_end: int) -> None:
-    state_path = book_root / "state.json"
-    if not state_path.exists():
-        return
-    state = _read_json(state_path)
-    cursor = state.get("cursor") if isinstance(state.get("cursor"), dict) else {}
-    current_chapter = _to_int(cursor.get("chapter")) or 0
-    current_scene = _to_int(cursor.get("scene")) or 0
-    if current_chapter == chapter_id and scene_start <= current_scene <= scene_end:
-        return
-    state["cursor"] = {"chapter": chapter_id, "scene": scene_start}
-    state["status"] = "OUTLINED"
-    _write_json(state_path, state)
 
 
 def _section_boundary_path(book_root: Path, chapter_id: int, section_id: int) -> Path:
@@ -1871,12 +1856,13 @@ def advance_section_workflow(
     _, scene_end_text = scene_end_ref.split(":", 1)
     scene_start = int(scene_start_text)
     scene_end = int(scene_end_text)
-    book_root = _book_root(workspace, book_id)
-    _ensure_cursor_for_section_run(book_root, chapter_id, scene_start, scene_end)
-    run_loop(
+    run_section_range(
         workspace=workspace,
         book_id=book_id,
-        until=f"chapter:{chapter_id}:scene:{scene_end}",
+        chapter_id=chapter_id,
+        section_id=section_id,
+        scene_start=scene_start,
+        scene_end=scene_end,
         resume=resume,
         ack_outline_attention_items=ack_outline_attention_items,
         force_outline_gate_bypass=force_outline_gate_bypass,

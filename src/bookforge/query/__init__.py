@@ -9,6 +9,7 @@ from .lineage import (
     materialization_source_for_section,
     resolve_scope_selector,
 )
+from .scene_phase import get_scene_phase_readiness
 from .workflow import WorkflowSnapshot, get_workflow_snapshot
 from .workspace import BranchState, WorkspaceStatus, current_main_node, get_workspace_status
 
@@ -33,4 +34,5 @@ __all__ = [
     "list_character_views",
     "materialization_source_for_section",
     "resolve_scope_selector",
+    "get_scene_phase_readiness",
 ]

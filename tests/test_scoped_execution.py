@@ -166,7 +166,7 @@ def test_resume_paused_section_succeeds_when_live_node_matches(tmp_path: Path, m
     (chapter_dir / "scene_001.md").write_text("Scene prose.", encoding="utf-8")
     (chapter_dir / "scene_001.meta.json").write_text(json.dumps({"ok": True}, ensure_ascii=True, indent=2), encoding="utf-8")
 
-    def _fake_run_loop(*args, **kwargs):
+    def _fake_run_section_range(*args, **kwargs):
         pause_path = book_root / "draft" / "context" / "run_paused.json"
         if pause_path.exists():
             pause_path.unlink()
@@ -183,7 +183,7 @@ def test_resume_paused_section_succeeds_when_live_node_matches(tmp_path: Path, m
             },
         )
 
-    monkeypatch.setattr("bookforge.execution.scoped.run_loop", _fake_run_loop)
+    monkeypatch.setattr("bookforge.execution.scoped.run_section_range", _fake_run_section_range)
 
     request = build_resume_paused_section_request(tmp_path, "my_book")
     result = resume_paused_section(tmp_path, request)
@@ -228,7 +228,7 @@ def test_resume_paused_section_returns_retryable_pause_when_writer_pauses_again(
     def _pause_again(*args, **kwargs):
         raise SystemExit(PAUSE_EXIT_CODE)
 
-    monkeypatch.setattr("bookforge.execution.scoped.run_loop", _pause_again)
+    monkeypatch.setattr("bookforge.execution.scoped.run_section_range", _pause_again)
 
     request = build_resume_paused_section_request(tmp_path, "my_book")
     result = resume_paused_section(tmp_path, request)

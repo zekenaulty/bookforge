@@ -1,0 +1,371 @@
+# 0070 Segment Section-Write Into Scoped Scene Actions
+
+Status: in_progress
+
+## Goal
+- Break the current `section_write` loop into truthful scene-phase execution actions and readiness queries so Nanda can steer write, lint, and repair as a graph of legal skills instead of only invoking section-level or batch wrappers.
+
+## Problem
+- `0060` extracted an honest section-level control surface:
+  - `freeze_section_from_phase03_artifact`
+  - `write_frozen_section`
+  - `resume_paused_section`
+  - `lock_section_from_written_state`
+  - `finalize_chapter_from_locked_sections`
+- That is enough for section-level composition, but it still hides the actual write choreography inside `run_loop`.
+- Today the engine still behaves like this:
+  - decide one section
+  - enter `run_loop`
+  - implicitly run plan -> preflight -> continuity -> write -> state_repair -> lint -> repair -> apply/commit
+  - return only when the whole scene or section segment is done or paused
+- That is too coarse for the next Nanda author loop.
+- The author system needs to be able to ask narrower questions, for example:
+  - can I write prose for this scene right now
+  - what prerequisite artifacts are missing before prose can be generated
+  - can I lint this scene yet
+  - can I repair only the prose without re-running planning
+  - what are my legal next actions from the current scene node
+- The user-facing author pane also needs a truthful capability basis.
+  - The author voice may stay expressive.
+  - The capability claims must come from actual BookForge readiness and execution receipts, not persona improvisation.
+
+## Detailed Work
+- Freeze the first scene-phase action vocabulary for the `section_write` family.
+  - Candidate first slice:
+    - `plan_scene`
+    - `preflight_scene_state`
+    - `generate_continuity_pack`
+    - `write_scene_prose`
+    - `state_repair_scene_patch`
+    - `lint_scene_prose`
+    - `repair_scene_prose`
+    - `apply_scene_commit`
+  - The first pass does not need to expose every micro-helper inside those phases.
+  - The boundary should still be phase-shaped, not internal utility-shaped.
+- Add a scene-phase readiness/query seam.
+  - A caller should be able to ask:
+    - what scene-phase actions are legal for the current node
+    - what prerequisite artifacts are present
+    - what prerequisite artifacts or prior actions are missing
+    - what the recommended next action is
+  - This can be a new contract or an extension of `ExecutionOption.details`, but it must be explicit and machine-usable.
+  - `legal_next_actions(...)` alone is not enough for this slice.
+  - The first implementation must also answer readiness questions about prerequisites, available inputs, present outputs, and mutation scope.
+- Introduce a truthful scene-phase status object.
+  - Minimum information:
+    - current scene scope
+    - current phase artifact availability
+    - whether prose exists
+    - whether lint exists
+    - whether repair exists
+    - whether the scene is committed
+    - missing prerequisites for each action
+    - current pause marker if any
+  - This should be queryable without starting execution.
+- Freeze produced-artifact truth semantics for scene-phase work.
+  - Every produced artifact in this slice must declare one status:
+    - `authoritative`
+    - `provisional`
+    - `derived`
+    - `diagnostic`
+  - The first implementation should not rely on implicit file meaning.
+  - Query surfaces and execution receipts must report artifact status explicitly.
+- Add a produced-artifact receipt surface.
+  - The first slice may implement this as a small new contract or as a typed detail structure carried by `ExecutionResult`.
+  - Minimum information per artifact:
+    - artifact id or stable label
+    - path or logical ref
+    - artifact status
+    - producing node
+    - producing action
+    - whether it is consumable, resumable, replaceable, or diagnostic-only
+- Extract the first pure prose-generation action.
+  - `write_scene_prose` must be callable without automatically triggering lint, repair, or final state commit.
+  - It should return the generated prose and the raw patch/artifact references the write phase already produces.
+  - If prerequisites are missing, it must refuse truthfully and report which prior actions are required.
+- Preserve pause/resume truth at the scene-phase level.
+  - Scene actions must emit enough node detail that a caller can tell:
+    - which scene and phase was active
+    - whether the action completed, paused, or failed
+    - what artifacts were created
+    - what the next legal action is
+- Split `runner.py` by concern before adding more action logic there.
+  - The current file is still too large and mixes:
+    - scene targeting
+    - pause handling
+    - per-phase execution
+    - state application
+    - persistence
+  - The extraction should move toward smaller modules such as:
+    - scene readiness / prerequisite evaluation
+    - scene-phase execution adapters
+    - scene commit/apply helpers
+    - pause + receipt helpers
+- Keep `run_loop` as a wrapper, not the only truthful write engine.
+  - `run_loop` may continue to exist for batch/operator use.
+  - It should progressively become a macro over extracted scene-phase actions instead of the source of truth for phase choreography.
+- Keep BookForge as the authority on skill traversal.
+  - Nanda should not infer "if prose exists then lint is legal" on its own.
+  - BookForge should answer that through legal-next-action and readiness surfaces.
+
+## Surface Refinements
+### Artifact Status Vocabulary
+- `authoritative`
+  - Canonical truth that downstream execution may safely consume.
+- `provisional`
+  - Produced by an execution action but not yet validated or promoted.
+  - May be resumable, replaceable, or discardable depending on the action contract.
+- `derived`
+  - Computed from other artifacts; useful for navigation or prompt context, but not independently canonical.
+- `diagnostic`
+  - Observability or debugging material only; never treated as an execution prerequisite by itself.
+
+### ScenePhaseReadiness
+- The first scene-phase readiness surface should answer, for each candidate action:
+  - whether it is legal now
+  - whether it is ready now
+  - which prerequisites are missing
+  - which inputs are available
+  - which outputs already exist
+  - whether the action would mutate canonical state, provisional state, or only diagnostics
+  - the recommended next action from the current scene node
+  - whether a pause marker or stale prerequisite blocks execution
+- This surface should be book-rooted and coordinate-addressable through `TimelineNodeRef` and `ScopeSelector`.
+- The first slice should prefer one readiness surface with multiple phase rows rather than many disconnected single-purpose booleans.
+
+### Partial Output Rules
+- A scene-phase action may produce useful intermediate output without reaching final scene commit.
+- The first contract rules are:
+  - incomplete but execution-produced scene-phase artifacts are `provisional`
+  - provisional outputs may be resumable or replaceable
+  - readiness must say whether a downstream action may consume a provisional output
+  - diagnostics may reference provisional outputs, but diagnostics do not promote them
+  - no downstream action may silently treat a provisional output as authoritative
+
+### Layered Query Rule
+- Scene/workflow state, appearance state, durable inventory state, continuity state, and thought-signature context must remain projection layers over the same coordinate system.
+- This step should only implement the layers required for the first code slice.
+- It should not pre-build future layer surfaces that are not yet needed.
+
+### Author Capability Grounding
+- The author pane may stay expressive, but it may only claim capabilities that correspond to actions currently reporting ready or legal status through the BookForge readiness/action surfaces.
+- Persona framing may translate capability into voice.
+- Persona framing may not invent tools, diagnostics, or mutation paths that BookForge cannot actually execute.
+
+## Nanda Impact
+- The Observe pane can already render truthful workspace, integrity, and node state.
+- The Author pane needs the next contract layer so it can stay honest while becoming more useful.
+- This step is the BookForge-side prerequisite for a Nanda-side author bus shaped like:
+  - read current `StateSurface`
+  - read scene-phase readiness / legal actions
+  - gather relevant thought signatures and artifact refs
+  - build a structured worker prompt package
+  - execute one narrow worker action
+  - translate the receipt back into author voice without claiming capabilities that are not wired
+- The author pane should not claim generic tools such as "The Forge" or "The Auditor" unless those map to real query or execution surfaces exposed by BookForge.
+- This step should leave Nanda with enough truthful structure to say:
+  - "I can write prose for scene 3 now."
+  - "I cannot lint yet because prose is missing."
+  - "I can inspect continuity state, but I cannot mutate until you choose a legal action."
+
+## Files Likely Touched
+- `src/bookforge/runner.py`
+- `src/bookforge/execution/scoped.py`
+- `src/bookforge/execution/` new scene-action modules
+- `src/bookforge/execution/scene_sequence.py`
+- `src/bookforge/section_workflow.py`
+- `src/bookforge/query/actions.py`
+- `src/bookforge/query/workspace.py`
+- `src/bookforge/query/workflow.py`
+- `src/bookforge/query/` new readiness module if needed
+- `src/bookforge/contracts/execution_option.py`
+- `src/bookforge/contracts/execution_request.py`
+- `src/bookforge/contracts/execution_result.py`
+- `src/bookforge/contracts/` new scene-readiness and produced-artifact contracts if needed
+- `src/bookforge/pipeline/phase_history.py`
+- `src/bookforge/pipeline/run_logging.py`
+- `src/bookforge/cli.py`
+- `docs/help/workflow.md`
+- `docs/help/run.md`
+- `docs/help/index.md`
+
+## Tests
+- Add scene-phase execution tests, for example:
+  - `tests/test_scene_action_execution.py`
+  - `tests/test_scene_action_readiness.py`
+- Add refusal-path tests that prove:
+  - `write_scene_prose` refuses when scene planning or continuity prerequisites are missing
+  - `lint_scene_prose` refuses until prose exists
+  - `repair_scene_prose` refuses until lint or repairable prose exists
+- Add readiness tests that prove:
+  - the readiness surface reports missing prerequisites instead of only blocked actions
+  - artifact statuses are queryable for produced scene-phase outputs
+  - provisional outputs are not silently treated as authoritative
+- Add one progression test that proves a legal-action graph transition such as:
+  - freeze section
+  - discover `plan_scene`
+  - execute `plan_scene`
+  - discover `preflight_scene_state`
+  - execute `preflight_scene_state`
+  - discover `generate_continuity_pack`
+  - execute `generate_continuity_pack`
+  - discover `write_scene_prose`
+  - execute `write_scene_prose`
+  - discover `state_repair_scene_patch`
+  - execute `state_repair_scene_patch`
+  - discover `lint_scene_prose`
+  - execute `lint_scene_prose`
+  - observe `repair_scene_prose` or `apply_scene_commit` become the next reported path based on lint result
+- Add one pause/resume test that proves a paused scene-phase action keeps a truthful phase-level node and can be resumed without silently widening scope.
+- Add one wrapper test that proves `run_loop` or a CLI wrapper can consume the extracted scene-phase actions without changing external behavior.
+
+## Definition Of Done
+- BookForge exposes at least one truthful pure prose action that does not automatically trigger lint, repair, or commit.
+- BookForge exposes a scene-phase readiness surface that tells a caller more than just allowed/blocked.
+- A caller can ask what scene-phase actions are legal next and why blocked actions are blocked.
+- A caller can ask what prerequisite artifacts or prior actions are missing before a selected scene-phase action can run.
+- A caller can tell whether produced scene-phase artifacts are `authoritative`, `provisional`, `derived`, or `diagnostic`.
+- Partial scene-phase outputs have explicit consumable/resumable/replaceable semantics instead of being implied by file presence.
+- Scene-phase actions emit receipts with enough node and artifact detail for scoped resume and author-pane reporting.
+- `run_loop` is no longer the only truthful owner of scene-phase choreography.
+- The extracted scene-phase surface is explicit enough that Nanda can build author responses around actual capabilities instead of persona theater.
+
+## Notes
+- This story is not about exposing internal chain-of-thought.
+- The Nanda-side "author bus" should be understood as a structured context assembly and worker-routing layer, not a request for raw hidden reasoning.
+- The first extracted scene-phase surface should stay narrow and truthful.
+  - Better to expose four or five reliable phase actions than a fake "full autonomous author" surface.
+- This story should prefer phase-shaped actions over one-off internal utility entry points.
+- The first code slice after this refinement should be:
+  - `ScenePhaseReadiness`
+  - `write_scene_prose`
+- Do not turn this refinement into a new doctrine cycle.
+  - The point is to give the next code slice a stable contract, not to spawn another planning branch.
+- First slice landed 2026-04-22 with:
+  - new contract objects:
+    - `ProducedArtifactReceipt`
+    - `ScenePhaseActionReadiness`
+    - `ScenePhaseReadiness`
+  - explicit produced-artifact status vocabulary:
+    - `authoritative`
+    - `provisional`
+    - `derived`
+    - `diagnostic`
+  - `ExecutionResult.produced_artifacts` so scene-phase execution can emit typed artifact receipts instead of hiding them in generic details
+  - a new query surface:
+    - `bookforge.query.get_scene_phase_readiness(...)`
+    - current slice is intentionally limited to the active cursor scene on `main`
+    - current action rows:
+      - `plan_scene`
+      - `preflight_scene_state`
+      - `generate_continuity_pack`
+      - `write_scene_prose`
+  - extracted execution actions:
+    - `build_plan_scene_request(...)`
+    - `plan_scene_action(...)`
+    - `build_preflight_scene_state_request(...)`
+    - `preflight_scene_state(...)`
+    - `build_generate_continuity_pack_request(...)`
+    - `generate_continuity_pack(...)`
+    - `build_write_scene_prose_request(...)`
+    - `write_scene_prose(...)`
+    - `build_state_repair_scene_patch_request(...)`
+    - `state_repair_scene_patch(...)`
+    - `build_lint_scene_prose_request(...)`
+    - `lint_scene_prose(...)`
+    - `build_repair_scene_prose_request(...)`
+    - `repair_scene_prose(...)`
+    - `build_apply_scene_commit_request(...)`
+    - `apply_scene_commit(...)`
+  - public surface exposure for the first slice:
+    - `bookforge workflow scene-readiness`
+    - `bookforge workflow plan-scene`
+    - `bookforge workflow preflight-scene-state`
+    - `bookforge workflow generate-continuity-pack`
+    - `bookforge workflow write-scene-prose`
+    - `bookforge workflow state-repair-scene-patch`
+    - `bookforge workflow lint-scene-prose`
+    - `bookforge workflow repair-scene-prose`
+    - `bookforge workflow apply-scene-commit`
+    - `bookforge workflow legal-actions --scene <s>` now includes extracted scene actions such as `plan_scene`, `preflight_scene_state`, `generate_continuity_pack`, `write_scene_prose`, `state_repair_scene_patch`, `lint_scene_prose`, `repair_scene_prose`, and `apply_scene_commit` when scene scope is selected
+  - guardrails on the continuity-pack slice:
+    - emits the continuity pack as `derived`
+    - applies safe preflight patch materialization only to an in-memory working state
+    - does not mutate `state.json`, character files, durable inventory/state, prose, lint, repair, or commit artifacts
+    - refuses when preflight artifacts imply provisional character or durable mutations that this slice cannot materialize truthfully yet
+  - guardrails on the first write slice:
+    - no implicit prerequisite generation
+    - no automatic lint, repair, or commit
+    - no hidden canonical mutation
+    - refusal when preflight artifacts imply provisional character or durable mutations that this slice cannot materialize truthfully yet
+  - guardrails on the state-repair slice:
+    - emits the corrected state patch as `provisional`
+    - applies safe preflight patch materialization only to an in-memory working state
+    - consumes write prose and write patch, but does not apply the resulting patch to canonical state
+    - does not run lint, prose repair, or commit
+    - refusal when preflight artifacts imply provisional character or durable mutations that this slice cannot materialize truthfully yet
+  - guardrails on the lint slice:
+    - emits the lint report as `provisional` because prose repair consumes it as an execution artifact
+    - applies safe preflight and state-repair patches only to in-memory working states
+    - consumes the latest current prose baseline, which may be `write_prose` or a newer `repair_prose`
+    - requires continuity-pack presence to preserve graph consistency even though lint itself reads prose/state inputs
+    - does not repair prose, rerun state repair, or commit
+    - refusal when preflight artifacts imply provisional character or durable mutations that this slice cannot materialize truthfully yet
+  - guardrails on the repair slice:
+    - emits `repair_prose` and `repair_patch` as `provisional`
+    - consumes the latest current prose baseline plus the latest current failing lint report
+    - does not rerun state repair, lint, or commit implicitly
+    - reopens the readiness graph so `state_repair_scene_patch` becomes the next truthful extracted action
+  - guardrails on the commit slice:
+    - consumes the latest current passing provisional baseline rather than assuming `write_*` is final
+    - mutates canonical state through the real scene apply path:
+      - state patch apply
+      - character/stat updates
+      - appearance refresh when requested
+      - durable apply
+      - scene-file persistence
+      - bible update
+      - chapter rollup/compile on chapter end
+      - cursor advance
+    - emits reconciled main-branch execution results so commit receipts carry `state_change_status` and `canonical_change_status`
+    - exposes authoritative scene artifacts as produced-artifact receipts instead of forcing callers to infer commit success from filesystem side effects
+  - readiness/source-lineage corrections in this slice:
+    - current provisional prose is now resolved from artifact lineage instead of assuming `write_*` remains current forever
+    - stale provisional `state_repair` and `lint` outputs are surfaced as superseded when a newer repair pass exists
+    - passing lint now truthfully recommends `apply_scene_commit`
+  - guardrails on the preflight slice:
+    - emits the preflight patch as `provisional`
+    - does not apply the patch to `state.json`
+    - does not apply character, stat, durable inventory, or deep-state mutations
+    - leaves continuity generation as a separate future scene-phase action
+  - validation completed:
+    - `python -m pytest tests/test_scope_contracts.py tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py -q`
+    - `python -m pytest tests/test_execution_actions.py tests/test_action_discovery.py tests/test_scoped_execution.py tests/test_query_workspace.py -q`
+    - `python -m pytest tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py -q --basetemp .pytest_tmp_0070_repair`
+    - `python -m pytest tests/test_scoped_execution.py tests/test_execution_actions.py tests/test_supervision_emit.py tests/test_query_workspace.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py -q --basetemp .pytest_tmp_0070_repair_regression`
+    - `python -m pytest tests/test_supervision_emit.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py -q`
+    - `python -m pytest tests/test_scene_action_execution.py tests/test_action_discovery.py tests/test_scene_phase_readiness.py tests/test_scoped_execution.py -q`
+    - `python -m pytest tests/test_scope_contracts.py tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py -q`
+    - `python -m pytest tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py -q --basetemp .pytest_tmp_0070_commit`
+    - `python -m pytest tests/test_scope_contracts.py tests/test_execution_actions.py tests/test_scoped_execution.py tests/test_query_workspace.py -q --basetemp .pytest_tmp_0070_commit_regression`
+    - `python -m pytest tests/test_supervision_emit.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py -q --basetemp .pytest_tmp_0070_commit_supervision`
+    - `python -m pytest tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py tests/test_scoped_execution.py -q --basetemp .pytest_tmp_0070_commit_sceneplus`
+    - `python -m pytest tests/test_runner_targeting.py tests/test_scene_action_execution.py tests/test_scene_phase_readiness.py tests/test_action_discovery.py -q --basetemp .pytest_tmp_0070_runner_wrap`
+    - `python -m pytest tests/test_execution_actions.py tests/test_scoped_execution.py tests/test_runner_outline_gate.py -q --basetemp .pytest_tmp_0070_runner_wrap_scoped`
+    - `python -m pytest tests/test_scope_contracts.py tests/test_supervision_emit.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_query_workspace.py tests/test_scoped_execution.py -q --basetemp .pytest_tmp_0070_runner_wrap_regression`
+    - `python -m pytest tests/test_runner_targeting.py tests/test_runner_outline_gate.py tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py tests/test_execution_actions.py tests/test_scoped_execution.py -q --basetemp .pytest_tmp_0070_runner_wrap_full`
+    - `python -m pytest tests/test_execution_actions.py tests/test_scoped_execution.py tests/test_runner_targeting.py tests/test_runner_outline_gate.py -q --basetemp .pytest_tmp_section_range`
+    - `python -m pytest tests/test_scene_phase_readiness.py tests/test_scene_action_execution.py tests/test_action_discovery.py tests/test_execution_actions.py tests/test_scoped_execution.py tests/test_runner_targeting.py tests/test_runner_outline_gate.py -q --basetemp .pytest_tmp_section_range_full`
+    - `python -m pytest tests/test_scope_contracts.py tests/test_supervision_emit.py tests/test_branch_execution.py tests/test_branch_promotion.py tests/test_fork_group_assembly.py tests/test_query_workspace.py tests/test_scoped_execution.py -q --basetemp .pytest_tmp_section_range_regression`
+  - wrapper/macro integration landed in this slice:
+    - `run_loop` now drives scene execution through the extracted scene-phase actions instead of owning an independent monolithic per-scene implementation
+    - the runner keeps the existing outer write gate, style-anchor bootstrap, progress heartbeat, and pause contract while delegating scene work to the scene-action sequence
+    - section-level write wrappers now route through a dedicated `run_section_range(...)` macro instead of parameterizing `run_loop(...)` directly
+    - `run_loop(...)` remains available as the batch/operator macro entry point over the same lower-level scene-phase traversal
+    - the runner-side sequence preserves the existing repair loop and durable-slice expansion policy while passing the expansion hints into extracted scene-phase actions
+    - pause conversion is now explicit:
+      - scene-phase `retryable_pause` results are translated back into the legacy `run_paused.json` surface so scoped resume and workspace observation keep working
+  - known repo-head drift outside this slice:
+    - outline tests currently fail because some dummy test clients do not accept the newer thinking arguments
+    - prompt composition checksum expectations are already stale at head
+    - skilltree artifact tests expect files that are not present in this repo state
