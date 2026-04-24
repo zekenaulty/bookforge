@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 from bookforge.contracts import TimelineNodeRef
-
 from . import _common
 
 
@@ -119,6 +118,26 @@ def _load_emitted_main_node(book_root) -> Optional[TimelineNodeRef]:
         return None
 
 
+def _execution_book_root(book_root, branch_id: str):
+    from bookforge.supervision import paths as supervision_paths
+    resolved_branch_id = str(branch_id or "main").strip() or "main"
+    if resolved_branch_id == "main":
+        return book_root
+    return supervision_paths.branch_snapshot_root(book_root, resolved_branch_id)
+
+
+def _load_branch_node(book_root, branch_id: str) -> Optional[TimelineNodeRef]:
+    if not branch_id or branch_id == "main":
+        return None
+    payload = _common.read_json(_common.branch_current_node_path(book_root, branch_id))
+    if not isinstance(payload, dict):
+        return None
+    try:
+        return TimelineNodeRef.from_dict(payload)
+    except ValueError:
+        return None
+
+
 def _chapter_status_counts(registry: Dict[str, Any]) -> Dict[str, int]:
     counts: Dict[str, int] = {}
     chapters = registry.get("chapters") if isinstance(registry.get("chapters"), list) else []
@@ -173,8 +192,30 @@ def current_main_node(workspace, book_id: str, *, prefer_emitted: bool = True) -
     )
 
 
-def get_section_status(workspace, book_id: str, chapter_id: int, section_id: int) -> Optional[Dict[str, Any]]:
-    registry = _common.load_registry(_common.book_root(workspace, book_id))
+def current_execution_node(
+    workspace,
+    book_id: str,
+    *,
+    branch_id: str = "main",
+    prefer_emitted: bool = True,
+) -> Optional[TimelineNodeRef]:
+    resolved_branch_id = str(branch_id or "main").strip() or "main"
+    if resolved_branch_id == "main":
+        return current_main_node(workspace, book_id, prefer_emitted=prefer_emitted)
+    book_root = _common.book_root(workspace, book_id)
+    return _load_branch_node(book_root, resolved_branch_id)
+
+
+def get_section_status(
+    workspace,
+    book_id: str,
+    chapter_id: int,
+    section_id: int,
+    *,
+    branch_id: str = "main",
+) -> Optional[Dict[str, Any]]:
+    book_root = _common.book_root(workspace, book_id)
+    registry = _common.load_registry(_execution_book_root(book_root, branch_id))
     chapters = registry.get("chapters") if isinstance(registry.get("chapters"), list) else []
     for chapter in chapters:
         if _common.coerce_int(chapter.get("chapter_id")) != int(chapter_id):
@@ -188,18 +229,43 @@ def get_section_status(workspace, book_id: str, chapter_id: int, section_id: int
 
 def get_workspace_status(workspace, book_id: str, *, prefer_emitted: bool = True) -> WorkspaceStatus:
     book_root = _common.book_root(workspace, book_id)
-    state = _common.load_book_state(book_root)
-    registry = _common.load_registry(book_root)
-    _, progress = _common.latest_run_progress(book_root)
-    pause = _common.state_pause_marker(book_root) or _common.latest_outline_pause_marker(book_root)
+    return get_workspace_status_for_branch(
+        workspace,
+        book_id,
+        branch_id="main",
+        prefer_emitted=prefer_emitted,
+    )
+
+
+def get_workspace_status_for_branch(
+    workspace,
+    book_id: str,
+    *,
+    branch_id: str = "main",
+    prefer_emitted: bool = True,
+) -> WorkspaceStatus:
+    book_root = _common.book_root(workspace, book_id)
+    execution_root = _execution_book_root(book_root, branch_id)
+    state = _common.load_book_state(execution_root)
+    registry = _common.load_registry(execution_root)
+    _, progress = _common.latest_run_progress(execution_root)
+    pause = _common.state_pause_marker(execution_root) or _common.latest_outline_pause_marker(execution_root)
     branches = [_load_branch_state(book_root, branch_id) for branch_id in _common.list_branch_ids(book_root)]
+    current_node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=prefer_emitted)
+    source_run_id = _common.first_non_empty(
+        [
+            registry.get("source_run_id"),
+            current_node.source_run_id if current_node is not None else None,
+            _common.latest_outline_run_id(execution_root),
+        ]
+    )
     return WorkspaceStatus(
         book_id=book_id,
         state_status=_common.first_non_empty([state.get("status")]),
         cursor=state.get("cursor") if isinstance(state.get("cursor"), dict) else {},
-        source_run_id=_common.first_non_empty([registry.get("source_run_id"), _common.latest_outline_run_id(book_root)]),
+        source_run_id=source_run_id,
         active_section=registry.get("active_section") if isinstance(registry.get("active_section"), dict) else None,
-        current_node=current_main_node(workspace, book_id, prefer_emitted=prefer_emitted),
+        current_node=current_node,
         pause_marker=pause,
         progress_heartbeat=progress,
         branches=branches,

@@ -19,6 +19,8 @@ Last Updated: 2026-04-23
 - The next pressure after the first execution-surface extraction is segmented write control. Nanda will need truthful scene-phase actions such as "prepare", "write prose", "lint", and "repair" instead of only section-level macros and hidden `run_loop` choreography.
 - The next pressure on the Nanda side is author-surface honesty. The author pane can keep voice, but it cannot claim tools or live state it does not actually receive through BookForge query and execution contracts.
 - The next projection-layer pressure is appearance and setting truth. Character appearance, scene background/setting, and prior-stage planning context must become queryable surfaces instead of hidden prompt side effects.
+- The next execution-root pressure after `0070` is isolated authoring. The engine needs real branch-scoped write roots so old-scene rewrites and recon work can happen off `main`.
+- The next lifecycle pressure after branch-scoped writing is parent-target merge discipline. Scene, section, and chapter branches must be able to promote upward, rebase against newer parent snapshots, and eventually support truthful parallel sibling write work.
 - The current repo already has the right raw materials:
   - section workflow lifecycle
   - immutable outline run artifacts

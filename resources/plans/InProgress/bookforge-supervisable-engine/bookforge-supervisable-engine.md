@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-24T02:54:22Z`
-- Source Document Count: `28`
+- Compiled At (UTC): `2026-04-24T03:52:39Z`
+- Source Document Count: `30`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -22,21 +22,23 @@
 11. `steps/0050-harden-reconciliation-integrity-and-command-surface/step.md`
 12. `steps/0060-extract-minimal-engine-execution-surface-for-nanda/step.md`
 13. `steps/0070-segment-section-write-into-scoped-scene-actions/step.md`
-14. `steps/0075-extract-appearance-setting-and-context-refinement-surfaces/step.md`
-15. `notes/2026-04-21-0010-execution.md`
-16. `notes/2026-04-21-0020-execution.md`
-17. `notes/2026-04-21-0030-execution.md`
-18. `notes/2026-04-21-0040-execution.md`
-19. `notes/2026-04-21-0045-execution.md`
-20. `notes/2026-04-21-0050-execution.md`
-21. `notes/2026-04-22-0050-execution.md`
-22. `notes/2026-04-22-0060-execution.md`
-23. `notes/2026-04-23-0070-commit-slice.md`
-24. `notes/2026-04-23-0070-continuity-pack-slice.md`
-25. `notes/2026-04-23-0070-repair-slice.md`
-26. `notes/2026-04-23-0070-run-loop-wrapper-slice.md`
-27. `notes/2026-04-23-0070-section-wrapper-tightening.md`
-28. `promotion.md`
+14. `steps/0071-make-scene-and-section-write-execution-branch-scoped/step.md`
+15. `steps/0072-add-parent-target-promotion-rebase-and-parallel-fork-write/step.md`
+16. `steps/0075-extract-appearance-setting-and-context-refinement-surfaces/step.md`
+17. `notes/2026-04-21-0010-execution.md`
+18. `notes/2026-04-21-0020-execution.md`
+19. `notes/2026-04-21-0030-execution.md`
+20. `notes/2026-04-21-0040-execution.md`
+21. `notes/2026-04-21-0045-execution.md`
+22. `notes/2026-04-21-0050-execution.md`
+23. `notes/2026-04-22-0050-execution.md`
+24. `notes/2026-04-22-0060-execution.md`
+25. `notes/2026-04-23-0070-commit-slice.md`
+26. `notes/2026-04-23-0070-continuity-pack-slice.md`
+27. `notes/2026-04-23-0070-repair-slice.md`
+28. `notes/2026-04-23-0070-run-loop-wrapper-slice.md`
+29. `notes/2026-04-23-0070-section-wrapper-tightening.md`
+30. `promotion.md`
 
 ---
 
@@ -63,6 +65,8 @@ Last Updated: 2026-04-23
 - The next pressure after the first execution-surface extraction is segmented write control. Nanda will need truthful scene-phase actions such as "prepare", "write prose", "lint", and "repair" instead of only section-level macros and hidden `run_loop` choreography.
 - The next pressure on the Nanda side is author-surface honesty. The author pane can keep voice, but it cannot claim tools or live state it does not actually receive through BookForge query and execution contracts.
 - The next projection-layer pressure is appearance and setting truth. Character appearance, scene background/setting, and prior-stage planning context must become queryable surfaces instead of hidden prompt side effects.
+- The next execution-root pressure after `0070` is isolated authoring. The engine needs real branch-scoped write roots so old-scene rewrites and recon work can happen off `main`.
+- The next lifecycle pressure after branch-scoped writing is parent-target merge discipline. Scene, section, and chapter branches must be able to promote upward, rebase against newer parent snapshots, and eventually support truthful parallel sibling write work.
 - The current repo already has the right raw materials:
   - section workflow lifecycle
   - immutable outline run artifacts
@@ -461,6 +465,8 @@ This plan is ready for promotion only when the target implementation can satisfy
 | 0050-harden-reconciliation-integrity-and-command-surface | completed | 0030, 0040, 0045 | Add post-execution and post-promotion reconciliation, stronger integrity helpers, and help-doc coherence. |
 | 0060-extract-minimal-engine-execution-surface-for-nanda | completed | 0050 | Replace command-only orchestration with a smaller action catalog and legal-next-action API that Nanda can compose. |
 | 0070-segment-section-write-into-scoped-scene-actions | in_progress | 0060 | Turn the hidden `section_write` batch flow into truthful scene-phase actions and readiness queries that Nanda can traverse as an author skill graph. |
+| 0071-make-scene-and-section-write-execution-branch-scoped | pending | 0070 | Move scene and section write execution off `main` into real branch-local execution roots so old-scene rewrites and isolated author work become truthful. |
+| 0072-add-parent-target-promotion-rebase-and-parallel-fork-write | pending | 0071 | Let branch work merge upward into parent branches or `main`, add explicit rebase, and support sibling parallel write branches with validation-gated assembly. |
 | 0075-extract-appearance-setting-and-context-refinement-surfaces | pending | 0070 | Make character appearance, scene background/setting, and prior-stage T1 thought-signature context explicit queryable projection layers instead of incidental prompt side effects. |
 
 ---
@@ -1539,7 +1545,322 @@ Status: in_progress
 
 ---
 
-## Source 14: `steps/0075-extract-appearance-setting-and-context-refinement-surfaces/step.md`
+## Source 14: `steps/0071-make-scene-and-section-write-execution-branch-scoped/step.md`
+
+# 0071 Make Scene And Section Write Execution Branch-Scoped
+
+Status: pending
+
+## Goal
+- Let BookForge run scene-phase and section-range writing inside real derived branches instead of only on `main`, so the author or supervisor can rewrite old scenes, revise prior chapters, and isolate risky authoring work without forcing a full-book rerun.
+
+## Problem
+- `0070` gives us truthful scene-phase actions and a truthful section-range macro on `main`.
+- That is necessary, but it is still single-root execution:
+  - scene readiness is effectively `main` + active cursor only
+  - scene actions are still `main_only`
+  - section wrappers are still `main`-family commands even though they now use a dedicated section-range macro
+- The current branch model is real, but shallow for writing:
+  - branch manifests and branch-local current nodes already exist
+  - branch snapshot roots already exist
+  - rerun-freeze/materialization already exists on branches
+  - promotion/assembly lifecycle already exists
+- What is missing is branch-local writer truth.
+- Today the system cannot truthfully support:
+  - rewrite Chapter 1 Scene 2 while `main` is currently writing Chapter 9 Section 3
+  - run two isolated scene writes in parallel without racing on canonical `main` state
+  - let Nanda treat rewrite/recon work as a branch-scoped author move
+- If we loosen `main` instead of making the writer branch-aware, we will recreate the same chimera class under a different name.
+
+## Detailed Work
+- Introduce an execution-root abstraction for write work.
+  - `main` execution root points at the canonical book root.
+  - derived-branch execution root points at the branch snapshot root.
+  - scene-phase and section-range code must read/write only through that execution root.
+- Make branch snapshots writer-complete.
+  - Branch creation currently copies outline/state projections.
+  - Expand the branch snapshot so it includes the write-side material a branch-scoped writer actually needs, such as:
+    - `draft/chapters`
+    - `draft/context`
+    - phase-history content required for scene-phase reuse or resume
+    - branch-local continuity/style anchor surfaces as needed
+  - Keep the copied surface minimal but sufficient for truthful write execution.
+- Generalize scene-phase readiness to branch scope.
+  - `ScenePhaseReadiness` must resolve against:
+    - `main`
+    - or a derived branch selected through `ScopeSelector.branch_id`
+  - It must stop assuming the active cursor scene on `main` is the only legal scene-phase target.
+  - In a derived branch, the active cursor and active section come from the branch snapshot, not canonical `main`.
+- Generalize scene-phase execution to branch scope.
+  - Scene-phase request builders and executors must support derived branch execution.
+  - Expected-node validation must compare against the branch-local current node, not `main`.
+  - Produced-artifact receipts must be emitted to the branch-local supervision surface.
+  - Scene actions should still refuse stale or mismatched lineage truthfully.
+- Generalize section-range execution to branch scope.
+  - `run_section_range(...)` should accept an execution root / branch selector.
+  - A branch-local section-range run should:
+    - use branch-local cursor truth
+    - emit branch-local pause markers and execution receipts
+    - not mutate canonical `main`
+- Preserve strict `main` semantics.
+  - `main` remains the canonical single-writer path.
+  - Branch-scoped execution is the truthful route for:
+    - off-cursor rewrite
+    - recon work
+    - parallel sibling write work
+    - risky repair exploration
+- Add branch-scoped write entry points.
+  - Candidate first execution surfaces:
+    - branch-scoped `scene-readiness`
+    - branch-scoped `plan_scene`
+    - branch-scoped `write_scene_prose`
+    - branch-scoped `repair_scene_prose`
+    - branch-scoped `apply_scene_commit`
+    - branch-scoped section-range execution
+  - Keep the first slice narrow. We do not need to expose every scene action in the first branch-aware pass if write/repair/commit prove the root.
+- Keep branch writes isolated.
+  - Branch-scoped execution must never mutate canonical state or canonical files directly.
+  - All write outputs, receipts, pause markers, and current-node movement must stay branch-local until promotion.
+
+## Surface Refinements
+### Execution Root Rule
+- Any write-capable action must execute against a resolved execution root.
+- The root is determined by:
+  - `main` branch => canonical book root
+  - derived branch => branch snapshot root
+- Query surfaces and execution surfaces must agree on the same root for one action request.
+
+### Branch-Scoped Readiness
+- A caller should be able to ask:
+  - what is the current scene/section cursor inside branch `X`
+  - what scene-phase actions are legal there
+  - whether a historical scene is writable inside that branch even when `main` is elsewhere
+  - what artifacts already exist inside the branch
+  - whether the branch is stale relative to its parent snapshot
+
+### Branch-Scoped Receipts
+- Scene-phase and section-range receipts inside a branch must:
+  - carry the branch-local `TimelineNodeRef`
+  - write to branch-local supervision paths
+  - declare artifact status using the shared vocabulary
+  - never imply canonical mutation until promotion
+
+## Nanda Impact
+- This step is what turns "rewrite an older scene" from a hand-wavy future capability into a truthful engine-owned path.
+- Nanda should eventually be able to:
+  - inspect `main`
+  - choose an old scene or section
+  - create an isolated branch for rewrite
+  - ask branch-local readiness questions
+  - run branch-local scene or section write work
+  - compare branch-local results without touching `main`
+- This is also the prerequisite for honest author-side parallelism.
+
+## Files Likely Touched
+- `src/bookforge/runner.py`
+- `src/bookforge/execution/scene_actions.py`
+- `src/bookforge/execution/scene_sequence.py`
+- `src/bookforge/execution/scoped.py`
+- `src/bookforge/query/scene_phase.py`
+- `src/bookforge/query/actions.py`
+- `src/bookforge/query/lineage.py`
+- `src/bookforge/query/workspace.py`
+- `src/bookforge/branching_store.py`
+- `src/bookforge/branching_fork.py`
+- `src/bookforge/branching_execution.py`
+- `src/bookforge/execution/branch_actions.py`
+- `src/bookforge/contracts/`
+- `docs/help/workflow.md`
+- `docs/help/run.md`
+- `docs/help/index.md`
+
+## Tests
+- Add branch-scoped writer tests, for example:
+  - `tests/test_branch_scene_phase_readiness.py`
+  - `tests/test_branch_scene_action_execution.py`
+  - `tests/test_branch_section_range_execution.py`
+- Required behavior coverage:
+  - create a branch from canonical state and run scene readiness against a historical scene while `main` is elsewhere
+  - branch-scoped scene execution writes only into the branch snapshot
+  - branch-scoped section-range execution can pause and resume without mutating `main`
+  - branch-scoped commit produces authoritative artifacts inside the branch snapshot only
+  - stale branch parent or stale expected node is detected truthfully
+  - `main` remains unchanged after branch-local scene or section execution
+
+## Definition Of Done
+- A derived branch can resolve its own active cursor and scene-phase readiness without consulting canonical `main` cursor truth.
+- A derived branch can execute at least one real scene-phase write path and one real section-range write path.
+- A historical scene can be rewritten inside a branch even when `main` is currently writing a different chapter/section.
+- Branch-local writer execution emits branch-local receipts, pause markers, and produced-artifact records.
+- Canonical `main` state remains unchanged until explicit promotion.
+- Truthful refusal surfaces exist for stale parent lineage, stale expected node, or invalid branch scope.
+
+## Notes
+- This step is about isolated authoring roots, not merge semantics.
+- It intentionally stops short of:
+  - parent-target promotion
+  - rebase
+  - parallel sibling assembly
+- Those belong in the next step because they change merge and lifecycle contracts.
+
+---
+
+## Source 15: `steps/0072-add-parent-target-promotion-rebase-and-parallel-fork-write/step.md`
+
+# 0072 Add Parent-Target Promotion, Rebase, And Parallel Fork Write
+
+Status: pending
+
+## Goal
+- Extend the branch model so write-capable branches can merge upward into their parent branch or `main`, support explicit rebase against newer parent snapshots, and enable truthful sibling parallel write execution through fork groups and validation-gated assembly.
+
+## Problem
+- `0071` gives us isolated branch-local writer execution roots.
+- That is not enough for real authoring workflows.
+- The user expectations here are stronger:
+  - chapter branches should be able to contain section sub-branches
+  - section branches should be able to contain scene branches
+  - a scene rewrite branch should be able to promote back into its section parent, not only `main`
+  - branches will eventually need incoming changes from their parent
+  - some writing work will run in parallel
+- The current branch lifecycle is still too narrow:
+  - promotion targets `main`
+  - branch creation copies from canonical `main`
+  - fork-group assembly exists conceptually, but not yet for writer-side branch content
+  - rebase does not exist as an explicit supervised capability
+- If we do not add parent-target promotion and explicit rebase, nested author branches become dead ends.
+- If we allow parallel write branches without a real fork-group assembly/validation discipline, we will recreate hidden race conditions and semantic merge drift.
+
+## Detailed Work
+- Generalize branch creation so a branch may derive from a parent branch snapshot, not only canonical `main`.
+  - Parent lineage must remain explicit in `BranchManifest`.
+  - Branch creation must refuse stale parent snapshots truthfully.
+- Add parent-target promotion.
+  - Promotion target must be explicit:
+    - branch -> parent branch
+    - branch -> `main`
+  - Promotion should copy validated branch-local state into the target execution root, not assume `main` as the only destination.
+  - Receipts must make the target branch explicit.
+- Add explicit rebase.
+  - Rebase should be an explicit supervised operation, not a silent background mutation.
+  - First safe version:
+    - detect stale parent snapshot
+    - create a refreshed child branch from the newer parent snapshot
+    - replay or transplant the scoped branch-local work in a controlled way
+    - mark the old branch stale or discarded
+  - Do not start with hidden in-place semantic merge.
+- Add nested branch hierarchy semantics without hardcoding one topology.
+  - Chapter, section, and scene branches are good default roles.
+  - The contract should still allow other scoped branch shapes.
+  - Parent-child lineage must stay the real source of truth.
+- Add write-capable fork-group siblings.
+  - Sibling write branches must:
+    - share the same parent snapshot revision
+    - remain isolated from each other during execution
+    - not read sibling outputs mid-run
+  - This is the truthful basis for parallel scene or section writing.
+- Add writer-side assembly.
+  - Sibling branch results must be assembled off-parent, not directly on `main` or the parent branch.
+  - Assembly should happen on an assembly branch derived from the shared parent snapshot.
+  - Validation must run there before upward promotion.
+- Add merge validation for write branches.
+  - The first validation pass should focus on merge-level risks such as:
+    - stale parent mismatch
+    - sibling lineage mismatch
+    - branch/fork contamination
+    - seam or continuity validation required before promotion
+  - Keep semantic prose merge narrow and explicit. Do not promise automatic perfect prose reconciliation.
+
+## Surface Refinements
+### Parent-Target Promotion
+- Promotion must carry:
+  - `source_branch_id`
+  - `target_branch_id`
+  - `merge_operation`
+  - parent snapshot revision
+  - validation status at time of promotion
+- The execution result must make it clear whether canonical `main` changed or only an intermediate parent branch changed.
+
+### Rebase
+- Rebase must be a first-class supervised lifecycle action.
+- The first safe contract should answer:
+  - what parent revision the branch was created from
+  - what parent revision is now current
+  - whether the branch is stale
+  - whether a refreshed child branch was created
+  - what happened to the previous branch
+- Rebase must not silently overwrite the old branch's recorded history.
+
+### Parallel Fork Write
+- Fork groups must support writer branches, not only outline/materialization branches.
+- Required invariants:
+  - siblings share one parent snapshot
+  - siblings do not read each other during execution
+  - assembly happens off-parent
+  - upward promotion requires explicit validation status
+
+## Nanda Impact
+- This step is what makes multi-level author work practical.
+- Nanda should eventually be able to:
+  - create a chapter branch
+  - create a section branch under it
+  - create a scene rewrite branch under that
+  - promote upward one layer at a time
+  - detect stale parent state and request rebase
+  - launch sibling branches for parallel write work
+  - inspect assembly and promotion status without reading raw files
+- This is also the step that makes future MCP-style execution skills coherent, because the agent can treat branch creation, branch write, rebase, assembly, and promotion as explicit capabilities rather than hidden recovery rituals.
+
+## Files Likely Touched
+- `src/bookforge/contracts/branch_manifest.py`
+- `src/bookforge/contracts/timeline_node.py`
+- `src/bookforge/contracts/scope_selector.py`
+- `src/bookforge/branching_store.py`
+- `src/bookforge/branching_fork.py`
+- `src/bookforge/branching_lifecycle.py`
+- `src/bookforge/branching_execution.py`
+- `src/bookforge/execution/branch_actions.py`
+- `src/bookforge/query/lineage.py`
+- `src/bookforge/query/integrity.py`
+- `src/bookforge/query/workspace.py`
+- `src/bookforge/query/actions.py`
+- `docs/help/workflow.md`
+- `docs/help/index.md`
+
+## Tests
+- Add nested-branch and rebase tests, for example:
+  - `tests/test_branch_parent_target_promotion.py`
+  - `tests/test_branch_rebase.py`
+  - `tests/test_parallel_fork_write.py`
+- Required behavior coverage:
+  - create a chapter branch from `main`, then section branch from chapter branch, then scene branch from section branch
+  - promote a scene branch into its section parent without mutating `main`
+  - promote a section branch into its chapter parent without mutating `main`
+  - detect stale parent revision when a parent branch advances
+  - perform explicit rebase or refreshed-child creation
+  - create sibling writer branches in one fork group and refuse sibling reads during execution
+  - assemble sibling results on an assembly branch before promotion
+  - refuse promotion when validation has not passed
+
+## Definition Of Done
+- A branch may be created from a parent branch snapshot, not only from canonical `main`.
+- A branch may promote into its parent branch or into `main`, with truthful receipts for the actual target.
+- Stale parent snapshots are detected and surfaced as a real lifecycle/integrity condition.
+- An explicit rebase capability exists and does not silently overwrite existing branch history.
+- Sibling writer branches can execute in parallel under one fork group without shared-state mutation.
+- Assembly and promotion remain validation-gated and off-parent until approved.
+
+## Notes
+- This step is where branch hierarchy becomes operational, not just conceptual.
+- The first implementation should stay conservative:
+  - explicit actions
+  - explicit validation
+  - no hidden semantic prose merge promises
+- Automatic prose-level reconciliation may exist later, but this step should first make the isolation, lineage, and merge surfaces truthful.
+
+---
+
+## Source 16: `steps/0075-extract-appearance-setting-and-context-refinement-surfaces/step.md`
 
 # 0075 Extract Appearance, Setting, And Context Refinement Surfaces
 
@@ -1755,7 +2076,7 @@ Status: pending
 
 ---
 
-## Source 15: `notes/2026-04-21-0010-execution.md`
+## Source 17: `notes/2026-04-21-0010-execution.md`
 
 # 0010 Execution Note
 
@@ -1795,7 +2116,7 @@ Notes
 
 ---
 
-## Source 16: `notes/2026-04-21-0020-execution.md`
+## Source 18: `notes/2026-04-21-0020-execution.md`
 
 # 0020 Execution Note
 
@@ -1843,7 +2164,7 @@ Notes
 
 ---
 
-## Source 17: `notes/2026-04-21-0030-execution.md`
+## Source 19: `notes/2026-04-21-0030-execution.md`
 
 # 0030 Execution Note
 
@@ -1899,7 +2220,7 @@ Notes
 
 ---
 
-## Source 18: `notes/2026-04-21-0040-execution.md`
+## Source 20: `notes/2026-04-21-0040-execution.md`
 
 # 0040 Execution Note
 
@@ -1950,7 +2271,7 @@ Notes
 
 ---
 
-## Source 19: `notes/2026-04-21-0045-execution.md`
+## Source 21: `notes/2026-04-21-0045-execution.md`
 
 # 0045 Execution Note
 
@@ -2008,7 +2329,7 @@ Notes
 
 ---
 
-## Source 20: `notes/2026-04-21-0050-execution.md`
+## Source 22: `notes/2026-04-21-0050-execution.md`
 
 # 0050 Execution Note
 
@@ -2072,7 +2393,7 @@ Notes
 
 ---
 
-## Source 21: `notes/2026-04-22-0050-execution.md`
+## Source 23: `notes/2026-04-22-0050-execution.md`
 
 # 0050 Execution Note
 
@@ -2131,7 +2452,7 @@ Notes
 
 ---
 
-## Source 22: `notes/2026-04-22-0060-execution.md`
+## Source 24: `notes/2026-04-22-0060-execution.md`
 
 # 0060 Execution Note
 
@@ -2289,7 +2610,7 @@ Notes
 
 ---
 
-## Source 23: `notes/2026-04-23-0070-commit-slice.md`
+## Source 25: `notes/2026-04-23-0070-commit-slice.md`
 
 ## 2026-04-23 - 0070 commit slice
 
@@ -2358,7 +2679,7 @@ Notes
 
 ---
 
-## Source 24: `notes/2026-04-23-0070-continuity-pack-slice.md`
+## Source 26: `notes/2026-04-23-0070-continuity-pack-slice.md`
 
 # 0070 Continuity-Pack Slice Execution Note
 
@@ -2469,7 +2790,7 @@ Notes
 
 ---
 
-## Source 25: `notes/2026-04-23-0070-repair-slice.md`
+## Source 27: `notes/2026-04-23-0070-repair-slice.md`
 
 ## 2026-04-23 - 0070 repair slice
 
@@ -2528,7 +2849,7 @@ Notes
 
 ---
 
-## Source 26: `notes/2026-04-23-0070-run-loop-wrapper-slice.md`
+## Source 28: `notes/2026-04-23-0070-run-loop-wrapper-slice.md`
 
 # 2026-04-23 0070 Run-Loop Wrapper Slice
 
@@ -2580,7 +2901,7 @@ Notes
 
 ---
 
-## Source 27: `notes/2026-04-23-0070-section-wrapper-tightening.md`
+## Source 29: `notes/2026-04-23-0070-section-wrapper-tightening.md`
 
 # 2026-04-23 0070 Section Wrapper Tightening
 
@@ -2629,7 +2950,7 @@ Notes
 
 ---
 
-## Source 28: `promotion.md`
+## Source 30: `promotion.md`
 
 # Promotion
 
