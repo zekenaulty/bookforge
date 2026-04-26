@@ -58,7 +58,14 @@ from bookforge.outline import (
 )
 from bookforge.runner import run_loop
 from bookforge.characters import generate_characters
-from bookforge.query import get_scene_phase_readiness, list_execution_options
+from bookforge.query import (
+    get_outline_lineage_audit,
+    get_outline_repair_candidates,
+    get_scene_phase_readiness,
+    get_section_lineage_matrix,
+    get_stale_outline_artifact_inventory,
+    list_execution_options,
+)
 from bookforge.contracts import ScopeSelector
 from bookforge.workspace import init_book_workspace, parse_genre, parse_targets, reset_book_workspace_detailed, update_book_templates
 from bookforge.llm.thoughts import format_thought_response, list_signatures, run_current_thoughts
@@ -474,6 +481,124 @@ def _workflow_legal_actions(args: argparse.Namespace) -> int:
         if option.refusal_reason:
             sys.stdout.write(f"  refusal_reason={option.refusal_reason}\n")
     return 0
+
+
+def _write_json_or_text(args: argparse.Namespace, payload, render_text) -> int:
+    if getattr(args, "json", False):
+        if hasattr(payload, "to_dict"):
+            payload = payload.to_dict()
+        elif isinstance(payload, list):
+            payload = [item.to_dict() if hasattr(item, "to_dict") else item for item in payload]
+        sys.stdout.write(json.dumps(payload, ensure_ascii=True, indent=2) + "\n")
+        return 0
+    render_text(payload)
+    return 0
+
+
+def _workflow_outline_lineage_audit(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        audit = get_outline_lineage_audit(workspace, args.book, branch_id=args.branch_id)
+    except Exception as exc:
+        sys.stderr.write(f"Workflow outline-lineage-audit failed: {exc}\n")
+        return 1
+
+    def render(audit) -> None:
+        sys.stdout.write(f"Book: {audit.book_id}\n")
+        sys.stdout.write(f"Lineage status: {audit.status}\n")
+        sys.stdout.write(f"Declared source run: {audit.declared_source_run_id}\n")
+        sys.stdout.write(f"Latest outline run: {audit.latest_outline_run_id}\n")
+        sys.stdout.write(f"First technical divergence: {audit.first_technical_divergence}\n")
+        sys.stdout.write(f"First visible story divergence: {audit.first_visible_story_divergence}\n")
+        sys.stdout.write(f"Affected sections: {len(audit.affected_sections)}\n")
+        for row in audit.affected_sections[:25]:
+            sys.stdout.write(
+                f"- ch{row.chapter_id:03d} sec{row.section_id:03d}: "
+                f"{row.suspected_contamination_class}; next={row.recommended_safe_next_action}; "
+                f"diffs={', '.join(row.differing_fields[:5]) or 'none'}\n"
+            )
+        if len(audit.affected_sections) > 25:
+            sys.stdout.write(f"... {len(audit.affected_sections) - 25} more affected section(s)\n")
+        sys.stdout.write("Repair candidates:\n")
+        for candidate in audit.repair_candidates:
+            status = "blocked" if candidate.blocked else "available"
+            sys.stdout.write(f"- {candidate.action} [{status}]: {candidate.summary}\n")
+
+    return _write_json_or_text(args, audit, render)
+
+
+def _workflow_section_lineage_matrix(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        rows = get_section_lineage_matrix(
+            workspace,
+            args.book,
+            branch_id=args.branch_id,
+            chapter_id=args.chapter,
+            section_id=args.section,
+        )
+    except Exception as exc:
+        sys.stderr.write(f"Workflow section-lineage-matrix failed: {exc}\n")
+        return 1
+
+    def render(rows) -> None:
+        sys.stdout.write(f"Book: {args.book}\n")
+        sys.stdout.write(f"Rows: {len(rows)}\n")
+        for row in rows:
+            sys.stdout.write(
+                f"- ch{row.chapter_id:03d} sec{row.section_id:03d} {row.section_title or ''}: "
+                f"{row.suspected_contamination_class}; scenes={row.scene_count_delta or 'aligned'}; "
+                f"chars={'; '.join(row.character_cohort_delta) or 'aligned'}; "
+                f"next={row.recommended_safe_next_action}\n"
+            )
+
+    return _write_json_or_text(args, rows, render)
+
+
+def _workflow_stale_outline_artifacts(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        artifacts = get_stale_outline_artifact_inventory(workspace, args.book, branch_id=args.branch_id)
+    except Exception as exc:
+        sys.stderr.write(f"Workflow stale-outline-artifacts failed: {exc}\n")
+        return 1
+
+    def render(artifacts) -> None:
+        sys.stdout.write(f"Book: {args.book}\n")
+        sys.stdout.write(f"Artifacts: {len(artifacts)}\n")
+        for artifact in artifacts:
+            scope = ""
+            if artifact.chapter_id is not None:
+                scope = f" ch{artifact.chapter_id:03d}"
+                if artifact.section_id is not None:
+                    scope += f" sec{artifact.section_id:03d}"
+            sys.stdout.write(
+                f"- {artifact.path}{scope}: {artifact.artifact_family} "
+                f"class={artifact.artifact_class} safe={artifact.safe_to_consume_as_canonical}\n"
+            )
+
+    return _write_json_or_text(args, artifacts, render)
+
+
+def _workflow_outline_repair_candidates(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        candidates = get_outline_repair_candidates(workspace, args.book, branch_id=args.branch_id)
+    except Exception as exc:
+        sys.stderr.write(f"Workflow outline-repair-candidates failed: {exc}\n")
+        return 1
+
+    def render(candidates) -> None:
+        sys.stdout.write(f"Book: {args.book}\n")
+        for candidate in candidates:
+            status = "blocked" if candidate.blocked else "available"
+            sys.stdout.write(
+                f"- {candidate.action} [{status}] risk={candidate.risk_level} "
+                f"human={candidate.requires_human_decision}: {candidate.summary}\n"
+            )
+            sys.stdout.write(f"  reason={candidate.reason}\n")
+
+    return _write_json_or_text(args, candidates, render)
 
 
 def _workflow_scene_readiness(args: argparse.Namespace) -> int:
@@ -1562,6 +1687,44 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_legal.add_argument("--section", type=int, help="Optional section scope.")
     workflow_legal.add_argument("--scene", type=int, help="Optional scene scope.")
     workflow_legal.set_defaults(func=_workflow_legal_actions)
+
+    workflow_lineage_audit = workflow_sub.add_parser(
+        "outline-lineage-audit",
+        help="Show read-only outline lineage audit evidence for a book.",
+    )
+    workflow_lineage_audit.add_argument("--book", required=True, help="Book id.")
+    workflow_lineage_audit.add_argument("--branch-id", default="main", help="Optional branch scope; defaults to main.")
+    workflow_lineage_audit.add_argument("--json", action="store_true", help="Emit the full audit as JSON.")
+    workflow_lineage_audit.set_defaults(func=_workflow_outline_lineage_audit)
+
+    workflow_lineage_matrix = workflow_sub.add_parser(
+        "section-lineage-matrix",
+        help="Show section-level outline lineage comparisons.",
+    )
+    workflow_lineage_matrix.add_argument("--book", required=True, help="Book id.")
+    workflow_lineage_matrix.add_argument("--branch-id", default="main", help="Optional branch scope; defaults to main.")
+    workflow_lineage_matrix.add_argument("--chapter", type=int, help="Optional chapter scope.")
+    workflow_lineage_matrix.add_argument("--section", type=int, help="Optional section scope.")
+    workflow_lineage_matrix.add_argument("--json", action="store_true", help="Emit matrix rows as JSON.")
+    workflow_lineage_matrix.set_defaults(func=_workflow_section_lineage_matrix)
+
+    workflow_stale_artifacts = workflow_sub.add_parser(
+        "stale-outline-artifacts",
+        help="Show outline artifacts that need explicit lineage treatment.",
+    )
+    workflow_stale_artifacts.add_argument("--book", required=True, help="Book id.")
+    workflow_stale_artifacts.add_argument("--branch-id", default="main", help="Optional branch scope; defaults to main.")
+    workflow_stale_artifacts.add_argument("--json", action="store_true", help="Emit artifact inventory as JSON.")
+    workflow_stale_artifacts.set_defaults(func=_workflow_stale_outline_artifacts)
+
+    workflow_repair_candidates = workflow_sub.add_parser(
+        "outline-repair-candidates",
+        help="Show non-mutating outline recovery candidates for a contaminated book.",
+    )
+    workflow_repair_candidates.add_argument("--book", required=True, help="Book id.")
+    workflow_repair_candidates.add_argument("--branch-id", default="main", help="Optional branch scope; defaults to main.")
+    workflow_repair_candidates.add_argument("--json", action="store_true", help="Emit repair candidates as JSON.")
+    workflow_repair_candidates.set_defaults(func=_workflow_outline_repair_candidates)
 
     workflow_create_branch = workflow_sub.add_parser(
         "create-branch",

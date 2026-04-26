@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Dict, List, Optional
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
 
 from bookforge.contracts import BranchManifest
 
 from . import _common
 from .lineage import materialization_source_for_section
+from .outline_lineage import get_outline_lineage_audit
 from .workspace import current_main_node, get_workspace_status
 
 
@@ -15,6 +16,7 @@ class IntegrityIssue:
     code: str
     severity: str
     message: str
+    details: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -160,37 +162,33 @@ def get_integrity_verdict(workspace, book_id: str, *, prefer_emitted: bool = Tru
             break
         seen_names[normalized] = str(character.get("character_id") or "").strip()
 
-    source_outline = _source_outline_payload(book_root, source_run_id or latest_run_id)
-    if source_outline:
-        for chapter in chapters:
-            chapter_id = _common.coerce_int(chapter.get("chapter_id"))
-            sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
-            for section in sections:
-                section_id = _common.coerce_int(section.get("section_id"))
-                section_status = str(section.get("status") or "").strip().lower()
-                if chapter_id is None or section_id is None or section_status not in {"frozen", "locked"}:
-                    continue
-                source_section = _find_section(source_outline, chapter_id, section_id)
-                if not isinstance(source_section, dict):
-                    issues.append(
-                        IntegrityIssue(
-                            code="overscoped_recovery",
-                            severity="high",
-                            message=f"Materialized section {chapter_id}:{section_id} is missing from declared source run {source_run_id or latest_run_id}.",
-                        )
-                    )
-                    break
-                if _normalize_section_for_compare(section) != _normalize_section_for_compare(source_section):
-                    issues.append(
-                        IntegrityIssue(
-                            code="overscoped_recovery",
-                            severity="high",
-                            message=f"Materialized section {chapter_id}:{section_id} no longer matches declared source run {source_run_id or latest_run_id}.",
-                        )
-                    )
-                    break
-            if any(issue.code == "overscoped_recovery" for issue in issues):
-                break
+    lineage_audit = get_outline_lineage_audit(workspace, book_id)
+    affected_rows = lineage_audit.affected_sections
+    if affected_rows:
+        affected_scopes = [
+            {"chapter_id": row.chapter_id, "section_id": row.section_id, "class": row.suspected_contamination_class}
+            for row in affected_rows
+        ]
+        issues.append(
+            IntegrityIssue(
+                code="overscoped_recovery",
+                severity="high",
+                message=(
+                    "Outline lineage audit found materialized sections that disagree with the declared source "
+                    f"lineage across {len(affected_rows)} section(s)."
+                ),
+                details={
+                    "affected_scopes": affected_scopes,
+                    "first_technical_divergence": lineage_audit.first_technical_divergence,
+                    "first_visible_story_divergence": lineage_audit.first_visible_story_divergence,
+                    "character_cohort_conflicts": lineage_audit.character_cohort_conflicts,
+                    "recommended_safe_next_actions": [
+                        candidate.action for candidate in lineage_audit.repair_candidates if not candidate.blocked
+                    ],
+                    "blocked_actions": lineage_audit.blocked_actions,
+                },
+            )
+        )
 
     fork_groups: Dict[str, list[BranchManifest]] = {}
     for branch_id in _common.list_branch_ids(book_root):

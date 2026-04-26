@@ -3,7 +3,7 @@
 Status: In Progress
 Stage: InProgress
 Owner: BookForge engine workstream
-Last Updated: 2026-04-23
+Last Updated: 2026-04-26
 
 ## Objective
 - Make BookForge truthful and supervisable by Nanda without moving prose generation or canonical state mutation out of BookForge.
@@ -21,6 +21,7 @@ Last Updated: 2026-04-23
 - The next projection-layer pressure is appearance and setting truth. Character appearance, scene background/setting, and prior-stage planning context must become queryable surfaces instead of hidden prompt side effects.
 - The next execution-root pressure after `0070` is isolated authoring. The engine needs real branch-scoped write roots so old-scene rewrites and recon work can happen off `main`.
 - The next lifecycle pressure after branch-scoped writing is parent-target merge discipline. Scene, section, and chapter branches must be able to promote upward, rebase against newer parent snapshots, and eventually support truthful parallel sibling write work.
+- The next safety pressure after branch-scoped authoring is localized lineage diagnosis. `chimera_risk` is not operational enough by itself; Nanda needs section-level evidence, artifact-family disagreement, and safe recovery candidates before it can supervise contaminated books without relying on the human operator as the safety catch.
 - The current repo already has the right raw materials:
   - section workflow lifecycle
   - immutable outline run artifacts
@@ -84,6 +85,19 @@ Last Updated: 2026-04-23
   - scene background and setting projection state
   are projection layers over the same book-rooted coordinate system, not separate truth systems.
 - All projection layers must stay addressable by the same `TimelineNodeRef` and `ScopeSelector` vocabulary.
+
+### Lineage Audit Surfaces
+- Integrity verdicts must be actionable, not only global.
+- When BookForge detects mixed lineage, overscoped recovery, stale section drafts, or mutable-source materialization, it must expose enough structured evidence for Nanda to answer:
+  - which chapter/section scopes are affected
+  - which artifact families disagree
+  - where the first technical divergence starts
+  - where the first reader-visible story splice appears if detectable from structured artifacts
+  - which candidate source lineages are coherent enough to inspect
+  - which repair actions are blocked until a human chooses a recovery anchor
+- The first lineage-audit surface is read-only.
+- Repair mutation must remain a later explicit action with branch isolation, receipts, backup/quarantine semantics, and validation gates.
+- Until a lineage matrix exists for a contaminated book, Nanda may report the global risk and missing evidence, but it must not claim exact repair scope.
 
 ### TimelineNodeRef
 - Every execution point gets a coordinate.

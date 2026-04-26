@@ -10,6 +10,17 @@ from .lineage import (
     materialization_source_for_section,
     resolve_scope_selector,
 )
+from .outline_lineage import (
+    OutlineArtifactObservation,
+    OutlineLineageAudit,
+    OutlineRepairCandidate,
+    SectionLineageRow,
+    StaleOutlineArtifact,
+    get_outline_lineage_audit,
+    get_outline_repair_candidates,
+    get_section_lineage_matrix,
+    get_stale_outline_artifact_inventory,
+)
 from .scene_phase import get_scene_phase_readiness
 from .scene_context import SceneContextProjectionView, get_scene_context_projection
 from .setting import SceneSettingProjectionView, get_scene_setting_projection
@@ -32,8 +43,13 @@ __all__ = [
     "ContinuityView",
     "IntegrityIssue",
     "IntegrityVerdict",
+    "OutlineArtifactObservation",
+    "OutlineLineageAudit",
+    "OutlineRepairCandidate",
     "SceneSettingProjectionView",
     "SceneContextProjectionView",
+    "SectionLineageRow",
+    "StaleOutlineArtifact",
     "ThoughtContextProjectionView",
     "legal_next_actions",
     "list_execution_options",
@@ -47,9 +63,13 @@ __all__ = [
     "get_continuity_view",
     "get_frozen_chapter_projection",
     "get_integrity_verdict",
+    "get_outline_lineage_audit",
+    "get_outline_repair_candidates",
     "get_section_draft_lineage",
+    "get_section_lineage_matrix",
     "get_source_run",
     "get_section_status",
+    "get_stale_outline_artifact_inventory",
     "get_workflow_snapshot",
     "get_workspace_status",
     "get_workspace_status_for_branch",

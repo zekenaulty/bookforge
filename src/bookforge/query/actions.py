@@ -7,6 +7,7 @@ from bookforge.pipeline.scene_phase_artifacts import load_scene_phase_artifact_s
 
 from . import _common
 from .appearance import list_appearance_projection_views
+from .outline_lineage import get_outline_lineage_audit
 from .scene_phase import get_scene_phase_readiness
 from .setting import get_scene_setting_projection
 from .workspace import current_execution_node, current_main_node, get_section_status, get_workspace_status, get_workspace_status_for_branch
@@ -14,6 +15,69 @@ from .workspace import current_execution_node, current_main_node, get_section_st
 
 def _resolved_branch_id(selector: ScopeSelector) -> str:
     return str(selector.branch_id or MAIN_BRANCH_ID).strip() or MAIN_BRANCH_ID
+
+
+_LINEAGE_BLOCKED_MAIN_ACTIONS = {
+    "freeze_section_from_phase03_artifact",
+    "write_frozen_section",
+    "lock_section_from_written_state",
+    "finalize_chapter_from_locked_sections",
+    "resume_paused_section",
+    "plan_scene",
+    "preflight_scene_state",
+    "generate_continuity_pack",
+    "write_scene_prose",
+    "state_repair_scene_patch",
+    "lint_scene_prose",
+    "repair_scene_prose",
+    "apply_scene_commit",
+    "refresh_character_appearance_projection",
+    "draft_scene_setting_projection",
+    "extract_scene_setting_from_prose",
+}
+
+
+def _lineage_blocked_option(option: ExecutionOption, details: dict) -> ExecutionOption:
+    merged_details = dict(option.details)
+    merged_details.update(details)
+    return ExecutionOption(
+        action=option.action,
+        summary=option.summary,
+        branch_policy=option.branch_policy,
+        workflow_family=option.workflow_family,
+        mutates_canonical_state=option.mutates_canonical_state,
+        requires_expected_node=option.requires_expected_node,
+        allowed=False,
+        selector_requirements=list(option.selector_requirements),
+        refusal_reason="Book has outline lineage chimera risk; inspect outline lineage and create a recovery branch before mutating main.",
+        details=merged_details,
+    )
+
+
+def _apply_lineage_safety_gate(workspace, book_id: str, branch_id: str, options: List[ExecutionOption]) -> List[ExecutionOption]:
+    if branch_id != MAIN_BRANCH_ID:
+        return options
+    audit = get_outline_lineage_audit(workspace, book_id, branch_id=branch_id)
+    if audit.status != "chimera_risk":
+        return options
+    details = {
+        "integrity_status": audit.status,
+        "affected_scopes": [
+            {"chapter_id": row.chapter_id, "section_id": row.section_id, "class": row.suspected_contamination_class}
+            for row in audit.affected_sections[:10]
+        ],
+        "affected_scope_count": len(audit.affected_sections),
+        "first_technical_divergence": audit.first_technical_divergence,
+        "first_visible_story_divergence": audit.first_visible_story_divergence,
+        "recommended_safe_next_action": "outline_lineage_audit",
+    }
+    gated: List[ExecutionOption] = []
+    for option in options:
+        if option.action in _LINEAGE_BLOCKED_MAIN_ACTIONS:
+            gated.append(_lineage_blocked_option(option, details))
+        else:
+            gated.append(option)
+    return gated
 
 
 def _workflow_initialized(book_root) -> bool:
@@ -1264,7 +1328,7 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
                 details=apply_scene_commit_details,
             )
         )
-    return options
+    return _apply_lineage_safety_gate(workspace, book_id, resolved_branch_id, options)
 
 
 def legal_next_actions(workspace, selector: ScopeSelector, *, prefer_emitted: bool = True) -> List[ExecutionOption]:

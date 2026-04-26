@@ -130,6 +130,7 @@ def _integrity_tickets(book_id: str, node: TimelineNodeRef, verdict) -> List[Iss
         code = str(getattr(issue, "code", "") or "").strip()
         severity = str(getattr(issue, "severity", "") or "").strip() or "medium"
         message = str(getattr(issue, "message", "") or "").strip() or code
+        details = getattr(issue, "details", {}) or {}
         if not code:
             continue
         tickets.append(
@@ -142,6 +143,7 @@ def _integrity_tickets(book_id: str, node: TimelineNodeRef, verdict) -> List[Iss
                 node=node,
                 selector=selector,
                 branch_scope=node.branch_id,
+                details=details if isinstance(details, dict) else {},
                 detected_at=now,
             )
         )

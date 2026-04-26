@@ -91,6 +91,7 @@ Behavior
   - `write_frozen_section`
 - Shows whether each action is allowed right now or blocked.
 - Includes refusal reasons for blocked actions so operators do not have to infer transition rules from docs alone.
+- If outline lineage audit reports `chimera_risk`, unsafe main-branch mutation actions are blocked with affected scope details. Use `outline-lineage-audit` and `section-lineage-matrix` before repair.
 - `main` branch examples:
   - `create_assembly_branch` when fork-group scope resolves to sibling branches that can be assembled
   - `finalize_chapter_from_locked_sections` when a chapter's sections are already locked
@@ -115,6 +116,45 @@ Behavior
   - `discard_branch`
   - `record_assembly_validation` for active assembly branches
   - `promote_branch_to_main` once the branch reaches `promote_ready`
+
+## Outline Lineage Audit Commands
+
+Purpose
+- Diagnose outline-pass bleed, stale section drafts, and mixed-lineage materialization before the author system mutates a book.
+- These commands are read-only. They do not repair, quarantine, restore, rewrite, or promote anything.
+
+Commands
+- `bookforge workflow outline-lineage-audit --book <id> [--branch-id <id>] [--json]`
+- `bookforge workflow section-lineage-matrix --book <id> [--branch-id <id>] [--chapter <n>] [--section <m>] [--json]`
+- `bookforge workflow stale-outline-artifacts --book <id> [--branch-id <id>] [--json]`
+- `bookforge workflow outline-repair-candidates --book <id> [--branch-id <id>] [--json]`
+
+Behavior
+- `outline-lineage-audit` returns the global verdict plus localized evidence:
+  - declared source run
+  - latest outline run
+  - first technical divergence
+  - first visible story divergence when detectable from structured artifact casts
+  - affected section count
+  - repair candidates
+- `section-lineage-matrix` compares section scopes across:
+  - declared immutable source run
+  - latest outline run
+  - frozen chapter projection
+  - mutable `outline.json`
+  - section draft artifact
+- Matrix rows include normalized section/scene hashes, differing fields, scene count deltas, character cohort deltas, artifact mtimes, suspected contamination class, and recommended safe next action.
+- `stale-outline-artifacts` lists section drafts, mutable compatibility views, and outline projections with artifact class/status and whether each is safe to consume as canonical.
+- `outline-repair-candidates` returns non-mutating recovery options such as:
+  - `inspect_only`
+  - `choose_recovery_anchor`
+  - `create_recovery_branch_from_selected_lineage`
+  - `restore_affected_sections_from_declared_source_run`
+  - `restore_affected_sections_from_frozen_chapter_projection`
+  - `quarantine_stale_section_drafts`
+  - `shelf_book`
+- Mutation-capable recovery actions are intentionally blocked until a later explicit recovery story supplies branch isolation, backup/quarantine receipts, and validation gates.
+- Nanda should use these surfaces before answering content questions about contaminated books or before presenting author repair choices.
 
 ## Branch Lifecycle Commands
 

@@ -76,6 +76,10 @@ Result truth
     - `bookforge.query.get_scene_context_projection(...)`
     - `bookforge.query.get_thought_context_projection(...)`
     - `bookforge.query.get_scene_phase_readiness(...)`
+    - `bookforge.query.get_outline_lineage_audit(...)`
+    - `bookforge.query.get_section_lineage_matrix(...)`
+    - `bookforge.query.get_stale_outline_artifact_inventory(...)`
+    - `bookforge.query.get_outline_repair_candidates(...)`
   - `bookforge run` now provides the batch/operator macro over the extracted scene-phase execution path.
   - section-level write wrappers now use a dedicated section-range macro over that same extracted path instead of parameterizing `bookforge run` directly.
   - CLI:
@@ -83,6 +87,10 @@ Result truth
     - `bookforge workflow legal-actions --branch-id <id>`
     - `bookforge workflow legal-actions --fork-group-id <id>`
     - `bookforge workflow legal-actions --scene <s>`
+    - `bookforge workflow outline-lineage-audit`
+    - `bookforge workflow section-lineage-matrix`
+    - `bookforge workflow stale-outline-artifacts`
+    - `bookforge workflow outline-repair-candidates`
     - `bookforge workflow create-branch`
     - `bookforge workflow create-assembly-branch`
     - `bookforge workflow discard-branch`
@@ -107,6 +115,7 @@ Result truth
 Lineage rule
 - Immutable run artifacts under `outline/pipeline_runs/<run_id>/...` are the preferred lineage anchors.
 - Mutable compatibility views such as `outline/outline.json` are useful, but they are not enough by themselves when immutable run artifacts exist.
+- When integrity reports `chimera_risk`, use the outline lineage audit surfaces before running authoring, seam repair, or main-branch mutation.
 
 Stub commands
 - The following commands exist in CLI but are not implemented yet: compile, export synopsis, book set-current, book show-current, book clear-current.

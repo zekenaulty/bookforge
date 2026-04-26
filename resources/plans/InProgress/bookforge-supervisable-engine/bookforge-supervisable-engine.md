@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-26T05:49:21Z`
-- Source Document Count: `41`
+- Compiled At (UTC): `2026-04-26T14:05:20Z`
+- Source Document Count: `43`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -25,31 +25,33 @@
 14. `steps/0071-make-scene-and-section-write-execution-branch-scoped/step.md`
 15. `steps/0072-add-parent-target-promotion-rebase-and-parallel-fork-write/step.md`
 16. `steps/0075-extract-appearance-setting-and-context-refinement-surfaces/step.md`
-17. `notes/2026-04-21-0010-execution.md`
-18. `notes/2026-04-21-0020-execution.md`
-19. `notes/2026-04-21-0030-execution.md`
-20. `notes/2026-04-21-0040-execution.md`
-21. `notes/2026-04-21-0045-execution.md`
-22. `notes/2026-04-21-0050-execution.md`
-23. `notes/2026-04-22-0050-execution.md`
-24. `notes/2026-04-22-0060-execution.md`
-25. `notes/2026-04-23-0070-commit-slice.md`
-26. `notes/2026-04-23-0070-continuity-pack-slice.md`
-27. `notes/2026-04-23-0070-repair-slice.md`
-28. `notes/2026-04-23-0070-run-loop-wrapper-slice.md`
-29. `notes/2026-04-23-0070-section-wrapper-tightening.md`
-30. `notes/2026-04-26-0070-complete.md`
-31. `notes/2026-04-26-0071-branch-scoped-writer.md`
-32. `notes/2026-04-26-0072-complete.md`
-33. `notes/2026-04-26-0072-lifecycle-cli.md`
-34. `notes/2026-04-26-0072-nested-branch-primitives.md`
-35. `notes/2026-04-26-0072-writer-assembly-staging.md`
-36. `notes/2026-04-26-0075-appearance-pending-fix.md`
-37. `notes/2026-04-26-0075-complete.md`
-38. `notes/2026-04-26-0075-context-receipts.md`
-39. `notes/2026-04-26-0075-projection-query-slice.md`
-40. `notes/2026-04-26-0075-setting-actions.md`
-41. `promotion.md`
+17. `steps/0080-add-outline-lineage-audit-and-recovery-briefing/step.md`
+18. `notes/2026-04-21-0010-execution.md`
+19. `notes/2026-04-21-0020-execution.md`
+20. `notes/2026-04-21-0030-execution.md`
+21. `notes/2026-04-21-0040-execution.md`
+22. `notes/2026-04-21-0045-execution.md`
+23. `notes/2026-04-21-0050-execution.md`
+24. `notes/2026-04-22-0050-execution.md`
+25. `notes/2026-04-22-0060-execution.md`
+26. `notes/2026-04-23-0070-commit-slice.md`
+27. `notes/2026-04-23-0070-continuity-pack-slice.md`
+28. `notes/2026-04-23-0070-repair-slice.md`
+29. `notes/2026-04-23-0070-run-loop-wrapper-slice.md`
+30. `notes/2026-04-23-0070-section-wrapper-tightening.md`
+31. `notes/2026-04-26-0070-complete.md`
+32. `notes/2026-04-26-0071-branch-scoped-writer.md`
+33. `notes/2026-04-26-0072-complete.md`
+34. `notes/2026-04-26-0072-lifecycle-cli.md`
+35. `notes/2026-04-26-0072-nested-branch-primitives.md`
+36. `notes/2026-04-26-0072-writer-assembly-staging.md`
+37. `notes/2026-04-26-0075-appearance-pending-fix.md`
+38. `notes/2026-04-26-0075-complete.md`
+39. `notes/2026-04-26-0075-context-receipts.md`
+40. `notes/2026-04-26-0075-projection-query-slice.md`
+41. `notes/2026-04-26-0075-setting-actions.md`
+42. `notes/2026-04-26-0080-complete.md`
+43. `promotion.md`
 
 ---
 
@@ -60,7 +62,7 @@
 Status: In Progress
 Stage: InProgress
 Owner: BookForge engine workstream
-Last Updated: 2026-04-23
+Last Updated: 2026-04-26
 
 ## Objective
 - Make BookForge truthful and supervisable by Nanda without moving prose generation or canonical state mutation out of BookForge.
@@ -78,6 +80,7 @@ Last Updated: 2026-04-23
 - The next projection-layer pressure is appearance and setting truth. Character appearance, scene background/setting, and prior-stage planning context must become queryable surfaces instead of hidden prompt side effects.
 - The next execution-root pressure after `0070` is isolated authoring. The engine needs real branch-scoped write roots so old-scene rewrites and recon work can happen off `main`.
 - The next lifecycle pressure after branch-scoped writing is parent-target merge discipline. Scene, section, and chapter branches must be able to promote upward, rebase against newer parent snapshots, and eventually support truthful parallel sibling write work.
+- The next safety pressure after branch-scoped authoring is localized lineage diagnosis. `chimera_risk` is not operational enough by itself; Nanda needs section-level evidence, artifact-family disagreement, and safe recovery candidates before it can supervise contaminated books without relying on the human operator as the safety catch.
 - The current repo already has the right raw materials:
   - section workflow lifecycle
   - immutable outline run artifacts
@@ -141,6 +144,19 @@ Last Updated: 2026-04-23
   - scene background and setting projection state
   are projection layers over the same book-rooted coordinate system, not separate truth systems.
 - All projection layers must stay addressable by the same `TimelineNodeRef` and `ScopeSelector` vocabulary.
+
+### Lineage Audit Surfaces
+- Integrity verdicts must be actionable, not only global.
+- When BookForge detects mixed lineage, overscoped recovery, stale section drafts, or mutable-source materialization, it must expose enough structured evidence for Nanda to answer:
+  - which chapter/section scopes are affected
+  - which artifact families disagree
+  - where the first technical divergence starts
+  - where the first reader-visible story splice appears if detectable from structured artifacts
+  - which candidate source lineages are coherent enough to inspect
+  - which repair actions are blocked until a human chooses a recovery anchor
+- The first lineage-audit surface is read-only.
+- Repair mutation must remain a later explicit action with branch isolation, receipts, backup/quarantine semantics, and validation gates.
+- Until a lineage matrix exists for a contaminated book, Nanda may report the global risk and missing evidence, but it must not claim exact repair scope.
 
 ### TimelineNodeRef
 - Every execution point gets a coordinate.
@@ -479,6 +495,7 @@ This plan is ready for promotion only when the target implementation can satisfy
 | 0071-make-scene-and-section-write-execution-branch-scoped | completed | 0070 | Move scene and section write execution off `main` into real branch-local execution roots so old-scene rewrites and isolated author work become truthful. |
 | 0072-add-parent-target-promotion-rebase-and-parallel-fork-write | completed | 0071 | Let branch work merge upward into parent branches or `main`, add explicit rebase, and support sibling parallel write branches with validation-gated assembly. |
 | 0075-extract-appearance-setting-and-context-refinement-surfaces | completed | 0070 | Make character appearance, scene background/setting, and prior-stage T1 thought-signature context explicit queryable projection layers instead of incidental prompt side effects. |
+| 0080-add-outline-lineage-audit-and-recovery-briefing | completed | 0020, 0030, 0050, 0060 | Add read-only outline lineage audit, section-level lineage matrix, stale artifact inventory, and recovery candidate briefing so Nanda can localize chimera risks before any repair mutation. |
 
 ---
 
@@ -2175,7 +2192,273 @@ Status: completed
 
 ---
 
-## Source 17: `notes/2026-04-21-0010-execution.md`
+## Source 17: `steps/0080-add-outline-lineage-audit-and-recovery-briefing/step.md`
+
+# 0080 Add Outline Lineage Audit And Recovery Briefing
+
+Status: completed
+
+## Goal
+- Add read-only BookForge query surfaces that localize outline lineage contamination by chapter and section before any repair or author mutation is attempted.
+- Give Nanda enough structured evidence to explain, inspect, and block unsafe author actions without relying on the human operator to notice outline-pass bleed manually.
+
+## Problem
+- BookForge can currently classify `veiled_ledger_b1` as `chimera_risk`, but the classification is too global to be operational.
+- The current integrity verdict exposes:
+  - `stale_section_drafts_present`
+  - first `overscoped_recovery`
+- That is not enough for an author agent to answer:
+  - which sections disagree
+  - which artifact families disagree
+  - where the first technical divergence starts
+  - where the first reader-visible story splice appears
+  - which candidate source lineage is coherent
+  - which repair paths are safe to propose
+- The Veiled Ledger failure class was not caught by the engine early enough.
+  - A full deep outline pass and section-local outline drafts coexisted.
+  - Recovery continued by consuming a broader or different outline source than the active section-local workflow expected.
+  - The mutable compatibility outline became mixed.
+  - The author/operator had to infer the failure from prose and artifact archaeology.
+- That makes Nanda unsafe as an author supervisor. If the engine only says "chimera risk" without evidence, the author pane can either overclaim or underreact.
+
+## Design Rule
+- This step is read-only.
+- Do not add repair mutation yet.
+- Do not quarantine, overwrite, restore, promote, or rebuild canonical state in this story.
+- The output of this story is structured diagnosis and recovery candidate briefing only.
+- Mutation belongs in a later explicit recovery story after the audit surface exists and has tests.
+
+## Detailed Work
+- Completed implementation:
+  - added read-only outline lineage audit surfaces
+  - added section-level lineage matrix rows with artifact hashes, field diffs, scene-count deltas, and character-cohort deltas
+  - added stale outline artifact inventory
+  - added non-mutating repair candidate briefing
+  - threaded localized lineage details into integrity issues and emitted issue tickets
+  - blocked unsafe main-branch authoring/write/seam actions when lineage chimera is detected
+  - added operator-facing CLI projections for audit, matrix, stale artifacts, and repair candidates
+- Add an outline lineage audit query module.
+  - Candidate module:
+    - `src/bookforge/query/outline_lineage.py`
+  - Candidate public functions:
+    - `get_outline_lineage_audit(workspace, book_id, *, branch_id="main")`
+    - `get_section_lineage_matrix(workspace, book_id, *, chapter_id=None, section_id=None, branch_id="main")`
+    - `get_stale_outline_artifact_inventory(workspace, book_id, *, branch_id="main")`
+    - `get_outline_repair_candidates(workspace, book_id, *, branch_id="main")`
+- Build a section-level lineage matrix.
+  - Each row should identify one chapter/section scope.
+  - Minimum row fields:
+    - `chapter_id`
+    - `section_id`
+    - `section_title`
+    - `declared_source_run_id`
+    - `latest_outline_run_id`
+    - `workflow_family`
+    - `materialized_status`
+    - `candidate_artifacts`
+    - `normalized_section_hashes`
+    - `normalized_scene_list_hashes`
+    - `differing_fields`
+    - `scene_count_delta`
+    - `character_cohort_delta`
+    - `artifact_mtimes`
+    - `suspected_contamination_class`
+    - `recommended_safe_next_action`
+- Compare these artifact families when present:
+  - immutable declared outline run artifacts under `outline/pipeline_runs/<source_run_id>/`
+  - latest outline run artifacts under `outline/pipeline_runs/<latest_run_id>/`
+  - frozen chapter projections under `outline/chapters/ch_###.json`
+  - mutable compatibility outline under `outline/outline.json`
+  - section-local draft artifacts under `outline/section_drafts/ch_###_sec_###_phase03.json`
+  - workflow registry and snapshot views:
+    - `outline/snapshot_registry.json`
+    - `outline/outline.thin.json`
+    - `outline/outline.index.json`
+    - `outline/outline.toc.json`
+    - `outline/outline.appendix.json`
+- Normalize section comparison before hashing.
+  - Include:
+    - section id
+    - title
+    - intent
+    - end condition
+    - scene ids
+    - scene summaries
+    - scene outcomes
+    - scene character ids
+    - scene thread ids
+    - handoff refs
+    - terminal echo fields
+  - Exclude volatile fields unless needed for diagnostics:
+    - mtimes
+    - file paths
+    - generated report timestamps
+    - diagnostics-only metadata
+- Add character cohort detection.
+  - Detect incompatible character id families that occupy the same narrative role or scope.
+  - The first implementation should flag:
+    - multiple protagonist ids in the same book lineage
+    - character cohorts that switch within a chapter
+    - scene casts that use ids absent from the chosen candidate source
+    - registry characters that are not referenced by the selected coherent lineage
+  - For Veiled Ledger, the surface should be able to show:
+    - `char_rhea / char_vex / char_artie`
+    - `rhea_mercer / vance_harrow / unit_734`
+    - chapter 3 as the visible splice zone
+- Add artifact inventory diagnostics.
+  - Return a structured list of stale or competing outline artifacts with:
+    - path
+    - artifact family
+    - artifact status
+    - mtime
+    - size
+    - inferred chapter/section scope
+    - inferred source run if available
+    - hash
+    - whether it is safe to consume as canonical
+- Add repair candidate briefing, still read-only.
+  - Candidate recommendations should be explicit and non-mutating:
+    - `inspect_only`
+    - `choose_recovery_anchor`
+    - `create_recovery_branch_from_selected_lineage`
+    - `restore_affected_sections_from_declared_source_run`
+    - `restore_affected_sections_from_frozen_chapter_projection`
+    - `quarantine_stale_section_drafts`
+    - `rebuild_snapshot_registry_from_selected_source`
+    - `shelf_book`
+  - Each candidate must include:
+    - required human decision
+    - expected writable scope for the later repair story
+    - affected section set
+    - source artifact family
+    - risk level
+    - why the action is blocked or allowed
+- Integrate the audit result into integrity reporting.
+  - `get_integrity_verdict(...)` should stop breaking after the first overscoped section.
+  - It should include enough `IntegrityIssue.details` for Nanda to link an issue to a localized matrix row.
+  - `IssueTicket.details` should preserve:
+    - affected scopes
+    - first technical divergence
+    - first visible story divergence if detected
+    - candidate artifact families
+    - recommended safe next action
+  - If this requires extending `IntegrityIssue`, do it with backward-compatible defaults.
+- Add legal-action gating for contaminated books.
+  - Action discovery should treat `chimera_risk` with lineage conflicts as blocking for:
+    - direct main `write-section`
+    - direct main `advance-section`
+    - direct main `seam-chapter`
+    - direct main `finalize-chapter`
+    - direct main scene rewrite or repair
+  - Allowed actions should be read-only diagnostics and branch/recovery preparation only.
+  - If a mutation action remains technically available for compatibility, its refusal reason must say why it is unsafe.
+- Add a minimal CLI/operator surface if useful for local testing.
+  - Candidate commands:
+    - `bookforge workflow outline-lineage-audit --book <book>`
+    - `bookforge workflow section-lineage-matrix --book <book> [--chapter N] [--section N]`
+    - `bookforge workflow outline-repair-candidates --book <book>`
+  - CLI output should be a readable projection of the query objects.
+  - The query functions are the real contract; CLI commands are convenience wrappers.
+
+## Nanda Contract Notes
+- Nanda should call the lineage audit automatically when:
+  - integrity status is `chimera_risk`
+  - the user mentions chimera, bleed, outline pass, section drafts, wrong chapter, wrong characters, or "what went wrong"
+  - the user asks about content in a contaminated book or chapter
+- Nanda should not claim exact localization until this audit surface exists.
+- Before this step is implemented, acceptable author wording is:
+  - "BookForge reports chimera risk and stale section drafts, but it does not yet expose enough evidence to identify every affected section."
+- After this step is implemented, acceptable author wording is:
+  - "BookForge reports chimera risk. I inspected outline lineage. The affected scopes are ..., the first technical divergence is ..., and the safe next action is ..."
+- Nanda should render:
+  - global verdict
+  - affected section matrix
+  - artifact inventory
+  - recommended safe next actions
+  - blocked mutation actions
+
+## Files Likely Touched
+- `src/bookforge/query/outline_lineage.py`
+- `src/bookforge/query/integrity.py`
+- `src/bookforge/query/actions.py`
+- `src/bookforge/query/__init__.py`
+- `src/bookforge/contracts/` if a typed audit contract is introduced
+- `src/bookforge/supervision/emit.py`
+- `src/bookforge/cli.py`
+- `docs/help/workflow.md`
+- `docs/help/index.md`
+- `resources/plans/InProgress/bookforge-supervisable-engine/steps/index.md`
+
+## Tests
+- Add focused lineage audit tests:
+  - `tests/test_outline_lineage_audit.py`
+  - `tests/test_section_lineage_matrix.py`
+- Required fixtures:
+  - healthy single-lineage book
+  - stale section drafts present but non-canonical
+  - mutable outline differs from frozen chapter projection
+  - declared source run differs from latest run
+  - mixed character cohort within a chapter
+  - Veiled Ledger-style section-local draft vs frozen chapter projection conflict
+- Required assertions:
+  - healthy books return `healthy` and no affected scopes
+  - audit returns every affected section, not just the first mismatch
+  - matrix rows include hash, differing fields, artifact mtimes, and recommended safe action
+  - character cohort switch is detected and localized
+  - integrity tickets include localized details
+  - legal action discovery blocks unsafe main mutations while allowing inspection/branch setup
+  - no test mutates canonical book state
+
+## Definition Of Done
+- BookForge exposes a read-only outline lineage audit query surface.
+- BookForge exposes a section-level lineage matrix that localizes outline-source disagreement.
+- BookForge exposes stale outline artifact inventory.
+- BookForge exposes non-mutating repair candidates.
+- `get_integrity_verdict(...)` reports localized lineage details instead of stopping at the first overscoped section.
+- Nanda can distinguish:
+  - global chimera status
+  - affected scopes
+  - suspected artifact source
+  - first technical divergence
+  - visible story splice zone
+  - blocked unsafe actions
+  - safe next diagnostic or recovery-prep action
+- Veiled Ledger can be inspected without raw filesystem archaeology.
+- No repair mutation is implemented in this step.
+
+## Executed Validation
+- Focused lineage/action suite:
+  - `python -m pytest -o addopts='' tests/test_outline_lineage_audit.py tests/test_query_integrity.py tests/test_action_discovery.py --basetemp=.pytest_tmp_0080_focus`
+- Broader query/action/supervision regression:
+  - `python -m pytest -o addopts='' tests/test_outline_lineage_audit.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_supervision_emit.py tests/test_action_discovery.py tests/test_scoped_execution.py --basetemp=.pytest_tmp_0080_regression`
+- Full regression:
+  - `python -m pytest -o addopts='' --basetemp=.pytest_tmp_0080_full`
+  - result: `304 passed`
+- Veiled Ledger smoke checks:
+  - `bookforge workflow outline-lineage-audit --book veiled_ledger_b1`
+  - `bookforge workflow section-lineage-matrix --book veiled_ledger_b1 --chapter 3`
+  - `bookforge workflow legal-actions --book veiled_ledger_b1 --chapter 3 --section 3`
+
+## Explicit Non-Goals
+- Do not repair Veiled Ledger in this story.
+- Do not delete or quarantine stale artifacts in this story.
+- Do not rebuild `outline.json`.
+- Do not rebuild snapshot registry.
+- Do not rewrite prose.
+- Do not run seam repair.
+- Do not promote any recovery branch.
+- Do not make Nanda infer lineage from prose when BookForge can expose artifact truth.
+
+## Follow-On Work
+- Add an explicit branch-scoped recovery-import action after this read-only audit is stable.
+- Add repair candidate execution with backup/quarantine receipts.
+- Add snapshot registry rebuild from a selected source lineage.
+- Add branch-local validation comparing repaired candidate state against the lineage audit.
+- Add Nanda author planner support for automatic audit queries and grounded repair briefing.
+
+---
+
+## Source 18: `notes/2026-04-21-0010-execution.md`
 
 # 0010 Execution Note
 
@@ -2215,7 +2498,7 @@ Notes
 
 ---
 
-## Source 18: `notes/2026-04-21-0020-execution.md`
+## Source 19: `notes/2026-04-21-0020-execution.md`
 
 # 0020 Execution Note
 
@@ -2263,7 +2546,7 @@ Notes
 
 ---
 
-## Source 19: `notes/2026-04-21-0030-execution.md`
+## Source 20: `notes/2026-04-21-0030-execution.md`
 
 # 0030 Execution Note
 
@@ -2319,7 +2602,7 @@ Notes
 
 ---
 
-## Source 20: `notes/2026-04-21-0040-execution.md`
+## Source 21: `notes/2026-04-21-0040-execution.md`
 
 # 0040 Execution Note
 
@@ -2370,7 +2653,7 @@ Notes
 
 ---
 
-## Source 21: `notes/2026-04-21-0045-execution.md`
+## Source 22: `notes/2026-04-21-0045-execution.md`
 
 # 0045 Execution Note
 
@@ -2428,7 +2711,7 @@ Notes
 
 ---
 
-## Source 22: `notes/2026-04-21-0050-execution.md`
+## Source 23: `notes/2026-04-21-0050-execution.md`
 
 # 0050 Execution Note
 
@@ -2492,7 +2775,7 @@ Notes
 
 ---
 
-## Source 23: `notes/2026-04-22-0050-execution.md`
+## Source 24: `notes/2026-04-22-0050-execution.md`
 
 # 0050 Execution Note
 
@@ -2551,7 +2834,7 @@ Notes
 
 ---
 
-## Source 24: `notes/2026-04-22-0060-execution.md`
+## Source 25: `notes/2026-04-22-0060-execution.md`
 
 # 0060 Execution Note
 
@@ -2709,7 +2992,7 @@ Notes
 
 ---
 
-## Source 25: `notes/2026-04-23-0070-commit-slice.md`
+## Source 26: `notes/2026-04-23-0070-commit-slice.md`
 
 ## 2026-04-23 - 0070 commit slice
 
@@ -2778,7 +3061,7 @@ Notes
 
 ---
 
-## Source 26: `notes/2026-04-23-0070-continuity-pack-slice.md`
+## Source 27: `notes/2026-04-23-0070-continuity-pack-slice.md`
 
 # 0070 Continuity-Pack Slice Execution Note
 
@@ -2889,7 +3172,7 @@ Notes
 
 ---
 
-## Source 27: `notes/2026-04-23-0070-repair-slice.md`
+## Source 28: `notes/2026-04-23-0070-repair-slice.md`
 
 ## 2026-04-23 - 0070 repair slice
 
@@ -2948,7 +3231,7 @@ Notes
 
 ---
 
-## Source 28: `notes/2026-04-23-0070-run-loop-wrapper-slice.md`
+## Source 29: `notes/2026-04-23-0070-run-loop-wrapper-slice.md`
 
 # 2026-04-23 0070 Run-Loop Wrapper Slice
 
@@ -3000,7 +3283,7 @@ Notes
 
 ---
 
-## Source 29: `notes/2026-04-23-0070-section-wrapper-tightening.md`
+## Source 30: `notes/2026-04-23-0070-section-wrapper-tightening.md`
 
 # 2026-04-23 0070 Section Wrapper Tightening
 
@@ -3049,7 +3332,7 @@ Notes
 
 ---
 
-## Source 30: `notes/2026-04-26-0070-complete.md`
+## Source 31: `notes/2026-04-26-0070-complete.md`
 
 # 2026-04-26 0070 Complete
 
@@ -3100,7 +3383,7 @@ Notes
 
 ---
 
-## Source 31: `notes/2026-04-26-0071-branch-scoped-writer.md`
+## Source 32: `notes/2026-04-26-0071-branch-scoped-writer.md`
 
 # 2026-04-26 0071 Branch-Scoped Writer
 
@@ -3127,7 +3410,7 @@ Notes
 
 ---
 
-## Source 32: `notes/2026-04-26-0072-complete.md`
+## Source 33: `notes/2026-04-26-0072-complete.md`
 
 # 2026-04-26 0072 Complete
 
@@ -3147,7 +3430,7 @@ Notes
 
 ---
 
-## Source 33: `notes/2026-04-26-0072-lifecycle-cli.md`
+## Source 34: `notes/2026-04-26-0072-lifecycle-cli.md`
 
 # 2026-04-26 0072 Lifecycle CLI
 
@@ -3176,7 +3459,7 @@ Notes
 
 ---
 
-## Source 34: `notes/2026-04-26-0072-nested-branch-primitives.md`
+## Source 35: `notes/2026-04-26-0072-nested-branch-primitives.md`
 
 # 2026-04-26 0072 Nested Branch Primitives
 
@@ -3199,7 +3482,7 @@ Notes
 
 ---
 
-## Source 35: `notes/2026-04-26-0072-writer-assembly-staging.md`
+## Source 36: `notes/2026-04-26-0072-writer-assembly-staging.md`
 
 # 2026-04-26 0072 Writer Assembly Staging
 
@@ -3225,7 +3508,7 @@ Notes
 
 ---
 
-## Source 36: `notes/2026-04-26-0075-appearance-pending-fix.md`
+## Source 37: `notes/2026-04-26-0075-appearance-pending-fix.md`
 
 # 2026-04-26 0075 Appearance Pending Fix
 
@@ -3253,7 +3536,7 @@ Notes
 
 ---
 
-## Source 37: `notes/2026-04-26-0075-complete.md`
+## Source 38: `notes/2026-04-26-0075-complete.md`
 
 # 2026-04-26 0075 Complete
 
@@ -3297,7 +3580,7 @@ Notes
 
 ---
 
-## Source 38: `notes/2026-04-26-0075-context-receipts.md`
+## Source 39: `notes/2026-04-26-0075-context-receipts.md`
 
 # 2026-04-26 0075 Scene Context Receipt Slice
 
@@ -3340,7 +3623,7 @@ Notes
 
 ---
 
-## Source 39: `notes/2026-04-26-0075-projection-query-slice.md`
+## Source 40: `notes/2026-04-26-0075-projection-query-slice.md`
 
 # 2026-04-26 0075 Projection Query Slice
 
@@ -3373,7 +3656,7 @@ Notes
 
 ---
 
-## Source 40: `notes/2026-04-26-0075-setting-actions.md`
+## Source 41: `notes/2026-04-26-0075-setting-actions.md`
 
 # 2026-04-26 0075 Setting Projection Actions
 
@@ -3408,7 +3691,61 @@ Notes
 
 ---
 
-## Source 41: `promotion.md`
+## Source 42: `notes/2026-04-26-0080-complete.md`
+
+# 2026-04-26 0080 Complete
+
+## Summary
+- Completed the read-only outline lineage audit slice.
+- BookForge now exposes operational evidence for chimera-class outline bleed instead of only global `chimera_risk`.
+- Nanda can query affected sections, artifact-family disagreement, character-cohort conflict, stale outline artifacts, and non-mutating repair candidates before presenting author repair choices.
+
+## Implemented Surfaces
+- `bookforge.query.get_outline_lineage_audit(...)`
+- `bookforge.query.get_section_lineage_matrix(...)`
+- `bookforge.query.get_stale_outline_artifact_inventory(...)`
+- `bookforge.query.get_outline_repair_candidates(...)`
+
+## CLI Surfaces
+- `bookforge workflow outline-lineage-audit`
+- `bookforge workflow section-lineage-matrix`
+- `bookforge workflow stale-outline-artifacts`
+- `bookforge workflow outline-repair-candidates`
+
+## Safety Behavior
+- `get_integrity_verdict(...)` now includes localized lineage details for `overscoped_recovery`.
+- Emitted issue tickets preserve those details for Nanda.
+- Main-branch mutation actions are blocked when outline lineage audit reports `chimera_risk`.
+- `create_branch` remains available so recovery can start from an isolated branch instead of mutating `main`.
+- No repair mutation was added in this slice.
+
+## Veiled Ledger Smoke Result
+- `outline-lineage-audit` localizes the current Veiled Ledger conflict to affected sections instead of reporting only a global state.
+- The audit reports:
+  - first technical divergence
+  - first visible story divergence
+  - affected section count
+  - per-section differing fields
+  - character cohort deltas
+  - repair candidates
+- `legal-actions` now blocks unsafe main mutation for the contaminated book and recommends lineage audit first.
+
+## Validation
+- Focused lineage/action suite:
+  - `python -m pytest -o addopts='' tests/test_outline_lineage_audit.py tests/test_query_integrity.py tests/test_action_discovery.py --basetemp=.pytest_tmp_0080_focus`
+- Broader query/action/supervision regression:
+  - `python -m pytest -o addopts='' tests/test_outline_lineage_audit.py tests/test_query_lineage.py tests/test_query_integrity.py tests/test_supervision_emit.py tests/test_action_discovery.py tests/test_scoped_execution.py --basetemp=.pytest_tmp_0080_regression`
+- Full regression:
+  - `python -m pytest -o addopts='' --basetemp=.pytest_tmp_0080_full`
+  - result: `304 passed`
+
+## Follow-Up
+- Add a mutation-capable recovery-import story only after Nanda consumes this read-only audit surface.
+- That future story should include branch isolation, backup/quarantine receipts, selected recovery anchor, and validation-gated promotion.
+
+---
+
+## Source 43: `promotion.md`
 
 # Promotion
 
