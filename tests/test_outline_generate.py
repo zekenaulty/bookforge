@@ -1,5 +1,6 @@
 ﻿from pathlib import Path
 import json
+from copy import deepcopy
 import shutil
 import pytest
 
@@ -22,7 +23,7 @@ class DummyClient:
         self.calls = []
         self.provider = provider
 
-    def chat(self, messages, model, temperature=0.7, max_tokens=1024, thinking_level=None):
+    def chat(self, messages, model, temperature=0.7, max_tokens=1024, thinking_level=None, thinking_budget=None):
         self.messages_history.append(messages)
         self.calls.append(
             {
@@ -30,6 +31,7 @@ class DummyClient:
                 "temperature": temperature,
                 "max_tokens": max_tokens,
                 "thinking_level": thinking_level,
+                "thinking_budget": thinking_budget,
             }
         )
         if self._responses:
@@ -52,7 +54,7 @@ class DummyClientWithPause(DummyClient):
         self._call_number = 0
         self._fail_call_number = fail_call_number
 
-    def chat(self, messages, model, temperature=0.7, max_tokens=1024, thinking_level=None):
+    def chat(self, messages, model, temperature=0.7, max_tokens=1024, thinking_level=None, thinking_budget=None):
         self._call_number += 1
         if self._call_number == self._fail_call_number:
             raise LLMRequestError(
@@ -68,6 +70,7 @@ class DummyClientWithPause(DummyClient):
             temperature=temperature,
             max_tokens=max_tokens,
             thinking_level=thinking_level,
+            thinking_budget=thinking_budget,
         )
 
 
@@ -101,6 +104,8 @@ def _base_outline() -> dict:
                                 "location_end_label": "City Gate",
                                 "location_start": "City Gate",
                                 "location_end": "City Gate",
+                                "location_start_id": "LOC_CITY_GATE_D2C554",
+                                "location_end_id": "LOC_CITY_GATE_D2C554",
                                 "handoff_mode": "direct_continuation",
                                 "constraint_state": "free",
                                 "transition_in_text": "At the city gate, patrol lanterns sweep the archway.",
@@ -139,6 +144,8 @@ def _base_outline() -> dict:
                                 "location_end_label": "Market Square",
                                 "location_start": "Market Square",
                                 "location_end": "Market Square",
+                                "location_start_id": "LOC_MARKET_SQUARE_D46950",
+                                "location_end_id": "LOC_MARKET_SQUARE_D46950",
                                 "handoff_mode": "direct_continuation",
                                 "constraint_state": "pursued",
                                 "transition_in_text": "In market square, stall awnings whip as guards push through the crowd.",
@@ -291,8 +298,76 @@ def _phase_04b_for_chapter_with_report(
     inserted_scene_refs: list[str] | None = None,
 ) -> dict:
     payload = _phase_04b_for_chapter(chapter_id)
-    payload["phase_report"]["resolved_candidates"] = resolved_candidates or []
-    payload["phase_report"]["inserted_scene_refs"] = inserted_scene_refs or []
+    resolved = resolved_candidates or []
+    inserted_refs = inserted_scene_refs or []
+    payload["phase_report"]["resolved_candidates"] = resolved
+    payload["phase_report"]["inserted_scene_refs"] = inserted_refs
+    if inserted_refs:
+        chapter = payload["outline"]["chapters"][0]
+        sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
+        first_section = sections[0] if sections and isinstance(sections[0], dict) else {}
+        scenes = first_section.get("scenes") if isinstance(first_section.get("scenes"), list) else []
+        existing_scene_ids = {
+            int(scene.get("scene_id"))
+            for scene in scenes
+            if isinstance(scene, dict) and str(scene.get("scene_id") or "").isdigit()
+        }
+        for scene_ref in inserted_refs:
+            try:
+                ref_chapter, ref_scene = [int(part) for part in str(scene_ref).split(":", 1)]
+            except (TypeError, ValueError):
+                continue
+            if ref_chapter != chapter_id or ref_scene in existing_scene_ids:
+                continue
+            previous_scene = scenes[-1] if scenes and isinstance(scenes[-1], dict) else {}
+            previous_scene_id = int(previous_scene.get("scene_id") or max(existing_scene_ids or {0}))
+            if previous_scene:
+                previous_scene["transition_out_text"] = "The prior beat hands directly into the inserted seam."
+                previous_scene["transition_out_anchors"] = ["prior beat", "handoff motion", "inserted seam"]
+                previous_scene["hands_off_to"] = f"{chapter_id}:{ref_scene}"
+            base_scene = deepcopy(previous_scene) if previous_scene else {}
+            base_scene.update(
+                {
+                    "scene_id": ref_scene,
+                    "summary": "Inserted transition scene.",
+                    "type": "transition",
+                    "outcome": "The transition seam is resolved.",
+                    "handoff_mode": "direct_continuation",
+                    "consumes_outcome_from": f"{chapter_id}:{previous_scene_id}",
+                    "transition_in_text": "The inserted transition carries the prior outcome forward.",
+                    "transition_in_anchors": ["prior outcome", "forward motion", "resolved seam"],
+                    "seam_score": 90,
+                    "seam_resolution": "full_scene",
+                }
+            )
+            base_scene.pop("transition_out_text", None)
+            base_scene.pop("transition_out_anchors", None)
+            base_scene.pop("hands_off_to", None)
+            scenes.append(base_scene)
+            existing_scene_ids.add(ref_scene)
+        scenes.sort(key=lambda scene: int(scene.get("scene_id") or 0) if isinstance(scene, dict) else 0)
+        pacing = chapter.get("pacing") if isinstance(chapter.get("pacing"), dict) else {}
+        pacing["expected_scene_count"] = len(scenes)
+        chapter["pacing"] = pacing
+        first_section["scenes"] = scenes
+    impacts = []
+    for item in resolved:
+        if not isinstance(item, dict):
+            continue
+        inserted_ref = str(item.get("inserted_scene_ref") or "").strip()
+        if not inserted_ref:
+            continue
+        impacts.append(
+            {
+                "from_scene_ref": item.get("from_scene_ref"),
+                "to_scene_ref": item.get("to_scene_ref"),
+                "inserted_scene_ref": inserted_ref,
+                "requested_resolution": item.get("requested_resolution"),
+                "resolution": item.get("resolution"),
+            }
+        )
+    if impacts:
+        payload["phase_report"]["insertion_edge_impacts"] = impacts
     return payload
 
 
@@ -318,19 +393,48 @@ def _phase_06_for_chapter(chapter_id: int) -> dict:
     return _outline_for_chapter(chapter_id)
 
 
+def _phase_04c_handoff_for_chapter(chapter_id: int) -> dict:
+    chapter_outline = _outline_for_chapter(chapter_id)
+    chapters = chapter_outline.get("chapters", [])
+    if chapters and isinstance(chapters[0], dict):
+        sections = chapters[0].get("sections", [])
+        if sections:
+            last_section = sections[-1]
+            scenes = last_section.get("scenes", [])
+            if scenes:
+                scenes[-1] = {**scenes[-1], "handoff_mode": "terminal"}
+    return {
+        "schema_version": "outline_handoff_normalize_v1",
+        "outline": chapter_outline,
+        "phase_report": {"touched_scene_refs": [], "notes": []},
+    }
+
+
+def _t1_plan() -> dict:
+    # T1 response only needs to be parseable JSON; content is not semantically validated.
+    return {}
+
+
 def _pipeline_responses() -> list[str]:
+    # Each chapter-scoped two-turn phase produces T1 + T2 calls per chapter.
+    # 04c (metadata_relink), 04c_intro, and 04d short-circuit for test data (no
+    # insertions, no intro mismatches). 04c_handoff always runs because the last
+    # scene's handoff_mode is "direct_continuation", not "terminal".
     return [
         json.dumps(_phase_01()),
         json.dumps(_phase_02()),
-        json.dumps(_base_outline()),
-        json.dumps(_phase_04a_for_chapter(1)),
-        json.dumps(_phase_04a_for_chapter(2)),
-        json.dumps(_phase_04b_for_chapter(1)),
-        json.dumps(_phase_04b_for_chapter(2)),
-        json.dumps(_phase_05_for_chapter(1)),
-        json.dumps(_phase_05_for_chapter(2)),
-        json.dumps(_phase_06_for_chapter(1)),
-        json.dumps(_phase_06_for_chapter(2)),
+        json.dumps(_t1_plan()), json.dumps(_outline_for_chapter(1)),          # phase 3 ch1 T1+T2
+        json.dumps(_t1_plan()), json.dumps(_outline_for_chapter(2)),          # phase 3 ch2 T1+T2
+        json.dumps(_t1_plan()), json.dumps(_phase_04a_for_chapter(1)),        # phase 4a ch1 T1+T2
+        json.dumps(_t1_plan()), json.dumps(_phase_04a_for_chapter(2)),        # phase 4a ch2 T1+T2
+        json.dumps(_t1_plan()), json.dumps(_phase_04b_for_chapter(1)),        # phase 4b ch1 T1+T2
+        json.dumps(_t1_plan()), json.dumps(_phase_04b_for_chapter(2)),        # phase 4b ch2 T1+T2
+        json.dumps(_t1_plan()), json.dumps(_phase_04c_handoff_for_chapter(1)), # phase 4c_handoff ch1 T1+T2
+        json.dumps(_t1_plan()), json.dumps(_phase_04c_handoff_for_chapter(2)), # phase 4c_handoff ch2 T1+T2
+        json.dumps(_t1_plan()), json.dumps(_phase_05_for_chapter(1)),         # phase 5 ch1 T1+T2
+        json.dumps(_t1_plan()), json.dumps(_phase_05_for_chapter(2)),         # phase 5 ch2 T1+T2
+        json.dumps(_t1_plan()), json.dumps(_phase_06_for_chapter(1)),         # phase 6 ch1 T1+T2
+        json.dumps(_t1_plan()), json.dumps(_phase_06_for_chapter(2)),         # phase 6 ch2 T1+T2
     ]
 
 
@@ -370,7 +474,7 @@ def test_generate_outline_pipeline_writes_files(tmp_path: Path) -> None:
     assert (outline_path.parent / "chapters" / "ch_001.json").exists()
     assert (outline_path.parent / "chapters" / "ch_002.json").exists()
     assert (outline_path.parent / "pipeline_runs").exists()
-    assert len(client.messages_history) == 11
+    assert len(client.messages_history) == 26
 
     report_path, report = load_latest_outline_pipeline_report(workspace=tmp_path, book_id="my_book")
     assert report_path is not None
@@ -382,7 +486,7 @@ def test_generate_outline_resume_reuses_successful_steps(tmp_path: Path) -> None
 
     first_client = DummyClient(_pipeline_responses())
     generate_outline(workspace=tmp_path, book_id="my_book", client=first_client, model="dummy")
-    assert len(first_client.messages_history) == 11
+    assert len(first_client.messages_history) == 26
 
     resume_client = DummyClient(_pipeline_responses())
     generate_outline(workspace=tmp_path, book_id="my_book", resume=True, client=resume_client, model="dummy")
@@ -397,10 +501,12 @@ def test_generate_outline_phase_rerun_uses_previous_dependencies(tmp_path: Path)
 
     rerun_client = DummyClient(
         [
-            json.dumps(_phase_04a_for_chapter(1)),
-            json.dumps(_phase_04a_for_chapter(2)),
-            json.dumps(_phase_04b_for_chapter(1)),
-            json.dumps(_phase_04b_for_chapter(2)),
+            json.dumps(_t1_plan()), json.dumps(_phase_04a_for_chapter(1)),
+            json.dumps(_t1_plan()), json.dumps(_phase_04a_for_chapter(2)),
+            json.dumps(_t1_plan()), json.dumps(_phase_04b_for_chapter(1)),
+            json.dumps(_t1_plan()), json.dumps(_phase_04b_for_chapter(2)),
+            json.dumps(_t1_plan()), json.dumps(_phase_04c_handoff_for_chapter(1)),
+            json.dumps(_t1_plan()), json.dumps(_phase_04c_handoff_for_chapter(2)),
         ]
     )
     handoff_path = generate_outline(
@@ -414,7 +520,7 @@ def test_generate_outline_phase_rerun_uses_previous_dependencies(tmp_path: Path)
     )
 
     assert handoff_path.name in {"outline.json", "outline_transitions_refined_v1_1.json"}
-    assert len(rerun_client.messages_history) == 4
+    assert len(rerun_client.messages_history) == 12
 
 
 def test_generate_outline_from_phase_without_dependencies_fails(tmp_path: Path) -> None:
@@ -435,11 +541,11 @@ def test_generate_outline_from_phase_without_dependencies_fails(tmp_path: Path) 
 def test_generate_outline_phase4a_resume_restarts_at_failed_chapter(tmp_path: Path) -> None:
     _init_book(tmp_path)
 
-    first_client = DummyClientWithPause(_pipeline_responses(), fail_call_number=5)
+    first_client = DummyClientWithPause(_pipeline_responses(), fail_call_number=9)
     with pytest.raises(RuntimeError):
         generate_outline(workspace=tmp_path, book_id="my_book", client=first_client, model="dummy")
 
-    resume_client = DummyClient([json.dumps(_phase_04a_for_chapter(2))])
+    resume_client = DummyClient([json.dumps(_t1_plan()), json.dumps(_phase_04a_for_chapter(2))])
     handoff_path = generate_outline(
         workspace=tmp_path,
         book_id="my_book",
@@ -450,7 +556,7 @@ def test_generate_outline_phase4a_resume_restarts_at_failed_chapter(tmp_path: Pa
         model="dummy",
     )
     assert handoff_path.name in {"outline.json", "phase_04a_transition_seam_analysis_output.json"}
-    assert len(resume_client.messages_history) == 1
+    assert len(resume_client.messages_history) == 2
 
 
 def test_generate_outline_resume_pause_does_not_create_unknown_step(tmp_path: Path) -> None:
@@ -503,7 +609,10 @@ def test_generate_outline_force_full_rerun_reexecutes_successful_chapters(tmp_pa
     generate_outline(workspace=tmp_path, book_id="my_book", client=baseline_client, model="dummy")
 
     rerun_client = DummyClient(
-        [json.dumps(_phase_04a_for_chapter(1)), json.dumps(_phase_04a_for_chapter(2))]
+        [
+            json.dumps(_t1_plan()), json.dumps(_phase_04a_for_chapter(1)),
+            json.dumps(_t1_plan()), json.dumps(_phase_04a_for_chapter(2)),
+        ]
     )
     generate_outline(
         workspace=tmp_path,
@@ -515,7 +624,7 @@ def test_generate_outline_force_full_rerun_reexecutes_successful_chapters(tmp_pa
         client=rerun_client,
         model="dummy",
     )
-    assert len(rerun_client.messages_history) == 2
+    assert len(rerun_client.messages_history) == 4
 
 
 def test_generate_outline_phase4a_resume_retries_exhausted_failed_chapter(tmp_path: Path) -> None:
@@ -525,9 +634,12 @@ def test_generate_outline_phase4a_resume_retries_exhausted_failed_chapter(tmp_pa
 
     failing_rerun_client = DummyClient(
         [
-            json.dumps(_phase_04a_for_chapter(1)),
-            "not-json",
-            "still-not-json",
+            json.dumps(_t1_plan()),                  # ch1 T1
+            json.dumps(_phase_04a_for_chapter(1)),   # ch1 T2 (success)
+            json.dumps(_t1_plan()),                  # ch2 T1 attempt 1
+            "not-json",                              # ch2 T2 attempt 1 (fail)
+            json.dumps(_t1_plan()),                  # ch2 T1 attempt 2 (T1 re-runs; DummyClient t1_assistant_parts is None)
+            "still-not-json",                        # ch2 T2 attempt 2 (fail, exhausted)
         ]
     )
     with pytest.raises(Exception):
@@ -541,7 +653,7 @@ def test_generate_outline_phase4a_resume_retries_exhausted_failed_chapter(tmp_pa
             model="dummy",
         )
 
-    resume_client = DummyClient([json.dumps(_phase_04a_for_chapter(2))])
+    resume_client = DummyClient([json.dumps(_t1_plan()), json.dumps(_phase_04a_for_chapter(2))])
     handoff_path = generate_outline(
         workspace=tmp_path,
         book_id="my_book",
@@ -552,7 +664,7 @@ def test_generate_outline_phase4a_resume_retries_exhausted_failed_chapter(tmp_pa
         model="dummy",
     )
     assert handoff_path.name in {"outline.json", "phase_04a_transition_seam_analysis_output.json"}
-    assert len(resume_client.messages_history) == 1
+    assert len(resume_client.messages_history) == 2
 
 
 def test_generate_outline_chapter_scoped_phase_requires_chapter_template_tokens(tmp_path: Path) -> None:
@@ -670,17 +782,21 @@ def test_generate_outline_phase_thinking_env_overrides(tmp_path: Path, monkeypat
     )
     levels = [str(call.get("thinking_level")) for call in client.calls]
     assert levels == [
-        "low",
-        "medium",
-        "high",
-        "minimal",
-        "minimal",
-        "low",
-        "low",
-        "medium",
-        "medium",
-        "high",
-        "high",
+        "low",     # phase01
+        "medium",  # phase02
+        "high", "minimal",    # phase03 ch1 T1+T2
+        "high", "minimal",    # phase03 ch2 T1+T2
+        "minimal", "minimal", # phase04a ch1 T1+T2
+        "minimal", "minimal", # phase04a ch2 T1+T2
+        "low", "minimal",     # phase04b ch1 T1+T2
+        "low", "minimal",     # phase04b ch2 T1+T2
+        # 04c and 04d short-circuit; 04c_handoff: no env override → "high" for CHAPTER_SCOPED_STEPS
+        "high", "minimal",    # phase04c_handoff ch1 T1+T2
+        "high", "minimal",    # phase04c_handoff ch2 T1+T2
+        "medium", "minimal",  # phase05 ch1 T1+T2
+        "medium", "minimal",  # phase05 ch2 T1+T2
+        "high", "minimal",    # phase06 ch1 T1+T2
+        "high", "minimal",    # phase06 ch2 T1+T2
     ]
 
 
@@ -707,6 +823,7 @@ def test_generate_outline_phase04b_input_uses_phase04a_selected_insertions(tmp_p
 
     rerun_client = DummyClient(
         [
+            json.dumps(_t1_plan()),
             json.dumps(
                 _phase_04b_for_chapter_with_report(
                     1,
@@ -722,6 +839,7 @@ def test_generate_outline_phase04b_input_uses_phase04a_selected_insertions(tmp_p
                     inserted_scene_refs=["1:2"],
                 )
             ),
+            json.dumps(_t1_plan()),
             json.dumps(_phase_04b_for_chapter_with_report(2)),
         ]
     )
@@ -759,14 +877,14 @@ def test_generate_outline_phase04b_input_uses_phase04a_selected_insertions(tmp_p
 def test_generate_outline_resume_phase5_reports_existing_phase04_seam_metrics(tmp_path: Path) -> None:
     _init_book(tmp_path)
     phase04_candidates_ch1 = [
-        {
-            "from_scene_ref": "1:1",
-            "to_scene_ref": "1:2",
-            "seam_score": 90,
-            "requested_resolution": "full_scene",
-            "reason": "phase04 metric test",
-        }
-    ]
+            {
+                "from_scene_ref": "1:1",
+                "to_scene_ref": "1:2",
+                "seam_score": 90,
+                "requested_resolution": "inline_bridge",
+                "reason": "phase04 metric test",
+            }
+        ]
     phase04_candidates_ch2 = [
         {
             "from_scene_ref": "2:1",
@@ -781,39 +899,41 @@ def test_generate_outline_resume_phase5_reports_existing_phase04_seam_metrics(tm
         [
             json.dumps(_phase_01()),
             json.dumps(_phase_02()),
-            json.dumps(_base_outline()),
-            json.dumps(_phase_04a_for_chapter_with_candidates(1, phase04_candidates_ch1)),
-            json.dumps(_phase_04a_for_chapter_with_candidates(2, phase04_candidates_ch2)),
+            json.dumps(_t1_plan()), json.dumps(_outline_for_chapter(1)),   # phase03 ch1 T1+T2
+            json.dumps(_t1_plan()), json.dumps(_outline_for_chapter(2)),   # phase03 ch2 T1+T2
+            json.dumps(_t1_plan()), json.dumps(_phase_04a_for_chapter_with_candidates(1, phase04_candidates_ch1)),
+            json.dumps(_t1_plan()), json.dumps(_phase_04a_for_chapter_with_candidates(2, phase04_candidates_ch2)),
+            json.dumps(_t1_plan()),
             json.dumps(
                 _phase_04b_for_chapter_with_report(
                     1,
                     resolved_candidates=[
-                        {
-                            "from_scene_ref": "1:1",
-                            "to_scene_ref": "1:2",
-                            "requested_resolution": "full_scene",
-                            "resolution": "full_scene",
-                            "inserted_scene_ref": "1:2",
-                        }
-                    ],
-                    inserted_scene_refs=["1:2"],
-                )
-            ),
-            json.dumps(_phase_04b_for_chapter_with_report(2)),
-            json.dumps(_phase_05_for_chapter(1)),
-            json.dumps(_phase_05_for_chapter(2)),
-            json.dumps(_phase_06_for_chapter(1)),
-            json.dumps(_phase_06_for_chapter(2)),
+                            {
+                                "from_scene_ref": "1:1",
+                                "to_scene_ref": "1:2",
+                                "requested_resolution": "inline_bridge",
+                                "resolution": "inline_bridge",
+                            }
+                        ],
+                    )
+                ),
+            json.dumps(_t1_plan()), json.dumps(_phase_04b_for_chapter_with_report(2)),
+            json.dumps(_t1_plan()), json.dumps(_phase_04c_handoff_for_chapter(1)),
+            json.dumps(_t1_plan()), json.dumps(_phase_04c_handoff_for_chapter(2)),
+            json.dumps(_t1_plan()), json.dumps(_phase_05_for_chapter(1)),
+            json.dumps(_t1_plan()), json.dumps(_phase_05_for_chapter(2)),
+            json.dumps(_t1_plan()), json.dumps(_phase_06_for_chapter(1)),
+            json.dumps(_t1_plan()), json.dumps(_phase_06_for_chapter(2)),
         ]
     )
     generate_outline(workspace=tmp_path, book_id="my_book", client=first_client, model="dummy")
 
     resume_client = DummyClient(
         [
-            json.dumps(_phase_05_for_chapter(1)),
-            json.dumps(_phase_05_for_chapter(2)),
-            json.dumps(_phase_06_for_chapter(1)),
-            json.dumps(_phase_06_for_chapter(2)),
+            json.dumps(_t1_plan()), json.dumps(_phase_05_for_chapter(1)),
+            json.dumps(_t1_plan()), json.dumps(_phase_05_for_chapter(2)),
+            json.dumps(_t1_plan()), json.dumps(_phase_06_for_chapter(1)),
+            json.dumps(_t1_plan()), json.dumps(_phase_06_for_chapter(2)),
         ]
     )
     generate_outline(
@@ -855,10 +975,10 @@ def test_generate_outline_success_clears_pause_marker_and_unknown_step(tmp_path:
 
     resume_client = DummyClient(
         [
-            json.dumps(_phase_05_for_chapter(1)),
-            json.dumps(_phase_05_for_chapter(2)),
-            json.dumps(_phase_06_for_chapter(1)),
-            json.dumps(_phase_06_for_chapter(2)),
+            json.dumps(_t1_plan()), json.dumps(_phase_05_for_chapter(1)),
+            json.dumps(_t1_plan()), json.dumps(_phase_05_for_chapter(2)),
+            json.dumps(_t1_plan()), json.dumps(_phase_06_for_chapter(1)),
+            json.dumps(_t1_plan()), json.dumps(_phase_06_for_chapter(2)),
         ]
     )
     generate_outline(

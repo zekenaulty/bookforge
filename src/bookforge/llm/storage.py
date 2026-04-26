@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import hashlib
 from pathlib import Path
 from typing import Any, Dict, Optional
 import re
@@ -10,6 +11,14 @@ def _sanitize_component(value: str) -> str:
     cleaned = re.sub(r"[^A-Za-z0-9._-]+", "-", str(value or ""))
     cleaned = cleaned.strip("-_.")
     return cleaned or "unknown"
+
+
+def _compact_component(value: str, *, max_length: int = 48) -> str:
+    if len(value) <= max_length:
+        return value
+    digest = hashlib.sha1(value.encode("utf-8")).hexdigest()[:8]
+    prefix_length = max(max_length - len(digest) - 1, 1)
+    return f"{value[:prefix_length].rstrip('-_.')}-{digest}"
 
 
 def _format_chapter_component(value: Any) -> str:
@@ -61,8 +70,8 @@ def llm_log_path(
     extra = extra if isinstance(extra, dict) else {}
     book_component = _sanitize_component(str(extra.get("book_id") or "global"))
     chapter_component = _format_chapter_component(extra.get("chapter"))
-    raw_label_component = _sanitize_component(str(label or "event"))
-    action_component = _normalize_action_descriptor(str(label or "event"))
+    raw_label_component = _compact_component(_sanitize_component(str(label or "event")))
+    action_component = _compact_component(_normalize_action_descriptor(str(label or "event")))
     scene_prefix = _format_scene_prefix(extra.get("scene"))
     if not timestamp:
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")

@@ -81,6 +81,9 @@ Behavior
   - `preflight_scene_state` when scene scope is selected
   - `generate_continuity_pack` when scene scope is selected
   - `write_scene_prose` when scene scope is selected
+  - `refresh_character_appearance_projection` when scene scope is selected
+  - `draft_scene_setting_projection` when scene scope is selected
+  - `extract_scene_setting_from_prose` when scene scope is selected and prose exists
   - `state_repair_scene_patch` when scene scope is selected
   - `lint_scene_prose` when scene scope is selected
   - `repair_scene_prose` when scene scope is selected
@@ -100,6 +103,9 @@ Behavior
   - `generate_continuity_pack` when the active cursor scene has scene-card and preflight artifacts but no continuity pack
   - `resume_paused_section`
   - `write_scene_prose` when the active cursor scene has the required scene-card, preflight, continuity, and style-anchor inputs
+  - `refresh_character_appearance_projection` when a scene scope has a current execution node and the caller wants a derived, non-mutating appearance projection for the scene/cast
+  - `draft_scene_setting_projection` when a scene scope has a current execution node and the caller wants to record provisional author setting intent
+  - `extract_scene_setting_from_prose` when a scene scope has existing prose and the caller wants to record derived setting observations from that prose
   - `state_repair_scene_patch` when the active cursor scene has a current provisional prose baseline and no current state-repair patch for that baseline
   - `lint_scene_prose` when the active cursor scene has a current state-repair patch and no current lint report for that patched baseline
   - `repair_scene_prose` when the latest current lint report fails
@@ -110,13 +116,37 @@ Behavior
   - `record_assembly_validation` for active assembly branches
   - `promote_branch_to_main` once the branch reaches `promote_ready`
 
+## Branch Lifecycle Commands
+
+Purpose
+- Provide operator-facing access to the branch lifecycle primitives used by Nanda and the engine action surface.
+
+Commands
+- `bookforge workflow create-branch --book <id> [--branch-id <id>] [--parent-branch-id <id>] [--fork-group-id <id>] [--chapter <n>] [--section <m>] [--branch-role <role>] [--merge-operation <op>]`
+- `bookforge workflow create-assembly-branch --book <id> --fork-group-id <id> [--chapter <n>] [--branch-id <id>]`
+- `bookforge workflow discard-branch --book <id> --branch-id <id> [--reason <text>]`
+- `bookforge workflow promote-branch --book <id> --branch-id <id> [--target-branch-id <id>]`
+- `bookforge workflow rebase-branch --book <id> --branch-id <id> [--new-branch-id <id>]`
+- `bookforge workflow validate-assembly-branch --book <id> --branch-id <id>`
+- `bookforge workflow record-assembly-validation --book <id> --branch-id <id> (--passed | --failed) [--message <text>]`
+
+Behavior
+- `create-branch` derives a branch from `main` by default, or from `--parent-branch-id` when a nested branch is needed.
+- `promote-branch` promotes to `main` by default, or into `--target-branch-id` for parent-target promotion.
+- `rebase-branch` is conservative: it creates a refreshed child branch from the current parent snapshot and discards the old branch without erasing its history.
+- `create-assembly-branch` creates an off-parent assembly branch for a fork group; it does not promote assembled content by itself.
+- When sibling branches contain scoped writer outputs, `create-assembly-branch` stages those draft scene files into the assembly branch snapshot for validation.
+- `validate-assembly-branch` deterministically checks that expected scoped sibling writer files are present in the assembly snapshot and records pass/fail.
+- `record-assembly-validation` records whether the assembly branch has passed validation before promotion.
+- These commands emit execution receipts with node, branch, status, and details instead of requiring raw branch manifest inspection.
+
 ## `bookforge workflow scene-readiness`
 
 Purpose
-- Show the truthful scene-phase readiness surface for one scene on the current main-branch cursor path.
+- Show the truthful scene-phase readiness surface for one scene on `main` or a selected derived branch.
 
 Usage
-- `bookforge workflow scene-readiness --book <id> --chapter <n> --scene <s> [--section <m>]`
+- `bookforge workflow scene-readiness --book <id> [--branch-id <id>] --chapter <n> --scene <s> [--section <m>]`
 
 Behavior
 - Reports:
@@ -126,9 +156,11 @@ Behavior
   - missing prerequisites
   - available inputs
   - existing outputs with explicit artifact status
-- Current first-slice scope:
-  - main branch only
-  - active cursor scene only
+- Branch scope:
+  - `main` still requires the selected scene to match the active cursor scene.
+  - derived branches resolve against the branch-local current node, active section, and snapshot root.
+  - unknown, discarded, or promoted branches return truthful refusal details instead of falling back to `main`.
+  - copied committed scene files inside a derived branch are treated as replaceable branch baselines, not canonical overwrite permission.
 - phase rows currently exposed:
   - `plan_scene`
   - `preflight_scene_state`
@@ -150,16 +182,48 @@ Behavior
 - This is the truthful query surface behind deeper author control.
 - It exists so callers do not have to infer scene readiness from file presence or persona text.
 
+## Projection Query Surfaces
+
+Purpose
+- Expose scene-context projections that Nanda can query without reading prompt logs or treating prose as hidden state.
+
+Python surfaces
+- `bookforge.query.list_appearance_projection_views(...)`
+- `bookforge.query.get_scene_setting_projection(...)`
+- `bookforge.query.get_scene_context_projection(...)`
+- `bookforge.query.get_thought_context_projection(...)`
+- `bookforge.execution.build_refresh_character_appearance_projection_request(...)`
+- `bookforge.execution.refresh_character_appearance_projection(...)`
+- `bookforge.execution.build_draft_scene_setting_projection_request(...)`
+- `bookforge.execution.draft_scene_setting_projection(...)`
+- `bookforge.execution.build_extract_scene_setting_from_prose_request(...)`
+- `bookforge.execution.extract_scene_setting_from_prose(...)`
+
+Behavior
+- Appearance projections are book-rooted and can narrow by branch, chapter, section, scene, and character.
+- `get_scene_context_projection` aggregates appearance, setting, and prior T1 thought-context availability for a scene without making callers stitch raw files together.
+- Existing character appearance is labeled truthfully as `derived`, `provisional`, or `diagnostic` unless a stronger artifact status is explicitly present.
+- Scene setting projections distinguish:
+  - `author_drafted` as `provisional`
+  - `prose_extracted` as `derived`
+  - `outline_derived` as `derived`
+  - missing setting as `diagnostic`
+- Prior T1 thought signatures are exposed as diagnostic planning-reuse context only.
+- Thought signatures are never treated as proof of execution truth; execution receipts remain authoritative for what happened.
+- `refresh_character_appearance_projection` writes a derived projection artifact for the selected scene/cast and records a produced-artifact receipt without mutating character truth.
+- `draft_scene_setting_projection` writes a provisional author-drafted setting artifact and records a produced-artifact receipt without mutating scene or location truth.
+- `extract_scene_setting_from_prose` writes a derived prose-extracted setting artifact and refuses when no scene prose exists.
+
 ## `bookforge workflow plan-scene`
 
 Purpose
 - Generate a provisional scene card for one scene without auto-running downstream phases.
 
 Usage
-- `bookforge workflow plan-scene --book <id> --chapter <n> --scene <s> [--section <m>]`
+- `bookforge workflow plan-scene --book <id> [--branch-id <id>] --chapter <n> --scene <s> [--section <m>]`
 
 Behavior
-- Requires the selected scene to be the active cursor scene on `main`.
+- Requires the selected scene to be the active cursor scene on `main`, or the branch-local active scene when `--branch-id` targets a derived branch.
 - Produces only the provisional scene-card artifact for the current scene.
 - Does not auto-run:
   - preflight
@@ -178,10 +242,10 @@ Purpose
 - Generate a provisional preflight state patch for one scene without applying it.
 
 Usage
-- `bookforge workflow preflight-scene-state --book <id> --chapter <n> --scene <s> [--section <m>]`
+- `bookforge workflow preflight-scene-state --book <id> [--branch-id <id>] --chapter <n> --scene <s> [--section <m>]`
 
 Behavior
-- Requires the selected scene to be the active cursor scene on `main`.
+- Requires the selected scene to be the active cursor scene on `main`, or the branch-local active scene when `--branch-id` targets a derived branch.
 - Requires an existing provisional scene card.
 - Produces only the provisional preflight patch artifact for the current scene.
 - Does not apply the patch to:
@@ -204,10 +268,10 @@ Purpose
 - Generate a derived continuity pack for one scene without writing prose or mutating canonical state.
 
 Usage
-- `bookforge workflow generate-continuity-pack --book <id> --chapter <n> --scene <s> [--section <m>]`
+- `bookforge workflow generate-continuity-pack --book <id> [--branch-id <id>] --chapter <n> --scene <s> [--section <m>]`
 
 Behavior
-- Requires the selected scene to be the active cursor scene on `main`.
+- Requires the selected scene to be the active cursor scene on `main`, or the branch-local active scene when `--branch-id` targets a derived branch.
 - Requires an existing provisional scene card and provisional preflight state patch.
 - Produces only the derived continuity-pack artifact for the current scene.
 - Applies safe preflight patch materialization only to an in-memory working state.
@@ -228,31 +292,33 @@ Behavior
 ## `bookforge workflow apply-scene-commit`
 
 Purpose
-- Commit one scene's latest passing provisional baseline into canonical state and authoritative scene artifacts.
+- Commit one scene's latest passing provisional baseline into the selected execution root.
 
 Usage
-- `bookforge workflow apply-scene-commit --book <id> --chapter <n> --scene <s> [--section <m>]`
+- `bookforge workflow apply-scene-commit --book <id> [--branch-id <id>] --chapter <n> --scene <s> [--section <m>]`
 
 Behavior
-- Requires the selected scene to be the active cursor scene on `main`.
+- Requires the selected scene to be the active cursor scene on `main`, or the branch-local active scene when `--branch-id` targets a derived branch.
 - Requires:
   - current scene card
   - current prose baseline (`write_prose` or newer `repair_prose`)
   - current `state_repair_patch`
   - current passing `lint_report`
-- Runs the real canonical apply path for one scene:
+- Runs the real apply path for one scene:
   - applies the final state patch
   - applies character/stat updates
   - refreshes appearance projections when requested
   - applies durable mutations
-  - writes authoritative scene prose/meta
+  - writes authoritative scene prose/meta in the selected execution root
   - updates bible context
   - compiles chapter outputs on chapter end
   - advances the cursor
 - Emits authoritative or derived produced-artifact receipts instead of forcing callers to infer commit success from filesystem changes.
+- On `main`, existing committed scene files are protected and block accidental overwrite.
+- In a derived branch, existing copied scene files are replaceable branch-local baselines; replacement preserves `.original` backups before writing the new branch-local authoritative scene files.
 - Current implementation note:
   - this command routes through the narrow engine action `apply_scene_commit`
-  - the action emits a reconciled main-branch execution result with canonical-change details
+  - the action emits a reconciled main-branch result on `main` or a branch-local reconciled result when `--branch-id` is selected
 
 ## `bookforge workflow freeze-section`
 
@@ -293,7 +359,7 @@ Purpose
 - Run the `section_write` loop for the active frozen section through its terminal scene without locking it.
 
 Usage
-- `bookforge workflow write-section --book <id> --chapter <n> --section <m> [options]`
+- `bookforge workflow write-section --book <id> [--branch-id <id>] --chapter <n> --section <m> [options]`
 
 Options
 - `--ack-outline-attention-items`: Pass through to the writer loop.
@@ -301,6 +367,8 @@ Options
 
 Behavior
 - Requires the selected section to be the active frozen section.
+- `main` writes against canonical book state.
+- `--branch-id <id>` writes against that branch's snapshot root, branch-local current node, and branch-local active section.
 - Refuses if a pause marker is already present; paused execution must use `resume-paused-section`.
 - Writes only through the section's terminal scene.
 - Leaves locking as a separate explicit action.
@@ -316,10 +384,10 @@ Purpose
 - Generate provisional prose for one scene without auto-running lint, repair, or commit.
 
 Usage
-- `bookforge workflow write-scene-prose --book <id> --chapter <n> --scene <s> [--section <m>]`
+- `bookforge workflow write-scene-prose --book <id> [--branch-id <id>] --chapter <n> --scene <s> [--section <m>]`
 
 Behavior
-- Requires the selected scene to be the active cursor scene on `main`.
+- Requires the selected scene to be the active cursor scene on `main`, or the branch-local active scene when `--branch-id` targets a derived branch.
 - Requires the first-slice scene prerequisites to already exist:
   - `scene_card`
   - `preflight_patch`
@@ -327,6 +395,7 @@ Behavior
   - `style_anchor`
 - Refuses truthfully when prerequisites are missing or when the live node has drifted.
 - Produces provisional write artifacts only.
+- In a derived branch, copied committed scene prose is a replaceable baseline and does not by itself block a new provisional prose pass.
 - Does not auto-run:
   - lint
   - repair
@@ -342,10 +411,10 @@ Purpose
 - Generate a provisional corrected state patch for one scene without linting, repairing prose, or committing.
 
 Usage
-- `bookforge workflow state-repair-scene-patch --book <id> --chapter <n> --scene <s> [--section <m>]`
+- `bookforge workflow state-repair-scene-patch --book <id> [--branch-id <id>] --chapter <n> --scene <s> [--section <m>]`
 
 Behavior
-- Requires the selected scene to be the active cursor scene on `main`.
+- Requires the selected scene to be the active cursor scene on `main`, or the branch-local active scene when `--branch-id` targets a derived branch.
 - Requires existing first-slice scene artifacts:
   - `scene_card`
   - `preflight_patch`
@@ -374,10 +443,10 @@ Purpose
 - Generate a provisional lint report for one scene without repairing prose or committing.
 
 Usage
-- `bookforge workflow lint-scene-prose --book <id> --chapter <n> --scene <s> [--section <m>]`
+- `bookforge workflow lint-scene-prose --book <id> [--branch-id <id>] --chapter <n> --scene <s> [--section <m>]`
 
 Behavior
-- Requires the selected scene to be the active cursor scene on `main`.
+- Requires the selected scene to be the active cursor scene on `main`, or the branch-local active scene when `--branch-id` targets a derived branch.
 - Requires existing first-slice scene artifacts:
   - `scene_card`
   - `preflight_patch`
@@ -404,10 +473,10 @@ Purpose
 - Generate provisional repaired prose and repair-patch artifacts for one scene without rerunning state repair, lint, or commit.
 
 Usage
-- `bookforge workflow repair-scene-prose --book <id> --chapter <n> --scene <s> [--section <m>]`
+- `bookforge workflow repair-scene-prose --book <id> [--branch-id <id>] --chapter <n> --scene <s> [--section <m>]`
 
 Behavior
-- Requires the selected scene to be the active cursor scene on `main`.
+- Requires the selected scene to be the active cursor scene on `main`, or the branch-local active scene when `--branch-id` targets a derived branch.
 - Requires:
   - `scene_card`
   - the current provisional prose artifact:
@@ -522,10 +591,14 @@ Current implementation note
 - `bookforge workflow write-section`, `bookforge workflow resume-paused-section`, and `bookforge workflow advance-section` now use a dedicated section-range macro over the extracted scene-phase actions rather than calling the generic batch `run` surface directly.
 - `bookforge workflow advance-section` is still a macro convenience wrapper, but it now composes the extracted execution actions instead of calling its own orchestration path.
 - `thin_outline` remains reserved vocabulary for a future thinner batch surface and is not a public command today.
-- Main-branch workflow commands emit reconciliation details alongside result status. Derived-branch reruns and promotions are still a lower-level engine surface and are not exposed as public CLI commands yet.
+- Main-branch workflow commands emit reconciliation details alongside result status.
+- Scene-phase commands and `write-section` now accept `--branch-id <id>` for derived-branch execution roots.
+- Derived-branch lifecycle operations such as create/discard/promote/rebase are still a lower-level engine surface and are not exposed as public CLI commands yet.
 - `bookforge workflow legal-actions --branch-id <id>` is the current operator-facing way to inspect derived-branch action legality without calling Python directly.
 - `bookforge workflow legal-actions --fork-group-id <id>` is the current operator-facing way to inspect whether a main-branch fork group is eligible for assembly-branch creation.
 - `bookforge workflow legal-actions --scene <s>` is the current operator-facing way to expose scene-scoped execution options such as `write_scene_prose`.
+- `bookforge workflow scene-readiness --branch-id <id>` is the operator-facing way to inspect branch-local scene-phase readiness without reading branch files directly.
+- `bookforge workflow create-branch`, `promote-branch`, `rebase-branch`, `discard-branch`, `create-assembly-branch`, `validate-assembly-branch`, and `record-assembly-validation` expose the first operator-facing branch lifecycle controls.
 - The extracted section materialization path on `main` now covers:
   - init
   - freeze
@@ -568,6 +641,22 @@ Examples
   - `bookforge --workspace workspace workflow generate-continuity-pack --book criticulous_the_rng_hellscape --chapter 1 --scene 1 --section 1`
 - Generate provisional prose for the active cursor scene only:
   - `bookforge --workspace workspace workflow write-scene-prose --book criticulous_the_rng_hellscape --chapter 1 --scene 1 --section 1`
+- Inspect scene-phase readiness inside a derived branch:
+  - `bookforge --workspace workspace workflow scene-readiness --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --chapter 1 --scene 1 --section 1`
+- Create a scene rewrite branch from `main`:
+  - `bookforge --workspace workspace workflow create-branch --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --chapter 1 --section 1 --branch-role scene`
+- Create a nested scene branch from a chapter branch:
+  - `bookforge --workspace workspace workflow create-branch --book criticulous_the_rng_hellscape --parent-branch-id chapter-1-rewrite --branch-id rewrite-ch1-sc1 --chapter 1 --section 1 --branch-role scene`
+- Generate provisional prose inside a derived branch without touching `main`:
+  - `bookforge --workspace workspace workflow write-scene-prose --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --chapter 1 --scene 1 --section 1`
+- Commit a rewritten scene inside a derived branch while preserving the branch snapshot's original scene as `.original` backup:
+  - `bookforge --workspace workspace workflow apply-scene-commit --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --chapter 1 --scene 1 --section 1`
+- Promote a scene branch back into its parent branch:
+  - `bookforge --workspace workspace workflow promote-branch --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --target-branch-id chapter-1-rewrite`
+- Rebase a stale branch into a refreshed child:
+  - `bookforge --workspace workspace workflow rebase-branch --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --new-branch-id rewrite-ch1-sc1-rebased`
+- Validate an assembly branch after staging sibling writer outputs:
+  - `bookforge --workspace workspace workflow validate-assembly-branch --book criticulous_the_rng_hellscape --branch-id assembly-ch1`
 - Generate a provisional corrected state patch for the active cursor scene only:
   - `bookforge --workspace workspace workflow state-repair-scene-patch --book criticulous_the_rng_hellscape --chapter 1 --scene 1 --section 1`
 - Generate a provisional lint report for the active cursor scene only:

@@ -10,7 +10,7 @@ class DummyClient:
     def __init__(self, text: str) -> None:
         self._text = text
 
-    def chat(self, messages, model, temperature=0.7, max_tokens=1024):
+    def chat(self, messages, model, temperature=0.7, max_tokens=1024, thinking_level=None, thinking_budget=None):
         return LLMResponse(
             text=self._text,
             raw={"candidates": [{"finishReason": "STOP"}]},

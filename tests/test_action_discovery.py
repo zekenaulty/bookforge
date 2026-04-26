@@ -566,6 +566,8 @@ def test_list_execution_options_for_active_scene_includes_write_scene_prose(tmp_
         "create_branch",
         "write_frozen_section",
         "write_scene_prose",
+        "refresh_character_appearance_projection",
+        "draft_scene_setting_projection",
     ]
 
 
@@ -634,6 +636,9 @@ def test_list_execution_options_for_prose_generated_scene_includes_state_repair(
     assert [option.action for option in legal] == [
         "create_branch",
         "write_frozen_section",
+        "refresh_character_appearance_projection",
+        "draft_scene_setting_projection",
+        "extract_scene_setting_from_prose",
         "state_repair_scene_patch",
     ]
 
@@ -712,6 +717,9 @@ def test_list_execution_options_for_state_repaired_scene_includes_lint(tmp_path:
     assert [option.action for option in legal] == [
         "create_branch",
         "write_frozen_section",
+        "refresh_character_appearance_projection",
+        "draft_scene_setting_projection",
+        "extract_scene_setting_from_prose",
         "lint_scene_prose",
     ]
 
@@ -780,6 +788,9 @@ def test_list_execution_options_for_passing_lint_scene_includes_commit(tmp_path:
     assert [option.action for option in legal] == [
         "create_branch",
         "write_frozen_section",
+        "refresh_character_appearance_projection",
+        "draft_scene_setting_projection",
+        "extract_scene_setting_from_prose",
         "apply_scene_commit",
     ]
 
@@ -847,6 +858,9 @@ def test_list_execution_options_for_failing_lint_scene_includes_repair(tmp_path:
     assert [option.action for option in legal] == [
         "create_branch",
         "write_frozen_section",
+        "refresh_character_appearance_projection",
+        "draft_scene_setting_projection",
+        "extract_scene_setting_from_prose",
         "repair_scene_prose",
     ]
 
@@ -915,6 +929,9 @@ def test_list_execution_options_reopens_state_repair_after_repair_outputs(tmp_pa
     assert [option.action for option in legal] == [
         "create_branch",
         "write_frozen_section",
+        "refresh_character_appearance_projection",
+        "draft_scene_setting_projection",
+        "extract_scene_setting_from_prose",
         "state_repair_scene_patch",
     ]
 
@@ -940,6 +957,8 @@ def test_list_execution_options_for_unstarted_scene_includes_plan_scene(tmp_path
         "create_branch",
         "write_frozen_section",
         "plan_scene",
+        "refresh_character_appearance_projection",
+        "draft_scene_setting_projection",
     ]
 
 
@@ -967,6 +986,8 @@ def test_list_execution_options_for_planned_scene_includes_preflight_scene_state
         "create_branch",
         "write_frozen_section",
         "preflight_scene_state",
+        "refresh_character_appearance_projection",
+        "draft_scene_setting_projection",
     ]
 
 
@@ -1002,6 +1023,8 @@ def test_list_execution_options_for_preflighted_scene_includes_generate_continui
         "create_branch",
         "write_frozen_section",
         "generate_continuity_pack",
+        "refresh_character_appearance_projection",
+        "draft_scene_setting_projection",
     ]
 
 
@@ -1048,6 +1071,8 @@ def test_cli_parser_accepts_workflow_scene_readiness_command() -> None:
             "scene-readiness",
             "--book",
             "my_book",
+            "--branch-id",
+            "rewrite-sec1",
             "--chapter",
             "1",
             "--scene",
@@ -1060,9 +1085,154 @@ def test_cli_parser_accepts_workflow_scene_readiness_command() -> None:
     assert args.command == "workflow"
     assert args.workflow_command == "scene-readiness"
     assert args.book == "my_book"
+    assert args.branch_id == "rewrite-sec1"
     assert args.chapter == 1
     assert args.scene == 2
     assert args.section == 1
+
+
+def test_cli_parser_accepts_workflow_branch_lifecycle_commands() -> None:
+    parser = build_parser()
+
+    create_args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "create-branch",
+            "--book",
+            "my_book",
+            "--branch-id",
+            "scene-rewrite",
+            "--parent-branch-id",
+            "chapter-branch",
+            "--fork-group-id",
+            "fg-1",
+            "--chapter",
+            "1",
+            "--section",
+            "2",
+            "--branch-role",
+            "scene",
+        ]
+    )
+    assert create_args.workflow_command == "create-branch"
+    assert create_args.branch_id == "scene-rewrite"
+    assert create_args.parent_branch_id == "chapter-branch"
+    assert create_args.fork_group_id == "fg-1"
+    assert create_args.chapter == 1
+    assert create_args.section == 2
+    assert create_args.branch_role == "scene"
+
+    assembly_args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "create-assembly-branch",
+            "--book",
+            "my_book",
+            "--fork-group-id",
+            "fg-1",
+            "--chapter",
+            "1",
+            "--branch-id",
+            "assembly-ch1",
+        ]
+    )
+    assert assembly_args.workflow_command == "create-assembly-branch"
+    assert assembly_args.branch_id == "assembly-ch1"
+    assert assembly_args.fork_group_id == "fg-1"
+    assert assembly_args.chapter == 1
+
+    discard_args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "discard-branch",
+            "--book",
+            "my_book",
+            "--branch-id",
+            "scene-rewrite",
+            "--reason",
+            "stale",
+        ]
+    )
+    assert discard_args.workflow_command == "discard-branch"
+    assert discard_args.branch_id == "scene-rewrite"
+    assert discard_args.reason == "stale"
+
+    promote_args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "promote-branch",
+            "--book",
+            "my_book",
+            "--branch-id",
+            "scene-rewrite",
+            "--target-branch-id",
+            "chapter-branch",
+        ]
+    )
+    assert promote_args.workflow_command == "promote-branch"
+    assert promote_args.branch_id == "scene-rewrite"
+    assert promote_args.target_branch_id == "chapter-branch"
+
+    rebase_args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "rebase-branch",
+            "--book",
+            "my_book",
+            "--branch-id",
+            "scene-rewrite",
+            "--new-branch-id",
+            "scene-rewrite-rebased",
+        ]
+    )
+    assert rebase_args.workflow_command == "rebase-branch"
+    assert rebase_args.branch_id == "scene-rewrite"
+    assert rebase_args.new_branch_id == "scene-rewrite-rebased"
+
+    validate_args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "validate-assembly-branch",
+            "--book",
+            "my_book",
+            "--branch-id",
+            "assembly-ch1",
+        ]
+    )
+    assert validate_args.workflow_command == "validate-assembly-branch"
+    assert validate_args.branch_id == "assembly-ch1"
+
+    validation_args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "record-assembly-validation",
+            "--book",
+            "my_book",
+            "--branch-id",
+            "assembly-ch1",
+            "--failed",
+            "--message",
+            "Seam audit failed.",
+        ]
+    )
+    assert validation_args.workflow_command == "record-assembly-validation"
+    assert validation_args.branch_id == "assembly-ch1"
+    assert validation_args.passed is False
+    assert validation_args.message == "Seam audit failed."
 
 
 def test_cli_parser_accepts_workflow_plan_scene_command() -> None:

@@ -98,6 +98,15 @@ def _outline_wrapper() -> dict:
                 }
             ],
             "inserted_scene_refs": ["1:2"],
+            "insertion_edge_impacts": [
+                {
+                    "from_scene_ref": "1:1",
+                    "to_scene_ref": "1:2",
+                    "inserted_scene_ref": "1:2",
+                    "requested_resolution": "micro_scene",
+                    "resolution": "micro_scene",
+                }
+            ],
             "unresolved_required_insertions": [],
         },
     }

@@ -13,6 +13,15 @@ def book_root(workspace: Path, book_id: str) -> Path:
     return workspace / "books" / book_id
 
 
+def execution_book_root(book_root: Path, branch_id: str = MAIN_BRANCH_ID) -> Path:
+    resolved = str(branch_id or MAIN_BRANCH_ID).strip() or MAIN_BRANCH_ID
+    if resolved == MAIN_BRANCH_ID:
+        return book_root
+    from bookforge.supervision import paths as supervision_paths
+
+    return supervision_paths.branch_snapshot_root(book_root, resolved)
+
+
 def outline_root(book_root: Path) -> Path:
     return book_root / "outline"
 

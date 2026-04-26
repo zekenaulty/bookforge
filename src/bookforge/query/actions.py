@@ -3,10 +3,13 @@ from __future__ import annotations
 from typing import List, Optional, Tuple
 
 from bookforge.contracts import BranchManifest, ExecutionOption, MAIN_BRANCH_ID, ScopeSelector
+from bookforge.pipeline.scene_phase_artifacts import load_scene_phase_artifact_state
 
 from . import _common
+from .appearance import list_appearance_projection_views
 from .scene_phase import get_scene_phase_readiness
-from .workspace import current_main_node, get_section_status, get_workspace_status
+from .setting import get_scene_setting_projection
+from .workspace import current_execution_node, current_main_node, get_section_status, get_workspace_status, get_workspace_status_for_branch
 
 
 def _resolved_branch_id(selector: ScopeSelector) -> str:
@@ -26,6 +29,14 @@ def _load_branch_manifest(book_root, branch_id: str) -> Optional[BranchManifest]
         return BranchManifest.from_dict(payload)
     except ValueError:
         return None
+
+
+def _execution_book_root(book_root, branch_id: str):
+    if str(branch_id or MAIN_BRANCH_ID).strip() == MAIN_BRANCH_ID:
+        return book_root
+    from bookforge.supervision import paths as supervision_paths
+
+    return supervision_paths.branch_snapshot_root(book_root, branch_id)
 
 
 def _evaluate_initialize_workflow(workspace, book_id: str, selector: ScopeSelector) -> Tuple[bool, Optional[str], dict]:
@@ -223,14 +234,23 @@ def _evaluate_lock_section(workspace, book_id: str, selector: ScopeSelector) -> 
 
 def _evaluate_write_section(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
     book_root = _common.book_root(workspace, book_id)
-    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
-        return False, "write_frozen_section only supports main-branch execution.", {}
-    if not _workflow_initialized(book_root):
+    branch_id = _resolved_branch_id(selector)
+    execution_root = _execution_book_root(book_root, branch_id)
+    if branch_id != MAIN_BRANCH_ID:
+        manifest = _load_branch_manifest(book_root, branch_id)
+        if manifest is None:
+            return False, f"Branch {branch_id} does not exist.", {}
+        if manifest.lifecycle_state in {"discard", "promoted"}:
+            return False, f"Branch {branch_id} is already in terminal lifecycle state {manifest.lifecycle_state}.", {
+                "branch_id": branch_id,
+                "lifecycle_state": manifest.lifecycle_state,
+            }
+    if not _workflow_initialized(execution_root):
         return False, "Workflow must be initialized before a frozen section can be written.", {}
     if selector.chapter is None or selector.section is None:
         return False, "write_frozen_section requires chapter and section scope.", {}
 
-    status = get_workspace_status(workspace, book_id, prefer_emitted=prefer_emitted)
+    status = get_workspace_status_for_branch(workspace, book_id, branch_id=branch_id, prefer_emitted=prefer_emitted)
     if status.pause_marker:
         return False, "write_frozen_section refuses when a pause marker is present; use resume_paused_section.", {
             "pause_marker": status.pause_marker,
@@ -248,7 +268,7 @@ def _evaluate_write_section(workspace, book_id: str, selector: ScopeSelector, *,
             "active_section": active_section_id,
         }
 
-    section_status = get_section_status(workspace, book_id, selector.chapter, selector.section) or {}
+    section_status = get_section_status(workspace, book_id, selector.chapter, selector.section, branch_id=branch_id) or {}
     normalized_status = str(section_status.get("status") or "").strip().lower()
     if normalized_status == "locked":
         return False, "Selected section is already locked.", {"section_status": section_status.get("status")}
@@ -274,7 +294,7 @@ def _evaluate_write_section(workspace, book_id: str, selector: ScopeSelector, *,
             "scene_ref_start": section_status.get("scene_ref_start"),
             "scene_ref_end": section_status.get("scene_ref_end"),
         }
-    chapter_dir = _common.book_root(workspace, book_id) / "draft" / "chapters" / f"ch_{int(selector.chapter):03d}"
+    chapter_dir = execution_root / "draft" / "chapters" / f"ch_{int(selector.chapter):03d}"
     missing = []
     for scene_id in range(scene_start, scene_end + 1):
         prose_path = chapter_dir / f"scene_{scene_id:03d}.md"
@@ -297,6 +317,8 @@ def _evaluate_write_section(workspace, book_id: str, selector: ScopeSelector, *,
         "scene_ref_start": scene_ref_start,
         "scene_ref_end": scene_ref_end,
         "missing_artifact_count": len(missing),
+        "branch_id": branch_id,
+        "mutation_scope": "canonical" if branch_id == MAIN_BRANCH_ID else "branch_authoritative",
     }
 
 
@@ -437,11 +459,11 @@ def _evaluate_record_assembly_validation(workspace, book_id: str, selector: Scop
 
 
 def _evaluate_write_scene_prose(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
-    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
-        return False, "write_scene_prose only supports main-branch execution.", {}
+    resolved_branch_id = _resolved_branch_id(selector)
     readiness = get_scene_phase_readiness(
         workspace,
         book_id,
+        branch_id=resolved_branch_id,
         chapter_id=selector.chapter,
         scene_id=selector.scene,
         section_id=selector.section,
@@ -464,12 +486,113 @@ def _evaluate_write_scene_prose(workspace, book_id: str, selector: ScopeSelector
     return bool(action_row.legal and action_row.ready), action_row.refusal_reason, details
 
 
+def _evaluate_refresh_character_appearance_projection(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
+    resolved_branch_id = _resolved_branch_id(selector)
+    if selector.chapter is None or selector.scene is None:
+        return False, "refresh_character_appearance_projection requires chapter and scene scope.", {}
+    node = current_execution_node(workspace, book_id, branch_id=resolved_branch_id, prefer_emitted=prefer_emitted)
+    if node is None:
+        return False, f"No current node is available for branch {resolved_branch_id}.", {}
+    views = list_appearance_projection_views(
+        workspace,
+        book_id,
+        branch_id=resolved_branch_id,
+        chapter_id=selector.chapter,
+        section_id=selector.section,
+        scene_id=selector.scene,
+        prefer_emitted=prefer_emitted,
+    )
+    return True, None, {
+        "chapter_id": selector.chapter,
+        "section_id": selector.section,
+        "scene_id": selector.scene,
+        "mutation_scope": "derived_projection",
+        "character_count": len(views),
+        "missing_count": sum(1 for view in views if view.appearance_status == "missing"),
+        "stale_count": sum(1 for view in views if view.appearance_status == "stale"),
+        "artifact_status": "derived",
+        "statuses": [
+            {
+                "character_id": view.character_id,
+                "appearance_status": view.appearance_status,
+                "artifact_status": view.artifact_status,
+                "staleness_reason": view.staleness_reason,
+            }
+            for view in views
+        ],
+    }
+
+
+def _current_or_committed_prose_path(book_root, chapter: int, scene: int):
+    artifact_state = load_scene_phase_artifact_state(book_root, int(chapter), int(scene))
+    if artifact_state.current_prose_path is not None:
+        return artifact_state.current_prose_path
+    committed = book_root / "draft" / "chapters" / f"ch_{int(chapter):03d}" / f"scene_{int(scene):03d}.md"
+    return committed if committed.exists() else None
+
+
+def _evaluate_draft_scene_setting_projection(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
+    resolved_branch_id = _resolved_branch_id(selector)
+    if selector.chapter is None or selector.scene is None:
+        return False, "draft_scene_setting_projection requires chapter and scene scope.", {}
+    node = current_execution_node(workspace, book_id, branch_id=resolved_branch_id, prefer_emitted=prefer_emitted)
+    if node is None:
+        return False, f"No current node is available for branch {resolved_branch_id}.", {}
+    setting = get_scene_setting_projection(
+        workspace,
+        book_id,
+        branch_id=resolved_branch_id,
+        chapter_id=int(selector.chapter),
+        section_id=selector.section,
+        scene_id=int(selector.scene),
+        prefer_emitted=prefer_emitted,
+    )
+    return True, None, {
+        "chapter_id": selector.chapter,
+        "section_id": selector.section,
+        "scene_id": selector.scene,
+        "mutation_scope": "provisional_projection",
+        "current_setting_status": setting.setting_status,
+        "current_source_mode": setting.source_mode,
+        "current_artifact_status": setting.artifact_status,
+        "artifact_status": "provisional",
+    }
+
+
+def _evaluate_extract_scene_setting_from_prose(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
+    resolved_branch_id = _resolved_branch_id(selector)
+    if selector.chapter is None or selector.scene is None:
+        return False, "extract_scene_setting_from_prose requires chapter and scene scope.", {}
+    node = current_execution_node(workspace, book_id, branch_id=resolved_branch_id, prefer_emitted=prefer_emitted)
+    if node is None:
+        return False, f"No current node is available for branch {resolved_branch_id}.", {}
+    book_root = _execution_book_root(_common.book_root(workspace, book_id), resolved_branch_id)
+    prose_path = _current_or_committed_prose_path(book_root, int(selector.chapter), int(selector.scene))
+    if prose_path is None:
+        return False, "extract_scene_setting_from_prose requires existing scene prose.", {
+            "chapter_id": selector.chapter,
+            "section_id": selector.section,
+            "scene_id": selector.scene,
+            "mutation_scope": "derived_projection",
+            "missing_prerequisites": ["scene_prose"],
+        }
+    return True, None, {
+        "chapter_id": selector.chapter,
+        "section_id": selector.section,
+        "scene_id": selector.scene,
+        "mutation_scope": "derived_projection",
+        "available_inputs": ["scene_prose"],
+        "source_prose_path": prose_path.relative_to(book_root).as_posix(),
+        "artifact_status": "derived",
+    }
+
+
 def _evaluate_plan_scene(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
-    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
-        return False, "plan_scene only supports main-branch execution.", {}
+    resolved_branch_id = _resolved_branch_id(selector)
     readiness = get_scene_phase_readiness(
         workspace,
         book_id,
+        branch_id=resolved_branch_id,
         chapter_id=selector.chapter,
         scene_id=selector.scene,
         section_id=selector.section,
@@ -493,11 +616,11 @@ def _evaluate_plan_scene(workspace, book_id: str, selector: ScopeSelector, *, pr
 
 
 def _evaluate_preflight_scene_state(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
-    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
-        return False, "preflight_scene_state only supports main-branch execution.", {}
+    resolved_branch_id = _resolved_branch_id(selector)
     readiness = get_scene_phase_readiness(
         workspace,
         book_id,
+        branch_id=resolved_branch_id,
         chapter_id=selector.chapter,
         scene_id=selector.scene,
         section_id=selector.section,
@@ -521,11 +644,11 @@ def _evaluate_preflight_scene_state(workspace, book_id: str, selector: ScopeSele
 
 
 def _evaluate_generate_continuity_pack(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
-    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
-        return False, "generate_continuity_pack only supports main-branch execution.", {}
+    resolved_branch_id = _resolved_branch_id(selector)
     readiness = get_scene_phase_readiness(
         workspace,
         book_id,
+        branch_id=resolved_branch_id,
         chapter_id=selector.chapter,
         scene_id=selector.scene,
         section_id=selector.section,
@@ -549,11 +672,11 @@ def _evaluate_generate_continuity_pack(workspace, book_id: str, selector: ScopeS
 
 
 def _evaluate_state_repair_scene_patch(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
-    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
-        return False, "state_repair_scene_patch only supports main-branch execution.", {}
+    resolved_branch_id = _resolved_branch_id(selector)
     readiness = get_scene_phase_readiness(
         workspace,
         book_id,
+        branch_id=resolved_branch_id,
         chapter_id=selector.chapter,
         scene_id=selector.scene,
         section_id=selector.section,
@@ -577,11 +700,11 @@ def _evaluate_state_repair_scene_patch(workspace, book_id: str, selector: ScopeS
 
 
 def _evaluate_lint_scene_prose(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
-    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
-        return False, "lint_scene_prose only supports main-branch execution.", {}
+    resolved_branch_id = _resolved_branch_id(selector)
     readiness = get_scene_phase_readiness(
         workspace,
         book_id,
+        branch_id=resolved_branch_id,
         chapter_id=selector.chapter,
         scene_id=selector.scene,
         section_id=selector.section,
@@ -605,11 +728,11 @@ def _evaluate_lint_scene_prose(workspace, book_id: str, selector: ScopeSelector,
 
 
 def _evaluate_repair_scene_prose(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
-    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
-        return False, "repair_scene_prose only supports main-branch execution.", {}
+    resolved_branch_id = _resolved_branch_id(selector)
     readiness = get_scene_phase_readiness(
         workspace,
         book_id,
+        branch_id=resolved_branch_id,
         chapter_id=selector.chapter,
         scene_id=selector.scene,
         section_id=selector.section,
@@ -633,11 +756,11 @@ def _evaluate_repair_scene_prose(workspace, book_id: str, selector: ScopeSelecto
 
 
 def _evaluate_apply_scene_commit(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
-    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
-        return False, "apply_scene_commit only supports main-branch execution.", {}
+    resolved_branch_id = _resolved_branch_id(selector)
     readiness = get_scene_phase_readiness(
         workspace,
         book_id,
+        branch_id=resolved_branch_id,
         chapter_id=selector.chapter,
         scene_id=selector.scene,
         section_id=selector.section,
@@ -725,6 +848,24 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
         prefer_emitted=prefer_emitted,
     )
     write_scene_allowed, write_scene_refusal, write_scene_details = _evaluate_write_scene_prose(
+        workspace,
+        book_id,
+        selector,
+        prefer_emitted=prefer_emitted,
+    )
+    appearance_projection_allowed, appearance_projection_refusal, appearance_projection_details = _evaluate_refresh_character_appearance_projection(
+        workspace,
+        book_id,
+        selector,
+        prefer_emitted=prefer_emitted,
+    )
+    draft_setting_allowed, draft_setting_refusal, draft_setting_details = _evaluate_draft_scene_setting_projection(
+        workspace,
+        book_id,
+        selector,
+        prefer_emitted=prefer_emitted,
+    )
+    extract_setting_allowed, extract_setting_refusal, extract_setting_details = _evaluate_extract_scene_setting_from_prose(
         workspace,
         book_id,
         selector,
@@ -968,12 +1109,12 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
             details=validate_assembly_details,
         ),
     ]
-    if resolved_branch_id == MAIN_BRANCH_ID and selector.scene is not None:
+    if selector.scene is not None:
         options.append(
             ExecutionOption(
                 action="plan_scene",
                 summary="Generate a provisional scene card for the active cursor scene without auto-running downstream phases.",
-                branch_policy="main_only",
+                branch_policy="any",
                 workflow_family="section_write",
                 mutates_canonical_state=False,
                 requires_expected_node=True,
@@ -987,7 +1128,7 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
             ExecutionOption(
                 action="preflight_scene_state",
                 summary="Generate a provisional preflight state patch for the active cursor scene without applying it.",
-                branch_policy="main_only",
+                branch_policy="any",
                 workflow_family="section_write",
                 mutates_canonical_state=False,
                 requires_expected_node=True,
@@ -1001,7 +1142,7 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
             ExecutionOption(
                 action="generate_continuity_pack",
                 summary="Generate a derived continuity pack for the active cursor scene without auto-running prose or repair.",
-                branch_policy="main_only",
+                branch_policy="any",
                 workflow_family="section_write",
                 mutates_canonical_state=False,
                 requires_expected_node=True,
@@ -1015,7 +1156,7 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
             ExecutionOption(
                 action="write_scene_prose",
                 summary="Generate provisional prose for the active cursor scene without auto-running lint, repair, or commit.",
-                branch_policy="main_only",
+                branch_policy="any",
                 workflow_family="section_write",
                 mutates_canonical_state=False,
                 requires_expected_node=True,
@@ -1027,9 +1168,51 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
         )
         options.append(
             ExecutionOption(
+                action="refresh_character_appearance_projection",
+                summary="Derive a scene/cast-scoped appearance projection without mutating character truth.",
+                branch_policy="any",
+                workflow_family="section_write",
+                mutates_canonical_state=False,
+                requires_expected_node=True,
+                allowed=appearance_projection_allowed,
+                selector_requirements=["book_id", "chapter", "scene"],
+                refusal_reason=appearance_projection_refusal,
+                details=appearance_projection_details,
+            )
+        )
+        options.append(
+            ExecutionOption(
+                action="draft_scene_setting_projection",
+                summary="Record a provisional author-drafted setting/background projection for the selected scene.",
+                branch_policy="any",
+                workflow_family="section_write",
+                mutates_canonical_state=False,
+                requires_expected_node=True,
+                allowed=draft_setting_allowed,
+                selector_requirements=["book_id", "chapter", "scene"],
+                refusal_reason=draft_setting_refusal,
+                details=draft_setting_details,
+            )
+        )
+        options.append(
+            ExecutionOption(
+                action="extract_scene_setting_from_prose",
+                summary="Record a derived setting/background projection from existing scene prose.",
+                branch_policy="any",
+                workflow_family="section_write",
+                mutates_canonical_state=False,
+                requires_expected_node=True,
+                allowed=extract_setting_allowed,
+                selector_requirements=["book_id", "chapter", "scene"],
+                refusal_reason=extract_setting_refusal,
+                details=extract_setting_details,
+            )
+        )
+        options.append(
+            ExecutionOption(
                 action="state_repair_scene_patch",
                 summary="Generate a provisional corrected state patch for the active cursor scene without linting, repairing prose, or committing.",
-                branch_policy="main_only",
+                branch_policy="any",
                 workflow_family="section_write",
                 mutates_canonical_state=False,
                 requires_expected_node=True,
@@ -1043,7 +1226,7 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
             ExecutionOption(
                 action="lint_scene_prose",
                 summary="Generate a provisional lint report for the active cursor scene without repairing prose or committing.",
-                branch_policy="main_only",
+                branch_policy="any",
                 workflow_family="section_write",
                 mutates_canonical_state=False,
                 requires_expected_node=True,
@@ -1057,7 +1240,7 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
             ExecutionOption(
                 action="repair_scene_prose",
                 summary="Generate provisional repaired prose and patch artifacts for the active cursor scene without rerunning state repair, lint, or commit.",
-                branch_policy="main_only",
+                branch_policy="any",
                 workflow_family="section_write",
                 mutates_canonical_state=False,
                 requires_expected_node=True,
@@ -1071,9 +1254,9 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
             ExecutionOption(
                 action="apply_scene_commit",
                 summary="Commit the active cursor scene's latest passing provisional baseline into canonical state and authoritative scene artifacts.",
-                branch_policy="main_only",
+                branch_policy="any",
                 workflow_family="section_write",
-                mutates_canonical_state=True,
+                mutates_canonical_state=resolved_branch_id == MAIN_BRANCH_ID,
                 requires_expected_node=True,
                 allowed=apply_scene_commit_allowed,
                 selector_requirements=["book_id", "chapter", "scene"],

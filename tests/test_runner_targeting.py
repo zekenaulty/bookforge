@@ -161,7 +161,17 @@ def test_run_loop_routes_scene_through_extracted_scene_actions(tmp_path: Path, m
     book_root = _init_book(tmp_path)
     action_calls: list[str] = []
 
-    def _fake_scene_action(workspace, book_id, action, *, chapter_id, scene_id, section_id=None, extra_details=None):
+    def _fake_scene_action(
+        workspace,
+        book_id,
+        action,
+        *,
+        chapter_id,
+        scene_id,
+        section_id=None,
+        branch_id="main",
+        extra_details=None,
+    ):
         action_calls.append(action)
         if action == "plan_scene":
             payload = _scene_card(chapter_id, scene_id)

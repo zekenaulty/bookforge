@@ -16,7 +16,7 @@ from .branching_store import (
     _book_root,
     _branch_node,
     _branch_selector,
-    _copy_canonical_projection_to_branch,
+    _copy_book_projection_to_branch,
     _generate_branch_id,
     _load_manifest,
     _now_iso,
@@ -66,7 +66,7 @@ def create_branch(
     if resolved_branch_id == "main":
         raise ValueError("Derived branch id cannot be 'main'.")
 
-    _copy_canonical_projection_to_branch(book_root, resolved_branch_id)
+    _copy_book_projection_to_branch(book_root, resolved_branch_id, source_branch_id=parent_node.branch_id)
     node = _branch_node(parent_node, selector, resolved_branch_id, fork_group_id)
     selector_payload = _branch_selector(book_id, resolved_branch_id, parent_node, selector, fork_group_id)
     manifest = BranchManifest(

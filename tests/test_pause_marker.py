@@ -19,7 +19,15 @@ def test_pause_on_quota_writes_marker(tmp_path: Path) -> None:
     )
 
     with pytest.raises(SystemExit) as excinfo:
-        _pause_on_quota(book_root, state_path, None, "write_scene", error, None)
+        _pause_on_quota(
+            book_root=book_root,
+            state_path=state_path,
+            state=None,
+            run_id=None,
+            phase="write_scene",
+            error=error,
+            scene_card=None,
+        )
 
     assert excinfo.value.code == PAUSE_EXIT_CODE
     pause_path = book_root / "draft" / "context" / "run_paused.json"
@@ -33,13 +41,14 @@ def test_pause_on_reason_writes_marker(tmp_path: Path) -> None:
 
     with pytest.raises(SystemExit) as excinfo:
         _pause_on_reason(
-            book_root,
-            state_path,
-            None,
-            "lint_scene",
-            "durable_slice_missing",
-            "Missing durable ids",
-            {"chapter": 1, "scene": 2},
+            book_root=book_root,
+            state_path=state_path,
+            state=None,
+            run_id=None,
+            phase="lint_scene",
+            reason_code="durable_slice_missing",
+            message="Missing durable ids",
+            scene_card={"chapter": 1, "scene": 2},
             details={"issues": [{"code": "durable_slice_missing", "message": "missing ITEM_x"}]},
         )
 
@@ -78,6 +87,7 @@ def test_apply_durable_updates_or_pause_writes_chronology_pause_marker(tmp_path:
             book_root=book_root,
             state_path=state_path,
             state=None,
+            run_id=None,
             patch={
                 "schema_version": "1.0",
                 "item_registry_updates": [

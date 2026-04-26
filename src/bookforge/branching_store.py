@@ -74,11 +74,22 @@ def _copytree_if_exists(source: Path, dest: Path) -> None:
     shutil.copytree(source, dest, dirs_exist_ok=True)
 
 
-def _copy_canonical_projection_to_branch(book_root: Path, branch_id: str) -> None:
+def _execution_source_root(book_root: Path, source_branch_id: str) -> Path:
+    cleaned = str(source_branch_id or "main").strip() or "main"
+    if cleaned == "main":
+        return book_root
+    return _branch_snapshot_root(book_root, cleaned)
+
+
+def _copy_book_projection_to_branch(book_root: Path, branch_id: str, *, source_branch_id: str = "main") -> None:
+    source_root = _execution_source_root(book_root, source_branch_id)
+    if not source_root.exists():
+        raise FileNotFoundError(f"Branch source root does not exist: {source_root}")
     snapshot_root = _branch_snapshot_root(book_root, branch_id)
     outline_root = snapshot_root / "outline"
     outline_root.mkdir(parents=True, exist_ok=True)
-    _copy_if_exists(book_root / "state.json", snapshot_root / "state.json")
+    _copy_if_exists(source_root / "book.json", snapshot_root / "book.json")
+    _copy_if_exists(source_root / "state.json", snapshot_root / "state.json")
     for name in (
         "outline.json",
         sw.REGISTRY_FILENAME,
@@ -88,9 +99,16 @@ def _copy_canonical_projection_to_branch(book_root: Path, branch_id: str) -> Non
         sw.APPENDIX_FILENAME,
         "characters.json",
     ):
-        _copy_if_exists(book_root / "outline" / name, outline_root / name)
-    _copytree_if_exists(book_root / "outline" / "boundaries", outline_root / "boundaries")
-    _copytree_if_exists(book_root / "outline" / "chapters", outline_root / "chapters")
+        _copy_if_exists(source_root / "outline" / name, outline_root / name)
+    _copytree_if_exists(source_root / "outline" / "boundaries", outline_root / "boundaries")
+    _copytree_if_exists(source_root / "outline" / "chapters", outline_root / "chapters")
+    _copytree_if_exists(source_root / "draft", snapshot_root / "draft")
+    _copytree_if_exists(source_root / "prompts", snapshot_root / "prompts")
+    _copytree_if_exists(source_root / "characters", snapshot_root / "characters")
+
+
+def _copy_canonical_projection_to_branch(book_root: Path, branch_id: str) -> None:
+    _copy_book_projection_to_branch(book_root, branch_id, source_branch_id="main")
 
 
 def _load_manifest(book_root: Path, branch_id: str) -> BranchManifest:

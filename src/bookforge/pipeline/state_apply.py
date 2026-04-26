@@ -821,6 +821,7 @@ def _apply_character_updates(book_root: Path, patch: Dict[str, Any], chapter_num
                     appearance_changed = True
             if appearance_changed:
                 state["appearance_current"] = current_appearance
+                state["appearance_projection_pending"] = True
                 appearance_history = state.get("appearance_history")
                 if not isinstance(appearance_history, list):
                     appearance_history = []

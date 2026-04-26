@@ -1,6 +1,6 @@
 # 0071 Make Scene And Section Write Execution Branch-Scoped
 
-Status: pending
+Status: completed
 
 ## Goal
 - Let BookForge run scene-phase and section-range writing inside real derived branches instead of only on `main`, so the author or supervisor can rewrite old scenes, revise prior chapters, and isolate risky authoring work without forcing a full-book rerun.
@@ -88,6 +88,11 @@ Status: pending
   - whether a historical scene is writable inside that branch even when `main` is elsewhere
   - what artifacts already exist inside the branch
   - whether the branch is stale relative to its parent snapshot
+- Branch query edge cases are first-class:
+  - unknown branch id returns a truthful refusal or empty result, never a fallback to `main`
+  - discarded/promoted branches remain queryable for history but are not write-ready
+  - branch-local current node is used for readiness and expected-node validation
+  - `ScopeSelector(branch_id=...)` lets Nanda query a specific branch without reading branch files directly
 
 ### Branch-Scoped Receipts
 - Scene-phase and section-range receipts inside a branch must:
@@ -138,6 +143,11 @@ Status: pending
   - stale branch parent or stale expected node is detected truthfully
   - `main` remains unchanged after branch-local scene or section execution
 
+## Open Todo
+- Fix outline test failures separately from this branch-execution work.
+  - Current working tree contains outline-related edits in `src/bookforge/outline.py`, `tests/test_outline_generate.py`, and `tests/test_plan_scene.py`.
+  - Do not mix those fixes into `0071` unless they directly block branch-scoped execution tests.
+
 ## Definition Of Done
 - A derived branch can resolve its own active cursor and scene-phase readiness without consulting canonical `main` cursor truth.
 - A derived branch can execute at least one real scene-phase write path and one real section-range write path.
@@ -145,6 +155,21 @@ Status: pending
 - Branch-local writer execution emits branch-local receipts, pause markers, and produced-artifact records.
 - Canonical `main` state remains unchanged until explicit promotion.
 - Truthful refusal surfaces exist for stale parent lineage, stale expected node, or invalid branch scope.
+
+## Execution Notes
+- Implemented branch-aware workspace/current-node queries and branch-scoped scene-phase readiness.
+- Scene-phase request builders and actions now accept `branch_id` and resolve reads/writes through the selected execution root.
+- Branch snapshots now include writer-facing material such as `draft`, `prompts`, and context folders needed for branch-local authoring.
+- Branch-local `apply_scene_commit` can replace a copied committed scene while preserving `.original` backups; `main` still blocks accidental committed-scene overwrite.
+- `write_section` can execute through a branch-local section-range path and passes branch identity down to the section traversal.
+- CLI workflow scene-phase commands and `write-section` now accept `--branch-id`.
+- Focused non-outline validation passed:
+  - `tests/test_branch_execution.py`
+  - `tests/test_action_discovery.py`
+  - `tests/test_execution_actions.py`
+  - `tests/test_scoped_execution.py`
+  - `tests/test_scene_phase_readiness.py`
+  - `tests/test_scene_action_execution.py`
 
 ## Notes
 - This step is about isolated authoring roots, not merge semantics.

@@ -50,10 +50,14 @@ from bookforge.pipeline.lint import _heuristic_invariant_issues, _linked_durable
 from bookforge.pipeline.durable import _durable_state_context
 from bookforge.pipeline.parse import _extract_prose_and_patch
 from bookforge.pipeline.log import _status, _now_iso, set_run_log_path
+from bookforge.contracts import MAIN_BRANCH_ID
 from bookforge.supervision import (
     RuntimeIssue,
     capture_main_branch_snapshot,
+    capture_surface_snapshot,
     emit_reconciled_main_branch_contracts,
+    emit_reconciled_branch_contracts,
+    paths as supervision_paths,
 )
 from bookforge.util.schema import validate_json
 from bookforge.outline import (
@@ -62,6 +66,78 @@ from bookforge.outline import (
 )
 
 PAUSE_EXIT_CODE = 75
+
+
+def _execution_book_root(workspace: Path, book_id: str, branch_id: str) -> Path:
+    resolved_branch_id = str(branch_id or MAIN_BRANCH_ID).strip() or MAIN_BRANCH_ID
+    if resolved_branch_id == MAIN_BRANCH_ID:
+        return workspace / "books" / book_id
+    return supervision_paths.branch_snapshot_root(workspace / "books" / book_id, resolved_branch_id)
+
+
+def _execution_context(book_root: Path) -> Tuple[Path, str, str]:
+    if (
+        book_root.name == "snapshot"
+        and len(book_root.parents) >= 5
+        and book_root.parent.parent.name == "branches"
+        and book_root.parent.parent.parent.name == "supervision"
+    ):
+        canonical_root = book_root.parents[4]
+        return canonical_root.parent.parent, canonical_root.name, book_root.parent.name
+    return book_root.parent.parent, book_root.name, MAIN_BRANCH_ID
+
+
+def _capture_execution_snapshot(workspace: Path, book_id: str, branch_id: str):
+    resolved_branch_id = str(branch_id or MAIN_BRANCH_ID).strip() or MAIN_BRANCH_ID
+    if resolved_branch_id == MAIN_BRANCH_ID:
+        return capture_main_branch_snapshot(workspace, book_id)
+    return capture_surface_snapshot(workspace, book_id, branch_id=resolved_branch_id)
+
+
+def _emit_reconciled_execution_contracts(
+    *,
+    workspace: Path,
+    book_id: str,
+    branch_id: str,
+    before_snapshot,
+    action: str,
+    result_status: str,
+    message: str,
+    runtime_issues=None,
+    artifact_paths: Optional[Dict[str, str]] = None,
+    produced_artifacts=None,
+    details: Optional[Dict[str, Any]] = None,
+    request_id: Optional[str] = None,
+):
+    resolved_branch_id = str(branch_id or MAIN_BRANCH_ID).strip() or MAIN_BRANCH_ID
+    if resolved_branch_id == MAIN_BRANCH_ID:
+        return emit_reconciled_main_branch_contracts(
+            workspace=workspace,
+            book_id=book_id,
+            before_snapshot=before_snapshot,
+            action=action,
+            result_status=result_status,
+            request_id=request_id,
+            message=message,
+            runtime_issues=runtime_issues,
+            artifact_paths=artifact_paths,
+            produced_artifacts=produced_artifacts,
+            details=details,
+        )
+    return emit_reconciled_branch_contracts(
+        workspace=workspace,
+        book_id=book_id,
+        branch_id=resolved_branch_id,
+        before_snapshot=before_snapshot,
+        action=action,
+        result_status=result_status,
+        request_id=request_id,
+        message=message,
+        runtime_issues=runtime_issues,
+        artifact_paths=artifact_paths,
+        produced_artifacts=produced_artifacts,
+        details=details,
+    )
 
 def _cursor_beyond_target(
     chapter: int,
@@ -217,8 +293,10 @@ def _write_reason_pause_marker(
 ) -> Path:
     context_dir = book_root / "draft" / "context"
     context_dir.mkdir(parents=True, exist_ok=True)
+    _, context_book_id, branch_id = _execution_context(book_root)
     payload: Dict[str, Any] = {
-        "book_id": book_root.name,
+        "book_id": context_book_id,
+        "branch_id": branch_id,
         "phase": str(phase).strip(),
         "reason_code": str(reason_code).strip(),
         "message": str(message).strip(),
@@ -250,7 +328,7 @@ def _emit_pause_contracts(
     scene_card: Optional[Dict[str, Any]] = None,
     details: Optional[Dict[str, Any]] = None,
 ) -> None:
-    workspace = book_root.parent.parent
+    workspace, context_book_id, branch_id = _execution_context(book_root)
     artifact_paths: Dict[str, str] = {
         "pause_marker": _artifact_relpath(book_root, pause_path),
         "state": _artifact_relpath(book_root, state_path),
@@ -262,9 +340,10 @@ def _emit_pause_contracts(
             prose_path = book_root / "draft" / "chapters" / f"ch_{chapter:03d}" / f"scene_{scene:03d}.md"
             if prose_path.exists():
                 artifact_paths["scene_prose"] = _artifact_relpath(book_root, prose_path)
-    emit_reconciled_main_branch_contracts(
+    _emit_reconciled_execution_contracts(
         workspace=workspace,
-        book_id=book_root.name,
+        book_id=context_book_id,
+        branch_id=branch_id,
         before_snapshot=before_snapshot,
         action="run_loop",
         result_status="retryable_pause",
@@ -286,7 +365,8 @@ def _pause_on_reason(
     scene_card: Optional[Dict[str, Any]] = None,
     details: Optional[Dict[str, Any]] = None,
 ) -> None:
-    before_snapshot = capture_main_branch_snapshot(book_root.parent.parent, book_root.name)
+    workspace, context_book_id, branch_id = _execution_context(book_root)
+    before_snapshot = _capture_execution_snapshot(workspace, context_book_id, branch_id)
     if state is not None:
         try:
             validate_json(state, "state")
@@ -295,7 +375,8 @@ def _pause_on_reason(
             pass
     if run_id:
         progress_payload: Dict[str, Any] = {
-            "book_id": book_root.name,
+            "book_id": context_book_id,
+            "branch_id": branch_id,
             "status": "paused",
             "phase": str(phase).strip(),
             "reason_code": str(reason_code).strip(),
@@ -341,8 +422,10 @@ def _write_pause_marker(
 ) -> Path:
     context_dir = book_root / "draft" / "context"
     context_dir.mkdir(parents=True, exist_ok=True)
+    _, context_book_id, branch_id = _execution_context(book_root)
     payload: Dict[str, Any] = {
-        "book_id": book_root.name,
+        "book_id": context_book_id,
+        "branch_id": branch_id,
         "phase": phase,
         "status_code": error.status_code,
         "message": error.message,
@@ -378,7 +461,8 @@ def _pause_on_quota(
     error: LLMRequestError,
     scene_card: Optional[Dict[str, Any]] = None,
 ) -> None:
-    before_snapshot = capture_main_branch_snapshot(book_root.parent.parent, book_root.name)
+    workspace, context_book_id, branch_id = _execution_context(book_root)
+    before_snapshot = _capture_execution_snapshot(workspace, context_book_id, branch_id)
     if error.status_code != 429 and not error.quota_violations:
         raise error
     if state is not None:
@@ -388,7 +472,8 @@ def _pause_on_quota(
         except Exception:
             pass
     progress_payload: Dict[str, Any] = {
-        "book_id": book_root.name,
+        "book_id": context_book_id,
+        "branch_id": branch_id,
         "status": "paused",
         "phase": str(phase).strip(),
         "reason_code": "quota",
@@ -579,8 +664,10 @@ def _write_scene_action_pause_marker(
     context_dir = book_root / "draft" / "context"
     context_dir.mkdir(parents=True, exist_ok=True)
     details = result.details if isinstance(result.details, dict) else {}
+    _, context_book_id, branch_id = _execution_context(book_root)
     payload: Dict[str, Any] = {
-        "book_id": book_root.name,
+        "book_id": context_book_id,
+        "branch_id": branch_id,
         "phase": str(phase).strip(),
         "status_code": details.get("status_code"),
         "message": result.message,
@@ -612,7 +699,8 @@ def _pause_on_scene_action_result(
     result: ExecutionResult,
     scene_card: Optional[Dict[str, Any]] = None,
 ) -> None:
-    before_snapshot = capture_main_branch_snapshot(book_root.parent.parent, book_root.name)
+    workspace, context_book_id, branch_id = _execution_context(book_root)
+    before_snapshot = _capture_execution_snapshot(workspace, context_book_id, branch_id)
     if state is not None:
         try:
             validate_json(state, "state")
@@ -621,7 +709,8 @@ def _pause_on_scene_action_result(
             pass
     details = result.details if isinstance(result.details, dict) else {}
     progress_payload: Dict[str, Any] = {
-        "book_id": book_root.name,
+        "book_id": context_book_id,
+        "branch_id": branch_id,
         "status": "paused",
         "phase": str(phase).strip(),
         "reason_code": str(details.get("failure_code") or "provider_retry_exhausted").strip(),
@@ -683,6 +772,7 @@ def _run_scene_via_actions(
     chapter_order: List[int],
     scene_counts: Dict[int, int],
     update_progress,
+    branch_id: str = MAIN_BRANCH_ID,
 ) -> None:
     durable_expand_ids: set[str] = set()
     durable_expand_attempts = 0
@@ -713,6 +803,7 @@ def _run_scene_via_actions(
             chapter_id=chapter_num,
             scene_id=scene_num,
             section_id=section_id,
+            branch_id=branch_id,
             extra_details={"durable_expand_ids": sorted(durable_expand_ids)},
         )
         if result.status == "retryable_pause":
@@ -940,8 +1031,10 @@ def _run_write_scope(
     resume: bool = False,
     ack_outline_attention_items: bool = False,
     force_outline_gate_bypass: bool = False,
+    branch_id: str = MAIN_BRANCH_ID,
 ) -> None:
-    book_root = workspace / "books" / book_id
+    branch_id = str(branch_id or MAIN_BRANCH_ID).strip() or MAIN_BRANCH_ID
+    book_root = _execution_book_root(workspace, book_id, branch_id)
     if not book_root.exists():
         raise FileNotFoundError(f"Book workspace not found: {book_root}")
 
@@ -958,7 +1051,7 @@ def _run_write_scope(
         raise FileNotFoundError(f"Missing outline.json: {outline_path}")
     if not system_path.exists():
         raise FileNotFoundError(f"Missing system_v1.md: {system_path}")
-    before_snapshot = capture_main_branch_snapshot(workspace, book_id)
+    before_snapshot = _capture_execution_snapshot(workspace, book_id, branch_id)
 
     run_id = _current_run_id()
     run_log_path = _run_log_path(book_root, run_id)
@@ -1176,6 +1269,7 @@ def _run_write_scope(
             chapter_order=chapter_order,
             scene_counts=scene_counts,
             update_progress=update_progress,
+            branch_id=branch_id,
         )
 
         if steps_remaining is not None:
@@ -1190,9 +1284,10 @@ def _run_write_scope(
         scene=_maybe_int(final_cursor.get("scene")),
         message="Run loop exited cleanly.",
     )
-    emit_reconciled_main_branch_contracts(
+    _emit_reconciled_execution_contracts(
         workspace=workspace,
         book_id=book_id,
+        branch_id=branch_id,
         before_snapshot=before_snapshot,
         action="run_loop",
         result_status="success",
@@ -1242,10 +1337,12 @@ def run_section_range(
     resume: bool = False,
     ack_outline_attention_items: bool = False,
     force_outline_gate_bypass: bool = False,
+    branch_id: str = MAIN_BRANCH_ID,
 ) -> None:
     if scene_start <= 0 or scene_end <= 0 or scene_end < scene_start:
         raise ValueError("run_section_range requires a valid inclusive scene range.")
-    book_root = workspace / "books" / book_id
+    branch_id = str(branch_id or MAIN_BRANCH_ID).strip() or MAIN_BRANCH_ID
+    book_root = _execution_book_root(workspace, book_id, branch_id)
     state_path = book_root / "state.json"
     if not resume:
         _set_cursor_for_scene_range(
@@ -1261,6 +1358,7 @@ def run_section_range(
         resume=resume,
         ack_outline_attention_items=ack_outline_attention_items,
         force_outline_gate_bypass=force_outline_gate_bypass,
+        branch_id=branch_id,
     )
 
 
@@ -1272,6 +1370,7 @@ def run_loop(
     resume: bool = False,
     ack_outline_attention_items: bool = False,
     force_outline_gate_bypass: bool = False,
+    branch_id: str = MAIN_BRANCH_ID,
 ) -> None:
     _run_write_scope(
         workspace=workspace,
@@ -1281,18 +1380,11 @@ def run_loop(
         resume=resume,
         ack_outline_attention_items=ack_outline_attention_items,
         force_outline_gate_bypass=force_outline_gate_bypass,
+        branch_id=branch_id,
     )
 
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
-
-
-
-
-
-
-
-
 
 
 

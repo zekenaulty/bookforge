@@ -1,4 +1,5 @@
 import argparse
+import json
 from pathlib import Path
 import sys
 
@@ -6,10 +7,18 @@ from bookforge.author import generate_author
 from bookforge.execution import (
     apply_scene_commit,
     build_apply_scene_commit_request,
+    build_create_assembly_branch_request,
+    build_create_branch_request,
+    build_discard_branch_request,
     build_generate_continuity_pack_request,
     build_lint_scene_prose_request,
     build_plan_scene_request,
     build_preflight_scene_state_request,
+    build_promote_branch_request,
+    build_promote_branch_to_parent_request,
+    build_rebase_branch_request,
+    build_record_assembly_validation_request,
+    build_validate_assembly_branch_request,
     build_repair_scene_prose_request,
     build_state_repair_scene_patch_request,
     build_finalize_chapter_request,
@@ -19,6 +28,9 @@ from bookforge.execution import (
     build_resume_paused_section_request,
     build_write_scene_prose_request,
     build_write_section_request,
+    create_assembly_branch_action,
+    create_branch_action,
+    discard_branch_action,
     finalize_chapter,
     freeze_section,
     generate_continuity_pack,
@@ -27,9 +39,13 @@ from bookforge.execution import (
     lock_section,
     plan_scene_action,
     preflight_scene_state,
+    promote_branch_action,
+    rebase_branch_action,
     repair_scene_prose,
     resume_paused_section,
+    record_assembly_validation_action,
     state_repair_scene_patch,
+    validate_assembly_branch_action,
     write_scene_prose,
     write_frozen_section,
 )
@@ -277,6 +293,157 @@ def _workflow_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def _print_execution_result(result) -> None:
+    sys.stdout.write(
+        f"Request: {result.request_id or ''}\n"
+        f"Action: {result.action}\n"
+        f"Status: {result.status}\n"
+        f"Message: {result.message or ''}\n"
+    )
+    if result.node is not None:
+        sys.stdout.write(
+            f"Node: {result.node.workflow_family} "
+            f"branch={result.node.branch_id} "
+            f"run={result.node.source_run_id} "
+            f"rev={result.node.revision_id}\n"
+        )
+    if result.details:
+        sys.stdout.write(f"Details: {json.dumps(result.details, ensure_ascii=True, sort_keys=True)}\n")
+    if result.artifact_paths:
+        sys.stdout.write(f"Artifacts: {json.dumps(result.artifact_paths, ensure_ascii=True, sort_keys=True)}\n")
+
+
+def _exit_code_for_result(result) -> int:
+    if result.status == "retryable_pause":
+        return 75
+    if result.status in {"hard_fail", "integrity_degraded"}:
+        return 1
+    return 0
+
+
+def _workflow_create_branch(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        request = build_create_branch_request(
+            workspace,
+            args.book,
+            chapter=getattr(args, "chapter", None),
+            section=getattr(args, "section", None),
+            branch_id=getattr(args, "branch_id", None),
+            parent_branch_id=getattr(args, "parent_branch_id", None) or "main",
+            fork_group_id=getattr(args, "fork_group_id", None),
+            merge_operation=getattr(args, "merge_operation", None) or "promotion",
+            branch_role=getattr(args, "branch_role", None) or "rerun",
+        )
+        result = create_branch_action(workspace, request)
+    except Exception as exc:
+        sys.stderr.write(f"Create branch failed: {exc}\n")
+        return 1
+    _print_execution_result(result)
+    return _exit_code_for_result(result)
+
+
+def _workflow_create_assembly_branch(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        request = build_create_assembly_branch_request(
+            args.book,
+            fork_group_id=args.fork_group_id,
+            chapter_id=getattr(args, "chapter", None),
+            branch_id=getattr(args, "branch_id", None),
+        )
+        result = create_assembly_branch_action(workspace, request)
+    except Exception as exc:
+        sys.stderr.write(f"Create assembly branch failed: {exc}\n")
+        return 1
+    _print_execution_result(result)
+    return _exit_code_for_result(result)
+
+
+def _workflow_discard_branch(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        request = build_discard_branch_request(
+            args.book,
+            branch_id=args.branch_id,
+            reason=getattr(args, "reason", None),
+        )
+        result = discard_branch_action(workspace, request)
+    except Exception as exc:
+        sys.stderr.write(f"Discard branch failed: {exc}\n")
+        return 1
+    _print_execution_result(result)
+    return _exit_code_for_result(result)
+
+
+def _workflow_promote_branch(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        target_branch_id = str(getattr(args, "target_branch_id", None) or "main").strip() or "main"
+        if target_branch_id == "main":
+            request = build_promote_branch_request(args.book, branch_id=args.branch_id)
+        else:
+            request = build_promote_branch_to_parent_request(
+                args.book,
+                branch_id=args.branch_id,
+                target_branch_id=target_branch_id,
+            )
+        result = promote_branch_action(workspace, request)
+    except Exception as exc:
+        sys.stderr.write(f"Promote branch failed: {exc}\n")
+        return 1
+    _print_execution_result(result)
+    return _exit_code_for_result(result)
+
+
+def _workflow_rebase_branch(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        request = build_rebase_branch_request(
+            args.book,
+            branch_id=args.branch_id,
+            new_branch_id=getattr(args, "new_branch_id", None),
+        )
+        result = rebase_branch_action(workspace, request)
+    except Exception as exc:
+        sys.stderr.write(f"Rebase branch failed: {exc}\n")
+        return 1
+    _print_execution_result(result)
+    return _exit_code_for_result(result)
+
+
+def _workflow_record_assembly_validation(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        request = build_record_assembly_validation_request(
+            args.book,
+            branch_id=args.branch_id,
+            passed=bool(args.passed),
+            message=getattr(args, "message", None),
+        )
+        result = record_assembly_validation_action(workspace, request)
+    except Exception as exc:
+        sys.stderr.write(f"Record assembly validation failed: {exc}\n")
+        return 1
+    _print_execution_result(result)
+    return _exit_code_for_result(result)
+
+
+def _workflow_validate_assembly_branch(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        request = build_validate_assembly_branch_request(
+            args.book,
+            branch_id=args.branch_id,
+        )
+        result = validate_assembly_branch_action(workspace, request)
+    except Exception as exc:
+        sys.stderr.write(f"Validate assembly branch failed: {exc}\n")
+        return 1
+    _print_execution_result(result)
+    return _exit_code_for_result(result)
+
+
 def _workflow_legal_actions(args: argparse.Namespace) -> int:
     workspace = Path(args.workspace)
     try:
@@ -315,6 +482,7 @@ def _workflow_scene_readiness(args: argparse.Namespace) -> int:
         readiness = get_scene_phase_readiness(
             workspace,
             args.book,
+            branch_id=getattr(args, "branch_id", None) or "main",
             chapter_id=int(args.chapter),
             scene_id=int(args.scene),
             section_id=getattr(args, "section", None),
@@ -375,6 +543,7 @@ def _workflow_plan_scene(args: argparse.Namespace) -> int:
         request = build_plan_scene_request(
             workspace=workspace,
             book_id=args.book,
+            branch_id=getattr(args, "branch_id", None) or "main",
             chapter_id=int(args.chapter),
             scene_id=int(args.scene),
             section_id=getattr(args, "section", None),
@@ -424,6 +593,7 @@ def _workflow_preflight_scene_state(args: argparse.Namespace) -> int:
         request = build_preflight_scene_state_request(
             workspace=workspace,
             book_id=args.book,
+            branch_id=getattr(args, "branch_id", None) or "main",
             chapter_id=int(args.chapter),
             scene_id=int(args.scene),
             section_id=getattr(args, "section", None),
@@ -473,6 +643,7 @@ def _workflow_generate_continuity_pack(args: argparse.Namespace) -> int:
         request = build_generate_continuity_pack_request(
             workspace=workspace,
             book_id=args.book,
+            branch_id=getattr(args, "branch_id", None) or "main",
             chapter_id=int(args.chapter),
             scene_id=int(args.scene),
             section_id=getattr(args, "section", None),
@@ -522,6 +693,7 @@ def _workflow_state_repair_scene_patch(args: argparse.Namespace) -> int:
         request = build_state_repair_scene_patch_request(
             workspace=workspace,
             book_id=args.book,
+            branch_id=getattr(args, "branch_id", None) or "main",
             chapter_id=int(args.chapter),
             scene_id=int(args.scene),
             section_id=getattr(args, "section", None),
@@ -571,6 +743,7 @@ def _workflow_lint_scene_prose(args: argparse.Namespace) -> int:
         request = build_lint_scene_prose_request(
             workspace=workspace,
             book_id=args.book,
+            branch_id=getattr(args, "branch_id", None) or "main",
             chapter_id=int(args.chapter),
             scene_id=int(args.scene),
             section_id=getattr(args, "section", None),
@@ -620,6 +793,7 @@ def _workflow_repair_scene_prose(args: argparse.Namespace) -> int:
         request = build_repair_scene_prose_request(
             workspace=workspace,
             book_id=args.book,
+            branch_id=getattr(args, "branch_id", None) or "main",
             chapter_id=int(args.chapter),
             scene_id=int(args.scene),
             section_id=getattr(args, "section", None),
@@ -669,6 +843,7 @@ def _workflow_apply_scene_commit(args: argparse.Namespace) -> int:
         request = build_apply_scene_commit_request(
             workspace=workspace,
             book_id=args.book,
+            branch_id=getattr(args, "branch_id", None) or "main",
             chapter_id=int(args.chapter),
             scene_id=int(args.scene),
             section_id=getattr(args, "section", None),
@@ -853,6 +1028,7 @@ def _workflow_write_section(args: argparse.Namespace) -> int:
         request = build_write_section_request(
             workspace=workspace,
             book_id=args.book,
+            branch_id=getattr(args, "branch_id", None) or "main",
             chapter_id=int(args.chapter),
             section_id=int(args.section),
             ack_outline_attention_items=bool(
@@ -888,6 +1064,7 @@ def _workflow_write_scene_prose(args: argparse.Namespace) -> int:
         request = build_write_scene_prose_request(
             workspace=workspace,
             book_id=args.book,
+            branch_id=getattr(args, "branch_id", None) or "main",
             chapter_id=int(args.chapter),
             scene_id=int(args.scene),
             section_id=getattr(args, "section", None),
@@ -1386,11 +1563,83 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_legal.add_argument("--scene", type=int, help="Optional scene scope.")
     workflow_legal.set_defaults(func=_workflow_legal_actions)
 
+    workflow_create_branch = workflow_sub.add_parser(
+        "create-branch",
+        help="Create a derived branch from main or another branch snapshot.",
+    )
+    workflow_create_branch.add_argument("--book", required=True, help="Book id.")
+    workflow_create_branch.add_argument("--branch-id", help="Optional explicit branch id.")
+    workflow_create_branch.add_argument("--parent-branch-id", default="main", help="Parent branch scope; defaults to main.")
+    workflow_create_branch.add_argument("--fork-group-id", help="Optional fork group for sibling branches.")
+    workflow_create_branch.add_argument("--chapter", type=int, help="Optional chapter scope.")
+    workflow_create_branch.add_argument("--section", type=int, help="Optional section scope.")
+    workflow_create_branch.add_argument("--branch-role", default="rerun", help="Branch role label, such as rerun, chapter, section, scene, or writer.")
+    workflow_create_branch.add_argument("--merge-operation", default="promotion", help="Merge operation label; defaults to promotion.")
+    workflow_create_branch.set_defaults(func=_workflow_create_branch)
+
+    workflow_create_assembly_branch = workflow_sub.add_parser(
+        "create-assembly-branch",
+        help="Create an off-parent assembly branch for a fork group.",
+    )
+    workflow_create_assembly_branch.add_argument("--book", required=True, help="Book id.")
+    workflow_create_assembly_branch.add_argument("--fork-group-id", required=True, help="Fork group id to assemble.")
+    workflow_create_assembly_branch.add_argument("--chapter", type=int, help="Optional chapter scope.")
+    workflow_create_assembly_branch.add_argument("--branch-id", help="Optional explicit assembly branch id.")
+    workflow_create_assembly_branch.set_defaults(func=_workflow_create_assembly_branch)
+
+    workflow_discard_branch = workflow_sub.add_parser(
+        "discard-branch",
+        help="Discard a derived branch without mutating its parent or main.",
+    )
+    workflow_discard_branch.add_argument("--book", required=True, help="Book id.")
+    workflow_discard_branch.add_argument("--branch-id", required=True, help="Derived branch id to discard.")
+    workflow_discard_branch.add_argument("--reason", help="Optional discard reason.")
+    workflow_discard_branch.set_defaults(func=_workflow_discard_branch)
+
+    workflow_promote_branch = workflow_sub.add_parser(
+        "promote-branch",
+        help="Promote a branch to main or to an explicit parent branch.",
+    )
+    workflow_promote_branch.add_argument("--book", required=True, help="Book id.")
+    workflow_promote_branch.add_argument("--branch-id", required=True, help="Source branch id to promote.")
+    workflow_promote_branch.add_argument("--target-branch-id", default="main", help="Target branch id; defaults to main.")
+    workflow_promote_branch.set_defaults(func=_workflow_promote_branch)
+
+    workflow_rebase_branch = workflow_sub.add_parser(
+        "rebase-branch",
+        help="Create a refreshed child branch from the current parent snapshot and discard the old branch.",
+    )
+    workflow_rebase_branch.add_argument("--book", required=True, help="Book id.")
+    workflow_rebase_branch.add_argument("--branch-id", required=True, help="Derived branch id to rebase.")
+    workflow_rebase_branch.add_argument("--new-branch-id", help="Optional explicit id for the refreshed child branch.")
+    workflow_rebase_branch.set_defaults(func=_workflow_rebase_branch)
+
+    workflow_validate_assembly_branch = workflow_sub.add_parser(
+        "validate-assembly-branch",
+        help="Run deterministic staging validation for an assembly branch.",
+    )
+    workflow_validate_assembly_branch.add_argument("--book", required=True, help="Book id.")
+    workflow_validate_assembly_branch.add_argument("--branch-id", required=True, help="Assembly branch id.")
+    workflow_validate_assembly_branch.set_defaults(func=_workflow_validate_assembly_branch)
+
+    workflow_record_assembly_validation = workflow_sub.add_parser(
+        "record-assembly-validation",
+        help="Record validation status for an assembly branch before promotion.",
+    )
+    workflow_record_assembly_validation.add_argument("--book", required=True, help="Book id.")
+    workflow_record_assembly_validation.add_argument("--branch-id", required=True, help="Assembly branch id.")
+    validation_group = workflow_record_assembly_validation.add_mutually_exclusive_group(required=True)
+    validation_group.add_argument("--passed", dest="passed", action="store_true", help="Mark assembly validation as passed.")
+    validation_group.add_argument("--failed", dest="passed", action="store_false", help="Mark assembly validation as failed.")
+    workflow_record_assembly_validation.add_argument("--message", help="Optional validation message.")
+    workflow_record_assembly_validation.set_defaults(func=_workflow_record_assembly_validation)
+
     workflow_scene_readiness = workflow_sub.add_parser(
         "scene-readiness",
         help="Show truthful scene-phase readiness for one scene on the current main-branch cursor path.",
     )
     workflow_scene_readiness.add_argument("--book", required=True, help="Book id.")
+    workflow_scene_readiness.add_argument("--branch-id", help="Optional branch scope; defaults to main.")
     workflow_scene_readiness.add_argument("--chapter", required=True, type=int, help="Chapter id.")
     workflow_scene_readiness.add_argument("--scene", required=True, type=int, help="Scene id.")
     workflow_scene_readiness.add_argument("--section", type=int, help="Optional section id.")
@@ -1401,6 +1650,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Generate a provisional scene card for one scene without auto-running downstream phases.",
     )
     workflow_plan_scene.add_argument("--book", required=True, help="Book id.")
+    workflow_plan_scene.add_argument("--branch-id", help="Optional branch scope; defaults to main.")
     workflow_plan_scene.add_argument("--chapter", required=True, type=int, help="Chapter id.")
     workflow_plan_scene.add_argument("--scene", required=True, type=int, help="Scene id.")
     workflow_plan_scene.add_argument("--section", type=int, help="Optional section id.")
@@ -1411,6 +1661,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Generate a provisional preflight state patch for one scene without applying it.",
     )
     workflow_preflight_scene.add_argument("--book", required=True, help="Book id.")
+    workflow_preflight_scene.add_argument("--branch-id", help="Optional branch scope; defaults to main.")
     workflow_preflight_scene.add_argument("--chapter", required=True, type=int, help="Chapter id.")
     workflow_preflight_scene.add_argument("--scene", required=True, type=int, help="Scene id.")
     workflow_preflight_scene.add_argument("--section", type=int, help="Optional section id.")
@@ -1421,6 +1672,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Generate a derived continuity pack for one scene without writing prose or mutating canonical state.",
     )
     workflow_continuity_pack.add_argument("--book", required=True, help="Book id.")
+    workflow_continuity_pack.add_argument("--branch-id", help="Optional branch scope; defaults to main.")
     workflow_continuity_pack.add_argument("--chapter", required=True, type=int, help="Chapter id.")
     workflow_continuity_pack.add_argument("--scene", required=True, type=int, help="Scene id.")
     workflow_continuity_pack.add_argument("--section", type=int, help="Optional section id.")
@@ -1431,6 +1683,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Generate a provisional corrected state patch for one scene without linting, repairing prose, or committing.",
     )
     workflow_state_repair_scene.add_argument("--book", required=True, help="Book id.")
+    workflow_state_repair_scene.add_argument("--branch-id", help="Optional branch scope; defaults to main.")
     workflow_state_repair_scene.add_argument("--chapter", required=True, type=int, help="Chapter id.")
     workflow_state_repair_scene.add_argument("--scene", required=True, type=int, help="Scene id.")
     workflow_state_repair_scene.add_argument("--section", type=int, help="Optional section id.")
@@ -1441,6 +1694,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Generate a provisional lint report for one scene without repairing prose or committing.",
     )
     workflow_lint_scene.add_argument("--book", required=True, help="Book id.")
+    workflow_lint_scene.add_argument("--branch-id", help="Optional branch scope; defaults to main.")
     workflow_lint_scene.add_argument("--chapter", required=True, type=int, help="Chapter id.")
     workflow_lint_scene.add_argument("--scene", required=True, type=int, help="Scene id.")
     workflow_lint_scene.add_argument("--section", type=int, help="Optional section id.")
@@ -1451,6 +1705,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Generate provisional repaired prose and patch artifacts for one scene without rerunning state repair, lint, or commit.",
     )
     workflow_repair_scene.add_argument("--book", required=True, help="Book id.")
+    workflow_repair_scene.add_argument("--branch-id", help="Optional branch scope; defaults to main.")
     workflow_repair_scene.add_argument("--chapter", required=True, type=int, help="Chapter id.")
     workflow_repair_scene.add_argument("--scene", required=True, type=int, help="Scene id.")
     workflow_repair_scene.add_argument("--section", type=int, help="Optional section id.")
@@ -1461,6 +1716,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Commit the active scene's latest passing provisional baseline into canonical state and authoritative scene artifacts.",
     )
     workflow_apply_scene_commit.add_argument("--book", required=True, help="Book id.")
+    workflow_apply_scene_commit.add_argument("--branch-id", help="Optional branch scope; defaults to main.")
     workflow_apply_scene_commit.add_argument("--chapter", required=True, type=int, help="Chapter id.")
     workflow_apply_scene_commit.add_argument("--scene", required=True, type=int, help="Scene id.")
     workflow_apply_scene_commit.add_argument("--section", type=int, help="Optional section id.")
@@ -1481,6 +1737,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Run the section_write loop for one frozen section without locking it.",
     )
     workflow_write.add_argument("--book", required=True, help="Book id.")
+    workflow_write.add_argument("--branch-id", help="Optional branch scope; defaults to main.")
     workflow_write.add_argument("--chapter", required=True, type=int, help="Chapter id.")
     workflow_write.add_argument("--section", required=True, type=int, help="Section id.")
     workflow_write.add_argument(
@@ -1502,6 +1759,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Generate provisional prose for one scene without auto-running lint, repair, or commit.",
     )
     workflow_write_scene.add_argument("--book", required=True, help="Book id.")
+    workflow_write_scene.add_argument("--branch-id", help="Optional branch scope; defaults to main.")
     workflow_write_scene.add_argument("--chapter", required=True, type=int, help="Chapter id.")
     workflow_write_scene.add_argument("--scene", required=True, type=int, help="Scene id.")
     workflow_write_scene.add_argument("--section", type=int, help="Optional section id.")

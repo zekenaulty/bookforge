@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 import hashlib
 import json
+import shutil
 
 from bookforge.config.env import load_config
 from bookforge.characters import refresh_appearance_projections
@@ -42,12 +43,15 @@ from bookforge.pipeline.state_apply import (
     _summary_from_state,
     _update_bible,
 )
-from bookforge.query import current_main_node
+from bookforge.query import current_execution_node, get_scene_context_projection
 from bookforge.query.scene_phase import get_scene_phase_readiness as _get_scene_phase_readiness
 from bookforge.supervision import (
     RuntimeIssue,
     capture_main_branch_snapshot,
+    capture_surface_snapshot,
+    emit_branch_contracts,
     emit_reconciled_main_branch_contracts,
+    emit_reconciled_branch_contracts,
     paths as supervision_paths,
 )
 from bookforge.util.schema import validate_json
@@ -64,12 +68,38 @@ def _artifact_relpath(book_root: Path, path: Path) -> str:
         return path.as_posix()
 
 
+def _request_branch_id(request: ExecutionRequest) -> str:
+    return str(request.branch_id or request.selector.branch_id or MAIN_BRANCH_ID).strip() or MAIN_BRANCH_ID
+
+
+def _canonical_book_root(workspace: Path, book_id: str) -> Path:
+    return Path(workspace) / "books" / book_id
+
+
+def _execution_book_root(workspace: Path, book_id: str, branch_id: str) -> Path:
+    canonical_root = _canonical_book_root(workspace, book_id)
+    if branch_id == MAIN_BRANCH_ID:
+        return canonical_root
+    return supervision_paths.branch_snapshot_root(canonical_root, branch_id)
+
+
+def _supervision_book_root(book_root: Path) -> Path:
+    if (
+        book_root.name == "snapshot"
+        and len(book_root.parents) >= 5
+        and book_root.parent.parent.name == "branches"
+        and book_root.parent.parent.parent.name == "supervision"
+    ):
+        return book_root.parents[4]
+    return book_root
+
+
 def _load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _append_execution_result(book_root: Path, result: ExecutionResult) -> None:
-    path = supervision_paths.execution_results_path(book_root)
+    path = supervision_paths.execution_results_path(_supervision_book_root(book_root), result.node.branch_id)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(result.to_dict(), ensure_ascii=True) + "\n")
@@ -115,6 +145,49 @@ def _build_execution_node(
         turn_id=None,
         revision_id=live_node.revision_id,
     )
+
+
+def _revision_token() -> str:
+    raw = datetime.now(timezone.utc).isoformat(timespec="microseconds")
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def _advance_branch_node(book_root: Path, node: TimelineNodeRef, *, phase_id: str) -> TimelineNodeRef:
+    advanced = TimelineNodeRef(
+        book_id=node.book_id,
+        workflow_family=node.workflow_family,
+        source_run_id=node.source_run_id,
+        branch_id=node.branch_id,
+        fork_group_id=node.fork_group_id,
+        chapter=node.chapter,
+        section=node.section,
+        scene=node.scene,
+        phase_id=phase_id,
+        turn_id=node.turn_id,
+        revision_id=_revision_token(),
+    )
+    node_path = supervision_paths.current_node_path(_supervision_book_root(book_root), advanced.branch_id)
+    node_path.parent.mkdir(parents=True, exist_ok=True)
+    node_path.write_text(
+        json.dumps(advanced.to_dict(), ensure_ascii=True, indent=2),
+        encoding="utf-8",
+    )
+    return advanced
+
+
+def _mark_branch_promote_ready(book_root: Path, branch_id: str) -> None:
+    if branch_id == MAIN_BRANCH_ID:
+        return
+    manifest_path = supervision_paths.branch_manifest_path(_supervision_book_root(book_root), branch_id)
+    if not manifest_path.exists():
+        return
+    payload = _load_json(manifest_path)
+    lifecycle_state = str(payload.get("lifecycle_state") or "").strip()
+    if lifecycle_state in {"discard", "promoted", "assembled_pending_promotion"}:
+        return
+    payload["lifecycle_state"] = "promote_ready"
+    payload["updated_at"] = _now_token()
+    manifest_path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
 
 
 def _hash_id(*parts: str) -> str:
@@ -166,6 +239,46 @@ def _emit_reconciled_result_for_request(
     runtime_issue: Optional[RuntimeIssue] = None,
     details: Optional[Dict[str, Any]] = None,
 ) -> ExecutionResult:
+    branch_id = _request_branch_id(request)
+    if branch_id != MAIN_BRANCH_ID:
+        bundle = emit_reconciled_branch_contracts(
+            workspace=workspace,
+            book_id=book_id,
+            branch_id=branch_id,
+            before_snapshot=before_snapshot,
+            action=request.action,
+            result_status=status,
+            request_id=request.request_id,
+            message=message,
+            runtime_issues=[runtime_issue] if runtime_issue else None,
+            artifact_paths=dict(artifact_paths or {}),
+            produced_artifacts=list(produced_artifacts or []),
+            details=dict(details or {}),
+        )
+        if bundle.execution_result is not None:
+            return bundle.execution_result
+        node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False) or request.expected_node
+        if node is None:
+            raise ValueError("Unable to resolve node for reconciled branch scene action result.")
+        return ExecutionResult(
+            result_id=_hash_id(
+                request.selector.book_id,
+                request.request_id,
+                status,
+                node.revision_id,
+                _now_token(),
+            ),
+            action=request.action,
+            status=status,
+            node=node,
+            selector=request.selector,
+            message=message,
+            artifact_paths=dict(artifact_paths or {}),
+            produced_artifacts=list(produced_artifacts or []),
+            details=dict(details or {}),
+            emitted_at=_now_token(),
+            request_id=request.request_id,
+        )
     bundle = emit_reconciled_main_branch_contracts(
         workspace=workspace,
         book_id=book_id,
@@ -181,7 +294,7 @@ def _emit_reconciled_result_for_request(
     )
     if bundle.execution_result is not None:
         return bundle.execution_result
-    node = current_main_node(workspace, book_id, prefer_emitted=False) or request.expected_node
+    node = current_execution_node(workspace, book_id, branch_id=MAIN_BRANCH_ID, prefer_emitted=False) or request.expected_node
     if node is None:
         raise ValueError("Unable to resolve node for reconciled scene action result.")
     return ExecutionResult(
@@ -304,6 +417,110 @@ def _durable_expand_ids_from_request(request: ExecutionRequest) -> List[str]:
     return normalized
 
 
+def _scene_context_projection_receipt(
+    *,
+    workspace: Path,
+    book_id: str,
+    branch_id: str,
+    chapter_id: int,
+    scene_id: int,
+    section_id: Optional[int],
+    phase_id: str,
+) -> Dict[str, Any]:
+    try:
+        projection = get_scene_context_projection(
+            workspace,
+            book_id,
+            branch_id=branch_id,
+            chapter_id=chapter_id,
+            scene_id=scene_id,
+            section_id=section_id,
+            phase_id=phase_id,
+            prefer_emitted=False,
+        )
+    except Exception as exc:  # pragma: no cover - diagnostic projection must not fail execution.
+        return {
+            "schema_version": "scene_context_projection_receipt_v1",
+            "projection_status": "unavailable",
+            "used_as_prompt_input": False,
+            "usage_note": "Projection lookup failed; action execution does not depend on this diagnostic receipt.",
+            "error": str(exc),
+        }
+
+    payload = projection.to_dict()
+    appearance = [
+        {
+            "character_id": item.get("character_id"),
+            "character_name": item.get("character_name"),
+            "appearance_status": item.get("appearance_status"),
+            "artifact_status": item.get("artifact_status"),
+            "source_artifacts": list(item.get("source_artifacts") or []),
+            "staleness_reason": item.get("staleness_reason"),
+        }
+        for item in payload.get("appearance", [])
+        if isinstance(item, dict)
+    ]
+    setting = payload.get("setting") if isinstance(payload.get("setting"), dict) else {}
+    thought_context = payload.get("thought_context") if isinstance(payload.get("thought_context"), dict) else {}
+    selected_signatures = [
+        {
+            "signature_id": item.get("signature_id"),
+            "phase_id": item.get("phase_id"),
+            "turn_id": item.get("turn_id"),
+            "created_at": item.get("created_at"),
+            "label": item.get("label"),
+        }
+        for item in thought_context.get("selected_signatures", [])
+        if isinstance(item, dict)
+    ]
+    return {
+        "schema_version": "scene_context_projection_receipt_v1",
+        "projection_status": "available",
+        "used_as_prompt_input": False,
+        "usage_note": "Recorded for observation only; scene prompt assembly still uses the legacy phase inputs.",
+        "availability": dict(payload.get("availability") or {}),
+        "appearance": appearance,
+        "setting": {
+            "setting_status": setting.get("setting_status"),
+            "artifact_status": setting.get("artifact_status"),
+            "source_mode": setting.get("source_mode"),
+            "source_artifacts": list(setting.get("source_artifacts") or []),
+            "location_id": setting.get("location_id"),
+            "location_label": setting.get("location_label"),
+        },
+        "thought_context": {
+            "artifact_status": thought_context.get("artifact_status"),
+            "context_role": thought_context.get("context_role"),
+            "selected_signatures": selected_signatures,
+            "limitations": list(thought_context.get("limitations") or []),
+        },
+    }
+
+
+def _with_scene_context_projection(
+    details: Dict[str, Any],
+    *,
+    workspace: Path,
+    book_id: str,
+    branch_id: str,
+    chapter_id: int,
+    scene_id: int,
+    section_id: Optional[int],
+    phase_id: str,
+) -> Dict[str, Any]:
+    enriched = dict(details)
+    enriched["scene_context_projection"] = _scene_context_projection_receipt(
+        workspace=workspace,
+        book_id=book_id,
+        branch_id=branch_id,
+        chapter_id=chapter_id,
+        scene_id=scene_id,
+        section_id=section_id,
+        phase_id=phase_id,
+    )
+    return enriched
+
+
 def build_plan_scene_request(
     workspace: Path,
     book_id: str,
@@ -311,14 +528,15 @@ def build_plan_scene_request(
     chapter_id: int,
     scene_id: int,
     section_id: Optional[int] = None,
+    branch_id: str = MAIN_BRANCH_ID,
 ) -> ExecutionRequest:
-    node = current_main_node(workspace, book_id, prefer_emitted=False)
+    node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if node is None:
-        raise ValueError("No current main-branch node is available for plan_scene.")
+        raise ValueError(f"No current node is available for plan_scene on branch {branch_id}.")
     resolved_section = section_id or node.section
     selector = ScopeSelector(
         book_id=book_id,
-        branch_id=MAIN_BRANCH_ID,
+        branch_id=branch_id,
         workflow_family="section_write",
         chapter=chapter_id,
         section=resolved_section,
@@ -332,6 +550,7 @@ def build_plan_scene_request(
             str(chapter_id),
             str(scene_id),
             str(resolved_section or ""),
+            branch_id,
             node.revision_id,
             _now_token(),
         ]
@@ -341,7 +560,7 @@ def build_plan_scene_request(
         action="plan_scene",
         selector=selector,
         expected_node=node,
-        branch_id=MAIN_BRANCH_ID,
+        branch_id=branch_id,
         requested_at=_now_token(),
         details={
             "chapter_id": int(chapter_id),
@@ -358,14 +577,15 @@ def build_write_scene_prose_request(
     chapter_id: int,
     scene_id: int,
     section_id: Optional[int] = None,
+    branch_id: str = MAIN_BRANCH_ID,
 ) -> ExecutionRequest:
-    node = current_main_node(workspace, book_id, prefer_emitted=False)
+    node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if node is None:
-        raise ValueError("No current main-branch node is available for write_scene_prose.")
+        raise ValueError(f"No current node is available for write_scene_prose on branch {branch_id}.")
     resolved_section = section_id or node.section
     selector = ScopeSelector(
         book_id=book_id,
-        branch_id=MAIN_BRANCH_ID,
+        branch_id=branch_id,
         workflow_family="section_write",
         chapter=chapter_id,
         section=resolved_section,
@@ -379,6 +599,7 @@ def build_write_scene_prose_request(
             str(chapter_id),
             str(scene_id),
             str(resolved_section or ""),
+            branch_id,
             node.revision_id,
             _now_token(),
         ]
@@ -388,7 +609,7 @@ def build_write_scene_prose_request(
         action="write_scene_prose",
         selector=selector,
         expected_node=node,
-        branch_id=MAIN_BRANCH_ID,
+        branch_id=branch_id,
         requested_at=_now_token(),
         details={
             "chapter_id": int(chapter_id),
@@ -405,14 +626,15 @@ def build_generate_continuity_pack_request(
     chapter_id: int,
     scene_id: int,
     section_id: Optional[int] = None,
+    branch_id: str = MAIN_BRANCH_ID,
 ) -> ExecutionRequest:
-    node = current_main_node(workspace, book_id, prefer_emitted=False)
+    node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if node is None:
-        raise ValueError("No current main-branch node is available for generate_continuity_pack.")
+        raise ValueError(f"No current node is available for generate_continuity_pack on branch {branch_id}.")
     resolved_section = section_id or node.section
     selector = ScopeSelector(
         book_id=book_id,
-        branch_id=MAIN_BRANCH_ID,
+        branch_id=branch_id,
         workflow_family="section_write",
         chapter=chapter_id,
         section=resolved_section,
@@ -426,6 +648,7 @@ def build_generate_continuity_pack_request(
             str(chapter_id),
             str(scene_id),
             str(resolved_section or ""),
+            branch_id,
             node.revision_id,
             _now_token(),
         ]
@@ -435,7 +658,7 @@ def build_generate_continuity_pack_request(
         action="generate_continuity_pack",
         selector=selector,
         expected_node=node,
-        branch_id=MAIN_BRANCH_ID,
+        branch_id=branch_id,
         requested_at=_now_token(),
         details={
             "chapter_id": int(chapter_id),
@@ -452,14 +675,15 @@ def build_state_repair_scene_patch_request(
     chapter_id: int,
     scene_id: int,
     section_id: Optional[int] = None,
+    branch_id: str = MAIN_BRANCH_ID,
 ) -> ExecutionRequest:
-    node = current_main_node(workspace, book_id, prefer_emitted=False)
+    node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if node is None:
-        raise ValueError("No current main-branch node is available for state_repair_scene_patch.")
+        raise ValueError(f"No current node is available for state_repair_scene_patch on branch {branch_id}.")
     resolved_section = section_id or node.section
     selector = ScopeSelector(
         book_id=book_id,
-        branch_id=MAIN_BRANCH_ID,
+        branch_id=branch_id,
         workflow_family="section_write",
         chapter=chapter_id,
         section=resolved_section,
@@ -473,6 +697,7 @@ def build_state_repair_scene_patch_request(
             str(chapter_id),
             str(scene_id),
             str(resolved_section or ""),
+            branch_id,
             node.revision_id,
             _now_token(),
         ]
@@ -482,7 +707,7 @@ def build_state_repair_scene_patch_request(
         action="state_repair_scene_patch",
         selector=selector,
         expected_node=node,
-        branch_id=MAIN_BRANCH_ID,
+        branch_id=branch_id,
         requested_at=_now_token(),
         details={
             "chapter_id": int(chapter_id),
@@ -499,14 +724,15 @@ def build_lint_scene_prose_request(
     chapter_id: int,
     scene_id: int,
     section_id: Optional[int] = None,
+    branch_id: str = MAIN_BRANCH_ID,
 ) -> ExecutionRequest:
-    node = current_main_node(workspace, book_id, prefer_emitted=False)
+    node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if node is None:
-        raise ValueError("No current main-branch node is available for lint_scene_prose.")
+        raise ValueError(f"No current node is available for lint_scene_prose on branch {branch_id}.")
     resolved_section = section_id or node.section
     selector = ScopeSelector(
         book_id=book_id,
-        branch_id=MAIN_BRANCH_ID,
+        branch_id=branch_id,
         workflow_family="section_write",
         chapter=chapter_id,
         section=resolved_section,
@@ -520,6 +746,7 @@ def build_lint_scene_prose_request(
             str(chapter_id),
             str(scene_id),
             str(resolved_section or ""),
+            branch_id,
             node.revision_id,
             _now_token(),
         ]
@@ -529,7 +756,7 @@ def build_lint_scene_prose_request(
         action="lint_scene_prose",
         selector=selector,
         expected_node=node,
-        branch_id=MAIN_BRANCH_ID,
+        branch_id=branch_id,
         requested_at=_now_token(),
         details={
             "chapter_id": int(chapter_id),
@@ -546,14 +773,15 @@ def build_repair_scene_prose_request(
     chapter_id: int,
     scene_id: int,
     section_id: Optional[int] = None,
+    branch_id: str = MAIN_BRANCH_ID,
 ) -> ExecutionRequest:
-    node = current_main_node(workspace, book_id, prefer_emitted=False)
+    node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if node is None:
-        raise ValueError("No current main-branch node is available for repair_scene_prose.")
+        raise ValueError(f"No current node is available for repair_scene_prose on branch {branch_id}.")
     resolved_section = section_id or node.section
     selector = ScopeSelector(
         book_id=book_id,
-        branch_id=MAIN_BRANCH_ID,
+        branch_id=branch_id,
         workflow_family="section_write",
         chapter=chapter_id,
         section=resolved_section,
@@ -567,6 +795,7 @@ def build_repair_scene_prose_request(
             str(chapter_id),
             str(scene_id),
             str(resolved_section or ""),
+            branch_id,
             node.revision_id,
             _now_token(),
         ]
@@ -576,7 +805,7 @@ def build_repair_scene_prose_request(
         action="repair_scene_prose",
         selector=selector,
         expected_node=node,
-        branch_id=MAIN_BRANCH_ID,
+        branch_id=branch_id,
         requested_at=_now_token(),
         details={
             "chapter_id": int(chapter_id),
@@ -593,14 +822,15 @@ def build_apply_scene_commit_request(
     chapter_id: int,
     scene_id: int,
     section_id: Optional[int] = None,
+    branch_id: str = MAIN_BRANCH_ID,
 ) -> ExecutionRequest:
-    node = current_main_node(workspace, book_id, prefer_emitted=False)
+    node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if node is None:
-        raise ValueError("No current main-branch node is available for apply_scene_commit.")
+        raise ValueError(f"No current node is available for apply_scene_commit on branch {branch_id}.")
     resolved_section = section_id or node.section
     selector = ScopeSelector(
         book_id=book_id,
-        branch_id=MAIN_BRANCH_ID,
+        branch_id=branch_id,
         workflow_family="section_write",
         chapter=chapter_id,
         section=resolved_section,
@@ -614,6 +844,7 @@ def build_apply_scene_commit_request(
             str(chapter_id),
             str(scene_id),
             str(resolved_section or ""),
+            branch_id,
             node.revision_id,
             _now_token(),
         ]
@@ -623,7 +854,7 @@ def build_apply_scene_commit_request(
         action="apply_scene_commit",
         selector=selector,
         expected_node=node,
-        branch_id=MAIN_BRANCH_ID,
+        branch_id=branch_id,
         requested_at=_now_token(),
         details={
             "chapter_id": int(chapter_id),
@@ -640,14 +871,15 @@ def build_preflight_scene_state_request(
     chapter_id: int,
     scene_id: int,
     section_id: Optional[int] = None,
+    branch_id: str = MAIN_BRANCH_ID,
 ) -> ExecutionRequest:
-    node = current_main_node(workspace, book_id, prefer_emitted=False)
+    node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if node is None:
-        raise ValueError("No current main-branch node is available for preflight_scene_state.")
+        raise ValueError(f"No current node is available for preflight_scene_state on branch {branch_id}.")
     resolved_section = section_id or node.section
     selector = ScopeSelector(
         book_id=book_id,
-        branch_id=MAIN_BRANCH_ID,
+        branch_id=branch_id,
         workflow_family="section_write",
         chapter=chapter_id,
         section=resolved_section,
@@ -661,6 +893,7 @@ def build_preflight_scene_state_request(
             str(chapter_id),
             str(scene_id),
             str(resolved_section or ""),
+            branch_id,
             node.revision_id,
             _now_token(),
         ]
@@ -670,7 +903,7 @@ def build_preflight_scene_state_request(
         action="preflight_scene_state",
         selector=selector,
         expected_node=node,
-        branch_id=MAIN_BRANCH_ID,
+        branch_id=branch_id,
         requested_at=_now_token(),
         details={
             "chapter_id": int(chapter_id),
@@ -683,29 +916,28 @@ def build_preflight_scene_state_request(
 def plan_scene_action(workspace: Path, request: ExecutionRequest) -> ExecutionResult:
     if request.action != "plan_scene":
         raise ValueError("Unsupported execution action.")
-    if (request.branch_id or request.selector.branch_id or MAIN_BRANCH_ID) != MAIN_BRANCH_ID:
-        raise ValueError("plan_scene only supports main-branch execution.")
     if request.selector.chapter is None or request.selector.scene is None:
         raise ValueError("plan_scene requires chapter and scene scope.")
 
+    branch_id = _request_branch_id(request)
     book_id = request.selector.book_id
     chapter_id = int(request.selector.chapter)
     scene_id = int(request.selector.scene)
     section_id = int(request.selector.section) if request.selector.section is not None else None
-    book_root = Path(workspace) / "books" / book_id
+    book_root = _execution_book_root(workspace, book_id, branch_id)
     scope_details = {
         "chapter_id": chapter_id,
         "scene_id": scene_id,
         "section_id": section_id,
     }
 
-    live_node = current_main_node(workspace, book_id, prefer_emitted=False)
+    live_node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if live_node is None:
         selector_node = request.expected_node or TimelineNodeRef(
             book_id=book_id,
             workflow_family="section_write",
             source_run_id="unknown",
-            branch_id="main",
+            branch_id=branch_id,
             revision_id="unresolved",
             chapter=chapter_id,
             section=section_id,
@@ -716,7 +948,7 @@ def plan_scene_action(workspace: Path, request: ExecutionRequest) -> ExecutionRe
             request=request,
             node=selector_node,
             status="hard_fail",
-            message="No live main-branch node is available for plan_scene.",
+            message=f"No live execution node is available for plan_scene on branch {branch_id}.",
             details={**scope_details, "failure_code": "missing_live_node"},
         )
         _append_execution_result(book_root, result)
@@ -754,6 +986,7 @@ def plan_scene_action(workspace: Path, request: ExecutionRequest) -> ExecutionRe
     readiness = _get_scene_phase_readiness(
         workspace,
         book_id,
+        branch_id=branch_id,
         chapter_id=chapter_id,
         scene_id=scene_id,
         section_id=section_id,
@@ -880,29 +1113,28 @@ def plan_scene_action(workspace: Path, request: ExecutionRequest) -> ExecutionRe
 def generate_continuity_pack(workspace: Path, request: ExecutionRequest) -> ExecutionResult:
     if request.action != "generate_continuity_pack":
         raise ValueError("Unsupported execution action.")
-    if (request.branch_id or request.selector.branch_id or MAIN_BRANCH_ID) != MAIN_BRANCH_ID:
-        raise ValueError("generate_continuity_pack only supports main-branch execution.")
     if request.selector.chapter is None or request.selector.scene is None:
         raise ValueError("generate_continuity_pack requires chapter and scene scope.")
 
+    branch_id = _request_branch_id(request)
     book_id = request.selector.book_id
     chapter_id = int(request.selector.chapter)
     scene_id = int(request.selector.scene)
     section_id = int(request.selector.section) if request.selector.section is not None else None
-    book_root = Path(workspace) / "books" / book_id
+    book_root = _execution_book_root(workspace, book_id, branch_id)
     scope_details = {
         "chapter_id": chapter_id,
         "scene_id": scene_id,
         "section_id": section_id,
     }
 
-    live_node = current_main_node(workspace, book_id, prefer_emitted=False)
+    live_node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if live_node is None:
         selector_node = request.expected_node or TimelineNodeRef(
             book_id=book_id,
             workflow_family="section_write",
             source_run_id="unknown",
-            branch_id="main",
+            branch_id=branch_id,
             revision_id="unresolved",
             chapter=chapter_id,
             section=section_id,
@@ -913,7 +1145,7 @@ def generate_continuity_pack(workspace: Path, request: ExecutionRequest) -> Exec
             request=request,
             node=selector_node,
             status="hard_fail",
-            message="No live main-branch node is available for generate_continuity_pack.",
+            message=f"No live execution node is available for generate_continuity_pack on branch {branch_id}.",
             details={**scope_details, "failure_code": "missing_live_node"},
         )
         _append_execution_result(book_root, result)
@@ -951,6 +1183,7 @@ def generate_continuity_pack(workspace: Path, request: ExecutionRequest) -> Exec
     readiness = _get_scene_phase_readiness(
         workspace,
         book_id,
+        branch_id=branch_id,
         chapter_id=chapter_id,
         scene_id=scene_id,
         section_id=section_id,
@@ -1127,13 +1360,22 @@ def generate_continuity_pack(workspace: Path, request: ExecutionRequest) -> Exec
         message="generate_continuity_pack produced a derived continuity pack.",
         artifact_paths={"continuity_pack": _artifact_relpath(book_root, pack_path)},
         produced_artifacts=produced_artifacts,
-        details={
-            **scope_details,
-            "scene_status": readiness.scene_status,
-            "recommended_next_action": "write_scene_prose",
-            "pre_revision_id": live_node.revision_id,
-            "post_revision_id": live_node.revision_id,
-        },
+        details=_with_scene_context_projection(
+            {
+                **scope_details,
+                "scene_status": readiness.scene_status,
+                "recommended_next_action": "write_scene_prose",
+                "pre_revision_id": live_node.revision_id,
+                "post_revision_id": live_node.revision_id,
+            },
+            workspace=workspace,
+            book_id=book_id,
+            branch_id=branch_id,
+            chapter_id=chapter_id,
+            scene_id=scene_id,
+            section_id=section_id,
+            phase_id="generate_continuity_pack",
+        ),
     )
     _append_execution_result(book_root, result)
     return result
@@ -1142,29 +1384,28 @@ def generate_continuity_pack(workspace: Path, request: ExecutionRequest) -> Exec
 def preflight_scene_state(workspace: Path, request: ExecutionRequest) -> ExecutionResult:
     if request.action != "preflight_scene_state":
         raise ValueError("Unsupported execution action.")
-    if (request.branch_id or request.selector.branch_id or MAIN_BRANCH_ID) != MAIN_BRANCH_ID:
-        raise ValueError("preflight_scene_state only supports main-branch execution.")
     if request.selector.chapter is None or request.selector.scene is None:
         raise ValueError("preflight_scene_state requires chapter and scene scope.")
 
+    branch_id = _request_branch_id(request)
     book_id = request.selector.book_id
     chapter_id = int(request.selector.chapter)
     scene_id = int(request.selector.scene)
     section_id = int(request.selector.section) if request.selector.section is not None else None
-    book_root = Path(workspace) / "books" / book_id
+    book_root = _execution_book_root(workspace, book_id, branch_id)
     scope_details = {
         "chapter_id": chapter_id,
         "scene_id": scene_id,
         "section_id": section_id,
     }
 
-    live_node = current_main_node(workspace, book_id, prefer_emitted=False)
+    live_node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if live_node is None:
         selector_node = request.expected_node or TimelineNodeRef(
             book_id=book_id,
             workflow_family="section_write",
             source_run_id="unknown",
-            branch_id="main",
+            branch_id=branch_id,
             revision_id="unresolved",
             chapter=chapter_id,
             section=section_id,
@@ -1175,7 +1416,7 @@ def preflight_scene_state(workspace: Path, request: ExecutionRequest) -> Executi
             request=request,
             node=selector_node,
             status="hard_fail",
-            message="No live main-branch node is available for preflight_scene_state.",
+            message=f"No live execution node is available for preflight_scene_state on branch {branch_id}.",
             details={**scope_details, "failure_code": "missing_live_node"},
         )
         _append_execution_result(book_root, result)
@@ -1213,6 +1454,7 @@ def preflight_scene_state(workspace: Path, request: ExecutionRequest) -> Executi
     readiness = _get_scene_phase_readiness(
         workspace,
         book_id,
+        branch_id=branch_id,
         chapter_id=chapter_id,
         scene_id=scene_id,
         section_id=section_id,
@@ -1387,29 +1629,28 @@ def preflight_scene_state(workspace: Path, request: ExecutionRequest) -> Executi
 def write_scene_prose(workspace: Path, request: ExecutionRequest) -> ExecutionResult:
     if request.action != "write_scene_prose":
         raise ValueError("Unsupported execution action.")
-    if (request.branch_id or request.selector.branch_id or MAIN_BRANCH_ID) != MAIN_BRANCH_ID:
-        raise ValueError("write_scene_prose only supports main-branch execution.")
     if request.selector.chapter is None or request.selector.scene is None:
         raise ValueError("write_scene_prose requires chapter and scene scope.")
 
+    branch_id = _request_branch_id(request)
     book_id = request.selector.book_id
     chapter_id = int(request.selector.chapter)
     scene_id = int(request.selector.scene)
     section_id = int(request.selector.section) if request.selector.section is not None else None
-    book_root = Path(workspace) / "books" / book_id
+    book_root = _execution_book_root(workspace, book_id, branch_id)
     scope_details = {
         "chapter_id": chapter_id,
         "scene_id": scene_id,
         "section_id": section_id,
     }
 
-    live_node = current_main_node(workspace, book_id, prefer_emitted=False)
+    live_node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if live_node is None:
         selector_node = request.expected_node or TimelineNodeRef(
             book_id=book_id,
             workflow_family="section_write",
             source_run_id="unknown",
-            branch_id="main",
+            branch_id=branch_id,
             revision_id="unresolved",
             chapter=chapter_id,
             section=section_id,
@@ -1420,7 +1661,7 @@ def write_scene_prose(workspace: Path, request: ExecutionRequest) -> ExecutionRe
             request=request,
             node=selector_node,
             status="hard_fail",
-            message="No live main-branch node is available for write_scene_prose.",
+            message=f"No live execution node is available for write_scene_prose on branch {branch_id}.",
             details={**scope_details, "failure_code": "missing_live_node"},
         )
         _append_execution_result(book_root, result)
@@ -1458,6 +1699,7 @@ def write_scene_prose(workspace: Path, request: ExecutionRequest) -> ExecutionRe
     readiness = _get_scene_phase_readiness(
         workspace,
         book_id,
+        branch_id=branch_id,
         chapter_id=chapter_id,
         scene_id=scene_id,
         section_id=section_id,
@@ -1678,13 +1920,22 @@ def write_scene_prose(workspace: Path, request: ExecutionRequest) -> ExecutionRe
         message=f"Scene {chapter_id}:{scene_id} prose generated as provisional write artifacts.",
         artifact_paths={item.artifact_key: item.path for item in produced_artifacts},
         produced_artifacts=produced_artifacts,
-        details={
-            **scope_details,
-            "scene_status": readiness.scene_status,
-            "recommended_next_action": readiness.recommended_next_action,
-            "pre_revision_id": live_node.revision_id,
-            "post_revision_id": live_node.revision_id,
-        },
+        details=_with_scene_context_projection(
+            {
+                **scope_details,
+                "scene_status": readiness.scene_status,
+                "recommended_next_action": readiness.recommended_next_action,
+                "pre_revision_id": live_node.revision_id,
+                "post_revision_id": live_node.revision_id,
+            },
+            workspace=workspace,
+            book_id=book_id,
+            branch_id=branch_id,
+            chapter_id=chapter_id,
+            scene_id=scene_id,
+            section_id=section_id,
+            phase_id="write_scene_prose",
+        ),
     )
     _append_execution_result(book_root, result)
     return result
@@ -1693,29 +1944,28 @@ def write_scene_prose(workspace: Path, request: ExecutionRequest) -> ExecutionRe
 def state_repair_scene_patch(workspace: Path, request: ExecutionRequest) -> ExecutionResult:
     if request.action != "state_repair_scene_patch":
         raise ValueError("Unsupported execution action.")
-    if (request.branch_id or request.selector.branch_id or MAIN_BRANCH_ID) != MAIN_BRANCH_ID:
-        raise ValueError("state_repair_scene_patch only supports main-branch execution.")
     if request.selector.chapter is None or request.selector.scene is None:
         raise ValueError("state_repair_scene_patch requires chapter and scene scope.")
 
+    branch_id = _request_branch_id(request)
     book_id = request.selector.book_id
     chapter_id = int(request.selector.chapter)
     scene_id = int(request.selector.scene)
     section_id = int(request.selector.section) if request.selector.section is not None else None
-    book_root = Path(workspace) / "books" / book_id
+    book_root = _execution_book_root(workspace, book_id, branch_id)
     scope_details = {
         "chapter_id": chapter_id,
         "scene_id": scene_id,
         "section_id": section_id,
     }
 
-    live_node = current_main_node(workspace, book_id, prefer_emitted=False)
+    live_node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if live_node is None:
         selector_node = request.expected_node or TimelineNodeRef(
             book_id=book_id,
             workflow_family="section_write",
             source_run_id="unknown",
-            branch_id="main",
+            branch_id=branch_id,
             revision_id="unresolved",
             chapter=chapter_id,
             section=section_id,
@@ -1726,7 +1976,7 @@ def state_repair_scene_patch(workspace: Path, request: ExecutionRequest) -> Exec
             request=request,
             node=selector_node,
             status="hard_fail",
-            message="No live main-branch node is available for state_repair_scene_patch.",
+            message=f"No live execution node is available for state_repair_scene_patch on branch {branch_id}.",
             details={**scope_details, "failure_code": "missing_live_node"},
         )
         _append_execution_result(book_root, result)
@@ -1764,6 +2014,7 @@ def state_repair_scene_patch(workspace: Path, request: ExecutionRequest) -> Exec
     readiness = _get_scene_phase_readiness(
         workspace,
         book_id,
+        branch_id=branch_id,
         chapter_id=chapter_id,
         scene_id=scene_id,
         section_id=section_id,
@@ -1962,14 +2213,23 @@ def state_repair_scene_patch(workspace: Path, request: ExecutionRequest) -> Exec
         message="state_repair_scene_patch produced a provisional corrected state patch.",
         artifact_paths={"state_repair_patch": _artifact_relpath(book_root, patch_path)},
         produced_artifacts=produced_artifacts,
-        details={
-            **scope_details,
-            "scene_status": readiness.scene_status,
-            "recommended_next_action": "lint_scene_prose",
-            "source_prose_phase": artifact_state.current_prose_phase,
-            "pre_revision_id": live_node.revision_id,
-            "post_revision_id": live_node.revision_id,
-        },
+        details=_with_scene_context_projection(
+            {
+                **scope_details,
+                "scene_status": readiness.scene_status,
+                "recommended_next_action": "lint_scene_prose",
+                "source_prose_phase": artifact_state.current_prose_phase,
+                "pre_revision_id": live_node.revision_id,
+                "post_revision_id": live_node.revision_id,
+            },
+            workspace=workspace,
+            book_id=book_id,
+            branch_id=branch_id,
+            chapter_id=chapter_id,
+            scene_id=scene_id,
+            section_id=section_id,
+            phase_id="state_repair_scene_patch",
+        ),
     )
     _append_execution_result(book_root, result)
     return result
@@ -1978,29 +2238,28 @@ def state_repair_scene_patch(workspace: Path, request: ExecutionRequest) -> Exec
 def lint_scene_prose(workspace: Path, request: ExecutionRequest) -> ExecutionResult:
     if request.action != "lint_scene_prose":
         raise ValueError("Unsupported execution action.")
-    if (request.branch_id or request.selector.branch_id or MAIN_BRANCH_ID) != MAIN_BRANCH_ID:
-        raise ValueError("lint_scene_prose only supports main-branch execution.")
     if request.selector.chapter is None or request.selector.scene is None:
         raise ValueError("lint_scene_prose requires chapter and scene scope.")
 
+    branch_id = _request_branch_id(request)
     book_id = request.selector.book_id
     chapter_id = int(request.selector.chapter)
     scene_id = int(request.selector.scene)
     section_id = int(request.selector.section) if request.selector.section is not None else None
-    book_root = Path(workspace) / "books" / book_id
+    book_root = _execution_book_root(workspace, book_id, branch_id)
     scope_details = {
         "chapter_id": chapter_id,
         "scene_id": scene_id,
         "section_id": section_id,
     }
 
-    live_node = current_main_node(workspace, book_id, prefer_emitted=False)
+    live_node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if live_node is None:
         selector_node = request.expected_node or TimelineNodeRef(
             book_id=book_id,
             workflow_family="section_write",
             source_run_id="unknown",
-            branch_id="main",
+            branch_id=branch_id,
             revision_id="unresolved",
             chapter=chapter_id,
             section=section_id,
@@ -2011,7 +2270,7 @@ def lint_scene_prose(workspace: Path, request: ExecutionRequest) -> ExecutionRes
             request=request,
             node=selector_node,
             status="hard_fail",
-            message="No live main-branch node is available for lint_scene_prose.",
+            message=f"No live execution node is available for lint_scene_prose on branch {branch_id}.",
             details={**scope_details, "failure_code": "missing_live_node"},
         )
         _append_execution_result(book_root, result)
@@ -2049,6 +2308,7 @@ def lint_scene_prose(workspace: Path, request: ExecutionRequest) -> ExecutionRes
     readiness = _get_scene_phase_readiness(
         workspace,
         book_id,
+        branch_id=branch_id,
         chapter_id=chapter_id,
         scene_id=scene_id,
         section_id=section_id,
@@ -2258,15 +2518,24 @@ def lint_scene_prose(workspace: Path, request: ExecutionRequest) -> ExecutionRes
         message=f"lint_scene_prose produced a provisional lint report with status {report.get('status', 'unknown')}.",
         artifact_paths={"lint_report": _artifact_relpath(book_root, report_path)},
         produced_artifacts=produced_artifacts,
-        details={
-            **scope_details,
-            "scene_status": readiness.scene_status,
-            "lint_status": report.get("status"),
-            "recommended_next_action": "repair_scene_prose" if report.get("status") == "fail" else "apply_scene_commit",
-            "source_prose_phase": artifact_state.current_prose_phase,
-            "pre_revision_id": live_node.revision_id,
-            "post_revision_id": live_node.revision_id,
-        },
+        details=_with_scene_context_projection(
+            {
+                **scope_details,
+                "scene_status": readiness.scene_status,
+                "lint_status": report.get("status"),
+                "recommended_next_action": "repair_scene_prose" if report.get("status") == "fail" else "apply_scene_commit",
+                "source_prose_phase": artifact_state.current_prose_phase,
+                "pre_revision_id": live_node.revision_id,
+                "post_revision_id": live_node.revision_id,
+            },
+            workspace=workspace,
+            book_id=book_id,
+            branch_id=branch_id,
+            chapter_id=chapter_id,
+            scene_id=scene_id,
+            section_id=section_id,
+            phase_id="lint_scene_prose",
+        ),
     )
     _append_execution_result(book_root, result)
     return result
@@ -2275,29 +2544,28 @@ def lint_scene_prose(workspace: Path, request: ExecutionRequest) -> ExecutionRes
 def repair_scene_prose(workspace: Path, request: ExecutionRequest) -> ExecutionResult:
     if request.action != "repair_scene_prose":
         raise ValueError("Unsupported execution action.")
-    if (request.branch_id or request.selector.branch_id or MAIN_BRANCH_ID) != MAIN_BRANCH_ID:
-        raise ValueError("repair_scene_prose only supports main-branch execution.")
     if request.selector.chapter is None or request.selector.scene is None:
         raise ValueError("repair_scene_prose requires chapter and scene scope.")
 
+    branch_id = _request_branch_id(request)
     book_id = request.selector.book_id
     chapter_id = int(request.selector.chapter)
     scene_id = int(request.selector.scene)
     section_id = int(request.selector.section) if request.selector.section is not None else None
-    book_root = Path(workspace) / "books" / book_id
+    book_root = _execution_book_root(workspace, book_id, branch_id)
     scope_details = {
         "chapter_id": chapter_id,
         "scene_id": scene_id,
         "section_id": section_id,
     }
 
-    live_node = current_main_node(workspace, book_id, prefer_emitted=False)
+    live_node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if live_node is None:
         selector_node = request.expected_node or TimelineNodeRef(
             book_id=book_id,
             workflow_family="section_write",
             source_run_id="unknown",
-            branch_id="main",
+            branch_id=branch_id,
             revision_id="unresolved",
             chapter=chapter_id,
             section=section_id,
@@ -2308,7 +2576,7 @@ def repair_scene_prose(workspace: Path, request: ExecutionRequest) -> ExecutionR
             request=request,
             node=selector_node,
             status="hard_fail",
-            message="No live main-branch node is available for repair_scene_prose.",
+            message=f"No live execution node is available for repair_scene_prose on branch {branch_id}.",
             details={**scope_details, "failure_code": "missing_live_node"},
         )
         _append_execution_result(book_root, result)
@@ -2346,6 +2614,7 @@ def repair_scene_prose(workspace: Path, request: ExecutionRequest) -> ExecutionR
     readiness = _get_scene_phase_readiness(
         workspace,
         book_id,
+        branch_id=branch_id,
         chapter_id=chapter_id,
         scene_id=scene_id,
         section_id=section_id,
@@ -2532,15 +2801,24 @@ def repair_scene_prose(workspace: Path, request: ExecutionRequest) -> ExecutionR
         message="repair_scene_prose produced provisional repaired prose and patch artifacts.",
         artifact_paths={item.artifact_key: item.path for item in produced_artifacts},
         produced_artifacts=produced_artifacts,
-        details={
-            **scope_details,
-            "scene_status": readiness.scene_status,
-            "lint_status": artifact_state.lint_status,
-            "recommended_next_action": "state_repair_scene_patch",
-            "source_prose_phase": artifact_state.current_prose_phase,
-            "pre_revision_id": live_node.revision_id,
-            "post_revision_id": live_node.revision_id,
-        },
+        details=_with_scene_context_projection(
+            {
+                **scope_details,
+                "scene_status": readiness.scene_status,
+                "lint_status": artifact_state.lint_status,
+                "recommended_next_action": "state_repair_scene_patch",
+                "source_prose_phase": artifact_state.current_prose_phase,
+                "pre_revision_id": live_node.revision_id,
+                "post_revision_id": live_node.revision_id,
+            },
+            workspace=workspace,
+            book_id=book_id,
+            branch_id=branch_id,
+            chapter_id=chapter_id,
+            scene_id=scene_id,
+            section_id=section_id,
+            phase_id="repair_scene_prose",
+        ),
     )
     _append_execution_result(book_root, result)
     return result
@@ -2549,29 +2827,28 @@ def repair_scene_prose(workspace: Path, request: ExecutionRequest) -> ExecutionR
 def apply_scene_commit(workspace: Path, request: ExecutionRequest) -> ExecutionResult:
     if request.action != "apply_scene_commit":
         raise ValueError("Unsupported execution action.")
-    if (request.branch_id or request.selector.branch_id or MAIN_BRANCH_ID) != MAIN_BRANCH_ID:
-        raise ValueError("apply_scene_commit only supports main-branch execution.")
     if request.selector.chapter is None or request.selector.scene is None:
         raise ValueError("apply_scene_commit requires chapter and scene scope.")
 
+    branch_id = _request_branch_id(request)
     book_id = request.selector.book_id
     chapter_id = int(request.selector.chapter)
     scene_id = int(request.selector.scene)
     section_id = int(request.selector.section) if request.selector.section is not None else None
-    book_root = Path(workspace) / "books" / book_id
+    book_root = _execution_book_root(workspace, book_id, branch_id)
     scope_details = {
         "chapter_id": chapter_id,
         "scene_id": scene_id,
         "section_id": section_id,
     }
 
-    live_node = current_main_node(workspace, book_id, prefer_emitted=False)
+    live_node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if live_node is None:
         selector_node = request.expected_node or TimelineNodeRef(
             book_id=book_id,
             workflow_family="section_write",
             source_run_id="unknown",
-            branch_id="main",
+            branch_id=branch_id,
             revision_id="unresolved",
             chapter=chapter_id,
             section=section_id,
@@ -2582,13 +2859,24 @@ def apply_scene_commit(workspace: Path, request: ExecutionRequest) -> ExecutionR
             request=request,
             node=selector_node,
             status="hard_fail",
-            message="No live main-branch node is available for apply_scene_commit.",
+            message=f"No live execution node is available for apply_scene_commit on branch {branch_id}.",
             details={**scope_details, "failure_code": "missing_live_node"},
         )
         _append_execution_result(book_root, result)
         return result
 
-    before_snapshot = capture_main_branch_snapshot(workspace, book_id)
+    before_snapshot = (
+        capture_main_branch_snapshot(workspace, book_id)
+        if branch_id == MAIN_BRANCH_ID
+        else capture_surface_snapshot(workspace, book_id, branch_id=branch_id)
+    )
+    execution_node = _build_execution_node(
+        live_node=live_node,
+        chapter_id=chapter_id,
+        section_id=section_id,
+        scene_id=scene_id,
+        phase_id="apply_scene_commit",
+    )
     if request.expected_node is not None and live_node.to_dict() != request.expected_node.to_dict():
         failure_code, message = _classify_live_node_mismatch(
             request.expected_node,
@@ -2623,6 +2911,7 @@ def apply_scene_commit(workspace: Path, request: ExecutionRequest) -> ExecutionR
     readiness = _get_scene_phase_readiness(
         workspace,
         book_id,
+        branch_id=branch_id,
         chapter_id=chapter_id,
         scene_id=scene_id,
         section_id=section_id,
@@ -2878,46 +3167,71 @@ def apply_scene_commit(workspace: Path, request: ExecutionRequest) -> ExecutionR
             write_attempts,
         )
     except FileExistsError:
-        chapter_dir = book_root / "draft" / "chapters" / f"ch_{chapter_id:03d}"
-        committed_receipts = [
-            ProducedArtifactReceipt(
-                artifact_key="scene_prose",
-                label="Committed scene prose",
-                artifact_status="authoritative",
-                path=_artifact_relpath(book_root, chapter_dir / f"scene_{scene_id:03d}.md"),
-                format="text/markdown",
-                consumable=True,
-                resumable=False,
-                replaceable=False,
-                details={"phase": "commit"},
-            ),
-            ProducedArtifactReceipt(
-                artifact_key="scene_meta",
-                label="Committed scene metadata",
-                artifact_status="authoritative",
-                path=_artifact_relpath(book_root, chapter_dir / f"scene_{scene_id:03d}.meta.json"),
-                format="application/json",
-                consumable=True,
-                resumable=False,
-                replaceable=False,
-                details={"phase": "commit"},
-            ),
-        ]
-        return _emit_reconciled_result_for_request(
-            workspace=workspace,
-            book_id=book_id,
-            request=request,
-            before_snapshot=before_snapshot,
-            status="no_op",
-            message="Scene artifacts already exist for this committed scene.",
-            artifact_paths={item.artifact_key: item.path for item in committed_receipts},
-            produced_artifacts=committed_receipts,
-            details={
-                **scope_details,
-                "failure_code": "scene_already_committed",
-                "source_prose_phase": artifact_state.current_prose_phase,
-            },
-        )
+        if branch_id != MAIN_BRANCH_ID:
+            chapter_dir = book_root / "draft" / "chapters" / f"ch_{chapter_id:03d}"
+            existing_prose = chapter_dir / f"scene_{scene_id:03d}.md"
+            existing_meta = chapter_dir / f"scene_{scene_id:03d}.meta.json"
+            original_prose = chapter_dir / f"scene_{scene_id:03d}.original.md"
+            original_meta = chapter_dir / f"scene_{scene_id:03d}.original.meta.json"
+            if existing_prose.exists() and not original_prose.exists():
+                shutil.copy2(existing_prose, original_prose)
+            if existing_meta.exists() and not original_meta.exists():
+                shutil.copy2(existing_meta, original_meta)
+            if existing_prose.exists():
+                existing_prose.unlink()
+            if existing_meta.exists():
+                existing_meta.unlink()
+            _write_scene_files(
+                book_root,
+                chapter_id,
+                scene_id,
+                prose,
+                scene_card,
+                patch,
+                lint_report,
+                write_attempts,
+            )
+        else:
+            chapter_dir = book_root / "draft" / "chapters" / f"ch_{chapter_id:03d}"
+            committed_receipts = [
+                ProducedArtifactReceipt(
+                    artifact_key="scene_prose",
+                    label="Committed scene prose",
+                    artifact_status="authoritative",
+                    path=_artifact_relpath(book_root, chapter_dir / f"scene_{scene_id:03d}.md"),
+                    format="text/markdown",
+                    consumable=True,
+                    resumable=False,
+                    replaceable=False,
+                    details={"phase": "commit"},
+                ),
+                ProducedArtifactReceipt(
+                    artifact_key="scene_meta",
+                    label="Committed scene metadata",
+                    artifact_status="authoritative",
+                    path=_artifact_relpath(book_root, chapter_dir / f"scene_{scene_id:03d}.meta.json"),
+                    format="application/json",
+                    consumable=True,
+                    resumable=False,
+                    replaceable=False,
+                    details={"phase": "commit"},
+                ),
+            ]
+            return _emit_reconciled_result_for_request(
+                workspace=workspace,
+                book_id=book_id,
+                request=request,
+                before_snapshot=before_snapshot,
+                status="no_op",
+                message="Scene artifacts already exist for this committed scene.",
+                artifact_paths={item.artifact_key: item.path for item in committed_receipts},
+                produced_artifacts=committed_receipts,
+                details={
+                    **scope_details,
+                    "failure_code": "scene_already_committed",
+                    "source_prose_phase": artifact_state.current_prose_phase,
+                },
+            )
 
     _update_bible(book_root, patch)
 
@@ -3047,29 +3361,45 @@ def apply_scene_commit(workspace: Path, request: ExecutionRequest) -> ExecutionR
         "commit",
         artifact_paths,
     )
+    if branch_id != MAIN_BRANCH_ID:
+        _advance_branch_node(book_root, execution_node, phase_id="apply_scene_commit")
+        _mark_branch_promote_ready(book_root, branch_id)
     return _emit_reconciled_result_for_request(
         workspace=workspace,
         book_id=book_id,
         request=request,
         before_snapshot=before_snapshot,
         status="success",
-        message="apply_scene_commit advanced canonical state and persisted authoritative scene artifacts.",
+        message=(
+            "apply_scene_commit advanced canonical state and persisted authoritative scene artifacts."
+            if branch_id == MAIN_BRANCH_ID
+            else f"apply_scene_commit advanced branch-local state on {branch_id} and persisted authoritative scene artifacts."
+        ),
         artifact_paths=artifact_paths,
         produced_artifacts=produced_artifacts,
-        details={
-            **scope_details,
-            "scene_status": readiness.scene_status,
-            "recommended_next_action": None,
-            "source_prose_phase": artifact_state.current_prose_phase,
-            "lint_status": artifact_state.lint_status,
-            "chapter_end": chapter_end,
-            "completed": completed,
-            "next_chapter": next_chapter,
-            "next_scene": next_scene,
-            "write_attempts": write_attempts,
-            "durable_state_updated": bool(durable_updated),
-            "appearance_refresh_requested_ids": appearance_ids,
-            "appearance_refreshed_ids": refreshed_appearance_ids,
-            "pre_revision_id": live_node.revision_id,
-        },
+        details=_with_scene_context_projection(
+            {
+                **scope_details,
+                "scene_status": readiness.scene_status,
+                "recommended_next_action": None,
+                "source_prose_phase": artifact_state.current_prose_phase,
+                "lint_status": artifact_state.lint_status,
+                "chapter_end": chapter_end,
+                "completed": completed,
+                "next_chapter": next_chapter,
+                "next_scene": next_scene,
+                "write_attempts": write_attempts,
+                "durable_state_updated": bool(durable_updated),
+                "appearance_refresh_requested_ids": appearance_ids,
+                "appearance_refreshed_ids": refreshed_appearance_ids,
+                "pre_revision_id": live_node.revision_id,
+            },
+            workspace=workspace,
+            book_id=book_id,
+            branch_id=branch_id,
+            chapter_id=chapter_id,
+            scene_id=scene_id,
+            section_id=section_id,
+            phase_id="apply_scene_commit",
+        ),
     )

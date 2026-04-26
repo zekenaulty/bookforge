@@ -1,6 +1,6 @@
 # 0075 Extract Appearance, Setting, And Context Refinement Surfaces
 
-Status: pending
+Status: completed
 
 ## Goal
 - Make character appearance, scene background/setting, and prior-stage context refinement explicit, queryable BookForge projection layers that Nanda can use without inferring truth from prose, prompt logs, or hidden runner side effects.
@@ -18,6 +18,25 @@ Status: pending
   - which prior T1 planning signatures are safe and relevant context for the current author move
 
 ## Detailed Work
+- First implementation slice:
+  - added query modules for appearance, scene setting, and prior T1 thought-context projections
+  - added a deterministic `refresh_character_appearance_projection` execution action that writes a derived scene/cast projection artifact and produced-artifact receipt
+  - kept projection output non-canonical and non-mutating; existing character state is read, not rewritten
+  - added action discovery details so Nanda can see whether appearance projection can run for the selected scene scope
+- Second implementation slice:
+  - added `draft_scene_setting_projection` to record author-provided setting/background intent as a `provisional` artifact
+  - added `extract_scene_setting_from_prose` to record prose-derived setting/background observations as a `derived` artifact
+  - kept both actions non-canonical and non-mutating
+  - added action discovery for both setting projection actions
+  - `extract_scene_setting_from_prose` refuses when no scene prose exists instead of inventing source context
+- Third implementation slice:
+  - added `get_scene_context_projection(...)` as a compact aggregate query over appearance, setting, and prior T1 thought-context projections
+  - the aggregate reports availability counts and statuses without making Nanda stitch projection layers together manually
+- Fourth implementation slice:
+  - added compact `scene_context_projection` snapshots to downstream scene-phase `ExecutionResult.details`
+  - covered `generate_continuity_pack`, `write_scene_prose`, `state_repair_scene_patch`, `lint_scene_prose`, `repair_scene_prose`, and `apply_scene_commit`
+  - kept the receipt honest by recording `used_as_prompt_input: false`
+  - this means the action receipt exposes what appearance/setting/thought context was observable at execution time, but does not claim the prompt consumed that projection bundle
 - Audit the current character appearance path.
   - Likely starting points:
     - `src/bookforge/characters.py`
@@ -30,6 +49,10 @@ Status: pending
     - derived scene projections
     - provisional LLM outputs
     - diagnostic only
+  - Current implementation note:
+    - committed `appearance_updates` now mark `appearance_projection_pending: true`
+    - this prevents a failed/stalled legacy appearance refresh from being misreported as current appearance projection truth
+    - `list_appearance_projection_views(...)` reports this state as stale/provisional until refresh clears the pending flag
 - Add an appearance projection query surface.
   - Candidate module:
     - `src/bookforge/query/appearance.py`
@@ -68,6 +91,10 @@ Status: pending
   - Both paths must label outputs truthfully:
     - prose-derived extraction is `derived`
     - author-drafted setting projection is `provisional` until accepted by a later commit/apply action
+  - Current implementation note:
+    - `draft_scene_setting_projection` records structured caller/author-provided setting details; it does not call an LLM internally yet
+    - `extract_scene_setting_from_prose` reads existing scene prose and records a derived artifact; structured extraction can be supplied by a caller/author worker, otherwise the artifact remains conservative and may report no structured setting
+    - Decision for this step: Nanda/the author worker supplies structured setting payloads; an internal BookForge author-LLM setting draft/extract turn is deferred to a later explicit action
 - Add context refinement through prior T1 thought signatures.
   - Treat T1 thought signatures from previous workflow stages as context-management artifacts, not source of truth.
   - Candidate query surface:
@@ -76,6 +103,10 @@ Status: pending
     - select relevant prior T1 signatures by `TimelineNodeRef`, phase, scene, and workflow family
     - expose them as candidate context inputs for the next scene-phase action
     - record which signatures were included in the prompt package or execution receipt
+  - Current implementation note:
+    - scene-phase receipts now record selected prior T1 signatures in `scene_context_projection.thought_context`
+    - receipt snapshots explicitly say the projection was not used as prompt input yet
+    - later prompt injection must flip `used_as_prompt_input` only when the projection payload is actually assembled into the model request
   - This is essentially reuse of previous planning work.
   - It must not replace explicit execution receipts, state surfaces, or artifact truth.
 - Thread all three surfaces through the same coordinate model.
@@ -92,6 +123,8 @@ Status: pending
     - was the setting extracted from prose or drafted by the author LLM
     - which prior T1 thought signatures are available as refinement context
     - whether any of these are legal inputs for the next scene-phase action
+  - Current implementation note:
+    - `get_scene_context_projection(...)` provides the first aggregate availability surface for these projection layers
 - Keep this as projection-layer work, not canonical mutation work.
   - 0075 should not solve character-state promotion, inventory promotion, or final scene commit.
   - It should make projections visible, typed, and safe to reason about.
@@ -186,6 +219,7 @@ Status: pending
   - thought-signature context selection filters to relevant prior T1 signatures
   - thought signatures are never reported as authoritative execution truth
   - readiness surfaces can report appearance, setting, and thought-context availability without starting execution
+  - scene-phase execution receipts record projection availability and truthfully report whether the projection was used as prompt input
 
 ## Definition Of Done
 - A caller can query character appearance projection status for a book, scene, or character without inspecting raw files.
@@ -194,7 +228,7 @@ Status: pending
 - A caller can query scene background/setting status independently from prose generation.
 - A caller can distinguish prose-extracted setting details from author-drafted setting projections.
 - A caller can discover relevant prior T1 thought signatures as optional refinement context for a scene-phase action.
-- Execution receipts record when appearance, setting, or thought-context artifacts were used as inputs.
+- Execution receipts record whether appearance, setting, or thought-context artifacts were used as prompt inputs or were only observable as diagnostic projection context.
 - Nanda can present these capabilities honestly in the author pane using BookForge query results instead of persona claims.
 
 ## Notes

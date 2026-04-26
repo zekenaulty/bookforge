@@ -116,3 +116,7 @@ Related commands
 - `bookforge workflow write-section`
 - `bookforge workflow advance-section`
 - `bookforge workflow resume-paused-section`
+
+Branch-scoped writer note
+- `bookforge workflow scene-readiness`, scene-phase commands, and `bookforge workflow write-section` accept `--branch-id <id>` when the caller wants to execute against a derived branch snapshot instead of canonical `main`.
+- `bookforge run` remains the batch/operator macro over `main`; branch-local authoring should use the workflow scene/section surfaces.

@@ -55,6 +55,12 @@ Result truth
     - `bookforge.execution.generate_continuity_pack(...)`
     - `bookforge.execution.build_write_scene_prose_request(...)`
     - `bookforge.execution.write_scene_prose(...)`
+    - `bookforge.execution.build_refresh_character_appearance_projection_request(...)`
+    - `bookforge.execution.refresh_character_appearance_projection(...)`
+    - `bookforge.execution.build_draft_scene_setting_projection_request(...)`
+    - `bookforge.execution.draft_scene_setting_projection(...)`
+    - `bookforge.execution.build_extract_scene_setting_from_prose_request(...)`
+    - `bookforge.execution.extract_scene_setting_from_prose(...)`
     - `bookforge.execution.build_state_repair_scene_patch_request(...)`
     - `bookforge.execution.state_repair_scene_patch(...)`
     - `bookforge.execution.build_lint_scene_prose_request(...)`
@@ -65,6 +71,10 @@ Result truth
     - `bookforge.execution.apply_scene_commit(...)`
     - `bookforge.execution.build_write_section_request(...)`
     - `bookforge.execution.write_frozen_section(...)`
+    - `bookforge.query.list_appearance_projection_views(...)`
+    - `bookforge.query.get_scene_setting_projection(...)`
+    - `bookforge.query.get_scene_context_projection(...)`
+    - `bookforge.query.get_thought_context_projection(...)`
     - `bookforge.query.get_scene_phase_readiness(...)`
   - `bookforge run` now provides the batch/operator macro over the extracted scene-phase execution path.
   - section-level write wrappers now use a dedicated section-range macro over that same extracted path instead of parameterizing `bookforge run` directly.
@@ -73,15 +83,26 @@ Result truth
     - `bookforge workflow legal-actions --branch-id <id>`
     - `bookforge workflow legal-actions --fork-group-id <id>`
     - `bookforge workflow legal-actions --scene <s>`
+    - `bookforge workflow create-branch`
+    - `bookforge workflow create-assembly-branch`
+    - `bookforge workflow discard-branch`
+    - `bookforge workflow promote-branch`
+    - `bookforge workflow rebase-branch`
+    - `bookforge workflow validate-assembly-branch`
+    - `bookforge workflow record-assembly-validation`
     - `bookforge workflow plan-scene`
     - `bookforge workflow preflight-scene-state`
     - `bookforge workflow generate-continuity-pack`
     - `bookforge workflow scene-readiness`
+    - `bookforge workflow scene-readiness --branch-id <id>`
     - `bookforge workflow write-scene-prose`
+    - `bookforge workflow write-scene-prose --branch-id <id>`
     - `bookforge workflow state-repair-scene-patch`
     - `bookforge workflow lint-scene-prose`
     - `bookforge workflow repair-scene-prose`
     - `bookforge workflow apply-scene-commit`
+    - `bookforge workflow apply-scene-commit --branch-id <id>`
+    - `bookforge workflow write-section --branch-id <id>`
 
 Lineage rule
 - Immutable run artifacts under `outline/pipeline_runs/<run_id>/...` are the preferred lineage anchors.

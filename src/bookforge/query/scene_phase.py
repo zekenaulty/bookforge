@@ -4,12 +4,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from bookforge.contracts import ProducedArtifactReceipt, ScenePhaseActionReadiness, ScenePhaseReadiness, ScopeSelector
+from bookforge.contracts import MAIN_BRANCH_ID, ProducedArtifactReceipt, ScenePhaseActionReadiness, ScenePhaseReadiness, ScopeSelector
 from bookforge.memory.continuity import load_style_anchor, style_anchor_path
 from bookforge.pipeline.scene_phase_artifacts import ScenePhaseArtifactState, load_scene_phase_artifact_state
 
 from . import _common
-from .workspace import current_main_node, get_section_status, get_workspace_status
+from .workspace import current_execution_node, get_section_status, get_workspace_status_for_branch
 
 
 def _now_iso() -> str:
@@ -94,14 +94,34 @@ def get_scene_phase_readiness(
     workspace,
     book_id: str,
     *,
+    branch_id: str = MAIN_BRANCH_ID,
     chapter_id: Optional[int] = None,
     scene_id: Optional[int] = None,
     section_id: Optional[int] = None,
     prefer_emitted: bool = True,
 ) -> ScenePhaseReadiness:
-    book_root = _common.book_root(workspace, book_id)
-    status = get_workspace_status(workspace, book_id, prefer_emitted=prefer_emitted)
-    node = current_main_node(workspace, book_id, prefer_emitted=prefer_emitted)
+    resolved_branch_id = str(branch_id or MAIN_BRANCH_ID).strip() or MAIN_BRANCH_ID
+    canonical_book_root = _common.book_root(workspace, book_id)
+    if resolved_branch_id == MAIN_BRANCH_ID:
+        book_root = canonical_book_root
+    else:
+        from bookforge.supervision import paths as supervision_paths
+
+        book_root = supervision_paths.branch_snapshot_root(canonical_book_root, resolved_branch_id)
+    status = get_workspace_status_for_branch(
+        workspace,
+        book_id,
+        branch_id=resolved_branch_id,
+        prefer_emitted=prefer_emitted,
+    )
+    node = current_execution_node(
+        workspace,
+        book_id,
+        branch_id=resolved_branch_id,
+        prefer_emitted=prefer_emitted,
+    )
+    branch_state = next((branch for branch in status.branches if branch.branch_id == resolved_branch_id), None)
+    branch_lifecycle = branch_state.status if branch_state is not None else None
 
     cursor = status.cursor if isinstance(status.cursor, dict) else {}
     cursor_chapter = _common.coerce_int(cursor.get("chapter"))
@@ -116,7 +136,7 @@ def get_scene_phase_readiness(
 
     selector = ScopeSelector(
         book_id=book_id,
-        branch_id="main",
+        branch_id=resolved_branch_id,
         workflow_family="section_write",
         chapter=resolved_chapter,
         section=resolved_section,
@@ -124,22 +144,36 @@ def get_scene_phase_readiness(
     )
 
     active_section_status = (
-        get_section_status(workspace, book_id, active_chapter, active_section_id)
+        get_section_status(
+            workspace,
+            book_id,
+            active_chapter,
+            active_section_id,
+            branch_id=resolved_branch_id,
+        )
         if active_chapter is not None and active_section_id is not None
         else None
     )
     scene_start, scene_end = _section_scene_bounds(active_section_status or {})
 
     scope_refusal: Optional[str] = None
-    if resolved_chapter is None or resolved_scene is None:
+    if resolved_branch_id != MAIN_BRANCH_ID and branch_state is None:
+        scope_refusal = f"Branch {resolved_branch_id} does not exist."
+    elif resolved_branch_id != MAIN_BRANCH_ID and branch_lifecycle in {"discard", "promoted"}:
+        scope_refusal = f"Branch {resolved_branch_id} is {branch_lifecycle} and is not write-ready."
+    elif resolved_branch_id != MAIN_BRANCH_ID and node is None:
+        scope_refusal = f"Branch {resolved_branch_id} has no current execution node."
+    elif resolved_branch_id != MAIN_BRANCH_ID and not book_root.exists():
+        scope_refusal = f"Branch {resolved_branch_id} snapshot is missing."
+    elif resolved_chapter is None or resolved_scene is None:
         scope_refusal = "Scene-phase readiness requires a resolved chapter and scene."
     elif not isinstance(active_section, dict):
         scope_refusal = "No active frozen section is available for scene-phase actions."
     elif str(active_section.get("status") or "").strip().lower() != "frozen":
         scope_refusal = "Scene-phase actions require the active section to remain frozen."
-    elif cursor_chapter is None or cursor_scene is None:
+    elif resolved_branch_id == MAIN_BRANCH_ID and (cursor_chapter is None or cursor_scene is None):
         scope_refusal = "Scene-phase actions require a current cursor."
-    elif int(resolved_chapter) != int(cursor_chapter) or int(resolved_scene) != int(cursor_scene):
+    elif resolved_branch_id == MAIN_BRANCH_ID and (int(resolved_chapter) != int(cursor_chapter) or int(resolved_scene) != int(cursor_scene)):
         scope_refusal = "Scene-phase actions currently only support the active cursor scene."
     elif active_chapter is None or active_section_id is None:
         scope_refusal = "Scene-phase actions require a resolved active section."
@@ -390,6 +424,7 @@ def get_scene_phase_readiness(
         if lint_report_path is not None
         else []
     )
+    branch_rewrite_baseline = resolved_branch_id != MAIN_BRANCH_ID
     committed_receipts: List[ProducedArtifactReceipt] = []
     if committed_prose_path is not None:
         committed_receipts.append(
@@ -402,7 +437,8 @@ def get_scene_phase_readiness(
                 format="text/markdown",
                 consumable=True,
                 resumable=False,
-                replaceable=False,
+                replaceable=branch_rewrite_baseline,
+                details={"branch_rewrite_baseline": branch_rewrite_baseline} if branch_rewrite_baseline else None,
             )
         )
     if committed_meta_path is not None:
@@ -416,7 +452,8 @@ def get_scene_phase_readiness(
                 format="application/json",
                 consumable=True,
                 resumable=False,
-                replaceable=False,
+                replaceable=branch_rewrite_baseline,
+                details={"branch_rewrite_baseline": branch_rewrite_baseline} if branch_rewrite_baseline else None,
             )
         )
 
@@ -439,6 +476,9 @@ def get_scene_phase_readiness(
         scene_status = "planned"
 
     base_details = {
+        "branch_id": resolved_branch_id,
+        "branch_lifecycle_state": branch_lifecycle,
+        "execution_root": book_root.as_posix(),
         "current_cursor_chapter": cursor_chapter,
         "current_cursor_scene": cursor_scene,
         "active_section_chapter": active_chapter,
@@ -518,9 +558,12 @@ def get_scene_phase_readiness(
 
     current_prose_receipts = repair_receipts if artifact_state.current_prose_phase == "repair" else write_receipts
     current_prose_label, current_patch_label = _prose_labels(artifact_state)
+    commit_mutation_scope = "canonical" if resolved_branch_id == MAIN_BRANCH_ID else "branch_authoritative"
     repair_ready = artifact_state.lint_current and str(artifact_state.lint_status or "").lower() == "fail" and artifact_state.lint_version > artifact_state.repair_version
     state_repair_stale = bool(state_repair_receipts and not artifact_state.state_repair_current)
     lint_stale = bool(lint_receipts and not artifact_state.lint_current)
+    branch_can_replace_committed = bool(resolved_branch_id != MAIN_BRANCH_ID and committed_receipts)
+    branch_commit_superseded_outputs = committed_receipts if branch_can_replace_committed else []
 
     actions = [
         build_action(
@@ -550,7 +593,8 @@ def get_scene_phase_readiness(
                 ("continuity_pack", continuity_pack_path is not None),
                 ("style_anchor", style_anchor_exists),
             ],
-            existing_outputs=committed_receipts or current_prose_receipts,
+            existing_outputs=current_prose_receipts if branch_can_replace_committed else (committed_receipts or current_prose_receipts),
+            superseded_outputs=committed_receipts if branch_can_replace_committed else [],
         ),
         build_action(
             action="state_repair_scene_patch",
@@ -598,20 +642,24 @@ def get_scene_phase_readiness(
         ),
         build_action(
             action="apply_scene_commit",
-            mutation_scope="canonical",
+            mutation_scope=commit_mutation_scope,
             prerequisites=[
                 ("scene_card", scene_card_path is not None),
                 (current_prose_label, artifact_state.current_prose_path is not None),
                 ("state_repair_patch", artifact_state.state_repair_current),
                 ("passing_lint_report", artifact_state.lint_current and str(artifact_state.lint_status or "").lower() == "pass"),
             ],
-            existing_outputs=committed_receipts,
+            existing_outputs=[] if branch_can_replace_committed else committed_receipts,
+            superseded_outputs=branch_commit_superseded_outputs,
             refusal_reason=(
                 "apply_scene_commit requires the latest lint report to pass before canonical mutation can proceed."
                 if artifact_state.lint_current and str(artifact_state.lint_status or "").lower() != "pass"
                 else "apply_scene_commit output already exists for the active scene."
             ),
-            extra_details={"consumes_current_lint_status": artifact_state.lint_status},
+            extra_details={
+                "consumes_current_lint_status": artifact_state.lint_status,
+                "replaces_branch_committed_scene": branch_can_replace_committed,
+            },
         ),
     ]
 

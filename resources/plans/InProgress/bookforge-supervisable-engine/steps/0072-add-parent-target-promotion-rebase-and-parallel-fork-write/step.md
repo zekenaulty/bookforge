@@ -1,6 +1,6 @@
 # 0072 Add Parent-Target Promotion, Rebase, And Parallel Fork Write
 
-Status: pending
+Status: completed
 
 ## Goal
 - Extend the branch model so write-capable branches can merge upward into their parent branch or `main`, support explicit rebase against newer parent snapshots, and enable truthful sibling parallel write execution through fork groups and validation-gated assembly.
@@ -140,6 +140,35 @@ Status: pending
 - An explicit rebase capability exists and does not silently overwrite existing branch history.
 - Sibling writer branches can execute in parallel under one fork group without shared-state mutation.
 - Assembly and promotion remain validation-gated and off-parent until approved.
+
+## Progress
+- Implemented first conservative nested-branch primitives:
+  - branch creation can copy from a parent branch snapshot instead of always copying from `main`
+  - scene branches can promote into an explicit parent branch without mutating `main`
+  - rebase can create a refreshed child branch from the current parent snapshot and discard the old branch history-preservingly
+- Added branch/rebase action builders for the programmatic execution surface.
+- Added tests covering nested branch promotion and refreshed-child rebase.
+- Exposed the conservative lifecycle primitives through the workflow CLI:
+  - `create-branch`
+  - `create-assembly-branch`
+  - `discard-branch`
+  - `promote-branch`
+  - `rebase-branch`
+  - `validate-assembly-branch`
+  - `record-assembly-validation`
+- Added first writer-side assembly behavior:
+  - assembly branches are created off-parent
+  - sibling branches are required to share one parent snapshot
+  - parent staleness checks work for `main` and parent branches
+  - scoped sibling draft scene files are staged into the assembly branch snapshot for validation
+  - deterministic staging validation can mark the assembly branch `assembled_pending_promotion`
+- Validated full conservative fork-group path:
+  - sibling writer branches stage scoped files into an assembly branch
+  - deterministic validation marks the assembly branch promotion-ready
+  - validated assembly promotion copies staged outputs into `main`
+- Deferred follow-up:
+  - richer semantic seam/continuity merge checks before promotion
+  - higher-level sibling execution launch helpers for Nanda convenience
 
 ## Notes
 - This step is where branch hierarchy becomes operational, not just conceptual.

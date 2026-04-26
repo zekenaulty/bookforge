@@ -23,6 +23,7 @@ from bookforge.execution import (
     state_repair_scene_patch,
     write_scene_prose,
 )
+from bookforge.llm.signatures import append_signature_records
 from bookforge.memory.continuity import save_style_anchor, style_anchor_path
 from bookforge.pipeline.phase_history import _record_phase_success, _write_phase_artifact
 from bookforge.section_workflow import freeze_section_from_phase03_artifact, initialize_section_workflow
@@ -266,8 +267,74 @@ def _setup_scene_with_prereqs(tmp_path: Path) -> Path:
     return book_root
 
 
+def _write_projection_context_artifacts(tmp_path: Path, book_root: Path) -> None:
+    character_state_rel = "draft/context/characters/protagonist.state.json"
+    character_dir = book_root / "draft" / "context" / "characters"
+    character_dir.mkdir(parents=True, exist_ok=True)
+    (character_dir / "index.json").write_text(
+        json.dumps(
+            {
+                "characters": [
+                    {
+                        "character_id": "CHAR_protagonist",
+                        "state_path": character_state_rel,
+                    }
+                ]
+            },
+            ensure_ascii=True,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (book_root / character_state_rel).write_text(
+        json.dumps(
+            {
+                "character_id": "CHAR_protagonist",
+                "name": "Rhea",
+                "appearance_current": {"summary": "Rain-dark cloak and scraped knuckles."},
+                "last_touched": {"chapter": 1, "scene": 1},
+            },
+            ensure_ascii=True,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    setting_dir = book_root / "draft" / "context" / "settings" / "ch_001" / "scene_001"
+    setting_dir.mkdir(parents=True, exist_ok=True)
+    (setting_dir / "author_drafted.setting.json").write_text(
+        json.dumps(
+            {
+                "location_label": "Front Gate",
+                "background_details": ["Rain beads on the ironwork."],
+                "sensory_anchors": ["rain", "cold iron"],
+            },
+            ensure_ascii=True,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    append_signature_records(
+        tmp_path,
+        [
+            {
+                "schema_version": "thought_signature_v1",
+                "signature_id": "sig-write-t1",
+                "created_at": "2026-04-26T12:00:00Z",
+                "book_id": "my_book",
+                "workflow_family": "section_write",
+                "phase_id": "write_scene_prose",
+                "turn_id": "T1",
+                "chapter_id": 1,
+                "scene_id": 1,
+                "label": "write_scene_prose_t1",
+            }
+        ],
+    )
+
+
 def test_write_scene_prose_generates_provisional_receipts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     book_root = _setup_scene_with_prereqs(tmp_path)
+    _write_projection_context_artifacts(tmp_path, book_root)
 
     monkeypatch.setattr("bookforge.execution.scene_actions.load_config", lambda: {})
     monkeypatch.setattr("bookforge.execution.scene_actions.get_llm_client", lambda config, phase=None: object())
@@ -290,6 +357,12 @@ def test_write_scene_prose_generates_provisional_receipts(tmp_path: Path, monkey
     assert execution_result["action"] == "write_scene_prose"
     assert execution_result["status"] == "success"
     assert len(execution_result["produced_artifacts"]) == 2
+    scene_context = execution_result["details"]["scene_context_projection"]
+    assert scene_context["projection_status"] == "available"
+    assert scene_context["used_as_prompt_input"] is False
+    assert scene_context["availability"]["appearance_available"] is True
+    assert scene_context["setting"]["source_mode"] == "author_drafted"
+    assert scene_context["thought_context"]["selected_signatures"][0]["signature_id"] == "sig-write-t1"
     assert not (book_root / "draft" / "chapters" / "ch_001" / "scene_001.md").exists()
 
 

@@ -703,7 +703,7 @@ def format_outline_pipeline_summary(
 
 
 def _resolve_outline_payload_from_run(run_dir: Path) -> Tuple[Dict[str, Any], str]:
-    history_path = run_dir / outline_artifacts.PHASE_HISTORY_FILE
+    history_path = run_dir / outline_artifacts.PIPELINE_HISTORY_FILE
     if history_path.exists():
         try:
             history = _read_json(history_path)

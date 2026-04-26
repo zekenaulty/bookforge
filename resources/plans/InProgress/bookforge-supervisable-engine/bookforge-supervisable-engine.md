@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-24T03:52:39Z`
-- Source Document Count: `30`
+- Compiled At (UTC): `2026-04-26T05:49:21Z`
+- Source Document Count: `41`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -38,7 +38,18 @@
 27. `notes/2026-04-23-0070-repair-slice.md`
 28. `notes/2026-04-23-0070-run-loop-wrapper-slice.md`
 29. `notes/2026-04-23-0070-section-wrapper-tightening.md`
-30. `promotion.md`
+30. `notes/2026-04-26-0070-complete.md`
+31. `notes/2026-04-26-0071-branch-scoped-writer.md`
+32. `notes/2026-04-26-0072-complete.md`
+33. `notes/2026-04-26-0072-lifecycle-cli.md`
+34. `notes/2026-04-26-0072-nested-branch-primitives.md`
+35. `notes/2026-04-26-0072-writer-assembly-staging.md`
+36. `notes/2026-04-26-0075-appearance-pending-fix.md`
+37. `notes/2026-04-26-0075-complete.md`
+38. `notes/2026-04-26-0075-context-receipts.md`
+39. `notes/2026-04-26-0075-projection-query-slice.md`
+40. `notes/2026-04-26-0075-setting-actions.md`
+41. `promotion.md`
 
 ---
 
@@ -464,10 +475,10 @@ This plan is ready for promotion only when the target implementation can satisfy
 | 0045-add-isolated-branch-reruns-and-fork-group-assembly | completed | 0030, 0040 | Add branch isolation, sibling fork groups, promotion vs assembly semantics, and validation-gated merge paths. |
 | 0050-harden-reconciliation-integrity-and-command-surface | completed | 0030, 0040, 0045 | Add post-execution and post-promotion reconciliation, stronger integrity helpers, and help-doc coherence. |
 | 0060-extract-minimal-engine-execution-surface-for-nanda | completed | 0050 | Replace command-only orchestration with a smaller action catalog and legal-next-action API that Nanda can compose. |
-| 0070-segment-section-write-into-scoped-scene-actions | in_progress | 0060 | Turn the hidden `section_write` batch flow into truthful scene-phase actions and readiness queries that Nanda can traverse as an author skill graph. |
-| 0071-make-scene-and-section-write-execution-branch-scoped | pending | 0070 | Move scene and section write execution off `main` into real branch-local execution roots so old-scene rewrites and isolated author work become truthful. |
-| 0072-add-parent-target-promotion-rebase-and-parallel-fork-write | pending | 0071 | Let branch work merge upward into parent branches or `main`, add explicit rebase, and support sibling parallel write branches with validation-gated assembly. |
-| 0075-extract-appearance-setting-and-context-refinement-surfaces | pending | 0070 | Make character appearance, scene background/setting, and prior-stage T1 thought-signature context explicit queryable projection layers instead of incidental prompt side effects. |
+| 0070-segment-section-write-into-scoped-scene-actions | completed | 0060 | Turn the hidden `section_write` batch flow into truthful scene-phase actions and readiness queries that Nanda can traverse as an author skill graph. |
+| 0071-make-scene-and-section-write-execution-branch-scoped | completed | 0070 | Move scene and section write execution off `main` into real branch-local execution roots so old-scene rewrites and isolated author work become truthful. |
+| 0072-add-parent-target-promotion-rebase-and-parallel-fork-write | completed | 0071 | Let branch work merge upward into parent branches or `main`, add explicit rebase, and support sibling parallel write branches with validation-gated assembly. |
+| 0075-extract-appearance-setting-and-context-refinement-surfaces | completed | 0070 | Make character appearance, scene background/setting, and prior-stage T1 thought-signature context explicit queryable projection layers instead of incidental prompt side effects. |
 
 ---
 
@@ -1173,7 +1184,7 @@ Status: completed
 
 # 0070 Segment Section-Write Into Scoped Scene Actions
 
-Status: in_progress
+Status: completed
 
 ## Goal
 - Break the current `section_write` loop into truthful scene-phase execution actions and readiness queries so Nanda can steer write, lint, and repair as a graph of legal skills instead of only invoking section-level or batch wrappers.
@@ -1549,7 +1560,7 @@ Status: in_progress
 
 # 0071 Make Scene And Section Write Execution Branch-Scoped
 
-Status: pending
+Status: completed
 
 ## Goal
 - Let BookForge run scene-phase and section-range writing inside real derived branches instead of only on `main`, so the author or supervisor can rewrite old scenes, revise prior chapters, and isolate risky authoring work without forcing a full-book rerun.
@@ -1637,6 +1648,11 @@ Status: pending
   - whether a historical scene is writable inside that branch even when `main` is elsewhere
   - what artifacts already exist inside the branch
   - whether the branch is stale relative to its parent snapshot
+- Branch query edge cases are first-class:
+  - unknown branch id returns a truthful refusal or empty result, never a fallback to `main`
+  - discarded/promoted branches remain queryable for history but are not write-ready
+  - branch-local current node is used for readiness and expected-node validation
+  - `ScopeSelector(branch_id=...)` lets Nanda query a specific branch without reading branch files directly
 
 ### Branch-Scoped Receipts
 - Scene-phase and section-range receipts inside a branch must:
@@ -1687,6 +1703,11 @@ Status: pending
   - stale branch parent or stale expected node is detected truthfully
   - `main` remains unchanged after branch-local scene or section execution
 
+## Open Todo
+- Fix outline test failures separately from this branch-execution work.
+  - Current working tree contains outline-related edits in `src/bookforge/outline.py`, `tests/test_outline_generate.py`, and `tests/test_plan_scene.py`.
+  - Do not mix those fixes into `0071` unless they directly block branch-scoped execution tests.
+
 ## Definition Of Done
 - A derived branch can resolve its own active cursor and scene-phase readiness without consulting canonical `main` cursor truth.
 - A derived branch can execute at least one real scene-phase write path and one real section-range write path.
@@ -1694,6 +1715,21 @@ Status: pending
 - Branch-local writer execution emits branch-local receipts, pause markers, and produced-artifact records.
 - Canonical `main` state remains unchanged until explicit promotion.
 - Truthful refusal surfaces exist for stale parent lineage, stale expected node, or invalid branch scope.
+
+## Execution Notes
+- Implemented branch-aware workspace/current-node queries and branch-scoped scene-phase readiness.
+- Scene-phase request builders and actions now accept `branch_id` and resolve reads/writes through the selected execution root.
+- Branch snapshots now include writer-facing material such as `draft`, `prompts`, and context folders needed for branch-local authoring.
+- Branch-local `apply_scene_commit` can replace a copied committed scene while preserving `.original` backups; `main` still blocks accidental committed-scene overwrite.
+- `write_section` can execute through a branch-local section-range path and passes branch identity down to the section traversal.
+- CLI workflow scene-phase commands and `write-section` now accept `--branch-id`.
+- Focused non-outline validation passed:
+  - `tests/test_branch_execution.py`
+  - `tests/test_action_discovery.py`
+  - `tests/test_execution_actions.py`
+  - `tests/test_scoped_execution.py`
+  - `tests/test_scene_phase_readiness.py`
+  - `tests/test_scene_action_execution.py`
 
 ## Notes
 - This step is about isolated authoring roots, not merge semantics.
@@ -1709,7 +1745,7 @@ Status: pending
 
 # 0072 Add Parent-Target Promotion, Rebase, And Parallel Fork Write
 
-Status: pending
+Status: completed
 
 ## Goal
 - Extend the branch model so write-capable branches can merge upward into their parent branch or `main`, support explicit rebase against newer parent snapshots, and enable truthful sibling parallel write execution through fork groups and validation-gated assembly.
@@ -1850,6 +1886,35 @@ Status: pending
 - Sibling writer branches can execute in parallel under one fork group without shared-state mutation.
 - Assembly and promotion remain validation-gated and off-parent until approved.
 
+## Progress
+- Implemented first conservative nested-branch primitives:
+  - branch creation can copy from a parent branch snapshot instead of always copying from `main`
+  - scene branches can promote into an explicit parent branch without mutating `main`
+  - rebase can create a refreshed child branch from the current parent snapshot and discard the old branch history-preservingly
+- Added branch/rebase action builders for the programmatic execution surface.
+- Added tests covering nested branch promotion and refreshed-child rebase.
+- Exposed the conservative lifecycle primitives through the workflow CLI:
+  - `create-branch`
+  - `create-assembly-branch`
+  - `discard-branch`
+  - `promote-branch`
+  - `rebase-branch`
+  - `validate-assembly-branch`
+  - `record-assembly-validation`
+- Added first writer-side assembly behavior:
+  - assembly branches are created off-parent
+  - sibling branches are required to share one parent snapshot
+  - parent staleness checks work for `main` and parent branches
+  - scoped sibling draft scene files are staged into the assembly branch snapshot for validation
+  - deterministic staging validation can mark the assembly branch `assembled_pending_promotion`
+- Validated full conservative fork-group path:
+  - sibling writer branches stage scoped files into an assembly branch
+  - deterministic validation marks the assembly branch promotion-ready
+  - validated assembly promotion copies staged outputs into `main`
+- Deferred follow-up:
+  - richer semantic seam/continuity merge checks before promotion
+  - higher-level sibling execution launch helpers for Nanda convenience
+
 ## Notes
 - This step is where branch hierarchy becomes operational, not just conceptual.
 - The first implementation should stay conservative:
@@ -1864,7 +1929,7 @@ Status: pending
 
 # 0075 Extract Appearance, Setting, And Context Refinement Surfaces
 
-Status: pending
+Status: completed
 
 ## Goal
 - Make character appearance, scene background/setting, and prior-stage context refinement explicit, queryable BookForge projection layers that Nanda can use without inferring truth from prose, prompt logs, or hidden runner side effects.
@@ -1882,6 +1947,25 @@ Status: pending
   - which prior T1 planning signatures are safe and relevant context for the current author move
 
 ## Detailed Work
+- First implementation slice:
+  - added query modules for appearance, scene setting, and prior T1 thought-context projections
+  - added a deterministic `refresh_character_appearance_projection` execution action that writes a derived scene/cast projection artifact and produced-artifact receipt
+  - kept projection output non-canonical and non-mutating; existing character state is read, not rewritten
+  - added action discovery details so Nanda can see whether appearance projection can run for the selected scene scope
+- Second implementation slice:
+  - added `draft_scene_setting_projection` to record author-provided setting/background intent as a `provisional` artifact
+  - added `extract_scene_setting_from_prose` to record prose-derived setting/background observations as a `derived` artifact
+  - kept both actions non-canonical and non-mutating
+  - added action discovery for both setting projection actions
+  - `extract_scene_setting_from_prose` refuses when no scene prose exists instead of inventing source context
+- Third implementation slice:
+  - added `get_scene_context_projection(...)` as a compact aggregate query over appearance, setting, and prior T1 thought-context projections
+  - the aggregate reports availability counts and statuses without making Nanda stitch projection layers together manually
+- Fourth implementation slice:
+  - added compact `scene_context_projection` snapshots to downstream scene-phase `ExecutionResult.details`
+  - covered `generate_continuity_pack`, `write_scene_prose`, `state_repair_scene_patch`, `lint_scene_prose`, `repair_scene_prose`, and `apply_scene_commit`
+  - kept the receipt honest by recording `used_as_prompt_input: false`
+  - this means the action receipt exposes what appearance/setting/thought context was observable at execution time, but does not claim the prompt consumed that projection bundle
 - Audit the current character appearance path.
   - Likely starting points:
     - `src/bookforge/characters.py`
@@ -1894,6 +1978,10 @@ Status: pending
     - derived scene projections
     - provisional LLM outputs
     - diagnostic only
+  - Current implementation note:
+    - committed `appearance_updates` now mark `appearance_projection_pending: true`
+    - this prevents a failed/stalled legacy appearance refresh from being misreported as current appearance projection truth
+    - `list_appearance_projection_views(...)` reports this state as stale/provisional until refresh clears the pending flag
 - Add an appearance projection query surface.
   - Candidate module:
     - `src/bookforge/query/appearance.py`
@@ -1932,6 +2020,10 @@ Status: pending
   - Both paths must label outputs truthfully:
     - prose-derived extraction is `derived`
     - author-drafted setting projection is `provisional` until accepted by a later commit/apply action
+  - Current implementation note:
+    - `draft_scene_setting_projection` records structured caller/author-provided setting details; it does not call an LLM internally yet
+    - `extract_scene_setting_from_prose` reads existing scene prose and records a derived artifact; structured extraction can be supplied by a caller/author worker, otherwise the artifact remains conservative and may report no structured setting
+    - Decision for this step: Nanda/the author worker supplies structured setting payloads; an internal BookForge author-LLM setting draft/extract turn is deferred to a later explicit action
 - Add context refinement through prior T1 thought signatures.
   - Treat T1 thought signatures from previous workflow stages as context-management artifacts, not source of truth.
   - Candidate query surface:
@@ -1940,6 +2032,10 @@ Status: pending
     - select relevant prior T1 signatures by `TimelineNodeRef`, phase, scene, and workflow family
     - expose them as candidate context inputs for the next scene-phase action
     - record which signatures were included in the prompt package or execution receipt
+  - Current implementation note:
+    - scene-phase receipts now record selected prior T1 signatures in `scene_context_projection.thought_context`
+    - receipt snapshots explicitly say the projection was not used as prompt input yet
+    - later prompt injection must flip `used_as_prompt_input` only when the projection payload is actually assembled into the model request
   - This is essentially reuse of previous planning work.
   - It must not replace explicit execution receipts, state surfaces, or artifact truth.
 - Thread all three surfaces through the same coordinate model.
@@ -1956,6 +2052,8 @@ Status: pending
     - was the setting extracted from prose or drafted by the author LLM
     - which prior T1 thought signatures are available as refinement context
     - whether any of these are legal inputs for the next scene-phase action
+  - Current implementation note:
+    - `get_scene_context_projection(...)` provides the first aggregate availability surface for these projection layers
 - Keep this as projection-layer work, not canonical mutation work.
   - 0075 should not solve character-state promotion, inventory promotion, or final scene commit.
   - It should make projections visible, typed, and safe to reason about.
@@ -2050,6 +2148,7 @@ Status: pending
   - thought-signature context selection filters to relevant prior T1 signatures
   - thought signatures are never reported as authoritative execution truth
   - readiness surfaces can report appearance, setting, and thought-context availability without starting execution
+  - scene-phase execution receipts record projection availability and truthfully report whether the projection was used as prompt input
 
 ## Definition Of Done
 - A caller can query character appearance projection status for a book, scene, or character without inspecting raw files.
@@ -2058,7 +2157,7 @@ Status: pending
 - A caller can query scene background/setting status independently from prose generation.
 - A caller can distinguish prose-extracted setting details from author-drafted setting projections.
 - A caller can discover relevant prior T1 thought signatures as optional refinement context for a scene-phase action.
-- Execution receipts record when appearance, setting, or thought-context artifacts were used as inputs.
+- Execution receipts record whether appearance, setting, or thought-context artifacts were used as prompt inputs or were only observable as diagnostic projection context.
 - Nanda can present these capabilities honestly in the author pane using BookForge query results instead of persona claims.
 
 ## Notes
@@ -2950,7 +3049,366 @@ Notes
 
 ---
 
-## Source 30: `promotion.md`
+## Source 30: `notes/2026-04-26-0070-complete.md`
+
+# 2026-04-26 0070 Complete
+
+## Completed Scope
+- Extracted scene-phase readiness and action surfaces for the section-write flow.
+- Exposed phase-shaped actions for:
+  - `plan_scene`
+  - `preflight_scene_state`
+  - `generate_continuity_pack`
+  - `write_scene_prose`
+  - `state_repair_scene_patch`
+  - `lint_scene_prose`
+  - `repair_scene_prose`
+  - `apply_scene_commit`
+- Routed `run_loop(...)` through extracted scene-phase actions.
+- Added `run_section_range(...)` as the section-scoped macro so section wrappers no longer depend on `run_loop(...)` as their macro entry point.
+- Added branch-scoped scene/section execution in 0071.
+- Added parent-target promotion, rebase, and parallel fork write/assembly in 0072.
+- Added appearance, setting, and thought-context projection layers in 0075.
+
+## Validation
+- Closeout regression:
+  - `tests/test_scope_contracts.py`
+  - `tests/test_scene_phase_readiness.py`
+  - `tests/test_scene_action_execution.py`
+  - `tests/test_action_discovery.py`
+  - `tests/test_execution_actions.py`
+  - `tests/test_scoped_execution.py`
+  - `tests/test_runner_targeting.py`
+  - `tests/test_runner_outline_gate.py`
+  - `tests/test_query_workspace.py`
+  - `tests/test_supervision_emit.py`
+  - `tests/test_branch_execution.py`
+  - `tests/test_branch_promotion.py`
+  - `tests/test_fork_group_assembly.py`
+  - `tests/test_scene_context_query.py`
+  - `tests/test_scene_setting_actions.py`
+  - `tests/test_appearance_projection_action.py`
+  - `tests/test_appearance_query.py`
+  - `tests/test_scene_setting_query.py`
+  - `tests/test_thought_context_query.py`
+  - `tests/test_character_invariants_remove.py`
+- Result: `132 passed`.
+
+## Known Follow-Up
+- Broader outline tests remain a separate follow-up item.
+- Prior notes identified stale dummy-client thinking-argument expectations, prompt checksum drift, and skilltree artifact fixture drift outside the 0070/0075 surface.
+
+---
+
+## Source 31: `notes/2026-04-26-0071-branch-scoped-writer.md`
+
+# 2026-04-26 0071 Branch-Scoped Writer
+
+## Summary
+- Completed the first branch-scoped writer slice.
+- Scene-phase readiness and execution can now resolve against a derived branch execution root instead of only canonical `main`.
+- Section-range writing can run through a branch-local root and pass branch identity into the section traversal.
+- Historical scene rewrites are branch-local: copied committed scene files are treated as replaceable branch baselines, and `apply_scene_commit` preserves `.original` backups before replacing them in the branch snapshot.
+- `main` remains protected from accidental committed-scene overwrite.
+
+## Code Notes
+- Query surfaces now expose branch-local workspace status, current node, section status, and scene readiness.
+- Scene-phase request builders and actions accept `branch_id`.
+- Branch snapshots now copy writer-facing surfaces such as `draft`, `prompts`, and context folders.
+- CLI workflow scene-phase commands and `write-section` now accept `--branch-id`.
+
+## Tests
+- Focused branch execution: `15 passed`.
+- Broader non-outline regression set: `94 passed` before CLI/docs updates and `87 passed` for the focused scene/action/scoped set after CLI branch-id wiring.
+
+## Open Follow-Up
+- Outline tests are still tracked as a separate repair TODO because the current dirty tree includes unrelated outline edits from another agent.
+- 0072 remains in progress for fork-group writer assembly.
+
+---
+
+## Source 32: `notes/2026-04-26-0072-complete.md`
+
+# 2026-04-26 0072 Complete
+
+## Summary
+- Completed the conservative parent-target promotion, rebase, and fork-group writer assembly slice.
+
+## Delivered
+- Branches can derive from parent branches, not only `main`.
+- Branches can promote into parent branches or `main`.
+- Rebase exists as an explicit refreshed-child operation that preserves old branch history.
+- Workflow CLI exposes branch lifecycle controls.
+- Fork-group writer assembly stages sibling outputs off-parent, validates staged output presence, and only then permits promotion.
+
+## Deferred
+- Semantic seam and continuity validation for assembled prose belongs in a later seam/continuity validation step.
+- Nanda convenience launchers for sibling execution can build on these primitives without changing the engine contract.
+
+---
+
+## Source 33: `notes/2026-04-26-0072-lifecycle-cli.md`
+
+# 2026-04-26 0072 Lifecycle CLI
+
+## Summary
+- Added workflow CLI access for the branch lifecycle primitives already available through the execution layer.
+- New commands:
+  - `workflow create-branch`
+  - `workflow create-assembly-branch`
+  - `workflow discard-branch`
+  - `workflow promote-branch`
+  - `workflow rebase-branch`
+  - `workflow record-assembly-validation`
+
+## Intent
+- Keep Nanda and operator workflows on truthful execution receipts instead of forcing direct branch manifest/file inspection.
+- Support nested author branches from the command surface:
+  - chapter branch
+  - section branch under chapter branch
+  - scene rewrite branch under section/chapter branch
+  - promotion back to parent or `main`
+  - explicit refreshed-child rebase
+
+## Boundaries
+- The CLI exposes lifecycle controls, but does not yet implement writer fork-group assembly.
+- Rebase remains the conservative refreshed-child model; it does not silently transplant prose/state changes.
+
+---
+
+## Source 34: `notes/2026-04-26-0072-nested-branch-primitives.md`
+
+# 2026-04-26 0072 Nested Branch Primitives
+
+## Summary
+- Started 0072.
+- Landed the conservative branch hierarchy primitives needed before parallel writer assembly:
+  - create branch from parent branch snapshot
+  - promote a branch into an explicit parent branch
+  - rebase by creating a refreshed child branch from the current parent snapshot and discarding the old branch without erasing history
+
+## Current Boundaries
+- These primitives now have workflow CLI wrappers as of the 0072 lifecycle CLI slice.
+- The rebase path is intentionally safe and non-semantic: it refreshes the branch from the parent snapshot but does not attempt hidden prose/state transplant.
+- Writer fork-group assembly remains planned, not implemented.
+
+## Tests
+- Covered by `tests/test_branch_execution.py`:
+  - nested scene branch promotes into chapter parent without touching `main`
+  - rebase creates a refreshed child from the updated parent and marks the old branch discarded
+
+---
+
+## Source 35: `notes/2026-04-26-0072-writer-assembly-staging.md`
+
+# 2026-04-26 0072 Writer Assembly Staging
+
+## Summary
+- Extended `create_assembly_branch(...)` so it does more than create an empty off-parent branch.
+- It now stages scoped draft scene outputs from fork-group sibling writer branches into the assembly branch snapshot.
+- Added `validate_assembly_branch(...)` and `workflow validate-assembly-branch` to deterministically verify staged sibling writer outputs before promotion.
+
+## Rules
+- Sibling branches must still share the same parent node and parent snapshot revision.
+- Parent staleness is checked against the actual parent branch:
+  - `main` parent checks current `main`
+  - derived parent checks the parent branch current node
+- Assembly reads sibling outputs only after sibling execution, not during sibling execution.
+- The assembly branch remains off-parent until validation and explicit promotion.
+- Validation only checks staged output presence. It does not perform semantic seam or continuity review.
+
+## Validation
+- Added coverage that two sibling writer branches stage separate scene files into one assembly branch while leaving canonical `main` untouched.
+- Added coverage that deterministic assembly validation marks a staged assembly branch as `assembled_pending_promotion`.
+- Added coverage that a validated assembly branch can promote staged writer outputs to `main`.
+- Focused non-outline regression set passed with `99` tests.
+
+---
+
+## Source 36: `notes/2026-04-26-0075-appearance-pending-fix.md`
+
+# 2026-04-26 0075 Appearance Pending Fix
+
+## Finding
+- `_apply_character_updates(...)` could mutate `appearance_current` without marking the appearance projection as pending.
+- If the legacy LLM appearance refresh stalled or failed after that mutation, query surfaces could treat the changed appearance as current instead of stale.
+
+## Change
+- `src/bookforge/pipeline/state_apply.py` now sets `appearance_projection_pending: true` whenever `appearance_updates` change `appearance_current`.
+- `list_appearance_projection_views(...)` already classifies that state as:
+  - `appearance_status: stale`
+  - `artifact_status: provisional`
+  - `staleness_reason: appearance_projection_pending`
+
+## Validation
+- Added coverage in `tests/test_character_invariants_remove.py`.
+- Targeted run:
+  - `tests/test_character_invariants_remove.py`
+  - `tests/test_appearance_query.py`
+- Result: `6 passed`.
+
+## Remaining Follow-Up
+- Legacy `_load_character_states(...)` can still derive missing `appearance_current` from base state as a read-side compatibility behavior.
+- That path correctly marks `appearance_projection_pending: true`, but should be revisited later if we fully separate read-only projection preparation from canonical character-state mutation.
+
+---
+
+## Source 37: `notes/2026-04-26-0075-complete.md`
+
+# 2026-04-26 0075 Complete
+
+## Completed Scope
+- Appearance projection query surface.
+- Scene/cast-scoped appearance projection action.
+- Scene setting projection query surface.
+- Author-supplied setting projection action.
+- Prose-derived setting projection action.
+- Prior T1 thought-context projection query surface.
+- Aggregate scene context projection query.
+- Scene-phase execution receipts now include compact scene context projection snapshots.
+- Appearance update path now marks projections pending when canonical appearance state changes.
+
+## Decision
+- BookForge does not run an internal author-LLM setting draft/extract turn in this step.
+- For the current contract, Nanda or another author-worker caller supplies structured setting payloads to:
+  - `draft_scene_setting_projection`
+  - `extract_scene_setting_from_prose`
+- A later BookForge-owned LLM turn can be added as a separate action without changing the query/projection contract.
+
+## Validation
+- 0075 regression plus branch/action discovery coverage:
+  - `tests/test_action_discovery.py`
+  - `tests/test_branch_execution.py`
+  - `tests/test_fork_group_assembly.py`
+  - `tests/test_scene_action_execution.py`
+  - `tests/test_scene_context_query.py`
+  - `tests/test_scene_setting_actions.py`
+  - `tests/test_appearance_projection_action.py`
+  - `tests/test_appearance_query.py`
+  - `tests/test_scene_setting_query.py`
+  - `tests/test_thought_context_query.py`
+  - `tests/test_character_invariants_remove.py`
+- Result: `91 passed`.
+
+## Remaining Outside 0075
+- Future prompt-injection work should decide when scene context projections become actual model-request inputs.
+- If projections are injected into prompts, receipts must flip `used_as_prompt_input` only for actions that truly consumed them.
+- Future deep state/inventory projection layers should follow the same book-rooted coordinate and artifact-status model.
+
+---
+
+## Source 38: `notes/2026-04-26-0075-context-receipts.md`
+
+# 2026-04-26 0075 Scene Context Receipt Slice
+
+## Completed
+- Added `scene_context_projection` snapshots to scene-phase execution receipts.
+- Covered:
+  - `generate_continuity_pack`
+  - `write_scene_prose`
+  - `state_repair_scene_patch`
+  - `lint_scene_prose`
+  - `repair_scene_prose`
+  - `apply_scene_commit`
+- The receipt snapshot aggregates:
+  - appearance projection status and source artifacts
+  - scene setting status, source mode, and source artifacts
+  - selected prior T1 thought signatures and limitations
+
+## Truth Boundary
+- `scene_context_projection.used_as_prompt_input` is currently `false`.
+- The receipt is an observation surface, not proof that the author prompt consumed the projection payload.
+- A future prompt-injection slice must only flip this field when the projection payload is actually assembled into the model request.
+- Thought signatures remain context aids; execution receipts remain the truth of what happened.
+
+## Validation
+- Focused test:
+  - `tests/test_scene_action_execution.py::test_write_scene_prose_generates_provisional_receipts`
+- 0075 focused regression:
+  - `tests/test_scene_action_execution.py`
+  - `tests/test_scene_context_query.py`
+  - `tests/test_scene_setting_actions.py`
+  - `tests/test_appearance_projection_action.py`
+  - `tests/test_appearance_query.py`
+  - `tests/test_scene_setting_query.py`
+  - `tests/test_thought_context_query.py`
+- Result: `35 passed`.
+
+## Remaining 0075 Work
+- Decide whether prompt assembly should consume scene context projections directly in BookForge or whether Nanda should choose and pass them as explicit action inputs.
+- Audit legacy character appearance mutation/refresh paths against the projection contract.
+
+---
+
+## Source 39: `notes/2026-04-26-0075-projection-query-slice.md`
+
+# 2026-04-26 0075 Projection Query Slice
+
+## Completed
+- Added `bookforge.query.appearance` with branch-aware appearance projection views.
+- Added `bookforge.query.setting` with scene setting projection lookup.
+- Added `bookforge.query.thought_context` with prior T1 thought-signature context discovery.
+- Exported all three query surfaces from `bookforge.query`.
+- Added `refresh_character_appearance_projection` as a non-mutating execution action.
+- Added action discovery for `refresh_character_appearance_projection`.
+
+## Contract Notes
+- Existing character `appearance_current` is not silently treated as authoritative.
+- Appearance query defaults to `derived` for readable state, `provisional` when projection is pending, and `diagnostic` when missing.
+- Scene setting distinguishes `author_drafted` (`provisional`), `prose_extracted` (`derived`), `outline_derived` (`derived`), and `missing` (`diagnostic`).
+- Thought signatures are exposed as `diagnostic` planning-reuse context only; execution receipts remain the source of truth for what happened.
+- The appearance projection action writes `draft/context/appearance/ch_###/scene_###/appearance_projection.json` and records a `ProducedArtifactReceipt`.
+
+## Validation
+- `tests/test_appearance_query.py`
+- `tests/test_scene_setting_query.py`
+- `tests/test_thought_context_query.py`
+- `tests/test_appearance_projection_action.py`
+- Focused result: 11 passed.
+
+## Remaining 0075 Work
+- Add setting/background extraction and author-drafted setting actions.
+- Record appearance, setting, and thought-context artifact usage in downstream scene-phase prompt receipts.
+- Consider a compact aggregate scene-context readiness/query surface once the individual projections settle.
+
+---
+
+## Source 40: `notes/2026-04-26-0075-setting-actions.md`
+
+# 2026-04-26 0075 Setting Projection Actions
+
+## Completed
+- Added `draft_scene_setting_projection`.
+- Added `extract_scene_setting_from_prose`.
+- Added `get_scene_context_projection`.
+- Exported both request builders and execution actions from `bookforge.execution`.
+- Added both actions to legal-action discovery for scene scope.
+- Added setting action tests.
+
+## Contract Notes
+- `draft_scene_setting_projection` writes `author_drafted.setting.json` with artifact status `provisional`.
+- `extract_scene_setting_from_prose` writes `prose_extracted.setting.json` with artifact status `derived`.
+- Both actions are non-canonical and non-mutating.
+- `extract_scene_setting_from_prose` refuses when no scene prose exists.
+- The current implementation records structured setting supplied by the caller/author worker; it does not perform an internal LLM extraction turn yet.
+- If no structured extraction is supplied, the prose-extraction action keeps a source excerpt and reports conservative structured availability.
+- `get_scene_context_projection` aggregates appearance, setting, and T1 thought-context availability without creating a second truth model.
+
+## Validation
+- `tests/test_scene_setting_actions.py`
+- `tests/test_scene_setting_query.py`
+- `tests/test_scene_context_query.py`
+- `tests/test_action_discovery.py`
+- Focused result: 34 passed for action discovery plus setting actions.
+
+## Remaining 0075 Work
+- Record appearance, setting, and thought-context artifact usage in downstream prompt/execution receipts.
+- Decide whether to add an internal author-LLM setting draft turn or leave Nanda as the author-worker caller that supplies the structured setting payload.
+- Consider an aggregate scene-context readiness surface after projection usage receipts land.
+
+---
+
+## Source 41: `promotion.md`
 
 # Promotion
 

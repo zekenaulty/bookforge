@@ -1,6 +1,6 @@
 # 0070 Segment Section-Write Into Scoped Scene Actions
 
-Status: in_progress
+Status: completed
 
 ## Goal
 - Break the current `section_write` loop into truthful scene-phase execution actions and readiness queries so Nanda can steer write, lint, and repair as a graph of legal skills instead of only invoking section-level or batch wrappers.

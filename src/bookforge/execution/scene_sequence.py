@@ -3,7 +3,8 @@ from __future__ import annotations
 from typing import Any, Callable, Dict, Optional
 
 from bookforge.contracts import ExecutionRequest
-from bookforge.query import current_main_node
+from bookforge.contracts import MAIN_BRANCH_ID
+from bookforge.query import current_execution_node
 
 from .scene_actions import (
     apply_scene_commit,
@@ -76,6 +77,7 @@ def build_live_scene_phase_request(
     chapter_id: int,
     scene_id: int,
     section_id: Optional[int] = None,
+    branch_id: str = MAIN_BRANCH_ID,
     extra_details: Optional[Dict[str, Any]] = None,
 ) -> ExecutionRequest:
     builder = _BUILDERS.get(action)
@@ -87,10 +89,11 @@ def build_live_scene_phase_request(
         chapter_id=chapter_id,
         scene_id=scene_id,
         section_id=section_id,
+        branch_id=branch_id,
     )
     if isinstance(extra_details, dict) and extra_details:
         request = _request_with_details(request, extra_details)
-    live_node = current_main_node(workspace, book_id, prefer_emitted=False)
+    live_node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if live_node is None:
         return request
     return ExecutionRequest(
@@ -113,6 +116,7 @@ def run_scene_phase_action(
     chapter_id: int,
     scene_id: int,
     section_id: Optional[int] = None,
+    branch_id: str = MAIN_BRANCH_ID,
     extra_details: Optional[Dict[str, Any]] = None,
 ):
     request = build_live_scene_phase_request(
@@ -122,6 +126,7 @@ def run_scene_phase_action(
         chapter_id=chapter_id,
         scene_id=scene_id,
         section_id=section_id,
+        branch_id=branch_id,
         extra_details=extra_details,
     )
     executor = _EXECUTORS.get(action)
