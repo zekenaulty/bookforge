@@ -1619,6 +1619,41 @@ def finalize_chapter_from_locked_sections(
     book_root, _, _, outline, registry = _ensure_initialized(workspace=workspace, book_id=book_id, run_id=None)
     if not _chapter_all_sections_locked(registry, chapter_id):
         raise ValueError(f"Chapter {chapter_id} is not ready for finalization; all sections must be locked first.")
+    registry_chapter = _find_registry_chapter(registry, chapter_id)
+    if (
+        str(registry_chapter.get("chapter_status") or "").strip().lower() == "finalized"
+        and str(registry_chapter.get("chapter_final_markdown") or "").strip()
+    ):
+        _emit_section_workflow_contracts(
+            workspace=workspace,
+            book_id=book_id,
+            book_root=book_root,
+            before_snapshot=before_snapshot,
+            action="finalize_chapter_from_locked_sections",
+            result_status="no_op",
+            message=f"Chapter {chapter_id} is already finalized.",
+            artifact_paths={
+                "outline": _outline_dir(book_root) / "outline.json",
+                "registry": _outline_dir(book_root) / REGISTRY_FILENAME,
+                "chapter_seam_report": registry_chapter.get("chapter_seam_report"),
+                "chapter_original_markdown": registry_chapter.get("chapter_original_markdown"),
+                "chapter_fixed_markdown": registry_chapter.get("chapter_fixed_markdown"),
+                "chapter_candidate_markdown": registry_chapter.get("chapter_candidate_markdown"),
+                "chapter_final_markdown": registry_chapter.get("chapter_final_markdown"),
+            },
+            details={"chapter_id": chapter_id, "status": registry_chapter.get("chapter_status")},
+            request_id=request_id,
+        )
+        return {
+            "status": registry_chapter.get("chapter_status"),
+            "report_path": registry_chapter.get("chapter_seam_report"),
+            "original_path": registry_chapter.get("chapter_original_markdown"),
+            "fixed_path": registry_chapter.get("chapter_fixed_markdown"),
+            "provisional_path": registry_chapter.get("chapter_provisional_markdown"),
+            "candidate_path": registry_chapter.get("chapter_candidate_markdown"),
+            "final_path": registry_chapter.get("chapter_final_markdown"),
+            "updated": False,
+        }
     chapter_finalization = finalize_locked_chapter(book_root, outline, chapter_id)
     _update_chapter_finalization_fields(registry, chapter_id, chapter_finalization)
     state_path = book_root / "state.json"

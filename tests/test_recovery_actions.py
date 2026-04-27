@@ -191,6 +191,10 @@ def _create_recovery_branch(tmp_path: Path, branch_id: str = "recover-sec1") -> 
     assert result.details["branch_id"] == branch_id
 
 
+def _postcondition(result) -> dict:
+    return result.details["recovery_receipt"]["details"]["postcondition"]
+
+
 def test_recovery_branch_snapshots_evidence_and_exposes_legal_actions(tmp_path: Path) -> None:
     book_root = _setup_initialized_book(tmp_path)
     _introduce_lineage_drift(book_root)
@@ -237,6 +241,8 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
         build_recovery_branch_request(tmp_path, "my_book", action="quarantine_artifacts", branch_id="recover-sec1"),
     )
     assert quarantine_result.status == "success"
+    assert _postcondition(quarantine_result)["recommended_next_action"] == "normalize_outline_scope"
+    assert "normalize_outline_scope" in _postcondition(quarantine_result)["remaining_required_receipts"]
     assert not (branch_root / "outline" / "section_drafts" / "ch_001_sec_001_phase03.json").exists()
     assert (book_root / "outline" / "section_drafts" / "ch_001_sec_001_phase03.json").exists()
 
@@ -245,6 +251,7 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
         build_recovery_branch_request(tmp_path, "my_book", action="normalize_outline_scope", branch_id="recover-sec1"),
     )
     assert normalize_result.status == "success"
+    assert _postcondition(normalize_result)["recommended_next_action"] == "invalidate_scope_outputs"
     branch_outline = _read_json(branch_root / "outline" / "outline.json")
     assert branch_outline["characters"] == [{"character_id": "rhea_mercer", "name": "Rhea Mercer"}]
     assert len(branch_outline["chapters"][0]["sections"][0]["scenes"]) == 1
@@ -258,6 +265,7 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
         build_recovery_branch_request(tmp_path, "my_book", action="invalidate_scope_outputs", branch_id="recover-sec1"),
     )
     assert invalidate_result.status == "success"
+    assert _postcondition(invalidate_result)["recommended_next_action"] == "rebuild_state_scope"
     assert not (branch_root / "draft" / "chapters" / "ch_001" / "scene_002.md").exists()
     assert (book_root / "draft" / "chapters" / "ch_001" / "scene_002.md").exists()
 
@@ -267,6 +275,8 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
     )
     assert blocked_validate.status == "integrity_degraded"
     assert "rebuild_state_scope has not completed" in blocked_validate.details["recovery_receipt"]["details"]["blockers"]
+    assert _postcondition(blocked_validate)["branch_health_status_after"] == "blocked"
+    assert _postcondition(blocked_validate)["recommended_next_action"] == "rebuild_state_scope"
 
     state_preview = get_state_rebuild_preview(tmp_path, "my_book", branch_id="recover-sec1")
     assert "state.json" in state_preview["candidate_paths"]
@@ -278,6 +288,7 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
         build_recovery_branch_request(tmp_path, "my_book", action="rebuild_state_scope", branch_id="recover-sec1"),
     )
     assert rebuild_result.status == "success"
+    assert _postcondition(rebuild_result)["recommended_next_action"] == "redraft_scope"
     branch_state = _read_json(branch_root / "state.json")
     assert branch_state["summary"]["story_so_far"] == []
     assert branch_state["world"]["recent_facts"] == []
@@ -291,6 +302,7 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
     )
     assert blocked_after_rebuild.status == "integrity_degraded"
     assert "redraft_scope has not completed" in blocked_after_rebuild.details["recovery_receipt"]["details"]["blockers"]
+    assert _postcondition(blocked_after_rebuild)["recommended_next_action"] == "redraft_scope"
 
     def _fake_run_section_range(*args, **kwargs):
         root = supervision_paths.branch_snapshot_root(book_root, kwargs["branch_id"])
@@ -306,6 +318,7 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
         build_recovery_branch_request(tmp_path, "my_book", action="redraft_scope", branch_id="recover-sec1"),
     )
     assert redraft_result.status == "success"
+    assert _postcondition(redraft_result)["recommended_next_action"] == "validate_recovery_branch"
     assert (branch_root / "draft" / "chapters" / "ch_001" / "scene_001.md").read_text(encoding="utf-8") == "Recovered scene 1."
     assert not (branch_root / "draft" / "chapters" / "ch_001" / "scene_002.md").exists()
 
@@ -314,6 +327,11 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
         build_recovery_branch_request(tmp_path, "my_book", action="validate_recovery_branch", branch_id="recover-sec1"),
     )
     assert validate_result.status == "success"
+    validate_postcondition = _postcondition(validate_result)
+    assert validate_postcondition["branch_health_status_after"] == "healthy"
+    assert validate_postcondition["remaining_required_receipts"] == []
+    assert validate_postcondition["recommended_next_action"] == "promote_recovery_branch"
+    assert validate_postcondition["canonical_change_status"] == "none"
     health = get_recovery_branch_health(tmp_path, "my_book", branch_id="recover-sec1")
     assert health.status == "healthy"
     assert health.details["recommended_next_action"] == "promote_recovery_branch"

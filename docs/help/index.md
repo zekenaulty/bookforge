@@ -144,6 +144,7 @@ Lineage rule
 - Mutable compatibility views such as `outline/outline.json` are useful, but they are not enough by themselves when immutable run artifacts exist.
 - When integrity reports `chimera_risk`, use the outline lineage audit surfaces before running authoring, seam repair, or main-branch mutation.
 - Recovery mutation must run in a derived `recovery_import` branch. Promotion applies recorded removals/quarantine before copying validated branch data back to `main`.
+- Branch-local recovery receipts include postcondition snapshots so Nanda can see the next safe recovery action, branch health, outline lineage status, remaining successful receipts, and approval reasons without reading raw branch files.
 
 Stub commands
 - The following commands exist in CLI but are not implemented yet: compile, export synopsis, book set-current, book show-current, book clear-current.

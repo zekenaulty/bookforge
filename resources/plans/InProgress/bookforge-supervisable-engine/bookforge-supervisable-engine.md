@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T09:22:38Z`
-- Source Document Count: `48`
+- Compiled At (UTC): `2026-04-27T13:53:14Z`
+- Source Document Count: `49`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -54,9 +54,10 @@
 43. `notes/2026-04-26-0080-complete.md`
 44. `notes/2026-04-26-0081-implementation-slice.md`
 45. `notes/2026-04-26-0081-planning.md`
-46. `notes/2026-04-27-0081-redraft-scope-slice.md`
-47. `notes/2026-04-27-0081-state-rebuild-slice.md`
-48. `promotion.md`
+46. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+47. `notes/2026-04-27-0081-redraft-scope-slice.md`
+48. `notes/2026-04-27-0081-state-rebuild-slice.md`
+49. `promotion.md`
 
 ---
 
@@ -2676,6 +2677,14 @@ Status: in_progress
 - Implemented legal-action discovery for the recovery sequence.
 - Implemented CLI wrappers for the implemented query/action primitives.
 - Implemented initial approval/next-action metadata on recovery discovery and health surfaces.
+- Recovery receipts now include status-aware postcondition snapshots with:
+  - branch health status after the action
+  - outline lineage status after the action
+  - completed and remaining required receipts
+  - blockers/warnings after the action
+  - recommended next recovery action
+  - approval-required metadata
+  - canonical-change status for branch-local mutation
 - Promotion now honors branch recovery removal receipts before copying branch snapshot data into the target.
 - Recovery branches materialize outline evidence directories that normal rerun branches intentionally omit:
   - `outline/pipeline_runs`
@@ -2688,7 +2697,7 @@ Status: in_progress
 - Quarantine now uses hashed fallback quarantine paths when deep Windows paths exceed practical filesystem limits while preserving original source paths in receipts.
 
 ## Remaining Implementation
-- Add richer postcondition receipts with integrity deltas and next-action snapshots.
+- Extend recovery receipt postconditions with canonical integrity deltas on promotion results.
 - Add blast-radius query surfaces that separate prose, state, series, continuity, and projection invalidation candidates.
 - Add approval-required metadata to all destructive or broad-scope primitives.
 - Expand validation beyond outline lineage to state/projection families:
@@ -4265,7 +4274,55 @@ Notes
 
 ---
 
-## Source 46: `notes/2026-04-27-0081-redraft-scope-slice.md`
+## Source 46: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+
+# 2026-04-27 0081 Recovery Receipt Postconditions
+
+## Summary
+- Added status-aware postcondition snapshots to every branch-local recovery receipt.
+- The postcondition surface lets Nanda inspect an action result and see:
+  - branch health after the action
+  - outline lineage status after the action
+  - completed and remaining successful recovery receipts
+  - blockers and warnings after the action
+  - recommended next recovery action
+  - approval-required metadata
+  - branch-local mutation scope and canonical-change status
+
+## Important Behavior
+- Receipt prerequisites are status-aware.
+- A failed `validate_recovery_branch` receipt no longer satisfies the validation prerequisite.
+- This matters because recovery branches may be validated multiple times while still missing rebuild/redraft work.
+- The next-action snapshot should guide the author layer back to the next missing successful step instead of treating the first failed attempt as completion.
+- While validating this slice, the full suite exposed that explicit chapter finalization after lock needed to remain a truthful `no_op` when the chapter was already finalized by section lock. That behavior is now handled at the chapter workflow level without weakening recovery branch mutation status.
+
+## Files Touched
+- `src/bookforge/execution/recovery_common.py`
+- `tests/test_recovery_actions.py`
+- `docs/help/index.md`
+- `docs/help/workflow.md`
+- `resources/plans/InProgress/bookforge-supervisable-engine/steps/0081-add-author-operable-timeline-recovery-and-story-weaving-primitives/step.md`
+- `src/bookforge/section_workflow.py`
+
+## Validation
+- Focused tests:
+  - `python -m pytest -o addopts='' tests/test_recovery_actions.py tests/test_action_discovery.py --basetemp=.pytest_tmp_0081_postconditions_focus`
+  - Result: `35 passed`
+- Regression focus after chapter-finalize no-op correction:
+  - `python -m pytest -o addopts='' tests/test_execution_actions.py::test_finalize_chapter_action_returns_main_scoped_emitted_result tests/test_recovery_actions.py tests/test_action_discovery.py --basetemp=.pytest_tmp_0081_postconditions_focus`
+  - Result: `36 passed`
+- Full suite:
+  - `python -m pytest -o addopts='' --basetemp=.pytest_tmp_0081_postconditions_full`
+  - Result: `308 passed`
+
+## Next
+- Run the full suite.
+- Add blast-radius query surfaces for prose, state, series, continuity, and projection invalidation candidates.
+- Extend promotion results with canonical post-promotion integrity deltas.
+
+---
+
+## Source 47: `notes/2026-04-27-0081-redraft-scope-slice.md`
 
 # 2026-04-27 0081 Redraft Scope Slice
 
@@ -4304,7 +4361,7 @@ Notes
 
 ---
 
-## Source 47: `notes/2026-04-27-0081-state-rebuild-slice.md`
+## Source 48: `notes/2026-04-27-0081-state-rebuild-slice.md`
 
 # 2026-04-27 0081 State Rebuild Slice
 
@@ -4352,7 +4409,7 @@ Notes
 
 ---
 
-## Source 48: `promotion.md`
+## Source 49: `promotion.md`
 
 # Promotion
 

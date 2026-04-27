@@ -147,6 +147,14 @@ Status: in_progress
 - Implemented legal-action discovery for the recovery sequence.
 - Implemented CLI wrappers for the implemented query/action primitives.
 - Implemented initial approval/next-action metadata on recovery discovery and health surfaces.
+- Recovery receipts now include status-aware postcondition snapshots with:
+  - branch health status after the action
+  - outline lineage status after the action
+  - completed and remaining required receipts
+  - blockers/warnings after the action
+  - recommended next recovery action
+  - approval-required metadata
+  - canonical-change status for branch-local mutation
 - Promotion now honors branch recovery removal receipts before copying branch snapshot data into the target.
 - Recovery branches materialize outline evidence directories that normal rerun branches intentionally omit:
   - `outline/pipeline_runs`
@@ -159,7 +167,7 @@ Status: in_progress
 - Quarantine now uses hashed fallback quarantine paths when deep Windows paths exceed practical filesystem limits while preserving original source paths in receipts.
 
 ## Remaining Implementation
-- Add richer postcondition receipts with integrity deltas and next-action snapshots.
+- Extend recovery receipt postconditions with canonical integrity deltas on promotion results.
 - Add blast-radius query surfaces that separate prose, state, series, continuity, and projection invalidation candidates.
 - Add approval-required metadata to all destructive or broad-scope primitives.
 - Expand validation beyond outline lineage to state/projection families:

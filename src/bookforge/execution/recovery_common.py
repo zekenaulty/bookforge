@@ -26,6 +26,16 @@ from bookforge.supervision import (
 )
 from bookforge.supervision import paths as supervision_paths
 
+RECOVERY_REQUIRED_SEQUENCE = (
+    "create_recovery_branch",
+    "quarantine_artifacts",
+    "normalize_outline_scope",
+    "invalidate_scope_outputs",
+    "rebuild_state_scope",
+    "redraft_scope",
+    "validate_recovery_branch",
+)
+
 
 def now_token() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
@@ -133,6 +143,156 @@ def record_promotion_removals(root: Path, branch_id: str, rel_paths: Iterable[st
     )
 
 
+def _read_receipt_actions(path: Path) -> List[str]:
+    if not path.exists():
+        return []
+    actions: List[str] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        action = str(payload.get("action") or "").strip() if isinstance(payload, dict) else ""
+        if action:
+            actions.append(action)
+    return actions
+
+
+def _read_receipt_statuses(path: Path) -> Dict[str, str]:
+    if not path.exists():
+        return {}
+    statuses: Dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(payload, dict):
+            continue
+        action = str(payload.get("action") or "").strip()
+        status = str(payload.get("status") or "").strip()
+        if action and status:
+            statuses[action] = status
+    return statuses
+
+
+def _unique_actions(actions: Iterable[str]) -> List[str]:
+    seen: set[str] = set()
+    ordered: List[str] = []
+    for action in actions:
+        cleaned = str(action or "").strip()
+        if not cleaned or cleaned in seen:
+            continue
+        seen.add(cleaned)
+        ordered.append(cleaned)
+    return ordered
+
+
+def _recommended_next_recovery_action(actions: set[str], blockers: List[str]) -> str:
+    for required in RECOVERY_REQUIRED_SEQUENCE:
+        if required not in actions:
+            return required
+    if blockers:
+        return "inspect_recovery_blockers"
+    return "promote_recovery_branch"
+
+
+def _approval_requirements(manifest: Dict[str, Any], actions: set[str]) -> Dict[str, Any]:
+    scope = manifest.get("scope") if isinstance(manifest.get("scope"), dict) else {}
+    affected_scopes = [dict(item) for item in scope.get("affected_scopes", []) if isinstance(item, dict)]
+    broad_scope = len(affected_scopes) > 1 or any("section_id" not in item for item in affected_scopes)
+    pending: List[str] = []
+    if "create_recovery_branch" in actions:
+        pending.append("recovery anchor selection")
+    if "quarantine_artifacts" not in actions:
+        pending.append("destructive cleanup/quarantine")
+    if "invalidate_scope_outputs" not in actions:
+        pending.append("scope output invalidation")
+    if "rebuild_state_scope" not in actions:
+        pending.append("state/projection rebuild")
+    if "redraft_scope" not in actions:
+        pending.append("scope redraft")
+    if "validate_recovery_branch" in actions:
+        pending.append("promotion to main")
+    if broad_scope:
+        pending.append("broad recovery radius")
+    return {
+        "approval_required": bool(pending),
+        "approval_reasons": sorted(set(pending)),
+        "broad_recovery_radius": broad_scope,
+        "affected_scopes": affected_scopes,
+    }
+
+
+def _postcondition_snapshot(
+    workspace: Path,
+    book_id: str,
+    branch_id: str,
+    *,
+    action: str,
+    status: str,
+    receipt_actions_after: List[str],
+    receipt_statuses_after: Dict[str, str],
+) -> Dict[str, Any]:
+    root = book_root(workspace, book_id)
+    manifest = read_json(recovery_manifest_path(root, branch_id))
+    completed_actions = {
+        action_name
+        for action_name, action_status in receipt_statuses_after.items()
+        if action_status in {"success", "no_op"}
+    }
+    blockers = [
+        f"missing successful receipt: {action_name}"
+        for action_name in RECOVERY_REQUIRED_SEQUENCE
+        if action_name not in completed_actions
+    ]
+    warnings: List[str] = []
+    outline_status: Optional[str] = None
+    try:
+        audit = get_outline_lineage_audit(workspace, book_id, branch_id=branch_id)
+        outline_status = audit.status
+        if audit.status == "chimera_risk":
+            blockers.append("branch still reports chimera_risk")
+        elif audit.status == "attention_required":
+            warnings.append("branch still has diagnostic outline artifacts")
+    except Exception as exc:  # pragma: no cover - receipt emission should not fail on diagnostics.
+        outline_status = "unavailable"
+        warnings.append(f"outline lineage postcondition unavailable: {type(exc).__name__}")
+    if status not in {"success", "no_op"}:
+        blockers.append(f"action did not complete successfully: {action}")
+    approval = _approval_requirements(manifest, completed_actions) if manifest else {
+        "approval_required": False,
+        "approval_reasons": [],
+        "broad_recovery_radius": False,
+        "affected_scopes": [],
+    }
+    return {
+        "schema_version": "recovery_postcondition_v1",
+        "book_id": book_id,
+        "branch_id": branch_id,
+        "action": action,
+        "status": status,
+        "mutation_scope": "branch",
+        "canonical_change_status": "none",
+        "outline_lineage_status_after": outline_status,
+        "branch_health_status_after": "healthy" if not blockers else "blocked",
+        "receipt_actions_after": receipt_actions_after,
+        "completed_receipt_actions_after": sorted(completed_actions),
+        "receipt_statuses_after": dict(sorted(receipt_statuses_after.items())),
+        "remaining_required_receipts": [
+            action_name for action_name in RECOVERY_REQUIRED_SEQUENCE if action_name not in completed_actions
+        ],
+        "blockers_after": blockers,
+        "warnings_after": warnings,
+        "recommended_next_action": _recommended_next_recovery_action(completed_actions, blockers),
+        **approval,
+    }
+
+
 def write_receipt(
     workspace: Path,
     book_id: str,
@@ -150,6 +310,20 @@ def write_receipt(
     node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
     if node is None:
         raise ValueError(f"No current node is available for recovery branch {branch_id}.")
+    receipt_path = recovery_receipts_path(root, branch_id)
+    statuses_after = _read_receipt_statuses(receipt_path)
+    statuses_after[action] = status
+    actions_after = _unique_actions([*_read_receipt_actions(receipt_path), action])
+    merged_details = dict(details or {})
+    merged_details["postcondition"] = _postcondition_snapshot(
+        workspace,
+        book_id,
+        branch_id,
+        action=action,
+        status=status,
+        receipt_actions_after=actions_after,
+        receipt_statuses_after=statuses_after,
+    )
     receipt = RecoveryReceipt(
         receipt_id=request_id(book_id, action, branch_id, status),
         action=action,
@@ -160,9 +334,9 @@ def write_receipt(
         artifact_paths=dict(artifact_paths or {}),
         removed_active_paths=list(removed_active_paths or []),
         quarantined_paths=list(quarantined_paths or []),
-        details=dict(details or {}),
+        details=merged_details,
     )
-    append_jsonl(recovery_receipts_path(root, branch_id), receipt.to_dict())
+    append_jsonl(receipt_path, receipt.to_dict())
     return receipt
 
 

@@ -218,6 +218,8 @@ Recovery sequence
 
 Truth rules
 - Recovery mutation never writes directly to contaminated `main`.
+- Every branch-local recovery receipt includes a postcondition snapshot with branch health, outline lineage status, completed/remaining required receipts, blockers/warnings, approval metadata, and the recommended next recovery action.
+- Receipt prerequisites are status-aware: a failed validation attempt does not count as a completed validation receipt.
 - Existing polluted prose is salvage/reference material only unless later redrafted or explicitly promoted by a future tool.
 - `rebuild-state-scope` currently performs a conservative full-book context reset inside the recovery branch because state history is not yet event-sourced enough for safe partial rollback.
 - `redraft-scope` may invoke LLM-backed writing. It should be run with the same long timeout expectations as normal section writing.
@@ -610,8 +612,8 @@ Usage
 - `bookforge workflow finalize-chapter --book <id> --chapter <n>`
 
 Behavior
-- Re-runs chapter seam repair/finalization against the currently locked chapter state.
-- Because the result is reconciled against current canonical state, rerunning finalization may truthfully return `no_op` when nothing changed.
+- Runs chapter seam repair/finalization against the currently locked chapter state when the chapter is not already finalized.
+- Returns `no_op` when the chapter is already finalized and has a recorded final markdown artifact.
 - Current implementation note:
   - this command now routes through the narrow engine action `finalize_chapter_from_locked_sections`
   - the CLI wrapper is no longer the only caller-visible implementation path
