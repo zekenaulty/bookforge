@@ -1,6 +1,6 @@
 # 0082 Add Semantic Recovery Review And Downstream Impact Surfaces
 
-Status: in_progress
+Status: completed
 
 ## Goal
 - Add semantic recovery review surfaces that let Nanda decide whether a structurally recovered branch is also story-safe.
@@ -148,18 +148,24 @@ Status: in_progress
   - refusing mutation without explicit scoped action requests
 
 ## Definition Of Done
-- Readiness query exists for semantic recovery review.
-- At least one diagnostic semantic review action exists and is exposed through `legal_next_actions`.
-- Review artifacts carry `artifact_status: diagnostic`.
-- Recovery branch health can surface whether semantic review is missing, clean, or attention-required.
+- Readiness query exists for semantic recovery review. Done.
+- At least one diagnostic semantic review action exists and is exposed through `legal_next_actions`. Done.
+- Review artifacts carry `artifact_status: diagnostic`. Done.
+- Recovery branch health can surface whether semantic review is missing, clean, or attention-required. Done.
 - Tests cover:
-  - review refused before structural prerequisites
-  - review artifact emitted after redraft/validation
-  - downstream review candidates appear without becoming mutation targets
-  - Nanda-visible query output distinguishes structural health from semantic review status
+  - review refused before structural prerequisites. Done through action-discovery/refusal coverage.
+  - review artifact emitted after redraft/validation. Done.
+  - downstream review candidates appear without becoming mutation targets. Done.
+  - Nanda-visible query output distinguishes structural health from semantic review status. Done.
 
 ## Test Plan
 - Add focused unit tests for readiness and action discovery.
 - Add fixture tests using the two-chapter recovery fixture from 0081.
 - Keep LLM calls mocked.
 - Run full regression before marking complete.
+
+## Completion Notes
+- BookForge now provides diagnostic evidence surfaces for semantic recovery review and downstream dependency review.
+- The implemented actions do not call an LLM, rewrite prose, repair seams, promote branches, or decide story quality.
+- LLM-backed author review is deferred to Nanda/author-reasoning integration unless BookForge later needs an engine-owned reviewer prompt.
+- Latest full validation: `310 passed`.

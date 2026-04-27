@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T17:44:48Z`
-- Source Document Count: `66`
+- Compiled At (UTC): `2026-04-27T17:48:21Z`
+- Source Document Count: `67`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -71,10 +71,11 @@
 60. `notes/2026-04-27-0081-state-rebuild-slice.md`
 61. `notes/2026-04-27-0081-state-validation-slice.md`
 62. `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
-63. `notes/2026-04-27-0082-downstream-review-slice.md`
-64. `notes/2026-04-27-0082-semantic-readiness-slice.md`
-65. `notes/2026-04-27-0082-semantic-review-action-slice.md`
-66. `promotion.md`
+63. `notes/2026-04-27-0082-complete.md`
+64. `notes/2026-04-27-0082-downstream-review-slice.md`
+65. `notes/2026-04-27-0082-semantic-readiness-slice.md`
+66. `notes/2026-04-27-0082-semantic-review-action-slice.md`
+67. `promotion.md`
 
 ---
 
@@ -581,7 +582,7 @@ This plan is ready for promotion only when the target implementation can satisfy
 | 0075-extract-appearance-setting-and-context-refinement-surfaces | completed | 0070 | Make character appearance, scene background/setting, and prior-stage T1 thought-signature context explicit queryable projection layers instead of incidental prompt side effects. |
 | 0080-add-outline-lineage-audit-and-recovery-briefing | completed | 0020, 0030, 0050, 0060 | Add read-only outline lineage audit, section-level lineage matrix, stale artifact inventory, and recovery candidate briefing so Nanda can localize chimera risks before any repair mutation. |
 | 0081-add-author-operable-timeline-recovery-and-story-weaving-primitives | completed | 0045, 0070, 0071, 0072, 0075, 0080 | Add branch-first mutation primitives that let Nanda compose timeline recovery, retcon, redraft, and downstream story-weaving plans without BookForge needing bespoke fix commands for every failure class. |
-| 0082-add-semantic-recovery-review-and-downstream-impact-surfaces | in_progress | 0075, 0081 | Add author/Nanda-facing semantic recovery review surfaces for downstream dependency tracing, story continuity, and meaning-level validation after structural recovery. |
+| 0082-add-semantic-recovery-review-and-downstream-impact-surfaces | completed | 0075, 0081 | Add author/Nanda-facing semantic recovery review surfaces for downstream dependency tracing, story continuity, and meaning-level validation after structural recovery. |
 
 ---
 
@@ -2936,7 +2937,7 @@ Status: completed
 
 # 0082 Add Semantic Recovery Review And Downstream Impact Surfaces
 
-Status: in_progress
+Status: completed
 
 ## Goal
 - Add semantic recovery review surfaces that let Nanda decide whether a structurally recovered branch is also story-safe.
@@ -3084,21 +3085,27 @@ Status: in_progress
   - refusing mutation without explicit scoped action requests
 
 ## Definition Of Done
-- Readiness query exists for semantic recovery review.
-- At least one diagnostic semantic review action exists and is exposed through `legal_next_actions`.
-- Review artifacts carry `artifact_status: diagnostic`.
-- Recovery branch health can surface whether semantic review is missing, clean, or attention-required.
+- Readiness query exists for semantic recovery review. Done.
+- At least one diagnostic semantic review action exists and is exposed through `legal_next_actions`. Done.
+- Review artifacts carry `artifact_status: diagnostic`. Done.
+- Recovery branch health can surface whether semantic review is missing, clean, or attention-required. Done.
 - Tests cover:
-  - review refused before structural prerequisites
-  - review artifact emitted after redraft/validation
-  - downstream review candidates appear without becoming mutation targets
-  - Nanda-visible query output distinguishes structural health from semantic review status
+  - review refused before structural prerequisites. Done through action-discovery/refusal coverage.
+  - review artifact emitted after redraft/validation. Done.
+  - downstream review candidates appear without becoming mutation targets. Done.
+  - Nanda-visible query output distinguishes structural health from semantic review status. Done.
 
 ## Test Plan
 - Add focused unit tests for readiness and action discovery.
 - Add fixture tests using the two-chapter recovery fixture from 0081.
 - Keep LLM calls mocked.
 - Run full regression before marking complete.
+
+## Completion Notes
+- BookForge now provides diagnostic evidence surfaces for semantic recovery review and downstream dependency review.
+- The implemented actions do not call an LLM, rewrite prose, repair seams, promote branches, or decide story quality.
+- LLM-backed author review is deferred to Nanda/author-reasoning integration unless BookForge later needs an engine-owned reviewer prompt.
+- Latest full validation: `310 passed`.
 
 ---
 
@@ -5111,7 +5118,37 @@ Notes
 
 ---
 
-## Source 63: `notes/2026-04-27-0082-downstream-review-slice.md`
+## Source 63: `notes/2026-04-27-0082-complete.md`
+
+# 2026-04-27 0082 Complete
+
+Marked `0082` complete.
+
+BookForge-side deliverables now include:
+
+- semantic recovery review readiness query
+- semantic recovery review read query
+- diagnostic `review_recovery_semantics` action
+- downstream dependency review read query
+- diagnostic `review_downstream_dependencies` action
+- `legal_next_actions` exposure for both diagnostic actions
+- CLI commands for review reads and action execution
+- recovery branch health visibility for semantic and downstream review status
+
+Boundary decision:
+
+- BookForge emits diagnostic evidence and receipts.
+- Nanda/author reasoning owns story-quality judgment, strategy selection, human approval, and deciding whether downstream mutation is required.
+- LLM-backed semantic author review is not implemented in BookForge in this step.
+
+Validation:
+
+- Focused recovery/action tests passed.
+- Full regression passed: `310 passed`.
+
+---
+
+## Source 64: `notes/2026-04-27-0082-downstream-review-slice.md`
 
 # 2026-04-27 0082 Downstream Review Slice
 
@@ -5144,7 +5181,7 @@ Remaining `0082` work:
 
 ---
 
-## Source 64: `notes/2026-04-27-0082-semantic-readiness-slice.md`
+## Source 65: `notes/2026-04-27-0082-semantic-readiness-slice.md`
 
 # 2026-04-27 0082 Semantic Readiness Slice
 
@@ -5171,7 +5208,7 @@ Remaining `0082` work:
 
 ---
 
-## Source 65: `notes/2026-04-27-0082-semantic-review-action-slice.md`
+## Source 66: `notes/2026-04-27-0082-semantic-review-action-slice.md`
 
 # 2026-04-27 0082 Semantic Review Action Slice
 
@@ -5209,7 +5246,7 @@ Remaining `0082` work:
 
 ---
 
-## Source 66: `promotion.md`
+## Source 67: `promotion.md`
 
 # Promotion
 
