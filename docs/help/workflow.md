@@ -223,6 +223,7 @@ Recovery sequence
 - `redraft-scope` marks normalized affected sections as branch-local frozen sections and invokes the existing scoped section writer inside the recovery branch.
 - `validate-recovery-branch` refuses promotion while branch-local lineage still reports `chimera_risk` or required receipts are missing.
 - `promote-recovery-branch` promotes only a healthy branch and applies recorded removals before copying branch snapshot data to `main`.
+- `promote-recovery-branch` returns a canonical postcondition with pre/post outline-lineage status, pre/post integrity status, planned/applied removals, and whether `main` cleared chimera risk.
 
 Truth rules
 - Recovery mutation never writes directly to contaminated `main`.

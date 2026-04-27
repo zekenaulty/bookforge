@@ -147,6 +147,7 @@ Lineage rule
 - When integrity reports `chimera_risk`, use the outline lineage audit surfaces before running authoring, seam repair, or main-branch mutation.
 - Recovery mutation must run in a derived `recovery_import` branch. Promotion applies recorded removals/quarantine before copying validated branch data back to `main`.
 - Branch-local recovery receipts include postcondition snapshots so Nanda can see the next safe recovery action, branch health, outline lineage status, remaining successful receipts, and approval reasons without reading raw branch files.
+- Recovery promotion results include canonical postconditions with pre/post lineage and integrity status plus planned/applied removals.
 
 Stub commands
 - The following commands exist in CLI but are not implemented yet: compile, export synopsis, book set-current, book show-current, book clear-current.

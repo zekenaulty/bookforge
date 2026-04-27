@@ -168,9 +168,9 @@ Status: in_progress
 - Validation now requires `rebuild_state_scope` and `redraft_scope` before a recovery branch can become healthy.
 - Quarantine now uses hashed fallback quarantine paths when deep Windows paths exceed practical filesystem limits while preserving original source paths in receipts.
 - Recovery blast-radius now categorizes impact-report-friendly candidate artifacts into prose, state, continuity, projection, and series families.
+- Recovery promotion results now include canonical postconditions with pre/post outline lineage status, pre/post integrity status, planned/applied removals, and whether `main` cleared chimera risk.
 
 ## Remaining Implementation
-- Extend recovery receipt postconditions with canonical integrity deltas on promotion results.
 - Extend blast-radius surfaces with downstream dependency tracing after redraft.
 - Add approval-required metadata to all destructive or broad-scope primitives.
 - Expand validation beyond outline lineage to state/projection families:

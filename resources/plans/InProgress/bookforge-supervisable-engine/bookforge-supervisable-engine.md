@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T14:03:04Z`
-- Source Document Count: `50`
+- Compiled At (UTC): `2026-04-27T14:08:46Z`
+- Source Document Count: `51`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -55,10 +55,11 @@
 44. `notes/2026-04-26-0081-implementation-slice.md`
 45. `notes/2026-04-26-0081-planning.md`
 46. `notes/2026-04-27-0081-blast-radius-slice.md`
-47. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
-48. `notes/2026-04-27-0081-redraft-scope-slice.md`
-49. `notes/2026-04-27-0081-state-rebuild-slice.md`
-50. `promotion.md`
+47. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+48. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+49. `notes/2026-04-27-0081-redraft-scope-slice.md`
+50. `notes/2026-04-27-0081-state-rebuild-slice.md`
+51. `promotion.md`
 
 ---
 
@@ -2699,9 +2700,9 @@ Status: in_progress
 - Validation now requires `rebuild_state_scope` and `redraft_scope` before a recovery branch can become healthy.
 - Quarantine now uses hashed fallback quarantine paths when deep Windows paths exceed practical filesystem limits while preserving original source paths in receipts.
 - Recovery blast-radius now categorizes impact-report-friendly candidate artifacts into prose, state, continuity, projection, and series families.
+- Recovery promotion results now include canonical postconditions with pre/post outline lineage status, pre/post integrity status, planned/applied removals, and whether `main` cleared chimera risk.
 
 ## Remaining Implementation
-- Extend recovery receipt postconditions with canonical integrity deltas on promotion results.
 - Extend blast-radius surfaces with downstream dependency tracing after redraft.
 - Add approval-required metadata to all destructive or broad-scope primitives.
 - Expand validation beyond outline lineage to state/projection families:
@@ -4330,7 +4331,46 @@ Notes
 
 ---
 
-## Source 47: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+## Source 47: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+
+# 2026-04-27 0081 Recovery Promotion Postcondition
+
+## Summary
+- Added canonical postcondition details to `promote_recovery_branch`.
+- The promotion result now reports:
+  - pre/post outline-lineage status
+  - pre/post integrity status
+  - planned promotion removals
+  - applied promotion removals
+  - whether main cleared chimera risk
+  - whether main outline lineage and integrity are healthy after promotion
+
+## Why
+- Nanda needs to verify that a recovery plan actually changed canonical timeline health.
+- A successful branch promotion is not enough by itself; the author layer needs to know whether `main` is now trusted and which invalid files were removed.
+
+## Files Touched
+- `src/bookforge/execution/recovery_validation.py`
+- `tests/test_recovery_actions.py`
+- `docs/help/index.md`
+- `docs/help/workflow.md`
+- `resources/plans/InProgress/bookforge-supervisable-engine/steps/0081-add-author-operable-timeline-recovery-and-story-weaving-primitives/step.md`
+
+## Validation
+- Focused tests:
+  - `python -m pytest -o addopts='' tests/test_recovery_actions.py tests/test_action_discovery.py --basetemp=.pytest_tmp_0081_promotion_focus`
+  - Result: `35 passed`
+- Full suite:
+  - `python -m pytest -o addopts='' --basetemp=.pytest_tmp_0081_promotion_full`
+  - Result: `308 passed`
+
+## Next
+- Add downstream dependency tracing after redraft.
+- Expand validation from outline lineage into state/projection family health.
+
+---
+
+## Source 48: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
 
 # 2026-04-27 0081 Recovery Receipt Postconditions
 
@@ -4378,7 +4418,7 @@ Notes
 
 ---
 
-## Source 48: `notes/2026-04-27-0081-redraft-scope-slice.md`
+## Source 49: `notes/2026-04-27-0081-redraft-scope-slice.md`
 
 # 2026-04-27 0081 Redraft Scope Slice
 
@@ -4417,7 +4457,7 @@ Notes
 
 ---
 
-## Source 49: `notes/2026-04-27-0081-state-rebuild-slice.md`
+## Source 50: `notes/2026-04-27-0081-state-rebuild-slice.md`
 
 # 2026-04-27 0081 State Rebuild Slice
 
@@ -4465,7 +4505,7 @@ Notes
 
 ---
 
-## Source 50: `promotion.md`
+## Source 51: `promotion.md`
 
 # Promotion
 

@@ -348,6 +348,12 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
         build_recovery_branch_request(tmp_path, "my_book", action="promote_recovery_branch", branch_id="recover-sec1"),
     )
     assert promote_result.status == "success"
+    promotion_postcondition = promote_result.details["postcondition"]
+    assert promotion_postcondition["canonical_change_status"] == "canonical"
+    assert promotion_postcondition["pre_outline_lineage_status"] == "chimera_risk"
+    assert promotion_postcondition["post_outline_lineage_status"] == "healthy"
+    assert promotion_postcondition["main_recovered_from_chimera"] is True
+    assert "outline/section_drafts/ch_001_sec_001_phase03.json" in promotion_postcondition["applied_removed_paths"]
     assert not (book_root / "outline" / "section_drafts" / "ch_001_sec_001_phase03.json").exists()
     assert not (book_root / "draft" / "chapters" / "ch_001" / "scene_002.md").exists()
     assert (book_root / "draft" / "chapters" / "ch_001" / "scene_001.md").read_text(encoding="utf-8") == "Recovered scene 1."
