@@ -247,6 +247,41 @@ def test_recovery_branch_snapshots_evidence_and_exposes_legal_actions(tmp_path: 
     assert blast_radius["scope_groups"]["downstream_trace_status"] == "manifest_declared_only"
 
 
+def test_recovery_branch_supports_explicit_multi_scope_radius(tmp_path: Path) -> None:
+    book_root = _setup_initialized_book(tmp_path)
+    _introduce_lineage_drift(book_root)
+    _write_polluted_draft_outputs(book_root)
+
+    request = build_create_recovery_branch_request(
+        tmp_path,
+        "my_book",
+        anchor_type="declared_source_run",
+        source_run_id="run_001",
+        affected_scopes=[{"chapter_id": 1, "section_id": 1}, {"chapter_id": 2, "section_id": 1}],
+        branch_id="recover-wide",
+    )
+    result = create_recovery_branch(tmp_path, request)
+    assert result.status == "success"
+
+    manifest = get_recovery_manifest(tmp_path, "my_book", branch_id="recover-wide")
+    assert manifest["scope"]["affected_scopes"] == [{"chapter_id": 1, "section_id": 1}, {"chapter_id": 2, "section_id": 1}]
+    assert manifest["scope_output_ranges"]["ch_001_sec_001"]["scene_ids"] == [1, 2]
+    assert manifest["scope_output_ranges"]["ch_002_sec_001"]["scene_ids"] == []
+
+    branch_selector = ScopeSelector(book_id="my_book", branch_id="recover-wide", chapter=1, section=1)
+    branch_actions = {option.action: option for option in list_execution_options(tmp_path, branch_selector, prefer_emitted=False)}
+    assert "broad recovery radius" in branch_actions["quarantine_artifacts"].details["approval_reasons"]
+    assert "broad recovery radius" in branch_actions["redraft_scope"].details["approval_reasons"]
+
+    blast_radius = get_recovery_blast_radius(tmp_path, "my_book", branch_id="recover-wide")
+    assert blast_radius["scope_groups"]["affected"] == [
+        {"chapter_id": 1, "section_id": 1},
+        {"chapter_id": 2, "section_id": 1},
+    ]
+    assert blast_radius["scope_groups"]["state_rebuild_scope"] == blast_radius["scope_groups"]["affected"]
+    assert blast_radius["scope_groups"]["downstream_trace_status"] == "none_declared"
+
+
 def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_and_promotes(tmp_path: Path, monkeypatch) -> None:
     book_root = _setup_initialized_book(tmp_path)
     _introduce_lineage_drift(book_root)

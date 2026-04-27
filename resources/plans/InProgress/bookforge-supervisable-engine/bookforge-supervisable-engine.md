@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T16:46:40Z`
-- Source Document Count: `57`
+- Compiled At (UTC): `2026-04-27T16:50:55Z`
+- Source Document Count: `58`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -59,13 +59,14 @@
 48. `notes/2026-04-27-0081-blast-radius-slice.md`
 49. `notes/2026-04-27-0081-continuity-validation-slice.md`
 50. `notes/2026-04-27-0081-durable-validation-slice.md`
-51. `notes/2026-04-27-0081-projection-validation-slice.md`
-52. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
-53. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
-54. `notes/2026-04-27-0081-redraft-scope-slice.md`
-55. `notes/2026-04-27-0081-state-rebuild-slice.md`
-56. `notes/2026-04-27-0081-state-validation-slice.md`
-57. `promotion.md`
+51. `notes/2026-04-27-0081-multi-scope-coverage.md`
+52. `notes/2026-04-27-0081-projection-validation-slice.md`
+53. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+54. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+55. `notes/2026-04-27-0081-redraft-scope-slice.md`
+56. `notes/2026-04-27-0081-state-rebuild-slice.md`
+57. `notes/2026-04-27-0081-state-validation-slice.md`
+58. `promotion.md`
 
 ---
 
@@ -2725,6 +2726,7 @@ Status: in_progress
   - prose invalidation scope
   - state rebuild scope
   - downstream trace status
+- Recovery tests now cover explicit broad multi-scope recovery branch creation, broad-radius approval metadata, and blast-radius scope grouping.
 
 ## Remaining Implementation
 - Extend blast-radius surfaces with semantic downstream dependency tracing after redraft; current downstream grouping is manifest-declared only.
@@ -2735,7 +2737,7 @@ Status: in_progress
   - semantic validation for chapter summaries beyond ghost-character checks
   - semantic validation for appearance/setting projections beyond stale branch and ghost-character checks
 - Add richer downstream invalidation detection after redraft.
-- Add Veiled Ledger-size multi-chapter fixture coverage.
+- Add Veiled Ledger-size multi-chapter fixture coverage with actual multi-chapter outline/prose/state artifacts.
 
 ## Detailed Work
 - Add recovery contracts.
@@ -4498,7 +4500,38 @@ Notes
 
 ---
 
-## Source 51: `notes/2026-04-27-0081-projection-validation-slice.md`
+## Source 51: `notes/2026-04-27-0081-multi-scope-coverage.md`
+
+# 2026-04-27 0081 Multi-Scope Coverage
+
+## Summary
+- Added regression coverage for explicit broad-scope recovery branch creation.
+- The test now covers:
+  - caller-provided `affected_scopes` with multiple scopes
+  - manifest persistence of each affected scope
+  - empty scene-range handling for a declared scope with no registry range
+  - broad-radius approval metadata on recovery actions
+  - blast-radius `scope_groups` output for broad affected scopes
+
+## Boundary
+- This is broad-scope contract coverage, not a full Veiled Ledger fixture.
+- It does not yet create multiple real chapters with full outline/prose/state/projection contamination.
+
+## Why
+- Nanda will need to request broad recovery scopes when a timeline impact report identifies multiple affected chapters or sections.
+- BookForge should preserve those scopes and expose broad-radius approval metadata even when some declared scopes have incomplete branch-local material.
+
+## Validation
+- Focused suite passed:
+  - `.\.venv\Scripts\python.exe -m pytest -o addopts='' tests/test_recovery_actions.py --basetemp=.pytest_tmp_0081_multi_scope_focus`
+  - Result: `5 passed`
+- Full suite passed:
+  - `.\.venv\Scripts\python.exe -m pytest -o addopts='' --basetemp=.pytest_tmp_0081_multi_scope_full`
+  - Result: `309 passed`
+
+---
+
+## Source 52: `notes/2026-04-27-0081-projection-validation-slice.md`
 
 # 2026-04-27 0081 Projection Validation Slice
 
@@ -4537,7 +4570,7 @@ Notes
 
 ---
 
-## Source 52: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+## Source 53: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
 
 # 2026-04-27 0081 Recovery Promotion Postcondition
 
@@ -4576,7 +4609,7 @@ Notes
 
 ---
 
-## Source 53: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+## Source 54: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
 
 # 2026-04-27 0081 Recovery Receipt Postconditions
 
@@ -4624,7 +4657,7 @@ Notes
 
 ---
 
-## Source 54: `notes/2026-04-27-0081-redraft-scope-slice.md`
+## Source 55: `notes/2026-04-27-0081-redraft-scope-slice.md`
 
 # 2026-04-27 0081 Redraft Scope Slice
 
@@ -4663,7 +4696,7 @@ Notes
 
 ---
 
-## Source 55: `notes/2026-04-27-0081-state-rebuild-slice.md`
+## Source 56: `notes/2026-04-27-0081-state-rebuild-slice.md`
 
 # 2026-04-27 0081 State Rebuild Slice
 
@@ -4711,7 +4744,7 @@ Notes
 
 ---
 
-## Source 56: `notes/2026-04-27-0081-state-validation-slice.md`
+## Source 57: `notes/2026-04-27-0081-state-validation-slice.md`
 
 # 2026-04-27 0081 Recovery State Validation Slice
 
@@ -4748,7 +4781,7 @@ Notes
 
 ---
 
-## Source 57: `promotion.md`
+## Source 58: `promotion.md`
 
 # Promotion
 
