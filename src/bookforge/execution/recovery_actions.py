@@ -5,6 +5,7 @@ from .recovery_common import build_create_recovery_branch_request, build_recover
 from .recovery_create import create_recovery_branch
 from .recovery_outline import normalize_outline_scope
 from .recovery_redraft import redraft_scope
+from .recovery_semantic import review_recovery_semantics
 from .recovery_state import rebuild_state_scope
 from .recovery_validation import promote_recovery_branch, validate_recovery_branch
 
@@ -18,5 +19,6 @@ __all__ = [
     "quarantine_artifacts",
     "rebuild_state_scope",
     "redraft_scope",
+    "review_recovery_semantics",
     "validate_recovery_branch",
 ]

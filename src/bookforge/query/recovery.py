@@ -808,8 +808,14 @@ def get_recovery_branch_health(workspace: Path, book_id: str, *, branch_id: str)
         "affected_scopes": [],
     }
     latest_validation = next((receipt for receipt in reversed(receipts) if receipt.action == "validate_recovery_branch"), None)
+    latest_semantic_review = next((receipt for receipt in reversed(receipts) if receipt.action == "review_recovery_semantics"), None)
+    manifest_validation = manifest.get("validation") if isinstance(manifest.get("validation"), dict) else {}
     semantic_validation = (
-        latest_validation.details.get("semantic_validation")
+        latest_semantic_review.details.get("semantic_validation")
+        if latest_semantic_review is not None and isinstance(latest_semantic_review.details.get("semantic_validation"), dict)
+        else manifest_validation.get("semantic_validation")
+        if isinstance(manifest_validation.get("semantic_validation"), dict)
+        else latest_validation.details.get("semantic_validation")
         if latest_validation is not None and isinstance(latest_validation.details.get("semantic_validation"), dict)
         else None
     )

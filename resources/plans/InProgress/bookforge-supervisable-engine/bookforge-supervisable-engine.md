@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T17:26:10Z`
-- Source Document Count: `64`
+- Compiled At (UTC): `2026-04-27T17:36:05Z`
+- Source Document Count: `65`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -72,7 +72,8 @@
 61. `notes/2026-04-27-0081-state-validation-slice.md`
 62. `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
 63. `notes/2026-04-27-0082-semantic-readiness-slice.md`
-64. `promotion.md`
+64. `notes/2026-04-27-0082-semantic-review-action-slice.md`
+65. `promotion.md`
 
 ---
 
@@ -2990,6 +2991,11 @@ Status: in_progress
 - Added query-only semantic review surfaces:
   - `get_recovery_semantic_review_readiness(workspace, book_id, *, branch_id)`
   - `get_recovery_semantic_review(workspace, book_id, *, branch_id)`
+- Added diagnostic semantic review execution action:
+  - `review_recovery_semantics`
+  - exposed through `legal_next_actions`
+  - exposed through `workflow review-recovery-semantics`
+  - emits `recovery_semantic_review.json`
 - The readiness surface is diagnostic-only and returns:
   - derived-branch requirement
   - required successful recovery receipts
@@ -2998,7 +3004,12 @@ Status: in_progress
   - present semantic review output, if any
   - recommended next action
 - The read surface returns a truthful `not_started` diagnostic object when no semantic review artifact exists.
-- The first slice deliberately does not add an LLM review action yet.
+- The action is still evidence assembly, not automatic story repair:
+  - it updates branch semantic-validation status
+  - it records findings and limitations
+  - it does not rewrite prose
+  - it does not promote or mutate canonical state
+  - it does not claim semantic continuity is proven
 
 ## Proposed Execution Actions
 - `review_recovery_semantics`
@@ -5119,7 +5130,45 @@ Remaining `0082` work:
 
 ---
 
-## Source 64: `promotion.md`
+## Source 64: `notes/2026-04-27-0082-semantic-review-action-slice.md`
+
+# 2026-04-27 0082 Semantic Review Action Slice
+
+Implemented the first diagnostic semantic recovery action:
+
+- `review_recovery_semantics`
+
+The action is branch-scoped and diagnostic-only. It requires the semantic recovery readiness surface to report ready, then emits `recovery_semantic_review.json` under the branch recovery artifact directory.
+
+The emitted review artifact includes:
+
+- `artifact_status: diagnostic`
+- branch `TimelineNodeRef`
+- affected and downstream review scopes
+- reviewed artifact references from recovery blast radius
+- findings
+- blocked semantic auto-approval actions
+- recommended next action
+- confidence and review limitations
+
+The action deliberately assembles evidence rather than pretending to prove story quality. Structural recovery can be healthy while semantic review reports `reviewed_attention_required`.
+
+Validation:
+
+- `python -m pytest -o addopts='' tests/test_recovery_actions.py --basetemp=.pytest_tmp_0082_semantic_action_focus`
+- Result: `6 passed`
+- `python -m pytest -o addopts='' tests/test_action_discovery.py tests/test_execution_actions.py tests/test_recovery_actions.py --basetemp=.pytest_tmp_0082_semantic_action_actions`
+- Result: `48 passed`
+
+Remaining `0082` work:
+
+- Add downstream dependency review surfaces.
+- Decide whether to add an LLM-backed semantic reviewer or keep this as evidence assembly consumed by Nanda.
+- Add broader fixtures where downstream scopes are present and semantic findings are richer.
+
+---
+
+## Source 65: `promotion.md`
 
 # Promotion
 

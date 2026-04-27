@@ -56,6 +56,11 @@ Status: in_progress
 - Added query-only semantic review surfaces:
   - `get_recovery_semantic_review_readiness(workspace, book_id, *, branch_id)`
   - `get_recovery_semantic_review(workspace, book_id, *, branch_id)`
+- Added diagnostic semantic review execution action:
+  - `review_recovery_semantics`
+  - exposed through `legal_next_actions`
+  - exposed through `workflow review-recovery-semantics`
+  - emits `recovery_semantic_review.json`
 - The readiness surface is diagnostic-only and returns:
   - derived-branch requirement
   - required successful recovery receipts
@@ -64,7 +69,12 @@ Status: in_progress
   - present semantic review output, if any
   - recommended next action
 - The read surface returns a truthful `not_started` diagnostic object when no semantic review artifact exists.
-- The first slice deliberately does not add an LLM review action yet.
+- The action is still evidence assembly, not automatic story repair:
+  - it updates branch semantic-validation status
+  - it records findings and limitations
+  - it does not rewrite prose
+  - it does not promote or mutate canonical state
+  - it does not claim semantic continuity is proven
 
 ## Proposed Execution Actions
 - `review_recovery_semantics`

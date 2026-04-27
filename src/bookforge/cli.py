@@ -51,6 +51,7 @@ from bookforge.execution import (
     rebuild_state_scope,
     redraft_scope,
     repair_scene_prose,
+    review_recovery_semantics,
     resume_paused_section,
     record_assembly_validation_action,
     state_repair_scene_patch,
@@ -80,6 +81,8 @@ from bookforge.query.recovery import (
     get_recovery_branch_health,
     get_recovery_blast_radius,
     get_recovery_plan_readiness,
+    get_recovery_semantic_review,
+    get_recovery_semantic_review_readiness,
     get_scope_invalidation_preview,
     get_state_rebuild_preview,
 )
@@ -452,6 +455,10 @@ def _workflow_validate_recovery_branch(args: argparse.Namespace) -> int:
     return _workflow_recovery_branch_action(args, "validate_recovery_branch", validate_recovery_branch)
 
 
+def _workflow_review_recovery_semantics(args: argparse.Namespace) -> int:
+    return _workflow_recovery_branch_action(args, "review_recovery_semantics", review_recovery_semantics)
+
+
 def _workflow_promote_recovery_branch(args: argparse.Namespace) -> int:
     return _workflow_recovery_branch_action(args, "promote_recovery_branch", promote_recovery_branch)
 
@@ -500,6 +507,45 @@ def _workflow_recovery_readiness(args: argparse.Namespace) -> int:
             sys.stdout.write(f"Blocker: {blocker}\n")
 
     return _write_json_or_text(args, readiness, render)
+
+
+def _workflow_recovery_semantic_readiness(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        readiness = get_recovery_semantic_review_readiness(workspace, args.book, branch_id=args.branch_id)
+    except Exception as exc:
+        sys.stderr.write(f"Recovery semantic readiness failed: {exc}\n")
+        return 1
+
+    def render(payload) -> None:
+        sys.stdout.write(f"Book: {payload.get('book_id')}\n")
+        sys.stdout.write(f"Branch: {payload.get('branch_id')}\n")
+        sys.stdout.write(f"Ready: {payload.get('ready')}\n")
+        sys.stdout.write(f"Structural health: {payload.get('structural_health_status')}\n")
+        sys.stdout.write(f"Semantic status: {payload.get('semantic_validation_status')}\n")
+        sys.stdout.write(f"Recommended next action: {payload.get('recommended_next_action')}\n")
+        for blocker in payload.get("blockers", []):
+            sys.stdout.write(f"Blocker: {blocker}\n")
+
+    return _write_json_or_text(args, readiness, render)
+
+
+def _workflow_recovery_semantic_review(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        review = get_recovery_semantic_review(workspace, args.book, branch_id=args.branch_id)
+    except Exception as exc:
+        sys.stderr.write(f"Recovery semantic review failed: {exc}\n")
+        return 1
+
+    def render(payload) -> None:
+        sys.stdout.write(f"Book: {payload.get('book_id')}\n")
+        sys.stdout.write(f"Branch: {payload.get('branch_id')}\n")
+        sys.stdout.write(f"Status: {payload.get('status')}\n")
+        sys.stdout.write(f"Findings: {len(payload.get('findings') or [])}\n")
+        sys.stdout.write(f"Recommended next action: {payload.get('recommended_next_action')}\n")
+
+    return _write_json_or_text(args, review, render)
 
 
 def _workflow_scope_invalidation_preview(args: argparse.Namespace) -> int:
@@ -2006,6 +2052,24 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_recovery_blast_radius.add_argument("--json", action="store_true", help="Emit blast-radius preview as JSON.")
     workflow_recovery_blast_radius.set_defaults(func=_workflow_recovery_blast_radius)
 
+    workflow_recovery_semantic_readiness = workflow_sub.add_parser(
+        "recovery-semantic-readiness",
+        help="Show whether a recovery branch is ready for diagnostic semantic review.",
+    )
+    workflow_recovery_semantic_readiness.add_argument("--book", required=True, help="Book id.")
+    workflow_recovery_semantic_readiness.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_recovery_semantic_readiness.add_argument("--json", action="store_true", help="Emit semantic readiness as JSON.")
+    workflow_recovery_semantic_readiness.set_defaults(func=_workflow_recovery_semantic_readiness)
+
+    workflow_recovery_semantic_review = workflow_sub.add_parser(
+        "recovery-semantic-review",
+        help="Show the current diagnostic semantic review artifact, if present.",
+    )
+    workflow_recovery_semantic_review.add_argument("--book", required=True, help="Book id.")
+    workflow_recovery_semantic_review.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_recovery_semantic_review.add_argument("--json", action="store_true", help="Emit semantic review as JSON.")
+    workflow_recovery_semantic_review.set_defaults(func=_workflow_recovery_semantic_review)
+
     workflow_quarantine_artifacts = workflow_sub.add_parser(
         "quarantine-artifacts",
         help="Move stale or invalid recovery-scope artifacts out of the active branch snapshot.",
@@ -2053,6 +2117,14 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_validate_recovery_branch.add_argument("--book", required=True, help="Book id.")
     workflow_validate_recovery_branch.add_argument("--branch-id", required=True, help="Recovery branch id.")
     workflow_validate_recovery_branch.set_defaults(func=_workflow_validate_recovery_branch)
+
+    workflow_review_recovery_semantics = workflow_sub.add_parser(
+        "review-recovery-semantics",
+        help="Emit a diagnostic semantic review artifact for a structurally recovered branch.",
+    )
+    workflow_review_recovery_semantics.add_argument("--book", required=True, help="Book id.")
+    workflow_review_recovery_semantics.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_review_recovery_semantics.set_defaults(func=_workflow_review_recovery_semantics)
 
     workflow_promote_recovery_branch = workflow_sub.add_parser(
         "promote-recovery-branch",

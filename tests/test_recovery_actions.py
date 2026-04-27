@@ -15,6 +15,7 @@ from bookforge.execution import (
     quarantine_artifacts,
     rebuild_state_scope,
     redraft_scope,
+    review_recovery_semantics,
     validate_recovery_branch,
 )
 from bookforge.query import get_outline_lineage_audit, legal_next_actions, list_execution_options
@@ -354,6 +355,8 @@ def test_recovery_branch_snapshots_evidence_and_exposes_legal_actions(tmp_path: 
     assert "state/projection rebuild" in branch_actions["rebuild_state_scope"].details["approval_reasons"]
     assert "scope redraft" in branch_actions["redraft_scope"].details["approval_reasons"]
     assert "promotion to main" in branch_actions["promote_recovery_branch"].details["approval_reasons"]
+    assert branch_actions["review_recovery_semantics"].allowed is False
+    assert "missing successful receipt: redraft_scope" in branch_actions["review_recovery_semantics"].refusal_reason
 
     readiness = get_recovery_plan_readiness(tmp_path, "my_book", branch_id="recover-sec1")
     assert readiness["recommended_next_action"] == "normalize_outline_scope"
@@ -757,6 +760,21 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
     assert semantic_review["readiness"]["ready"] is True
     assert semantic_review["blocked_actions"] == []
     assert semantic_review["recommended_next_action"] == "review_recovery_semantics"
+    branch_selector = ScopeSelector(book_id="my_book", branch_id="recover-sec1", chapter=1, section=1)
+    branch_actions = {option.action: option for option in list_execution_options(tmp_path, branch_selector, prefer_emitted=False)}
+    assert branch_actions["review_recovery_semantics"].allowed is True
+    review_result = review_recovery_semantics(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="review_recovery_semantics", branch_id="recover-sec1"),
+    )
+    assert review_result.status == "success"
+    emitted_review = get_recovery_semantic_review(tmp_path, "my_book", branch_id="recover-sec1")
+    assert emitted_review["status"] == "reviewed_attention_required"
+    assert emitted_review["artifact_status"] == "diagnostic"
+    assert any(finding["category"] == "semantic_continuity_risk" for finding in emitted_review["findings"])
+    assert emitted_review["readiness"]["present_outputs"][0]["artifact_status"] == "diagnostic"
+    health_after_review = get_recovery_branch_health(tmp_path, "my_book", branch_id="recover-sec1")
+    assert health_after_review.details["semantic_validation"]["status"] == "reviewed_attention_required"
 
     promote_result = promote_recovery_branch(
         tmp_path,
@@ -842,9 +860,12 @@ def test_cli_parser_accepts_recovery_workflow_commands() -> None:
         "rebuild-state-scope",
         "redraft-scope",
         "validate-recovery-branch",
+        "review-recovery-semantics",
         "promote-recovery-branch",
         "recovery-health",
         "recovery-readiness",
+        "recovery-semantic-readiness",
+        "recovery-semantic-review",
         "scope-invalidation-preview",
     ):
         args = parser.parse_args(
