@@ -8,6 +8,7 @@ from bookforge.pipeline.scene_phase_artifacts import load_scene_phase_artifact_s
 from . import _common
 from .appearance import list_appearance_projection_views
 from .outline_lineage import get_outline_lineage_audit
+from .recovery import get_recovery_branch_health, get_recovery_manifest
 from .scene_phase import get_scene_phase_readiness
 from .setting import get_scene_setting_projection
 from .workspace import current_execution_node, current_main_node, get_section_status, get_workspace_status, get_workspace_status_for_branch
@@ -401,6 +402,118 @@ def _evaluate_create_branch(workspace, book_id: str, selector: ScopeSelector, *,
         "section": selector.section if selector.section is not None else live_node.section,
         "prefer_emitted": bool(prefer_emitted),
     }
+
+
+def _evaluate_create_recovery_branch(workspace, book_id: str, selector: ScopeSelector) -> Tuple[bool, Optional[str], dict]:
+    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
+        return False, "create_recovery_branch only derives from main.", {}
+    audit = get_outline_lineage_audit(workspace, book_id)
+    affected = [{"chapter_id": row.chapter_id, "section_id": row.section_id} for row in audit.affected_sections]
+    if not affected and selector.workflow_family == "recovery_import" and selector.chapter is not None:
+        scoped = {"chapter_id": int(selector.chapter)}
+        if selector.section is not None:
+            scoped["section_id"] = int(selector.section)
+        if selector.scene is not None:
+            scoped["scene_id"] = int(selector.scene)
+        affected = [scoped]
+    if not affected:
+        return False, "create_recovery_branch requires affected lineage scopes or an explicit selector scope.", {
+            "integrity_status": audit.status,
+        }
+    return True, None, {
+        "integrity_status": audit.status,
+        "affected_scopes": affected,
+        "affected_scope_count": len(affected),
+        "requires_anchor": True,
+        "approval_required": True,
+        "approval_reasons": ["recovery anchor selection"] + (["broad recovery radius"] if len(affected) > 1 else []),
+        "broad_recovery_radius": len(affected) > 1,
+    }
+
+
+def _recovery_receipt_actions(workspace, book_id: str, branch_id: str) -> set[str]:
+    try:
+        health = get_recovery_branch_health(workspace, book_id, branch_id=branch_id)
+    except Exception:
+        return set()
+    return {receipt.action for receipt in health.receipts}
+
+
+def _recovery_scope_count(manifest: dict) -> int:
+    scope = manifest.get("scope") if isinstance(manifest.get("scope"), dict) else {}
+    return len(scope.get("affected_scopes") or [])
+
+
+def _recovery_approval_metadata(action: str, manifest: dict) -> dict:
+    scope = manifest.get("scope") if isinstance(manifest.get("scope"), dict) else {}
+    scopes = [item for item in (scope.get("affected_scopes") or []) if isinstance(item, dict)]
+    scope_count = len(scopes)
+    broad_scope = scope_count > 1 or any("section_id" not in item for item in scopes)
+    reasons = []
+    if action == "create_recovery_branch":
+        reasons.append("recovery anchor selection")
+    if action in {"quarantine_artifacts", "invalidate_scope_outputs"}:
+        reasons.append("destructive cleanup/quarantine")
+    if action == "promote_recovery_branch":
+        reasons.append("promotion to main")
+    if broad_scope:
+        reasons.append("broad recovery radius")
+    return {
+        "approval_required": bool(reasons),
+        "approval_reasons": reasons,
+        "broad_recovery_radius": bool(broad_scope),
+        "affected_scope_count": scope_count,
+    }
+
+
+def _evaluate_recovery_branch_action(workspace, book_id: str, selector: ScopeSelector, action: str) -> Tuple[bool, Optional[str], dict]:
+    branch_id = _resolved_branch_id(selector)
+    if branch_id == MAIN_BRANCH_ID:
+        return False, f"{action} requires a derived recovery branch.", {}
+    manifest = get_recovery_manifest(workspace, book_id, branch_id=branch_id)
+    if not manifest:
+        return False, f"{action} requires a recovery branch manifest.", {"branch_id": branch_id}
+    receipt_actions = _recovery_receipt_actions(workspace, book_id, branch_id)
+    details = {
+        "branch_id": branch_id,
+        "receipt_actions": sorted(receipt_actions),
+        "anchor": manifest.get("anchor"),
+        "scope": manifest.get("scope"),
+        **_recovery_approval_metadata(action, manifest),
+    }
+    if action == "quarantine_artifacts":
+        if action in receipt_actions:
+            return False, "quarantine_artifacts already has a receipt for this branch.", details
+        return True, None, details
+    if action == "normalize_outline_scope":
+        if action in receipt_actions:
+            return False, "normalize_outline_scope already has a receipt for this branch.", details
+        return True, None, details
+    if action == "invalidate_scope_outputs":
+        if "normalize_outline_scope" not in receipt_actions:
+            return False, "invalidate_scope_outputs requires normalized outline scope first.", details
+        if action in receipt_actions:
+            return False, "invalidate_scope_outputs already has a receipt for this branch.", details
+        return True, None, details
+    if action == "validate_recovery_branch":
+        if "quarantine_artifacts" not in receipt_actions:
+            return False, "validate_recovery_branch requires quarantine_artifacts first.", details
+        if "normalize_outline_scope" not in receipt_actions:
+            return False, "validate_recovery_branch requires normalized outline scope first.", details
+        if "invalidate_scope_outputs" not in receipt_actions:
+            return False, "validate_recovery_branch requires invalidated scope outputs first.", details
+        return True, None, details
+    if action == "promote_recovery_branch":
+        health = get_recovery_branch_health(workspace, book_id, branch_id=branch_id)
+        if health.status != "healthy":
+            return False, "promote_recovery_branch requires healthy recovery branch validation.", {
+                **details,
+                "health_status": health.status,
+                "blockers": health.blockers,
+                "warnings": health.warnings,
+            }
+        return True, None, {**details, "health_status": health.status}
+    return False, f"Unknown recovery action: {action}", details
 
 
 def _evaluate_create_assembly_branch(workspace, book_id: str, selector: ScopeSelector) -> Tuple[bool, Optional[str], dict]:
@@ -857,6 +970,11 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
         selector,
         prefer_emitted=prefer_emitted,
     )
+    create_recovery_allowed, create_recovery_refusal, create_recovery_details = _evaluate_create_recovery_branch(
+        workspace,
+        book_id,
+        selector,
+    )
     create_assembly_allowed, create_assembly_refusal, create_assembly_details = _evaluate_create_assembly_branch(
         workspace,
         book_id,
@@ -892,6 +1010,36 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
         workspace,
         book_id,
         selector,
+    )
+    quarantine_artifacts_allowed, quarantine_artifacts_refusal, quarantine_artifacts_details = _evaluate_recovery_branch_action(
+        workspace,
+        book_id,
+        selector,
+        "quarantine_artifacts",
+    )
+    normalize_outline_allowed, normalize_outline_refusal, normalize_outline_details = _evaluate_recovery_branch_action(
+        workspace,
+        book_id,
+        selector,
+        "normalize_outline_scope",
+    )
+    invalidate_outputs_allowed, invalidate_outputs_refusal, invalidate_outputs_details = _evaluate_recovery_branch_action(
+        workspace,
+        book_id,
+        selector,
+        "invalidate_scope_outputs",
+    )
+    validate_recovery_allowed, validate_recovery_refusal, validate_recovery_details = _evaluate_recovery_branch_action(
+        workspace,
+        book_id,
+        selector,
+        "validate_recovery_branch",
+    )
+    promote_recovery_allowed, promote_recovery_refusal, promote_recovery_details = _evaluate_recovery_branch_action(
+        workspace,
+        book_id,
+        selector,
+        "promote_recovery_branch",
     )
     plan_scene_allowed, plan_scene_refusal, plan_scene_details = _evaluate_plan_scene(
         workspace,
@@ -990,6 +1138,18 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
             selector_requirements=["book_id"],
             refusal_reason=create_branch_refusal,
             details=create_branch_details,
+        ),
+        ExecutionOption(
+            action="create_recovery_branch",
+            summary="Create a derived recovery branch from contaminated main state using an explicit timeline anchor and affected scope.",
+            branch_policy="main_only",
+            workflow_family="recovery_import",
+            mutates_canonical_state=False,
+            requires_expected_node=False,
+            allowed=create_recovery_allowed,
+            selector_requirements=["book_id"],
+            refusal_reason=create_recovery_refusal,
+            details=create_recovery_details,
         ),
         ExecutionOption(
             action="finalize_chapter_from_locked_sections",
@@ -1125,6 +1285,18 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
             details=create_branch_details,
         ),
         ExecutionOption(
+            action="create_recovery_branch",
+            summary="Create a derived recovery branch from contaminated main state using an explicit timeline anchor and affected scope.",
+            branch_policy="main_only",
+            workflow_family="recovery_import",
+            mutates_canonical_state=False,
+            requires_expected_node=False,
+            allowed=create_recovery_allowed,
+            selector_requirements=["book_id"],
+            refusal_reason=create_recovery_refusal,
+            details=create_recovery_details,
+        ),
+        ExecutionOption(
             action="create_assembly_branch",
             summary="Create an assembly branch from an existing fork group so sibling results can be validated before promotion.",
             branch_policy="main_only",
@@ -1171,6 +1343,66 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
             selector_requirements=["book_id", "branch_id"],
             refusal_reason=validate_assembly_refusal,
             details=validate_assembly_details,
+        ),
+        ExecutionOption(
+            action="quarantine_artifacts",
+            summary="Move stale or invalid recovery-scope artifacts out of the active branch snapshot and record promotion removals.",
+            branch_policy="derived_only",
+            workflow_family="recovery_import",
+            mutates_canonical_state=False,
+            requires_expected_node=True,
+            allowed=quarantine_artifacts_allowed,
+            selector_requirements=["book_id", "branch_id"],
+            refusal_reason=quarantine_artifacts_refusal,
+            details=quarantine_artifacts_details,
+        ),
+        ExecutionOption(
+            action="normalize_outline_scope",
+            summary="Replace affected branch outline scopes from the selected recovery anchor and rebuild outline projections.",
+            branch_policy="derived_only",
+            workflow_family="recovery_import",
+            mutates_canonical_state=False,
+            requires_expected_node=True,
+            allowed=normalize_outline_allowed,
+            selector_requirements=["book_id", "branch_id"],
+            refusal_reason=normalize_outline_refusal,
+            details=normalize_outline_details,
+        ),
+        ExecutionOption(
+            action="invalidate_scope_outputs",
+            summary="Quarantine prose and generated artifacts for affected branch scopes before redraft.",
+            branch_policy="derived_only",
+            workflow_family="recovery_import",
+            mutates_canonical_state=False,
+            requires_expected_node=True,
+            allowed=invalidate_outputs_allowed,
+            selector_requirements=["book_id", "branch_id"],
+            refusal_reason=invalidate_outputs_refusal,
+            details=invalidate_outputs_details,
+        ),
+        ExecutionOption(
+            action="validate_recovery_branch",
+            summary="Validate a recovery branch after normalization and invalidation before it may promote to main.",
+            branch_policy="derived_only",
+            workflow_family="recovery_import",
+            mutates_canonical_state=False,
+            requires_expected_node=True,
+            allowed=validate_recovery_allowed,
+            selector_requirements=["book_id", "branch_id"],
+            refusal_reason=validate_recovery_refusal,
+            details=validate_recovery_details,
+        ),
+        ExecutionOption(
+            action="promote_recovery_branch",
+            summary="Promote a validated recovery branch to main, including recorded removals of invalid canonical artifacts.",
+            branch_policy="derived_only",
+            workflow_family="recovery_import",
+            mutates_canonical_state=True,
+            requires_expected_node=True,
+            allowed=promote_recovery_allowed,
+            selector_requirements=["book_id", "branch_id"],
+            refusal_reason=promote_recovery_refusal,
+            details=promote_recovery_details,
         ),
     ]
     if selector.scene is not None:

@@ -80,6 +80,18 @@ Result truth
     - `bookforge.query.get_section_lineage_matrix(...)`
     - `bookforge.query.get_stale_outline_artifact_inventory(...)`
     - `bookforge.query.get_outline_repair_candidates(...)`
+    - `bookforge.query.get_recovery_plan_readiness(...)`
+    - `bookforge.query.get_recovery_branch_health(...)`
+    - `bookforge.query.get_scope_invalidation_preview(...)`
+    - `bookforge.query.get_salvage_candidates(...)`
+    - `bookforge.execution.build_create_recovery_branch_request(...)`
+    - `bookforge.execution.create_recovery_branch(...)`
+    - `bookforge.execution.build_recovery_branch_request(...)`
+    - `bookforge.execution.quarantine_artifacts(...)`
+    - `bookforge.execution.normalize_outline_scope(...)`
+    - `bookforge.execution.invalidate_scope_outputs(...)`
+    - `bookforge.execution.validate_recovery_branch(...)`
+    - `bookforge.execution.promote_recovery_branch(...)`
   - `bookforge run` now provides the batch/operator macro over the extracted scene-phase execution path.
   - section-level write wrappers now use a dedicated section-range macro over that same extracted path instead of parameterizing `bookforge run` directly.
   - CLI:
@@ -91,6 +103,15 @@ Result truth
     - `bookforge workflow section-lineage-matrix`
     - `bookforge workflow stale-outline-artifacts`
     - `bookforge workflow outline-repair-candidates`
+    - `bookforge workflow create-recovery-branch`
+    - `bookforge workflow recovery-readiness`
+    - `bookforge workflow recovery-health`
+    - `bookforge workflow scope-invalidation-preview`
+    - `bookforge workflow quarantine-artifacts`
+    - `bookforge workflow normalize-outline-scope`
+    - `bookforge workflow invalidate-scope-outputs`
+    - `bookforge workflow validate-recovery-branch`
+    - `bookforge workflow promote-recovery-branch`
     - `bookforge workflow create-branch`
     - `bookforge workflow create-assembly-branch`
     - `bookforge workflow discard-branch`
@@ -116,6 +137,7 @@ Lineage rule
 - Immutable run artifacts under `outline/pipeline_runs/<run_id>/...` are the preferred lineage anchors.
 - Mutable compatibility views such as `outline/outline.json` are useful, but they are not enough by themselves when immutable run artifacts exist.
 - When integrity reports `chimera_risk`, use the outline lineage audit surfaces before running authoring, seam repair, or main-branch mutation.
+- Recovery mutation must run in a derived `recovery_import` branch. Promotion applies recorded removals/quarantine before copying validated branch data back to `main`.
 
 Stub commands
 - The following commands exist in CLI but are not implemented yet: compile, export synopsis, book set-current, book show-current, book clear-current.

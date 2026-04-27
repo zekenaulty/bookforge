@@ -21,6 +21,13 @@ from .outline_lineage import (
     get_section_lineage_matrix,
     get_stale_outline_artifact_inventory,
 )
+from .recovery import (
+    get_recovery_branch_health,
+    get_recovery_manifest,
+    get_recovery_plan_readiness,
+    get_salvage_candidates,
+    get_scope_invalidation_preview,
+)
 from .scene_phase import get_scene_phase_readiness
 from .scene_context import SceneContextProjectionView, get_scene_context_projection
 from .setting import SceneSettingProjectionView, get_scene_setting_projection
@@ -65,8 +72,13 @@ __all__ = [
     "get_integrity_verdict",
     "get_outline_lineage_audit",
     "get_outline_repair_candidates",
+    "get_recovery_branch_health",
+    "get_recovery_manifest",
+    "get_recovery_plan_readiness",
+    "get_salvage_candidates",
     "get_section_draft_lineage",
     "get_section_lineage_matrix",
+    "get_scope_invalidation_preview",
     "get_source_run",
     "get_section_status",
     "get_stale_outline_artifact_inventory",

@@ -19,5 +19,9 @@ This plan is ready for promotion only when the target implementation can satisfy
 - Derived branches expose unambiguous current-node state through branch-local pointers or manifests.
 - Fork-group assembly refuses when the frozen parent snapshot is no longer valid for safe merge.
 - The plan states clearly how branch lifecycle states map to public execution results and canonical-change status.
+- Contaminated book recovery is expressed as composable branch-first primitives, not a one-off fixer command.
+- Recovery promotion can apply removals/quarantine as well as additions/replacements.
+- Nanda can build a `book_timeline_impact_report_v1` from BookForge evidence and then request scoped recovery/story-weaving actions without direct filesystem mutation.
+- A recovered book can be verified through query surfaces as no longer blocked by the original lineage or chimera issue.
 - Help docs and CLI labels match the actual runtime mode and recovery behavior.
 - New code follows the small-file rule and does not normalize `300-600` line modules as acceptable.

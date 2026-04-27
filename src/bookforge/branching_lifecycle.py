@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import List, Optional
+import json
+import shutil
 
 from bookforge import section_workflow as sw
 from bookforge.contracts import (
@@ -74,6 +76,35 @@ def _copy_snapshot_to_target(snapshot_root: Path, target_root: Path) -> None:
     _copytree_if_exists(snapshot_root / "draft", target_root / "draft")
     _copytree_if_exists(snapshot_root / "characters", target_root / "characters")
     _copytree_if_exists(snapshot_root / "prompts", target_root / "prompts")
+
+
+def _apply_promotion_removals(book_root: Path, branch_id: str, target_root: Path) -> list[str]:
+    removal_path = book_root / "runtime" / "supervision" / "branches" / branch_id / "recovery" / "promotion_removals.json"
+    if not removal_path.exists():
+        return []
+    try:
+        payload = json.loads(removal_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    removed: list[str] = []
+    for rel_path in sorted({str(item).strip().replace("\\", "/") for item in payload.get("remove_paths", []) if str(item).strip()}):
+        if rel_path in {".", "/"} or Path(rel_path).is_absolute():
+            continue
+        target = target_root / rel_path
+        try:
+            resolved_target = target.resolve()
+            resolved_root = target_root.resolve()
+        except OSError:
+            continue
+        if resolved_root not in resolved_target.parents:
+            continue
+        if target.is_dir():
+            shutil.rmtree(target)
+            removed.append(rel_path)
+        elif target.exists():
+            target.unlink()
+            removed.append(rel_path)
+    return removed
 
 
 def _manifest_chapter(manifest: BranchManifest) -> Optional[int]:
@@ -400,6 +431,7 @@ def promote_branch_to_main(
         raise FileNotFoundError(f"Branch snapshot missing for {branch_id}.")
     before_snapshot = capture_main_branch_snapshot(workspace, book_id)
 
+    removed_paths = _apply_promotion_removals(book_root, branch_id, book_root)
     _copy_snapshot_to_target(snapshot_root, book_root)
 
     updated = _evolve_manifest(manifest, lifecycle_state="promoted")
@@ -416,6 +448,7 @@ def promote_branch_to_main(
             "source_branch_id": branch_id,
             "merge_operation": manifest.merge_operation,
             "branch_lifecycle_state": "promoted",
+            "removed_paths": removed_paths,
         },
     )
     emit_branch_contracts(
@@ -426,7 +459,10 @@ def promote_branch_to_main(
         result_status=execution_result_for_branch_lifecycle("promoted"),
         request_id=request_id,
         message=f"Branch {branch_id} promoted to main.",
-        details={"canonical_change_status": canonical_change_status_for_branch_lifecycle("promoted")},
+        details={
+            "canonical_change_status": canonical_change_status_for_branch_lifecycle("promoted"),
+            "removed_paths": removed_paths,
+        },
     )
     return updated
 
@@ -460,6 +496,7 @@ def promote_branch_to_parent(
         else capture_surface_snapshot(workspace, book_id, branch_id=resolved_target)
     )
     target_root = _promotion_target_root(book_root, resolved_target)
+    removed_paths = _apply_promotion_removals(book_root, branch_id, target_root)
     _copy_snapshot_to_target(snapshot_root, target_root)
 
     source_node = current_execution_node(workspace, book_id, branch_id=branch_id, prefer_emitted=False)
@@ -489,6 +526,7 @@ def promote_branch_to_parent(
         "merge_operation": manifest.merge_operation,
         "branch_lifecycle_state": "promoted",
         "canonical_change_status": "canonical" if resolved_target == MAIN_BRANCH_ID else "none",
+        "removed_paths": removed_paths,
     }
     if resolved_target == MAIN_BRANCH_ID:
         emit_reconciled_main_branch_contracts(

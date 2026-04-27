@@ -5,6 +5,7 @@ from .execution_request import ExecutionRequest
 from .execution_result import ExecutionResult
 from .issue_ticket import IssueTicket
 from .produced_artifact import ProducedArtifactReceipt
+from .recovery import RecoveryAnchor, RecoveryBranchHealth, RecoveryReceipt, RecoveryScope
 from .scene_phase_readiness import ScenePhaseActionReadiness, ScenePhaseReadiness
 from .source_artifacts import SourceArtifactClass, classify_source_artifact
 from .state_surface import StateSurface
@@ -43,6 +44,10 @@ __all__ = [
     "MERGE_OPERATIONS",
     "PRODUCED_ARTIFACT_STATUSES",
     "ProducedArtifactReceipt",
+    "RecoveryAnchor",
+    "RecoveryBranchHealth",
+    "RecoveryReceipt",
+    "RecoveryScope",
     "ScopeSelector",
     "ScenePhaseActionReadiness",
     "ScenePhaseReadiness",

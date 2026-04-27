@@ -9,7 +9,9 @@ from bookforge.execution import (
     build_apply_scene_commit_request,
     build_create_assembly_branch_request,
     build_create_branch_request,
+    build_create_recovery_branch_request,
     build_discard_branch_request,
+    build_recovery_branch_request,
     build_generate_continuity_pack_request,
     build_lint_scene_prose_request,
     build_plan_scene_request,
@@ -30,22 +32,28 @@ from bookforge.execution import (
     build_write_section_request,
     create_assembly_branch_action,
     create_branch_action,
+    create_recovery_branch,
     discard_branch_action,
     finalize_chapter,
     freeze_section,
     generate_continuity_pack,
     initialize_workflow,
+    invalidate_scope_outputs,
     lint_scene_prose,
     lock_section,
+    normalize_outline_scope,
     plan_scene_action,
     preflight_scene_state,
     promote_branch_action,
+    promote_recovery_branch,
+    quarantine_artifacts,
     rebase_branch_action,
     repair_scene_prose,
     resume_paused_section,
     record_assembly_validation_action,
     state_repair_scene_patch,
     validate_assembly_branch_action,
+    validate_recovery_branch,
     write_scene_prose,
     write_frozen_section,
 )
@@ -66,6 +74,7 @@ from bookforge.query import (
     get_stale_outline_artifact_inventory,
     list_execution_options,
 )
+from bookforge.query.recovery import get_recovery_branch_health, get_recovery_plan_readiness, get_scope_invalidation_preview
 from bookforge.contracts import ScopeSelector
 from bookforge.workspace import init_book_workspace, parse_genre, parse_targets, reset_book_workspace_detailed, update_book_templates
 from bookforge.llm.thoughts import format_thought_response, list_signatures, run_current_thoughts
@@ -348,6 +357,151 @@ def _workflow_create_branch(args: argparse.Namespace) -> int:
         return 1
     _print_execution_result(result)
     return _exit_code_for_result(result)
+
+
+def _parse_recovery_scopes(raw_values: list[str] | None) -> list[dict[str, int]] | None:
+    if not raw_values:
+        return None
+    scopes: list[dict[str, int]] = []
+    for raw in raw_values:
+        text = str(raw or "").strip()
+        if not text:
+            continue
+        normalized = text.replace(".", ":").replace("/", ":")
+        parts = [part for part in normalized.split(":") if part]
+        try:
+            if len(parts) == 1:
+                scopes.append({"chapter_id": int(parts[0])})
+            elif len(parts) == 2:
+                scopes.append({"chapter_id": int(parts[0]), "section_id": int(parts[1])})
+            elif len(parts) == 3:
+                scopes.append({"chapter_id": int(parts[0]), "section_id": int(parts[1]), "scene_id": int(parts[2])})
+            else:
+                raise ValueError
+        except ValueError as exc:
+            raise ValueError(f"Invalid recovery scope '{text}'. Use chapter, chapter:section, or chapter:section:scene.") from exc
+    return scopes or None
+
+
+def _workflow_create_recovery_branch(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        request = build_create_recovery_branch_request(
+            workspace,
+            args.book,
+            anchor_type=args.anchor_type,
+            source_run_id=getattr(args, "source_run_id", None),
+            affected_scopes=_parse_recovery_scopes(getattr(args, "affected_scope", None)),
+            branch_id=getattr(args, "branch_id", None),
+            salvage_policy=getattr(args, "salvage_policy", None) or "none",
+        )
+        result = create_recovery_branch(workspace, request)
+    except Exception as exc:
+        sys.stderr.write(f"Create recovery branch failed: {exc}\n")
+        return 1
+    _print_execution_result(result)
+    return _exit_code_for_result(result)
+
+
+def _workflow_recovery_branch_action(args: argparse.Namespace, action: str, executor) -> int:
+    workspace = Path(args.workspace)
+    try:
+        request = build_recovery_branch_request(
+            workspace,
+            args.book,
+            action=action,
+            branch_id=args.branch_id,
+        )
+        result = executor(workspace, request)
+    except Exception as exc:
+        sys.stderr.write(f"{action} failed: {exc}\n")
+        return 1
+    _print_execution_result(result)
+    return _exit_code_for_result(result)
+
+
+def _workflow_quarantine_artifacts(args: argparse.Namespace) -> int:
+    return _workflow_recovery_branch_action(args, "quarantine_artifacts", quarantine_artifacts)
+
+
+def _workflow_normalize_outline_scope(args: argparse.Namespace) -> int:
+    return _workflow_recovery_branch_action(args, "normalize_outline_scope", normalize_outline_scope)
+
+
+def _workflow_invalidate_scope_outputs(args: argparse.Namespace) -> int:
+    return _workflow_recovery_branch_action(args, "invalidate_scope_outputs", invalidate_scope_outputs)
+
+
+def _workflow_validate_recovery_branch(args: argparse.Namespace) -> int:
+    return _workflow_recovery_branch_action(args, "validate_recovery_branch", validate_recovery_branch)
+
+
+def _workflow_promote_recovery_branch(args: argparse.Namespace) -> int:
+    return _workflow_recovery_branch_action(args, "promote_recovery_branch", promote_recovery_branch)
+
+
+def _workflow_recovery_health(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        health = get_recovery_branch_health(workspace, args.book, branch_id=args.branch_id)
+    except Exception as exc:
+        sys.stderr.write(f"Recovery health failed: {exc}\n")
+        return 1
+
+    def render(health) -> None:
+        sys.stdout.write(f"Book: {health.book_id}\n")
+        sys.stdout.write(f"Branch: {health.branch_id}\n")
+        sys.stdout.write(f"Status: {health.status}\n")
+        for blocker in health.blockers:
+            sys.stdout.write(f"Blocker: {blocker}\n")
+        for warning in health.warnings:
+            sys.stdout.write(f"Warning: {warning}\n")
+        sys.stdout.write(f"Receipts: {', '.join(receipt.action for receipt in health.receipts) or 'none'}\n")
+
+    return _write_json_or_text(args, health, render)
+
+
+def _workflow_recovery_readiness(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        readiness = get_recovery_plan_readiness(
+            workspace,
+            args.book,
+            branch_id=args.branch_id,
+            impact_report_ref=getattr(args, "impact_report_ref", None),
+        )
+    except Exception as exc:
+        sys.stderr.write(f"Recovery readiness failed: {exc}\n")
+        return 1
+
+    def render(payload) -> None:
+        sys.stdout.write(f"Book: {payload.get('book_id')}\n")
+        sys.stdout.write(f"Branch: {payload.get('branch_id')}\n")
+        sys.stdout.write(f"Ready: {payload.get('ready')}\n")
+        sys.stdout.write(f"Main integrity: {payload.get('main_integrity_status')}\n")
+        sys.stdout.write(f"Recommended next action: {payload.get('recommended_next_action')}\n")
+        for blocker in payload.get("blockers", []):
+            sys.stdout.write(f"Blocker: {blocker}\n")
+
+    return _write_json_or_text(args, readiness, render)
+
+
+def _workflow_scope_invalidation_preview(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        preview = get_scope_invalidation_preview(workspace, args.book, branch_id=args.branch_id)
+    except Exception as exc:
+        sys.stderr.write(f"Scope invalidation preview failed: {exc}\n")
+        return 1
+
+    def render(payload) -> None:
+        sys.stdout.write(f"Book: {payload.get('book_id')}\n")
+        sys.stdout.write(f"Branch: {payload.get('branch_id')}\n")
+        sys.stdout.write(f"Candidate paths: {len(payload.get('candidate_paths') or [])}\n")
+        for rel_path in payload.get("candidate_paths", [])[:100]:
+            sys.stdout.write(f"- {rel_path}\n")
+
+    return _write_json_or_text(args, preview, render)
 
 
 def _workflow_create_assembly_branch(args: argparse.Namespace) -> int:
@@ -1725,6 +1879,100 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_repair_candidates.add_argument("--branch-id", default="main", help="Optional branch scope; defaults to main.")
     workflow_repair_candidates.add_argument("--json", action="store_true", help="Emit repair candidates as JSON.")
     workflow_repair_candidates.set_defaults(func=_workflow_outline_repair_candidates)
+
+    workflow_create_recovery_branch = workflow_sub.add_parser(
+        "create-recovery-branch",
+        help="Create a derived recovery branch from contaminated main state using an explicit timeline anchor.",
+    )
+    workflow_create_recovery_branch.add_argument("--book", required=True, help="Book id.")
+    workflow_create_recovery_branch.add_argument("--branch-id", help="Optional explicit recovery branch id.")
+    workflow_create_recovery_branch.add_argument(
+        "--anchor-type",
+        required=True,
+        choices=["declared_source_run", "latest_outline_run", "frozen_chapter_projection", "manual_hybrid", "shelf"],
+        help="Recovery anchor type selected by the author/operator.",
+    )
+    workflow_create_recovery_branch.add_argument("--source-run-id", help="Source outline run id for source-run anchors.")
+    workflow_create_recovery_branch.add_argument(
+        "--affected-scope",
+        action="append",
+        help="Affected scope as chapter, chapter:section, or chapter:section:scene. Repeatable; defaults to lineage audit affected sections.",
+    )
+    workflow_create_recovery_branch.add_argument(
+        "--salvage-policy",
+        default="none",
+        choices=["none", "reference_only", "explicit_reuse_required"],
+        help="How existing polluted prose may be treated during recovery.",
+    )
+    workflow_create_recovery_branch.set_defaults(func=_workflow_create_recovery_branch)
+
+    workflow_recovery_readiness = workflow_sub.add_parser(
+        "recovery-readiness",
+        help="Show recovery plan readiness for a derived recovery branch.",
+    )
+    workflow_recovery_readiness.add_argument("--book", required=True, help="Book id.")
+    workflow_recovery_readiness.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_recovery_readiness.add_argument("--impact-report-ref", help="Optional Nanda impact report reference.")
+    workflow_recovery_readiness.add_argument("--json", action="store_true", help="Emit readiness as JSON.")
+    workflow_recovery_readiness.set_defaults(func=_workflow_recovery_readiness)
+
+    workflow_recovery_health = workflow_sub.add_parser(
+        "recovery-health",
+        help="Show recovery branch health, blockers, warnings, and receipt sequence.",
+    )
+    workflow_recovery_health.add_argument("--book", required=True, help="Book id.")
+    workflow_recovery_health.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_recovery_health.add_argument("--json", action="store_true", help="Emit health as JSON.")
+    workflow_recovery_health.set_defaults(func=_workflow_recovery_health)
+
+    workflow_scope_invalidation_preview = workflow_sub.add_parser(
+        "scope-invalidation-preview",
+        help="Preview branch-local output artifacts that invalidate-scope-outputs would quarantine.",
+    )
+    workflow_scope_invalidation_preview.add_argument("--book", required=True, help="Book id.")
+    workflow_scope_invalidation_preview.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_scope_invalidation_preview.add_argument("--json", action="store_true", help="Emit preview as JSON.")
+    workflow_scope_invalidation_preview.set_defaults(func=_workflow_scope_invalidation_preview)
+
+    workflow_quarantine_artifacts = workflow_sub.add_parser(
+        "quarantine-artifacts",
+        help="Move stale or invalid recovery-scope artifacts out of the active branch snapshot.",
+    )
+    workflow_quarantine_artifacts.add_argument("--book", required=True, help="Book id.")
+    workflow_quarantine_artifacts.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_quarantine_artifacts.set_defaults(func=_workflow_quarantine_artifacts)
+
+    workflow_normalize_outline_scope = workflow_sub.add_parser(
+        "normalize-outline-scope",
+        help="Replace affected branch outline scopes from the selected recovery anchor and rebuild projections.",
+    )
+    workflow_normalize_outline_scope.add_argument("--book", required=True, help="Book id.")
+    workflow_normalize_outline_scope.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_normalize_outline_scope.set_defaults(func=_workflow_normalize_outline_scope)
+
+    workflow_invalidate_scope_outputs = workflow_sub.add_parser(
+        "invalidate-scope-outputs",
+        help="Quarantine prose and generated artifacts for affected branch scopes before redraft.",
+    )
+    workflow_invalidate_scope_outputs.add_argument("--book", required=True, help="Book id.")
+    workflow_invalidate_scope_outputs.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_invalidate_scope_outputs.set_defaults(func=_workflow_invalidate_scope_outputs)
+
+    workflow_validate_recovery_branch = workflow_sub.add_parser(
+        "validate-recovery-branch",
+        help="Validate a recovery branch before it may promote to main.",
+    )
+    workflow_validate_recovery_branch.add_argument("--book", required=True, help="Book id.")
+    workflow_validate_recovery_branch.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_validate_recovery_branch.set_defaults(func=_workflow_validate_recovery_branch)
+
+    workflow_promote_recovery_branch = workflow_sub.add_parser(
+        "promote-recovery-branch",
+        help="Promote a healthy recovery branch to main, including recorded removals.",
+    )
+    workflow_promote_recovery_branch.add_argument("--book", required=True, help="Book id.")
+    workflow_promote_recovery_branch.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_promote_recovery_branch.set_defaults(func=_workflow_promote_recovery_branch)
 
     workflow_create_branch = workflow_sub.add_parser(
         "create-branch",

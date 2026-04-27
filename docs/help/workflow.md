@@ -88,6 +88,12 @@ Behavior
   - `lint_scene_prose` when scene scope is selected
   - `repair_scene_prose` when scene scope is selected
   - `apply_scene_commit` when scene scope is selected
+  - `create_recovery_branch` when lineage contamination exists, or when recovery scope is explicitly selected with `workflow_family=recovery_import`
+  - `quarantine_artifacts` on a recovery branch
+  - `normalize_outline_scope` on a recovery branch
+  - `invalidate_scope_outputs` after branch-local outline normalization
+  - `validate_recovery_branch` after quarantine, normalization, and invalidation receipts exist
+  - `promote_recovery_branch` after recovery branch health is clean
   - `write_frozen_section`
 - Shows whether each action is allowed right now or blocked.
 - Includes refusal reasons for blocked actions so operators do not have to infer transition rules from docs alone.
@@ -116,6 +122,7 @@ Behavior
   - `discard_branch`
   - `record_assembly_validation` for active assembly branches
   - `promote_branch_to_main` once the branch reaches `promote_ready`
+  - `quarantine_artifacts`, `normalize_outline_scope`, `invalidate_scope_outputs`, `validate_recovery_branch`, and `promote_recovery_branch` for branches created with recovery manifests
 
 ## Outline Lineage Audit Commands
 
@@ -153,8 +160,59 @@ Behavior
   - `restore_affected_sections_from_frozen_chapter_projection`
   - `quarantine_stale_section_drafts`
   - `shelf_book`
-- Mutation-capable recovery actions are intentionally blocked until a later explicit recovery story supplies branch isolation, backup/quarantine receipts, and validation gates.
+- Mutation-capable recovery actions are now available, but only through explicit recovery branches with receipts and validation gates.
 - Nanda should use these surfaces before answering content questions about contaminated books or before presenting author repair choices.
+
+## Timeline Recovery Commands
+
+Purpose
+- Execute author-approved timeline recovery or story-weaving plans through branch-first primitives.
+- These commands are composable tools, not a bespoke fixer for one book.
+- The author/Nanda side should still produce an impact report and choose the recovery anchor before mutation.
+
+Commands
+- `bookforge workflow create-recovery-branch --book <id> --anchor-type <type> [--source-run-id <run>] [--branch-id <id>] [--affected-scope <scope>] [--salvage-policy <policy>]`
+- `bookforge workflow recovery-readiness --book <id> --branch-id <id> [--impact-report-ref <ref>] [--json]`
+- `bookforge workflow recovery-health --book <id> --branch-id <id> [--json]`
+- `bookforge workflow scope-invalidation-preview --book <id> --branch-id <id> [--json]`
+- `bookforge workflow quarantine-artifacts --book <id> --branch-id <id>`
+- `bookforge workflow normalize-outline-scope --book <id> --branch-id <id>`
+- `bookforge workflow invalidate-scope-outputs --book <id> --branch-id <id>`
+- `bookforge workflow validate-recovery-branch --book <id> --branch-id <id>`
+- `bookforge workflow promote-recovery-branch --book <id> --branch-id <id>`
+
+Anchor types
+- `declared_source_run`: rebuild affected scopes from the source run declared by workflow lineage.
+- `latest_outline_run`: rebuild from the selected/latest outline run.
+- `frozen_chapter_projection`: rebuild from branch-local frozen chapter projection files.
+- `manual_hybrid`: reserved for future human-approved hybrid recovery.
+- `shelf`: reserved for explicit no-repair/shelf decisions.
+
+Scope syntax
+- `--affected-scope 1` means chapter 1.
+- `--affected-scope 1:2` means chapter 1, section 2.
+- `--affected-scope 1:2:3` means chapter 1, section 2, scene 3.
+- Repeat `--affected-scope` for multiple scopes.
+- If omitted, `create-recovery-branch` defaults to affected sections from `outline-lineage-audit`.
+
+Recovery sequence
+- `create-recovery-branch` derives an isolated branch with workflow family `recovery_import`.
+- The recovery branch copies the outline evidence normal rerun branches omit:
+  - `outline/pipeline_runs`
+  - `outline/section_drafts`
+  - latest outline pointer/report files when present
+- `quarantine-artifacts` moves stale section-draft artifacts out of the active branch snapshot and records promotion removals.
+- `normalize-outline-scope` replaces affected branch outline scopes from the selected anchor and rebuilds branch-local outline projections.
+- `scope-invalidation-preview` shows which branch-local prose/generated outputs would be quarantined.
+- `invalidate-scope-outputs` quarantines affected prose/generated outputs and records promotion removals.
+- `validate-recovery-branch` refuses promotion while branch-local lineage still reports `chimera_risk` or required receipts are missing.
+- `promote-recovery-branch` promotes only a healthy branch and applies recorded removals before copying branch snapshot data to `main`.
+
+Truth rules
+- Recovery mutation never writes directly to contaminated `main`.
+- Existing polluted prose is salvage/reference material only unless later redrafted or explicitly promoted by a future tool.
+- A recovery branch can become timeline-healthy while still needing author revision, prose redraft, seam repair, or downstream state rebuild.
+- This first slice normalizes outline lineage and invalidates affected outputs. `rebuild_state_scope` and `redraft_scope` remain follow-up primitives.
 
 ## Branch Lifecycle Commands
 

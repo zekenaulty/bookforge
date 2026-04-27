@@ -22,6 +22,7 @@ Last Updated: 2026-04-26
 - The next execution-root pressure after `0070` is isolated authoring. The engine needs real branch-scoped write roots so old-scene rewrites and recon work can happen off `main`.
 - The next lifecycle pressure after branch-scoped writing is parent-target merge discipline. Scene, section, and chapter branches must be able to promote upward, rebase against newer parent snapshots, and eventually support truthful parallel sibling write work.
 - The next safety pressure after branch-scoped authoring is localized lineage diagnosis. `chimera_risk` is not operational enough by itself; Nanda needs section-level evidence, artifact-family disagreement, and safe recovery candidates before it can supervise contaminated books without relying on the human operator as the safety catch.
+- The next recovery pressure after lineage diagnosis is author-operable mutation. BookForge should provide timeline-safe primitives, while Nanda produces impact reports, strategy, sequencing, and approval flow. The engine should not need a bespoke `fix_veiled_ledger_chimera` command, but it must expose enough scoped tools to quarantine bad artifacts, normalize a chosen timeline, invalidate impacted outputs, rebuild state, redraft affected prose, validate, and promote with removals.
 - The current repo already has the right raw materials:
   - section workflow lifecycle
   - immutable outline run artifacts
@@ -98,6 +99,44 @@ Last Updated: 2026-04-26
 - The first lineage-audit surface is read-only.
 - Repair mutation must remain a later explicit action with branch isolation, receipts, backup/quarantine semantics, and validation gates.
 - Until a lineage matrix exists for a contaminated book, Nanda may report the global risk and missing evidence, but it must not claim exact repair scope.
+
+### Author-Operable Timeline Recovery And Story Weaving
+- BookForge provides timeline-safe primitives.
+- Nanda provides author-level diagnosis, strategy, sequencing, approval flow, and user-facing explanation.
+- The missing Nanda object is `book_timeline_impact_report_v1`.
+- `book_timeline_impact_report_v1` is Nanda-owned, but BookForge must expose enough query and mutation surfaces for Nanda to populate and execute it truthfully.
+- The impact report should include:
+  - `cause_hypothesis`
+  - `affected_scopes`
+  - `downstream_scopes`
+  - `artifact_impacts`
+  - `canonical_conflicts`
+  - `salvage_candidates`
+  - `repair_strategy_options`
+  - `recommended_plan`
+  - `human_decisions_required`
+  - `validation_gates`
+- BookForge mutation primitives should be reusable for both disaster recovery and normal authoring work:
+  - contaminated outline recovery
+  - upstream scene or chapter retcon
+  - downstream continuity reweaving
+  - alternate branch comparison
+  - scoped redrafting
+  - prose salvage as non-canonical reference
+- In this plan, "repair" means restoring a coherent book timeline, not merely patching prose.
+- A completed timeline repair means:
+  - only the selected correct outline lineage remains active in canonical outline artifacts
+  - invalid outline artifacts are removed from active discovery paths or quarantined with receipts
+  - invalid series, continuity, character, inventory, setting, summary, index, and projection data no longer appear in canonical book datasets
+  - impacted prose is invalidated and redrafted from the selected timeline
+  - final promotion to `main` includes additions, replacements, removals, and quarantine receipts
+  - BookForge no longer reports `chimera_risk`
+  - previously blocked actions become available again through legal-action and readiness surfaces
+- Salvage is separate from canonical truth.
+  - Contaminated prose may be referenced as inspiration only when explicitly selected.
+  - Salvage material must not silently feed continuity, state, outline, or downstream prose as authoritative input.
+- Healthy timeline and good story are separate gates.
+  - Integrity validation can pass while seam repair, style polish, or author revision still remain.
 
 ### TimelineNodeRef
 - Every execution point gets a coordinate.
@@ -253,6 +292,16 @@ class TimelineNodeRef:
   - `ExecutionRequest`
   - `ExecutionResult`
 - Prepare explicit receipt and readiness surfaces so produced artifacts, prerequisites, and recommended next actions are queryable instead of inferred from files alone.
+- Add author-operable recovery and story-weaving mutation primitives that can be composed by Nanda:
+  - select a recovery anchor
+  - create a recovery branch
+  - quarantine scoped artifacts
+  - normalize outline scope from a selected source lineage
+  - invalidate impacted outputs
+  - rebuild book state projections for a scope
+  - redraft affected scenes, sections, or chapters
+  - validate recovery branch health
+  - promote cleaned state back to `main` with removals
 - Support one truthful main-branch execution path with bounded pause/resume behavior.
 - Support isolated branch reruns and fork-group fan-out/fan-in through the same coordinate system and branch invariants.
 - Reconcile and validate lineage before returning control to the caller.
@@ -315,6 +364,9 @@ class TimelineNodeRef:
 - Help docs stop implying scope that the runtime does not actually execute.
 - The plan preserves a path to replace macro command orchestration with smaller API-facing execution actions without changing the shared truth model.
 - The plan preserves a path for Nanda to ground author-surface capability claims in actual readiness and receipt data instead of persona-only prompt behavior.
+- A contaminated book can be recovered through composable branch-first primitives without direct main mutation or manual filesystem surgery.
+- Promotion of a recovery branch removes or quarantines invalid files as well as writing repaired replacements.
+- After recovery promotion, lineage, integrity, legal-action, and readiness surfaces agree that the book is no longer blocked by the original timeline contamination.
 
 ## Constraints
 - BookForge keeps ownership of prose generation and canonical workspace mutation.
@@ -329,6 +381,11 @@ class TimelineNodeRef:
 - No promotion or assembly without explicit reconciliation and integrity validation.
 - Parallel siblings may not read one another during execution.
 - Fork-group assembly must use the frozen parent snapshot declared at fork time unless an explicit rebase or recreation step occurs.
+- Recovery mutation must be branch-first.
+- No direct `main` recovery mutation from a contaminated lineage.
+- No recovery action may silently choose a source lineage. Anchor selection must be explicit in the request and receipt.
+- No recovery promotion may leave invalid artifacts in active canonical discovery paths.
+- Nanda may plan, sequence, and request actions, but BookForge enforces preconditions, scope, receipts, rollback/quarantine, validation, and promotion safety.
 - Existing working-tree changes outside this plan scope are not part of this draft and must remain untouched.
 
 ## Dependencies

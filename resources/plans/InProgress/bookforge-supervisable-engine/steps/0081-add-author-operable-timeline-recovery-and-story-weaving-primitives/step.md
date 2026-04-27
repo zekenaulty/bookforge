@@ -1,0 +1,330 @@
+# 0081 Add Author-Operable Timeline Recovery And Story-Weaving Primitives
+
+Status: in_progress
+
+## Goal
+- Add branch-first BookForge mutation primitives that let Nanda compose timeline recovery, retcon, redraft, and downstream story-weaving plans without requiring a bespoke BookForge command for every failure class.
+- Make "repair" mean full timeline recovery:
+  - correct outline lineage active
+  - invalid artifacts removed from active discovery paths or quarantined
+  - invalid state/projection data removed from canonical datasets
+  - impacted prose invalidated and redrafted
+  - branch validated
+  - promotion to `main` includes replacements and removals
+  - `chimera_risk` clears
+
+## Problem
+- `0080` made chimera and outline lineage contamination visible, but it is read-only.
+- Nanda can now identify affected scopes and candidate recovery anchors, but it cannot yet execute the repair safely.
+- The current engine has branch primitives, scene write primitives, outline lineage audit, and promotion primitives, but it lacks composable recovery tools for:
+  - selecting a trusted timeline source
+  - normalizing outline artifacts inside a branch
+  - quarantining stale or polluted artifacts
+  - invalidating affected prose/state outputs
+  - rebuilding timeline-derived state
+  - redrafting impacted scopes
+  - validating that the recovered branch is healthy
+- A monolithic command like `fix_veiled_ledger_chimera` would solve one incident but not the long-term author workflow.
+- The author agent needs reusable tools it can reason over and sequence.
+
+## Boundary With Nanda
+- BookForge owns mutation, scope enforcement, receipts, validation, artifact cleanup, and promotion safety.
+- Nanda owns author-level reasoning:
+  - diagnosis from multiple surfaces
+  - impact report creation
+  - strategy selection
+  - task sequencing
+  - human approval flow
+  - explanation to the user
+- Nanda should produce a first-class `book_timeline_impact_report_v1` before requesting mutation.
+- `book_timeline_impact_report_v1` is Nanda-owned, but BookForge must expose enough evidence and tools for it to be truthful.
+- Expected impact report fields:
+  - `cause_hypothesis`
+  - `affected_scopes`
+  - `downstream_scopes`
+  - `artifact_impacts`
+  - `canonical_conflicts`
+  - `salvage_candidates`
+  - `repair_strategy_options`
+  - `recommended_plan`
+  - `human_decisions_required`
+  - `validation_gates`
+- BookForge should accept the chosen recovery anchor and scoped execution requests. It should not need to parse or own the whole impact report.
+
+## Nanda Decision-Layer Alignment
+- Nanda can implement read-only and shadow-mode reasoning now using existing surfaces from `0060`, `0070`, `0075`, `0080`, and the partial `0081` recovery slice.
+- Full non-shadow timeline recovery requires BookForge to expose stable primitive receipts and readiness metadata so Nanda can compare candidate actions without filesystem inference.
+- BookForge must provide:
+  - stable action names through `legal_next_actions`
+  - stable request/result schemas for recovery/story-weaving primitives
+  - readiness queries for recovery/story-weaving work, not only scene-phase work
+  - approval-required metadata for:
+    - anchor selection
+    - destructive cleanup/quarantine
+    - broad recovery radius
+    - promotion to `main`
+  - postcondition receipts that report:
+    - affected scopes
+    - produced artifacts
+    - deleted or quarantined artifacts
+    - integrity delta
+    - recommended next legal action
+  - impact-report-friendly blast-radius query surfaces for:
+    - prose invalidation
+    - state invalidation
+    - series/continuity invalidation
+    - projection invalidation
+    - downstream redraft candidates
+- Until those surfaces exist for a primitive, Nanda must treat that primitive as shadow-mode or human-approved only.
+- BookForge should not encode Nanda's decision policy; it should expose enough truthful state for Nanda to run that policy.
+
+## Design Rules
+- Recovery mutation is branch-first.
+- No recovery action mutates `main` directly when the book is contaminated.
+- Every recovery branch declares:
+  - parent `TimelineNodeRef`
+  - selected source lineage or recovery anchor
+  - affected writable scopes
+  - expected quarantine/removal policy
+  - salvage policy
+- Source lineage selection is explicit.
+- A recovery action must refuse if:
+  - the selected anchor does not match the audit evidence
+  - requested scope is wider than approved
+  - required backups or quarantine receipts cannot be written
+  - branch parent is stale
+  - active fork/branch descendants would be invalidated without explicit handling
+- Promotion is not just copy-in.
+  - It must support additions, replacements, removals, and quarantine receipts.
+  - Invalid files must leave active canonical discovery paths.
+- Salvage is non-canonical unless explicitly promoted.
+  - Contaminated prose can be included as reference for redraft only when requested.
+  - Salvage material must never become authoritative continuity/state input by accident.
+- Healthy timeline and good story are separate gates.
+  - Timeline validation clears structural risk.
+  - Seam repair, style polish, or author revision can remain separate follow-up work.
+
+## Proposed Primitive Tool Surface
+- Readiness/query primitives:
+  - `get_recovery_plan_readiness(workspace, book_id, *, branch_id, impact_report_ref=None)`
+  - `get_recovery_branch_health(workspace, book_id, *, branch_id)`
+  - `get_scope_invalidation_preview(workspace, book_id, *, branch_id, scope)`
+  - `get_salvage_candidates(workspace, book_id, *, scope)`
+- Execution primitives:
+  - `select_recovery_anchor`
+  - `create_recovery_branch`
+  - `quarantine_artifacts`
+  - `normalize_outline_scope`
+  - `invalidate_scope_outputs`
+  - `rebuild_state_scope`
+  - `redraft_scope`
+  - `validate_recovery_branch`
+  - `promote_recovery_branch`
+- CLI wrappers should be convenience only.
+  - The Python action/query surface is the contract Nanda should compose.
+
+## Current Implementation Slice
+- Implemented recovery contracts:
+  - `RecoveryAnchor`
+  - `RecoveryScope`
+  - `RecoveryReceipt`
+  - `RecoveryBranchHealth`
+- Implemented read/query surfaces:
+  - `get_recovery_plan_readiness`
+  - `get_recovery_branch_health`
+  - `get_scope_invalidation_preview`
+  - `get_salvage_candidates`
+- Implemented branch-first execution primitives:
+  - `create_recovery_branch`
+  - `quarantine_artifacts`
+  - `normalize_outline_scope`
+  - `invalidate_scope_outputs`
+  - `validate_recovery_branch`
+  - `promote_recovery_branch`
+- Implemented legal-action discovery for the recovery sequence.
+- Implemented CLI wrappers for the implemented query/action primitives.
+- Implemented initial approval/next-action metadata on recovery discovery and health surfaces.
+- Promotion now honors branch recovery removal receipts before copying branch snapshot data into the target.
+- Recovery branches materialize outline evidence directories that normal rerun branches intentionally omit:
+  - `outline/pipeline_runs`
+  - `outline/section_drafts`
+  - latest outline pointer/summary files when present
+- Scope invalidation preserves the pre-normalization scene range so a normalized one-scene section cannot accidentally leave a stale extra scene file active.
+
+## Remaining Implementation
+- Add `rebuild_state_scope`.
+- Add `redraft_scope` as a scope-level composition over existing scene/section write actions.
+- Add richer postcondition receipts with integrity deltas and next-action snapshots.
+- Add blast-radius query surfaces that separate prose, state, series, continuity, and projection invalidation candidates.
+- Add approval-required metadata to all destructive or broad-scope primitives.
+- Expand validation beyond outline lineage to state/projection families:
+  - continuity
+  - locations/settings
+  - inventory/deep state
+  - chapter summaries
+  - appearance/setting projections
+- Add richer downstream invalidation detection after redraft.
+- Add Veiled Ledger-size multi-chapter fixture coverage.
+
+## Detailed Work
+- Add recovery contracts.
+  - Candidate contracts:
+    - `RecoveryAnchor`
+    - `RecoveryScope`
+    - `RecoveryPlanReceipt`
+    - `ArtifactQuarantineReceipt`
+    - `ScopeInvalidationReceipt`
+    - `TimelineNormalizationReceipt`
+    - `RecoveryBranchHealth`
+  - Every contract must carry `TimelineNodeRef`, branch id, scope, and artifact status.
+- Add recovery branch creation.
+  - Create a derived branch with workflow family `recovery_import`.
+  - Record selected anchor:
+    - declared source run
+    - frozen chapter projection
+    - manual hybrid
+    - shelf/no-op
+  - Record affected scope set.
+  - Record salvage policy:
+    - `none`
+    - `reference_only`
+    - `explicit_reuse_required`
+- Add artifact quarantine.
+  - Move or mark invalid artifacts out of active branch discovery paths.
+  - Preserve enough evidence for audit.
+  - Emit quarantine receipts.
+  - Initial families:
+    - `outline/section_drafts`
+    - mutable outline compatibility views
+    - stale outline projections
+    - affected draft prose
+    - affected state/projection files
+- Add outline normalization.
+  - Rebuild branch-local outline artifacts for selected scopes from the chosen anchor.
+  - Ensure branch-local `outline.json`, frozen chapter projections, section views, thin/toc/index/appendix views, and source lineage pointers agree.
+  - Do not leave mixed outline data active in the branch.
+- Add output invalidation.
+  - Mark affected prose/state/summary/projection outputs stale or quarantine them before redraft.
+  - Preserve original prose as historical material.
+  - Do not let invalidated outputs feed new state or prose as authoritative input.
+- Add state rebuild.
+  - Rebuild branch-local state from normalized outline and valid prior canonical state.
+  - Initial scope should include:
+    - characters
+    - continuity
+    - locations/settings
+    - inventory/deep state where represented
+    - chapter summaries
+    - phase history/projection indexes
+    - appearance and setting projections when present
+  - If a state family cannot be rebuilt yet, emit a blocking ticket instead of pretending it is clean.
+- Add scoped redraft.
+  - Let Nanda request redraft by chapter, section, or scene.
+  - Use existing branch-scoped write actions where possible.
+  - Preserve original prose under a non-canonical artifact status.
+  - Allow explicit salvage reference injection without treating salvage as truth.
+- Add validation.
+  - Recovery branch health must prove:
+    - no `chimera_risk`
+    - no stale active outline artifacts
+    - no source run mismatch
+    - normalized outline hashes agree across active views
+    - state/projection data does not contain invalid timeline entities
+    - impacted prose has been regenerated or explicitly marked unwritten
+    - legal actions are unblocked for the recovered scope
+  - Validation should emit actionable issues rather than a generic failure.
+- Add promotion.
+  - Promotion applies additions, replacements, removals, and quarantine markers.
+  - Promotion refuses if validation is stale or failed.
+  - Promotion emits canonical reconciliation and verifies `main` health after merge.
+
+## Edge Cases
+- A contaminated section can contain prose worth salvaging, but salvage is reference-only unless explicitly promoted.
+- A downstream chapter can be structurally clean but continuity-invalid because upstream facts changed.
+- State can be polluted even when outline hashes match.
+- A repair can expose new impacts after redraft; validation must be iterative.
+- Multiple anchors can be internally coherent but imply different books; Nanda must ask the human which timeline is correct.
+- Active branches or fork groups derived from polluted `main` must be blocked, rebased, or discarded.
+- Promotion must remove invalid files, not only overwrite valid replacements.
+- A branch can be timeline-healthy while the prose still needs seam repair or style revision.
+- Rebuilding a scope may require downstream invalidation if continuity dependencies cross the requested boundary.
+
+## Files Likely Touched
+- `src/bookforge/contracts/`
+- `src/bookforge/query/actions.py`
+- `src/bookforge/query/outline_lineage.py`
+- `src/bookforge/query/workspace.py`
+- `src/bookforge/execution/recovery_actions.py` or equivalent
+- `src/bookforge/execution/branch_actions.py`
+- `src/bookforge/execution/scene_actions.py`
+- `src/bookforge/branching_lifecycle.py`
+- `src/bookforge/section_workflow.py`
+- `src/bookforge/workspace.py`
+- `src/bookforge/cli.py`
+- `docs/help/workflow.md`
+- `docs/help/index.md`
+- `resources/plans/InProgress/bookforge-supervisable-engine/steps/index.md`
+
+## Tests
+- Add recovery primitive tests:
+  - create recovery branch from selected anchor
+  - refuse recovery branch without explicit anchor
+  - refuse recovery branch with stale parent
+  - quarantine stale outline artifacts in branch only
+  - normalize outline scope from declared source run
+  - normalize outline scope from frozen projection
+  - invalidate affected prose and state outputs
+  - preserve original prose as non-canonical historical material
+  - redraft section in recovery branch without mutating `main`
+  - validate recovered branch clears `chimera_risk`
+  - refuse promotion with active stale artifacts
+  - promote branch with removals and verify `main` no longer detects chimera
+- Add Veiled Ledger-style fixture tests:
+  - chapters 1-3 affected by mixed outline lineage
+  - ghost character cohort removed from canonical state after recovery
+  - affected prose redrafted from selected outline
+  - stale section drafts no longer appear in active discovery paths
+- Add action discovery tests:
+  - contaminated `main` exposes diagnostic and recovery-prep actions only
+  - recovery branch exposes normalize/invalidate/redraft/validate actions in legal order
+  - promotion appears only after validation passes
+
+## Definition Of Done
+- BookForge exposes recovery/story-weaving primitives as composable query and execution surfaces.
+- Nanda can choose a recovery strategy from an impact report and execute it through BookForge primitives without manual filesystem surgery.
+- Recovery mutation runs in a derived branch.
+- Recovery actions emit receipts for anchor selection, quarantine, normalization, invalidation, rebuild, redraft, validation, and promotion.
+- Invalid artifacts are removed from active discovery paths or quarantined with receipts.
+- Invalid timeline data is removed from canonical state/projection datasets before promotion.
+- Impacted prose can be redrafted by scene, section, or chapter.
+- Promotion can apply removals as well as additions/replacements.
+- After promotion, `outline-lineage-audit`, `section-lineage-matrix`, `integrity`, `legal-actions`, and readiness surfaces agree that the recovered book is no longer blocked by the original chimera risk.
+- The same primitives can support ordinary author work:
+  - retcon a prior scene
+  - rewrite an old chapter without rerunning the whole book
+  - reweave downstream continuity
+  - compare alternate branches
+
+## Explicit Non-Goals
+- Do not implement a bespoke `fix_veiled_ledger_chimera` command.
+- Do not move author reasoning or approval flow into BookForge.
+- Do not let Nanda mutate files directly.
+- Do not promote contaminated salvage as canonical without explicit selection.
+- Do not require full-book rewrite when a scoped branch recovery is sufficient.
+- Do not skip validation because a branch looks narratively plausible.
+
+## Nanda Coordination Notes
+- Nanda should add `book_timeline_impact_report_v1`.
+- Nanda should compose BookForge primitives into an execution plan.
+- Nanda should ask for human decisions when:
+  - multiple anchors are plausible
+  - salvage policy is non-obvious
+  - downstream invalidation scope is larger than the directly affected scope
+  - promotion would remove or quarantine significant material
+- Nanda should present:
+  - evidence
+  - proposed plan
+  - required approvals
+  - BookForge tools to be invoked
+  - validation gates
+- BookForge should return receipts that Nanda can summarize without inferring from raw files.
