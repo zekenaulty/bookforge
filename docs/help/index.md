@@ -83,6 +83,7 @@ Result truth
     - `bookforge.query.get_recovery_plan_readiness(...)`
     - `bookforge.query.get_recovery_branch_health(...)`
     - `bookforge.query.get_scope_invalidation_preview(...)`
+    - `bookforge.query.get_state_rebuild_preview(...)`
     - `bookforge.query.get_salvage_candidates(...)`
     - `bookforge.execution.build_create_recovery_branch_request(...)`
     - `bookforge.execution.create_recovery_branch(...)`
@@ -90,6 +91,7 @@ Result truth
     - `bookforge.execution.quarantine_artifacts(...)`
     - `bookforge.execution.normalize_outline_scope(...)`
     - `bookforge.execution.invalidate_scope_outputs(...)`
+    - `bookforge.execution.rebuild_state_scope(...)`
     - `bookforge.execution.validate_recovery_branch(...)`
     - `bookforge.execution.promote_recovery_branch(...)`
   - `bookforge run` now provides the batch/operator macro over the extracted scene-phase execution path.
@@ -107,9 +109,11 @@ Result truth
     - `bookforge workflow recovery-readiness`
     - `bookforge workflow recovery-health`
     - `bookforge workflow scope-invalidation-preview`
+    - `bookforge workflow state-rebuild-preview`
     - `bookforge workflow quarantine-artifacts`
     - `bookforge workflow normalize-outline-scope`
     - `bookforge workflow invalidate-scope-outputs`
+    - `bookforge workflow rebuild-state-scope`
     - `bookforge workflow validate-recovery-branch`
     - `bookforge workflow promote-recovery-branch`
     - `bookforge workflow create-branch`

@@ -166,6 +166,131 @@ def get_scope_invalidation_preview(
     }
 
 
+def _append_files_under(root: Path, rel_dir: str, paths: List[str]) -> None:
+    base = root / rel_dir
+    if not base.exists():
+        return
+    if base.is_file():
+        paths.append(rel_dir)
+        return
+    for path in sorted(base.rglob("*")):
+        if path.is_file():
+            paths.append(path.relative_to(root).as_posix())
+
+
+def _affected_chapters(scope: Optional[RecoveryScope]) -> List[int]:
+    if scope is None:
+        return []
+    chapters = []
+    for item in scope.affected_scopes + scope.downstream_scopes:
+        try:
+            chapters.append(int(item["chapter_id"]))
+        except (KeyError, TypeError, ValueError):
+            continue
+    return sorted(set(chapter for chapter in chapters if chapter >= 1))
+
+
+def _affected_scene_ids(manifest: Dict[str, Any], scope: Optional[RecoveryScope], registry: Dict[str, Any]) -> Dict[int, List[int]]:
+    scene_ids_by_chapter: Dict[int, List[int]] = {}
+    if scope is None:
+        return scene_ids_by_chapter
+    for item in scope.affected_scopes + scope.downstream_scopes:
+        try:
+            chapter_id = int(item["chapter_id"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        section_id = item.get("section_id")
+        if section_id is None:
+            continue
+        scene_ids = _scene_ids_from_manifest_range(manifest, chapter_id, int(section_id))
+        if not scene_ids:
+            scene_ids = _scene_ids_for_section(registry, chapter_id, int(section_id))
+        if scene_ids:
+            current = scene_ids_by_chapter.setdefault(chapter_id, [])
+            current.extend(scene_ids)
+    return {chapter: sorted(set(scene_ids)) for chapter, scene_ids in scene_ids_by_chapter.items()}
+
+
+def get_state_rebuild_preview(
+    workspace: Path,
+    book_id: str,
+    *,
+    branch_id: str,
+) -> Dict[str, Any]:
+    resolved = str(branch_id or "").strip()
+    book_root = _book_root(workspace, book_id)
+    manifest = get_recovery_manifest(workspace, book_id, branch_id=resolved) if resolved else {}
+    scope: Optional[RecoveryScope] = None
+    if isinstance(manifest.get("scope"), dict):
+        try:
+            scope = RecoveryScope.from_dict(manifest["scope"])
+        except ValueError:
+            scope = None
+    execution_root = _common.execution_book_root(book_root, resolved or MAIN_BRANCH_ID)
+    registry = _common.load_registry(execution_root)
+    affected_chapters = _affected_chapters(scope)
+    scene_ids_by_chapter = _affected_scene_ids(manifest, scope, registry)
+    paths: List[str] = []
+
+    for rel_path in (
+        "state.json",
+        "draft/context/bible.md",
+        "draft/context/last_excerpt.md",
+        "draft/context/continuity_pack.json",
+        "draft/context/run_paused.json",
+        "draft/context/item_registry.json",
+        "draft/context/plot_devices.json",
+        "draft/context/durable_commits.json",
+    ):
+        if (execution_root / rel_path).exists():
+            paths.append(rel_path)
+
+    for rel_dir in (
+        "draft/context/characters",
+        "draft/context/continuity_history",
+        "draft/context/items",
+        "draft/context/plot_devices",
+    ):
+        _append_files_under(execution_root, rel_dir, paths)
+
+    for chapter_id in affected_chapters:
+        for rel_path in (
+            f"draft/context/chapter_summaries/ch_{chapter_id:03d}.json",
+            f"draft/context/chapter_seams/ch_{chapter_id:03d}",
+            f"draft/context/settings/ch_{chapter_id:03d}",
+            f"draft/context/appearance/ch_{chapter_id:03d}",
+        ):
+            _append_files_under(execution_root, rel_path, paths)
+        for scene_id in scene_ids_by_chapter.get(chapter_id, []):
+            for rel_path in (
+                f"draft/context/phase_history/ch{chapter_id:03d}_sc{scene_id:03d}.json",
+                f"draft/context/phase_history/ch{chapter_id:03d}_sc{scene_id:03d}",
+            ):
+                _append_files_under(execution_root, rel_path, paths)
+    return {
+        "schema_version": "state_rebuild_preview_v1",
+        "book_id": book_id,
+        "branch_id": resolved,
+        "rebuild_mode": "full_book_context_reset_from_normalized_outline",
+        "affected_scopes": [dict(item) for item in scope.affected_scopes] if scope is not None else [],
+        "downstream_scopes": [dict(item) for item in scope.downstream_scopes] if scope is not None else [],
+        "affected_chapters": affected_chapters,
+        "affected_scene_ids": {str(key): value for key, value in scene_ids_by_chapter.items()},
+        "candidate_paths": sorted(set(paths)),
+        "rebuilt_outputs": [
+            "state.json",
+            "draft/context/characters/index.json",
+            "draft/context/bible.md",
+            "draft/context/last_excerpt.md",
+            "draft/context/item_registry.json",
+            "draft/context/plot_devices.json",
+            "draft/context/durable_commits.json",
+            "draft/context/items/index.json",
+            "draft/context/plot_devices/index.json",
+        ],
+    }
+
+
 def get_salvage_candidates(workspace: Path, book_id: str, *, scope: RecoveryScope) -> Dict[str, Any]:
     book_root = _book_root(workspace, book_id)
     preview = get_scope_invalidation_preview(workspace, book_id, branch_id=MAIN_BRANCH_ID, scope=scope)
@@ -238,6 +363,8 @@ def _recommended_next_recovery_action(actions: set[str], blockers: List[str]) ->
         return "normalize_outline_scope"
     if "invalidate_scope_outputs" not in actions:
         return "invalidate_scope_outputs"
+    if "rebuild_state_scope" not in actions:
+        return "rebuild_state_scope"
     if "validate_recovery_branch" not in actions:
         return "validate_recovery_branch"
     if blockers:
@@ -256,6 +383,8 @@ def _recovery_approval_requirements(manifest: Dict[str, Any], actions: set[str])
         pending.append("destructive cleanup/quarantine")
     if "invalidate_scope_outputs" not in actions:
         pending.append("scope output invalidation")
+    if "rebuild_state_scope" not in actions:
+        pending.append("state/projection rebuild")
     if "validate_recovery_branch" in actions:
         pending.append("promotion to main")
     if broad_scope:
@@ -286,6 +415,7 @@ def get_recovery_branch_health(workspace: Path, book_id: str, *, branch_id: str)
         "quarantine_artifacts",
         "normalize_outline_scope",
         "invalidate_scope_outputs",
+        "rebuild_state_scope",
         "validate_recovery_branch",
     ):
         if required not in actions:

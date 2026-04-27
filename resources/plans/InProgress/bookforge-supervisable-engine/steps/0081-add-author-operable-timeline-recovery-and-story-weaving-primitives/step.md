@@ -133,12 +133,14 @@ Status: in_progress
   - `get_recovery_plan_readiness`
   - `get_recovery_branch_health`
   - `get_scope_invalidation_preview`
+  - `get_state_rebuild_preview`
   - `get_salvage_candidates`
 - Implemented branch-first execution primitives:
   - `create_recovery_branch`
   - `quarantine_artifacts`
   - `normalize_outline_scope`
   - `invalidate_scope_outputs`
+  - `rebuild_state_scope`
   - `validate_recovery_branch`
   - `promote_recovery_branch`
 - Implemented legal-action discovery for the recovery sequence.
@@ -150,9 +152,11 @@ Status: in_progress
   - `outline/section_drafts`
   - latest outline pointer/summary files when present
 - Scope invalidation preserves the pre-normalization scene range so a normalized one-scene section cannot accidentally leave a stale extra scene file active.
+- State rebuild now quarantines branch-local state/projection artifacts and rebuilds a clean outline-derived baseline before validation.
+- Validation now requires `rebuild_state_scope` before a recovery branch can become healthy.
+- Quarantine now uses hashed fallback quarantine paths when deep Windows paths exceed practical filesystem limits while preserving original source paths in receipts.
 
 ## Remaining Implementation
-- Add `rebuild_state_scope`.
 - Add `redraft_scope` as a scope-level composition over existing scene/section write actions.
 - Add richer postcondition receipts with integrity deltas and next-action snapshots.
 - Add blast-radius query surfaces that separate prose, state, series, continuity, and projection invalidation candidates.
@@ -218,6 +222,19 @@ Status: in_progress
     - phase history/projection indexes
     - appearance and setting projections when present
   - If a state family cannot be rebuilt yet, emit a blocking ticket instead of pretending it is clean.
+  - Current implementation uses a conservative branch-local full-book context reset because state data is not yet event-sourced enough for safe partial rollback.
+  - Current implementation rebuilds:
+    - `state.json`
+    - character index/state files from normalized outline characters
+    - empty bible and last excerpt context
+    - durable item/plot-device registries
+  - Current implementation quarantines active branch copies of:
+    - old `state.json`
+    - character state/index files
+    - affected chapter summaries
+    - affected settings/appearance projections
+    - affected scene phase-history artifacts
+    - durable-state context files
 - Add scoped redraft.
   - Let Nanda request redraft by chapter, section, or scene.
   - Use existing branch-scoped write actions where possible.

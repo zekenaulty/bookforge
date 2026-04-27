@@ -92,7 +92,8 @@ Behavior
   - `quarantine_artifacts` on a recovery branch
   - `normalize_outline_scope` on a recovery branch
   - `invalidate_scope_outputs` after branch-local outline normalization
-  - `validate_recovery_branch` after quarantine, normalization, and invalidation receipts exist
+  - `rebuild_state_scope` after invalidation removes generated prose/phase outputs
+  - `validate_recovery_branch` after quarantine, normalization, invalidation, and state rebuild receipts exist
   - `promote_recovery_branch` after recovery branch health is clean
   - `write_frozen_section`
 - Shows whether each action is allowed right now or blocked.
@@ -122,7 +123,7 @@ Behavior
   - `discard_branch`
   - `record_assembly_validation` for active assembly branches
   - `promote_branch_to_main` once the branch reaches `promote_ready`
-  - `quarantine_artifacts`, `normalize_outline_scope`, `invalidate_scope_outputs`, `validate_recovery_branch`, and `promote_recovery_branch` for branches created with recovery manifests
+  - `quarantine_artifacts`, `normalize_outline_scope`, `invalidate_scope_outputs`, `rebuild_state_scope`, `validate_recovery_branch`, and `promote_recovery_branch` for branches created with recovery manifests
 
 ## Outline Lineage Audit Commands
 
@@ -175,9 +176,11 @@ Commands
 - `bookforge workflow recovery-readiness --book <id> --branch-id <id> [--impact-report-ref <ref>] [--json]`
 - `bookforge workflow recovery-health --book <id> --branch-id <id> [--json]`
 - `bookforge workflow scope-invalidation-preview --book <id> --branch-id <id> [--json]`
+- `bookforge workflow state-rebuild-preview --book <id> --branch-id <id> [--json]`
 - `bookforge workflow quarantine-artifacts --book <id> --branch-id <id>`
 - `bookforge workflow normalize-outline-scope --book <id> --branch-id <id>`
 - `bookforge workflow invalidate-scope-outputs --book <id> --branch-id <id>`
+- `bookforge workflow rebuild-state-scope --book <id> --branch-id <id>`
 - `bookforge workflow validate-recovery-branch --book <id> --branch-id <id>`
 - `bookforge workflow promote-recovery-branch --book <id> --branch-id <id>`
 
@@ -205,14 +208,17 @@ Recovery sequence
 - `normalize-outline-scope` replaces affected branch outline scopes from the selected anchor and rebuilds branch-local outline projections.
 - `scope-invalidation-preview` shows which branch-local prose/generated outputs would be quarantined.
 - `invalidate-scope-outputs` quarantines affected prose/generated outputs and records promotion removals.
+- `state-rebuild-preview` shows which branch-local state, continuity, durable-state, phase-history, appearance, and setting projection artifacts would be quarantined.
+- `rebuild-state-scope` quarantines those branch-local state/projection artifacts, records promotion removals, and writes a clean outline-derived state baseline.
 - `validate-recovery-branch` refuses promotion while branch-local lineage still reports `chimera_risk` or required receipts are missing.
 - `promote-recovery-branch` promotes only a healthy branch and applies recorded removals before copying branch snapshot data to `main`.
 
 Truth rules
 - Recovery mutation never writes directly to contaminated `main`.
 - Existing polluted prose is salvage/reference material only unless later redrafted or explicitly promoted by a future tool.
-- A recovery branch can become timeline-healthy while still needing author revision, prose redraft, seam repair, or downstream state rebuild.
-- This first slice normalizes outline lineage and invalidates affected outputs. `rebuild_state_scope` and `redraft_scope` remain follow-up primitives.
+- `rebuild-state-scope` currently performs a conservative full-book context reset inside the recovery branch because state history is not yet event-sourced enough for safe partial rollback.
+- A recovery branch can become timeline-healthy while still needing author revision, prose redraft, seam repair, or downstream story weaving.
+- `redraft_scope` remains a follow-up primitive.
 
 ## Branch Lifecycle Commands
 

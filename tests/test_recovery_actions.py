@@ -13,6 +13,7 @@ from bookforge.execution import (
     normalize_outline_scope,
     promote_recovery_branch,
     quarantine_artifacts,
+    rebuild_state_scope,
     validate_recovery_branch,
 )
 from bookforge.query import get_outline_lineage_audit, legal_next_actions, list_execution_options
@@ -21,6 +22,7 @@ from bookforge.query.recovery import (
     get_recovery_manifest,
     get_recovery_plan_readiness,
     get_scope_invalidation_preview,
+    get_state_rebuild_preview,
 )
 from bookforge.section_workflow import initialize_section_workflow
 from bookforge.supervision import paths as supervision_paths
@@ -141,6 +143,38 @@ def _write_polluted_draft_outputs(book_root: Path) -> None:
         (chapter_dir / f"scene_{scene_id:03d}.md").write_text(f"Polluted scene {scene_id}.", encoding="utf-8")
         _write_json(chapter_dir / f"scene_{scene_id:03d}.meta.json", {"scene_id": scene_id})
     (book_root / "draft" / "chapters" / "ch_001.md").write_text("Polluted chapter.", encoding="utf-8")
+    _write_json(
+        book_root / "state.json",
+        {
+            "schema_version": "1.0",
+            "status": "WRITING",
+            "cursor": {"chapter": 1, "scene": 2},
+            "world": {"recent_facts": ["Artie and Vex are here."], "open_threads": ["thread_wrong"]},
+            "summary": {"story_so_far": ["Ghost outline happened."], "must_stay_true": ["Vex exists."]},
+            "budgets": {"tokens": 123},
+        },
+    )
+    _write_json(
+        book_root / "draft" / "context" / "characters" / "index.json",
+        {
+            "characters": [
+                {"character_id": "char_artie", "state_path": "draft/context/characters/artie.state.json"},
+                {"character_id": "rhea_mercer", "state_path": "draft/context/characters/rhea.state.json"},
+            ]
+        },
+    )
+    _write_json(
+        book_root / "draft" / "context" / "characters" / "artie.state.json",
+        {"character_id": "char_artie", "name": "Artie", "last_touched": {"chapter": 1, "scene": 2}},
+    )
+    _write_json(
+        book_root / "draft" / "context" / "characters" / "rhea.state.json",
+        {"character_id": "rhea_mercer", "name": "Rhea", "inventory": [{"item": "polluted"}], "last_touched": {"chapter": 1, "scene": 2}},
+    )
+    _write_json(book_root / "draft" / "context" / "chapter_summaries" / "ch_001.json", {"key_events": ["polluted"]})
+    _write_json(book_root / "draft" / "context" / "settings" / "ch_001" / "scene_001" / "prose_extracted.setting.json", {"location": "polluted"})
+    _write_json(book_root / "draft" / "context" / "phase_history" / "ch001_sc001.json", {"phases": {"write": {"status": "success"}}})
+    _write_json(book_root / "draft" / "context" / "item_registry.json", {"items": [{"item_id": "ITEM_WRONG"}]})
 
 
 def _create_recovery_branch(tmp_path: Path, branch_id: str = "recover-sec1") -> None:
@@ -226,6 +260,30 @@ def test_recovery_branch_quarantines_normalizes_invalidates_validates_and_promot
     assert not (branch_root / "draft" / "chapters" / "ch_001" / "scene_002.md").exists()
     assert (book_root / "draft" / "chapters" / "ch_001" / "scene_002.md").exists()
 
+    blocked_validate = validate_recovery_branch(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="validate_recovery_branch", branch_id="recover-sec1"),
+    )
+    assert blocked_validate.status == "integrity_degraded"
+    assert "rebuild_state_scope has not completed" in blocked_validate.details["recovery_receipt"]["details"]["blockers"]
+
+    state_preview = get_state_rebuild_preview(tmp_path, "my_book", branch_id="recover-sec1")
+    assert "state.json" in state_preview["candidate_paths"]
+    assert "draft/context/characters/artie.state.json" in state_preview["candidate_paths"]
+    assert "draft/context/settings/ch_001/scene_001/prose_extracted.setting.json" in state_preview["candidate_paths"]
+
+    rebuild_result = rebuild_state_scope(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="rebuild_state_scope", branch_id="recover-sec1"),
+    )
+    assert rebuild_result.status == "success"
+    branch_state = _read_json(branch_root / "state.json")
+    assert branch_state["summary"]["story_so_far"] == []
+    assert branch_state["world"]["recent_facts"] == []
+    assert not (branch_root / "draft" / "context" / "characters" / "artie.state.json").exists()
+    rebuilt_index = _read_json(branch_root / "draft" / "context" / "characters" / "index.json")
+    assert [entry["character_id"] for entry in rebuilt_index["characters"]] == ["rhea_mercer"]
+
     validate_result = validate_recovery_branch(
         tmp_path,
         build_recovery_branch_request(tmp_path, "my_book", action="validate_recovery_branch", branch_id="recover-sec1"),
@@ -243,6 +301,9 @@ def test_recovery_branch_quarantines_normalizes_invalidates_validates_and_promot
     assert promote_result.status == "success"
     assert not (book_root / "outline" / "section_drafts" / "ch_001_sec_001_phase03.json").exists()
     assert not (book_root / "draft" / "chapters" / "ch_001" / "scene_002.md").exists()
+    assert not (book_root / "draft" / "context" / "characters" / "artie.state.json").exists()
+    main_index = _read_json(book_root / "draft" / "context" / "characters" / "index.json")
+    assert [entry["character_id"] for entry in main_index["characters"]] == ["rhea_mercer"]
     assert get_outline_lineage_audit(tmp_path, "my_book").status == "healthy"
 
 
@@ -305,6 +366,8 @@ def test_cli_parser_accepts_recovery_workflow_commands() -> None:
         "quarantine-artifacts",
         "normalize-outline-scope",
         "invalidate-scope-outputs",
+        "state-rebuild-preview",
+        "rebuild-state-scope",
         "validate-recovery-branch",
         "promote-recovery-branch",
         "recovery-health",

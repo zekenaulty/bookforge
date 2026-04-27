@@ -41,6 +41,7 @@ from .recovery_actions import (
     normalize_outline_scope,
     promote_recovery_branch,
     quarantine_artifacts,
+    rebuild_state_scope,
     validate_recovery_branch,
 )
 from .scoped import (
@@ -86,6 +87,7 @@ __all__ = [
     "promote_branch_action",
     "promote_recovery_branch",
     "quarantine_artifacts",
+    "rebuild_state_scope",
     "rebase_branch_action",
     "record_assembly_validation_action",
     "validate_assembly_branch_action",

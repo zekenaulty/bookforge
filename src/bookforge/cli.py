@@ -48,6 +48,7 @@ from bookforge.execution import (
     promote_recovery_branch,
     quarantine_artifacts,
     rebase_branch_action,
+    rebuild_state_scope,
     repair_scene_prose,
     resume_paused_section,
     record_assembly_validation_action,
@@ -74,7 +75,12 @@ from bookforge.query import (
     get_stale_outline_artifact_inventory,
     list_execution_options,
 )
-from bookforge.query.recovery import get_recovery_branch_health, get_recovery_plan_readiness, get_scope_invalidation_preview
+from bookforge.query.recovery import (
+    get_recovery_branch_health,
+    get_recovery_plan_readiness,
+    get_scope_invalidation_preview,
+    get_state_rebuild_preview,
+)
 from bookforge.contracts import ScopeSelector
 from bookforge.workspace import init_book_workspace, parse_genre, parse_targets, reset_book_workspace_detailed, update_book_templates
 from bookforge.llm.thoughts import format_thought_response, list_signatures, run_current_thoughts
@@ -432,6 +438,10 @@ def _workflow_invalidate_scope_outputs(args: argparse.Namespace) -> int:
     return _workflow_recovery_branch_action(args, "invalidate_scope_outputs", invalidate_scope_outputs)
 
 
+def _workflow_rebuild_state_scope(args: argparse.Namespace) -> int:
+    return _workflow_recovery_branch_action(args, "rebuild_state_scope", rebuild_state_scope)
+
+
 def _workflow_validate_recovery_branch(args: argparse.Namespace) -> int:
     return _workflow_recovery_branch_action(args, "validate_recovery_branch", validate_recovery_branch)
 
@@ -497,6 +507,25 @@ def _workflow_scope_invalidation_preview(args: argparse.Namespace) -> int:
     def render(payload) -> None:
         sys.stdout.write(f"Book: {payload.get('book_id')}\n")
         sys.stdout.write(f"Branch: {payload.get('branch_id')}\n")
+        sys.stdout.write(f"Candidate paths: {len(payload.get('candidate_paths') or [])}\n")
+        for rel_path in payload.get("candidate_paths", [])[:100]:
+            sys.stdout.write(f"- {rel_path}\n")
+
+    return _write_json_or_text(args, preview, render)
+
+
+def _workflow_state_rebuild_preview(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        preview = get_state_rebuild_preview(workspace, args.book, branch_id=args.branch_id)
+    except Exception as exc:
+        sys.stderr.write(f"State rebuild preview failed: {exc}\n")
+        return 1
+
+    def render(payload) -> None:
+        sys.stdout.write(f"Book: {payload.get('book_id')}\n")
+        sys.stdout.write(f"Branch: {payload.get('branch_id')}\n")
+        sys.stdout.write(f"Rebuild mode: {payload.get('rebuild_mode')}\n")
         sys.stdout.write(f"Candidate paths: {len(payload.get('candidate_paths') or [])}\n")
         for rel_path in payload.get("candidate_paths", [])[:100]:
             sys.stdout.write(f"- {rel_path}\n")
@@ -1934,6 +1963,15 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_scope_invalidation_preview.add_argument("--json", action="store_true", help="Emit preview as JSON.")
     workflow_scope_invalidation_preview.set_defaults(func=_workflow_scope_invalidation_preview)
 
+    workflow_state_rebuild_preview = workflow_sub.add_parser(
+        "state-rebuild-preview",
+        help="Preview branch-local state and projection artifacts that rebuild-state-scope would quarantine.",
+    )
+    workflow_state_rebuild_preview.add_argument("--book", required=True, help="Book id.")
+    workflow_state_rebuild_preview.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_state_rebuild_preview.add_argument("--json", action="store_true", help="Emit preview as JSON.")
+    workflow_state_rebuild_preview.set_defaults(func=_workflow_state_rebuild_preview)
+
     workflow_quarantine_artifacts = workflow_sub.add_parser(
         "quarantine-artifacts",
         help="Move stale or invalid recovery-scope artifacts out of the active branch snapshot.",
@@ -1957,6 +1995,14 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_invalidate_scope_outputs.add_argument("--book", required=True, help="Book id.")
     workflow_invalidate_scope_outputs.add_argument("--branch-id", required=True, help="Recovery branch id.")
     workflow_invalidate_scope_outputs.set_defaults(func=_workflow_invalidate_scope_outputs)
+
+    workflow_rebuild_state_scope = workflow_sub.add_parser(
+        "rebuild-state-scope",
+        help="Rebuild branch-local state/projection baselines from the normalized outline before validation.",
+    )
+    workflow_rebuild_state_scope.add_argument("--book", required=True, help="Book id.")
+    workflow_rebuild_state_scope.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_rebuild_state_scope.set_defaults(func=_workflow_rebuild_state_scope)
 
     workflow_validate_recovery_branch = workflow_sub.add_parser(
         "validate-recovery-branch",

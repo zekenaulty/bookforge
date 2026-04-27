@@ -452,7 +452,7 @@ def _recovery_approval_metadata(action: str, manifest: dict) -> dict:
     reasons = []
     if action == "create_recovery_branch":
         reasons.append("recovery anchor selection")
-    if action in {"quarantine_artifacts", "invalidate_scope_outputs"}:
+    if action in {"quarantine_artifacts", "invalidate_scope_outputs", "rebuild_state_scope"}:
         reasons.append("destructive cleanup/quarantine")
     if action == "promote_recovery_branch":
         reasons.append("promotion to main")
@@ -495,6 +495,14 @@ def _evaluate_recovery_branch_action(workspace, book_id: str, selector: ScopeSel
         if action in receipt_actions:
             return False, "invalidate_scope_outputs already has a receipt for this branch.", details
         return True, None, details
+    if action == "rebuild_state_scope":
+        if "normalize_outline_scope" not in receipt_actions:
+            return False, "rebuild_state_scope requires normalized outline scope first.", details
+        if "invalidate_scope_outputs" not in receipt_actions:
+            return False, "rebuild_state_scope requires invalidated scope outputs first.", details
+        if action in receipt_actions:
+            return False, "rebuild_state_scope already has a receipt for this branch.", details
+        return True, None, details
     if action == "validate_recovery_branch":
         if "quarantine_artifacts" not in receipt_actions:
             return False, "validate_recovery_branch requires quarantine_artifacts first.", details
@@ -502,6 +510,8 @@ def _evaluate_recovery_branch_action(workspace, book_id: str, selector: ScopeSel
             return False, "validate_recovery_branch requires normalized outline scope first.", details
         if "invalidate_scope_outputs" not in receipt_actions:
             return False, "validate_recovery_branch requires invalidated scope outputs first.", details
+        if "rebuild_state_scope" not in receipt_actions:
+            return False, "validate_recovery_branch requires rebuilt state scope first.", details
         return True, None, details
     if action == "promote_recovery_branch":
         health = get_recovery_branch_health(workspace, book_id, branch_id=branch_id)
@@ -1029,6 +1039,12 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
         selector,
         "invalidate_scope_outputs",
     )
+    rebuild_state_allowed, rebuild_state_refusal, rebuild_state_details = _evaluate_recovery_branch_action(
+        workspace,
+        book_id,
+        selector,
+        "rebuild_state_scope",
+    )
     validate_recovery_allowed, validate_recovery_refusal, validate_recovery_details = _evaluate_recovery_branch_action(
         workspace,
         book_id,
@@ -1379,6 +1395,18 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
             selector_requirements=["book_id", "branch_id"],
             refusal_reason=invalidate_outputs_refusal,
             details=invalidate_outputs_details,
+        ),
+        ExecutionOption(
+            action="rebuild_state_scope",
+            summary="Rebuild branch-local state and projection baselines from the normalized outline before validation.",
+            branch_policy="derived_only",
+            workflow_family="recovery_import",
+            mutates_canonical_state=False,
+            requires_expected_node=True,
+            allowed=rebuild_state_allowed,
+            selector_requirements=["book_id", "branch_id"],
+            refusal_reason=rebuild_state_refusal,
+            details=rebuild_state_details,
         ),
         ExecutionOption(
             action="validate_recovery_branch",

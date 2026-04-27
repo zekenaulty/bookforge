@@ -35,7 +35,7 @@ def validate_recovery_branch(workspace: Path, request: ExecutionRequest) -> Exec
     if audit.status == "chimera_risk":
         blockers.append("branch still reports chimera_risk")
     actions = {receipt.action for receipt in get_recovery_branch_health(workspace, book_id, branch_id=branch_id).receipts}
-    for required in ("quarantine_artifacts", "normalize_outline_scope", "invalidate_scope_outputs"):
+    for required in ("quarantine_artifacts", "normalize_outline_scope", "invalidate_scope_outputs", "rebuild_state_scope"):
         if required not in actions:
             blockers.append(f"{required} has not completed")
     status = "success" if not blockers else "integrity_degraded"

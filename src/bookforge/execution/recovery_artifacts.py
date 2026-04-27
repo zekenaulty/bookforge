@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Dict, Iterable, List
+import hashlib
 import shutil
 
 from bookforge.contracts import ExecutionRequest, ExecutionResult, MAIN_BRANCH_ID
@@ -24,6 +25,12 @@ def _quarantine_path(root: Path, branch_id: str, action: str, rel_path: str) -> 
     return recovery_dir(root, branch_id) / "quarantine" / action / rel_path
 
 
+def _short_quarantine_path(root: Path, branch_id: str, action: str, rel_path: str) -> Path:
+    digest = hashlib.sha1(str(rel_path).encode("utf-8")).hexdigest()[:12]
+    suffix = Path(rel_path).suffix
+    return recovery_dir(root, branch_id) / "quarantine" / action / "_paths" / f"{digest}{suffix}"
+
+
 def _move_to_quarantine(root: Path, branch_id: str, rel_paths: Iterable[str], *, action: str) -> List[Dict[str, str]]:
     snapshot_root = execution_root(root, branch_id)
     moved: List[Dict[str, str]] = []
@@ -32,10 +39,19 @@ def _move_to_quarantine(root: Path, branch_id: str, rel_paths: Iterable[str], *,
         if not source.exists() or not source.is_file():
             continue
         dest = _quarantine_path(root, branch_id, action, rel_path)
+        if len(str(dest)) > 240:
+            dest = _short_quarantine_path(root, branch_id, action, rel_path)
         dest.parent.mkdir(parents=True, exist_ok=True)
         if dest.exists():
             dest.unlink()
-        shutil.move(str(source), str(dest))
+        try:
+            shutil.move(str(source), str(dest))
+        except OSError:
+            dest = _short_quarantine_path(root, branch_id, action, rel_path)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            if dest.exists():
+                dest.unlink()
+            shutil.move(str(source), str(dest))
         moved.append({"source": rel_path, "quarantine": relative(root, dest)})
     return moved
 
