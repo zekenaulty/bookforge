@@ -43,6 +43,7 @@ from .recovery_actions import (
     quarantine_artifacts,
     rebuild_state_scope,
     redraft_scope,
+    review_downstream_dependencies,
     review_recovery_semantics,
     validate_recovery_branch,
 )
@@ -91,6 +92,7 @@ __all__ = [
     "quarantine_artifacts",
     "rebuild_state_scope",
     "redraft_scope",
+    "review_downstream_dependencies",
     "review_recovery_semantics",
     "rebase_branch_action",
     "record_assembly_validation_action",

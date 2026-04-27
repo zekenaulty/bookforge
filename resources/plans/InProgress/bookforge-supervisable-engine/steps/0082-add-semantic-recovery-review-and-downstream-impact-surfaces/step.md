@@ -61,6 +61,13 @@ Status: in_progress
   - exposed through `legal_next_actions`
   - exposed through `workflow review-recovery-semantics`
   - emits `recovery_semantic_review.json`
+- Added downstream dependency review surfaces:
+  - `get_downstream_dependency_review(workspace, book_id, *, branch_id)`
+  - `review_downstream_dependencies`
+  - exposed through `legal_next_actions`
+  - exposed through `workflow downstream-dependency-review`
+  - exposed through `workflow review-downstream-dependencies`
+  - emits `downstream_dependency_review.json`
 - The readiness surface is diagnostic-only and returns:
   - derived-branch requirement
   - required successful recovery receipts

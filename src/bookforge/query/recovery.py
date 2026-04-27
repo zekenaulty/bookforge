@@ -17,6 +17,7 @@ RECOVERY_MANIFEST_FILENAME = "recovery_manifest.json"
 RECOVERY_RECEIPTS_FILENAME = "recovery_receipts.jsonl"
 PROMOTION_REMOVALS_FILENAME = "promotion_removals.json"
 SEMANTIC_REVIEW_FILENAME = "recovery_semantic_review.json"
+DOWNSTREAM_REVIEW_FILENAME = "downstream_dependency_review.json"
 
 
 def recovery_dir(book_root: Path, branch_id: str) -> Path:
@@ -37,6 +38,10 @@ def promotion_removals_path(book_root: Path, branch_id: str) -> Path:
 
 def recovery_semantic_review_path(book_root: Path, branch_id: str) -> Path:
     return recovery_dir(book_root, branch_id) / SEMANTIC_REVIEW_FILENAME
+
+
+def downstream_dependency_review_path(book_root: Path, branch_id: str) -> Path:
+    return recovery_dir(book_root, branch_id) / DOWNSTREAM_REVIEW_FILENAME
 
 
 def _book_root(workspace: Path, book_id: str) -> Path:
@@ -769,6 +774,68 @@ def get_recovery_semantic_review(workspace: Path, book_id: str, *, branch_id: st
     return merged
 
 
+def get_downstream_dependency_review(workspace: Path, book_id: str, *, branch_id: str) -> Dict[str, Any]:
+    resolved = str(branch_id or "").strip()
+    book_root = _book_root(workspace, book_id)
+    manifest = get_recovery_manifest(workspace, book_id, branch_id=resolved) if resolved else {}
+    scope = manifest.get("scope") if isinstance(manifest.get("scope"), dict) else {}
+    downstream_scopes = [dict(item) for item in scope.get("downstream_scopes", []) if isinstance(item, dict)]
+    review_path = downstream_dependency_review_path(book_root, resolved) if resolved else book_root / DOWNSTREAM_REVIEW_FILENAME
+    readiness = get_recovery_semantic_review_readiness(workspace, book_id, branch_id=resolved)
+    if review_path.exists():
+        payload = _read_json(review_path)
+        if payload:
+            merged = dict(payload)
+            merged.setdefault("schema_version", "downstream_dependency_review_v1")
+            merged.setdefault("book_id", book_id)
+            merged.setdefault("branch_id", resolved)
+            merged.setdefault("artifact_status", "diagnostic")
+            merged.setdefault("status", "reviewed_attention_required")
+            merged["readiness"] = readiness
+            return merged
+        return {
+            "schema_version": "downstream_dependency_review_v1",
+            "book_id": book_id,
+            "branch_id": resolved,
+            "artifact_status": "diagnostic",
+            "status": "review_failed",
+            "downstream_scopes": downstream_scopes,
+            "reviewed_artifacts": [],
+            "findings": [
+                {
+                    "category": "missing_evidence",
+                    "severity": "error",
+                    "message": "Downstream dependency review artifact exists but could not be decoded.",
+                    "artifact": _relpath(review_path, book_root),
+                }
+            ],
+            "readiness": readiness,
+            "recommended_next_action": "rerun_downstream_dependency_review",
+        }
+
+    blast_radius = get_recovery_blast_radius(workspace, book_id, branch_id=resolved) if resolved else {}
+    downstream_artifacts = [
+        dict(item)
+        for item in blast_radius.get("artifact_impacts", [])
+        if isinstance(item, dict) and item.get("family") == "downstream_review"
+    ]
+    status = "manifest_declared_only" if downstream_scopes else "not_started"
+    return {
+        "schema_version": "downstream_dependency_review_v1",
+        "book_id": book_id,
+        "branch_id": resolved,
+        "artifact_status": "diagnostic",
+        "status": status,
+        "downstream_scopes": downstream_scopes,
+        "reviewed_artifacts": [],
+        "candidate_artifacts": downstream_artifacts,
+        "findings": [],
+        "readiness": readiness,
+        "recommended_next_action": "review_downstream_dependencies" if downstream_scopes else readiness["recommended_next_action"],
+        "review_limitations": ["downstream dependency review artifact has not been emitted yet"],
+    }
+
+
 def get_recovery_branch_health(workspace: Path, book_id: str, *, branch_id: str) -> RecoveryBranchHealth:
     resolved = str(branch_id or "").strip()
     book_root = _book_root(workspace, book_id)
@@ -833,6 +900,9 @@ def get_recovery_branch_health(workspace: Path, book_id: str, *, branch_id: str)
             "receipt_actions": sorted(actions),
             "recommended_next_action": next_action,
             "semantic_validation": semantic_validation,
+            "downstream_dependency_review": manifest_validation.get("downstream_dependency_review")
+            if isinstance(manifest_validation.get("downstream_dependency_review"), dict)
+            else None,
             **approval,
         },
     )

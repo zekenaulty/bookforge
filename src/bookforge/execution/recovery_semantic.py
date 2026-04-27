@@ -5,6 +5,7 @@ from typing import Any, Dict, List
 
 from bookforge.contracts import ExecutionRequest, ExecutionResult, MAIN_BRANCH_ID, ProducedArtifactReceipt
 from bookforge.query.recovery import (
+    downstream_dependency_review_path,
     get_recovery_blast_radius,
     get_recovery_branch_health,
     get_recovery_manifest,
@@ -51,6 +52,14 @@ def _reviewed_artifacts(blast_radius: Dict[str, Any]) -> List[Dict[str, Any]]:
             }
         )
     return reviewed
+
+
+def _downstream_artifacts(blast_radius: Dict[str, Any]) -> List[Dict[str, Any]]:
+    return [
+        item
+        for item in _reviewed_artifacts(blast_radius)
+        if item.get("family") == "downstream_review"
+    ]
 
 
 def _semantic_findings(readiness: Dict[str, Any], blast_radius: Dict[str, Any], manifest: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -193,5 +202,119 @@ def review_recovery_semantics(workspace: Path, request: ExecutionRequest) -> Exe
         artifact_paths={"semantic_review": rel_review_path},
         produced_artifacts=[artifact],
         details={"semantic_review": payload},
+        before_snapshot=before_snapshot,
+    )
+
+
+def review_downstream_dependencies(workspace: Path, request: ExecutionRequest) -> ExecutionResult:
+    if request.action != "review_downstream_dependencies":
+        raise ValueError("Unsupported execution action.")
+    branch_id = str(request.branch_id or request.selector.branch_id or "").strip()
+    if not branch_id or branch_id == MAIN_BRANCH_ID:
+        raise ValueError("review_downstream_dependencies requires a derived recovery branch.")
+    book_id = request.selector.book_id
+    root = book_root(workspace, book_id)
+    before_snapshot = capture_surface_snapshot(workspace, book_id, branch_id=branch_id)
+    readiness = get_recovery_semantic_review_readiness(workspace, book_id, branch_id=branch_id)
+    if not readiness.get("ready"):
+        raise ValueError(f"review_downstream_dependencies is not ready: {readiness.get('blockers') or []}")
+
+    manifest = get_recovery_manifest(workspace, book_id, branch_id=branch_id)
+    blast_radius = get_recovery_blast_radius(workspace, book_id, branch_id=branch_id)
+    node = advance_recovery_node(workspace, book_id, branch_id, "review_downstream_dependencies")
+    review_path = downstream_dependency_review_path(root, branch_id)
+    rel_review_path = relative(root, review_path)
+    downstream_scopes = _review_scope(manifest)["downstream_scopes"]
+    reviewed_artifacts = _downstream_artifacts(blast_radius)
+    findings: List[Dict[str, Any]] = []
+    if downstream_scopes:
+        findings.append(
+            {
+                "category": "downstream_dependency_risk",
+                "severity": "medium",
+                "message": "Downstream scopes are declared and should be reviewed against the recovered timeline before promotion or follow-up mutation.",
+                "scopes": downstream_scopes,
+                "evidence": ["recovery_manifest.scope.downstream_scopes"],
+            }
+        )
+    if downstream_scopes and not reviewed_artifacts:
+        findings.append(
+            {
+                "category": "missing_evidence",
+                "severity": "medium",
+                "message": "Downstream scopes are declared, but no downstream review artifacts were found in the blast-radius surface.",
+                "evidence": ["recovery_blast_radius.artifact_impacts"],
+            }
+        )
+    status = "reviewed_attention_required" if findings else "reviewed_clean"
+    downstream_review = {
+        "status": status,
+        "reviewed_at": now_token(),
+        "artifact_path": rel_review_path,
+        "finding_count": len(findings),
+    }
+    payload = {
+        "schema_version": "downstream_dependency_review_v1",
+        "book_id": book_id,
+        "branch_id": branch_id,
+        "node": node.to_dict(),
+        "artifact_status": "diagnostic",
+        "status": status,
+        "downstream_scopes": downstream_scopes,
+        "reviewed_artifacts": reviewed_artifacts,
+        "findings": findings,
+        "blocked_actions": ["downstream_auto_approval"] if findings else [],
+        "recommended_next_action": "author_review_downstream_dependencies" if findings else "review_recovery_semantics",
+        "confidence": "medium" if findings else "low",
+        "review_limitations": [
+            "This diagnostic action reports downstream dependency evidence; it does not repair downstream prose or continuity.",
+            "Nanda/author review decides whether downstream scopes need redraft, seam repair, or projection refresh.",
+        ],
+        "readiness": readiness,
+    }
+    write_json(review_path, payload)
+
+    manifest_payload = get_recovery_manifest(workspace, book_id, branch_id=branch_id)
+    validation = manifest_payload.get("validation") if isinstance(manifest_payload.get("validation"), dict) else {}
+    validation["downstream_dependency_review"] = downstream_review
+    manifest_payload["validation"] = validation
+    manifest_payload["updated_at"] = now_token()
+    write_recovery_manifest(root, branch_id, manifest_payload)
+
+    receipt = write_receipt(
+        workspace,
+        book_id,
+        branch_id,
+        action="review_downstream_dependencies",
+        status="success",
+        message="Downstream dependency review diagnostic emitted.",
+        artifact_paths={"downstream_dependency_review": rel_review_path},
+        details={
+            "downstream_dependency_review": downstream_review,
+            "finding_count": len(findings),
+            "review_status": status,
+            "recommended_next_action": payload["recommended_next_action"],
+        },
+    )
+    artifact = ProducedArtifactReceipt(
+        artifact_key="downstream_dependency_review",
+        label="Downstream dependency review",
+        artifact_status="diagnostic",
+        path=rel_review_path,
+        format="json",
+        consumable=True,
+        replaceable=True,
+        details={"status": status, "finding_count": len(findings)},
+    )
+    return emit_result(
+        workspace,
+        book_id,
+        request,
+        status="success",
+        message="Downstream dependency review diagnostic emitted.",
+        receipt=receipt,
+        artifact_paths={"downstream_dependency_review": rel_review_path},
+        produced_artifacts=[artifact],
+        details={"downstream_dependency_review": payload},
         before_snapshot=before_snapshot,
     )

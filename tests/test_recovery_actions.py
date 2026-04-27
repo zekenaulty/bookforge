@@ -15,11 +15,13 @@ from bookforge.execution import (
     quarantine_artifacts,
     rebuild_state_scope,
     redraft_scope,
+    review_downstream_dependencies,
     review_recovery_semantics,
     validate_recovery_branch,
 )
 from bookforge.query import get_outline_lineage_audit, legal_next_actions, list_execution_options
 from bookforge.query.recovery import (
+    get_downstream_dependency_review,
     get_recovery_branch_health,
     get_recovery_blast_radius,
     get_recovery_manifest,
@@ -357,6 +359,8 @@ def test_recovery_branch_snapshots_evidence_and_exposes_legal_actions(tmp_path: 
     assert "promotion to main" in branch_actions["promote_recovery_branch"].details["approval_reasons"]
     assert branch_actions["review_recovery_semantics"].allowed is False
     assert "missing successful receipt: redraft_scope" in branch_actions["review_recovery_semantics"].refusal_reason
+    assert branch_actions["review_downstream_dependencies"].allowed is False
+    assert "missing successful receipt: redraft_scope" in branch_actions["review_downstream_dependencies"].refusal_reason
 
     readiness = get_recovery_plan_readiness(tmp_path, "my_book", branch_id="recover-sec1")
     assert readiness["recommended_next_action"] == "normalize_outline_scope"
@@ -380,6 +384,11 @@ def test_recovery_branch_snapshots_evidence_and_exposes_legal_actions(tmp_path: 
     assert blast_radius["families"]["downstream_review"]["candidate_count"] == 2
     assert blast_radius["families"]["downstream_review"]["mutation_supported"] is False
     assert "author_review_downstream_scope" in blast_radius["families"]["downstream_review"]["recommended_actions"]
+    downstream_review = get_downstream_dependency_review(tmp_path, "my_book", branch_id="recover-sec1")
+    assert downstream_review["status"] == "manifest_declared_only"
+    assert downstream_review["downstream_scopes"] == [{"chapter_id": 2, "section_id": 1}]
+    assert len(downstream_review["candidate_artifacts"]) == 2
+    assert downstream_review["recommended_next_action"] == "review_downstream_dependencies"
 
 
 def test_recovery_branch_supports_explicit_multi_scope_radius(tmp_path: Path) -> None:
@@ -763,6 +772,18 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
     branch_selector = ScopeSelector(book_id="my_book", branch_id="recover-sec1", chapter=1, section=1)
     branch_actions = {option.action: option for option in list_execution_options(tmp_path, branch_selector, prefer_emitted=False)}
     assert branch_actions["review_recovery_semantics"].allowed is True
+    assert branch_actions["review_downstream_dependencies"].allowed is True
+    downstream_result = review_downstream_dependencies(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="review_downstream_dependencies", branch_id="recover-sec1"),
+    )
+    assert downstream_result.status == "success"
+    downstream_review = get_downstream_dependency_review(tmp_path, "my_book", branch_id="recover-sec1")
+    assert downstream_review["status"] == "reviewed_clean"
+    assert downstream_review["artifact_status"] == "diagnostic"
+    assert downstream_review["readiness"]["ready"] is True
+    health_after_downstream = get_recovery_branch_health(tmp_path, "my_book", branch_id="recover-sec1")
+    assert health_after_downstream.details["downstream_dependency_review"]["status"] == "reviewed_clean"
     review_result = review_recovery_semantics(
         tmp_path,
         build_recovery_branch_request(tmp_path, "my_book", action="review_recovery_semantics", branch_id="recover-sec1"),
@@ -860,12 +881,14 @@ def test_cli_parser_accepts_recovery_workflow_commands() -> None:
         "rebuild-state-scope",
         "redraft-scope",
         "validate-recovery-branch",
+        "review-downstream-dependencies",
         "review-recovery-semantics",
         "promote-recovery-branch",
         "recovery-health",
         "recovery-readiness",
         "recovery-semantic-readiness",
         "recovery-semantic-review",
+        "downstream-dependency-review",
         "scope-invalidation-preview",
     ):
         args = parser.parse_args(

@@ -540,6 +540,22 @@ def _evaluate_recovery_branch_action(workspace, book_id: str, selector: ScopeSel
             blockers = readiness.get("blockers") or []
             return False, "; ".join(str(item) for item in blockers) or "review_recovery_semantics is not ready.", review_details
         return True, None, review_details
+    if action == "review_downstream_dependencies":
+        readiness = get_recovery_semantic_review_readiness(workspace, book_id, branch_id=branch_id)
+        scope = manifest.get("scope") if isinstance(manifest.get("scope"), dict) else {}
+        downstream_scopes = [dict(item) for item in scope.get("downstream_scopes", []) if isinstance(item, dict)]
+        review_details = {
+            **details,
+            "semantic_review_ready": bool(readiness.get("ready")),
+            "semantic_review_status": readiness.get("status"),
+            "downstream_scopes": downstream_scopes,
+            "downstream_scope_count": len(downstream_scopes),
+            "mutation_scope": readiness.get("mutation_scope"),
+        }
+        if not readiness.get("ready"):
+            blockers = readiness.get("blockers") or []
+            return False, "; ".join(str(item) for item in blockers) or "review_downstream_dependencies is not ready.", review_details
+        return True, None, review_details
     if action == "promote_recovery_branch":
         health = get_recovery_branch_health(workspace, book_id, branch_id=branch_id)
         if health.status != "healthy":
@@ -1090,6 +1106,12 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
         selector,
         "review_recovery_semantics",
     )
+    review_downstream_dependencies_allowed, review_downstream_dependencies_refusal, review_downstream_dependencies_details = _evaluate_recovery_branch_action(
+        workspace,
+        book_id,
+        selector,
+        "review_downstream_dependencies",
+    )
     promote_recovery_allowed, promote_recovery_refusal, promote_recovery_details = _evaluate_recovery_branch_action(
         workspace,
         book_id,
@@ -1482,6 +1504,18 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
             selector_requirements=["book_id", "branch_id"],
             refusal_reason=review_recovery_semantics_refusal,
             details=review_recovery_semantics_details,
+        ),
+        ExecutionOption(
+            action="review_downstream_dependencies",
+            summary="Emit a diagnostic downstream dependency review artifact for a structurally recovered branch.",
+            branch_policy="derived_only",
+            workflow_family="recovery_import",
+            mutates_canonical_state=False,
+            requires_expected_node=True,
+            allowed=review_downstream_dependencies_allowed,
+            selector_requirements=["book_id", "branch_id"],
+            refusal_reason=review_downstream_dependencies_refusal,
+            details=review_downstream_dependencies_details,
         ),
         ExecutionOption(
             action="promote_recovery_branch",

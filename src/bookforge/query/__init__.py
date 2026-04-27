@@ -22,6 +22,7 @@ from .outline_lineage import (
     get_stale_outline_artifact_inventory,
 )
 from .recovery import (
+    get_downstream_dependency_review,
     get_recovery_branch_health,
     get_recovery_blast_radius,
     get_recovery_manifest,
@@ -78,6 +79,7 @@ __all__ = [
     "get_outline_repair_candidates",
     "get_recovery_branch_health",
     "get_recovery_blast_radius",
+    "get_downstream_dependency_review",
     "get_recovery_manifest",
     "get_recovery_plan_readiness",
     "get_recovery_semantic_review",

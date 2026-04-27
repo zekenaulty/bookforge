@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T17:36:05Z`
-- Source Document Count: `65`
+- Compiled At (UTC): `2026-04-27T17:44:48Z`
+- Source Document Count: `66`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -71,9 +71,10 @@
 60. `notes/2026-04-27-0081-state-rebuild-slice.md`
 61. `notes/2026-04-27-0081-state-validation-slice.md`
 62. `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
-63. `notes/2026-04-27-0082-semantic-readiness-slice.md`
-64. `notes/2026-04-27-0082-semantic-review-action-slice.md`
-65. `promotion.md`
+63. `notes/2026-04-27-0082-downstream-review-slice.md`
+64. `notes/2026-04-27-0082-semantic-readiness-slice.md`
+65. `notes/2026-04-27-0082-semantic-review-action-slice.md`
+66. `promotion.md`
 
 ---
 
@@ -2996,6 +2997,13 @@ Status: in_progress
   - exposed through `legal_next_actions`
   - exposed through `workflow review-recovery-semantics`
   - emits `recovery_semantic_review.json`
+- Added downstream dependency review surfaces:
+  - `get_downstream_dependency_review(workspace, book_id, *, branch_id)`
+  - `review_downstream_dependencies`
+  - exposed through `legal_next_actions`
+  - exposed through `workflow downstream-dependency-review`
+  - exposed through `workflow review-downstream-dependencies`
+  - emits `downstream_dependency_review.json`
 - The readiness surface is diagnostic-only and returns:
   - derived-branch requirement
   - required successful recovery receipts
@@ -5103,7 +5111,40 @@ Notes
 
 ---
 
-## Source 63: `notes/2026-04-27-0082-semantic-readiness-slice.md`
+## Source 63: `notes/2026-04-27-0082-downstream-review-slice.md`
+
+# 2026-04-27 0082 Downstream Review Slice
+
+Implemented downstream dependency review surfaces:
+
+- `get_downstream_dependency_review(workspace, book_id, *, branch_id)`
+- `review_downstream_dependencies`
+
+The query returns `manifest_declared_only` when downstream scopes exist but no review artifact has been emitted. It includes downstream candidate artifacts from the recovery blast-radius surface without treating them as mutation targets.
+
+The execution action is branch-scoped and diagnostic-only. It emits `downstream_dependency_review.json`, records a recovery receipt, and updates the branch manifest validation block with downstream review status.
+
+This keeps the boundary explicit:
+
+- BookForge identifies downstream dependency evidence and emits receipts.
+- Nanda/author decides whether downstream scopes require redraft, seam repair, projection refresh, or user approval.
+
+Validation:
+
+- `python -m pytest -o addopts='' tests/test_recovery_actions.py --basetemp=.pytest_tmp_0082_downstream_focus`
+- Result: `6 passed`
+- `python -m pytest -o addopts='' tests/test_action_discovery.py tests/test_execution_actions.py tests/test_recovery_actions.py --basetemp=.pytest_tmp_0082_downstream_actions`
+- Result: `48 passed`
+
+Remaining `0082` work:
+
+- Run full regression for this slice.
+- Decide whether `0082` should add LLM-backed semantic review now or defer it behind Nanda-side author reasoning.
+- Consider marking `0082` complete if the intended BookForge side is diagnostic evidence only.
+
+---
+
+## Source 64: `notes/2026-04-27-0082-semantic-readiness-slice.md`
 
 # 2026-04-27 0082 Semantic Readiness Slice
 
@@ -5130,7 +5171,7 @@ Remaining `0082` work:
 
 ---
 
-## Source 64: `notes/2026-04-27-0082-semantic-review-action-slice.md`
+## Source 65: `notes/2026-04-27-0082-semantic-review-action-slice.md`
 
 # 2026-04-27 0082 Semantic Review Action Slice
 
@@ -5168,7 +5209,7 @@ Remaining `0082` work:
 
 ---
 
-## Source 65: `promotion.md`
+## Source 66: `promotion.md`
 
 # Promotion
 

@@ -51,6 +51,7 @@ from bookforge.execution import (
     rebuild_state_scope,
     redraft_scope,
     repair_scene_prose,
+    review_downstream_dependencies,
     review_recovery_semantics,
     resume_paused_section,
     record_assembly_validation_action,
@@ -78,6 +79,7 @@ from bookforge.query import (
     list_execution_options,
 )
 from bookforge.query.recovery import (
+    get_downstream_dependency_review,
     get_recovery_branch_health,
     get_recovery_blast_radius,
     get_recovery_plan_readiness,
@@ -459,6 +461,10 @@ def _workflow_review_recovery_semantics(args: argparse.Namespace) -> int:
     return _workflow_recovery_branch_action(args, "review_recovery_semantics", review_recovery_semantics)
 
 
+def _workflow_review_downstream_dependencies(args: argparse.Namespace) -> int:
+    return _workflow_recovery_branch_action(args, "review_downstream_dependencies", review_downstream_dependencies)
+
+
 def _workflow_promote_recovery_branch(args: argparse.Namespace) -> int:
     return _workflow_recovery_branch_action(args, "promote_recovery_branch", promote_recovery_branch)
 
@@ -542,6 +548,25 @@ def _workflow_recovery_semantic_review(args: argparse.Namespace) -> int:
         sys.stdout.write(f"Book: {payload.get('book_id')}\n")
         sys.stdout.write(f"Branch: {payload.get('branch_id')}\n")
         sys.stdout.write(f"Status: {payload.get('status')}\n")
+        sys.stdout.write(f"Findings: {len(payload.get('findings') or [])}\n")
+        sys.stdout.write(f"Recommended next action: {payload.get('recommended_next_action')}\n")
+
+    return _write_json_or_text(args, review, render)
+
+
+def _workflow_downstream_dependency_review(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        review = get_downstream_dependency_review(workspace, args.book, branch_id=args.branch_id)
+    except Exception as exc:
+        sys.stderr.write(f"Downstream dependency review failed: {exc}\n")
+        return 1
+
+    def render(payload) -> None:
+        sys.stdout.write(f"Book: {payload.get('book_id')}\n")
+        sys.stdout.write(f"Branch: {payload.get('branch_id')}\n")
+        sys.stdout.write(f"Status: {payload.get('status')}\n")
+        sys.stdout.write(f"Downstream scopes: {len(payload.get('downstream_scopes') or [])}\n")
         sys.stdout.write(f"Findings: {len(payload.get('findings') or [])}\n")
         sys.stdout.write(f"Recommended next action: {payload.get('recommended_next_action')}\n")
 
@@ -2070,6 +2095,15 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_recovery_semantic_review.add_argument("--json", action="store_true", help="Emit semantic review as JSON.")
     workflow_recovery_semantic_review.set_defaults(func=_workflow_recovery_semantic_review)
 
+    workflow_downstream_dependency_review = workflow_sub.add_parser(
+        "downstream-dependency-review",
+        help="Show the current diagnostic downstream dependency review artifact, if present.",
+    )
+    workflow_downstream_dependency_review.add_argument("--book", required=True, help="Book id.")
+    workflow_downstream_dependency_review.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_downstream_dependency_review.add_argument("--json", action="store_true", help="Emit downstream review as JSON.")
+    workflow_downstream_dependency_review.set_defaults(func=_workflow_downstream_dependency_review)
+
     workflow_quarantine_artifacts = workflow_sub.add_parser(
         "quarantine-artifacts",
         help="Move stale or invalid recovery-scope artifacts out of the active branch snapshot.",
@@ -2125,6 +2159,14 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_review_recovery_semantics.add_argument("--book", required=True, help="Book id.")
     workflow_review_recovery_semantics.add_argument("--branch-id", required=True, help="Recovery branch id.")
     workflow_review_recovery_semantics.set_defaults(func=_workflow_review_recovery_semantics)
+
+    workflow_review_downstream_dependencies = workflow_sub.add_parser(
+        "review-downstream-dependencies",
+        help="Emit a diagnostic downstream dependency review artifact for a recovery branch.",
+    )
+    workflow_review_downstream_dependencies.add_argument("--book", required=True, help="Book id.")
+    workflow_review_downstream_dependencies.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_review_downstream_dependencies.set_defaults(func=_workflow_review_downstream_dependencies)
 
     workflow_promote_recovery_branch = workflow_sub.add_parser(
         "promote-recovery-branch",
