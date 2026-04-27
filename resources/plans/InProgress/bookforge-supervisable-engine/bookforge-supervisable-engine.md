@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T16:37:20Z`
-- Source Document Count: `55`
+- Compiled At (UTC): `2026-04-27T16:42:27Z`
+- Source Document Count: `56`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -54,16 +54,17 @@
 43. `notes/2026-04-26-0080-complete.md`
 44. `notes/2026-04-26-0081-implementation-slice.md`
 45. `notes/2026-04-26-0081-planning.md`
-46. `notes/2026-04-27-0081-blast-radius-slice.md`
-47. `notes/2026-04-27-0081-continuity-validation-slice.md`
-48. `notes/2026-04-27-0081-durable-validation-slice.md`
-49. `notes/2026-04-27-0081-projection-validation-slice.md`
-50. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
-51. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
-52. `notes/2026-04-27-0081-redraft-scope-slice.md`
-53. `notes/2026-04-27-0081-state-rebuild-slice.md`
-54. `notes/2026-04-27-0081-state-validation-slice.md`
-55. `promotion.md`
+46. `notes/2026-04-27-0081-approval-metadata-slice.md`
+47. `notes/2026-04-27-0081-blast-radius-slice.md`
+48. `notes/2026-04-27-0081-continuity-validation-slice.md`
+49. `notes/2026-04-27-0081-durable-validation-slice.md`
+50. `notes/2026-04-27-0081-projection-validation-slice.md`
+51. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+52. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+53. `notes/2026-04-27-0081-redraft-scope-slice.md`
+54. `notes/2026-04-27-0081-state-rebuild-slice.md`
+55. `notes/2026-04-27-0081-state-validation-slice.md`
+56. `promotion.md`
 
 ---
 
@@ -2709,10 +2710,17 @@ Status: in_progress
 - Recovery validation now blocks branch promotion when affected chapter summaries, setting projections, or appearance projections reference non-outline character IDs or carry stale embedded branch coordinates.
 - Recovery validation now blocks branch promotion when durable inventory/plot-device registries and indexes retain non-outline character refs, stale embedded branch coordinates, or index entries that no longer exist in their registries.
 - Recovery validation now blocks branch promotion when continuity packs, continuity history, bible/last-excerpt text, or affected chapter seam reports retain non-outline character/thread refs or stale embedded branch coordinates.
+- Recovery action discovery now reports specific approval reasons for each destructive or promotion-sensitive primitive:
+  - recovery anchor selection
+  - destructive cleanup/quarantine
+  - scope output invalidation
+  - state/projection rebuild
+  - scope redraft
+  - promotion to main
+  - broad recovery radius
 
 ## Remaining Implementation
 - Extend blast-radius surfaces with downstream dependency tracing after redraft.
-- Add approval-required metadata to all destructive or broad-scope primitives.
 - Expand validation beyond outline lineage to state/projection families:
   - semantic continuity validation beyond ghost-character, thread-reference, and stale-branch checks
   - semantic validation for inventory/deep state beyond ghost-character and index-consistency checks
@@ -4240,7 +4248,8 @@ Notes
   - `recovery_validation.py`: 109 lines
   - `recovery_actions.py`: 18-line facade
 
-## Remaining Work
+## Historical Remaining Work At This Slice
+- Later 2026-04-27 slices completed `rebuild_state_scope`, `redraft_scope`, postcondition receipts, blast-radius query surfaces, specific approval metadata, and initial structural validation across state/projection families.
 - Add `rebuild_state_scope`.
 - Add `redraft_scope` as a scope-level orchestration primitive.
 - Add postcondition receipts with integrity deltas and next legal action snapshots.
@@ -4287,7 +4296,41 @@ Notes
 
 ---
 
-## Source 46: `notes/2026-04-27-0081-blast-radius-slice.md`
+## Source 46: `notes/2026-04-27-0081-approval-metadata-slice.md`
+
+# 2026-04-27 0081 Approval Metadata Slice
+
+## Summary
+- Tightened recovery action discovery so each recovery primitive reports a specific approval reason.
+- Nanda can now distinguish:
+  - `recovery anchor selection`
+  - `destructive cleanup/quarantine`
+  - `scope output invalidation`
+  - `state/projection rebuild`
+  - `scope redraft`
+  - `promotion to main`
+  - `broad recovery radius`
+
+## Boundary
+- This updates query/action-discovery metadata.
+- It does not add a new approval enforcement layer.
+- Enforcement remains branch-first execution, validation, and promotion safety; Nanda owns approval flow and decision policy.
+
+## Why
+- Generic approval text is not enough for an author agent planning multi-step recovery.
+- The author decision layer needs to know whether an action is selecting a timeline anchor, invalidating outputs, rebuilding state, redrafting, or promoting canonical changes.
+
+## Validation
+- Focused suite passed:
+  - `.\.venv\Scripts\python.exe -m pytest -o addopts='' tests/test_recovery_actions.py tests/test_action_discovery.py --basetemp=.pytest_tmp_0081_approval_focus`
+  - Result: `35 passed`
+- Full suite passed:
+  - `.\.venv\Scripts\python.exe -m pytest -o addopts='' --basetemp=.pytest_tmp_0081_approval_full`
+  - Result: `308 passed`
+
+---
+
+## Source 47: `notes/2026-04-27-0081-blast-radius-slice.md`
 
 # 2026-04-27 0081 Recovery Blast Radius Slice
 
@@ -4339,7 +4382,7 @@ Notes
 
 ---
 
-## Source 47: `notes/2026-04-27-0081-continuity-validation-slice.md`
+## Source 48: `notes/2026-04-27-0081-continuity-validation-slice.md`
 
 # 2026-04-27 0081 Continuity Validation Slice
 
@@ -4375,7 +4418,7 @@ Notes
 
 ---
 
-## Source 48: `notes/2026-04-27-0081-durable-validation-slice.md`
+## Source 49: `notes/2026-04-27-0081-durable-validation-slice.md`
 
 # 2026-04-27 0081 Durable Validation Slice
 
@@ -4413,7 +4456,7 @@ Notes
 
 ---
 
-## Source 49: `notes/2026-04-27-0081-projection-validation-slice.md`
+## Source 50: `notes/2026-04-27-0081-projection-validation-slice.md`
 
 # 2026-04-27 0081 Projection Validation Slice
 
@@ -4452,7 +4495,7 @@ Notes
 
 ---
 
-## Source 50: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+## Source 51: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
 
 # 2026-04-27 0081 Recovery Promotion Postcondition
 
@@ -4491,7 +4534,7 @@ Notes
 
 ---
 
-## Source 51: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+## Source 52: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
 
 # 2026-04-27 0081 Recovery Receipt Postconditions
 
@@ -4539,7 +4582,7 @@ Notes
 
 ---
 
-## Source 52: `notes/2026-04-27-0081-redraft-scope-slice.md`
+## Source 53: `notes/2026-04-27-0081-redraft-scope-slice.md`
 
 # 2026-04-27 0081 Redraft Scope Slice
 
@@ -4578,7 +4621,7 @@ Notes
 
 ---
 
-## Source 53: `notes/2026-04-27-0081-state-rebuild-slice.md`
+## Source 54: `notes/2026-04-27-0081-state-rebuild-slice.md`
 
 # 2026-04-27 0081 State Rebuild Slice
 
@@ -4626,7 +4669,7 @@ Notes
 
 ---
 
-## Source 54: `notes/2026-04-27-0081-state-validation-slice.md`
+## Source 55: `notes/2026-04-27-0081-state-validation-slice.md`
 
 # 2026-04-27 0081 Recovery State Validation Slice
 
@@ -4663,7 +4706,7 @@ Notes
 
 ---
 
-## Source 55: `promotion.md`
+## Source 56: `promotion.md`
 
 # Promotion
 

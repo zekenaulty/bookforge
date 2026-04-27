@@ -224,6 +224,10 @@ def test_recovery_branch_snapshots_evidence_and_exposes_legal_actions(tmp_path: 
     assert "validate_recovery_branch" not in legal
     assert branch_actions["quarantine_artifacts"].details["approval_required"] is True
     assert "destructive cleanup/quarantine" in branch_actions["quarantine_artifacts"].details["approval_reasons"]
+    assert "scope output invalidation" in branch_actions["invalidate_scope_outputs"].details["approval_reasons"]
+    assert "state/projection rebuild" in branch_actions["rebuild_state_scope"].details["approval_reasons"]
+    assert "scope redraft" in branch_actions["redraft_scope"].details["approval_reasons"]
+    assert "promotion to main" in branch_actions["promote_recovery_branch"].details["approval_reasons"]
 
     readiness = get_recovery_plan_readiness(tmp_path, "my_book", branch_id="recover-sec1")
     assert readiness["recommended_next_action"] == "normalize_outline_scope"

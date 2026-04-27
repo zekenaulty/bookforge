@@ -173,10 +173,17 @@ Status: in_progress
 - Recovery validation now blocks branch promotion when affected chapter summaries, setting projections, or appearance projections reference non-outline character IDs or carry stale embedded branch coordinates.
 - Recovery validation now blocks branch promotion when durable inventory/plot-device registries and indexes retain non-outline character refs, stale embedded branch coordinates, or index entries that no longer exist in their registries.
 - Recovery validation now blocks branch promotion when continuity packs, continuity history, bible/last-excerpt text, or affected chapter seam reports retain non-outline character/thread refs or stale embedded branch coordinates.
+- Recovery action discovery now reports specific approval reasons for each destructive or promotion-sensitive primitive:
+  - recovery anchor selection
+  - destructive cleanup/quarantine
+  - scope output invalidation
+  - state/projection rebuild
+  - scope redraft
+  - promotion to main
+  - broad recovery radius
 
 ## Remaining Implementation
 - Extend blast-radius surfaces with downstream dependency tracing after redraft.
-- Add approval-required metadata to all destructive or broad-scope primitives.
 - Expand validation beyond outline lineage to state/projection families:
   - semantic continuity validation beyond ghost-character, thread-reference, and stale-branch checks
   - semantic validation for inventory/deep state beyond ghost-character and index-consistency checks

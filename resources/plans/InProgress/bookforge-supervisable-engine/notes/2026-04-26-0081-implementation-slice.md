@@ -46,7 +46,8 @@
   - `recovery_validation.py`: 109 lines
   - `recovery_actions.py`: 18-line facade
 
-## Remaining Work
+## Historical Remaining Work At This Slice
+- Later 2026-04-27 slices completed `rebuild_state_scope`, `redraft_scope`, postcondition receipts, blast-radius query surfaces, specific approval metadata, and initial structural validation across state/projection families.
 - Add `rebuild_state_scope`.
 - Add `redraft_scope` as a scope-level orchestration primitive.
 - Add postcondition receipts with integrity deltas and next legal action snapshots.

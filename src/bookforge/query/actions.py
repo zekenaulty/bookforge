@@ -450,12 +450,17 @@ def _recovery_approval_metadata(action: str, manifest: dict) -> dict:
     scope_count = len(scopes)
     broad_scope = scope_count > 1 or any("section_id" not in item for item in scopes)
     reasons = []
-    if action == "create_recovery_branch":
-        reasons.append("recovery anchor selection")
-    if action in {"quarantine_artifacts", "invalidate_scope_outputs", "rebuild_state_scope", "redraft_scope"}:
-        reasons.append("destructive cleanup/quarantine")
-    if action == "promote_recovery_branch":
-        reasons.append("promotion to main")
+    action_reasons = {
+        "create_recovery_branch": "recovery anchor selection",
+        "quarantine_artifacts": "destructive cleanup/quarantine",
+        "invalidate_scope_outputs": "scope output invalidation",
+        "rebuild_state_scope": "state/projection rebuild",
+        "redraft_scope": "scope redraft",
+        "promote_recovery_branch": "promotion to main",
+    }
+    action_reason = action_reasons.get(action)
+    if action_reason:
+        reasons.append(action_reason)
     if broad_scope:
         reasons.append("broad recovery radius")
     return {
