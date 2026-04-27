@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T13:53:14Z`
-- Source Document Count: `49`
+- Compiled At (UTC): `2026-04-27T14:03:04Z`
+- Source Document Count: `50`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -54,10 +54,11 @@
 43. `notes/2026-04-26-0080-complete.md`
 44. `notes/2026-04-26-0081-implementation-slice.md`
 45. `notes/2026-04-26-0081-planning.md`
-46. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
-47. `notes/2026-04-27-0081-redraft-scope-slice.md`
-48. `notes/2026-04-27-0081-state-rebuild-slice.md`
-49. `promotion.md`
+46. `notes/2026-04-27-0081-blast-radius-slice.md`
+47. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+48. `notes/2026-04-27-0081-redraft-scope-slice.md`
+49. `notes/2026-04-27-0081-state-rebuild-slice.md`
+50. `promotion.md`
 
 ---
 
@@ -2638,6 +2639,7 @@ Status: in_progress
 - Readiness/query primitives:
   - `get_recovery_plan_readiness(workspace, book_id, *, branch_id, impact_report_ref=None)`
   - `get_recovery_branch_health(workspace, book_id, *, branch_id)`
+  - `get_recovery_blast_radius(workspace, book_id, *, branch_id)`
   - `get_scope_invalidation_preview(workspace, book_id, *, branch_id, scope)`
   - `get_salvage_candidates(workspace, book_id, *, scope)`
 - Execution primitives:
@@ -2662,6 +2664,7 @@ Status: in_progress
 - Implemented read/query surfaces:
   - `get_recovery_plan_readiness`
   - `get_recovery_branch_health`
+  - `get_recovery_blast_radius`
   - `get_scope_invalidation_preview`
   - `get_state_rebuild_preview`
   - `get_salvage_candidates`
@@ -2695,10 +2698,11 @@ Status: in_progress
 - Redraft now prepares normalized affected sections as branch-local frozen sections and invokes the existing scoped section writer in the recovery branch.
 - Validation now requires `rebuild_state_scope` and `redraft_scope` before a recovery branch can become healthy.
 - Quarantine now uses hashed fallback quarantine paths when deep Windows paths exceed practical filesystem limits while preserving original source paths in receipts.
+- Recovery blast-radius now categorizes impact-report-friendly candidate artifacts into prose, state, continuity, projection, and series families.
 
 ## Remaining Implementation
 - Extend recovery receipt postconditions with canonical integrity deltas on promotion results.
-- Add blast-radius query surfaces that separate prose, state, series, continuity, and projection invalidation candidates.
+- Extend blast-radius surfaces with downstream dependency tracing after redraft.
 - Add approval-required metadata to all destructive or broad-scope primitives.
 - Expand validation beyond outline lineage to state/projection families:
   - continuity
@@ -4274,7 +4278,59 @@ Notes
 
 ---
 
-## Source 46: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+## Source 46: `notes/2026-04-27-0081-blast-radius-slice.md`
+
+# 2026-04-27 0081 Recovery Blast Radius Slice
+
+## Summary
+- Added `get_recovery_blast_radius(...)` as an impact-report-friendly recovery query surface.
+- Added CLI support via `bookforge workflow recovery-blast-radius`.
+- The surface combines existing branch-local invalidation previews into categorized artifact families:
+  - prose
+  - state
+  - continuity
+  - projection
+  - series
+
+## Contract Notes
+- The surface is read-only and intended to run before destructive recovery actions.
+- Prose impacts map to `invalidate_scope_outputs`.
+- State, continuity, and projection impacts map to `rebuild_state_scope`.
+- Series impacts are diagnostic-only in this slice because series canon is outside the current recovery branch mutation set.
+- Every impact row declares:
+  - artifact family
+  - path
+  - artifact status
+  - whether the artifact exists
+  - whether it is safe as canonical
+  - recommended action
+  - whether BookForge currently supports mutation for that family
+
+## Files Touched
+- `src/bookforge/query/recovery.py`
+- `src/bookforge/query/__init__.py`
+- `src/bookforge/cli.py`
+- `tests/test_recovery_actions.py`
+- `docs/help/index.md`
+- `docs/help/workflow.md`
+- `resources/plans/InProgress/bookforge-supervisable-engine/steps/0081-add-author-operable-timeline-recovery-and-story-weaving-primitives/step.md`
+
+## Validation
+- Focused tests:
+  - `python -m pytest -o addopts='' tests/test_recovery_actions.py tests/test_action_discovery.py --basetemp=.pytest_tmp_0081_blast_radius_focus`
+  - Result: `35 passed`
+- Full suite:
+  - `python -m pytest -o addopts='' --basetemp=.pytest_tmp_0081_blast_radius_full`
+  - Result: `308 passed`
+
+## Next
+- Add downstream dependency tracing after redraft.
+- Add promotion-result canonical integrity deltas.
+- Expand validation from outline lineage into state/projection family health.
+
+---
+
+## Source 47: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
 
 # 2026-04-27 0081 Recovery Receipt Postconditions
 
@@ -4322,7 +4378,7 @@ Notes
 
 ---
 
-## Source 47: `notes/2026-04-27-0081-redraft-scope-slice.md`
+## Source 48: `notes/2026-04-27-0081-redraft-scope-slice.md`
 
 # 2026-04-27 0081 Redraft Scope Slice
 
@@ -4361,7 +4417,7 @@ Notes
 
 ---
 
-## Source 48: `notes/2026-04-27-0081-state-rebuild-slice.md`
+## Source 49: `notes/2026-04-27-0081-state-rebuild-slice.md`
 
 # 2026-04-27 0081 State Rebuild Slice
 
@@ -4409,7 +4465,7 @@ Notes
 
 ---
 
-## Source 49: `promotion.md`
+## Source 50: `promotion.md`
 
 # Promotion
 

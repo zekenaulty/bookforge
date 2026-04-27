@@ -108,6 +108,7 @@ Status: in_progress
 - Readiness/query primitives:
   - `get_recovery_plan_readiness(workspace, book_id, *, branch_id, impact_report_ref=None)`
   - `get_recovery_branch_health(workspace, book_id, *, branch_id)`
+  - `get_recovery_blast_radius(workspace, book_id, *, branch_id)`
   - `get_scope_invalidation_preview(workspace, book_id, *, branch_id, scope)`
   - `get_salvage_candidates(workspace, book_id, *, scope)`
 - Execution primitives:
@@ -132,6 +133,7 @@ Status: in_progress
 - Implemented read/query surfaces:
   - `get_recovery_plan_readiness`
   - `get_recovery_branch_health`
+  - `get_recovery_blast_radius`
   - `get_scope_invalidation_preview`
   - `get_state_rebuild_preview`
   - `get_salvage_candidates`
@@ -165,10 +167,11 @@ Status: in_progress
 - Redraft now prepares normalized affected sections as branch-local frozen sections and invokes the existing scoped section writer in the recovery branch.
 - Validation now requires `rebuild_state_scope` and `redraft_scope` before a recovery branch can become healthy.
 - Quarantine now uses hashed fallback quarantine paths when deep Windows paths exceed practical filesystem limits while preserving original source paths in receipts.
+- Recovery blast-radius now categorizes impact-report-friendly candidate artifacts into prose, state, continuity, projection, and series families.
 
 ## Remaining Implementation
 - Extend recovery receipt postconditions with canonical integrity deltas on promotion results.
-- Add blast-radius query surfaces that separate prose, state, series, continuity, and projection invalidation candidates.
+- Extend blast-radius surfaces with downstream dependency tracing after redraft.
 - Add approval-required metadata to all destructive or broad-scope primitives.
 - Expand validation beyond outline lineage to state/projection families:
   - continuity

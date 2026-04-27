@@ -20,6 +20,7 @@ from bookforge.execution import (
 from bookforge.query import get_outline_lineage_audit, legal_next_actions, list_execution_options
 from bookforge.query.recovery import (
     get_recovery_branch_health,
+    get_recovery_blast_radius,
     get_recovery_manifest,
     get_recovery_plan_readiness,
     get_scope_invalidation_preview,
@@ -259,6 +260,16 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
     preview = get_scope_invalidation_preview(tmp_path, "my_book", branch_id="recover-sec1")
     assert "draft/chapters/ch_001/scene_001.md" in preview["candidate_paths"]
     assert "draft/chapters/ch_001/scene_002.md" in preview["candidate_paths"]
+    state_preview = get_state_rebuild_preview(tmp_path, "my_book", branch_id="recover-sec1")
+    assert "state.json" in state_preview["candidate_paths"]
+    assert "draft/context/characters/artie.state.json" in state_preview["candidate_paths"]
+    assert "draft/context/settings/ch_001/scene_001/prose_extracted.setting.json" in state_preview["candidate_paths"]
+    blast_radius = get_recovery_blast_radius(tmp_path, "my_book", branch_id="recover-sec1")
+    assert blast_radius["families"]["prose"]["candidate_count"] >= 2
+    assert blast_radius["families"]["state"]["candidate_count"] >= 2
+    assert blast_radius["families"]["projection"]["candidate_count"] >= 1
+    assert "series" in blast_radius["families"]
+    assert "future_series_scope_rebuild" in blast_radius["families"]["series"]["recommended_actions"]
 
     invalidate_result = invalidate_scope_outputs(
         tmp_path,
@@ -277,11 +288,6 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
     assert "rebuild_state_scope has not completed" in blocked_validate.details["recovery_receipt"]["details"]["blockers"]
     assert _postcondition(blocked_validate)["branch_health_status_after"] == "blocked"
     assert _postcondition(blocked_validate)["recommended_next_action"] == "rebuild_state_scope"
-
-    state_preview = get_state_rebuild_preview(tmp_path, "my_book", branch_id="recover-sec1")
-    assert "state.json" in state_preview["candidate_paths"]
-    assert "draft/context/characters/artie.state.json" in state_preview["candidate_paths"]
-    assert "draft/context/settings/ch_001/scene_001/prose_extracted.setting.json" in state_preview["candidate_paths"]
 
     rebuild_result = rebuild_state_scope(
         tmp_path,
@@ -411,6 +417,7 @@ def test_cli_parser_accepts_recovery_workflow_commands() -> None:
         "normalize-outline-scope",
         "invalidate-scope-outputs",
         "state-rebuild-preview",
+        "recovery-blast-radius",
         "rebuild-state-scope",
         "redraft-scope",
         "validate-recovery-branch",

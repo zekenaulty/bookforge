@@ -291,6 +291,153 @@ def get_state_rebuild_preview(
     }
 
 
+def _impact_item(
+    *,
+    family: str,
+    rel_path: str,
+    root: Path,
+    recommended_action: str,
+    mutation_supported: bool,
+    note: str,
+) -> Dict[str, Any]:
+    return {
+        "family": family,
+        "path": rel_path,
+        "artifact_status": "diagnostic",
+        "exists": (root / rel_path).exists(),
+        "safe_as_canonical": False,
+        "recommended_action": recommended_action,
+        "mutation_supported": mutation_supported,
+        "note": note,
+    }
+
+
+def _classify_state_family(rel_path: str) -> str:
+    path = rel_path.replace("\\", "/")
+    if path.startswith("draft/context/chapter_summaries/") or path.startswith("draft/context/chapter_seams/"):
+        return "continuity"
+    if path.startswith("draft/context/continuity_history/") or path in {"draft/context/bible.md", "draft/context/last_excerpt.md"}:
+        return "continuity"
+    if path.startswith("draft/context/settings/") or path.startswith("draft/context/appearance/"):
+        return "projection"
+    if path.startswith("draft/context/phase_history/"):
+        return "projection"
+    return "state"
+
+
+def _series_candidate_paths(workspace: Path, execution_root: Path) -> List[str]:
+    book_payload = _read_json(execution_root / "book.json")
+    series_ref = str(book_payload.get("series_ref") or "").strip()
+    series_id = str(book_payload.get("series_id") or "").strip()
+    if series_ref:
+        series_root = workspace / series_ref
+        rel_prefix = series_ref.replace("\\", "/").strip("/")
+    elif series_id:
+        series_root = workspace / "series" / series_id
+        rel_prefix = f"series/{series_id}"
+    else:
+        return []
+    if not series_root.exists():
+        return []
+    paths: List[str] = []
+    for path in sorted(series_root.rglob("*")):
+        if path.is_file():
+            paths.append(f"{rel_prefix}/{path.relative_to(series_root).as_posix()}")
+    return paths
+
+
+def get_recovery_blast_radius(
+    workspace: Path,
+    book_id: str,
+    *,
+    branch_id: str,
+) -> Dict[str, Any]:
+    resolved = str(branch_id or "").strip()
+    book_root = _book_root(workspace, book_id)
+    execution_root = _common.execution_book_root(book_root, resolved or MAIN_BRANCH_ID)
+    manifest = get_recovery_manifest(workspace, book_id, branch_id=resolved) if resolved else {}
+    scope: Optional[RecoveryScope] = None
+    if isinstance(manifest.get("scope"), dict):
+        try:
+            scope = RecoveryScope.from_dict(manifest["scope"])
+        except ValueError:
+            scope = None
+    prose_preview = get_scope_invalidation_preview(workspace, book_id, branch_id=resolved, scope=scope)
+    state_preview = get_state_rebuild_preview(workspace, book_id, branch_id=resolved)
+    impacts: List[Dict[str, Any]] = []
+
+    for rel_path in prose_preview.get("candidate_paths") or []:
+        impacts.append(
+            _impact_item(
+                family="prose",
+                rel_path=str(rel_path),
+                root=execution_root,
+                recommended_action="invalidate_scope_outputs",
+                mutation_supported=True,
+                note="Affected branch-local prose/generated scene artifact; quarantine before redraft.",
+            )
+        )
+
+    for rel_path in state_preview.get("candidate_paths") or []:
+        family = _classify_state_family(str(rel_path))
+        impacts.append(
+            _impact_item(
+                family=family,
+                rel_path=str(rel_path),
+                root=execution_root,
+                recommended_action="rebuild_state_scope",
+                mutation_supported=True,
+                note="Affected branch-local state/projection artifact; quarantine before rebuilding branch state.",
+            )
+        )
+
+    for rel_path in _series_candidate_paths(workspace, execution_root):
+        impacts.append(
+            {
+                "family": "series",
+                "path": rel_path,
+                "artifact_status": "diagnostic",
+                "exists": (Path(workspace) / rel_path).exists(),
+                "safe_as_canonical": False,
+                "recommended_action": "future_series_scope_rebuild",
+                "mutation_supported": False,
+                "note": "Series canon is outside the current recovery branch mutation set; Nanda should include it in impact reports when timeline facts changed.",
+            }
+        )
+
+    families: Dict[str, Dict[str, Any]] = {}
+    for impact in impacts:
+        family = str(impact.get("family") or "unknown")
+        row = families.setdefault(
+            family,
+            {
+                "candidate_count": 0,
+                "paths": [],
+                "mutation_supported": bool(impact.get("mutation_supported")),
+                "recommended_actions": [],
+            },
+        )
+        row["candidate_count"] += 1
+        row["paths"].append(impact["path"])
+        action = str(impact.get("recommended_action") or "").strip()
+        if action and action not in row["recommended_actions"]:
+            row["recommended_actions"].append(action)
+        row["mutation_supported"] = bool(row["mutation_supported"]) or bool(impact.get("mutation_supported"))
+
+    return {
+        "schema_version": "recovery_blast_radius_v1",
+        "book_id": book_id,
+        "branch_id": resolved,
+        "affected_scopes": [dict(item) for item in scope.affected_scopes] if scope is not None else [],
+        "downstream_scopes": [dict(item) for item in scope.downstream_scopes] if scope is not None else [],
+        "families": families,
+        "artifact_impacts": impacts,
+        "total_candidate_count": len(impacts),
+        "mutation_supported_families": sorted(family for family, row in families.items() if row.get("mutation_supported")),
+        "unsupported_families": sorted(family for family, row in families.items() if not row.get("mutation_supported")),
+    }
+
+
 def get_salvage_candidates(workspace: Path, book_id: str, *, scope: RecoveryScope) -> Dict[str, Any]:
     book_root = _book_root(workspace, book_id)
     preview = get_scope_invalidation_preview(workspace, book_id, branch_id=MAIN_BRANCH_ID, scope=scope)

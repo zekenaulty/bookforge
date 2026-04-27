@@ -78,6 +78,7 @@ from bookforge.query import (
 )
 from bookforge.query.recovery import (
     get_recovery_branch_health,
+    get_recovery_blast_radius,
     get_recovery_plan_readiness,
     get_scope_invalidation_preview,
     get_state_rebuild_preview,
@@ -534,6 +535,25 @@ def _workflow_state_rebuild_preview(args: argparse.Namespace) -> int:
         sys.stdout.write(f"Candidate paths: {len(payload.get('candidate_paths') or [])}\n")
         for rel_path in payload.get("candidate_paths", [])[:100]:
             sys.stdout.write(f"- {rel_path}\n")
+
+    return _write_json_or_text(args, preview, render)
+
+
+def _workflow_recovery_blast_radius(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace)
+    try:
+        preview = get_recovery_blast_radius(workspace, args.book, branch_id=args.branch_id)
+    except Exception as exc:
+        sys.stderr.write(f"Recovery blast radius failed: {exc}\n")
+        return 1
+
+    def render(payload) -> None:
+        sys.stdout.write(f"Book: {payload.get('book_id')}\n")
+        sys.stdout.write(f"Branch: {payload.get('branch_id')}\n")
+        sys.stdout.write(f"Candidate artifacts: {payload.get('total_candidate_count')}\n")
+        families = payload.get("families") if isinstance(payload.get("families"), dict) else {}
+        for family, row in sorted(families.items()):
+            sys.stdout.write(f"- {family}: {row.get('candidate_count', 0)} candidates\n")
 
     return _write_json_or_text(args, preview, render)
 
@@ -1976,6 +1996,15 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_state_rebuild_preview.add_argument("--branch-id", required=True, help="Recovery branch id.")
     workflow_state_rebuild_preview.add_argument("--json", action="store_true", help="Emit preview as JSON.")
     workflow_state_rebuild_preview.set_defaults(func=_workflow_state_rebuild_preview)
+
+    workflow_recovery_blast_radius = workflow_sub.add_parser(
+        "recovery-blast-radius",
+        help="Show categorized artifact impacts for a recovery branch.",
+    )
+    workflow_recovery_blast_radius.add_argument("--book", required=True, help="Book id.")
+    workflow_recovery_blast_radius.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_recovery_blast_radius.add_argument("--json", action="store_true", help="Emit blast-radius preview as JSON.")
+    workflow_recovery_blast_radius.set_defaults(func=_workflow_recovery_blast_radius)
 
     workflow_quarantine_artifacts = workflow_sub.add_parser(
         "quarantine-artifacts",

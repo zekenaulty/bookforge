@@ -82,6 +82,7 @@ Result truth
     - `bookforge.query.get_outline_repair_candidates(...)`
     - `bookforge.query.get_recovery_plan_readiness(...)`
     - `bookforge.query.get_recovery_branch_health(...)`
+    - `bookforge.query.get_recovery_blast_radius(...)`
     - `bookforge.query.get_scope_invalidation_preview(...)`
     - `bookforge.query.get_state_rebuild_preview(...)`
     - `bookforge.query.get_salvage_candidates(...)`
@@ -109,6 +110,7 @@ Result truth
     - `bookforge workflow create-recovery-branch`
     - `bookforge workflow recovery-readiness`
     - `bookforge workflow recovery-health`
+    - `bookforge workflow recovery-blast-radius`
     - `bookforge workflow scope-invalidation-preview`
     - `bookforge workflow state-rebuild-preview`
     - `bookforge workflow quarantine-artifacts`

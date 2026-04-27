@@ -23,6 +23,7 @@ from .outline_lineage import (
 )
 from .recovery import (
     get_recovery_branch_health,
+    get_recovery_blast_radius,
     get_recovery_manifest,
     get_recovery_plan_readiness,
     get_salvage_candidates,
@@ -74,6 +75,7 @@ __all__ = [
     "get_outline_lineage_audit",
     "get_outline_repair_candidates",
     "get_recovery_branch_health",
+    "get_recovery_blast_radius",
     "get_recovery_manifest",
     "get_recovery_plan_readiness",
     "get_salvage_candidates",

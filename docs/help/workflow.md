@@ -176,6 +176,7 @@ Commands
 - `bookforge workflow create-recovery-branch --book <id> --anchor-type <type> [--source-run-id <run>] [--branch-id <id>] [--affected-scope <scope>] [--salvage-policy <policy>]`
 - `bookforge workflow recovery-readiness --book <id> --branch-id <id> [--impact-report-ref <ref>] [--json]`
 - `bookforge workflow recovery-health --book <id> --branch-id <id> [--json]`
+- `bookforge workflow recovery-blast-radius --book <id> --branch-id <id> [--json]`
 - `bookforge workflow scope-invalidation-preview --book <id> --branch-id <id> [--json]`
 - `bookforge workflow state-rebuild-preview --book <id> --branch-id <id> [--json]`
 - `bookforge workflow quarantine-artifacts --book <id> --branch-id <id>`
@@ -211,6 +212,13 @@ Recovery sequence
 - `scope-invalidation-preview` shows which branch-local prose/generated outputs would be quarantined.
 - `invalidate-scope-outputs` quarantines affected prose/generated outputs and records promotion removals.
 - `state-rebuild-preview` shows which branch-local state, continuity, durable-state, phase-history, appearance, and setting projection artifacts would be quarantined.
+- `recovery-blast-radius` combines prose invalidation and state rebuild previews into impact families:
+  - prose
+  - state
+  - continuity
+  - projection
+  - series
+- The series family is diagnostic-only in this slice. It lets Nanda include series canon risk in an impact report without pretending BookForge can mutate series canon through recovery promotion yet.
 - `rebuild-state-scope` quarantines those branch-local state/projection artifacts, records promotion removals, and writes a clean outline-derived state baseline.
 - `redraft-scope` marks normalized affected sections as branch-local frozen sections and invokes the existing scoped section writer inside the recovery branch.
 - `validate-recovery-branch` refuses promotion while branch-local lineage still reports `chimera_risk` or required receipts are missing.
