@@ -23,6 +23,8 @@ from bookforge.query.recovery import (
     get_recovery_blast_radius,
     get_recovery_manifest,
     get_recovery_plan_readiness,
+    get_recovery_semantic_review,
+    get_recovery_semantic_review_readiness,
     get_scope_invalidation_preview,
     get_state_rebuild_preview,
     recovery_manifest_path,
@@ -356,6 +358,12 @@ def test_recovery_branch_snapshots_evidence_and_exposes_legal_actions(tmp_path: 
     readiness = get_recovery_plan_readiness(tmp_path, "my_book", branch_id="recover-sec1")
     assert readiness["recommended_next_action"] == "normalize_outline_scope"
     assert readiness["approval_required"] is True
+    semantic_readiness = get_recovery_semantic_review_readiness(tmp_path, "my_book", branch_id="recover-sec1")
+    assert semantic_readiness["ready"] is False
+    assert semantic_readiness["artifact_status"] == "diagnostic"
+    assert semantic_readiness["mutation_scope"] == "diagnostic_only"
+    assert "missing successful receipt: redraft_scope" in semantic_readiness["blockers"]
+    assert "missing successful receipt: validate_recovery_branch" in semantic_readiness["blockers"]
 
     blast_radius = get_recovery_blast_radius(tmp_path, "my_book", branch_id="recover-sec1")
     assert blast_radius["scope_groups"]["affected"] == [{"chapter_id": 1, "section_id": 1}]
@@ -735,6 +743,20 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
     assert health.details["recommended_next_action"] == "promote_recovery_branch"
     assert "promotion to main" in health.details["approval_reasons"]
     assert health.details["semantic_validation"]["status"] == "deferred"
+    semantic_readiness = get_recovery_semantic_review_readiness(tmp_path, "my_book", branch_id="recover-sec1")
+    assert semantic_readiness["ready"] is True
+    assert semantic_readiness["status"] == "ready"
+    assert semantic_readiness["artifact_status"] == "diagnostic"
+    assert semantic_readiness["mutation_scope"] == "diagnostic_only"
+    assert semantic_readiness["structural_health_status"] == "healthy"
+    assert semantic_readiness["semantic_validation_status"] == "deferred"
+    assert semantic_readiness["recommended_next_action"] == "review_recovery_semantics"
+    semantic_review = get_recovery_semantic_review(tmp_path, "my_book", branch_id="recover-sec1")
+    assert semantic_review["status"] == "not_started"
+    assert semantic_review["artifact_status"] == "diagnostic"
+    assert semantic_review["readiness"]["ready"] is True
+    assert semantic_review["blocked_actions"] == []
+    assert semantic_review["recommended_next_action"] == "review_recovery_semantics"
 
     promote_result = promote_recovery_branch(
         tmp_path,

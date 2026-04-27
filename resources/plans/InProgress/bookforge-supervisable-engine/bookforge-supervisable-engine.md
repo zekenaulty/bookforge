@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T17:19:06Z`
-- Source Document Count: `63`
+- Compiled At (UTC): `2026-04-27T17:26:10Z`
+- Source Document Count: `64`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -71,7 +71,8 @@
 60. `notes/2026-04-27-0081-state-rebuild-slice.md`
 61. `notes/2026-04-27-0081-state-validation-slice.md`
 62. `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
-63. `promotion.md`
+63. `notes/2026-04-27-0082-semantic-readiness-slice.md`
+64. `promotion.md`
 
 ---
 
@@ -578,7 +579,7 @@ This plan is ready for promotion only when the target implementation can satisfy
 | 0075-extract-appearance-setting-and-context-refinement-surfaces | completed | 0070 | Make character appearance, scene background/setting, and prior-stage T1 thought-signature context explicit queryable projection layers instead of incidental prompt side effects. |
 | 0080-add-outline-lineage-audit-and-recovery-briefing | completed | 0020, 0030, 0050, 0060 | Add read-only outline lineage audit, section-level lineage matrix, stale artifact inventory, and recovery candidate briefing so Nanda can localize chimera risks before any repair mutation. |
 | 0081-add-author-operable-timeline-recovery-and-story-weaving-primitives | completed | 0045, 0070, 0071, 0072, 0075, 0080 | Add branch-first mutation primitives that let Nanda compose timeline recovery, retcon, redraft, and downstream story-weaving plans without BookForge needing bespoke fix commands for every failure class. |
-| 0082-add-semantic-recovery-review-and-downstream-impact-surfaces | pending | 0075, 0081 | Add author/Nanda-facing semantic recovery review surfaces for downstream dependency tracing, story continuity, and meaning-level validation after structural recovery. |
+| 0082-add-semantic-recovery-review-and-downstream-impact-surfaces | in_progress | 0075, 0081 | Add author/Nanda-facing semantic recovery review surfaces for downstream dependency tracing, story continuity, and meaning-level validation after structural recovery. |
 
 ---
 
@@ -2933,7 +2934,7 @@ Status: completed
 
 # 0082 Add Semantic Recovery Review And Downstream Impact Surfaces
 
-Status: pending
+Status: in_progress
 
 ## Goal
 - Add semantic recovery review surfaces that let Nanda decide whether a structurally recovered branch is also story-safe.
@@ -2984,6 +2985,20 @@ Status: pending
 - `get_recovery_semantic_review_readiness(workspace, book_id, *, branch_id)`
   - reports whether the branch has enough structural recovery artifacts to run semantic review
   - refuses before redraft and before structural validation has at least been attempted
+
+## Current Implementation Slice
+- Added query-only semantic review surfaces:
+  - `get_recovery_semantic_review_readiness(workspace, book_id, *, branch_id)`
+  - `get_recovery_semantic_review(workspace, book_id, *, branch_id)`
+- The readiness surface is diagnostic-only and returns:
+  - derived-branch requirement
+  - required successful recovery receipts
+  - structural branch health
+  - semantic validation boundary status from 0081
+  - present semantic review output, if any
+  - recommended next action
+- The read surface returns a truthful `not_started` diagnostic object when no semantic review artifact exists.
+- The first slice deliberately does not add an LLM review action yet.
 
 ## Proposed Execution Actions
 - `review_recovery_semantics`
@@ -5077,7 +5092,34 @@ Notes
 
 ---
 
-## Source 63: `promotion.md`
+## Source 63: `notes/2026-04-27-0082-semantic-readiness-slice.md`
+
+# 2026-04-27 0082 Semantic Readiness Slice
+
+Implemented the first `0082` slice as query-only surfaces:
+
+- `get_recovery_semantic_review_readiness(workspace, book_id, *, branch_id)`
+- `get_recovery_semantic_review(workspace, book_id, *, branch_id)`
+
+The readiness surface stays diagnostic-only. It requires a derived recovery branch, a recovery manifest, successful recovery receipts through `validate_recovery_branch`, and healthy structural branch state before reporting `ready`.
+
+The read surface returns a truthful `not_started` semantic review object when no review artifact exists. This gives Nanda an honest capability boundary: structural recovery may be healthy while author-level semantic review remains unperformed.
+
+Validation:
+
+- `python -m pytest -o addopts='' tests/test_recovery_actions.py --basetemp=.pytest_tmp_0082_semantic_readiness_focus`
+- Result: `6 passed`
+
+Remaining `0082` work:
+
+- Add diagnostic `review_recovery_semantics` execution action.
+- Add downstream dependency review query/action surfaces.
+- Expose semantic review action readiness through `legal_next_actions`.
+- Add Nanda-visible review artifacts with findings and confidence.
+
+---
+
+## Source 64: `promotion.md`
 
 # Promotion
 

@@ -16,6 +16,7 @@ RECOVERY_DIRNAME = "recovery"
 RECOVERY_MANIFEST_FILENAME = "recovery_manifest.json"
 RECOVERY_RECEIPTS_FILENAME = "recovery_receipts.jsonl"
 PROMOTION_REMOVALS_FILENAME = "promotion_removals.json"
+SEMANTIC_REVIEW_FILENAME = "recovery_semantic_review.json"
 
 
 def recovery_dir(book_root: Path, branch_id: str) -> Path:
@@ -32,6 +33,10 @@ def recovery_receipts_path(book_root: Path, branch_id: str) -> Path:
 
 def promotion_removals_path(book_root: Path, branch_id: str) -> Path:
     return recovery_dir(book_root, branch_id) / PROMOTION_REMOVALS_FILENAME
+
+
+def recovery_semantic_review_path(book_root: Path, branch_id: str) -> Path:
+    return recovery_dir(book_root, branch_id) / SEMANTIC_REVIEW_FILENAME
 
 
 def _book_root(workspace: Path, book_id: str) -> Path:
@@ -60,6 +65,17 @@ def _read_receipts(path: Path) -> List[RecoveryReceipt]:
         except (ValueError, json.JSONDecodeError):
             continue
     return receipts
+
+
+def _relpath(path: Path, root: Path) -> str:
+    try:
+        return path.relative_to(root).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _successful_recovery_actions(receipts: List[RecoveryReceipt]) -> set[str]:
+    return {receipt.action for receipt in receipts if receipt.status in {"success", "no_op"}}
 
 
 def get_recovery_manifest(workspace: Path, book_id: str, *, branch_id: str) -> Dict[str, Any]:
@@ -605,6 +621,152 @@ def _recovery_approval_requirements(manifest: Dict[str, Any], actions: set[str])
         "broad_recovery_radius": broad_scope,
         "affected_scopes": affected_scopes,
     }
+
+
+def get_recovery_semantic_review_readiness(workspace: Path, book_id: str, *, branch_id: str) -> Dict[str, Any]:
+    resolved = str(branch_id or "").strip()
+    book_root = _book_root(workspace, book_id)
+    manifest = get_recovery_manifest(workspace, book_id, branch_id=resolved) if resolved else {}
+    receipts = _read_receipts(recovery_receipts_path(book_root, resolved)) if resolved else []
+    successful_actions = _successful_recovery_actions(receipts)
+    review_path = recovery_semantic_review_path(book_root, resolved) if resolved else book_root / SEMANTIC_REVIEW_FILENAME
+    health = get_recovery_branch_health(workspace, book_id, branch_id=resolved) if resolved else None
+
+    blockers: List[str] = []
+    if not resolved or resolved == MAIN_BRANCH_ID:
+        blockers.append("semantic recovery review requires a derived recovery branch")
+    if not manifest:
+        blockers.append("recovery branch manifest is missing")
+
+    for required in (
+        "create_recovery_branch",
+        "quarantine_artifacts",
+        "normalize_outline_scope",
+        "invalidate_scope_outputs",
+        "rebuild_state_scope",
+        "redraft_scope",
+        "validate_recovery_branch",
+    ):
+        if required not in successful_actions:
+            blockers.append(f"missing successful receipt: {required}")
+
+    if health is not None and health.status != "healthy":
+        blockers.append("recovery branch structural health is not healthy")
+
+    structural_health_status = health.status if health is not None else "unknown"
+    semantic_validation = (
+        health.details.get("semantic_validation")
+        if health is not None and isinstance(health.details.get("semantic_validation"), dict)
+        else None
+    )
+    review_exists = review_path.exists() if resolved else False
+    present_outputs = []
+    if review_exists:
+        present_outputs.append(
+            {
+                "path": _relpath(review_path, book_root),
+                "artifact_status": "diagnostic",
+                "family": "semantic_recovery_review",
+            }
+        )
+
+    next_action = "review_recovery_semantics" if not blockers else _recommended_next_recovery_action(successful_actions, blockers)
+    return {
+        "schema_version": "recovery_semantic_review_readiness_v1",
+        "book_id": book_id,
+        "branch_id": resolved,
+        "ready": not blockers,
+        "status": "ready" if not blockers else "blocked",
+        "artifact_status": "diagnostic",
+        "mutation_scope": "diagnostic_only",
+        "blockers": blockers,
+        "available_inputs": [
+            "recovery_manifest",
+            "recovery_receipts",
+            "recovery_branch_health",
+            "normalized_outline",
+            "redrafted_prose",
+            "state_projection_context",
+            "recovery_blast_radius",
+        ],
+        "present_outputs": present_outputs,
+        "missing_inputs": blockers,
+        "structural_health_status": structural_health_status,
+        "semantic_validation_status": semantic_validation.get("status") if isinstance(semantic_validation, dict) else None,
+        "semantic_validation": semantic_validation,
+        "recommended_next_action": next_action,
+    }
+
+
+def get_recovery_semantic_review(workspace: Path, book_id: str, *, branch_id: str) -> Dict[str, Any]:
+    resolved = str(branch_id or "").strip()
+    book_root = _book_root(workspace, book_id)
+    readiness = get_recovery_semantic_review_readiness(workspace, book_id, branch_id=resolved)
+    review_path = recovery_semantic_review_path(book_root, resolved) if resolved else book_root / SEMANTIC_REVIEW_FILENAME
+    manifest = get_recovery_manifest(workspace, book_id, branch_id=resolved) if resolved else {}
+    node = current_execution_node(workspace, book_id, branch_id=resolved, prefer_emitted=False) if resolved else None
+    if not review_path.exists():
+        scope = manifest.get("scope") if isinstance(manifest.get("scope"), dict) else {}
+        return {
+            "schema_version": "recovery_semantic_review_v1",
+            "book_id": book_id,
+            "branch_id": resolved,
+            "node": node.to_dict() if node else None,
+            "artifact_status": "diagnostic",
+            "status": "not_started",
+            "review_scope": {
+                "affected_scopes": [dict(item) for item in scope.get("affected_scopes", []) if isinstance(item, dict)],
+                "downstream_scopes": [dict(item) for item in scope.get("downstream_scopes", []) if isinstance(item, dict)],
+            },
+            "readiness": readiness,
+            "reviewed_artifacts": [],
+            "findings": [],
+            "blocked_actions": [] if readiness["ready"] else ["review_recovery_semantics"],
+            "recommended_next_action": readiness["recommended_next_action"],
+            "confidence": "none",
+            "review_limitations": ["semantic review artifact has not been emitted yet"],
+        }
+
+    payload = _read_json(review_path)
+    if not payload:
+        return {
+            "schema_version": "recovery_semantic_review_v1",
+            "book_id": book_id,
+            "branch_id": resolved,
+            "node": node.to_dict() if node else None,
+            "artifact_status": "diagnostic",
+            "status": "review_failed",
+            "readiness": readiness,
+            "reviewed_artifacts": [],
+            "findings": [
+                {
+                    "category": "missing_evidence",
+                    "severity": "error",
+                    "message": "Semantic review artifact exists but could not be decoded.",
+                    "artifact": _relpath(review_path, book_root),
+                }
+            ],
+            "blocked_actions": ["promote_recovery_branch"],
+            "recommended_next_action": "rerun_recovery_semantic_review",
+            "confidence": "none",
+            "review_limitations": ["semantic review artifact is unreadable"],
+        }
+
+    merged = dict(payload)
+    merged.setdefault("schema_version", "recovery_semantic_review_v1")
+    merged.setdefault("book_id", book_id)
+    merged.setdefault("branch_id", resolved)
+    merged.setdefault("node", node.to_dict() if node else None)
+    merged.setdefault("artifact_status", "diagnostic")
+    merged.setdefault("status", "reviewed_attention_required")
+    merged.setdefault("reviewed_artifacts", [])
+    merged.setdefault("findings", [])
+    merged.setdefault("blocked_actions", [])
+    merged.setdefault("recommended_next_action", "inspect_recovery_semantic_review")
+    merged.setdefault("confidence", "unknown")
+    merged.setdefault("review_limitations", [])
+    merged["readiness"] = readiness
+    return merged
 
 
 def get_recovery_branch_health(workspace: Path, book_id: str, *, branch_id: str) -> RecoveryBranchHealth:

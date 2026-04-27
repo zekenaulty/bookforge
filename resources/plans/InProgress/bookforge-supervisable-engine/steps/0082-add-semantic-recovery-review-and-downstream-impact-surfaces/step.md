@@ -1,6 +1,6 @@
 # 0082 Add Semantic Recovery Review And Downstream Impact Surfaces
 
-Status: pending
+Status: in_progress
 
 ## Goal
 - Add semantic recovery review surfaces that let Nanda decide whether a structurally recovered branch is also story-safe.
@@ -51,6 +51,20 @@ Status: pending
 - `get_recovery_semantic_review_readiness(workspace, book_id, *, branch_id)`
   - reports whether the branch has enough structural recovery artifacts to run semantic review
   - refuses before redraft and before structural validation has at least been attempted
+
+## Current Implementation Slice
+- Added query-only semantic review surfaces:
+  - `get_recovery_semantic_review_readiness(workspace, book_id, *, branch_id)`
+  - `get_recovery_semantic_review(workspace, book_id, *, branch_id)`
+- The readiness surface is diagnostic-only and returns:
+  - derived-branch requirement
+  - required successful recovery receipts
+  - structural branch health
+  - semantic validation boundary status from 0081
+  - present semantic review output, if any
+  - recommended next action
+- The read surface returns a truthful `not_started` diagnostic object when no semantic review artifact exists.
+- The first slice deliberately does not add an LLM review action yet.
 
 ## Proposed Execution Actions
 - `review_recovery_semantics`
