@@ -328,6 +328,30 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
     assert (branch_root / "draft" / "chapters" / "ch_001" / "scene_001.md").read_text(encoding="utf-8") == "Recovered scene 1."
     assert not (branch_root / "draft" / "chapters" / "ch_001" / "scene_002.md").exists()
 
+    rogue_character_dir = branch_root / "draft" / "context" / "characters"
+    _write_json(
+        rogue_character_dir / "index.json",
+        {
+            "characters": [
+                {"character_id": "rhea_mercer", "state_path": "draft/context/characters/rhea_mercer.state.json"},
+                {"character_id": "char_artie", "state_path": "draft/context/characters/artie.state.json"},
+            ]
+        },
+    )
+    _write_json(rogue_character_dir / "artie.state.json", {"character_id": "char_artie", "name": "Artie"})
+    blocked_ghost_state = validate_recovery_branch(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="validate_recovery_branch", branch_id="recover-sec1"),
+    )
+    assert blocked_ghost_state.status == "integrity_degraded"
+    ghost_blockers = blocked_ghost_state.details["recovery_receipt"]["details"]["state_projection_blockers"]
+    assert any("non-outline character: char_artie" in blocker for blocker in ghost_blockers)
+    _write_json(
+        rogue_character_dir / "index.json",
+        {"characters": [{"character_id": "rhea_mercer", "state_path": "draft/context/characters/rhea_mercer.state.json"}]},
+    )
+    (rogue_character_dir / "artie.state.json").unlink()
+
     validate_result = validate_recovery_branch(
         tmp_path,
         build_recovery_branch_request(tmp_path, "my_book", action="validate_recovery_branch", branch_id="recover-sec1"),

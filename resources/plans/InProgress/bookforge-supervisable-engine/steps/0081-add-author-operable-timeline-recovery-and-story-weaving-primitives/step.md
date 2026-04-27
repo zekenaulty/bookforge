@@ -169,6 +169,7 @@ Status: in_progress
 - Quarantine now uses hashed fallback quarantine paths when deep Windows paths exceed practical filesystem limits while preserving original source paths in receipts.
 - Recovery blast-radius now categorizes impact-report-friendly candidate artifacts into prose, state, continuity, projection, and series families.
 - Recovery promotion results now include canonical postconditions with pre/post outline lineage status, pre/post integrity status, planned/applied removals, and whether `main` cleared chimera risk.
+- Recovery validation now blocks branch promotion when branch-local character index/state artifacts contain character IDs that are absent from the normalized outline.
 
 ## Remaining Implementation
 - Extend blast-radius surfaces with downstream dependency tracing after redraft.

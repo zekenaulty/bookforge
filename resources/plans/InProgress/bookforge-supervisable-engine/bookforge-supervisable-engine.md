@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T14:08:46Z`
-- Source Document Count: `51`
+- Compiled At (UTC): `2026-04-27T14:13:21Z`
+- Source Document Count: `52`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -59,7 +59,8 @@
 48. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
 49. `notes/2026-04-27-0081-redraft-scope-slice.md`
 50. `notes/2026-04-27-0081-state-rebuild-slice.md`
-51. `promotion.md`
+51. `notes/2026-04-27-0081-state-validation-slice.md`
+52. `promotion.md`
 
 ---
 
@@ -2701,6 +2702,7 @@ Status: in_progress
 - Quarantine now uses hashed fallback quarantine paths when deep Windows paths exceed practical filesystem limits while preserving original source paths in receipts.
 - Recovery blast-radius now categorizes impact-report-friendly candidate artifacts into prose, state, continuity, projection, and series families.
 - Recovery promotion results now include canonical postconditions with pre/post outline lineage status, pre/post integrity status, planned/applied removals, and whether `main` cleared chimera risk.
+- Recovery validation now blocks branch promotion when branch-local character index/state artifacts contain character IDs that are absent from the normalized outline.
 
 ## Remaining Implementation
 - Extend blast-radius surfaces with downstream dependency tracing after redraft.
@@ -4505,7 +4507,44 @@ Notes
 
 ---
 
-## Source 51: `promotion.md`
+## Source 51: `notes/2026-04-27-0081-state-validation-slice.md`
+
+# 2026-04-27 0081 Recovery State Validation Slice
+
+## Summary
+- Added branch-local character state/projection validation to `validate_recovery_branch`.
+- Validation now blocks promotion if the recovery branch contains character index entries or character state files whose `character_id` is absent from the normalized outline.
+
+## Why
+- This directly targets the Veiled Ledger ghost-character failure mode.
+- Outline lineage can be healthy while stale state/projection data still contains invalid timeline entities.
+- The branch must not promote if characters like `char_artie` or `char_vex` survive in state after outline normalization and state rebuild.
+
+## Current Scope
+- Implemented:
+  - `draft/context/characters/index.json`
+  - `draft/context/characters/*.state.json`
+- Deferred:
+  - continuity prose/fact extraction
+  - settings/location projections
+  - inventory/deep state
+  - chapter summaries
+  - appearance/setting projection semantic validation
+
+## Validation
+- Focused tests:
+  - `python -m pytest -o addopts='' tests/test_recovery_actions.py tests/test_action_discovery.py --basetemp=.pytest_tmp_0081_state_validation_focus`
+  - Result: `35 passed`
+- Full suite:
+  - `python -m pytest -o addopts='' --basetemp=.pytest_tmp_0081_state_validation_full`
+  - Result: `308 passed`
+
+## Next
+- Add validation for continuity, settings, inventory/deep state, chapter summaries, and appearance/setting projections.
+
+---
+
+## Source 52: `promotion.md`
 
 # Promotion
 

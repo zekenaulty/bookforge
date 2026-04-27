@@ -7,6 +7,7 @@ from bookforge.branching_store import _evolve_manifest, _load_manifest, _write_m
 from bookforge.contracts import ExecutionRequest, ExecutionResult, MAIN_BRANCH_ID, ScopeSelector
 from bookforge.query import current_main_node, get_integrity_verdict, get_outline_lineage_audit
 from bookforge.query.recovery import get_recovery_branch_health, get_recovery_manifest, promotion_removals_path
+from bookforge.supervision import paths as supervision_paths
 from bookforge.supervision import RuntimeIssue, capture_surface_snapshot
 
 from .recovery_common import (
@@ -19,6 +20,55 @@ from .recovery_common import (
     write_receipt,
     write_recovery_manifest,
 )
+
+
+def _outline_character_ids(outline: dict) -> set[str]:
+    character_ids: set[str] = set()
+    for item in outline.get("characters") or []:
+        if isinstance(item, dict):
+            character_id = str(item.get("character_id") or "").strip()
+            if character_id:
+                character_ids.add(character_id)
+    for chapter in outline.get("chapters") or []:
+        if not isinstance(chapter, dict):
+            continue
+        for section in chapter.get("sections") or []:
+            if not isinstance(section, dict):
+                continue
+            for scene in section.get("scenes") or []:
+                if not isinstance(scene, dict):
+                    continue
+                for character_id in scene.get("characters") or []:
+                    cleaned = str(character_id or "").strip()
+                    if cleaned:
+                        character_ids.add(cleaned)
+    return character_ids
+
+
+def _state_projection_blockers(workspace: Path, book_id: str, branch_id: str) -> list[str]:
+    root = book_root(workspace, book_id)
+    branch_root = supervision_paths.branch_snapshot_root(root, branch_id)
+    outline = read_json(branch_root / "outline" / "outline.json")
+    allowed_character_ids = _outline_character_ids(outline)
+    if not allowed_character_ids:
+        return []
+    blockers: list[str] = []
+    characters_root = branch_root / "draft" / "context" / "characters"
+    index_payload = read_json(characters_root / "index.json")
+    for item in index_payload.get("characters") or []:
+        if not isinstance(item, dict):
+            continue
+        character_id = str(item.get("character_id") or "").strip()
+        if character_id and character_id not in allowed_character_ids:
+            blockers.append(f"character index contains non-outline character: {character_id}")
+    if characters_root.exists():
+        for path in sorted(characters_root.glob("*.state.json")):
+            payload = read_json(path)
+            character_id = str(payload.get("character_id") or "").strip()
+            if character_id and character_id not in allowed_character_ids:
+                rel_path = path.relative_to(branch_root).as_posix()
+                blockers.append(f"character state contains non-outline character: {character_id} at {rel_path}")
+    return blockers
 
 
 def validate_recovery_branch(workspace: Path, request: ExecutionRequest) -> ExecutionResult:
@@ -39,6 +89,8 @@ def validate_recovery_branch(workspace: Path, request: ExecutionRequest) -> Exec
     for required in ("quarantine_artifacts", "normalize_outline_scope", "invalidate_scope_outputs", "rebuild_state_scope", "redraft_scope"):
         if required not in actions:
             blockers.append(f"{required} has not completed")
+    state_projection_blockers = _state_projection_blockers(workspace, book_id, branch_id)
+    blockers.extend(state_projection_blockers)
     status = "success" if not blockers else "integrity_degraded"
     lifecycle = "promote_ready" if not blockers else "needs_review"
     updated = _evolve_manifest(
@@ -51,7 +103,12 @@ def validate_recovery_branch(workspace: Path, request: ExecutionRequest) -> Exec
     manifest_payload = get_recovery_manifest(workspace, book_id, branch_id=branch_id)
     manifest_payload["status"] = "validated" if not blockers else "needs_review"
     manifest_payload["updated_at"] = now_token()
-    manifest_payload["validation"] = {"status": updated.validation_status, "blockers": blockers, "outline_lineage_status": audit.status}
+    manifest_payload["validation"] = {
+        "status": updated.validation_status,
+        "blockers": blockers,
+        "outline_lineage_status": audit.status,
+        "state_projection_blockers": state_projection_blockers,
+    }
     write_recovery_manifest(root, branch_id, manifest_payload)
     advance_recovery_node(workspace, book_id, branch_id, "validate_recovery_branch")
     receipt = write_receipt(
@@ -61,7 +118,7 @@ def validate_recovery_branch(workspace: Path, request: ExecutionRequest) -> Exec
         action="validate_recovery_branch",
         status=status,
         message=updated.validation_message or "Recovery validation completed.",
-        details={"blockers": blockers, "outline_lineage_status": audit.status},
+        details={"blockers": blockers, "outline_lineage_status": audit.status, "state_projection_blockers": state_projection_blockers},
     )
     return emit_result(
         workspace,
