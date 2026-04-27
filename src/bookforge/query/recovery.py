@@ -166,6 +166,32 @@ def get_scope_invalidation_preview(
     }
 
 
+def _prose_paths_for_scopes(execution_root: Path, manifest: Dict[str, Any], scopes: List[Dict[str, int]]) -> List[str]:
+    paths: List[str] = []
+    registry = _common.load_registry(execution_root)
+    for item in scopes:
+        chapter_id = int(item["chapter_id"])
+        section_id = item.get("section_id")
+        chapter_dir = execution_root / "draft" / "chapters" / f"ch_{chapter_id:03d}"
+        if not chapter_dir.exists():
+            continue
+        if section_id is None:
+            paths.extend(path.relative_to(execution_root).as_posix() for path in sorted(chapter_dir.glob("scene_*")) if path.is_file())
+            for suffix in (".md", ".provisional.md", ".fixed.md", ".original.md", ".seam_report.json"):
+                chapter_file = execution_root / "draft" / "chapters" / f"ch_{chapter_id:03d}{suffix}"
+                if chapter_file.exists():
+                    paths.append(chapter_file.relative_to(execution_root).as_posix())
+            continue
+        scene_ids = _scene_ids_from_manifest_range(manifest, chapter_id, int(section_id))
+        if not scene_ids:
+            scene_ids = _scene_ids_for_section(registry, chapter_id, int(section_id))
+        for scene_id in scene_ids:
+            for path in sorted(chapter_dir.glob(f"scene_{scene_id:03d}*")):
+                if path.is_file():
+                    paths.append(path.relative_to(execution_root).as_posix())
+    return sorted(set(paths))
+
+
 def _append_files_under(root: Path, rel_dir: str, paths: List[str]) -> None:
     base = root / rel_dir
     if not base.exists():
@@ -419,6 +445,21 @@ def get_recovery_blast_radius(
                 "recommended_action": "future_series_scope_rebuild",
                 "mutation_supported": False,
                 "note": "Series canon is outside the current recovery branch mutation set; Nanda should include it in impact reports when timeline facts changed.",
+            }
+        )
+
+    downstream_scopes = [dict(item) for item in scope.downstream_scopes] if scope is not None else []
+    for rel_path in _prose_paths_for_scopes(execution_root, manifest, downstream_scopes):
+        impacts.append(
+            {
+                "family": "downstream_review",
+                "path": rel_path,
+                "artifact_status": "diagnostic",
+                "exists": (execution_root / rel_path).exists(),
+                "safe_as_canonical": False,
+                "recommended_action": "author_review_downstream_scope",
+                "mutation_supported": False,
+                "note": "Manifest-declared downstream scope artifact; review after recovery/redraft before treating downstream continuity as trusted.",
             }
         )
 

@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T17:06:21Z`
-- Source Document Count: `59`
+- Compiled At (UTC): `2026-04-27T17:10:32Z`
+- Source Document Count: `60`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -58,16 +58,17 @@
 47. `notes/2026-04-27-0081-blast-radius-scope-groups.md`
 48. `notes/2026-04-27-0081-blast-radius-slice.md`
 49. `notes/2026-04-27-0081-continuity-validation-slice.md`
-50. `notes/2026-04-27-0081-durable-validation-slice.md`
-51. `notes/2026-04-27-0081-multi-scope-coverage.md`
-52. `notes/2026-04-27-0081-projection-validation-slice.md`
-53. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
-54. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
-55. `notes/2026-04-27-0081-redraft-scope-slice.md`
-56. `notes/2026-04-27-0081-state-rebuild-slice.md`
-57. `notes/2026-04-27-0081-state-validation-slice.md`
-58. `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
-59. `promotion.md`
+50. `notes/2026-04-27-0081-downstream-review-impacts.md`
+51. `notes/2026-04-27-0081-durable-validation-slice.md`
+52. `notes/2026-04-27-0081-multi-scope-coverage.md`
+53. `notes/2026-04-27-0081-projection-validation-slice.md`
+54. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+55. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+56. `notes/2026-04-27-0081-redraft-scope-slice.md`
+57. `notes/2026-04-27-0081-state-rebuild-slice.md`
+58. `notes/2026-04-27-0081-state-validation-slice.md`
+59. `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
+60. `promotion.md`
 
 ---
 
@@ -2727,6 +2728,7 @@ Status: in_progress
   - prose invalidation scope
   - state rebuild scope
   - downstream trace status
+- Recovery blast-radius now emits diagnostic `downstream_review` artifact impacts for manifest-declared downstream prose artifacts. These are non-mutating review candidates, not automatic invalidation targets.
 - Recovery tests now cover explicit broad multi-scope recovery branch creation, broad-radius approval metadata, and blast-radius scope grouping.
 - Recovery tests now include a two-chapter pollution fixture that runs branch-first recovery end to end across real outline, prose, state, chapter-summary, setting, character-state, and section-draft artifacts.
 
@@ -4464,7 +4466,39 @@ Notes
 
 ---
 
-## Source 50: `notes/2026-04-27-0081-durable-validation-slice.md`
+## Source 50: `notes/2026-04-27-0081-downstream-review-impacts.md`
+
+# 2026-04-27 0081 Downstream Review Impacts
+
+## Summary
+- Extended `get_recovery_blast_radius(...)` with diagnostic downstream review impacts.
+- Manifest-declared downstream prose artifacts now appear under the `downstream_review` family.
+- These impacts report:
+  - `artifact_status: diagnostic`
+  - `safe_as_canonical: false`
+  - `mutation_supported: false`
+  - `recommended_action: author_review_downstream_scope`
+
+## Boundary
+- This does not add semantic downstream dependency tracing.
+- This does not make downstream prose an automatic invalidation/redraft target.
+- It only gives Nanda a truthful list of declared downstream artifacts that should be reviewed after recovery.
+
+## Why
+- Downstream chapters may remain structurally clean but continuity-unsafe after upstream recovery.
+- Nanda needs visible review candidates without BookForge overstepping into broad mutation.
+
+## Validation
+- Focused suite passed:
+  - `.\.venv\Scripts\python.exe -m pytest -o addopts='' tests/test_recovery_actions.py --basetemp=.pytest_tmp_0081_downstream_review_focus`
+  - Result: `6 passed`
+- Full suite passed:
+  - `.\.venv\Scripts\python.exe -m pytest -o addopts='' --basetemp=.pytest_tmp_0081_downstream_review_full`
+  - Result: `310 passed`
+
+---
+
+## Source 51: `notes/2026-04-27-0081-durable-validation-slice.md`
 
 # 2026-04-27 0081 Durable Validation Slice
 
@@ -4502,7 +4536,7 @@ Notes
 
 ---
 
-## Source 51: `notes/2026-04-27-0081-multi-scope-coverage.md`
+## Source 52: `notes/2026-04-27-0081-multi-scope-coverage.md`
 
 # 2026-04-27 0081 Multi-Scope Coverage
 
@@ -4533,7 +4567,7 @@ Notes
 
 ---
 
-## Source 52: `notes/2026-04-27-0081-projection-validation-slice.md`
+## Source 53: `notes/2026-04-27-0081-projection-validation-slice.md`
 
 # 2026-04-27 0081 Projection Validation Slice
 
@@ -4572,7 +4606,7 @@ Notes
 
 ---
 
-## Source 53: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+## Source 54: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
 
 # 2026-04-27 0081 Recovery Promotion Postcondition
 
@@ -4611,7 +4645,7 @@ Notes
 
 ---
 
-## Source 54: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+## Source 55: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
 
 # 2026-04-27 0081 Recovery Receipt Postconditions
 
@@ -4659,7 +4693,7 @@ Notes
 
 ---
 
-## Source 55: `notes/2026-04-27-0081-redraft-scope-slice.md`
+## Source 56: `notes/2026-04-27-0081-redraft-scope-slice.md`
 
 # 2026-04-27 0081 Redraft Scope Slice
 
@@ -4698,7 +4732,7 @@ Notes
 
 ---
 
-## Source 56: `notes/2026-04-27-0081-state-rebuild-slice.md`
+## Source 57: `notes/2026-04-27-0081-state-rebuild-slice.md`
 
 # 2026-04-27 0081 State Rebuild Slice
 
@@ -4746,7 +4780,7 @@ Notes
 
 ---
 
-## Source 57: `notes/2026-04-27-0081-state-validation-slice.md`
+## Source 58: `notes/2026-04-27-0081-state-validation-slice.md`
 
 # 2026-04-27 0081 Recovery State Validation Slice
 
@@ -4783,7 +4817,7 @@ Notes
 
 ---
 
-## Source 58: `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
+## Source 59: `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
 
 # 2026-04-27 0081 Two-Chapter Recovery Fixture
 
@@ -4828,7 +4862,7 @@ Notes
 
 ---
 
-## Source 59: `promotion.md`
+## Source 60: `promotion.md`
 
 # Promotion
 

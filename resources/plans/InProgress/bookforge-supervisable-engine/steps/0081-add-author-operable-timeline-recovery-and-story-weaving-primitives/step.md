@@ -187,6 +187,7 @@ Status: in_progress
   - prose invalidation scope
   - state rebuild scope
   - downstream trace status
+- Recovery blast-radius now emits diagnostic `downstream_review` artifact impacts for manifest-declared downstream prose artifacts. These are non-mutating review candidates, not automatic invalidation targets.
 - Recovery tests now cover explicit broad multi-scope recovery branch creation, broad-radius approval metadata, and blast-radius scope grouping.
 - Recovery tests now include a two-chapter pollution fixture that runs branch-first recovery end to end across real outline, prose, state, chapter-summary, setting, character-state, and section-draft artifacts.
 

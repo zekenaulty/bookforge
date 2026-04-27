@@ -333,7 +333,12 @@ def test_recovery_branch_snapshots_evidence_and_exposes_legal_actions(tmp_path: 
     assert manifest["scope"]["affected_scopes"] == [{"chapter_id": 1, "section_id": 1}]
     assert manifest["scope_output_ranges"]["ch_001_sec_001"]["scene_ids"] == [1, 2]
     manifest["scope"]["downstream_scopes"] = [{"chapter_id": 2, "section_id": 1}]
+    manifest["scope_output_ranges"]["ch_002_sec_001"] = {"chapter_id": 2, "section_id": 1, "scene_ids": [1]}
     _write_json(recovery_manifest_path(book_root, "recover-sec1"), manifest)
+    downstream_chapter_dir = branch_root / "draft" / "chapters" / "ch_002"
+    downstream_chapter_dir.mkdir(parents=True, exist_ok=True)
+    (downstream_chapter_dir / "scene_001.md").write_text("Downstream scene needs review.", encoding="utf-8")
+    _write_json(downstream_chapter_dir / "scene_001.meta.json", {"chapter_id": 2, "scene_id": 1})
 
     branch_selector = ScopeSelector(book_id="my_book", branch_id="recover-sec1", chapter=1, section=1)
     branch_actions = {option.action: option for option in list_execution_options(tmp_path, branch_selector, prefer_emitted=False)}
@@ -361,6 +366,9 @@ def test_recovery_branch_snapshots_evidence_and_exposes_legal_actions(tmp_path: 
         {"chapter_id": 2, "section_id": 1},
     ]
     assert blast_radius["scope_groups"]["downstream_trace_status"] == "manifest_declared_only"
+    assert blast_radius["families"]["downstream_review"]["candidate_count"] == 2
+    assert blast_radius["families"]["downstream_review"]["mutation_supported"] is False
+    assert "author_review_downstream_scope" in blast_radius["families"]["downstream_review"]["recommended_actions"]
 
 
 def test_recovery_branch_supports_explicit_multi_scope_radius(tmp_path: Path) -> None:
