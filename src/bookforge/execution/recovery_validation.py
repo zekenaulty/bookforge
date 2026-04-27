@@ -164,6 +164,18 @@ def _scoped_projection_paths(branch_root: Path, manifest_payload: dict) -> list[
     return paths
 
 
+def _affected_chapter_ids(manifest_payload: dict) -> list[int]:
+    chapter_ids: list[int] = []
+    for scope in _iter_recovery_scopes(manifest_payload):
+        try:
+            chapter_id = int(scope.get("chapter_id") or scope.get("chapter"))
+        except (TypeError, ValueError):
+            continue
+        if chapter_id >= 1:
+            chapter_ids.append(chapter_id)
+    return sorted(set(chapter_ids))
+
+
 def _character_reference_blockers(
     payload: Any,
     allowed_character_ids: set[str],
@@ -213,6 +225,15 @@ def _character_reference_blockers(
     return blockers
 
 
+def _read_validation_payload(path: Path) -> Any:
+    if path.suffix.lower() == ".json":
+        return read_json(path)
+    try:
+        return path.read_text(encoding="utf-8")
+    except OSError:
+        return ""
+
+
 def _thread_reference_blockers(
     payload: Any,
     allowed_thread_ids: set[str],
@@ -237,6 +258,26 @@ def _thread_reference_blockers(
         if thread_id not in allowed_thread_ids:
             blockers.append(f"{artifact_label} references non-outline thread: {thread_id} at {rel_path}")
     return blockers
+
+
+def _continuity_artifact_paths(branch_root: Path, manifest_payload: dict) -> list[tuple[str, Path]]:
+    candidates: list[tuple[str, Path]] = []
+    context = branch_root / "draft" / "context"
+    for label, path in (
+        ("continuity pack", context / "continuity_pack.json"),
+        ("world bible", context / "bible.md"),
+        ("last excerpt", context / "last_excerpt.md"),
+    ):
+        if path.exists():
+            candidates.append((label, path))
+    history_root = context / "continuity_history"
+    if history_root.exists():
+        candidates.extend(("continuity history", path) for path in sorted(history_root.rglob("*.json")) if path.is_file())
+    for chapter_id in _affected_chapter_ids(manifest_payload):
+        chapter_seam_root = context / "chapter_seams" / f"ch_{chapter_id:03d}"
+        if chapter_seam_root.exists():
+            candidates.extend(("chapter seam artifact", path) for path in sorted(chapter_seam_root.rglob("*.json")) if path.is_file())
+    return candidates
 
 
 def _projection_lineage_blockers(payload: dict, *, branch_id: str, rel_path: str, artifact_label: str) -> list[str]:
@@ -339,6 +380,20 @@ def _state_projection_blockers(workspace: Path, book_id: str, branch_id: str) ->
             )
         )
         blockers.extend(_projection_lineage_blockers(payload, branch_id=branch_id, rel_path=rel_path, artifact_label=artifact_label))
+    for artifact_label, path in _continuity_artifact_paths(branch_root, manifest_payload):
+        payload = _read_validation_payload(path)
+        rel_path = path.relative_to(branch_root).as_posix()
+        blockers.extend(
+            _character_reference_blockers(
+                payload,
+                allowed_character_ids,
+                rel_path=rel_path,
+                artifact_label=artifact_label,
+            )
+        )
+        blockers.extend(_thread_reference_blockers(payload, allowed_thread_ids, rel_path=rel_path, artifact_label=artifact_label))
+        if isinstance(payload, dict):
+            blockers.extend(_projection_lineage_blockers(payload, branch_id=branch_id, rel_path=rel_path, artifact_label=artifact_label))
     for artifact_label, path in _durable_artifact_paths(branch_root):
         payload = read_json(path)
         rel_path = path.relative_to(branch_root).as_posix()

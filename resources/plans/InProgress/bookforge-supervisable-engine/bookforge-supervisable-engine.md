@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T16:32:16Z`
-- Source Document Count: `54`
+- Compiled At (UTC): `2026-04-27T16:37:20Z`
+- Source Document Count: `55`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -55,14 +55,15 @@
 44. `notes/2026-04-26-0081-implementation-slice.md`
 45. `notes/2026-04-26-0081-planning.md`
 46. `notes/2026-04-27-0081-blast-radius-slice.md`
-47. `notes/2026-04-27-0081-durable-validation-slice.md`
-48. `notes/2026-04-27-0081-projection-validation-slice.md`
-49. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
-50. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
-51. `notes/2026-04-27-0081-redraft-scope-slice.md`
-52. `notes/2026-04-27-0081-state-rebuild-slice.md`
-53. `notes/2026-04-27-0081-state-validation-slice.md`
-54. `promotion.md`
+47. `notes/2026-04-27-0081-continuity-validation-slice.md`
+48. `notes/2026-04-27-0081-durable-validation-slice.md`
+49. `notes/2026-04-27-0081-projection-validation-slice.md`
+50. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+51. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+52. `notes/2026-04-27-0081-redraft-scope-slice.md`
+53. `notes/2026-04-27-0081-state-rebuild-slice.md`
+54. `notes/2026-04-27-0081-state-validation-slice.md`
+55. `promotion.md`
 
 ---
 
@@ -2707,12 +2708,13 @@ Status: in_progress
 - Recovery validation now blocks branch promotion when branch-local character index/state artifacts contain character IDs that are absent from the normalized outline.
 - Recovery validation now blocks branch promotion when affected chapter summaries, setting projections, or appearance projections reference non-outline character IDs or carry stale embedded branch coordinates.
 - Recovery validation now blocks branch promotion when durable inventory/plot-device registries and indexes retain non-outline character refs, stale embedded branch coordinates, or index entries that no longer exist in their registries.
+- Recovery validation now blocks branch promotion when continuity packs, continuity history, bible/last-excerpt text, or affected chapter seam reports retain non-outline character/thread refs or stale embedded branch coordinates.
 
 ## Remaining Implementation
 - Extend blast-radius surfaces with downstream dependency tracing after redraft.
 - Add approval-required metadata to all destructive or broad-scope primitives.
 - Expand validation beyond outline lineage to state/projection families:
-  - continuity
+  - semantic continuity validation beyond ghost-character, thread-reference, and stale-branch checks
   - semantic validation for inventory/deep state beyond ghost-character and index-consistency checks
   - semantic validation for locations/settings beyond stale branch and ghost-character checks
   - semantic validation for chapter summaries beyond ghost-character checks
@@ -4337,7 +4339,43 @@ Notes
 
 ---
 
-## Source 47: `notes/2026-04-27-0081-durable-validation-slice.md`
+## Source 47: `notes/2026-04-27-0081-continuity-validation-slice.md`
+
+# 2026-04-27 0081 Continuity Validation Slice
+
+## Summary
+- Added recovery-branch validation for continuity-family artifacts before promotion.
+- `validate_recovery_branch` now scans:
+  - `draft/context/continuity_pack.json`
+  - `draft/context/continuity_history/*.json`
+  - `draft/context/bible.md`
+  - `draft/context/last_excerpt.md`
+  - affected `draft/context/chapter_seams/ch_*/**/*.json`
+- The validator blocks promotion when those artifacts retain:
+  - character references that are absent from the normalized branch outline
+  - stale `THREAD_*` references when the normalized outline exposes thread IDs
+  - stale embedded `node.branch_id` or `selector.branch_id` values in JSON artifacts
+
+## Boundary
+- This is structural validation only.
+- It prevents obvious ghost timeline continuity from surviving a recovery branch.
+- It does not decide whether rebuilt continuity prose is narratively complete or good.
+
+## Why
+- Continuity artifacts can stay stale even when outline, prose, and character state have been normalized.
+- Nanda needs these blockers reported through validation receipts before it can safely recommend promotion.
+
+## Validation
+- Focused suite passed:
+  - `.\.venv\Scripts\python.exe -m pytest -o addopts='' tests/test_recovery_actions.py --basetemp=.pytest_tmp_0081_continuity_validation_focus`
+  - Result: `4 passed`
+- Full suite passed:
+  - `.\.venv\Scripts\python.exe -m pytest -o addopts='' --basetemp=.pytest_tmp_0081_continuity_validation_full`
+  - Result: `308 passed`
+
+---
+
+## Source 48: `notes/2026-04-27-0081-durable-validation-slice.md`
 
 # 2026-04-27 0081 Durable Validation Slice
 
@@ -4375,7 +4413,7 @@ Notes
 
 ---
 
-## Source 48: `notes/2026-04-27-0081-projection-validation-slice.md`
+## Source 49: `notes/2026-04-27-0081-projection-validation-slice.md`
 
 # 2026-04-27 0081 Projection Validation Slice
 
@@ -4414,7 +4452,7 @@ Notes
 
 ---
 
-## Source 49: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+## Source 50: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
 
 # 2026-04-27 0081 Recovery Promotion Postcondition
 
@@ -4453,7 +4491,7 @@ Notes
 
 ---
 
-## Source 50: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+## Source 51: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
 
 # 2026-04-27 0081 Recovery Receipt Postconditions
 
@@ -4501,7 +4539,7 @@ Notes
 
 ---
 
-## Source 51: `notes/2026-04-27-0081-redraft-scope-slice.md`
+## Source 52: `notes/2026-04-27-0081-redraft-scope-slice.md`
 
 # 2026-04-27 0081 Redraft Scope Slice
 
@@ -4540,7 +4578,7 @@ Notes
 
 ---
 
-## Source 52: `notes/2026-04-27-0081-state-rebuild-slice.md`
+## Source 53: `notes/2026-04-27-0081-state-rebuild-slice.md`
 
 # 2026-04-27 0081 State Rebuild Slice
 
@@ -4588,7 +4626,7 @@ Notes
 
 ---
 
-## Source 53: `notes/2026-04-27-0081-state-validation-slice.md`
+## Source 54: `notes/2026-04-27-0081-state-validation-slice.md`
 
 # 2026-04-27 0081 Recovery State Validation Slice
 
@@ -4625,7 +4663,7 @@ Notes
 
 ---
 
-## Source 54: `promotion.md`
+## Source 55: `promotion.md`
 
 # Promotion
 

@@ -347,6 +347,36 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
     stale_setting_path.unlink()
     stale_appearance_path.unlink()
 
+    stale_continuity_pack = branch_root / "draft" / "context" / "continuity_pack.json"
+    stale_bible_path = branch_root / "draft" / "context" / "bible.md"
+    stale_seam_report = branch_root / "draft" / "context" / "chapter_seams" / "ch_001" / "chapter_seam_report.json"
+    _write_json(
+        stale_continuity_pack,
+        {
+            "scene_end_anchor": "char_artie escaped the polluted timeline.",
+            "constraints": [],
+            "open_threads": [],
+            "cast_present": ["char_artie"],
+            "location": "",
+            "next_action": "",
+        },
+    )
+    stale_bible_path.write_text("char_artie remains canonical after the wrong outline pass.\n", encoding="utf-8")
+    _write_json(stale_seam_report, {"node": {"branch_id": "main"}, "notes": ["char_artie overlap persists."]})
+    blocked_continuity_state = validate_recovery_branch(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="validate_recovery_branch", branch_id="recover-sec1"),
+    )
+    assert blocked_continuity_state.status == "integrity_degraded"
+    continuity_blockers = blocked_continuity_state.details["recovery_receipt"]["details"]["state_projection_blockers"]
+    assert any("continuity pack references non-outline character: char_artie" in blocker for blocker in continuity_blockers)
+    assert any("world bible references non-outline character: char_artie" in blocker for blocker in continuity_blockers)
+    assert any("chapter seam artifact references non-outline character: char_artie" in blocker for blocker in continuity_blockers)
+    assert any("chapter seam artifact has stale node branch main" in blocker for blocker in continuity_blockers)
+    stale_continuity_pack.unlink()
+    stale_bible_path.write_text("", encoding="utf-8")
+    stale_seam_report.unlink()
+
     context_dir = branch_root / "draft" / "context"
     _write_json(
         context_dir / "item_registry.json",
