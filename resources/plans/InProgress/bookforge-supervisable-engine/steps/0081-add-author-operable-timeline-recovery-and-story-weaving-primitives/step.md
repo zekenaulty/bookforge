@@ -1,6 +1,6 @@
 # 0081 Add Author-Operable Timeline Recovery And Story-Weaving Primitives
 
-Status: in_progress
+Status: completed
 
 ## Goal
 - Add branch-first BookForge mutation primitives that let Nanda compose timeline recovery, retcon, redraft, and downstream story-weaving plans without requiring a bespoke BookForge command for every failure class.
@@ -192,16 +192,16 @@ Status: in_progress
 - Recovery tests now include a two-chapter pollution fixture that runs branch-first recovery end to end across real outline, prose, state, chapter-summary, setting, character-state, and section-draft artifacts.
 - Recovery validation receipts and health surfaces now expose a `semantic_validation` boundary with `status: deferred` so Nanda can distinguish structural timeline health from author-level semantic/story validation.
 
-## Remaining Implementation
-- Extend blast-radius surfaces with semantic downstream dependency tracing after redraft; current downstream grouping is manifest-declared only.
-- Expand validation beyond outline lineage to state/projection families:
-  - semantic continuity validation beyond ghost-character, thread-reference, and stale-branch checks
-  - semantic validation for inventory/deep state beyond ghost-character and index-consistency checks
-  - semantic validation for locations/settings beyond stale branch and ghost-character checks
-  - semantic validation for chapter summaries beyond ghost-character checks
-  - semantic validation for appearance/setting projections beyond stale branch and ghost-character checks
-- Add richer downstream invalidation detection after redraft.
-- Add Veiled Ledger-size three-plus-chapter fixture coverage once the current two-chapter fixture needs further scale pressure.
+## Follow-Up Work Deferred To 0082
+- Semantic downstream dependency tracing after redraft.
+- Semantic recovery review for continuity, inventory/deep state, location/setting, summaries, appearance projections, and prose quality.
+- Richer downstream invalidation recommendations driven by semantic review results.
+- Veiled Ledger-size three-plus-chapter fixture coverage once the current two-chapter fixture needs further scale pressure.
+
+## Completion Note
+- `0081` is complete as the structural, branch-first recovery primitive slice.
+- It intentionally does not claim meaning-level story validation.
+- Semantic validation is explicitly reported as `deferred` in recovery validation receipts and recovery health surfaces.
 
 ## Detailed Work
 - Add recovery contracts.

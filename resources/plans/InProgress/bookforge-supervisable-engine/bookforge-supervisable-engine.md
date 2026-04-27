@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T17:15:40Z`
-- Source Document Count: `61`
+- Compiled At (UTC): `2026-04-27T17:19:06Z`
+- Source Document Count: `63`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -27,49 +27,51 @@
 16. `steps/0075-extract-appearance-setting-and-context-refinement-surfaces/step.md`
 17. `steps/0080-add-outline-lineage-audit-and-recovery-briefing/step.md`
 18. `steps/0081-add-author-operable-timeline-recovery-and-story-weaving-primitives/step.md`
-19. `notes/2026-04-21-0010-execution.md`
-20. `notes/2026-04-21-0020-execution.md`
-21. `notes/2026-04-21-0030-execution.md`
-22. `notes/2026-04-21-0040-execution.md`
-23. `notes/2026-04-21-0045-execution.md`
-24. `notes/2026-04-21-0050-execution.md`
-25. `notes/2026-04-22-0050-execution.md`
-26. `notes/2026-04-22-0060-execution.md`
-27. `notes/2026-04-23-0070-commit-slice.md`
-28. `notes/2026-04-23-0070-continuity-pack-slice.md`
-29. `notes/2026-04-23-0070-repair-slice.md`
-30. `notes/2026-04-23-0070-run-loop-wrapper-slice.md`
-31. `notes/2026-04-23-0070-section-wrapper-tightening.md`
-32. `notes/2026-04-26-0070-complete.md`
-33. `notes/2026-04-26-0071-branch-scoped-writer.md`
-34. `notes/2026-04-26-0072-complete.md`
-35. `notes/2026-04-26-0072-lifecycle-cli.md`
-36. `notes/2026-04-26-0072-nested-branch-primitives.md`
-37. `notes/2026-04-26-0072-writer-assembly-staging.md`
-38. `notes/2026-04-26-0075-appearance-pending-fix.md`
-39. `notes/2026-04-26-0075-complete.md`
-40. `notes/2026-04-26-0075-context-receipts.md`
-41. `notes/2026-04-26-0075-projection-query-slice.md`
-42. `notes/2026-04-26-0075-setting-actions.md`
-43. `notes/2026-04-26-0080-complete.md`
-44. `notes/2026-04-26-0081-implementation-slice.md`
-45. `notes/2026-04-26-0081-planning.md`
-46. `notes/2026-04-27-0081-approval-metadata-slice.md`
-47. `notes/2026-04-27-0081-blast-radius-scope-groups.md`
-48. `notes/2026-04-27-0081-blast-radius-slice.md`
-49. `notes/2026-04-27-0081-continuity-validation-slice.md`
-50. `notes/2026-04-27-0081-downstream-review-impacts.md`
-51. `notes/2026-04-27-0081-durable-validation-slice.md`
-52. `notes/2026-04-27-0081-multi-scope-coverage.md`
-53. `notes/2026-04-27-0081-projection-validation-slice.md`
-54. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
-55. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
-56. `notes/2026-04-27-0081-redraft-scope-slice.md`
-57. `notes/2026-04-27-0081-semantic-validation-boundary.md`
-58. `notes/2026-04-27-0081-state-rebuild-slice.md`
-59. `notes/2026-04-27-0081-state-validation-slice.md`
-60. `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
-61. `promotion.md`
+19. `steps/0082-add-semantic-recovery-review-and-downstream-impact-surfaces/step.md`
+20. `notes/2026-04-21-0010-execution.md`
+21. `notes/2026-04-21-0020-execution.md`
+22. `notes/2026-04-21-0030-execution.md`
+23. `notes/2026-04-21-0040-execution.md`
+24. `notes/2026-04-21-0045-execution.md`
+25. `notes/2026-04-21-0050-execution.md`
+26. `notes/2026-04-22-0050-execution.md`
+27. `notes/2026-04-22-0060-execution.md`
+28. `notes/2026-04-23-0070-commit-slice.md`
+29. `notes/2026-04-23-0070-continuity-pack-slice.md`
+30. `notes/2026-04-23-0070-repair-slice.md`
+31. `notes/2026-04-23-0070-run-loop-wrapper-slice.md`
+32. `notes/2026-04-23-0070-section-wrapper-tightening.md`
+33. `notes/2026-04-26-0070-complete.md`
+34. `notes/2026-04-26-0071-branch-scoped-writer.md`
+35. `notes/2026-04-26-0072-complete.md`
+36. `notes/2026-04-26-0072-lifecycle-cli.md`
+37. `notes/2026-04-26-0072-nested-branch-primitives.md`
+38. `notes/2026-04-26-0072-writer-assembly-staging.md`
+39. `notes/2026-04-26-0075-appearance-pending-fix.md`
+40. `notes/2026-04-26-0075-complete.md`
+41. `notes/2026-04-26-0075-context-receipts.md`
+42. `notes/2026-04-26-0075-projection-query-slice.md`
+43. `notes/2026-04-26-0075-setting-actions.md`
+44. `notes/2026-04-26-0080-complete.md`
+45. `notes/2026-04-26-0081-implementation-slice.md`
+46. `notes/2026-04-26-0081-planning.md`
+47. `notes/2026-04-27-0081-approval-metadata-slice.md`
+48. `notes/2026-04-27-0081-blast-radius-scope-groups.md`
+49. `notes/2026-04-27-0081-blast-radius-slice.md`
+50. `notes/2026-04-27-0081-complete-0082-drafted.md`
+51. `notes/2026-04-27-0081-continuity-validation-slice.md`
+52. `notes/2026-04-27-0081-downstream-review-impacts.md`
+53. `notes/2026-04-27-0081-durable-validation-slice.md`
+54. `notes/2026-04-27-0081-multi-scope-coverage.md`
+55. `notes/2026-04-27-0081-projection-validation-slice.md`
+56. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+57. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+58. `notes/2026-04-27-0081-redraft-scope-slice.md`
+59. `notes/2026-04-27-0081-semantic-validation-boundary.md`
+60. `notes/2026-04-27-0081-state-rebuild-slice.md`
+61. `notes/2026-04-27-0081-state-validation-slice.md`
+62. `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
+63. `promotion.md`
 
 ---
 
@@ -80,7 +82,7 @@
 Status: In Progress
 Stage: InProgress
 Owner: BookForge engine workstream
-Last Updated: 2026-04-26
+Last Updated: 2026-04-27
 
 ## Objective
 - Make BookForge truthful and supervisable by Nanda without moving prose generation or canonical state mutation out of BookForge.
@@ -575,7 +577,8 @@ This plan is ready for promotion only when the target implementation can satisfy
 | 0072-add-parent-target-promotion-rebase-and-parallel-fork-write | completed | 0071 | Let branch work merge upward into parent branches or `main`, add explicit rebase, and support sibling parallel write branches with validation-gated assembly. |
 | 0075-extract-appearance-setting-and-context-refinement-surfaces | completed | 0070 | Make character appearance, scene background/setting, and prior-stage T1 thought-signature context explicit queryable projection layers instead of incidental prompt side effects. |
 | 0080-add-outline-lineage-audit-and-recovery-briefing | completed | 0020, 0030, 0050, 0060 | Add read-only outline lineage audit, section-level lineage matrix, stale artifact inventory, and recovery candidate briefing so Nanda can localize chimera risks before any repair mutation. |
-| 0081-add-author-operable-timeline-recovery-and-story-weaving-primitives | in_progress | 0045, 0070, 0071, 0072, 0075, 0080 | Add branch-first mutation primitives that let Nanda compose timeline recovery, retcon, redraft, and downstream story-weaving plans without BookForge needing bespoke fix commands for every failure class. |
+| 0081-add-author-operable-timeline-recovery-and-story-weaving-primitives | completed | 0045, 0070, 0071, 0072, 0075, 0080 | Add branch-first mutation primitives that let Nanda compose timeline recovery, retcon, redraft, and downstream story-weaving plans without BookForge needing bespoke fix commands for every failure class. |
+| 0082-add-semantic-recovery-review-and-downstream-impact-surfaces | pending | 0075, 0081 | Add author/Nanda-facing semantic recovery review surfaces for downstream dependency tracing, story continuity, and meaning-level validation after structural recovery. |
 
 ---
 
@@ -2542,7 +2545,7 @@ Status: completed
 
 # 0081 Add Author-Operable Timeline Recovery And Story-Weaving Primitives
 
-Status: in_progress
+Status: completed
 
 ## Goal
 - Add branch-first BookForge mutation primitives that let Nanda compose timeline recovery, retcon, redraft, and downstream story-weaving plans without requiring a bespoke BookForge command for every failure class.
@@ -2734,16 +2737,16 @@ Status: in_progress
 - Recovery tests now include a two-chapter pollution fixture that runs branch-first recovery end to end across real outline, prose, state, chapter-summary, setting, character-state, and section-draft artifacts.
 - Recovery validation receipts and health surfaces now expose a `semantic_validation` boundary with `status: deferred` so Nanda can distinguish structural timeline health from author-level semantic/story validation.
 
-## Remaining Implementation
-- Extend blast-radius surfaces with semantic downstream dependency tracing after redraft; current downstream grouping is manifest-declared only.
-- Expand validation beyond outline lineage to state/projection families:
-  - semantic continuity validation beyond ghost-character, thread-reference, and stale-branch checks
-  - semantic validation for inventory/deep state beyond ghost-character and index-consistency checks
-  - semantic validation for locations/settings beyond stale branch and ghost-character checks
-  - semantic validation for chapter summaries beyond ghost-character checks
-  - semantic validation for appearance/setting projections beyond stale branch and ghost-character checks
-- Add richer downstream invalidation detection after redraft.
-- Add Veiled Ledger-size three-plus-chapter fixture coverage once the current two-chapter fixture needs further scale pressure.
+## Follow-Up Work Deferred To 0082
+- Semantic downstream dependency tracing after redraft.
+- Semantic recovery review for continuity, inventory/deep state, location/setting, summaries, appearance projections, and prose quality.
+- Richer downstream invalidation recommendations driven by semantic review results.
+- Veiled Ledger-size three-plus-chapter fixture coverage once the current two-chapter fixture needs further scale pressure.
+
+## Completion Note
+- `0081` is complete as the structural, branch-first recovery primitive slice.
+- It intentionally does not claim meaning-level story validation.
+- Semantic validation is explicitly reported as `deferred` in recovery validation receipts and recovery health surfaces.
 
 ## Detailed Work
 - Add recovery contracts.
@@ -2926,7 +2929,146 @@ Status: in_progress
 
 ---
 
-## Source 19: `notes/2026-04-21-0010-execution.md`
+## Source 19: `steps/0082-add-semantic-recovery-review-and-downstream-impact-surfaces/step.md`
+
+# 0082 Add Semantic Recovery Review And Downstream Impact Surfaces
+
+Status: pending
+
+## Goal
+- Add semantic recovery review surfaces that let Nanda decide whether a structurally recovered branch is also story-safe.
+- Keep BookForge honest:
+  - structural validation remains deterministic and engine-owned
+  - semantic review is evidence-generating and author/Nanda-facing
+  - semantic review does not silently promote, invalidate, or rewrite anything
+
+## Problem
+- `0081` can recover a coherent structural timeline:
+  - outline lineage normalized
+  - invalid artifacts quarantined or removed
+  - impacted prose redrafted
+  - branch validated and promoted with removals
+  - `chimera_risk` cleared
+- But `0081` deliberately marks semantic validation as `deferred`.
+- Nanda still needs structured evidence to answer:
+  - did the redraft preserve causal story continuity
+  - which downstream chapters/scenes need author review
+  - which continuity, inventory, setting, summary, or appearance facts may now be stale
+  - whether a recovered branch is ready for seam repair, revision, promotion, or user approval
+
+## Boundary
+- This step does not replace 0081 structural validation.
+- This step does not add a monolithic `fix_story_semantics` command.
+- This step should produce review surfaces and candidate actions.
+- Mutation remains separate and branch-first.
+- LLM review may be used, but the engine must constrain:
+  - scope
+  - input artifacts
+  - output schema
+  - allowed conclusions
+  - whether output is diagnostic or provisional
+
+## Proposed Query Surfaces
+- `get_recovery_semantic_review(workspace, book_id, *, branch_id)`
+  - summarizes semantic review status for the recovery branch
+  - reports reviewed scopes, pending scopes, blockers, warnings, and recommended next action
+- `get_downstream_dependency_review(workspace, book_id, *, branch_id)`
+  - reports downstream scopes declared by the manifest
+  - lists downstream artifacts requiring author review
+  - classifies review status as:
+    - `not_started`
+    - `manifest_declared_only`
+    - `reviewed_clean`
+    - `reviewed_attention_required`
+    - `review_failed`
+- `get_recovery_semantic_review_readiness(workspace, book_id, *, branch_id)`
+  - reports whether the branch has enough structural recovery artifacts to run semantic review
+  - refuses before redraft and before structural validation has at least been attempted
+
+## Proposed Execution Actions
+- `review_recovery_semantics`
+  - branch-scoped
+  - diagnostic output only
+  - reads normalized outline, affected/downstream prose, state/projection summaries, and recovery receipts
+  - emits `recovery_semantic_review.json`
+- `review_downstream_dependencies`
+  - branch-scoped
+  - diagnostic output only
+  - reads manifest downstream scopes and available downstream prose/projections
+  - emits `downstream_dependency_review.json`
+- Future follow-up actions may consume these diagnostics to request explicit:
+  - downstream redraft
+  - seam repair
+  - setting/appearance refresh
+  - summary rebuild
+  - human approval
+
+## Review Schema Requirements
+- Every semantic review artifact must include:
+  - `schema_version`
+  - `book_id`
+  - `branch_id`
+  - `node`
+  - `artifact_status: diagnostic`
+  - `review_scope`
+  - `reviewed_artifacts`
+  - `findings`
+  - `blocked_actions`
+  - `recommended_next_action`
+  - `confidence`
+  - `review_limitations`
+- Findings must distinguish:
+  - structural blocker already handled by 0081
+  - semantic continuity risk
+  - downstream dependency risk
+  - prose quality/seam risk
+  - missing evidence
+  - human decision required
+
+## LLM Contract Direction
+- Use the existing style of strict BookForge prompt contracts:
+  - read-only context separated from writable outputs
+  - exact scope
+  - explicit output schema
+  - `error_v1` fallback
+  - no repair text unless the action is a dedicated mutation action
+- The reviewer LLM should not invent canonical facts.
+- It should cite the artifacts and scene/chapter refs that support each finding.
+- It should be allowed to say the evidence is insufficient.
+
+## Nanda Alignment
+- Nanda should use these surfaces to populate or refine `book_timeline_impact_report_v1`.
+- Nanda owns:
+  - strategy selection
+  - comparing candidate actions
+  - human approval flow
+  - deciding whether semantic findings justify downstream mutation
+- BookForge owns:
+  - reading branch artifacts
+  - producing review receipts
+  - preserving diagnostic artifacts
+  - refusing mutation without explicit scoped action requests
+
+## Definition Of Done
+- Readiness query exists for semantic recovery review.
+- At least one diagnostic semantic review action exists and is exposed through `legal_next_actions`.
+- Review artifacts carry `artifact_status: diagnostic`.
+- Recovery branch health can surface whether semantic review is missing, clean, or attention-required.
+- Tests cover:
+  - review refused before structural prerequisites
+  - review artifact emitted after redraft/validation
+  - downstream review candidates appear without becoming mutation targets
+  - Nanda-visible query output distinguishes structural health from semantic review status
+
+## Test Plan
+- Add focused unit tests for readiness and action discovery.
+- Add fixture tests using the two-chapter recovery fixture from 0081.
+- Keep LLM calls mocked.
+- Run full regression before marking complete.
+
+---
+
+## Source 20: `notes/2026-04-21-0010-execution.md`
 
 # 0010 Execution Note
 
@@ -2966,7 +3108,7 @@ Notes
 
 ---
 
-## Source 20: `notes/2026-04-21-0020-execution.md`
+## Source 21: `notes/2026-04-21-0020-execution.md`
 
 # 0020 Execution Note
 
@@ -3014,7 +3156,7 @@ Notes
 
 ---
 
-## Source 21: `notes/2026-04-21-0030-execution.md`
+## Source 22: `notes/2026-04-21-0030-execution.md`
 
 # 0030 Execution Note
 
@@ -3070,7 +3212,7 @@ Notes
 
 ---
 
-## Source 22: `notes/2026-04-21-0040-execution.md`
+## Source 23: `notes/2026-04-21-0040-execution.md`
 
 # 0040 Execution Note
 
@@ -3121,7 +3263,7 @@ Notes
 
 ---
 
-## Source 23: `notes/2026-04-21-0045-execution.md`
+## Source 24: `notes/2026-04-21-0045-execution.md`
 
 # 0045 Execution Note
 
@@ -3179,7 +3321,7 @@ Notes
 
 ---
 
-## Source 24: `notes/2026-04-21-0050-execution.md`
+## Source 25: `notes/2026-04-21-0050-execution.md`
 
 # 0050 Execution Note
 
@@ -3243,7 +3385,7 @@ Notes
 
 ---
 
-## Source 25: `notes/2026-04-22-0050-execution.md`
+## Source 26: `notes/2026-04-22-0050-execution.md`
 
 # 0050 Execution Note
 
@@ -3302,7 +3444,7 @@ Notes
 
 ---
 
-## Source 26: `notes/2026-04-22-0060-execution.md`
+## Source 27: `notes/2026-04-22-0060-execution.md`
 
 # 0060 Execution Note
 
@@ -3460,7 +3602,7 @@ Notes
 
 ---
 
-## Source 27: `notes/2026-04-23-0070-commit-slice.md`
+## Source 28: `notes/2026-04-23-0070-commit-slice.md`
 
 ## 2026-04-23 - 0070 commit slice
 
@@ -3529,7 +3671,7 @@ Notes
 
 ---
 
-## Source 28: `notes/2026-04-23-0070-continuity-pack-slice.md`
+## Source 29: `notes/2026-04-23-0070-continuity-pack-slice.md`
 
 # 0070 Continuity-Pack Slice Execution Note
 
@@ -3640,7 +3782,7 @@ Notes
 
 ---
 
-## Source 29: `notes/2026-04-23-0070-repair-slice.md`
+## Source 30: `notes/2026-04-23-0070-repair-slice.md`
 
 ## 2026-04-23 - 0070 repair slice
 
@@ -3699,7 +3841,7 @@ Notes
 
 ---
 
-## Source 30: `notes/2026-04-23-0070-run-loop-wrapper-slice.md`
+## Source 31: `notes/2026-04-23-0070-run-loop-wrapper-slice.md`
 
 # 2026-04-23 0070 Run-Loop Wrapper Slice
 
@@ -3751,7 +3893,7 @@ Notes
 
 ---
 
-## Source 31: `notes/2026-04-23-0070-section-wrapper-tightening.md`
+## Source 32: `notes/2026-04-23-0070-section-wrapper-tightening.md`
 
 # 2026-04-23 0070 Section Wrapper Tightening
 
@@ -3800,7 +3942,7 @@ Notes
 
 ---
 
-## Source 32: `notes/2026-04-26-0070-complete.md`
+## Source 33: `notes/2026-04-26-0070-complete.md`
 
 # 2026-04-26 0070 Complete
 
@@ -3851,7 +3993,7 @@ Notes
 
 ---
 
-## Source 33: `notes/2026-04-26-0071-branch-scoped-writer.md`
+## Source 34: `notes/2026-04-26-0071-branch-scoped-writer.md`
 
 # 2026-04-26 0071 Branch-Scoped Writer
 
@@ -3878,7 +4020,7 @@ Notes
 
 ---
 
-## Source 34: `notes/2026-04-26-0072-complete.md`
+## Source 35: `notes/2026-04-26-0072-complete.md`
 
 # 2026-04-26 0072 Complete
 
@@ -3898,7 +4040,7 @@ Notes
 
 ---
 
-## Source 35: `notes/2026-04-26-0072-lifecycle-cli.md`
+## Source 36: `notes/2026-04-26-0072-lifecycle-cli.md`
 
 # 2026-04-26 0072 Lifecycle CLI
 
@@ -3927,7 +4069,7 @@ Notes
 
 ---
 
-## Source 36: `notes/2026-04-26-0072-nested-branch-primitives.md`
+## Source 37: `notes/2026-04-26-0072-nested-branch-primitives.md`
 
 # 2026-04-26 0072 Nested Branch Primitives
 
@@ -3950,7 +4092,7 @@ Notes
 
 ---
 
-## Source 37: `notes/2026-04-26-0072-writer-assembly-staging.md`
+## Source 38: `notes/2026-04-26-0072-writer-assembly-staging.md`
 
 # 2026-04-26 0072 Writer Assembly Staging
 
@@ -3976,7 +4118,7 @@ Notes
 
 ---
 
-## Source 38: `notes/2026-04-26-0075-appearance-pending-fix.md`
+## Source 39: `notes/2026-04-26-0075-appearance-pending-fix.md`
 
 # 2026-04-26 0075 Appearance Pending Fix
 
@@ -4004,7 +4146,7 @@ Notes
 
 ---
 
-## Source 39: `notes/2026-04-26-0075-complete.md`
+## Source 40: `notes/2026-04-26-0075-complete.md`
 
 # 2026-04-26 0075 Complete
 
@@ -4048,7 +4190,7 @@ Notes
 
 ---
 
-## Source 40: `notes/2026-04-26-0075-context-receipts.md`
+## Source 41: `notes/2026-04-26-0075-context-receipts.md`
 
 # 2026-04-26 0075 Scene Context Receipt Slice
 
@@ -4091,7 +4233,7 @@ Notes
 
 ---
 
-## Source 41: `notes/2026-04-26-0075-projection-query-slice.md`
+## Source 42: `notes/2026-04-26-0075-projection-query-slice.md`
 
 # 2026-04-26 0075 Projection Query Slice
 
@@ -4124,7 +4266,7 @@ Notes
 
 ---
 
-## Source 42: `notes/2026-04-26-0075-setting-actions.md`
+## Source 43: `notes/2026-04-26-0075-setting-actions.md`
 
 # 2026-04-26 0075 Setting Projection Actions
 
@@ -4159,7 +4301,7 @@ Notes
 
 ---
 
-## Source 43: `notes/2026-04-26-0080-complete.md`
+## Source 44: `notes/2026-04-26-0080-complete.md`
 
 # 2026-04-26 0080 Complete
 
@@ -4213,7 +4355,7 @@ Notes
 
 ---
 
-## Source 44: `notes/2026-04-26-0081-implementation-slice.md`
+## Source 45: `notes/2026-04-26-0081-implementation-slice.md`
 
 # 2026-04-26 0081 Implementation Slice
 
@@ -4275,7 +4417,7 @@ Notes
 
 ---
 
-## Source 45: `notes/2026-04-26-0081-planning.md`
+## Source 46: `notes/2026-04-26-0081-planning.md`
 
 # 2026-04-26 0081 Planning
 
@@ -4311,7 +4453,7 @@ Notes
 
 ---
 
-## Source 46: `notes/2026-04-27-0081-approval-metadata-slice.md`
+## Source 47: `notes/2026-04-27-0081-approval-metadata-slice.md`
 
 # 2026-04-27 0081 Approval Metadata Slice
 
@@ -4345,7 +4487,7 @@ Notes
 
 ---
 
-## Source 47: `notes/2026-04-27-0081-blast-radius-scope-groups.md`
+## Source 48: `notes/2026-04-27-0081-blast-radius-scope-groups.md`
 
 # 2026-04-27 0081 Blast-Radius Scope Groups
 
@@ -4380,7 +4522,7 @@ Notes
 
 ---
 
-## Source 48: `notes/2026-04-27-0081-blast-radius-slice.md`
+## Source 49: `notes/2026-04-27-0081-blast-radius-slice.md`
 
 # 2026-04-27 0081 Recovery Blast Radius Slice
 
@@ -4432,7 +4574,43 @@ Notes
 
 ---
 
-## Source 49: `notes/2026-04-27-0081-continuity-validation-slice.md`
+## Source 50: `notes/2026-04-27-0081-complete-0082-drafted.md`
+
+# 2026-04-27 0081 Complete And 0082 Drafted
+
+## Summary
+- Marked `0081` completed as the structural, branch-first timeline recovery primitive slice.
+- Added `0082-add-semantic-recovery-review-and-downstream-impact-surfaces`.
+- Updated the step index so semantic review work is no longer hidden inside 0081.
+
+## Why
+- 0081 now provides the mutation primitives and structural validation Nanda needs to compose timeline recovery:
+  - branch creation
+  - artifact quarantine
+  - outline normalization
+  - output invalidation
+  - state rebuild
+  - scoped redraft
+  - validation
+  - promotion with removals
+  - blast-radius/query surfaces
+  - approval metadata
+  - structural validation blockers
+- The remaining work is semantically different: review and meaning-level validation after structural recovery.
+- Keeping that in 0081 would blur deterministic engine validation with author/Nanda semantic judgment.
+
+## 0082 Boundary
+- 0082 should add diagnostic semantic review surfaces and readiness.
+- It should not add broad mutation.
+- It should preserve the 0081 rule that healthy timeline and good story are separate gates.
+
+## Validation
+- Documentation/plan-only change.
+- Plan projection compile required before commit.
+
+---
+
+## Source 51: `notes/2026-04-27-0081-continuity-validation-slice.md`
 
 # 2026-04-27 0081 Continuity Validation Slice
 
@@ -4468,7 +4646,7 @@ Notes
 
 ---
 
-## Source 50: `notes/2026-04-27-0081-downstream-review-impacts.md`
+## Source 52: `notes/2026-04-27-0081-downstream-review-impacts.md`
 
 # 2026-04-27 0081 Downstream Review Impacts
 
@@ -4500,7 +4678,7 @@ Notes
 
 ---
 
-## Source 51: `notes/2026-04-27-0081-durable-validation-slice.md`
+## Source 53: `notes/2026-04-27-0081-durable-validation-slice.md`
 
 # 2026-04-27 0081 Durable Validation Slice
 
@@ -4538,7 +4716,7 @@ Notes
 
 ---
 
-## Source 52: `notes/2026-04-27-0081-multi-scope-coverage.md`
+## Source 54: `notes/2026-04-27-0081-multi-scope-coverage.md`
 
 # 2026-04-27 0081 Multi-Scope Coverage
 
@@ -4569,7 +4747,7 @@ Notes
 
 ---
 
-## Source 53: `notes/2026-04-27-0081-projection-validation-slice.md`
+## Source 55: `notes/2026-04-27-0081-projection-validation-slice.md`
 
 # 2026-04-27 0081 Projection Validation Slice
 
@@ -4608,7 +4786,7 @@ Notes
 
 ---
 
-## Source 54: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+## Source 56: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
 
 # 2026-04-27 0081 Recovery Promotion Postcondition
 
@@ -4647,7 +4825,7 @@ Notes
 
 ---
 
-## Source 55: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+## Source 57: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
 
 # 2026-04-27 0081 Recovery Receipt Postconditions
 
@@ -4695,7 +4873,7 @@ Notes
 
 ---
 
-## Source 56: `notes/2026-04-27-0081-redraft-scope-slice.md`
+## Source 58: `notes/2026-04-27-0081-redraft-scope-slice.md`
 
 # 2026-04-27 0081 Redraft Scope Slice
 
@@ -4734,7 +4912,7 @@ Notes
 
 ---
 
-## Source 57: `notes/2026-04-27-0081-semantic-validation-boundary.md`
+## Source 59: `notes/2026-04-27-0081-semantic-validation-boundary.md`
 
 # 2026-04-27 0081 Semantic Validation Boundary
 
@@ -4769,7 +4947,7 @@ Notes
 
 ---
 
-## Source 58: `notes/2026-04-27-0081-state-rebuild-slice.md`
+## Source 60: `notes/2026-04-27-0081-state-rebuild-slice.md`
 
 # 2026-04-27 0081 State Rebuild Slice
 
@@ -4817,7 +4995,7 @@ Notes
 
 ---
 
-## Source 59: `notes/2026-04-27-0081-state-validation-slice.md`
+## Source 61: `notes/2026-04-27-0081-state-validation-slice.md`
 
 # 2026-04-27 0081 Recovery State Validation Slice
 
@@ -4854,7 +5032,7 @@ Notes
 
 ---
 
-## Source 60: `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
+## Source 62: `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
 
 # 2026-04-27 0081 Two-Chapter Recovery Fixture
 
@@ -4899,7 +5077,7 @@ Notes
 
 ---
 
-## Source 61: `promotion.md`
+## Source 63: `promotion.md`
 
 # Promotion
 
