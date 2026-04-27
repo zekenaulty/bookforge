@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T16:01:19Z`
-- Source Document Count: `53`
+- Compiled At (UTC): `2026-04-27T16:32:16Z`
+- Source Document Count: `54`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -55,13 +55,14 @@
 44. `notes/2026-04-26-0081-implementation-slice.md`
 45. `notes/2026-04-26-0081-planning.md`
 46. `notes/2026-04-27-0081-blast-radius-slice.md`
-47. `notes/2026-04-27-0081-projection-validation-slice.md`
-48. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
-49. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
-50. `notes/2026-04-27-0081-redraft-scope-slice.md`
-51. `notes/2026-04-27-0081-state-rebuild-slice.md`
-52. `notes/2026-04-27-0081-state-validation-slice.md`
-53. `promotion.md`
+47. `notes/2026-04-27-0081-durable-validation-slice.md`
+48. `notes/2026-04-27-0081-projection-validation-slice.md`
+49. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+50. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+51. `notes/2026-04-27-0081-redraft-scope-slice.md`
+52. `notes/2026-04-27-0081-state-rebuild-slice.md`
+53. `notes/2026-04-27-0081-state-validation-slice.md`
+54. `promotion.md`
 
 ---
 
@@ -2705,13 +2706,14 @@ Status: in_progress
 - Recovery promotion results now include canonical postconditions with pre/post outline lineage status, pre/post integrity status, planned/applied removals, and whether `main` cleared chimera risk.
 - Recovery validation now blocks branch promotion when branch-local character index/state artifacts contain character IDs that are absent from the normalized outline.
 - Recovery validation now blocks branch promotion when affected chapter summaries, setting projections, or appearance projections reference non-outline character IDs or carry stale embedded branch coordinates.
+- Recovery validation now blocks branch promotion when durable inventory/plot-device registries and indexes retain non-outline character refs, stale embedded branch coordinates, or index entries that no longer exist in their registries.
 
 ## Remaining Implementation
 - Extend blast-radius surfaces with downstream dependency tracing after redraft.
 - Add approval-required metadata to all destructive or broad-scope primitives.
 - Expand validation beyond outline lineage to state/projection families:
   - continuity
-  - inventory/deep state
+  - semantic validation for inventory/deep state beyond ghost-character and index-consistency checks
   - semantic validation for locations/settings beyond stale branch and ghost-character checks
   - semantic validation for chapter summaries beyond ghost-character checks
   - semantic validation for appearance/setting projections beyond stale branch and ghost-character checks
@@ -4335,7 +4337,45 @@ Notes
 
 ---
 
-## Source 47: `notes/2026-04-27-0081-projection-validation-slice.md`
+## Source 47: `notes/2026-04-27-0081-durable-validation-slice.md`
+
+# 2026-04-27 0081 Durable Validation Slice
+
+## Summary
+- Added recovery-branch validation for durable inventory and plot-device state before promotion.
+- `validate_recovery_branch` now scans branch-local durable artifacts under `draft/context`:
+  - `item_registry.json`
+  - `items/index.json`
+  - `plot_devices.json`
+  - `plot_devices/index.json`
+  - `durable_commits.json`
+  - item and plot-device history JSON files
+- The validator blocks promotion when these artifacts retain:
+  - character references that are absent from the normalized branch outline
+  - stale embedded `node.branch_id` or `selector.branch_id` values
+  - item/device index entries missing from their registries
+  - stale `THREAD_*` references when the normalized outline exposes a thread ID set
+
+## Boundary
+- This is deterministic structural validation, not semantic inventory reasoning.
+- It catches obvious stale timeline data such as ghost custodians, stale branch coordinates, and broken registry/index agreement.
+- It does not yet infer whether an item, device, or inventory fact is narratively correct after a redraft.
+
+## Why
+- Timeline recovery cannot clear `chimera_risk` safely if branch-local durable state still contains ghost timeline entities.
+- Nanda needs BookForge to surface these blockers as receipts and validation details, not require raw filesystem archaeology.
+
+## Validation
+- Focused suite passed:
+  - `.\.venv\Scripts\python.exe -m pytest -o addopts='' tests/test_recovery_actions.py tests/test_action_discovery.py --basetemp=.pytest_tmp_0081_durable_validation_focus2`
+  - Result: `35 passed`
+- Full suite passed:
+  - `.\.venv\Scripts\python.exe -m pytest -o addopts='' --basetemp=.pytest_tmp_0081_durable_validation_full`
+  - Result: `308 passed`
+
+---
+
+## Source 48: `notes/2026-04-27-0081-projection-validation-slice.md`
 
 # 2026-04-27 0081 Projection Validation Slice
 
@@ -4374,7 +4414,7 @@ Notes
 
 ---
 
-## Source 48: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+## Source 49: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
 
 # 2026-04-27 0081 Recovery Promotion Postcondition
 
@@ -4413,7 +4453,7 @@ Notes
 
 ---
 
-## Source 49: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+## Source 50: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
 
 # 2026-04-27 0081 Recovery Receipt Postconditions
 
@@ -4461,7 +4501,7 @@ Notes
 
 ---
 
-## Source 50: `notes/2026-04-27-0081-redraft-scope-slice.md`
+## Source 51: `notes/2026-04-27-0081-redraft-scope-slice.md`
 
 # 2026-04-27 0081 Redraft Scope Slice
 
@@ -4500,7 +4540,7 @@ Notes
 
 ---
 
-## Source 51: `notes/2026-04-27-0081-state-rebuild-slice.md`
+## Source 52: `notes/2026-04-27-0081-state-rebuild-slice.md`
 
 # 2026-04-27 0081 State Rebuild Slice
 
@@ -4548,7 +4588,7 @@ Notes
 
 ---
 
-## Source 52: `notes/2026-04-27-0081-state-validation-slice.md`
+## Source 53: `notes/2026-04-27-0081-state-validation-slice.md`
 
 # 2026-04-27 0081 Recovery State Validation Slice
 
@@ -4585,7 +4625,7 @@ Notes
 
 ---
 
-## Source 53: `promotion.md`
+## Source 54: `promotion.md`
 
 # Promotion
 

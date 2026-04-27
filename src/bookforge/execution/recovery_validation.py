@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any
-import re
 
 from bookforge.branching import promote_branch_to_main
 from bookforge.branching_store import _evolve_manifest, _load_manifest, _write_manifest
@@ -31,6 +31,8 @@ _CHARACTER_REF_KEYS = {
     "character_ids",
     "cast",
     "cast_present",
+    "custodian",
+    "owner",
     "pov_character",
     "speaker",
 }
@@ -57,6 +59,40 @@ def _outline_character_ids(outline: dict) -> set[str]:
                     if cleaned:
                         character_ids.add(cleaned)
     return character_ids
+
+
+def _looks_like_reference_id(text: str) -> bool:
+    cleaned = str(text or "").strip()
+    if not cleaned:
+        return False
+    if re.search(r"^(char|character|rhea|vance|unit)_", cleaned, flags=re.IGNORECASE):
+        return True
+    return bool(re.search(r"^[a-z][a-z0-9]+(?:_[a-z0-9]+)+$", cleaned))
+
+
+def _outline_thread_ids(outline: dict) -> set[str]:
+    thread_ids: set[str] = set()
+    for item in outline.get("threads") or []:
+        if isinstance(item, dict):
+            thread_id = str(item.get("thread_id") or item.get("id") or "").strip()
+        else:
+            thread_id = str(item or "").strip()
+        if thread_id:
+            thread_ids.add(thread_id)
+    for chapter in outline.get("chapters") or []:
+        if not isinstance(chapter, dict):
+            continue
+        for section in chapter.get("sections") or []:
+            if not isinstance(section, dict):
+                continue
+            for scene in section.get("scenes") or []:
+                if not isinstance(scene, dict):
+                    continue
+                for thread_id in scene.get("threads") or []:
+                    cleaned = str(thread_id or "").strip()
+                    if cleaned:
+                        thread_ids.add(cleaned)
+    return thread_ids
 
 
 def _iter_recovery_scopes(manifest_payload: dict) -> list[dict]:
@@ -168,12 +204,38 @@ def _character_reference_blockers(
     if not text:
         return blockers
     candidates: set[str] = set()
-    if context_key in _CHARACTER_REF_KEYS:
+    if context_key in _CHARACTER_REF_KEYS and _looks_like_reference_id(text):
         candidates.add(text)
-    candidates.update(match.group(0) for match in re.finditer(r"\bchar_[a-zA-Z0-9_]+\b", text))
+    candidates.update(match.group(0) for match in re.finditer(r"\bchar_[a-zA-Z0-9_]+\b", text, flags=re.IGNORECASE))
     for character_id in sorted(candidates):
         if character_id and character_id not in allowed_character_ids:
             blockers.append(f"{artifact_label} references non-outline character: {character_id} at {rel_path}")
+    return blockers
+
+
+def _thread_reference_blockers(
+    payload: Any,
+    allowed_thread_ids: set[str],
+    *,
+    rel_path: str,
+    artifact_label: str,
+) -> list[str]:
+    if not allowed_thread_ids:
+        return []
+    blockers: list[str] = []
+    if isinstance(payload, dict):
+        for value in payload.values():
+            blockers.extend(_thread_reference_blockers(value, allowed_thread_ids, rel_path=rel_path, artifact_label=artifact_label))
+        return blockers
+    if isinstance(payload, list):
+        for item in payload:
+            blockers.extend(_thread_reference_blockers(item, allowed_thread_ids, rel_path=rel_path, artifact_label=artifact_label))
+        return blockers
+    if not isinstance(payload, str):
+        return blockers
+    for thread_id in sorted({match.group(0) for match in re.finditer(r"\bTHREAD_[a-zA-Z0-9_]+\b", payload)}):
+        if thread_id not in allowed_thread_ids:
+            blockers.append(f"{artifact_label} references non-outline thread: {thread_id} at {rel_path}")
     return blockers
 
 
@@ -189,11 +251,63 @@ def _projection_lineage_blockers(payload: dict, *, branch_id: str, rel_path: str
     return blockers
 
 
+def _durable_artifact_paths(branch_root: Path) -> list[tuple[str, Path]]:
+    candidates: list[tuple[str, Path]] = []
+    context = branch_root / "draft" / "context"
+    for label, path in (
+        ("item registry", context / "item_registry.json"),
+        ("item index", context / "items" / "index.json"),
+        ("plot device registry", context / "plot_devices.json"),
+        ("plot device index", context / "plot_devices" / "index.json"),
+        ("durable commits", context / "durable_commits.json"),
+    ):
+        if path.exists():
+            candidates.append((label, path))
+    for label, rel_dir in (
+        ("item history", "items/history"),
+        ("plot device history", "plot_devices/history"),
+    ):
+        base = context / rel_dir
+        if not base.exists():
+            continue
+        candidates.extend((label, path) for path in sorted(base.rglob("*.json")) if path.is_file())
+    return candidates
+
+
+def _durable_index_blockers(branch_root: Path) -> list[str]:
+    blockers: list[str] = []
+    context = branch_root / "draft" / "context"
+    item_registry = read_json(context / "item_registry.json")
+    item_index = read_json(context / "items" / "index.json")
+    registered_items = {
+        str(item.get("item_id") or "").strip()
+        for item in item_registry.get("items") or []
+        if isinstance(item, dict) and str(item.get("item_id") or "").strip()
+    }
+    for item_id in item_index.get("item_ids") or []:
+        cleaned = str(item_id or "").strip()
+        if cleaned and cleaned not in registered_items:
+            blockers.append(f"item index references missing registry item: {cleaned} at draft/context/items/index.json")
+    plot_registry = read_json(context / "plot_devices.json")
+    plot_index = read_json(context / "plot_devices" / "index.json")
+    registered_devices = {
+        str(item.get("device_id") or "").strip()
+        for item in plot_registry.get("devices") or []
+        if isinstance(item, dict) and str(item.get("device_id") or "").strip()
+    }
+    for device_id in plot_index.get("device_ids") or []:
+        cleaned = str(device_id or "").strip()
+        if cleaned and cleaned not in registered_devices:
+            blockers.append(f"plot device index references missing registry device: {cleaned} at draft/context/plot_devices/index.json")
+    return blockers
+
+
 def _state_projection_blockers(workspace: Path, book_id: str, branch_id: str) -> list[str]:
     root = book_root(workspace, book_id)
     branch_root = supervision_paths.branch_snapshot_root(root, branch_id)
     outline = read_json(branch_root / "outline" / "outline.json")
     allowed_character_ids = _outline_character_ids(outline)
+    allowed_thread_ids = _outline_thread_ids(outline)
     if not allowed_character_ids:
         return []
     blockers: list[str] = []
@@ -225,6 +339,20 @@ def _state_projection_blockers(workspace: Path, book_id: str, branch_id: str) ->
             )
         )
         blockers.extend(_projection_lineage_blockers(payload, branch_id=branch_id, rel_path=rel_path, artifact_label=artifact_label))
+    for artifact_label, path in _durable_artifact_paths(branch_root):
+        payload = read_json(path)
+        rel_path = path.relative_to(branch_root).as_posix()
+        blockers.extend(
+            _character_reference_blockers(
+                payload,
+                allowed_character_ids,
+                rel_path=rel_path,
+                artifact_label=artifact_label,
+            )
+        )
+        blockers.extend(_thread_reference_blockers(payload, allowed_thread_ids, rel_path=rel_path, artifact_label=artifact_label))
+        blockers.extend(_projection_lineage_blockers(payload, branch_id=branch_id, rel_path=rel_path, artifact_label=artifact_label))
+    blockers.extend(_durable_index_blockers(branch_root))
     return blockers
 
 

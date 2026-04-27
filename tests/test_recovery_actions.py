@@ -347,6 +347,56 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
     stale_setting_path.unlink()
     stale_appearance_path.unlink()
 
+    context_dir = branch_root / "draft" / "context"
+    _write_json(
+        context_dir / "item_registry.json",
+        {
+            "schema_version": "1.0",
+            "items": [
+                {
+                    "item_id": "ITEM_wrong",
+                    "name": "Polluted Item",
+                    "custodian": "char_artie",
+                    "linked_threads": [],
+                    "last_seen": {"chapter": 1, "scene": 1},
+                }
+            ],
+        },
+    )
+    _write_json(context_dir / "items" / "index.json", {"schema_version": "1.0", "item_ids": ["ITEM_wrong", "ITEM_missing"]})
+    _write_json(
+        context_dir / "plot_devices.json",
+        {
+            "schema_version": "1.0",
+            "devices": [
+                {
+                    "device_id": "DEVICE_wrong",
+                    "custody_ref": "char_artie",
+                    "linked_threads": [],
+                    "last_seen": {"chapter": 1, "scene": 1},
+                }
+            ],
+        },
+    )
+    _write_json(
+        context_dir / "plot_devices" / "index.json",
+        {"schema_version": "1.0", "device_ids": ["DEVICE_wrong", "DEVICE_missing"]},
+    )
+    blocked_durable_state = validate_recovery_branch(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="validate_recovery_branch", branch_id="recover-sec1"),
+    )
+    assert blocked_durable_state.status == "integrity_degraded"
+    durable_blockers = blocked_durable_state.details["recovery_receipt"]["details"]["state_projection_blockers"]
+    assert any("item registry references non-outline character: char_artie" in blocker for blocker in durable_blockers)
+    assert any("plot device registry references non-outline character: char_artie" in blocker for blocker in durable_blockers)
+    assert any("item index references missing registry item: ITEM_missing" in blocker for blocker in durable_blockers)
+    assert any("plot device index references missing registry device: DEVICE_missing" in blocker for blocker in durable_blockers)
+    _write_json(context_dir / "item_registry.json", {"schema_version": "1.0", "items": []})
+    _write_json(context_dir / "items" / "index.json", {"schema_version": "1.0", "item_ids": []})
+    _write_json(context_dir / "plot_devices.json", {"schema_version": "1.0", "devices": []})
+    _write_json(context_dir / "plot_devices" / "index.json", {"schema_version": "1.0", "device_ids": []})
+
     rogue_character_dir = branch_root / "draft" / "context" / "characters"
     _write_json(
         rogue_character_dir / "index.json",
