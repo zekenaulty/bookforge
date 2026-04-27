@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
+import re
 
 from bookforge.branching import promote_branch_to_main
 from bookforge.branching_store import _evolve_manifest, _load_manifest, _write_manifest
@@ -20,6 +22,18 @@ from .recovery_common import (
     write_receipt,
     write_recovery_manifest,
 )
+
+
+_CHARACTER_REF_KEYS = {
+    "character",
+    "characters",
+    "character_id",
+    "character_ids",
+    "cast",
+    "cast_present",
+    "pov_character",
+    "speaker",
+}
 
 
 def _outline_character_ids(outline: dict) -> set[str]:
@@ -45,6 +59,136 @@ def _outline_character_ids(outline: dict) -> set[str]:
     return character_ids
 
 
+def _iter_recovery_scopes(manifest_payload: dict) -> list[dict]:
+    scope = manifest_payload.get("scope") if isinstance(manifest_payload.get("scope"), dict) else {}
+    rows = []
+    for key in ("affected_scopes", "downstream_scopes"):
+        values = scope.get(key) if isinstance(scope.get(key), list) else []
+        for item in values:
+            if isinstance(item, dict):
+                rows.append(dict(item))
+    return rows
+
+
+def _scope_key(chapter_id: int, section_id: int | None) -> str:
+    if section_id is None:
+        return f"ch_{int(chapter_id):03d}"
+    return f"ch_{int(chapter_id):03d}_sec_{int(section_id):03d}"
+
+
+def _scene_ids_for_scope(manifest_payload: dict, scope: dict) -> list[int]:
+    try:
+        chapter_id = int(scope.get("chapter_id") or scope.get("chapter"))
+    except (TypeError, ValueError):
+        return []
+    section_id_raw = scope.get("section_id", scope.get("section"))
+    try:
+        section_id = int(section_id_raw) if section_id_raw is not None else None
+    except (TypeError, ValueError):
+        section_id = None
+    ranges = manifest_payload.get("scope_output_ranges") if isinstance(manifest_payload.get("scope_output_ranges"), dict) else {}
+    row = ranges.get(_scope_key(chapter_id, section_id)) if isinstance(ranges, dict) else None
+    if not isinstance(row, dict):
+        return []
+    scene_ids: list[int] = []
+    for value in row.get("scene_ids") or []:
+        try:
+            scene_id = int(value)
+        except (TypeError, ValueError):
+            continue
+        if scene_id >= 1:
+            scene_ids.append(scene_id)
+    return sorted(set(scene_ids))
+
+
+def _scoped_projection_paths(branch_root: Path, manifest_payload: dict) -> list[tuple[str, Path]]:
+    paths: list[tuple[str, Path]] = []
+    seen: set[Path] = set()
+    for scope in _iter_recovery_scopes(manifest_payload):
+        try:
+            chapter_id = int(scope.get("chapter_id") or scope.get("chapter"))
+        except (TypeError, ValueError):
+            continue
+        summary_path = branch_root / "draft" / "context" / "chapter_summaries" / f"ch_{chapter_id:03d}.json"
+        if summary_path.exists() and summary_path not in seen:
+            seen.add(summary_path)
+            paths.append(("chapter summary", summary_path))
+        for scene_id in _scene_ids_for_scope(manifest_payload, scope):
+            for family, rel_dir in (
+                ("setting projection", f"draft/context/settings/ch_{chapter_id:03d}/scene_{scene_id:03d}"),
+                ("appearance projection", f"draft/context/appearance/ch_{chapter_id:03d}/scene_{scene_id:03d}"),
+            ):
+                base = branch_root / rel_dir
+                if not base.exists():
+                    continue
+                for path in sorted(base.rglob("*.json")):
+                    if path.is_file() and path not in seen:
+                        seen.add(path)
+                        paths.append((family, path))
+    return paths
+
+
+def _character_reference_blockers(
+    payload: Any,
+    allowed_character_ids: set[str],
+    *,
+    rel_path: str,
+    artifact_label: str,
+    context_key: str | None = None,
+) -> list[str]:
+    blockers: list[str] = []
+    if isinstance(payload, dict):
+        for key, value in payload.items():
+            cleaned_key = str(key or "").strip().lower()
+            blockers.extend(
+                _character_reference_blockers(
+                    value,
+                    allowed_character_ids,
+                    rel_path=rel_path,
+                    artifact_label=artifact_label,
+                    context_key=cleaned_key,
+                )
+            )
+        return blockers
+    if isinstance(payload, list):
+        for item in payload:
+            blockers.extend(
+                _character_reference_blockers(
+                    item,
+                    allowed_character_ids,
+                    rel_path=rel_path,
+                    artifact_label=artifact_label,
+                    context_key=context_key,
+                )
+            )
+        return blockers
+    if not isinstance(payload, str):
+        return blockers
+    text = payload.strip()
+    if not text:
+        return blockers
+    candidates: set[str] = set()
+    if context_key in _CHARACTER_REF_KEYS:
+        candidates.add(text)
+    candidates.update(match.group(0) for match in re.finditer(r"\bchar_[a-zA-Z0-9_]+\b", text))
+    for character_id in sorted(candidates):
+        if character_id and character_id not in allowed_character_ids:
+            blockers.append(f"{artifact_label} references non-outline character: {character_id} at {rel_path}")
+    return blockers
+
+
+def _projection_lineage_blockers(payload: dict, *, branch_id: str, rel_path: str, artifact_label: str) -> list[str]:
+    blockers: list[str] = []
+    for key in ("node", "selector"):
+        value = payload.get(key)
+        if not isinstance(value, dict):
+            continue
+        embedded_branch = str(value.get("branch_id") or "").strip()
+        if embedded_branch and embedded_branch != branch_id:
+            blockers.append(f"{artifact_label} has stale {key} branch {embedded_branch} at {rel_path}")
+    return blockers
+
+
 def _state_projection_blockers(workspace: Path, book_id: str, branch_id: str) -> list[str]:
     root = book_root(workspace, book_id)
     branch_root = supervision_paths.branch_snapshot_root(root, branch_id)
@@ -68,6 +212,19 @@ def _state_projection_blockers(workspace: Path, book_id: str, branch_id: str) ->
             if character_id and character_id not in allowed_character_ids:
                 rel_path = path.relative_to(branch_root).as_posix()
                 blockers.append(f"character state contains non-outline character: {character_id} at {rel_path}")
+    manifest_payload = get_recovery_manifest(workspace, book_id, branch_id=branch_id)
+    for artifact_label, path in _scoped_projection_paths(branch_root, manifest_payload):
+        payload = read_json(path)
+        rel_path = path.relative_to(branch_root).as_posix()
+        blockers.extend(
+            _character_reference_blockers(
+                payload,
+                allowed_character_ids,
+                rel_path=rel_path,
+                artifact_label=artifact_label,
+            )
+        )
+        blockers.extend(_projection_lineage_blockers(payload, branch_id=branch_id, rel_path=rel_path, artifact_label=artifact_label))
     return blockers
 
 

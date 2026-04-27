@@ -328,6 +328,25 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
     assert (branch_root / "draft" / "chapters" / "ch_001" / "scene_001.md").read_text(encoding="utf-8") == "Recovered scene 1."
     assert not (branch_root / "draft" / "chapters" / "ch_001" / "scene_002.md").exists()
 
+    stale_summary_path = branch_root / "draft" / "context" / "chapter_summaries" / "ch_001.json"
+    stale_setting_path = branch_root / "draft" / "context" / "settings" / "ch_001" / "scene_001" / "prose_extracted.setting.json"
+    stale_appearance_path = branch_root / "draft" / "context" / "appearance" / "ch_001" / "scene_001" / "appearance_projection.json"
+    _write_json(stale_summary_path, {"key_events": ["char_artie survived the old timeline."]})
+    _write_json(stale_setting_path, {"node": {"branch_id": "main"}, "setting": {"characters": ["char_artie"]}})
+    _write_json(stale_appearance_path, {"node": {"branch_id": "main"}, "characters": [{"character_id": "char_artie"}]})
+    blocked_stale_projection = validate_recovery_branch(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="validate_recovery_branch", branch_id="recover-sec1"),
+    )
+    assert blocked_stale_projection.status == "integrity_degraded"
+    projection_blockers = blocked_stale_projection.details["recovery_receipt"]["details"]["state_projection_blockers"]
+    assert any("chapter summary references non-outline character: char_artie" in blocker for blocker in projection_blockers)
+    assert any("setting projection has stale node branch main" in blocker for blocker in projection_blockers)
+    assert any("appearance projection references non-outline character: char_artie" in blocker for blocker in projection_blockers)
+    stale_summary_path.unlink()
+    stale_setting_path.unlink()
+    stale_appearance_path.unlink()
+
     rogue_character_dir = branch_root / "draft" / "context" / "characters"
     _write_json(
         rogue_character_dir / "index.json",

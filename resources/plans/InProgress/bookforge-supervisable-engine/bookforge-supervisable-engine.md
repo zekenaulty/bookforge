@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T14:13:21Z`
-- Source Document Count: `52`
+- Compiled At (UTC): `2026-04-27T16:01:19Z`
+- Source Document Count: `53`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -55,12 +55,13 @@
 44. `notes/2026-04-26-0081-implementation-slice.md`
 45. `notes/2026-04-26-0081-planning.md`
 46. `notes/2026-04-27-0081-blast-radius-slice.md`
-47. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
-48. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
-49. `notes/2026-04-27-0081-redraft-scope-slice.md`
-50. `notes/2026-04-27-0081-state-rebuild-slice.md`
-51. `notes/2026-04-27-0081-state-validation-slice.md`
-52. `promotion.md`
+47. `notes/2026-04-27-0081-projection-validation-slice.md`
+48. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+49. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+50. `notes/2026-04-27-0081-redraft-scope-slice.md`
+51. `notes/2026-04-27-0081-state-rebuild-slice.md`
+52. `notes/2026-04-27-0081-state-validation-slice.md`
+53. `promotion.md`
 
 ---
 
@@ -2703,16 +2704,17 @@ Status: in_progress
 - Recovery blast-radius now categorizes impact-report-friendly candidate artifacts into prose, state, continuity, projection, and series families.
 - Recovery promotion results now include canonical postconditions with pre/post outline lineage status, pre/post integrity status, planned/applied removals, and whether `main` cleared chimera risk.
 - Recovery validation now blocks branch promotion when branch-local character index/state artifacts contain character IDs that are absent from the normalized outline.
+- Recovery validation now blocks branch promotion when affected chapter summaries, setting projections, or appearance projections reference non-outline character IDs or carry stale embedded branch coordinates.
 
 ## Remaining Implementation
 - Extend blast-radius surfaces with downstream dependency tracing after redraft.
 - Add approval-required metadata to all destructive or broad-scope primitives.
 - Expand validation beyond outline lineage to state/projection families:
   - continuity
-  - locations/settings
   - inventory/deep state
-  - chapter summaries
-  - appearance/setting projections
+  - semantic validation for locations/settings beyond stale branch and ghost-character checks
+  - semantic validation for chapter summaries beyond ghost-character checks
+  - semantic validation for appearance/setting projections beyond stale branch and ghost-character checks
 - Add richer downstream invalidation detection after redraft.
 - Add Veiled Ledger-size multi-chapter fixture coverage.
 
@@ -4333,7 +4335,46 @@ Notes
 
 ---
 
-## Source 47: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+## Source 47: `notes/2026-04-27-0081-projection-validation-slice.md`
+
+# 2026-04-27 0081 Projection Validation Slice
+
+## Summary
+- Extended `validate_recovery_branch` beyond character state files.
+- Validation now inspects affected branch-local:
+  - chapter summaries
+  - setting projections
+  - appearance projections
+- The branch is blocked when these artifacts reference non-outline character IDs or carry embedded `node`/`selector` branch coordinates from outside the recovery branch.
+
+## Why
+- A recovery branch can normalize outline data and rebuild character state while stale side projections still point at the polluted timeline.
+- The Nanda author agent needs BookForge to reject that state before promotion instead of relying on the user to notice ghost facts in side data.
+
+## Current Scope
+- Implemented deterministic checks:
+  - `char_*` references in affected summary/projection payloads must exist in the normalized outline character set.
+  - Character-reference fields such as `character_id`, `characters`, `cast`, and `pov_character` must not name non-outline characters.
+  - Projection artifacts with embedded `node.branch_id` or `selector.branch_id` must match the recovery branch.
+- Deferred semantic checks:
+  - continuity contradictions in prose-like summaries
+  - location/setting semantic drift beyond stale branch coordinates and ghost character refs
+  - inventory/deep-state validation
+
+## Validation
+- Focused tests:
+  - `python -m pytest -o addopts='' tests/test_recovery_actions.py tests/test_action_discovery.py --basetemp=.pytest_tmp_0081_projection_validation_focus`
+  - Result: `35 passed`
+- Full suite:
+  - `python -m pytest -o addopts='' --basetemp=.pytest_tmp_0081_projection_validation_full`
+  - Result: `308 passed`
+
+## Next
+- Add inventory/deep-state validation and downstream dependency tracing.
+
+---
+
+## Source 48: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
 
 # 2026-04-27 0081 Recovery Promotion Postcondition
 
@@ -4372,7 +4413,7 @@ Notes
 
 ---
 
-## Source 48: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+## Source 49: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
 
 # 2026-04-27 0081 Recovery Receipt Postconditions
 
@@ -4420,7 +4461,7 @@ Notes
 
 ---
 
-## Source 49: `notes/2026-04-27-0081-redraft-scope-slice.md`
+## Source 50: `notes/2026-04-27-0081-redraft-scope-slice.md`
 
 # 2026-04-27 0081 Redraft Scope Slice
 
@@ -4459,7 +4500,7 @@ Notes
 
 ---
 
-## Source 50: `notes/2026-04-27-0081-state-rebuild-slice.md`
+## Source 51: `notes/2026-04-27-0081-state-rebuild-slice.md`
 
 # 2026-04-27 0081 State Rebuild Slice
 
@@ -4507,7 +4548,7 @@ Notes
 
 ---
 
-## Source 51: `notes/2026-04-27-0081-state-validation-slice.md`
+## Source 52: `notes/2026-04-27-0081-state-validation-slice.md`
 
 # 2026-04-27 0081 Recovery State Validation Slice
 
@@ -4544,7 +4585,7 @@ Notes
 
 ---
 
-## Source 52: `promotion.md`
+## Source 53: `promotion.md`
 
 # Promotion
 

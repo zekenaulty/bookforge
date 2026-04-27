@@ -170,16 +170,17 @@ Status: in_progress
 - Recovery blast-radius now categorizes impact-report-friendly candidate artifacts into prose, state, continuity, projection, and series families.
 - Recovery promotion results now include canonical postconditions with pre/post outline lineage status, pre/post integrity status, planned/applied removals, and whether `main` cleared chimera risk.
 - Recovery validation now blocks branch promotion when branch-local character index/state artifacts contain character IDs that are absent from the normalized outline.
+- Recovery validation now blocks branch promotion when affected chapter summaries, setting projections, or appearance projections reference non-outline character IDs or carry stale embedded branch coordinates.
 
 ## Remaining Implementation
 - Extend blast-radius surfaces with downstream dependency tracing after redraft.
 - Add approval-required metadata to all destructive or broad-scope primitives.
 - Expand validation beyond outline lineage to state/projection families:
   - continuity
-  - locations/settings
   - inventory/deep state
-  - chapter summaries
-  - appearance/setting projections
+  - semantic validation for locations/settings beyond stale branch and ghost-character checks
+  - semantic validation for chapter summaries beyond ghost-character checks
+  - semantic validation for appearance/setting projections beyond stale branch and ghost-character checks
 - Add richer downstream invalidation detection after redraft.
 - Add Veiled Ledger-size multi-chapter fixture coverage.
 
