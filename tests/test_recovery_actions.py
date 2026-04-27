@@ -92,36 +92,88 @@ def _outline_payload(*, characters: list[str] | None = None, scene_count: int = 
     }
 
 
-def _write_run_artifacts(book_root: Path, run_id: str = "run_001") -> None:
+def _multi_chapter_outline_payload() -> dict:
+    return {
+        "schema_version": "1.1",
+        "chapters": [
+            {
+                "chapter_id": 1,
+                "title": "Opening",
+                "sections": [
+                    {
+                        "section_id": 1,
+                        "title": "Arrival",
+                        "intent": "Rhea enters the ledger vault.",
+                        "end_condition": "The vault door opens.",
+                        "scenes": [_scene(1, "Rhea opens the vault.", ["rhea_mercer"])],
+                    }
+                ],
+            },
+            {
+                "chapter_id": 2,
+                "title": "Accounting",
+                "sections": [
+                    {
+                        "section_id": 1,
+                        "title": "Audit",
+                        "intent": "Vance audits the debt engine.",
+                        "end_condition": "The account mismatch is exposed.",
+                        "scenes": [_scene(1, "Vance finds the mismatch.", ["rhea_mercer", "vance_harrow"])],
+                    }
+                ],
+            },
+        ],
+        "characters": [
+            {"character_id": "rhea_mercer", "name": "Rhea Mercer"},
+            {"character_id": "vance_harrow", "name": "Vance Harrow"},
+        ],
+        "threads": [],
+    }
+
+
+def _write_run_artifacts(book_root: Path, run_id: str = "run_001", payload: dict | None = None) -> None:
+    outline_payload = payload or _outline_payload()
     outline_root = book_root / "outline"
     run_dir = outline_root / "pipeline_runs" / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
     _write_json(outline_root / "pipeline_latest.json", {"run_id": run_id})
-    _write_json(run_dir / "outline_spine_v1.json", {"chapters": [{"chapter_id": 1, "title": "Opening"}]})
+    _write_json(
+        run_dir / "outline_spine_v1.json",
+        {"chapters": [{"chapter_id": chapter.get("chapter_id"), "title": chapter.get("title")} for chapter in outline_payload.get("chapters", [])]},
+    )
     _write_json(
         run_dir / "outline_sections_v1.json",
         {
             "chapters": [
                 {
-                    "chapter_id": 1,
+                    "chapter_id": chapter.get("chapter_id"),
                     "sections": [
                         {
-                            "section_id": 1,
-                            "title": "Arrival",
-                            "intent": "Get inside.",
-                            "end_condition": "The door opens.",
+                            "section_id": section.get("section_id"),
+                            "title": section.get("title"),
+                            "intent": section.get("intent"),
+                            "end_condition": section.get("end_condition"),
                         }
+                        for section in chapter.get("sections", [])
                     ],
                 }
+                for chapter in outline_payload.get("chapters", [])
             ]
         },
     )
-    _write_json(run_dir / "outline_final_v1_1.json", _outline_payload())
+    _write_json(run_dir / "outline_final_v1_1.json", outline_payload)
 
 
 def _setup_initialized_book(tmp_path: Path) -> Path:
     book_root = _init_book(tmp_path)
     _write_run_artifacts(book_root)
+    initialize_section_workflow(workspace=tmp_path, book_id="my_book", overwrite=True)
+    return book_root
+
+
+def _setup_initialized_multi_chapter_book(tmp_path: Path) -> Path:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root, payload=_multi_chapter_outline_payload())
     initialize_section_workflow(workspace=tmp_path, book_id="my_book", overwrite=True)
     return book_root
 
@@ -136,6 +188,31 @@ def _introduce_lineage_drift(book_root: Path) -> None:
     registry["chapters"][0]["sections"][0]["status"] = "frozen"
     registry["chapters"][0]["sections"][0]["scene_ref_start"] = "1:1"
     registry["chapters"][0]["sections"][0]["scene_ref_end"] = "1:2"
+    _write_json(registry_path, registry)
+
+
+def _introduce_multi_chapter_lineage_drift(book_root: Path) -> None:
+    outline_root = book_root / "outline"
+    polluted = _multi_chapter_outline_payload()
+    polluted["characters"] = [
+        {"character_id": "rhea_mercer", "name": "Rhea Mercer"},
+        {"character_id": "vance_harrow", "name": "Vance Harrow"},
+        {"character_id": "char_artie", "name": "Artie"},
+    ]
+    for chapter in polluted["chapters"]:
+        section = chapter["sections"][0]
+        section["scenes"].append(_scene(2, f"Artie contaminates chapter {chapter['chapter_id']}.", ["char_artie"]))
+    _write_json(outline_root / "outline.json", polluted)
+    for chapter_id in (1, 2):
+        _write_json(outline_root / "section_drafts" / f"ch_{chapter_id:03d}_sec_001_phase03.json", polluted)
+    registry_path = outline_root / "snapshot_registry.json"
+    registry = _read_json(registry_path)
+    for chapter in registry["chapters"]:
+        chapter["chapter_status"] = "in_progress"
+        for section in chapter["sections"]:
+            section["status"] = "frozen"
+            section["scene_ref_start"] = f"{chapter['chapter_id']}:1"
+            section["scene_ref_end"] = f"{chapter['chapter_id']}:2"
     _write_json(registry_path, registry)
 
 
@@ -178,6 +255,45 @@ def _write_polluted_draft_outputs(book_root: Path) -> None:
     _write_json(book_root / "draft" / "context" / "settings" / "ch_001" / "scene_001" / "prose_extracted.setting.json", {"location": "polluted"})
     _write_json(book_root / "draft" / "context" / "phase_history" / "ch001_sc001.json", {"phases": {"write": {"status": "success"}}})
     _write_json(book_root / "draft" / "context" / "item_registry.json", {"items": [{"item_id": "ITEM_WRONG"}]})
+
+
+def _write_multi_chapter_polluted_outputs(book_root: Path) -> None:
+    for chapter_id in (1, 2):
+        chapter_dir = book_root / "draft" / "chapters" / f"ch_{chapter_id:03d}"
+        chapter_dir.mkdir(parents=True, exist_ok=True)
+        for scene_id in (1, 2):
+            (chapter_dir / f"scene_{scene_id:03d}.md").write_text(f"Polluted chapter {chapter_id} scene {scene_id}.", encoding="utf-8")
+            _write_json(chapter_dir / f"scene_{scene_id:03d}.meta.json", {"chapter_id": chapter_id, "scene_id": scene_id})
+        (book_root / "draft" / "chapters" / f"ch_{chapter_id:03d}.md").write_text(f"Polluted chapter {chapter_id}.", encoding="utf-8")
+        _write_json(book_root / "draft" / "context" / "chapter_summaries" / f"ch_{chapter_id:03d}.json", {"key_events": ["char_artie polluted this chapter"]})
+        _write_json(
+            book_root / "draft" / "context" / "settings" / f"ch_{chapter_id:03d}" / "scene_001" / "prose_extracted.setting.json",
+            {"node": {"branch_id": "main"}, "setting": {"characters": ["char_artie"]}},
+        )
+    _write_json(
+        book_root / "state.json",
+        {
+            "schema_version": "1.0",
+            "status": "WRITING",
+            "cursor": {"chapter": 2, "scene": 2},
+            "world": {"recent_facts": ["Artie contaminated both chapters."], "open_threads": ["thread_wrong"]},
+            "summary": {"story_so_far": ["Two chapters bled together."], "must_stay_true": ["Artie exists."]},
+            "budgets": {"tokens": 123},
+        },
+    )
+    _write_json(
+        book_root / "draft" / "context" / "characters" / "index.json",
+        {
+            "characters": [
+                {"character_id": "rhea_mercer", "state_path": "draft/context/characters/rhea_mercer.state.json"},
+                {"character_id": "vance_harrow", "state_path": "draft/context/characters/vance_harrow.state.json"},
+                {"character_id": "char_artie", "state_path": "draft/context/characters/artie.state.json"},
+            ]
+        },
+    )
+    _write_json(book_root / "draft" / "context" / "characters" / "artie.state.json", {"character_id": "char_artie", "name": "Artie"})
+    _write_json(book_root / "draft" / "context" / "characters" / "rhea_mercer.state.json", {"character_id": "rhea_mercer", "name": "Rhea"})
+    _write_json(book_root / "draft" / "context" / "characters" / "vance_harrow.state.json", {"character_id": "vance_harrow", "name": "Vance"})
 
 
 def _create_recovery_branch(tmp_path: Path, branch_id: str = "recover-sec1") -> None:
@@ -280,6 +396,94 @@ def test_recovery_branch_supports_explicit_multi_scope_radius(tmp_path: Path) ->
     ]
     assert blast_radius["scope_groups"]["state_rebuild_scope"] == blast_radius["scope_groups"]["affected"]
     assert blast_radius["scope_groups"]["downstream_trace_status"] == "none_declared"
+
+
+def test_recovery_branch_repairs_multi_chapter_pollution_end_to_end(tmp_path: Path, monkeypatch) -> None:
+    book_root = _setup_initialized_multi_chapter_book(tmp_path)
+    _introduce_multi_chapter_lineage_drift(book_root)
+    _write_multi_chapter_polluted_outputs(book_root)
+
+    request = build_create_recovery_branch_request(
+        tmp_path,
+        "my_book",
+        anchor_type="declared_source_run",
+        source_run_id="run_001",
+        affected_scopes=[{"chapter_id": 1, "section_id": 1}, {"chapter_id": 2, "section_id": 1}],
+        branch_id="recover-two-chapters",
+    )
+    create_recovery_branch(tmp_path, request)
+    branch_root = supervision_paths.branch_snapshot_root(book_root, "recover-two-chapters")
+
+    quarantine_artifacts(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="quarantine_artifacts", branch_id="recover-two-chapters"),
+    )
+    normalize_outline_scope(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="normalize_outline_scope", branch_id="recover-two-chapters"),
+    )
+    branch_outline = _read_json(branch_root / "outline" / "outline.json")
+    assert [item["character_id"] for item in branch_outline["characters"]] == ["rhea_mercer", "vance_harrow"]
+    assert len(branch_outline["chapters"][0]["sections"][0]["scenes"]) == 1
+    assert len(branch_outline["chapters"][1]["sections"][0]["scenes"]) == 1
+
+    preview = get_scope_invalidation_preview(tmp_path, "my_book", branch_id="recover-two-chapters")
+    assert "draft/chapters/ch_001/scene_002.md" in preview["candidate_paths"]
+    assert "draft/chapters/ch_002/scene_002.md" in preview["candidate_paths"]
+
+    invalidate_scope_outputs(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="invalidate_scope_outputs", branch_id="recover-two-chapters"),
+    )
+    assert not (branch_root / "draft" / "chapters" / "ch_001" / "scene_002.md").exists()
+    assert not (branch_root / "draft" / "chapters" / "ch_002" / "scene_002.md").exists()
+
+    rebuild_state_scope(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="rebuild_state_scope", branch_id="recover-two-chapters"),
+    )
+    rebuilt_index = _read_json(branch_root / "draft" / "context" / "characters" / "index.json")
+    assert [entry["character_id"] for entry in rebuilt_index["characters"]] == ["rhea_mercer", "vance_harrow"]
+    assert not (branch_root / "draft" / "context" / "characters" / "artie.state.json").exists()
+
+    def _fake_run_section_range(*args, **kwargs):
+        root = supervision_paths.branch_snapshot_root(book_root, kwargs["branch_id"])
+        chapter_id = int(kwargs["chapter_id"])
+        chapter_dir = root / "draft" / "chapters" / f"ch_{chapter_id:03d}"
+        chapter_dir.mkdir(parents=True, exist_ok=True)
+        for scene_id in range(int(kwargs["scene_start"]), int(kwargs["scene_end"]) + 1):
+            (chapter_dir / f"scene_{scene_id:03d}.md").write_text(f"Recovered chapter {chapter_id} scene {scene_id}.", encoding="utf-8")
+            _write_json(chapter_dir / f"scene_{scene_id:03d}.meta.json", {"chapter_id": chapter_id, "scene_id": scene_id, "recovered": True})
+
+    monkeypatch.setattr("bookforge.execution.scoped.run_section_range", _fake_run_section_range)
+    redraft_scope(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="redraft_scope", branch_id="recover-two-chapters"),
+    )
+    assert (branch_root / "draft" / "chapters" / "ch_001" / "scene_001.md").read_text(encoding="utf-8") == "Recovered chapter 1 scene 1."
+    assert (branch_root / "draft" / "chapters" / "ch_002" / "scene_001.md").read_text(encoding="utf-8") == "Recovered chapter 2 scene 1."
+
+    validate_result = validate_recovery_branch(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="validate_recovery_branch", branch_id="recover-two-chapters"),
+    )
+    assert validate_result.status == "success"
+
+    promote_result = promote_recovery_branch(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="promote_recovery_branch", branch_id="recover-two-chapters"),
+    )
+    assert promote_result.status == "success"
+    assert promote_result.details["postcondition"]["post_outline_lineage_status"] == "healthy"
+    for chapter_id in (1, 2):
+        assert not (book_root / "outline" / "section_drafts" / f"ch_{chapter_id:03d}_sec_001_phase03.json").exists()
+        assert not (book_root / "draft" / "chapters" / f"ch_{chapter_id:03d}" / "scene_002.md").exists()
+        assert (book_root / "draft" / "chapters" / f"ch_{chapter_id:03d}" / "scene_001.md").read_text(encoding="utf-8") == (
+            f"Recovered chapter {chapter_id} scene 1."
+        )
+    main_index = _read_json(book_root / "draft" / "context" / "characters" / "index.json")
+    assert [entry["character_id"] for entry in main_index["characters"]] == ["rhea_mercer", "vance_harrow"]
+    assert get_outline_lineage_audit(tmp_path, "my_book").status == "healthy"
 
 
 def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_and_promotes(tmp_path: Path, monkeypatch) -> None:

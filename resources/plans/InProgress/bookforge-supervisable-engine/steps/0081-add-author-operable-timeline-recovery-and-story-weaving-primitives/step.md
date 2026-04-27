@@ -188,6 +188,7 @@ Status: in_progress
   - state rebuild scope
   - downstream trace status
 - Recovery tests now cover explicit broad multi-scope recovery branch creation, broad-radius approval metadata, and blast-radius scope grouping.
+- Recovery tests now include a two-chapter pollution fixture that runs branch-first recovery end to end across real outline, prose, state, chapter-summary, setting, character-state, and section-draft artifacts.
 
 ## Remaining Implementation
 - Extend blast-radius surfaces with semantic downstream dependency tracing after redraft; current downstream grouping is manifest-declared only.
@@ -198,7 +199,7 @@ Status: in_progress
   - semantic validation for chapter summaries beyond ghost-character checks
   - semantic validation for appearance/setting projections beyond stale branch and ghost-character checks
 - Add richer downstream invalidation detection after redraft.
-- Add Veiled Ledger-size multi-chapter fixture coverage with actual multi-chapter outline/prose/state artifacts.
+- Add Veiled Ledger-size three-plus-chapter fixture coverage once the current two-chapter fixture needs further scale pressure.
 
 ## Detailed Work
 - Add recovery contracts.

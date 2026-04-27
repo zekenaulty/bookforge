@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T16:50:55Z`
-- Source Document Count: `58`
+- Compiled At (UTC): `2026-04-27T17:06:21Z`
+- Source Document Count: `59`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -66,7 +66,8 @@
 55. `notes/2026-04-27-0081-redraft-scope-slice.md`
 56. `notes/2026-04-27-0081-state-rebuild-slice.md`
 57. `notes/2026-04-27-0081-state-validation-slice.md`
-58. `promotion.md`
+58. `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
+59. `promotion.md`
 
 ---
 
@@ -2727,6 +2728,7 @@ Status: in_progress
   - state rebuild scope
   - downstream trace status
 - Recovery tests now cover explicit broad multi-scope recovery branch creation, broad-radius approval metadata, and blast-radius scope grouping.
+- Recovery tests now include a two-chapter pollution fixture that runs branch-first recovery end to end across real outline, prose, state, chapter-summary, setting, character-state, and section-draft artifacts.
 
 ## Remaining Implementation
 - Extend blast-radius surfaces with semantic downstream dependency tracing after redraft; current downstream grouping is manifest-declared only.
@@ -2737,7 +2739,7 @@ Status: in_progress
   - semantic validation for chapter summaries beyond ghost-character checks
   - semantic validation for appearance/setting projections beyond stale branch and ghost-character checks
 - Add richer downstream invalidation detection after redraft.
-- Add Veiled Ledger-size multi-chapter fixture coverage with actual multi-chapter outline/prose/state artifacts.
+- Add Veiled Ledger-size three-plus-chapter fixture coverage once the current two-chapter fixture needs further scale pressure.
 
 ## Detailed Work
 - Add recovery contracts.
@@ -4781,7 +4783,52 @@ Notes
 
 ---
 
-## Source 58: `promotion.md`
+## Source 58: `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
+
+# 2026-04-27 0081 Two-Chapter Recovery Fixture
+
+## Summary
+- Added an end-to-end two-chapter recovery regression fixture.
+- The fixture creates:
+  - a clean two-chapter outline anchor
+  - polluted mutable outline state with ghost `char_artie`
+  - section-draft contamination for both chapters
+  - polluted prose outputs for both chapters
+  - polluted character state/index data
+  - polluted chapter summaries and setting projections
+- The test runs:
+  - `create_recovery_branch`
+  - `quarantine_artifacts`
+  - `normalize_outline_scope`
+  - `invalidate_scope_outputs`
+  - `rebuild_state_scope`
+  - `redraft_scope`
+  - `validate_recovery_branch`
+  - `promote_recovery_branch`
+
+## Assertions
+- Normalization restores both affected sections from the clean source run.
+- Invalidation removes stale extra scenes in both chapters from the branch.
+- State rebuild removes ghost character state and restores only outline-valid characters.
+- Redraft regenerates both affected chapter sections in branch scope.
+- Promotion removes stale section drafts and extra polluted scenes from `main`.
+- Main outline lineage returns to `healthy`.
+
+## Boundary
+- This is a real multi-chapter artifact fixture, but still intentionally small.
+- It is not a full Veiled Ledger reproduction with large chapter count, real prose volume, or provider-generated artifacts.
+
+## Validation
+- Focused suite passed:
+  - `.\.venv\Scripts\python.exe -m pytest -o addopts='' tests/test_recovery_actions.py --basetemp=.pytest_tmp_0081_multichapter_fixture_focus`
+  - Result: `6 passed`
+- Full suite passed:
+  - `.\.venv\Scripts\python.exe -m pytest -o addopts='' --basetemp=.pytest_tmp_0081_multichapter_fixture_full`
+  - Result: `310 passed`
+
+---
+
+## Source 59: `promotion.md`
 
 # Promotion
 
