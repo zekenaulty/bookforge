@@ -346,6 +346,23 @@ def _series_candidate_paths(workspace: Path, execution_root: Path) -> List[str]:
     return paths
 
 
+def _blast_radius_scope_groups(scope: Optional[RecoveryScope]) -> Dict[str, Any]:
+    affected = [dict(item) for item in scope.affected_scopes] if scope is not None else []
+    downstream = [dict(item) for item in scope.downstream_scopes] if scope is not None else []
+    return {
+        "affected": affected,
+        "downstream": downstream,
+        "prose_invalidation_scope": affected,
+        "state_rebuild_scope": affected + downstream,
+        "downstream_trace_status": "manifest_declared_only" if downstream else "none_declared",
+        "downstream_trace_note": (
+            "Downstream scopes are declared by the recovery manifest; semantic dependency tracing after redraft is not implemented yet."
+            if downstream
+            else "No downstream scopes are declared by the recovery manifest."
+        ),
+    }
+
+
 def get_recovery_blast_radius(
     workspace: Path,
     book_id: str,
@@ -430,6 +447,7 @@ def get_recovery_blast_radius(
         "branch_id": resolved,
         "affected_scopes": [dict(item) for item in scope.affected_scopes] if scope is not None else [],
         "downstream_scopes": [dict(item) for item in scope.downstream_scopes] if scope is not None else [],
+        "scope_groups": _blast_radius_scope_groups(scope),
         "families": families,
         "artifact_impacts": impacts,
         "total_candidate_count": len(impacts),

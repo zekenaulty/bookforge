@@ -181,9 +181,15 @@ Status: in_progress
   - scope redraft
   - promotion to main
   - broad recovery radius
+- Recovery blast-radius now exposes explicit scope groups for Nanda planning:
+  - affected scopes
+  - downstream scopes
+  - prose invalidation scope
+  - state rebuild scope
+  - downstream trace status
 
 ## Remaining Implementation
-- Extend blast-radius surfaces with downstream dependency tracing after redraft.
+- Extend blast-radius surfaces with semantic downstream dependency tracing after redraft; current downstream grouping is manifest-declared only.
 - Expand validation beyond outline lineage to state/projection families:
   - semantic continuity validation beyond ghost-character, thread-reference, and stale-branch checks
   - semantic validation for inventory/deep state beyond ghost-character and index-consistency checks

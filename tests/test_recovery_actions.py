@@ -25,6 +25,7 @@ from bookforge.query.recovery import (
     get_recovery_plan_readiness,
     get_scope_invalidation_preview,
     get_state_rebuild_preview,
+    recovery_manifest_path,
 )
 from bookforge.section_workflow import initialize_section_workflow
 from bookforge.supervision import paths as supervision_paths
@@ -215,6 +216,8 @@ def test_recovery_branch_snapshots_evidence_and_exposes_legal_actions(tmp_path: 
     manifest = get_recovery_manifest(tmp_path, "my_book", branch_id="recover-sec1")
     assert manifest["scope"]["affected_scopes"] == [{"chapter_id": 1, "section_id": 1}]
     assert manifest["scope_output_ranges"]["ch_001_sec_001"]["scene_ids"] == [1, 2]
+    manifest["scope"]["downstream_scopes"] = [{"chapter_id": 2, "section_id": 1}]
+    _write_json(recovery_manifest_path(book_root, "recover-sec1"), manifest)
 
     branch_selector = ScopeSelector(book_id="my_book", branch_id="recover-sec1", chapter=1, section=1)
     branch_actions = {option.action: option for option in list_execution_options(tmp_path, branch_selector, prefer_emitted=False)}
@@ -232,6 +235,16 @@ def test_recovery_branch_snapshots_evidence_and_exposes_legal_actions(tmp_path: 
     readiness = get_recovery_plan_readiness(tmp_path, "my_book", branch_id="recover-sec1")
     assert readiness["recommended_next_action"] == "normalize_outline_scope"
     assert readiness["approval_required"] is True
+
+    blast_radius = get_recovery_blast_radius(tmp_path, "my_book", branch_id="recover-sec1")
+    assert blast_radius["scope_groups"]["affected"] == [{"chapter_id": 1, "section_id": 1}]
+    assert blast_radius["scope_groups"]["downstream"] == [{"chapter_id": 2, "section_id": 1}]
+    assert blast_radius["scope_groups"]["prose_invalidation_scope"] == [{"chapter_id": 1, "section_id": 1}]
+    assert blast_radius["scope_groups"]["state_rebuild_scope"] == [
+        {"chapter_id": 1, "section_id": 1},
+        {"chapter_id": 2, "section_id": 1},
+    ]
+    assert blast_radius["scope_groups"]["downstream_trace_status"] == "manifest_declared_only"
 
 
 def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_and_promotes(tmp_path: Path, monkeypatch) -> None:

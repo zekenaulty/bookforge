@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T16:42:27Z`
-- Source Document Count: `56`
+- Compiled At (UTC): `2026-04-27T16:46:40Z`
+- Source Document Count: `57`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -55,16 +55,17 @@
 44. `notes/2026-04-26-0081-implementation-slice.md`
 45. `notes/2026-04-26-0081-planning.md`
 46. `notes/2026-04-27-0081-approval-metadata-slice.md`
-47. `notes/2026-04-27-0081-blast-radius-slice.md`
-48. `notes/2026-04-27-0081-continuity-validation-slice.md`
-49. `notes/2026-04-27-0081-durable-validation-slice.md`
-50. `notes/2026-04-27-0081-projection-validation-slice.md`
-51. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
-52. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
-53. `notes/2026-04-27-0081-redraft-scope-slice.md`
-54. `notes/2026-04-27-0081-state-rebuild-slice.md`
-55. `notes/2026-04-27-0081-state-validation-slice.md`
-56. `promotion.md`
+47. `notes/2026-04-27-0081-blast-radius-scope-groups.md`
+48. `notes/2026-04-27-0081-blast-radius-slice.md`
+49. `notes/2026-04-27-0081-continuity-validation-slice.md`
+50. `notes/2026-04-27-0081-durable-validation-slice.md`
+51. `notes/2026-04-27-0081-projection-validation-slice.md`
+52. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+53. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+54. `notes/2026-04-27-0081-redraft-scope-slice.md`
+55. `notes/2026-04-27-0081-state-rebuild-slice.md`
+56. `notes/2026-04-27-0081-state-validation-slice.md`
+57. `promotion.md`
 
 ---
 
@@ -2718,9 +2719,15 @@ Status: in_progress
   - scope redraft
   - promotion to main
   - broad recovery radius
+- Recovery blast-radius now exposes explicit scope groups for Nanda planning:
+  - affected scopes
+  - downstream scopes
+  - prose invalidation scope
+  - state rebuild scope
+  - downstream trace status
 
 ## Remaining Implementation
-- Extend blast-radius surfaces with downstream dependency tracing after redraft.
+- Extend blast-radius surfaces with semantic downstream dependency tracing after redraft; current downstream grouping is manifest-declared only.
 - Expand validation beyond outline lineage to state/projection families:
   - semantic continuity validation beyond ghost-character, thread-reference, and stale-branch checks
   - semantic validation for inventory/deep state beyond ghost-character and index-consistency checks
@@ -4330,7 +4337,42 @@ Notes
 
 ---
 
-## Source 47: `notes/2026-04-27-0081-blast-radius-slice.md`
+## Source 47: `notes/2026-04-27-0081-blast-radius-scope-groups.md`
+
+# 2026-04-27 0081 Blast-Radius Scope Groups
+
+## Summary
+- Extended `get_recovery_blast_radius(...)` with an explicit `scope_groups` block.
+- The surface now separates:
+  - `affected`
+  - `downstream`
+  - `prose_invalidation_scope`
+  - `state_rebuild_scope`
+  - `downstream_trace_status`
+  - `downstream_trace_note`
+
+## Boundary
+- Downstream grouping is currently manifest-declared only.
+- This does not perform semantic dependency tracing after redraft.
+- The status field deliberately reports `manifest_declared_only` when downstream scopes are present so Nanda does not treat the grouping as proof of full dependency analysis.
+
+## Why
+- Nanda needs to plan recovery actions against different scopes:
+  - prose invalidation/redraft normally targets directly affected scopes
+  - state rebuild must consider directly affected and declared downstream scopes
+  - downstream author review may remain necessary even when mutation support is narrow
+
+## Validation
+- Focused suite passed:
+  - `.\.venv\Scripts\python.exe -m pytest -o addopts='' tests/test_recovery_actions.py --basetemp=.pytest_tmp_0081_blast_radius_scope_focus`
+  - Result: `4 passed`
+- Full suite passed:
+  - `.\.venv\Scripts\python.exe -m pytest -o addopts='' --basetemp=.pytest_tmp_0081_blast_radius_scope_full`
+  - Result: `308 passed`
+
+---
+
+## Source 48: `notes/2026-04-27-0081-blast-radius-slice.md`
 
 # 2026-04-27 0081 Recovery Blast Radius Slice
 
@@ -4382,7 +4424,7 @@ Notes
 
 ---
 
-## Source 48: `notes/2026-04-27-0081-continuity-validation-slice.md`
+## Source 49: `notes/2026-04-27-0081-continuity-validation-slice.md`
 
 # 2026-04-27 0081 Continuity Validation Slice
 
@@ -4418,7 +4460,7 @@ Notes
 
 ---
 
-## Source 49: `notes/2026-04-27-0081-durable-validation-slice.md`
+## Source 50: `notes/2026-04-27-0081-durable-validation-slice.md`
 
 # 2026-04-27 0081 Durable Validation Slice
 
@@ -4456,7 +4498,7 @@ Notes
 
 ---
 
-## Source 50: `notes/2026-04-27-0081-projection-validation-slice.md`
+## Source 51: `notes/2026-04-27-0081-projection-validation-slice.md`
 
 # 2026-04-27 0081 Projection Validation Slice
 
@@ -4495,7 +4537,7 @@ Notes
 
 ---
 
-## Source 51: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
+## Source 52: `notes/2026-04-27-0081-promotion-postcondition-slice.md`
 
 # 2026-04-27 0081 Recovery Promotion Postcondition
 
@@ -4534,7 +4576,7 @@ Notes
 
 ---
 
-## Source 52: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
+## Source 53: `notes/2026-04-27-0081-recovery-postconditions-slice.md`
 
 # 2026-04-27 0081 Recovery Receipt Postconditions
 
@@ -4582,7 +4624,7 @@ Notes
 
 ---
 
-## Source 53: `notes/2026-04-27-0081-redraft-scope-slice.md`
+## Source 54: `notes/2026-04-27-0081-redraft-scope-slice.md`
 
 # 2026-04-27 0081 Redraft Scope Slice
 
@@ -4621,7 +4663,7 @@ Notes
 
 ---
 
-## Source 54: `notes/2026-04-27-0081-state-rebuild-slice.md`
+## Source 55: `notes/2026-04-27-0081-state-rebuild-slice.md`
 
 # 2026-04-27 0081 State Rebuild Slice
 
@@ -4669,7 +4711,7 @@ Notes
 
 ---
 
-## Source 55: `notes/2026-04-27-0081-state-validation-slice.md`
+## Source 56: `notes/2026-04-27-0081-state-validation-slice.md`
 
 # 2026-04-27 0081 Recovery State Validation Slice
 
@@ -4706,7 +4748,7 @@ Notes
 
 ---
 
-## Source 56: `promotion.md`
+## Source 57: `promotion.md`
 
 # Promotion
 
