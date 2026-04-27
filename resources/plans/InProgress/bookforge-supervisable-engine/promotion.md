@@ -25,3 +25,12 @@ Date: 2026-04-21
 ## Immediate Expectation
 - Future implementation work for the supervisable engine should execute against the `InProgress` copy.
 - The `Drafts` copy remains the reviewed baseline for comparison and audit.
+
+## Implementation Checkpoint
+Date: 2026-04-27
+
+- The promoted `InProgress` plan has now executed through `0082`.
+- All numbered steps `0010-0082` are marked complete.
+- Latest full regression: `310 passed`.
+- The plan is now eligible for a promotion/closeout review as the completed supervisable-engine substrate.
+- Remaining valuable work from `_Pinned` should be split into successor plans instead of extending this plan indefinitely.

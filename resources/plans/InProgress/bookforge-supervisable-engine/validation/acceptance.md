@@ -1,6 +1,11 @@
 # Acceptance
 
-This plan is ready for promotion only when the target implementation can satisfy all of the following:
+This plan is ready for promotion only when the target implementation can satisfy all of the following.
+
+Status as of 2026-04-27:
+- The implementation path through `0082` satisfies the original supervision/recovery acceptance target.
+- Full regression passes: `310 passed`.
+- Remaining items are follow-up product/pipeline plans, not blockers for the supervisable-engine substrate.
 
 - BookForge exposes workflow, lineage, integrity, and book state through stable read-only query modules.
 - BookForge can resolve observer-shaped scope selection into a current `TimelineNodeRef` without hand-reading raw workspace files.
@@ -25,3 +30,8 @@ This plan is ready for promotion only when the target implementation can satisfy
 - A recovered book can be verified through query surfaces as no longer blocked by the original lineage or chimera issue.
 - Help docs and CLI labels match the actual runtime mode and recovery behavior.
 - New code follows the small-file rule and does not normalize `300-600` line modules as acceptable.
+
+## Promotion-Relevant Follow-Up Notes
+- The old `_Pinned` plan backlog still contains valuable work, but it should not block promotion of this engine substrate.
+- Compile/export, preview gates, similarity checks, word/page counts, series continuity, and lint/repair routing should move into follow-up plans with their own acceptance gates.
+- LLM-backed semantic author review is intentionally not required for this plan; BookForge now emits diagnostic evidence, while Nanda owns author-level strategy and judgment.

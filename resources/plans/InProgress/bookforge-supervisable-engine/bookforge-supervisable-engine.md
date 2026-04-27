@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T17:48:21Z`
-- Source Document Count: `67`
+- Compiled At (UTC): `2026-04-27T18:11:54Z`
+- Source Document Count: `68`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -75,7 +75,8 @@
 64. `notes/2026-04-27-0082-downstream-review-slice.md`
 65. `notes/2026-04-27-0082-semantic-readiness-slice.md`
 66. `notes/2026-04-27-0082-semantic-review-action-slice.md`
-67. `promotion.md`
+67. `notes/2026-04-27-current-delta-and-pinned-carryforward.md`
+68. `promotion.md`
 
 ---
 
@@ -87,6 +88,45 @@ Status: In Progress
 Stage: InProgress
 Owner: BookForge engine workstream
 Last Updated: 2026-04-27
+
+## Current Delta (2026-04-27)
+- The original supervisable-engine implementation run is complete through `0082`.
+- Current verified baseline:
+  - `0010-0082` are marked complete.
+  - Full regression passes: `310 passed`.
+  - BookForge now exposes query, action-discovery, branch, recovery, semantic-review, and downstream-review surfaces sufficient for Nanda to observe and compose safe recovery strategies.
+- The active plan remains in `InProgress` because the next decision is whether to promote this plan as completed or keep it as the umbrella for the next implementation band.
+- The safest planning interpretation is:
+  - this plan delivered the engine supervision and recovery substrate
+  - the next plan band should target product-authoring gaps that supervision exposes but does not solve by itself
+
+## Delta From Old `_Pinned` Plans
+- The pinned plans are no longer the active source of truth for engine supervision, branch isolation, or recovery primitives.
+- They still contain valuable product and pipeline backlog items that should be harvested into new, narrower follow-up plans rather than copied wholesale.
+- Still valuable:
+  - compile/export and manuscript output from `bookforge_plan_v3_draft.md`
+  - opening preview, banned phrase, similarity, word/page count, and duplication gates from v2/v3 planning
+  - lint/repair split routing and prose-only fast-path routing from `lint_repair_split_routing_plan_20260213_183000.md`
+  - series continuity rollups, cross-book summaries, and series-aware validation from `series_continuity_plan.md`
+  - outline dynamic lint/repair P0 checks and convergence rules from `outline_dynamic_lint_repair_loop_plan_20260412_1505.md`
+  - downstream contract alignment details for planner propagation, location identity ownership, `end_condition`, and unknown-key preservation from `downstream_contract_alignment_gap_plan_20260216_0233.md`
+  - skilltree/MCP mapping concepts from `bookforge_agent_skilltree_plan_20260412.md`, now reframed as generated/action-catalog capability projection rather than a second pipeline model
+  - thought-signature probe methodology from the April 2026 reports, as diagnostic context and replay support, not as execution truth
+  - durable appearance, inventory, plot-device, and continuity specs as doctrine for future projection and validation depth
+- Mostly superseded:
+  - original v1/v2 scaffolding plans
+  - old runner lift/phase lift implementation notes
+  - failed outline-registry/location plans except as failure-mode evidence
+  - proposed section-chunking material already absorbed by the active workflow/action/branch model
+
+## Next Planning Band
+- The next work should not broaden this plan indefinitely.
+- Recommended follow-up plans:
+  - `bookforge-manuscript-output-and-quality-gates`: compile/export, preview gate, similarity, banned phrases, word/page counts, manuscript validation
+  - `bookforge-lint-repair-routing`: issue classification, prose-only repair lane, lane metrics, fallback to full repair
+  - `bookforge-series-continuity-rollups`: book-end rollups, series summaries, cross-book state projection, series validation
+  - `bookforge-author-skill-capability-projection`: generated action/skill catalog for Nanda/MCP-style capability discovery
+  - `bookforge-outline-contract-hardening`: remaining outline/planner propagation, location ownership, `end_condition`, unknown-key doctrine gaps
 
 ## Objective
 - Make BookForge truthful and supervisable by Nanda without moving prose generation or canonical state mutation out of BookForge.
@@ -511,6 +551,14 @@ class TimelineNodeRef:
 - The current CLI workflows are transitional wrappers. The long-term orchestration seam is a smaller engine action surface that both CLI and Nanda can call.
 - Legal next actions should eventually be queryable from current engine truth; Nanda should not have to infer hidden valid transitions from command docs alone.
 
+## Decisions Confirmed By 0082
+- BookForge semantic recovery review is diagnostic evidence, not authorial story judgment.
+- Downstream dependency review is diagnostic evidence, not an automatic downstream mutation trigger.
+- Nanda owns author-level impact reports, strategy selection, action comparison, human approval, and final story-quality judgment.
+- BookForge owns branch-scoped mutation primitives, receipts, structural validation, artifact status, and canonical promotion safety.
+- Old `_Pinned` plans are reference material. New work should be extracted into narrow follow-up plans instead of reopening broad legacy plans.
+- Future MCP/skill capability projection should be generated from the action catalog, readiness surfaces, and receipts; it should not invent a parallel skill graph detached from BookForge execution truth.
+
 ---
 
 ## Source 3: `risks/initial-risks.md`
@@ -529,13 +577,26 @@ class TimelineNodeRef:
 - Derived prose features can sprawl into expensive or low-signal machinery if introduced before the state and ticket contracts are stable.
 - The repo already contains older and newer planning shapes; without discipline, this plan can become another disconnected artifact instead of the local BookForge source of truth.
 
+## Current Residual Risks (2026-04-27)
+- The supervision substrate is now stronger than the product-output layer. Compile/export, manuscript validation, preview gates, and word/page count enforcement remain underpowered compared with the new execution/action surfaces.
+- Recovery primitives are structurally useful, but Nanda still needs impact-report, planner, and approval-loop implementation to use them as a real author agent rather than as manual CLI tools.
+- Semantic review is diagnostic evidence assembly in BookForge, not story proof. If the author pane treats diagnostic findings as final judgment, it will overclaim.
+- Lint/repair depth is safer at `8`, but routing is still coarse. Without lane routing, high-cost full repair/state-repair remains the default for many failures.
+- Series-level state exists in scaffolding and character canon support, but cross-book rollups and series continuity validation remain incomplete.
+- The old `_Pinned` backlog is useful but noisy. Pulling whole old plans forward would reintroduce stale assumptions; each useful item needs a new scoped plan.
+
 ---
 
 ## Source 4: `validation/acceptance.md`
 
 # Acceptance
 
-This plan is ready for promotion only when the target implementation can satisfy all of the following:
+This plan is ready for promotion only when the target implementation can satisfy all of the following.
+
+Status as of 2026-04-27:
+- The implementation path through `0082` satisfies the original supervision/recovery acceptance target.
+- Full regression passes: `310 passed`.
+- Remaining items are follow-up product/pipeline plans, not blockers for the supervisable-engine substrate.
 
 - BookForge exposes workflow, lineage, integrity, and book state through stable read-only query modules.
 - BookForge can resolve observer-shaped scope selection into a current `TimelineNodeRef` without hand-reading raw workspace files.
@@ -560,6 +621,11 @@ This plan is ready for promotion only when the target implementation can satisfy
 - A recovered book can be verified through query surfaces as no longer blocked by the original lineage or chimera issue.
 - Help docs and CLI labels match the actual runtime mode and recovery behavior.
 - New code follows the small-file rule and does not normalize `300-600` line modules as acceptable.
+
+## Promotion-Relevant Follow-Up Notes
+- The old `_Pinned` plan backlog still contains valuable work, but it should not block promotion of this engine substrate.
+- Compile/export, preview gates, similarity checks, word/page counts, series continuity, and lint/repair routing should move into follow-up plans with their own acceptance gates.
+- LLM-backed semantic author review is intentionally not required for this plan; BookForge now emits diagnostic evidence, while Nanda owns author-level strategy and judgment.
 
 ---
 
@@ -5246,7 +5312,154 @@ Remaining `0082` work:
 
 ---
 
-## Source 67: `promotion.md`
+## Source 67: `notes/2026-04-27-current-delta-and-pinned-carryforward.md`
+
+# 2026-04-27 Current Delta And `_Pinned` Carry-Forward
+
+## Current State
+- `bookforge-supervisable-engine` is complete through `0082`.
+- Full regression is green: `310 passed`.
+- BookForge now has the engine substrate originally missing during the Veiled Ledger failure:
+  - explicit `TimelineNodeRef` / `ScopeSelector`
+  - book-rooted state and issue surfaces
+  - branch-local current-node state
+  - isolated rerun branches and fork groups
+  - action discovery through `legal_next_actions`
+  - scene-phase write actions
+  - branch-scoped writing
+  - appearance, setting, and thought-context projection surfaces
+  - outline lineage audit and section-level lineage matrix
+  - recovery branch primitives
+  - recovery blast radius and invalidation previews
+  - semantic recovery and downstream dependency diagnostic surfaces
+
+## What This Means
+- The system can now explain and contain lineage contamination mechanically.
+- BookForge has timeline-safe primitives that Nanda can compose.
+- The operator should no longer be the only safety catch for mixed-outline/chimera states.
+- The current gap is no longer "can BookForge know what happened?"
+- The next gap is "can Nanda reason over these surfaces, select an approved plan, and drive the right primitives without manual command choreography?"
+
+## What We Still Need To Get To
+- Nanda-side:
+  - `book_timeline_impact_report_v1`
+  - action comparison and shadow-mode planning
+  - approval gates for destructive cleanup, anchor selection, and promotion
+  - author-pane capability grounding from BookForge readiness/action surfaces
+- BookForge-side follow-up:
+  - manuscript compile/export
+  - output-quality gates before commit/promotion
+  - prose-only lint/repair routing
+  - series continuity rollups
+  - deeper outline contract hardening
+  - generated action/skill/MCP capability projection
+
+## Valuable `_Pinned` Carry-Forward
+### `bookforge_plan_v3_draft.md`
+Still valuable:
+- compile/export
+- opening preview gate
+- banned phrase and similarity checks
+- word/page count enforcement
+- prompt registry/logging completeness
+- thought-signature replay/perspective surfaces
+
+Current delta:
+- durable state, appearance, branch isolation, action discovery, recovery, and semantic diagnostics have moved beyond this draft.
+- compile/export and output-quality gates remain the highest-value unimplemented parts.
+
+### `lint_repair_split_routing_plan_20260213_183000.md`
+Still valuable:
+- deterministic issue classification
+- prose-only fast repair lane
+- lane-specific metrics
+- conservative escalation back to full repair
+
+Current delta:
+- lint/repair pass depth is already raised to `8`.
+- the right implementation point is now the scene/action surface and receipts, not hidden `runner.py` logic alone.
+
+### `series_continuity_plan.md`
+Still valuable:
+- `series_summary.json`
+- series continuity pack
+- book-end rollups
+- cross-book character state rollups
+- series-aware linting/validation
+
+Current delta:
+- workspace and character canon scaffolding exist, but phases 4-7 remain a real future milestone.
+
+### `outline_dynamic_lint_repair_loop_plan_20260412_1505.md`
+Still valuable:
+- P0 deterministic outline lint checks
+- repair-family grouping: Structural / Identity / Seam
+- window overlap and convergence rules
+- issue fingerprinting
+
+Current delta:
+- section chunking, lineage audit, and recovery branches reduce the blast radius.
+- a full outline lint/repair loop is still useful, but should be implemented as a scoped action/readiness path, not as more hidden phase jungle.
+
+### `downstream_contract_alignment_gap_plan_20260216_0233.md`
+Still valuable:
+- planner propagation of transition/location fields
+- location ID ownership unification
+- `end_condition` prompt/schema alignment
+- lint strictness wiring
+- unknown-key preserve-and-route doctrine
+
+Current delta:
+- some downstream safety is now handled through lineage/recovery surfaces.
+- the schema/prompt/runtime contract details remain relevant for a follow-up hardening plan.
+
+### `bookforge_agent_skilltree_plan_20260412.md`
+Still valuable:
+- skill capabilities should map to real graph/action nodes
+- generated capability docs should be derived from a manifest/catalog
+- orchestrators should route without duplicating execution logic
+
+Current delta:
+- the source of truth should now be `legal_next_actions`, readiness queries, `ExecutionRequest`, `ExecutionResult`, and produced-artifact receipts.
+- any MCP skill layer should be generated from those surfaces, not from a separate hand-maintained pipeline model.
+
+### Thought Signature Probe Reports
+Still valuable:
+- isolated lens probes
+- compression/critic/conflict/failure-simulation batteries
+- cross-probe stability as diagnostic signal
+
+Current delta:
+- thought signatures are context and recovery aids.
+- receipts, artifacts, and `TimelineNodeRef` remain execution truth.
+
+### Durable Appearance / Inventory / Continuity Completed Plans
+Still valuable:
+- durable-state doctrine
+- appearance/inventory/plot-device validation rules
+- authoritative-surface boundaries
+
+Current delta:
+- `0075` and `0081` brought some of this into query/recovery validation.
+- deeper series-level and author-facing projection work remains useful.
+
+## Mostly Superseded `_Pinned` Material
+- v1/v2 scaffolding plans
+- early runner-lift plans
+- older outline refinement plans marked failed
+- proposed section-chunking details already absorbed by `0070-0082`
+- stale deterministic seam-repair framing where it conflicts with the doctrine that LLM authors semantic seam repairs
+
+## Recommended Next Plan Order
+1. `bookforge-manuscript-output-and-quality-gates`
+2. `bookforge-lint-repair-routing`
+3. `bookforge-series-continuity-rollups`
+4. `bookforge-outline-contract-hardening`
+5. `bookforge-author-skill-capability-projection`
+
+---
+
+## Source 68: `promotion.md`
 
 # Promotion
 
@@ -5275,3 +5488,12 @@ Date: 2026-04-21
 ## Immediate Expectation
 - Future implementation work for the supervisable engine should execute against the `InProgress` copy.
 - The `Drafts` copy remains the reviewed baseline for comparison and audit.
+
+## Implementation Checkpoint
+Date: 2026-04-27
+
+- The promoted `InProgress` plan has now executed through `0082`.
+- All numbered steps `0010-0082` are marked complete.
+- Latest full regression: `310 passed`.
+- The plan is now eligible for a promotion/closeout review as the completed supervisable-engine substrate.
+- Remaining valuable work from `_Pinned` should be split into successor plans instead of extending this plan indefinitely.

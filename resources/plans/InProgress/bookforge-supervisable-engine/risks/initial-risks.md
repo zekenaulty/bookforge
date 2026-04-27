@@ -11,3 +11,11 @@
 - If book-rooted surfaces are implemented as ad hoc aggregation over many tiny artifacts, callers will still be forced to infer canonical truth from storage layout.
 - Derived prose features can sprawl into expensive or low-signal machinery if introduced before the state and ticket contracts are stable.
 - The repo already contains older and newer planning shapes; without discipline, this plan can become another disconnected artifact instead of the local BookForge source of truth.
+
+## Current Residual Risks (2026-04-27)
+- The supervision substrate is now stronger than the product-output layer. Compile/export, manuscript validation, preview gates, and word/page count enforcement remain underpowered compared with the new execution/action surfaces.
+- Recovery primitives are structurally useful, but Nanda still needs impact-report, planner, and approval-loop implementation to use them as a real author agent rather than as manual CLI tools.
+- Semantic review is diagnostic evidence assembly in BookForge, not story proof. If the author pane treats diagnostic findings as final judgment, it will overclaim.
+- Lint/repair depth is safer at `8`, but routing is still coarse. Without lane routing, high-cost full repair/state-repair remains the default for many failures.
+- Series-level state exists in scaffolding and character canon support, but cross-book rollups and series continuity validation remain incomplete.
+- The old `_Pinned` backlog is useful but noisy. Pulling whole old plans forward would reintroduce stale assumptions; each useful item needs a new scoped plan.
