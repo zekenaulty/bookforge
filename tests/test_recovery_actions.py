@@ -721,6 +721,11 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
     )
     assert validate_result.status == "success"
     validate_postcondition = _postcondition(validate_result)
+    semantic_validation = validate_result.details["recovery_receipt"]["details"]["semantic_validation"]
+    assert semantic_validation["status"] == "deferred"
+    assert "semantic_continuity" in semantic_validation["families"]
+    validation_manifest = get_recovery_manifest(tmp_path, "my_book", branch_id="recover-sec1")
+    assert validation_manifest["validation"]["semantic_validation"]["status"] == "deferred"
     assert validate_postcondition["branch_health_status_after"] == "healthy"
     assert validate_postcondition["remaining_required_receipts"] == []
     assert validate_postcondition["recommended_next_action"] == "promote_recovery_branch"
@@ -729,6 +734,7 @@ def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_a
     assert health.status == "healthy"
     assert health.details["recommended_next_action"] == "promote_recovery_branch"
     assert "promotion to main" in health.details["approval_reasons"]
+    assert health.details["semantic_validation"]["status"] == "deferred"
 
     promote_result = promote_recovery_branch(
         tmp_path,

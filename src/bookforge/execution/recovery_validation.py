@@ -38,6 +38,27 @@ _CHARACTER_REF_KEYS = {
 }
 
 
+_DEFERRED_SEMANTIC_VALIDATION_FAMILIES = [
+    "semantic_continuity",
+    "inventory_meaning",
+    "setting_meaning",
+    "chapter_summary_meaning",
+    "appearance_meaning",
+    "prose_quality",
+]
+
+
+def _semantic_validation_boundary() -> dict[str, Any]:
+    return {
+        "status": "deferred",
+        "families": list(_DEFERRED_SEMANTIC_VALIDATION_FAMILIES),
+        "note": (
+            "Recovery validation currently proves structural timeline health only. "
+            "Semantic continuity, story quality, and meaning-level inventory/setting/appearance checks remain author/Nanda review gates."
+        ),
+    }
+
+
 def _outline_character_ids(outline: dict) -> set[str]:
     character_ids: set[str] = set()
     for item in outline.get("characters") or []:
@@ -431,6 +452,7 @@ def validate_recovery_branch(workspace: Path, request: ExecutionRequest) -> Exec
             blockers.append(f"{required} has not completed")
     state_projection_blockers = _state_projection_blockers(workspace, book_id, branch_id)
     blockers.extend(state_projection_blockers)
+    semantic_validation = _semantic_validation_boundary()
     status = "success" if not blockers else "integrity_degraded"
     lifecycle = "promote_ready" if not blockers else "needs_review"
     updated = _evolve_manifest(
@@ -448,6 +470,7 @@ def validate_recovery_branch(workspace: Path, request: ExecutionRequest) -> Exec
         "blockers": blockers,
         "outline_lineage_status": audit.status,
         "state_projection_blockers": state_projection_blockers,
+        "semantic_validation": semantic_validation,
     }
     write_recovery_manifest(root, branch_id, manifest_payload)
     advance_recovery_node(workspace, book_id, branch_id, "validate_recovery_branch")
@@ -458,7 +481,12 @@ def validate_recovery_branch(workspace: Path, request: ExecutionRequest) -> Exec
         action="validate_recovery_branch",
         status=status,
         message=updated.validation_message or "Recovery validation completed.",
-        details={"blockers": blockers, "outline_lineage_status": audit.status, "state_projection_blockers": state_projection_blockers},
+        details={
+            "blockers": blockers,
+            "outline_lineage_status": audit.status,
+            "state_projection_blockers": state_projection_blockers,
+            "semantic_validation": semantic_validation,
+        },
     )
     return emit_result(
         workspace,

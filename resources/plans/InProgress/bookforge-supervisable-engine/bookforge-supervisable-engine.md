@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T17:10:32Z`
-- Source Document Count: `60`
+- Compiled At (UTC): `2026-04-27T17:15:40Z`
+- Source Document Count: `61`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -65,10 +65,11 @@
 54. `notes/2026-04-27-0081-promotion-postcondition-slice.md`
 55. `notes/2026-04-27-0081-recovery-postconditions-slice.md`
 56. `notes/2026-04-27-0081-redraft-scope-slice.md`
-57. `notes/2026-04-27-0081-state-rebuild-slice.md`
-58. `notes/2026-04-27-0081-state-validation-slice.md`
-59. `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
-60. `promotion.md`
+57. `notes/2026-04-27-0081-semantic-validation-boundary.md`
+58. `notes/2026-04-27-0081-state-rebuild-slice.md`
+59. `notes/2026-04-27-0081-state-validation-slice.md`
+60. `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
+61. `promotion.md`
 
 ---
 
@@ -2731,6 +2732,7 @@ Status: in_progress
 - Recovery blast-radius now emits diagnostic `downstream_review` artifact impacts for manifest-declared downstream prose artifacts. These are non-mutating review candidates, not automatic invalidation targets.
 - Recovery tests now cover explicit broad multi-scope recovery branch creation, broad-radius approval metadata, and blast-radius scope grouping.
 - Recovery tests now include a two-chapter pollution fixture that runs branch-first recovery end to end across real outline, prose, state, chapter-summary, setting, character-state, and section-draft artifacts.
+- Recovery validation receipts and health surfaces now expose a `semantic_validation` boundary with `status: deferred` so Nanda can distinguish structural timeline health from author-level semantic/story validation.
 
 ## Remaining Implementation
 - Extend blast-radius surfaces with semantic downstream dependency tracing after redraft; current downstream grouping is manifest-declared only.
@@ -4732,7 +4734,42 @@ Notes
 
 ---
 
-## Source 57: `notes/2026-04-27-0081-state-rebuild-slice.md`
+## Source 57: `notes/2026-04-27-0081-semantic-validation-boundary.md`
+
+# 2026-04-27 0081 Semantic Validation Boundary
+
+## Summary
+- Added explicit semantic validation boundary metadata to recovery validation.
+- `validate_recovery_branch` now records `semantic_validation` in:
+  - the recovery manifest validation block
+  - the validation receipt details
+  - recovery branch health query details
+- The current status is `deferred`.
+
+## Deferred Families
+- `semantic_continuity`
+- `inventory_meaning`
+- `setting_meaning`
+- `chapter_summary_meaning`
+- `appearance_meaning`
+- `prose_quality`
+
+## Why
+- A branch can be structurally healthy while still needing author review.
+- Nanda should not treat successful BookForge recovery validation as proof that story quality, semantic continuity, or meaning-level state is correct.
+- This keeps BookForge honest: it validates structural timeline health and reports the remaining author/Nanda review gates.
+
+## Validation
+- Focused suite passed:
+  - `.\.venv\Scripts\python.exe -m pytest -o addopts='' tests/test_recovery_actions.py --basetemp=.pytest_tmp_0081_semantic_boundary_focus`
+  - Result: `6 passed`
+- Full suite passed:
+  - `.\.venv\Scripts\python.exe -m pytest -o addopts='' --basetemp=.pytest_tmp_0081_semantic_boundary_full`
+  - Result: `310 passed`
+
+---
+
+## Source 58: `notes/2026-04-27-0081-state-rebuild-slice.md`
 
 # 2026-04-27 0081 State Rebuild Slice
 
@@ -4780,7 +4817,7 @@ Notes
 
 ---
 
-## Source 58: `notes/2026-04-27-0081-state-validation-slice.md`
+## Source 59: `notes/2026-04-27-0081-state-validation-slice.md`
 
 # 2026-04-27 0081 Recovery State Validation Slice
 
@@ -4817,7 +4854,7 @@ Notes
 
 ---
 
-## Source 59: `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
+## Source 60: `notes/2026-04-27-0081-two-chapter-recovery-fixture.md`
 
 # 2026-04-27 0081 Two-Chapter Recovery Fixture
 
@@ -4862,7 +4899,7 @@ Notes
 
 ---
 
-## Source 60: `promotion.md`
+## Source 61: `promotion.md`
 
 # Promotion
 

@@ -645,6 +645,12 @@ def get_recovery_branch_health(workspace: Path, book_id: str, *, branch_id: str)
         "broad_recovery_radius": False,
         "affected_scopes": [],
     }
+    latest_validation = next((receipt for receipt in reversed(receipts) if receipt.action == "validate_recovery_branch"), None)
+    semantic_validation = (
+        latest_validation.details.get("semantic_validation")
+        if latest_validation is not None and isinstance(latest_validation.details.get("semantic_validation"), dict)
+        else None
+    )
     return RecoveryBranchHealth(
         book_id=book_id,
         branch_id=resolved or MAIN_BRANCH_ID,
@@ -658,6 +664,7 @@ def get_recovery_branch_health(workspace: Path, book_id: str, *, branch_id: str)
             "outline_lineage_status": audit.status if audit else None,
             "receipt_actions": sorted(actions),
             "recommended_next_action": next_action,
+            "semantic_validation": semantic_validation,
             **approval,
         },
     )
