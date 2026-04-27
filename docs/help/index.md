@@ -92,6 +92,7 @@ Result truth
     - `bookforge.execution.normalize_outline_scope(...)`
     - `bookforge.execution.invalidate_scope_outputs(...)`
     - `bookforge.execution.rebuild_state_scope(...)`
+    - `bookforge.execution.redraft_scope(...)`
     - `bookforge.execution.validate_recovery_branch(...)`
     - `bookforge.execution.promote_recovery_branch(...)`
   - `bookforge run` now provides the batch/operator macro over the extracted scene-phase execution path.
@@ -114,6 +115,7 @@ Result truth
     - `bookforge workflow normalize-outline-scope`
     - `bookforge workflow invalidate-scope-outputs`
     - `bookforge workflow rebuild-state-scope`
+    - `bookforge workflow redraft-scope`
     - `bookforge workflow validate-recovery-branch`
     - `bookforge workflow promote-recovery-branch`
     - `bookforge workflow create-branch`

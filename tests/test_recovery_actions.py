@@ -14,6 +14,7 @@ from bookforge.execution import (
     promote_recovery_branch,
     quarantine_artifacts,
     rebuild_state_scope,
+    redraft_scope,
     validate_recovery_branch,
 )
 from bookforge.query import get_outline_lineage_audit, legal_next_actions, list_execution_options
@@ -224,7 +225,7 @@ def test_recovery_branch_snapshots_evidence_and_exposes_legal_actions(tmp_path: 
     assert readiness["approval_required"] is True
 
 
-def test_recovery_branch_quarantines_normalizes_invalidates_validates_and_promotes(tmp_path: Path) -> None:
+def test_recovery_branch_quarantines_normalizes_invalidates_redrafts_validates_and_promotes(tmp_path: Path, monkeypatch) -> None:
     book_root = _setup_initialized_book(tmp_path)
     _introduce_lineage_drift(book_root)
     _write_polluted_draft_outputs(book_root)
@@ -284,6 +285,30 @@ def test_recovery_branch_quarantines_normalizes_invalidates_validates_and_promot
     rebuilt_index = _read_json(branch_root / "draft" / "context" / "characters" / "index.json")
     assert [entry["character_id"] for entry in rebuilt_index["characters"]] == ["rhea_mercer"]
 
+    blocked_after_rebuild = validate_recovery_branch(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="validate_recovery_branch", branch_id="recover-sec1"),
+    )
+    assert blocked_after_rebuild.status == "integrity_degraded"
+    assert "redraft_scope has not completed" in blocked_after_rebuild.details["recovery_receipt"]["details"]["blockers"]
+
+    def _fake_run_section_range(*args, **kwargs):
+        root = supervision_paths.branch_snapshot_root(book_root, kwargs["branch_id"])
+        chapter_dir = root / "draft" / "chapters" / f"ch_{int(kwargs['chapter_id']):03d}"
+        chapter_dir.mkdir(parents=True, exist_ok=True)
+        for scene_id in range(int(kwargs["scene_start"]), int(kwargs["scene_end"]) + 1):
+            (chapter_dir / f"scene_{scene_id:03d}.md").write_text(f"Recovered scene {scene_id}.", encoding="utf-8")
+            _write_json(chapter_dir / f"scene_{scene_id:03d}.meta.json", {"scene_id": scene_id, "recovered": True})
+
+    monkeypatch.setattr("bookforge.execution.scoped.run_section_range", _fake_run_section_range)
+    redraft_result = redraft_scope(
+        tmp_path,
+        build_recovery_branch_request(tmp_path, "my_book", action="redraft_scope", branch_id="recover-sec1"),
+    )
+    assert redraft_result.status == "success"
+    assert (branch_root / "draft" / "chapters" / "ch_001" / "scene_001.md").read_text(encoding="utf-8") == "Recovered scene 1."
+    assert not (branch_root / "draft" / "chapters" / "ch_001" / "scene_002.md").exists()
+
     validate_result = validate_recovery_branch(
         tmp_path,
         build_recovery_branch_request(tmp_path, "my_book", action="validate_recovery_branch", branch_id="recover-sec1"),
@@ -301,6 +326,7 @@ def test_recovery_branch_quarantines_normalizes_invalidates_validates_and_promot
     assert promote_result.status == "success"
     assert not (book_root / "outline" / "section_drafts" / "ch_001_sec_001_phase03.json").exists()
     assert not (book_root / "draft" / "chapters" / "ch_001" / "scene_002.md").exists()
+    assert (book_root / "draft" / "chapters" / "ch_001" / "scene_001.md").read_text(encoding="utf-8") == "Recovered scene 1."
     assert not (book_root / "draft" / "context" / "characters" / "artie.state.json").exists()
     main_index = _read_json(book_root / "draft" / "context" / "characters" / "index.json")
     assert [entry["character_id"] for entry in main_index["characters"]] == ["rhea_mercer"]
@@ -368,6 +394,7 @@ def test_cli_parser_accepts_recovery_workflow_commands() -> None:
         "invalidate-scope-outputs",
         "state-rebuild-preview",
         "rebuild-state-scope",
+        "redraft-scope",
         "validate-recovery-branch",
         "promote-recovery-branch",
         "recovery-health",

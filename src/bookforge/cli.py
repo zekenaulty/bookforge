@@ -49,6 +49,7 @@ from bookforge.execution import (
     quarantine_artifacts,
     rebase_branch_action,
     rebuild_state_scope,
+    redraft_scope,
     repair_scene_prose,
     resume_paused_section,
     record_assembly_validation_action,
@@ -440,6 +441,10 @@ def _workflow_invalidate_scope_outputs(args: argparse.Namespace) -> int:
 
 def _workflow_rebuild_state_scope(args: argparse.Namespace) -> int:
     return _workflow_recovery_branch_action(args, "rebuild_state_scope", rebuild_state_scope)
+
+
+def _workflow_redraft_scope(args: argparse.Namespace) -> int:
+    return _workflow_recovery_branch_action(args, "redraft_scope", redraft_scope)
 
 
 def _workflow_validate_recovery_branch(args: argparse.Namespace) -> int:
@@ -2003,6 +2008,14 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_rebuild_state_scope.add_argument("--book", required=True, help="Book id.")
     workflow_rebuild_state_scope.add_argument("--branch-id", required=True, help="Recovery branch id.")
     workflow_rebuild_state_scope.set_defaults(func=_workflow_rebuild_state_scope)
+
+    workflow_redraft_scope = workflow_sub.add_parser(
+        "redraft-scope",
+        help="Redraft affected recovery scopes inside the branch using scoped section writing.",
+    )
+    workflow_redraft_scope.add_argument("--book", required=True, help="Book id.")
+    workflow_redraft_scope.add_argument("--branch-id", required=True, help="Recovery branch id.")
+    workflow_redraft_scope.set_defaults(func=_workflow_redraft_scope)
 
     workflow_validate_recovery_branch = workflow_sub.add_parser(
         "validate-recovery-branch",

@@ -141,6 +141,7 @@ Status: in_progress
   - `normalize_outline_scope`
   - `invalidate_scope_outputs`
   - `rebuild_state_scope`
+  - `redraft_scope`
   - `validate_recovery_branch`
   - `promote_recovery_branch`
 - Implemented legal-action discovery for the recovery sequence.
@@ -153,11 +154,11 @@ Status: in_progress
   - latest outline pointer/summary files when present
 - Scope invalidation preserves the pre-normalization scene range so a normalized one-scene section cannot accidentally leave a stale extra scene file active.
 - State rebuild now quarantines branch-local state/projection artifacts and rebuilds a clean outline-derived baseline before validation.
-- Validation now requires `rebuild_state_scope` before a recovery branch can become healthy.
+- Redraft now prepares normalized affected sections as branch-local frozen sections and invokes the existing scoped section writer in the recovery branch.
+- Validation now requires `rebuild_state_scope` and `redraft_scope` before a recovery branch can become healthy.
 - Quarantine now uses hashed fallback quarantine paths when deep Windows paths exceed practical filesystem limits while preserving original source paths in receipts.
 
 ## Remaining Implementation
-- Add `redraft_scope` as a scope-level composition over existing scene/section write actions.
 - Add richer postcondition receipts with integrity deltas and next-action snapshots.
 - Add blast-radius query surfaces that separate prose, state, series, continuity, and projection invalidation candidates.
 - Add approval-required metadata to all destructive or broad-scope primitives.
@@ -240,6 +241,9 @@ Status: in_progress
   - Use existing branch-scoped write actions where possible.
   - Preserve original prose under a non-canonical artifact status.
   - Allow explicit salvage reference injection without treating salvage as truth.
+  - Current implementation supports branch-local redraft for affected recovery scopes from the recovery manifest.
+  - Current implementation prepares each normalized affected section as frozen/writable, then delegates to the existing scoped section writer.
+  - Current implementation does not yet support explicit salvage reference injection.
 - Add validation.
   - Recovery branch health must prove:
     - no `chimera_risk`

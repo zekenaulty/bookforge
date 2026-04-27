@@ -42,6 +42,7 @@ from .recovery_actions import (
     promote_recovery_branch,
     quarantine_artifacts,
     rebuild_state_scope,
+    redraft_scope,
     validate_recovery_branch,
 )
 from .scoped import (
@@ -88,6 +89,7 @@ __all__ = [
     "promote_recovery_branch",
     "quarantine_artifacts",
     "rebuild_state_scope",
+    "redraft_scope",
     "rebase_branch_action",
     "record_assembly_validation_action",
     "validate_assembly_branch_action",

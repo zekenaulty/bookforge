@@ -3,8 +3,8 @@
 ## Compiled Plan Metadata
 
 - Plan Scope: `InProgress/bookforge-supervisable-engine`
-- Compiled At (UTC): `2026-04-27T09:11:08Z`
-- Source Document Count: `47`
+- Compiled At (UTC): `2026-04-27T09:22:38Z`
+- Source Document Count: `48`
 - Projection File: `bookforge-supervisable-engine.md`
 
 ## Contents
@@ -54,8 +54,9 @@
 43. `notes/2026-04-26-0080-complete.md`
 44. `notes/2026-04-26-0081-implementation-slice.md`
 45. `notes/2026-04-26-0081-planning.md`
-46. `notes/2026-04-27-0081-state-rebuild-slice.md`
-47. `promotion.md`
+46. `notes/2026-04-27-0081-redraft-scope-slice.md`
+47. `notes/2026-04-27-0081-state-rebuild-slice.md`
+48. `promotion.md`
 
 ---
 
@@ -2669,6 +2670,7 @@ Status: in_progress
   - `normalize_outline_scope`
   - `invalidate_scope_outputs`
   - `rebuild_state_scope`
+  - `redraft_scope`
   - `validate_recovery_branch`
   - `promote_recovery_branch`
 - Implemented legal-action discovery for the recovery sequence.
@@ -2681,11 +2683,11 @@ Status: in_progress
   - latest outline pointer/summary files when present
 - Scope invalidation preserves the pre-normalization scene range so a normalized one-scene section cannot accidentally leave a stale extra scene file active.
 - State rebuild now quarantines branch-local state/projection artifacts and rebuilds a clean outline-derived baseline before validation.
-- Validation now requires `rebuild_state_scope` before a recovery branch can become healthy.
+- Redraft now prepares normalized affected sections as branch-local frozen sections and invokes the existing scoped section writer in the recovery branch.
+- Validation now requires `rebuild_state_scope` and `redraft_scope` before a recovery branch can become healthy.
 - Quarantine now uses hashed fallback quarantine paths when deep Windows paths exceed practical filesystem limits while preserving original source paths in receipts.
 
 ## Remaining Implementation
-- Add `redraft_scope` as a scope-level composition over existing scene/section write actions.
 - Add richer postcondition receipts with integrity deltas and next-action snapshots.
 - Add blast-radius query surfaces that separate prose, state, series, continuity, and projection invalidation candidates.
 - Add approval-required metadata to all destructive or broad-scope primitives.
@@ -2768,6 +2770,9 @@ Status: in_progress
   - Use existing branch-scoped write actions where possible.
   - Preserve original prose under a non-canonical artifact status.
   - Allow explicit salvage reference injection without treating salvage as truth.
+  - Current implementation supports branch-local redraft for affected recovery scopes from the recovery manifest.
+  - Current implementation prepares each normalized affected section as frozen/writable, then delegates to the existing scoped section writer.
+  - Current implementation does not yet support explicit salvage reference injection.
 - Add validation.
   - Recovery branch health must prove:
     - no `chimera_risk`
@@ -4260,7 +4265,46 @@ Notes
 
 ---
 
-## Source 46: `notes/2026-04-27-0081-state-rebuild-slice.md`
+## Source 46: `notes/2026-04-27-0081-redraft-scope-slice.md`
+
+# 2026-04-27 0081 Redraft Scope Slice
+
+## Implemented
+- Added `redraft_scope`.
+  - Derived recovery branch only.
+  - Reads affected scopes from the recovery manifest.
+  - Prepares normalized affected sections as branch-local frozen sections with scene ranges from the normalized outline.
+  - Delegates writing to the existing scoped section writer instead of creating a second prose pipeline.
+  - Emits a recovery receipt with redrafted scopes and child write result ids.
+- Added `redraft_scope` to:
+  - execution exports
+  - legal-action ordering
+  - CLI workflow commands
+  - recovery health gating
+  - recovery validation requirements
+- Validation now requires `redraft_scope` after `rebuild_state_scope`.
+
+## Current Behavior
+- `redraft_scope` may call the LLM-backed section writer in real workspaces.
+- Tests mock the writer boundary and verify orchestration without model calls.
+- The action does not yet support explicit salvage-reference injection.
+
+## Validation
+- Focused suite passed:
+  - `python -m pytest -o addopts='' tests/test_recovery_actions.py tests/test_action_discovery.py --basetemp=.pytest_tmp_0081_redraft_focus`
+  - Result: `35 passed`
+- Full suite passed:
+  - `python -m pytest -o addopts='' --basetemp=.pytest_tmp_0081_redraft_full`
+  - Result: `308 passed`
+
+## Follow-Up
+- Add explicit salvage-reference injection for redraft.
+- Add richer postcondition receipts with next legal actions and integrity deltas.
+- Add downstream/story-weaving validation after redraft.
+
+---
+
+## Source 47: `notes/2026-04-27-0081-state-rebuild-slice.md`
 
 # 2026-04-27 0081 State Rebuild Slice
 
@@ -4308,7 +4352,7 @@ Notes
 
 ---
 
-## Source 47: `promotion.md`
+## Source 48: `promotion.md`
 
 # Promotion
 

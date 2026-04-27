@@ -452,7 +452,7 @@ def _recovery_approval_metadata(action: str, manifest: dict) -> dict:
     reasons = []
     if action == "create_recovery_branch":
         reasons.append("recovery anchor selection")
-    if action in {"quarantine_artifacts", "invalidate_scope_outputs", "rebuild_state_scope"}:
+    if action in {"quarantine_artifacts", "invalidate_scope_outputs", "rebuild_state_scope", "redraft_scope"}:
         reasons.append("destructive cleanup/quarantine")
     if action == "promote_recovery_branch":
         reasons.append("promotion to main")
@@ -503,6 +503,12 @@ def _evaluate_recovery_branch_action(workspace, book_id: str, selector: ScopeSel
         if action in receipt_actions:
             return False, "rebuild_state_scope already has a receipt for this branch.", details
         return True, None, details
+    if action == "redraft_scope":
+        if "rebuild_state_scope" not in receipt_actions:
+            return False, "redraft_scope requires rebuilt state scope first.", details
+        if action in receipt_actions:
+            return False, "redraft_scope already has a receipt for this branch.", details
+        return True, None, details
     if action == "validate_recovery_branch":
         if "quarantine_artifacts" not in receipt_actions:
             return False, "validate_recovery_branch requires quarantine_artifacts first.", details
@@ -512,6 +518,8 @@ def _evaluate_recovery_branch_action(workspace, book_id: str, selector: ScopeSel
             return False, "validate_recovery_branch requires invalidated scope outputs first.", details
         if "rebuild_state_scope" not in receipt_actions:
             return False, "validate_recovery_branch requires rebuilt state scope first.", details
+        if "redraft_scope" not in receipt_actions:
+            return False, "validate_recovery_branch requires redrafted scope first.", details
         return True, None, details
     if action == "promote_recovery_branch":
         health = get_recovery_branch_health(workspace, book_id, branch_id=branch_id)
@@ -1045,6 +1053,12 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
         selector,
         "rebuild_state_scope",
     )
+    redraft_scope_allowed, redraft_scope_refusal, redraft_scope_details = _evaluate_recovery_branch_action(
+        workspace,
+        book_id,
+        selector,
+        "redraft_scope",
+    )
     validate_recovery_allowed, validate_recovery_refusal, validate_recovery_details = _evaluate_recovery_branch_action(
         workspace,
         book_id,
@@ -1407,6 +1421,18 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
             selector_requirements=["book_id", "branch_id"],
             refusal_reason=rebuild_state_refusal,
             details=rebuild_state_details,
+        ),
+        ExecutionOption(
+            action="redraft_scope",
+            summary="Redraft affected recovery scopes inside the branch using the existing scoped section writer.",
+            branch_policy="derived_only",
+            workflow_family="recovery_import",
+            mutates_canonical_state=False,
+            requires_expected_node=True,
+            allowed=redraft_scope_allowed,
+            selector_requirements=["book_id", "branch_id"],
+            refusal_reason=redraft_scope_refusal,
+            details=redraft_scope_details,
         ),
         ExecutionOption(
             action="validate_recovery_branch",

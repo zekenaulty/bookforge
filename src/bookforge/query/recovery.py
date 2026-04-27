@@ -365,6 +365,8 @@ def _recommended_next_recovery_action(actions: set[str], blockers: List[str]) ->
         return "invalidate_scope_outputs"
     if "rebuild_state_scope" not in actions:
         return "rebuild_state_scope"
+    if "redraft_scope" not in actions:
+        return "redraft_scope"
     if "validate_recovery_branch" not in actions:
         return "validate_recovery_branch"
     if blockers:
@@ -385,6 +387,8 @@ def _recovery_approval_requirements(manifest: Dict[str, Any], actions: set[str])
         pending.append("scope output invalidation")
     if "rebuild_state_scope" not in actions:
         pending.append("state/projection rebuild")
+    if "redraft_scope" not in actions:
+        pending.append("scope redraft")
     if "validate_recovery_branch" in actions:
         pending.append("promotion to main")
     if broad_scope:
@@ -416,6 +420,7 @@ def get_recovery_branch_health(workspace: Path, book_id: str, *, branch_id: str)
         "normalize_outline_scope",
         "invalidate_scope_outputs",
         "rebuild_state_scope",
+        "redraft_scope",
         "validate_recovery_branch",
     ):
         if required not in actions:
