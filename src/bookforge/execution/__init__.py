@@ -15,6 +15,31 @@ from .branch_actions import (
     record_assembly_validation_action,
     validate_assembly_branch_action,
 )
+from .author_assets import (
+    AUTHOR_LIBRARY_SCOPE_ID,
+    build_create_author_request,
+    build_refine_author_request,
+    create_author_action,
+    refine_author_action,
+)
+from .adaptive_authoring import (
+    align_scene_pair_seam_action,
+    apply_bridge_scene_insertion_action,
+    build_align_scene_pair_seam_request,
+    build_apply_bridge_scene_insertion_request,
+    build_plan_bridge_scene_insertion_request,
+    plan_bridge_scene_insertion_action,
+)
+from .book_intent import (
+    BOOK_INTENT_LIBRARY_SCOPE_ID,
+    build_approve_book_intent_request,
+    build_create_book_from_intent_request,
+    build_draft_book_intent_request,
+    approve_book_intent_action,
+    create_book_from_intent_action,
+    draft_book_intent_action,
+)
+from .outline_start import build_draft_starter_outline_request, draft_starter_outline_from_intent
 from .materialize import (
     build_finalize_chapter_request,
     build_freeze_section_request,
@@ -71,11 +96,30 @@ from .scene_actions import (
     state_repair_scene_patch,
     write_scene_prose,
 )
+from .scene_sequence import build_continue_scene_request, continue_scene, run_scene_phase_action
+from .visual_actions import (
+    build_generate_visual_asset_request,
+    build_plan_visual_asset_request,
+    generate_visual_asset_action,
+    plan_visual_asset_action,
+)
 
 __all__ = [
     "build_create_assembly_branch_request",
+    "AUTHOR_LIBRARY_SCOPE_ID",
+    "BOOK_INTENT_LIBRARY_SCOPE_ID",
+    "align_scene_pair_seam_action",
+    "apply_bridge_scene_insertion_action",
+    "build_approve_book_intent_request",
+    "build_align_scene_pair_seam_request",
+    "build_apply_bridge_scene_insertion_request",
+    "build_create_author_request",
     "build_create_branch_request",
+    "build_create_book_from_intent_request",
     "build_create_recovery_branch_request",
+    "build_draft_starter_outline_request",
+    "build_refine_author_request",
+    "build_draft_book_intent_request",
     "build_discard_branch_request",
     "build_promote_branch_to_parent_request",
     "build_promote_branch_request",
@@ -84,9 +128,14 @@ __all__ = [
     "build_recovery_branch_request",
     "build_validate_assembly_branch_request",
     "create_assembly_branch_action",
+    "create_author_action",
+    "approve_book_intent_action",
+    "create_book_from_intent_action",
     "create_branch_action",
     "create_recovery_branch",
     "discard_branch_action",
+    "draft_book_intent_action",
+    "draft_starter_outline_from_intent",
     "promote_branch_action",
     "promote_recovery_branch",
     "quarantine_artifacts",
@@ -96,6 +145,7 @@ __all__ = [
     "review_recovery_semantics",
     "rebase_branch_action",
     "record_assembly_validation_action",
+    "refine_author_action",
     "validate_assembly_branch_action",
     "build_finalize_chapter_request",
     "build_freeze_section_request",
@@ -105,6 +155,7 @@ __all__ = [
     "build_extract_scene_setting_from_prose_request",
     "build_refresh_character_appearance_projection_request",
     "build_apply_scene_commit_request",
+    "build_continue_scene_request",
     "finalize_chapter",
     "freeze_section",
     "build_resume_paused_section_request",
@@ -122,11 +173,13 @@ __all__ = [
     "build_repair_scene_prose_request",
     "build_state_repair_scene_patch_request",
     "generate_continuity_pack",
+    "continue_scene",
     "apply_scene_commit",
     "lint_scene_prose",
     "plan_scene_action",
     "preflight_scene_state",
     "repair_scene_prose",
+    "run_scene_phase_action",
     "resume_paused_section",
     "state_repair_scene_patch",
     "normalize_outline_scope",
@@ -134,4 +187,10 @@ __all__ = [
     "write_frozen_section",
     "build_write_scene_prose_request",
     "write_scene_prose",
+    "build_plan_visual_asset_request",
+    "build_plan_bridge_scene_insertion_request",
+    "build_generate_visual_asset_request",
+    "plan_visual_asset_action",
+    "plan_bridge_scene_insertion_action",
+    "generate_visual_asset_action",
 ]

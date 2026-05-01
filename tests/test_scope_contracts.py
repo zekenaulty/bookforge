@@ -19,6 +19,9 @@ def test_runtime_vocabulary_is_frozen() -> None:
         "section_local_outline",
         "section_write",
         "recovery_import",
+        "author_assets",
+        "book_intent",
+        "visual_assets",
     )
     assert EXECUTION_RESULT_STATUSES == (
         "success",

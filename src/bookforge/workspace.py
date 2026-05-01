@@ -203,6 +203,31 @@ def _render_book_constitution(book: Dict[str, Any]) -> str:
         for key in sorted(targets.keys()):
             lines.append(f"- {key}: {targets[key]}")
 
+    intent = book.get("book_intent", {}) if isinstance(book.get("book_intent"), dict) else {}
+    if intent:
+        lines.append("\nBook Intent")
+        short_synopsis = str(intent.get("short_synopsis") or "").strip()
+        long_synopsis = str(intent.get("long_synopsis") or "").strip()
+        reader_promise = str(intent.get("reader_promise") or "").strip()
+        central_conflict = str(intent.get("central_conflict") or "").strip()
+        tone = str(intent.get("tone") or "").strip()
+        if reader_promise:
+            lines.append(f"- Reader promise: {reader_promise}")
+        if short_synopsis:
+            lines.append(f"- Short synopsis: {short_synopsis}")
+        if long_synopsis:
+            lines.append(f"- Long synopsis: {long_synopsis}")
+        if central_conflict:
+            lines.append(f"- Central conflict: {central_conflict}")
+        if tone:
+            lines.append(f"- Tone: {tone}")
+        must_have = intent.get("must_have") if isinstance(intent.get("must_have"), list) else []
+        if must_have:
+            lines.append("- Must have: " + "; ".join(str(item) for item in must_have if str(item).strip()))
+        must_not = intent.get("must_not") if isinstance(intent.get("must_not"), list) else []
+        if must_not:
+            lines.append("- Must not: " + "; ".join(str(item) for item in must_not if str(item).strip()))
+
     page_metrics = book.get("page_metrics", {}) if isinstance(book.get("page_metrics"), dict) else {}
     if page_metrics:
         lines.append("\nPage Metrics")

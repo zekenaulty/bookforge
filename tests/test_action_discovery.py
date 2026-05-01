@@ -14,6 +14,7 @@ from bookforge.query import legal_next_actions, list_execution_options
 from bookforge.contracts import ScopeSelector
 from bookforge.runner import PAUSE_EXIT_CODE, _pause_on_quota
 from bookforge.section_workflow import freeze_section_from_phase03_artifact, initialize_section_workflow
+from bookforge.supervision import paths as supervision_paths
 from bookforge.workspace import init_book_workspace
 from bookforge.cli import build_parser
 
@@ -477,6 +478,62 @@ def test_list_execution_options_for_frozen_section_with_written_artifacts_includ
     ]
 
 
+def test_list_execution_options_for_branch_frozen_section_with_written_artifacts_includes_branch_lock(tmp_path: Path) -> None:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root)
+    initialize_section_workflow(workspace=tmp_path, book_id="my_book", overwrite=True)
+    freeze_section_from_phase03_artifact(workspace=tmp_path, book_id="my_book", chapter_id=1, section_id=1)
+    create_branch(
+        workspace=tmp_path,
+        book_id="my_book",
+        selector=ScopeSelector(book_id="my_book", branch_id="main", workflow_family="section_write", chapter=1, section=1),
+        branch_id="rewrite-sec1",
+    )
+    branch_root = supervision_paths.branch_snapshot_root(book_root, "rewrite-sec1")
+    _write_scene_artifacts(branch_root, 1, 1, text="Branch-local prose.")
+
+    selector = ScopeSelector(book_id="my_book", branch_id="rewrite-sec1", chapter=1, section=1)
+    options = list_execution_options(tmp_path, selector, prefer_emitted=False)
+
+    by_action = {option.action: option for option in options}
+    assert by_action["lock_section_from_written_state"].allowed is True
+    assert by_action["lock_section_from_written_state"].branch_policy == "any"
+    assert by_action["lock_section_from_written_state"].mutates_canonical_state is False
+    assert by_action["lock_section_from_written_state"].details["branch_id"] == "rewrite-sec1"
+    assert by_action["lock_section_from_written_state"].details["mutation_scope"] == "branch_authoritative"
+
+    legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
+    assert "lock_section_from_written_state" in [option.action for option in legal]
+
+
+def test_list_execution_options_for_branch_locked_chapter_includes_branch_finalize(tmp_path: Path) -> None:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root)
+    initialize_section_workflow(workspace=tmp_path, book_id="my_book", overwrite=True)
+    freeze_section_from_phase03_artifact(workspace=tmp_path, book_id="my_book", chapter_id=1, section_id=1)
+    create_branch(
+        workspace=tmp_path,
+        book_id="my_book",
+        selector=ScopeSelector(book_id="my_book", branch_id="main", workflow_family="section_write", chapter=1, section=1),
+        branch_id="chapter-branch",
+    )
+    branch_root = supervision_paths.branch_snapshot_root(book_root, "chapter-branch")
+    branch_registry_path = branch_root / "outline" / "snapshot_registry.json"
+    branch_registry = json.loads(branch_registry_path.read_text(encoding="utf-8"))
+    branch_registry["chapters"][0]["sections"][0]["status"] = "locked"
+    branch_registry_path.write_text(json.dumps(branch_registry, ensure_ascii=True, indent=2), encoding="utf-8")
+
+    selector = ScopeSelector(book_id="my_book", branch_id="chapter-branch", chapter=1)
+    options = list_execution_options(tmp_path, selector, prefer_emitted=False)
+
+    by_action = {option.action: option for option in options}
+    assert by_action["finalize_chapter_from_locked_sections"].allowed is True
+    assert by_action["finalize_chapter_from_locked_sections"].branch_policy == "any"
+    assert by_action["finalize_chapter_from_locked_sections"].mutates_canonical_state is False
+    assert by_action["finalize_chapter_from_locked_sections"].details["branch_id"] == "chapter-branch"
+    assert by_action["finalize_chapter_from_locked_sections"].details["mutation_scope"] == "branch_authoritative"
+
+
 def test_list_execution_options_for_active_frozen_section_includes_write(tmp_path: Path) -> None:
     book_root = _init_book(tmp_path)
     _write_run_artifacts(book_root)
@@ -492,6 +549,11 @@ def test_list_execution_options_for_active_frozen_section_includes_write(tmp_pat
     assert by_action["write_frozen_section"].details["section_id"] == 1
     assert by_action["write_frozen_section"].details["scene_ref_start"] == "1:1"
     assert by_action["write_frozen_section"].details["scene_ref_end"] == "1:1"
+    assert by_action["write_frozen_section"].details["macro_kind"] == "section_write_range"
+    assert by_action["write_frozen_section"].details["broad_macro"] is True
+    assert by_action["write_frozen_section"].details["not_for_single_scene_requests"] is True
+    assert by_action["write_frozen_section"].details["preferred_single_scene_action"] == "continue_scene"
+    assert by_action["write_frozen_section"].details["scene_count"] == 1
     assert by_action["lock_section_from_written_state"].allowed is False
 
     legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
@@ -563,6 +625,7 @@ def test_list_execution_options_for_active_scene_includes_write_scene_prose(tmp_
 
     legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
     assert [option.action for option in legal] == [
+        "continue_scene",
         "create_branch",
         "write_frozen_section",
         "write_scene_prose",
@@ -634,6 +697,7 @@ def test_list_execution_options_for_prose_generated_scene_includes_state_repair(
 
     legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
     assert [option.action for option in legal] == [
+        "continue_scene",
         "create_branch",
         "write_frozen_section",
         "refresh_character_appearance_projection",
@@ -715,6 +779,7 @@ def test_list_execution_options_for_state_repaired_scene_includes_lint(tmp_path:
 
     legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
     assert [option.action for option in legal] == [
+        "continue_scene",
         "create_branch",
         "write_frozen_section",
         "refresh_character_appearance_projection",
@@ -786,6 +851,7 @@ def test_list_execution_options_for_passing_lint_scene_includes_commit(tmp_path:
 
     legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
     assert [option.action for option in legal] == [
+        "continue_scene",
         "create_branch",
         "write_frozen_section",
         "refresh_character_appearance_projection",
@@ -856,6 +922,7 @@ def test_list_execution_options_for_failing_lint_scene_includes_repair(tmp_path:
 
     legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
     assert [option.action for option in legal] == [
+        "continue_scene",
         "create_branch",
         "write_frozen_section",
         "refresh_character_appearance_projection",
@@ -927,6 +994,7 @@ def test_list_execution_options_reopens_state_repair_after_repair_outputs(tmp_pa
 
     legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
     assert [option.action for option in legal] == [
+        "continue_scene",
         "create_branch",
         "write_frozen_section",
         "refresh_character_appearance_projection",
@@ -946,6 +1014,9 @@ def test_list_execution_options_for_unstarted_scene_includes_plan_scene(tmp_path
     options = list_execution_options(tmp_path, selector, prefer_emitted=False)
 
     by_action = {option.action: option for option in options}
+    assert by_action["continue_scene"].allowed is True
+    assert by_action["continue_scene"].details["ready_child_action"] == "plan_scene"
+    assert by_action["continue_scene"].details["macro_kind"] == "single_recommended_scene_phase_step"
     assert by_action["plan_scene"].allowed is True
     assert by_action["plan_scene"].mutates_canonical_state is False
     assert by_action["plan_scene"].requires_expected_node is True
@@ -954,6 +1025,7 @@ def test_list_execution_options_for_unstarted_scene_includes_plan_scene(tmp_path
 
     legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
     assert [option.action for option in legal] == [
+        "continue_scene",
         "create_branch",
         "write_frozen_section",
         "plan_scene",
@@ -983,6 +1055,7 @@ def test_list_execution_options_for_planned_scene_includes_preflight_scene_state
 
     legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
     assert [option.action for option in legal] == [
+        "continue_scene",
         "create_branch",
         "write_frozen_section",
         "preflight_scene_state",
@@ -1020,6 +1093,7 @@ def test_list_execution_options_for_preflighted_scene_includes_generate_continui
 
     legal = legal_next_actions(tmp_path, selector, prefer_emitted=False)
     assert [option.action for option in legal] == [
+        "continue_scene",
         "create_branch",
         "write_frozen_section",
         "generate_continuity_pack",
@@ -1477,3 +1551,86 @@ def test_cli_parser_accepts_workflow_write_scene_prose_command() -> None:
     assert args.chapter == 1
     assert args.scene == 2
     assert args.section == 1
+
+
+def test_cli_parser_accepts_workflow_continue_scene_command() -> None:
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "continue-scene",
+            "--book",
+            "my_book",
+            "--branch-id",
+            "rewrite-sec1",
+            "--chapter",
+            "1",
+            "--scene",
+            "2",
+            "--section",
+            "1",
+            "--json",
+        ]
+    )
+
+    assert args.command == "workflow"
+    assert args.workflow_command == "continue-scene"
+    assert args.book == "my_book"
+    assert args.branch_id == "rewrite-sec1"
+    assert args.chapter == 1
+    assert args.scene == 2
+    assert args.section == 1
+    assert args.json is True
+
+
+def test_cli_parser_accepts_workflow_lock_section_branch_scope() -> None:
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "lock-section",
+            "--book",
+            "my_book",
+            "--branch-id",
+            "rewrite-sec1",
+            "--chapter",
+            "1",
+            "--section",
+            "1",
+        ]
+    )
+
+    assert args.command == "workflow"
+    assert args.workflow_command == "lock-section"
+    assert args.book == "my_book"
+    assert args.branch_id == "rewrite-sec1"
+    assert args.chapter == 1
+    assert args.section == 1
+
+
+def test_cli_parser_accepts_workflow_finalize_chapter_branch_scope() -> None:
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "--workspace",
+            "workspace",
+            "workflow",
+            "finalize-chapter",
+            "--book",
+            "my_book",
+            "--branch-id",
+            "chapter-branch",
+            "--chapter",
+            "1",
+        ]
+    )
+
+    assert args.command == "workflow"
+    assert args.workflow_command == "finalize-chapter"
+    assert args.book == "my_book"
+    assert args.branch_id == "chapter-branch"
+    assert args.chapter == 1

@@ -1,0 +1,5290 @@
+{
+  "schema_version": "capability_projection_v1",
+  "projection_source": "static_registry",
+  "capabilities": [
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.align_scene_pair_seam",
+      "human_label": "Align one adjacent scene seam inside a branch",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "align_scene_pair_seam",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "scene_pair",
+        "chapter",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "derived_only",
+      "mutation_class": "provisional_branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "authoritative",
+        "derived",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [
+        "uses_chapter_seam_lint_repair_pair"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "pair_selector_rule": "selector.scene is scene A; details.scene_b_id or outline adjacency resolves scene B",
+        "writable_window_policy": "only scene A tail and scene B head are rewritten",
+        "canonical_changed": false,
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.apply_bridge_scene_insertion",
+      "human_label": "Apply a planned adaptive bridge scene insertion",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "apply_bridge_scene_insertion",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "scene_pair",
+        "section",
+        "chapter",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "derived_only",
+      "mutation_class": "branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "authoritative",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [
+        "requires_plan_bridge_scene_insertion",
+        "enables_plan_scene_for_inserted_scene"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "branch_only": true,
+        "renumbering_policy": "branch_local_shift_following_integer_scene_ids",
+        "same_section_only_first_slice": true,
+        "does_not_write_bridge_prose": true,
+        "canonical_changed": false,
+        "nanda_wire_recommendation": "safe_to_wire_behind_gates",
+        "success_receipt_schema": "execution_result_v1",
+        "apply_report_schema": "bridge_scene_insertion_apply_report_v1",
+        "expected_success_details": [
+          "inserted_scene_id",
+          "branch_id",
+          "canonical_changed",
+          "branch_change_status",
+          "recommended_next_actions"
+        ],
+        "expected_artifact_keys": [
+          "bridge_scene_insertion_apply_report",
+          "outline",
+          "snapshot_registry"
+        ],
+        "legal_details_fields": [
+          "chapter_id",
+          "scene_a_id",
+          "scene_b_id",
+          "mutation_scope",
+          "artifact_status_after_success",
+          "canonical_changed",
+          "renumbering_policy",
+          "same_section_only",
+          "bridge_plan_path",
+          "refusal_code"
+        ],
+        "legal_refusal_codes": [
+          "branch_required",
+          "missing_chapter_or_scene_scope",
+          "no_adjacent_scene",
+          "missing_bridge_scene_insertion_plan"
+        ],
+        "execution_failure_codes": [
+          "branch_required",
+          "missing_live_node",
+          "stale_write",
+          "scope_contract_violation",
+          "bridge_scene_insertion_apply_failed"
+        ],
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.apply_scene_commit",
+      "human_label": "Commit one scene baseline",
+      "unit_type": "promotion_action",
+      "capability_type": "promotion",
+      "implementation_status": "implemented",
+      "action_key": "apply_scene_commit",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "scene",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "canonical_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "authoritative",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.approve_book_intent",
+      "human_label": "Approve a BookIntent for canonical book creation",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "approve_book_intent",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "book_seed",
+        "book"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "details.intent_ref"
+      ],
+      "branch_policy": "main_only",
+      "mutation_class": "canonical_mutation",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "book_intent",
+      "produced_artifact_statuses": [
+        "authoritative"
+      ],
+      "legal_next_action_relationships": [
+        "enables_create_book_from_intent"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "library_scope_id": "__book_intents__",
+        "approval_meaning": "The seed, title, author, genre, and intent fields are accepted as the source for a new BookForge book.",
+        "workflow_family": "book_intent"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.continue_scene",
+      "human_label": "Continue one scene by executing the current recommended scene-phase action",
+      "unit_type": "macro_workflow",
+      "capability_type": "macro",
+      "implementation_status": "implemented",
+      "action_key": "continue_scene",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "scene",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "provisional_branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "provisional",
+        "derived",
+        "authoritative",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [
+        "uses_scene_phase_readiness_recommended_next_action"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [
+        "plan_scene",
+        "preflight_scene_state",
+        "generate_continuity_pack",
+        "write_scene_prose",
+        "state_repair_scene_patch",
+        "lint_scene_prose",
+        "repair_scene_prose",
+        "apply_scene_commit"
+      ],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "macro_not_rail": true,
+        "step_count_per_call": 1,
+        "loop_step_receipt_schema": "author_loop_step_receipt_v1",
+        "truth_note": "This executes only the currently recommended scene-phase child action, then returns updated readiness context.",
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.create_assembly_branch",
+      "human_label": "Create an off-main assembly branch for a fork group",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "create_assembly_branch",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "fork_group"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "fork_group_id"
+      ],
+      "branch_policy": "main_only",
+      "mutation_class": "assembly",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "branching",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.create_author",
+      "human_label": "Create a versioned author persona",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "create_author",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "library",
+        "author"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "details.influences_or_prompt"
+      ],
+      "branch_policy": "main_only",
+      "mutation_class": "canonical_mutation",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "author_assets",
+      "produced_artifact_statuses": [
+        "authoritative"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "library_scope_id": "__author_library__",
+        "versioned": true,
+        "writes": [
+          "workspace/authors/<author_slug>/<version>/author.json",
+          "workspace/authors/<author_slug>/<version>/author_style.md",
+          "workspace/authors/<author_slug>/<version>/system_fragment.md",
+          "workspace/authors/<author_slug>/index.json"
+        ],
+        "workflow_family": "author_assets"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.create_book_from_intent",
+      "human_label": "Create a canonical BookForge book from an approved BookIntent",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "create_book_from_intent",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "book_seed",
+        "book"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "details.intent_ref"
+      ],
+      "branch_policy": "main_only",
+      "mutation_class": "canonical_mutation",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "book_intent",
+      "produced_artifact_statuses": [
+        "authoritative"
+      ],
+      "legal_next_action_relationships": [
+        "creates_book_workspace"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "library_scope_id": "__book_intents__",
+        "canonical_transition": "author_only_seed_to_book_scope",
+        "writes": [
+          "workspace/books/<book_id>/book.json",
+          "workspace/books/<book_id>/book_intent.json",
+          "workspace/books/<book_id>/draft/context/book_intent.md",
+          "workspace/books/<book_id>/prompts/system_v1.md"
+        ],
+        "workflow_family": "book_intent"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.create_branch",
+      "human_label": "Create an isolated derived branch",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "create_branch",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "book",
+        "chapter",
+        "section",
+        "scene",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "main_only",
+      "mutation_class": "branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "branching",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [
+        "branch_scope_unlocks_branch_local_actions"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.create_recovery_branch",
+      "human_label": "Create isolated recovery branch and record anchor",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "create_recovery_branch",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "book",
+        "chapter",
+        "section"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "main_only",
+      "mutation_class": "branch_mutation",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "recovery",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "cleanliness_status_after_success": "isolated_not_clean",
+        "truth_note": "This action isolates work and records the selected recovery anchor. It does not remove polluted data or apply the anchor by itself.",
+        "required_cleanup_actions": [
+          "quarantine_artifacts",
+          "normalize_outline_scope",
+          "invalidate_scope_outputs",
+          "rebuild_state_scope",
+          "redraft_scope",
+          "validate_recovery_branch"
+        ],
+        "workflow_family": "recovery_import"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.discard_branch",
+      "human_label": "Discard a derived branch",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "discard_branch",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "derived_only",
+      "mutation_class": "branch_mutation",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "branching",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.draft_book_intent",
+      "human_label": "Draft a BookIntent from an author-only seed",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "draft_book_intent",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "library",
+        "book_seed",
+        "book"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "details.title",
+        "details.author_ref",
+        "details.genre",
+        "details.seed_text_or_seed_file"
+      ],
+      "branch_policy": "main_only",
+      "mutation_class": "provisional_branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "book_intent",
+      "produced_artifact_statuses": [
+        "provisional"
+      ],
+      "legal_next_action_relationships": [
+        "enables_approve_book_intent"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "library_scope_id": "__book_intents__",
+        "canonical_book_created": false,
+        "truth_note": "This formalizes an author-only seed; it does not create a canonical book workspace.",
+        "workflow_family": "book_intent"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.draft_scene_setting_projection",
+      "human_label": "Draft setting/background projection for one scene",
+      "unit_type": "projection_skill",
+      "capability_type": "artifact",
+      "implementation_status": "implemented",
+      "action_key": "draft_scene_setting_projection",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "scene",
+        "setting",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "provisional_branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "projection_layers",
+      "produced_artifact_statuses": [
+        "provisional"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.draft_starter_outline_from_intent",
+      "human_label": "Author thin starter outline artifacts from a created BookIntent",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "draft_starter_outline_from_intent",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "book"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "main_only",
+      "mutation_class": "canonical_mutation",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "outline",
+      "produced_artifact_statuses": [
+        "authoritative",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [
+        "enables_initialize_section_workflow"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "source": "book_intent",
+        "provider_used": true,
+        "provider_call_count_per_request": 1,
+        "calls_outline_provider": true,
+        "deep_outline_pipeline": false,
+        "starter_not_deep_outline": true,
+        "purpose": "Create enough authored outline shape for workflow init and adaptive scene traversal without running the full deep outline pipeline.",
+        "does_not_initialize_workflow": true,
+        "does_not_freeze_section": true,
+        "does_not_create_branch": true,
+        "does_not_write_prose": true,
+        "writes": [
+          "workspace/books/<book_id>/outline/pipeline_runs/<run_id>/outline_spine_v1.json",
+          "workspace/books/<book_id>/outline/pipeline_runs/<run_id>/outline_sections_v1.json",
+          "workspace/books/<book_id>/outline/pipeline_runs/<run_id>/outline_final_v1_1.json",
+          "workspace/books/<book_id>/outline/pipeline_runs/<run_id>/outline_pipeline_report.json",
+          "workspace/books/<book_id>/outline/pipeline_latest.json"
+        ],
+        "next_recommended_action": "initialize_section_workflow",
+        "follow_on_sequence": [
+          "initialize_section_workflow",
+          "freeze_section_from_phase03_artifact",
+          "create_branch",
+          "continue_scene"
+        ],
+        "follow_on_sequence_policy": "Informational only; callers must re-query legal actions and readiness before every follow-on step.",
+        "workflow_family": "thin_outline"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.extract_scene_setting_from_prose",
+      "human_label": "Extract setting/background projection from prose",
+      "unit_type": "projection_skill",
+      "capability_type": "artifact",
+      "implementation_status": "implemented",
+      "action_key": "extract_scene_setting_from_prose",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "scene",
+        "setting",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "provisional_branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "projection_layers",
+      "produced_artifact_statuses": [
+        "derived"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.finalize_chapter_from_locked_sections",
+      "human_label": "Finalize a chapter from locked sections",
+      "unit_type": "macro_workflow",
+      "capability_type": "macro",
+      "implementation_status": "implemented",
+      "action_key": "finalize_chapter_from_locked_sections",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "chapter"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "authoritative",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [
+        "pairwise_scene_seam_repair",
+        "chapter_seam_audit"
+      ],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "child_actions_include_internal_unprojected_work": true,
+        "dynamic_mutation_scope": "canonical on main; branch_authoritative on derived branches",
+        "canonical_change_requires_main": true,
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.freeze_section_from_phase03_artifact",
+      "human_label": "Freeze one section from a phase-03 outline artifact",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "freeze_section_from_phase03_artifact",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "section"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "section"
+      ],
+      "branch_policy": "main_only",
+      "mutation_class": "canonical_mutation",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "outline",
+      "produced_artifact_statuses": [
+        "authoritative",
+        "derived"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "does_not_call_provider": true,
+        "freezes_one_section_only": true,
+        "does_not_create_branch": true,
+        "does_not_write_prose": true,
+        "next_recommended_action": "create_branch",
+        "workflow_family": "section_local_outline"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.generate_continuity_pack",
+      "human_label": "Generate one scene continuity pack",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "generate_continuity_pack",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "scene",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "diagnostic_only",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "derived"
+      ],
+      "legal_next_action_relationships": [
+        "enables_write_scene_prose"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.generate_visual_asset",
+      "human_label": "Generate a visual asset from a prompt plan",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "generate_visual_asset",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "book",
+        "author",
+        "branch",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "details.prompt_plan_path",
+        "details.allow_spend"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "provisional_branch_mutation",
+      "approval_required": true,
+      "readiness_source": "visual_action_readiness",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "visual_assets",
+      "produced_artifact_statuses": [
+        "provisional",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [
+        "requires_plan_visual_asset"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "default_provider_model": "nano-banana",
+        "default_model_id": "gemini-2.5-flash-image",
+        "option_provider_models": [
+          "nano-banana",
+          "gpt-image-2",
+          "dall-e-3",
+          "grok-imagine-image"
+        ],
+        "spend_guard": "requires explicit allow_spend=true",
+        "workflow_family": "visual_assets"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.initialize_section_workflow",
+      "human_label": "Initialize section-local workflow state",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "initialize_section_workflow",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "book"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "main_only",
+      "mutation_class": "canonical_mutation",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "outline",
+      "produced_artifact_statuses": [
+        "authoritative",
+        "derived"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "does_not_call_provider": true,
+        "does_not_freeze_section": true,
+        "does_not_create_branch": true,
+        "does_not_write_prose": true,
+        "next_recommended_action": "freeze_section_from_phase03_artifact",
+        "workflow_family": "section_local_outline"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.invalidate_scope_outputs",
+      "human_label": "Invalidate generated outputs for affected recovery scope",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "invalidate_scope_outputs",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "branch",
+        "chapter",
+        "section",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "derived_only",
+      "mutation_class": "branch_mutation",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "recovery",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "recovery_import"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.lint_scene_prose",
+      "human_label": "Lint one scene prose artifact",
+      "unit_type": "validation_gate",
+      "capability_type": "diagnostic",
+      "implementation_status": "implemented",
+      "action_key": "lint_scene_prose",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "scene",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "diagnostic_only",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [
+        "enables_apply_scene_commit_or_repair_scene_prose"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.lock_section_from_written_state",
+      "human_label": "Lock a written section",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "lock_section_from_written_state",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "section"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "section"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "authoritative"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "dynamic_mutation_scope": "canonical on main; branch_authoritative on derived branches",
+        "canonical_change_requires_main": true,
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.normalize_outline_scope",
+      "human_label": "Normalize affected outline scope in a recovery branch",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "normalize_outline_scope",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "branch",
+        "chapter",
+        "section"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "derived_only",
+      "mutation_class": "branch_mutation",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "recovery",
+      "produced_artifact_statuses": [
+        "authoritative",
+        "derived",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "recovery_import"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.plan_bridge_scene_insertion",
+      "human_label": "Plan an adaptive bridge scene insertion",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "plan_bridge_scene_insertion",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "scene_pair",
+        "chapter",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "derived_only",
+      "mutation_class": "provisional_branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "provisional"
+      ],
+      "legal_next_action_relationships": [
+        "precedes_apply_bridge_scene_insertion"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "proposal_only": true,
+        "does_not_modify_outline_or_prose": true,
+        "followup_action": "apply_bridge_scene_insertion",
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.plan_scene",
+      "human_label": "Plan one scene without downstream execution",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "plan_scene",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "scene",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "provisional_branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "provisional"
+      ],
+      "legal_next_action_relationships": [
+        "enables_preflight_scene_state"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.plan_visual_asset",
+      "human_label": "Plan a visual asset prompt package",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "plan_visual_asset",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "book",
+        "author",
+        "branch",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "details.prompt_text"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "provisional_branch_mutation",
+      "approval_required": false,
+      "readiness_source": "visual_action_readiness",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "visual_assets",
+      "produced_artifact_statuses": [
+        "provisional"
+      ],
+      "legal_next_action_relationships": [
+        "enables_visual_generation"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "default_provider_model": "nano-banana",
+        "default_model_id": "gemini-2.5-flash-image",
+        "option_provider_models": [
+          "nano-banana",
+          "gpt-image-2",
+          "dall-e-3",
+          "grok-imagine-image"
+        ],
+        "workflow_family": "visual_assets"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.preflight_scene_state",
+      "human_label": "Preflight one scene state patch",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "preflight_scene_state",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "scene",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "provisional_branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "provisional"
+      ],
+      "legal_next_action_relationships": [
+        "enables_generate_continuity_pack"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.promote_branch_to_main",
+      "human_label": "Promote a branch to main",
+      "unit_type": "promotion_action",
+      "capability_type": "promotion",
+      "implementation_status": "implemented",
+      "action_key": "promote_branch_to_main",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "derived_only",
+      "mutation_class": "promotion",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "branching",
+      "produced_artifact_statuses": [
+        "authoritative",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.promote_recovery_branch",
+      "human_label": "Promote a validated recovery branch with removals",
+      "unit_type": "promotion_action",
+      "capability_type": "promotion",
+      "implementation_status": "implemented",
+      "action_key": "promote_recovery_branch",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "derived_only",
+      "mutation_class": "promotion",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "recovery",
+      "produced_artifact_statuses": [
+        "authoritative",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "recovery_import"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.quarantine_artifacts",
+      "human_label": "Quarantine stale recovery artifacts",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "quarantine_artifacts",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "branch",
+        "recovery_candidate"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "derived_only",
+      "mutation_class": "branch_mutation",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "recovery",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "recovery_import"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.rebuild_state_scope",
+      "human_label": "Rebuild branch-local state and projections",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "rebuild_state_scope",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "branch",
+        "chapter",
+        "section"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "derived_only",
+      "mutation_class": "branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "recovery",
+      "produced_artifact_statuses": [
+        "derived",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "recovery_import"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.record_assembly_validation",
+      "human_label": "Record assembly validation result",
+      "unit_type": "validation_gate",
+      "capability_type": "diagnostic",
+      "implementation_status": "implemented",
+      "action_key": "record_assembly_validation",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "branch",
+        "fork_group"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "derived_only",
+      "mutation_class": "diagnostic_only",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "branching",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.redraft_scope",
+      "human_label": "Redraft affected recovery scope",
+      "unit_type": "macro_workflow",
+      "capability_type": "macro",
+      "implementation_status": "implemented",
+      "action_key": "redraft_scope",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "branch",
+        "chapter",
+        "section",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "derived_only",
+      "mutation_class": "branch_mutation",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "recovery",
+      "produced_artifact_statuses": [
+        "provisional",
+        "authoritative",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [
+        "write_frozen_section",
+        "plan_scene",
+        "write_scene_prose",
+        "lint_scene_prose",
+        "apply_scene_commit"
+      ],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "recovery_import"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.refine_author",
+      "human_label": "Refine an author persona into a new version",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "refine_author",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "author"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "details.author_ref",
+        "details.instructions_or_prompt"
+      ],
+      "branch_policy": "main_only",
+      "mutation_class": "canonical_mutation",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "author_assets",
+      "produced_artifact_statuses": [
+        "authoritative"
+      ],
+      "legal_next_action_relationships": [
+        "creates_successor_author_version"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "library_scope_id": "__author_library__",
+        "versioned": true,
+        "overwrite_behavior": "creates_new_version",
+        "workflow_family": "author_assets"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.refresh_character_appearance_projection",
+      "human_label": "Refresh character appearance projection for one scene",
+      "unit_type": "projection_skill",
+      "capability_type": "artifact",
+      "implementation_status": "implemented",
+      "action_key": "refresh_character_appearance_projection",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "scene",
+        "character",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "provisional_branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "projection_layers",
+      "produced_artifact_statuses": [
+        "derived",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.repair_scene_prose",
+      "human_label": "Repair one scene prose artifact",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "repair_scene_prose",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "scene",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "provisional_branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "provisional"
+      ],
+      "legal_next_action_relationships": [
+        "returns_to_state_repair_scene_patch"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.resume_paused_section",
+      "human_label": "Resume a paused main-branch section",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "resume_paused_section",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "book",
+        "section"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "main_only",
+      "mutation_class": "canonical_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "authoritative",
+        "provisional",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.review_downstream_dependencies",
+      "human_label": "Review downstream recovery dependencies",
+      "unit_type": "validation_gate",
+      "capability_type": "diagnostic",
+      "implementation_status": "implemented",
+      "action_key": "review_downstream_dependencies",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "derived_only",
+      "mutation_class": "diagnostic_only",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "recovery",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "recovery_import"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.review_recovery_semantics",
+      "human_label": "Review recovery semantic health",
+      "unit_type": "validation_gate",
+      "capability_type": "diagnostic",
+      "implementation_status": "implemented",
+      "action_key": "review_recovery_semantics",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "derived_only",
+      "mutation_class": "diagnostic_only",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "recovery",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "recovery_import"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.state_repair_scene_patch",
+      "human_label": "Repair one scene state patch",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "state_repair_scene_patch",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "scene",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "provisional_branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "provisional"
+      ],
+      "legal_next_action_relationships": [
+        "enables_lint_scene_prose"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.validate_recovery_branch",
+      "human_label": "Validate recovery branch health",
+      "unit_type": "validation_gate",
+      "capability_type": "diagnostic",
+      "implementation_status": "implemented",
+      "action_key": "validate_recovery_branch",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "derived_only",
+      "mutation_class": "diagnostic_only",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "recovery",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "recovery_import"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.write_frozen_section",
+      "human_label": "Write a frozen section as a macro workflow",
+      "unit_type": "macro_workflow",
+      "capability_type": "macro",
+      "implementation_status": "implemented",
+      "action_key": "write_frozen_section",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "section",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "section"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "canonical_mutation",
+      "approval_required": true,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "provisional",
+        "authoritative"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [
+        "plan_scene",
+        "preflight_scene_state",
+        "generate_continuity_pack",
+        "write_scene_prose",
+        "state_repair_scene_patch",
+        "lint_scene_prose",
+        "repair_scene_prose",
+        "apply_scene_commit"
+      ],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "approval_class": "section_macro",
+        "macro_not_rail": true,
+        "broad_macro": true,
+        "preferred_single_scene_action": "continue_scene",
+        "not_for_single_scene_requests": true,
+        "runs_until": "selected frozen section terminal scene",
+        "step_count_per_call": "all missing scenes in the selected frozen section",
+        "may_execute_multiple_scene_phase_children": true,
+        "refresh_required_before_invocation": true,
+        "branch_local_when_branch_id_is_derived": true,
+        "canonical_change_requires_main": true,
+        "truth_note": "This is a compatibility section macro around runner.run_section_range. It may plan, write, repair, lint, and commit every missing scene in the selected frozen section. Use continue_scene for adaptive one-step scene traversal.",
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "action.write_scene_prose",
+      "human_label": "Write one scene prose artifact",
+      "unit_type": "primitive_action",
+      "capability_type": "action",
+      "implementation_status": "implemented",
+      "action_key": "write_scene_prose",
+      "query_key": null,
+      "supported_scope_kinds": [
+        "scene",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "provisional_branch_mutation",
+      "approval_required": false,
+      "readiness_source": "list_execution_options",
+      "expected_receipt_type": "execution_result_v1",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "provisional"
+      ],
+      "legal_next_action_relationships": [
+        "enables_state_repair_scene_patch"
+      ],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "dynamic_readiness_refusal",
+        "refusal_reason_codes": [
+          "not_ready",
+          "scope_mismatch",
+          "lineage_blocked"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        },
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "cli",
+          "reference": "bookforge workflow legal-actions",
+          "note": null
+        }
+      ],
+      "details": {
+        "workflow_family": "section_write"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.author_profiles",
+      "human_label": "Author profile library",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "author_profiles",
+      "supported_scope_kinds": [
+        "library",
+        "author",
+        "book"
+      ],
+      "required_selector_shape": [],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "author_assets",
+      "produced_artifact_statuses": [
+        "authoritative"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.authors:list_author_profiles",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.author_profile",
+      "human_label": "Rich author voice and style profile",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "author_profile",
+      "supported_scope_kinds": [
+        "author",
+        "book"
+      ],
+      "required_selector_shape": [
+        "author_ref"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "author_assets",
+      "produced_artifact_statuses": [
+        "authoritative"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.authors:get_author_profile",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.book_intents",
+      "human_label": "Book intent library",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "book_intents",
+      "supported_scope_kinds": [
+        "library",
+        "book_seed",
+        "book"
+      ],
+      "required_selector_shape": [],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "book_intent",
+      "produced_artifact_statuses": [
+        "provisional",
+        "authoritative"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.book_intent:list_book_intents",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.book_intent",
+      "human_label": "Versioned book intent and synopsis surface",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "book_intent",
+      "supported_scope_kinds": [
+        "book_seed",
+        "book"
+      ],
+      "required_selector_shape": [
+        "intent_ref"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "book_intent",
+      "produced_artifact_statuses": [
+        "provisional",
+        "authoritative"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.book_intent:get_book_intent",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.book_cards",
+      "human_label": "Book library card index",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "book_cards",
+      "supported_scope_kinds": [
+        "library",
+        "book"
+      ],
+      "required_selector_shape": [],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "engine",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.books:list_book_cards",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.workspace_status",
+      "human_label": "Workspace status",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "workspace_status",
+      "supported_scope_kinds": [
+        "book",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "diagnostics",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.workspace:get_workspace_status",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.workflow_snapshot",
+      "human_label": "Workflow snapshot",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "workflow_snapshot",
+      "supported_scope_kinds": [
+        "book",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "diagnostics",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.workflow:get_workflow_snapshot",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.next_writing_target",
+      "human_label": "Next writing target",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "next_writing_target",
+      "supported_scope_kinds": [
+        "book",
+        "branch",
+        "chapter",
+        "section",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.writing:get_next_writing_target",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.writing_bootstrap_status",
+      "human_label": "Writing bootstrap status",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "writing_bootstrap_status",
+      "supported_scope_kinds": [
+        "book",
+        "branch",
+        "chapter",
+        "section",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.writing_bootstrap:get_writing_bootstrap_status",
+          "note": null
+        }
+      ],
+      "details": {
+        "truth_note": "Read-only bridge from created BookIntent to branch-local writing. It reports the next valid setup or writing action without calling providers or mutating artifacts.",
+        "expected_sequence": [
+          "draft_starter_outline_from_intent",
+          "initialize_section_workflow",
+          "freeze_section_from_phase03_artifact",
+          "create_branch",
+          "continue_scene"
+        ],
+        "integrity_policy": "Blocks writing bootstrap on chimera_risk and points callers to lineage/recovery diagnostics."
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.author_loop_envelopes",
+      "human_label": "Author work loop envelopes",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "author_loop_envelopes",
+      "supported_scope_kinds": [
+        "book",
+        "branch",
+        "chapter",
+        "section",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.author_loop:get_author_loop_envelopes",
+          "note": null
+        }
+      ],
+      "details": {
+        "static_dynamic_boundary": "Envelope support must be paired with readiness/legal action queries before execution.",
+        "refresh_required_between_steps": true,
+        "refresh_query_order": [
+          "branch_detail",
+          "branch_artifact_index",
+          "branch_diff_summary",
+          "book_reader_scene",
+          "next_writing_target",
+          "writing_gate_status",
+          "scene_phase_readiness",
+          "legal_actions"
+        ],
+        "cancellation_policy": "Cancel stops scheduling new child actions; branch-local artifacts from completed child actions remain."
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.chapter_seam_queue",
+      "human_label": "Chapter scene-pair seam queue",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "chapter_seam_queue",
+      "supported_scope_kinds": [
+        "chapter",
+        "scene_pair",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.seams:get_chapter_seam_queue",
+          "note": null
+        }
+      ],
+      "details": {
+        "truth_note": "Lists adjacent outline scene pairs and reports whether pairwise seam alignment is ready, blocked, or already aligned for the selected branch.",
+        "action_bridge": "Ready items map to action.align_scene_pair_seam."
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.scene_pair_seam_detail",
+      "human_label": "Scene-pair seam report detail",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "scene_pair_seam_detail",
+      "supported_scope_kinds": [
+        "scene_pair",
+        "chapter",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "details.scene_a_id",
+        "details.scene_b_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.seams:get_scene_pair_seam_detail",
+          "note": null
+        }
+      ],
+      "details": {
+        "truth_note": "Shows focused readiness/report evidence for one adjacent scene pair without mutating prose.",
+        "report_policy": "Can include the full pair seam report payload or a summary-only projection."
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.branch_inventory",
+      "human_label": "Branch and fork-group inventory",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "branch_inventory",
+      "supported_scope_kinds": [
+        "book",
+        "branch",
+        "fork_group"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "branching",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.branches:get_branch_inventory",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.branch_detail",
+      "human_label": "Branch workbench detail view",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "branch_detail",
+      "supported_scope_kinds": [
+        "branch",
+        "chapter",
+        "section",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "branching",
+      "produced_artifact_statuses": [
+        "diagnostic",
+        "authoritative",
+        "provisional",
+        "derived"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.branches:get_branch_detail",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.branch_artifact_index",
+      "human_label": "Branch artifact index",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "branch_artifact_index",
+      "supported_scope_kinds": [
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "branching",
+      "produced_artifact_statuses": [
+        "diagnostic",
+        "authoritative",
+        "provisional",
+        "derived"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.branches:get_branch_artifact_index",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.branch_diff_summary",
+      "human_label": "Branch diff summary",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "branch_diff_summary",
+      "supported_scope_kinds": [
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "branching",
+      "produced_artifact_statuses": [
+        "diagnostic",
+        "authoritative",
+        "provisional",
+        "derived"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.branches:get_branch_diff_summary",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.book_reader_index",
+      "human_label": "Canonical reader index",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "book_reader_index",
+      "supported_scope_kinds": [
+        "book",
+        "chapter",
+        "section",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "reader_output",
+      "produced_artifact_statuses": [
+        "authoritative",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.reader:get_book_reader_index",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.book_reader_chapter",
+      "human_label": "Canonical reader chapter view",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "book_reader_chapter",
+      "supported_scope_kinds": [
+        "chapter"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "reader_output",
+      "produced_artifact_statuses": [
+        "authoritative",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.reader:get_book_reader_chapter",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.book_reader_scene",
+      "human_label": "Canonical reader scene view",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "book_reader_scene",
+      "supported_scope_kinds": [
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "reader_output",
+      "produced_artifact_statuses": [
+        "authoritative",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.reader:get_book_reader_scene",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.book_reader_anchor",
+      "human_label": "Mutation-safe prose selection anchor",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "book_reader_anchor",
+      "supported_scope_kinds": [
+        "chapter",
+        "scene",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene",
+        "details.start_offset",
+        "details.end_offset"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "reader_output",
+      "produced_artifact_statuses": [
+        "authoritative",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.reader:get_book_reader_anchor",
+          "note": null
+        }
+      ],
+      "details": {
+        "truth_note": "A reader anchor proves source path, hashes, selected span, branch scope, and whether the selection is safe to use as a mutation target.",
+        "mutation_note": "Scene anchors can target branch-local rewrite tools. Chapter anchors are inspect-only until narrowed to a scene."
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.integrity_verdict",
+      "human_label": "Integrity verdict",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "integrity_verdict",
+      "supported_scope_kinds": [
+        "book"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "diagnostics",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.integrity:get_integrity_verdict",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.outline_lineage_audit",
+      "human_label": "Outline lineage audit",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "outline_lineage_audit",
+      "supported_scope_kinds": [
+        "book",
+        "chapter",
+        "section"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "outline",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.outline_lineage:get_outline_lineage_audit",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.section_lineage_matrix",
+      "human_label": "Section lineage matrix",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "section_lineage_matrix",
+      "supported_scope_kinds": [
+        "book",
+        "chapter",
+        "section"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "outline",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.outline_lineage:get_section_lineage_matrix",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.stale_outline_artifact_inventory",
+      "human_label": "Stale outline artifact inventory",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "stale_outline_artifact_inventory",
+      "supported_scope_kinds": [
+        "book"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "outline",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.outline_lineage:get_stale_outline_artifact_inventory",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.outline_repair_candidates",
+      "human_label": "Outline repair candidates",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "outline_repair_candidates",
+      "supported_scope_kinds": [
+        "book",
+        "chapter",
+        "section"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "outline",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.outline_lineage:get_outline_repair_candidates",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.recovery_anchor_candidates",
+      "human_label": "Recovery anchor candidates",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "recovery_anchor_candidates",
+      "supported_scope_kinds": [
+        "book",
+        "chapter",
+        "section"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "recovery",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.recovery:get_recovery_anchor_candidates",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.recovery_plan_preview",
+      "human_label": "Recovery plan preview",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "recovery_plan_preview",
+      "supported_scope_kinds": [
+        "book",
+        "chapter",
+        "section"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "recovery",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.recovery:get_recovery_plan_preview",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.recovery_branch_health",
+      "human_label": "Recovery branch health",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "recovery_branch_health",
+      "supported_scope_kinds": [
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "recovery",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.recovery:get_recovery_branch_health",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.recovery_blast_radius",
+      "human_label": "Recovery blast radius",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "recovery_blast_radius",
+      "supported_scope_kinds": [
+        "branch",
+        "chapter",
+        "section"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "recovery",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.recovery:get_recovery_blast_radius",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.scope_invalidation_preview",
+      "human_label": "Scope invalidation preview",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "scope_invalidation_preview",
+      "supported_scope_kinds": [
+        "branch",
+        "chapter",
+        "section",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "engine",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.recovery:get_scope_invalidation_preview",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.state_rebuild_preview",
+      "human_label": "State rebuild preview",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "state_rebuild_preview",
+      "supported_scope_kinds": [
+        "branch",
+        "chapter",
+        "section"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "engine",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.recovery:get_state_rebuild_preview",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.salvage_candidates",
+      "human_label": "Salvage candidates",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "salvage_candidates",
+      "supported_scope_kinds": [
+        "branch",
+        "chapter",
+        "section",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "engine",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.recovery:get_salvage_candidates",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.character_views",
+      "human_label": "Character projection views",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "character_views",
+      "supported_scope_kinds": [
+        "book",
+        "chapter",
+        "section",
+        "scene",
+        "character"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "engine",
+      "produced_artifact_statuses": [
+        "derived"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.characters:list_character_views",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.continuity_view",
+      "human_label": "Continuity projection view",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "continuity_view",
+      "supported_scope_kinds": [
+        "book",
+        "chapter",
+        "section",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "diagnostics",
+      "produced_artifact_statuses": [
+        "derived"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.continuity:get_continuity_view",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.appearance_projection_views",
+      "human_label": "Appearance projection views",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "appearance_projection_views",
+      "supported_scope_kinds": [
+        "book",
+        "chapter",
+        "section",
+        "scene",
+        "character"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "projection_layers",
+      "produced_artifact_statuses": [
+        "derived"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.appearance:list_appearance_projection_views",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.scene_setting_projection",
+      "human_label": "Scene setting projection",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "scene_setting_projection",
+      "supported_scope_kinds": [
+        "scene",
+        "setting"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "projection_layers",
+      "produced_artifact_statuses": [
+        "derived",
+        "provisional"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.setting:get_scene_setting_projection",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.scene_context_projection",
+      "human_label": "Scene context projection",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "scene_context_projection",
+      "supported_scope_kinds": [
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "projection_layers",
+      "produced_artifact_statuses": [
+        "derived"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.scene_context:get_scene_context_projection",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.thought_context_projection",
+      "human_label": "Thought context projection",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "thought_context_projection",
+      "supported_scope_kinds": [
+        "book",
+        "chapter",
+        "section",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "projection_layers",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.thought_context:get_thought_context_projection",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.visual_provider_descriptors",
+      "human_label": "Visual provider descriptors",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "visual_provider_descriptors",
+      "supported_scope_kinds": [
+        "library",
+        "book",
+        "author"
+      ],
+      "required_selector_shape": [],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "visual_assets",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.visual:list_visual_provider_descriptors",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.visual_asset_index",
+      "human_label": "Visual prompt-plan and generated-asset index",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "visual_asset_index",
+      "supported_scope_kinds": [
+        "book",
+        "author",
+        "branch",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "visual_assets",
+      "produced_artifact_statuses": [
+        "provisional",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.visual:get_visual_asset_index",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.visual_asset_detail",
+      "human_label": "Visual generated-asset detail with manifest and prompt-plan source",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "visual_asset_detail",
+      "supported_scope_kinds": [
+        "book",
+        "author",
+        "branch",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "details.asset_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "visual_assets",
+      "produced_artifact_statuses": [
+        "provisional",
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.visual:get_visual_asset_detail",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "query.visual_prompt_plan_detail",
+      "human_label": "Visual prompt-plan detail",
+      "unit_type": "query",
+      "capability_type": "query",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "visual_prompt_plan_detail",
+      "supported_scope_kinds": [
+        "book",
+        "author",
+        "branch",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "details.prompt_plan_ref"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": null,
+      "expected_receipt_type": "query_result",
+      "process_area": "visual_assets",
+      "produced_artifact_statuses": [
+        "provisional"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "query_refusal",
+        "refusal_reason_codes": [
+          "missing_scope",
+          "missing_artifact"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.visual:get_visual_prompt_plan_detail",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "readiness.legal_next_actions",
+      "human_label": "Legal next actions",
+      "unit_type": "readiness",
+      "capability_type": "readiness",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "legal_next_actions",
+      "supported_scope_kinds": [
+        "book",
+        "chapter",
+        "section",
+        "scene",
+        "branch",
+        "fork_group"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": "legal_next_actions",
+      "expected_receipt_type": "readiness_result",
+      "process_area": "engine",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "readiness_refusal",
+        "refusal_reason_codes": [
+          "missing_prerequisite",
+          "scope_mismatch",
+          "artifact_missing"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.actions:list_execution_options",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "readiness.scene_phase_readiness",
+      "human_label": "Scene phase readiness",
+      "unit_type": "readiness",
+      "capability_type": "readiness",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "scene_phase_readiness",
+      "supported_scope_kinds": [
+        "scene",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "chapter",
+        "scene"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": "scene_phase_readiness",
+      "expected_receipt_type": "readiness_result",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "readiness_refusal",
+        "refusal_reason_codes": [
+          "missing_prerequisite",
+          "scope_mismatch",
+          "artifact_missing"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.scene_phase:get_scene_phase_readiness",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "readiness.writing_gate_status",
+      "human_label": "Writing gate status",
+      "unit_type": "readiness",
+      "capability_type": "readiness",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "writing_gate_status",
+      "supported_scope_kinds": [
+        "book",
+        "branch",
+        "chapter",
+        "section",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": "writing_gate_status",
+      "expected_receipt_type": "readiness_result",
+      "process_area": "writing",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "readiness_refusal",
+        "refusal_reason_codes": [
+          "missing_prerequisite",
+          "scope_mismatch",
+          "artifact_missing"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.writing:get_writing_gate_status",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "readiness.recovery_plan_readiness",
+      "human_label": "Recovery plan readiness",
+      "unit_type": "readiness",
+      "capability_type": "readiness",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "recovery_plan_readiness",
+      "supported_scope_kinds": [
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": "recovery_plan_readiness",
+      "expected_receipt_type": "readiness_result",
+      "process_area": "recovery",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "readiness_refusal",
+        "refusal_reason_codes": [
+          "missing_prerequisite",
+          "scope_mismatch",
+          "artifact_missing"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.recovery:get_recovery_plan_readiness",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "readiness.recovery_semantic_review_readiness",
+      "human_label": "Recovery semantic review readiness",
+      "unit_type": "readiness",
+      "capability_type": "readiness",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "recovery_semantic_review_readiness",
+      "supported_scope_kinds": [
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "branch_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": "recovery_semantic_review_readiness",
+      "expected_receipt_type": "readiness_result",
+      "process_area": "recovery",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "readiness_refusal",
+        "refusal_reason_codes": [
+          "missing_prerequisite",
+          "scope_mismatch",
+          "artifact_missing"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.recovery:get_recovery_semantic_review_readiness",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "readiness.visual_action_readiness",
+      "human_label": "Visual action readiness",
+      "unit_type": "readiness",
+      "capability_type": "readiness",
+      "implementation_status": "implemented",
+      "action_key": null,
+      "query_key": "visual_action_readiness",
+      "supported_scope_kinds": [
+        "book",
+        "author",
+        "branch",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "details.visual_purpose"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": false,
+      "readiness_source": "visual_action_readiness",
+      "expected_receipt_type": "readiness_result",
+      "process_area": "visual_assets",
+      "produced_artifact_statuses": [
+        "diagnostic"
+      ],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "readiness_refusal",
+        "refusal_reason_codes": [
+          "missing_prerequisite",
+          "scope_mismatch",
+          "artifact_missing"
+        ],
+        "human_message": null
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "function",
+          "reference": "bookforge.query.visual:get_visual_action_readiness",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "gap.deep_state.inventory",
+      "human_label": "Deep state and inventory projection layer",
+      "unit_type": "query",
+      "capability_type": "gap",
+      "implementation_status": "designed_gap",
+      "action_key": null,
+      "query_key": null,
+      "supported_scope_kinds": [
+        "book",
+        "chapter",
+        "section",
+        "scene",
+        "character"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "read_only",
+      "approval_required": true,
+      "readiness_source": null,
+      "expected_receipt_type": null,
+      "process_area": "engine",
+      "produced_artifact_statuses": [],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "not_implemented",
+        "refusal_reason_codes": [
+          "designed_gap"
+        ],
+        "human_message": "This capability is intentionally surfaced as a planned gap, not an executable BookForge action."
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "plan",
+          "reference": "resources/plans/InProgress/bookforge-action-skill-projection-for-nanda",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "gap.compile_export_quality",
+      "human_label": "Compile/export and reader quality gate surface",
+      "unit_type": "macro_workflow",
+      "capability_type": "gap",
+      "implementation_status": "designed_gap",
+      "action_key": null,
+      "query_key": null,
+      "supported_scope_kinds": [
+        "book",
+        "chapter"
+      ],
+      "required_selector_shape": [
+        "book_id"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "diagnostic_only",
+      "approval_required": true,
+      "readiness_source": null,
+      "expected_receipt_type": null,
+      "process_area": "reader_output",
+      "produced_artifact_statuses": [],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "not_implemented",
+        "refusal_reason_codes": [
+          "designed_gap"
+        ],
+        "human_message": "This capability is intentionally surfaced as a planned gap, not an executable BookForge action."
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "plan",
+          "reference": "resources/plans/InProgress/bookforge-action-skill-projection-for-nanda",
+          "note": null
+        }
+      ],
+      "details": {}
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "gap.visual.reference_image_workflows",
+      "human_label": "Reference-image guided visual workflows",
+      "unit_type": "primitive_action",
+      "capability_type": "gap",
+      "implementation_status": "designed_gap",
+      "action_key": null,
+      "query_key": null,
+      "supported_scope_kinds": [
+        "author",
+        "character",
+        "book",
+        "scene"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "details.reference_image_refs"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "provisional_branch_mutation",
+      "approval_required": true,
+      "readiness_source": null,
+      "expected_receipt_type": null,
+      "process_area": "visual_assets",
+      "produced_artifact_statuses": [],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "not_implemented",
+        "refusal_reason_codes": [
+          "designed_gap"
+        ],
+        "human_message": "This capability is intentionally surfaced as a planned gap, not an executable BookForge action."
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "plan",
+          "reference": "resources/plans/InProgress/bookforge-action-skill-projection-for-nanda",
+          "note": null
+        }
+      ],
+      "details": {
+        "default_provider_model": "nano-banana"
+      }
+    },
+    {
+      "schema_version": "capability_descriptor_v1",
+      "capability_id": "gap.visual.compose_layers",
+      "human_label": "Compose visual layers from generated assets",
+      "unit_type": "primitive_action",
+      "capability_type": "gap",
+      "implementation_status": "designed_gap",
+      "action_key": null,
+      "query_key": null,
+      "supported_scope_kinds": [
+        "book",
+        "scene",
+        "branch"
+      ],
+      "required_selector_shape": [
+        "book_id",
+        "details.layer_manifest"
+      ],
+      "branch_policy": "any",
+      "mutation_class": "provisional_branch_mutation",
+      "approval_required": true,
+      "readiness_source": null,
+      "expected_receipt_type": null,
+      "process_area": "visual_assets",
+      "produced_artifact_statuses": [],
+      "legal_next_action_relationships": [],
+      "refusal_semantics": {
+        "schema_version": "capability_refusal_semantics_v1",
+        "refusal_mode": "not_implemented",
+        "refusal_reason_codes": [
+          "designed_gap"
+        ],
+        "human_message": "This capability is intentionally surfaced as a planned gap, not an executable BookForge action."
+      },
+      "child_actions": [],
+      "evidence_sources": [
+        {
+          "schema_version": "capability_evidence_source_v1",
+          "source_type": "plan",
+          "reference": "resources/plans/InProgress/bookforge-action-skill-projection-for-nanda",
+          "note": null
+        }
+      ],
+      "details": {}
+    }
+  ],
+  "details": {
+    "static_action_count": 44,
+    "observed_action_count": 0,
+    "unprojected_observed_actions": [],
+    "query_count": 42,
+    "readiness_count": 6,
+    "designed_gap_count": 4,
+    "scope_kinds": [
+      "author",
+      "book",
+      "book_seed",
+      "branch",
+      "chapter",
+      "character",
+      "fork_group",
+      "library",
+      "recovery_candidate",
+      "scene",
+      "scene_pair",
+      "section",
+      "setting"
+    ],
+    "process_areas": [
+      "author_assets",
+      "book_intent",
+      "branching",
+      "diagnostics",
+      "engine",
+      "outline",
+      "projection_layers",
+      "reader_output",
+      "recovery",
+      "visual_assets",
+      "writing"
+    ],
+    "static_dynamic_boundary": "Capability descriptors are static. Use readiness and legal-next-action queries for a selected scope."
+  }
+}

@@ -104,6 +104,10 @@ def _infer_main_family(
     if progress_phase in _WRITE_PHASES or pause_phase in _WRITE_PHASES:
         return "section_write"
     if outline_pause or _common.latest_outline_run_id(book_root):
+        latest_pointer = _common.read_json(_common.outline_root(book_root) / "pipeline_latest.json") or {}
+        latest_family = str(latest_pointer.get("workflow_family") or "").strip()
+        if latest_family in {"thin_outline", "deep_outline"}:
+            return latest_family
         return "deep_outline"
     return None
 

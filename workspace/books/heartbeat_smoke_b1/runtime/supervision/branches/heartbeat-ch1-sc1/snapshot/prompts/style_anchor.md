@@ -1,0 +1,1 @@
+Tight close third-person smoke style.

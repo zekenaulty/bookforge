@@ -1,0 +1,1 @@
+Rhea set her palm against the old latch. The metal gave with a tired click, and the door opened into the waiting dark.

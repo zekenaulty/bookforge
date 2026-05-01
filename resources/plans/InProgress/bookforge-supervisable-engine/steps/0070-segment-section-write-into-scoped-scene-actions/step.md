@@ -279,6 +279,7 @@ Status: completed
     - `apply_scene_commit(...)`
   - public surface exposure for the first slice:
     - `bookforge workflow scene-readiness`
+    - `bookforge workflow continue-scene`
     - `bookforge workflow plan-scene`
     - `bookforge workflow preflight-scene-state`
     - `bookforge workflow generate-continuity-pack`
@@ -288,6 +289,37 @@ Status: completed
     - `bookforge workflow repair-scene-prose`
     - `bookforge workflow apply-scene-commit`
     - `bookforge workflow legal-actions --scene <s>` now includes extracted scene actions such as `plan_scene`, `preflight_scene_state`, `generate_continuity_pack`, `write_scene_prose`, `state_repair_scene_patch`, `lint_scene_prose`, `repair_scene_prose`, and `apply_scene_commit` when scene scope is selected
+  - adaptive writing macro added 2026-04-28:
+    - `build_continue_scene_request(...)`
+    - `continue_scene(...)`
+    - `action.continue_scene` in capability projection
+    - `continue_scene` reads `ScenePhaseReadiness`, executes exactly one current `recommended_next_action`, and emits a wrapper `ExecutionResult` naming the child action/result plus before/after readiness context
+    - `continue_scene` also emits a nested `author_loop_step_receipt` with pre/post readiness refs, child action/result/request refs, produced artifact refs, `canonical_changed`, next recommended action, and stop reason
+    - this is intentionally a one-step graph traversal helper, not a hidden full-scene or full-section rail
+  - adaptive seam and bridge-planning slice added 2026-04-28:
+    - `bookforge.query.get_author_loop_envelopes(...)`
+    - `bookforge workflow author-loop-envelopes`
+    - `build_align_scene_pair_seam_request(...)`
+    - `align_scene_pair_seam_action(...)`
+    - `bookforge workflow align-scene-pair-seam`
+    - `build_plan_bridge_scene_insertion_request(...)`
+    - `plan_bridge_scene_insertion_action(...)`
+    - `bookforge workflow plan-bridge-scene-insertion`
+    - `build_apply_bridge_scene_insertion_request(...)`
+    - `apply_bridge_scene_insertion_action(...)`
+    - `bookforge workflow apply-bridge-scene-insertion`
+    - `bookforge.query.get_chapter_seam_queue(...)`
+    - `bookforge workflow chapter-seam-queue`
+    - `bookforge.query.get_scene_pair_seam_detail(...)`
+    - `bookforge workflow scene-pair-seam-detail`
+    - `align_scene_pair_seam` is derived-branch only and uses the existing LLM chapter seam repair prompt contract against one adjacent scene pair
+    - original branch-local scene prose is preserved as `.original`; fixed candidate/current artifacts and the pair seam report are emitted with explicit artifact statuses
+    - `plan_bridge_scene_insertion` is proposal-only: it writes provisional bridge-scene planning evidence and does not mutate outline order, renumber scenes, create a scene card, or write prose
+    - `apply_bridge_scene_insertion` consumes an existing bridge proposal, updates only the derived branch outline/registry/projections, shifts following integer scene artifacts, and leaves the inserted scene unwritten for normal scene-phase traversal
+    - `query.author_loop_envelopes` gives Nanda higher-level loop shapes (`continue_one_step`, `continue_scene`, `continue_section`, `continue_chapter`) without starting a long-running autonomous loop
+    - `query.chapter_seam_queue` gives Nanda a read-only chapter-level queue of adjacent scene pairs, including ready/blocked/aligned status and existing pair seam report evidence
+    - `query.scene_pair_seam_detail` gives Nanda a focused read-only inspector for one adjacent seam pair, including existing report payload/issue counts/artifact refs and next safe action
+    - first apply slice is intentionally same-section only; cross-section bridge insertion still requires a future ref-map/downstream validation expansion
   - guardrails on the continuity-pack slice:
     - emits the continuity pack as `derived`
     - applies safe preflight patch materialization only to an in-memory working state

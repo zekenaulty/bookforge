@@ -335,6 +335,8 @@ def test_recovery_branch_snapshots_evidence_and_exposes_legal_actions(tmp_path: 
     assert (branch_root / "outline" / "pipeline_runs" / "run_001" / "outline_final_v1_1.json").exists()
     assert (branch_root / "outline" / "section_drafts" / "ch_001_sec_001_phase03.json").exists()
     manifest = get_recovery_manifest(tmp_path, "my_book", branch_id="recover-sec1")
+    assert manifest["cleanliness_status"] == "isolated_not_clean"
+    assert "not clean until quarantine" in manifest["cleanliness_note"]
     assert manifest["scope"]["affected_scopes"] == [{"chapter_id": 1, "section_id": 1}]
     assert manifest["scope_output_ranges"]["ch_001_sec_001"]["scene_ids"] == [1, 2]
     manifest["scope"]["downstream_scopes"] = [{"chapter_id": 2, "section_id": 1}]

@@ -9,6 +9,9 @@ WorkflowFamily = Literal[
     "section_local_outline",
     "section_write",
     "recovery_import",
+    "author_assets",
+    "book_intent",
+    "visual_assets",
 ]
 
 ExecutionResultStatus = Literal[
@@ -41,14 +44,20 @@ WORKFLOW_FAMILIES: Final[tuple[str, ...]] = (
     "section_local_outline",
     "section_write",
     "recovery_import",
+    "author_assets",
+    "book_intent",
+    "visual_assets",
 )
 
 WORKFLOW_FAMILY_DESCRIPTIONS: Final[dict[str, str]] = {
-    "thin_outline": "Reserved thin-outline family. The public batch command is not exposed yet.",
+    "thin_outline": "Provider-authored starter/thin outline family rooted in immutable run artifacts, including BookIntent-derived starter outlines that are not full deep-outline pipeline runs.",
     "deep_outline": "Full batch outline pipeline rooted in immutable run artifacts under outline/pipeline_runs/<run_id>/.",
     "section_local_outline": "Section-scoped outline materialization and freeze work driven by workflow commands.",
     "section_write": "Scene planning, write, repair, state-repair, and lint execution for prose generation.",
     "recovery_import": "Explicit recovery/import work that may rebuild state from prior artifacts without pretending to be a same-family resume.",
+    "author_assets": "Versioned author persona creation and refinement under workspace/authors/.",
+    "book_intent": "Book intent, synopsis, seed approval, and canonical book workspace creation.",
+    "visual_assets": "Visual asset prompt planning, provider descriptor, and generated image artifact work.",
 }
 
 EXECUTION_RESULT_STATUSES: Final[tuple[str, ...]] = (

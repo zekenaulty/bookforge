@@ -1,14 +1,15 @@
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 import json
 
-from bookforge.contracts import MAIN_BRANCH_ID, RecoveryBranchHealth, RecoveryReceipt, RecoveryScope
+from bookforge.contracts import MAIN_BRANCH_ID, RecoveryAnchor, RecoveryBranchHealth, RecoveryReceipt, RecoveryScope
 from bookforge.supervision import paths as supervision_paths
 
 from . import _common
-from .outline_lineage import get_outline_lineage_audit
+from .outline_lineage import OutlineArtifactObservation, SectionLineageRow, get_outline_lineage_audit, get_section_lineage_matrix
 from .workspace import current_execution_node
 
 
@@ -18,6 +19,136 @@ RECOVERY_RECEIPTS_FILENAME = "recovery_receipts.jsonl"
 PROMOTION_REMOVALS_FILENAME = "promotion_removals.json"
 SEMANTIC_REVIEW_FILENAME = "recovery_semantic_review.json"
 DOWNSTREAM_REVIEW_FILENAME = "downstream_dependency_review.json"
+
+
+@dataclass(frozen=True, slots=True)
+class RecoveryAnchorCandidate:
+    candidate_id: str
+    anchor: RecoveryAnchor
+    label: str
+    description: str
+    trust_level: str
+    risk_level: str
+    selectable: bool
+    requires_human_decision: bool
+    auto_selectable: bool
+    affected_scopes: List[Dict[str, int]]
+    evidence_paths: List[str] = field(default_factory=list)
+    missing_scopes: List[Dict[str, int]] = field(default_factory=list)
+    differing_scopes: List[Dict[str, int]] = field(default_factory=list)
+    reasons: List[str] = field(default_factory=list)
+    schema_version: str = "recovery_anchor_candidate_v1"
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "schema_version": self.schema_version,
+            "candidate_id": self.candidate_id,
+            "anchor": self.anchor.to_dict(),
+            "label": self.label,
+            "description": self.description,
+            "trust_level": self.trust_level,
+            "risk_level": self.risk_level,
+            "selectable": self.selectable,
+            "requires_human_decision": self.requires_human_decision,
+            "auto_selectable": self.auto_selectable,
+            "affected_scopes": [dict(scope) for scope in self.affected_scopes],
+            "evidence_paths": list(self.evidence_paths),
+            "missing_scopes": [dict(scope) for scope in self.missing_scopes],
+            "differing_scopes": [dict(scope) for scope in self.differing_scopes],
+            "reasons": list(self.reasons),
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class RecoveryAnchorCandidateReport:
+    book_id: str
+    branch_id: str
+    status: str
+    affected_scopes: List[Dict[str, int]]
+    candidates: List[RecoveryAnchorCandidate]
+    recommended_candidate_id: Optional[str]
+    auto_selected_candidate_id: Optional[str]
+    human_decision_required: bool
+    decision_rule: str
+    warnings: List[str] = field(default_factory=list)
+    source: str = "bookforge.query.recovery.anchor_candidates.v1"
+    schema_version: str = "recovery_anchor_candidate_report_v1"
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "schema_version": self.schema_version,
+            "book_id": self.book_id,
+            "branch_id": self.branch_id,
+            "source": self.source,
+            "status": self.status,
+            "affected_scopes": [dict(scope) for scope in self.affected_scopes],
+            "candidates": [candidate.to_dict() for candidate in self.candidates],
+            "recommended_candidate_id": self.recommended_candidate_id,
+            "auto_selected_candidate_id": self.auto_selected_candidate_id,
+            "human_decision_required": self.human_decision_required,
+            "decision_rule": self.decision_rule,
+            "warnings": list(self.warnings),
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class RecoveryPlanStep:
+    order: int
+    action: str
+    summary: str
+    command: Optional[str]
+    mutation_class: str
+    approval_required: bool
+    expected_receipt: Optional[str]
+    status: str = "planned"
+    details: Dict[str, Any] = field(default_factory=dict)
+    schema_version: str = "recovery_plan_step_v1"
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "schema_version": self.schema_version,
+            "order": self.order,
+            "action": self.action,
+            "summary": self.summary,
+            "command": self.command,
+            "mutation_class": self.mutation_class,
+            "approval_required": self.approval_required,
+            "expected_receipt": self.expected_receipt,
+            "status": self.status,
+            "details": dict(self.details),
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class RecoveryPlanPreview:
+    book_id: str
+    branch_id: Optional[str]
+    status: str
+    selected_anchor: Optional[RecoveryAnchor]
+    affected_scopes: List[Dict[str, int]]
+    steps: List[RecoveryPlanStep]
+    blocked_reason: Optional[str]
+    anchor_report: RecoveryAnchorCandidateReport
+    approval_required: bool
+    warnings: List[str] = field(default_factory=list)
+    source: str = "bookforge.query.recovery.plan_preview.v1"
+    schema_version: str = "recovery_plan_preview_v1"
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "schema_version": self.schema_version,
+            "book_id": self.book_id,
+            "branch_id": self.branch_id,
+            "source": self.source,
+            "status": self.status,
+            "selected_anchor": self.selected_anchor.to_dict() if self.selected_anchor else None,
+            "affected_scopes": [dict(scope) for scope in self.affected_scopes],
+            "steps": [step.to_dict() for step in self.steps],
+            "blocked_reason": self.blocked_reason,
+            "anchor_report": self.anchor_report.to_dict(),
+            "approval_required": self.approval_required,
+            "warnings": list(self.warnings),
+        }
 
 
 def recovery_dir(book_root: Path, branch_id: str) -> Path:
@@ -88,6 +219,392 @@ def get_recovery_manifest(workspace: Path, book_id: str, *, branch_id: str) -> D
     if not resolved or resolved == MAIN_BRANCH_ID:
         return {}
     return _read_json(recovery_manifest_path(_book_root(workspace, book_id), resolved))
+
+
+def get_recovery_anchor_candidates(
+    workspace: Path,
+    book_id: str,
+    *,
+    branch_id: str = MAIN_BRANCH_ID,
+) -> RecoveryAnchorCandidateReport:
+    resolved_branch_id = str(branch_id or MAIN_BRANCH_ID).strip() or MAIN_BRANCH_ID
+    audit = get_outline_lineage_audit(workspace, book_id, branch_id=resolved_branch_id)
+    matrix = audit.section_matrix or get_section_lineage_matrix(workspace, book_id, branch_id=resolved_branch_id)
+    affected_rows = [row for row in matrix if row.suspected_contamination_class != "healthy"]
+    affected_scopes = [{"chapter_id": row.chapter_id, "section_id": row.section_id} for row in affected_rows]
+    candidates: List[RecoveryAnchorCandidate] = []
+    if not affected_rows:
+        candidates.append(
+            RecoveryAnchorCandidate(
+                candidate_id="inspect_only",
+                anchor=RecoveryAnchor(anchor_type="shelf", description="No recovery anchor required."),
+                label="No recovery required",
+                description="No contaminated outline scopes were detected.",
+                trust_level="high",
+                risk_level="low",
+                selectable=True,
+                requires_human_decision=False,
+                auto_selectable=True,
+                affected_scopes=[],
+                reasons=["outline lineage audit is healthy"],
+            )
+        )
+        return RecoveryAnchorCandidateReport(
+            book_id=book_id,
+            branch_id=resolved_branch_id,
+            status="healthy",
+            affected_scopes=[],
+            candidates=candidates,
+            recommended_candidate_id="inspect_only",
+            auto_selected_candidate_id="inspect_only",
+            human_decision_required=False,
+            decision_rule="No contaminated scopes were found; no recovery branch should be created.",
+        )
+
+    declared = _candidate_from_rows(
+        "declared_source_run",
+        label="Declared source run",
+        anchor=RecoveryAnchor(
+            anchor_type="declared_source_run",
+            source_run_id=audit.declared_source_run_id,
+            artifact_family="declared_source_run",
+            description="Use the immutable outline run declared by the workflow registry.",
+        ),
+        rows=affected_rows,
+        baseline_label="declared_source_run",
+    )
+    if declared:
+        candidates.append(declared)
+
+    if audit.latest_outline_run_id and audit.latest_outline_run_id != audit.declared_source_run_id:
+        latest = _candidate_from_rows(
+            "latest_outline_run",
+            label="Latest outline run",
+            anchor=RecoveryAnchor(
+                anchor_type="latest_outline_run",
+                source_run_id=audit.latest_outline_run_id,
+                artifact_family="latest_outline_run",
+                description="Use the latest immutable outline run present in the workspace.",
+            ),
+            rows=affected_rows,
+            baseline_label="declared_source_run",
+        )
+        if latest:
+            candidates.append(latest)
+
+    frozen = _candidate_from_rows(
+        "frozen_chapter_projection",
+        label="Frozen chapter projection",
+        anchor=RecoveryAnchor(
+            anchor_type="frozen_chapter_projection",
+            artifact_family="frozen_chapter_projection",
+            description="Use frozen chapter projections already materialized in the section workflow.",
+        ),
+        rows=affected_rows,
+        baseline_label="declared_source_run",
+    )
+    if frozen:
+        candidates.append(frozen)
+
+    selectable_non_shelf = [candidate for candidate in candidates if candidate.selectable and candidate.anchor.anchor_type != "shelf"]
+    manual = RecoveryAnchorCandidate(
+        candidate_id="manual_hybrid",
+        anchor=RecoveryAnchor(anchor_type="manual_hybrid", description="Human-selected hybrid timeline; BookForge will not auto-select this."),
+        label="Manual hybrid",
+        description="Use only when multiple coherent timelines contain material worth manually reconciling.",
+        trust_level="unknown",
+        risk_level="high",
+        selectable=True,
+        requires_human_decision=True,
+        auto_selectable=False,
+        affected_scopes=affected_scopes,
+        reasons=["manual hybrid requires explicit author/operator decision"],
+    )
+    shelf = RecoveryAnchorCandidate(
+        candidate_id="shelf",
+        anchor=RecoveryAnchor(anchor_type="shelf", description="Do not repair automatically."),
+        label="Shelf book",
+        description="Leave the book unchanged when no timeline anchor is trustworthy.",
+        trust_level="safe_no_mutation",
+        risk_level="low",
+        selectable=True,
+        requires_human_decision=True,
+        auto_selectable=False,
+        affected_scopes=affected_scopes,
+        reasons=["shelving avoids further canonical mutation"],
+    )
+    candidates.extend([manual, shelf])
+    recommended = _recommended_anchor_candidate(candidates)
+    auto_selected = _auto_selected_anchor_id(selectable_non_shelf)
+    manual_needed = auto_selected is None
+    return RecoveryAnchorCandidateReport(
+        book_id=book_id,
+        branch_id=resolved_branch_id,
+        status="auto_selected" if auto_selected else "needs_human_choice",
+        affected_scopes=affected_scopes,
+        candidates=candidates,
+        recommended_candidate_id=recommended.candidate_id if recommended else None,
+        auto_selected_candidate_id=auto_selected,
+        human_decision_required=manual_needed,
+        decision_rule=(
+            "Only one coherent non-shelf timeline is selectable; Nanda may auto-select it."
+            if auto_selected
+            else "Multiple or zero coherent non-shelf timeline anchors exist; Nanda must ask the user which timeline to inhabit."
+        ),
+        warnings=_anchor_warnings(audit, candidates),
+    )
+
+
+def get_recovery_plan_preview(
+    workspace: Path,
+    book_id: str,
+    *,
+    anchor_type: Optional[str] = None,
+    source_run_id: Optional[str] = None,
+    branch_id: Optional[str] = None,
+    salvage_policy: str = "none",
+) -> RecoveryPlanPreview:
+    report = get_recovery_anchor_candidates(workspace, book_id)
+    selected = _selected_anchor_from_report(report, anchor_type=anchor_type, source_run_id=source_run_id)
+    if selected is None:
+        return RecoveryPlanPreview(
+            book_id=book_id,
+            branch_id=branch_id,
+            status="needs_anchor_decision",
+            selected_anchor=None,
+            affected_scopes=report.affected_scopes,
+            steps=[],
+            blocked_reason="No recovery anchor was selected and BookForge could not auto-select exactly one safe non-shelf anchor.",
+            anchor_report=report,
+            approval_required=True,
+            warnings=list(report.warnings),
+        )
+    if selected.anchor_type == "shelf":
+        return RecoveryPlanPreview(
+            book_id=book_id,
+            branch_id=branch_id,
+            status="shelf_recommended",
+            selected_anchor=selected,
+            affected_scopes=report.affected_scopes,
+            steps=[
+                RecoveryPlanStep(
+                    order=1,
+                    action="shelf_book",
+                    summary="Do not mutate BookForge state. Keep the book quarantined for manual review.",
+                    command=None,
+                    mutation_class="no_op",
+                    approval_required=False,
+                    expected_receipt=None,
+                )
+            ],
+            blocked_reason=None,
+            anchor_report=report,
+            approval_required=False,
+            warnings=list(report.warnings),
+        )
+    branch_arg = branch_id or "<new-recovery-branch>"
+    affected_args = " ".join(f"--affected-scope {scope['chapter_id']}:{scope['section_id']}" for scope in report.affected_scopes)
+    source_arg = f" --source-run-id {selected.source_run_id}" if selected.source_run_id else ""
+    branch_opt = f" --branch-id {branch_id}" if branch_id else ""
+    create_command = (
+        f"bookforge workflow create-recovery-branch --book {book_id} --anchor-type {selected.anchor_type}"
+        f"{source_arg}{branch_opt} --salvage-policy {salvage_policy} {affected_args}".strip()
+    )
+    branch_initial_state = {
+        "cleanliness_status": "isolated_not_clean",
+        "note": (
+            "Branch creation snapshots current main and materializes outline evidence. "
+            "The selected anchor is recorded for later normalization; it is not applied by branch creation."
+        ),
+        "cleanup_required_before_clean": [
+            "quarantine_artifacts",
+            "normalize_outline_scope",
+            "invalidate_scope_outputs",
+            "rebuild_state_scope",
+            "redraft_scope",
+            "validate_recovery_branch",
+        ],
+    }
+    steps = [
+        RecoveryPlanStep(
+            1,
+            "create_recovery_branch",
+            "Create isolated recovery branch and record selected anchor; branch is not clean until later recovery steps complete.",
+            create_command,
+            "branch_mutation",
+            True,
+            "execution_result_v1",
+            details={"branch_initial_state": branch_initial_state},
+        ),
+        RecoveryPlanStep(2, "quarantine_artifacts", "Quarantine polluted/stale outline artifacts inside the recovery branch.", f"bookforge workflow quarantine-artifacts --book {book_id} --branch-id {branch_arg}", "branch_mutation", True, "recovery_receipt_v1"),
+        RecoveryPlanStep(3, "normalize_outline_scope", "Normalize affected outline scopes from the selected anchor.", f"bookforge workflow normalize-outline-scope --book {book_id} --branch-id {branch_arg}", "branch_mutation", True, "recovery_receipt_v1"),
+        RecoveryPlanStep(4, "invalidate_scope_outputs", "Invalidate prose/state/projection outputs made untrustworthy by the repaired outline.", f"bookforge workflow invalidate-scope-outputs --book {book_id} --branch-id {branch_arg}", "branch_mutation", True, "recovery_receipt_v1"),
+        RecoveryPlanStep(5, "rebuild_state_scope", "Rebuild branch-local state and projections for the repaired timeline.", f"bookforge workflow rebuild-state-scope --book {book_id} --branch-id {branch_arg}", "branch_mutation", False, "recovery_receipt_v1"),
+        RecoveryPlanStep(6, "redraft_scope", "Redraft impacted prose scopes against the normalized outline.", f"bookforge workflow redraft-scope --book {book_id} --branch-id {branch_arg}", "branch_mutation", True, "recovery_receipt_v1"),
+        RecoveryPlanStep(7, "review_recovery_semantics", "Run semantic recovery review before validation.", f"bookforge workflow review-recovery-semantics --book {book_id} --branch-id {branch_arg}", "diagnostic_only", False, "recovery_receipt_v1"),
+        RecoveryPlanStep(8, "review_downstream_dependencies", "Review downstream dependency risk after redraft.", f"bookforge workflow review-downstream-dependencies --book {book_id} --branch-id {branch_arg}", "diagnostic_only", False, "recovery_receipt_v1"),
+        RecoveryPlanStep(9, "validate_recovery_branch", "Validate branch health before promotion.", f"bookforge workflow validate-recovery-branch --book {book_id} --branch-id {branch_arg}", "diagnostic_only", False, "execution_result_v1"),
+        RecoveryPlanStep(10, "promote_recovery_branch", "Promote validated branch to main and apply recorded removals.", f"bookforge workflow promote-recovery-branch --book {book_id} --branch-id {branch_arg}", "promotion", True, "execution_result_v1"),
+    ]
+    return RecoveryPlanPreview(
+        book_id=book_id,
+        branch_id=branch_id,
+        status="ready",
+        selected_anchor=selected,
+        affected_scopes=report.affected_scopes,
+        steps=steps,
+        blocked_reason=None,
+        anchor_report=report,
+        approval_required=True,
+        warnings=list(report.warnings),
+    )
+
+
+def _scope_dict(row: SectionLineageRow) -> Dict[str, int]:
+    return {"chapter_id": int(row.chapter_id), "section_id": int(row.section_id)}
+
+
+def _observation(row: SectionLineageRow, label: str) -> Optional[OutlineArtifactObservation]:
+    return next((item for item in row.candidate_artifacts if item.label == label), None)
+
+
+def _candidate_from_rows(
+    candidate_id: str,
+    *,
+    label: str,
+    anchor: RecoveryAnchor,
+    rows: List[SectionLineageRow],
+    baseline_label: str,
+) -> Optional[RecoveryAnchorCandidate]:
+    if not rows:
+        return None
+    missing: List[Dict[str, int]] = []
+    differing: List[Dict[str, int]] = []
+    paths: List[str] = []
+    reasons: List[str] = []
+    for row in rows:
+        candidate = _observation(row, candidate_id)
+        baseline = _observation(row, baseline_label)
+        scope = _scope_dict(row)
+        if candidate is None or not candidate.exists or not candidate.section_hash:
+            missing.append(scope)
+            continue
+        if candidate.path:
+            paths.append(candidate.path)
+        if baseline and baseline.section_hash and candidate.section_hash != baseline.section_hash:
+            differing.append(scope)
+    selectable = not missing
+    if missing:
+        reasons.append(f"missing candidate data for {len(missing)} affected scope(s)")
+    if differing:
+        reasons.append(f"differs from declared source run in {len(differing)} affected scope(s)")
+    if selectable and not differing:
+        reasons.append("candidate matches declared source run for all affected scopes")
+    elif selectable:
+        reasons.append("candidate is complete but represents a different timeline than the declared source run")
+    trust = _candidate_trust(candidate_id, selectable=selectable, differing=differing)
+    risk = "low" if trust == "high" else "medium" if trust in {"medium", "complete_different_timeline"} else "high"
+    return RecoveryAnchorCandidate(
+        candidate_id=candidate_id,
+        anchor=anchor,
+        label=label,
+        description=anchor.description or label,
+        trust_level=trust,
+        risk_level=risk,
+        selectable=selectable,
+        requires_human_decision=bool(differing) or trust != "high",
+        auto_selectable=selectable and trust == "high",
+        affected_scopes=[_scope_dict(row) for row in rows],
+        evidence_paths=sorted(set(paths)),
+        missing_scopes=missing,
+        differing_scopes=differing,
+        reasons=reasons,
+    )
+
+
+def _candidate_trust(candidate_id: str, *, selectable: bool, differing: List[Dict[str, int]]) -> str:
+    if not selectable:
+        return "incomplete"
+    if candidate_id == "declared_source_run":
+        return "high"
+    if differing:
+        return "complete_different_timeline"
+    if candidate_id == "frozen_chapter_projection":
+        return "medium"
+    return "medium"
+
+
+def _recommended_anchor_candidate(candidates: List[RecoveryAnchorCandidate]) -> Optional[RecoveryAnchorCandidate]:
+    selectable = [candidate for candidate in candidates if candidate.selectable and candidate.anchor.anchor_type not in {"manual_hybrid", "shelf"}]
+    if not selectable:
+        return next((candidate for candidate in candidates if candidate.candidate_id == "shelf"), None)
+    ranked = {"high": 0, "medium": 1, "complete_different_timeline": 2, "incomplete": 3}
+    return sorted(selectable, key=lambda item: (ranked.get(item.trust_level, 99), item.risk_level, item.candidate_id))[0]
+
+
+def _auto_selected_anchor_id(selectable_non_shelf: List[RecoveryAnchorCandidate]) -> Optional[str]:
+    if len(selectable_non_shelf) == 1 and selectable_non_shelf[0].auto_selectable:
+        return selectable_non_shelf[0].candidate_id
+    declared = next((candidate for candidate in selectable_non_shelf if candidate.candidate_id == "declared_source_run"), None)
+    if declared is not None and declared.auto_selectable:
+        alternate_timelines = [
+            candidate for candidate in selectable_non_shelf
+            if candidate.candidate_id != declared.candidate_id and candidate.differing_scopes
+        ]
+        if not alternate_timelines:
+            return declared.candidate_id
+    return None
+
+
+def _anchor_warnings(audit: Any, candidates: List[RecoveryAnchorCandidate]) -> List[str]:
+    warnings: List[str] = []
+    if audit.first_visible_story_divergence:
+        warnings.append("visible_story_divergence_detected")
+    if audit.character_cohort_conflicts:
+        warnings.append("character_cohort_conflicts_detected")
+    selectable = [candidate for candidate in candidates if candidate.selectable and candidate.anchor.anchor_type not in {"manual_hybrid", "shelf"}]
+    if len(selectable) > 1:
+        if any(candidate.differing_scopes for candidate in selectable):
+            warnings.append("multiple_selectable_timeline_anchors")
+        else:
+            warnings.append("multiple_selectable_artifact_anchors_same_timeline")
+    if not selectable:
+        warnings.append("no_selectable_timeline_anchor")
+    return _dedupe(warnings)
+
+
+def _selected_anchor_from_report(
+    report: RecoveryAnchorCandidateReport,
+    *,
+    anchor_type: Optional[str],
+    source_run_id: Optional[str],
+) -> Optional[RecoveryAnchor]:
+    if anchor_type:
+        for candidate in report.candidates:
+            if candidate.anchor.anchor_type != anchor_type:
+                continue
+            if source_run_id and candidate.anchor.source_run_id != source_run_id:
+                continue
+            if candidate.selectable:
+                return candidate.anchor
+        return None
+    if report.auto_selected_candidate_id:
+        for candidate in report.candidates:
+            if candidate.candidate_id == report.auto_selected_candidate_id:
+                return candidate.anchor
+    return None
+
+
+def _dedupe(values: List[str]) -> List[str]:
+    seen: set[str] = set()
+    deduped: List[str] = []
+    for value in values:
+        text = str(value or "").strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        deduped.append(text)
+    return deduped
 
 
 def _parse_scene_ref(value: Any) -> Optional[int]:

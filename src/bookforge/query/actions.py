@@ -7,18 +7,131 @@ from bookforge.pipeline.scene_phase_artifacts import load_scene_phase_artifact_s
 
 from . import _common
 from .appearance import list_appearance_projection_views
+from .book_intent import list_book_intents
 from .outline_lineage import get_outline_lineage_audit
 from .recovery import get_recovery_branch_health, get_recovery_manifest, get_recovery_semantic_review_readiness
 from .scene_phase import get_scene_phase_readiness
 from .setting import get_scene_setting_projection
+from .visual import get_visual_asset_index
 from .workspace import current_execution_node, current_main_node, get_section_status, get_workspace_status, get_workspace_status_for_branch
+
+AUTHOR_LIBRARY_SCOPE_ID = "__author_library__"
+BOOK_INTENT_LIBRARY_SCOPE_ID = "__book_intents__"
 
 
 def _resolved_branch_id(selector: ScopeSelector) -> str:
     return str(selector.branch_id or MAIN_BRANCH_ID).strip() or MAIN_BRANCH_ID
 
 
+def _is_author_assets_selector(selector: ScopeSelector) -> bool:
+    return selector.book_id == AUTHOR_LIBRARY_SCOPE_ID or selector.workflow_family == "author_assets"
+
+
+def _is_book_intent_selector(selector: ScopeSelector) -> bool:
+    return selector.book_id == BOOK_INTENT_LIBRARY_SCOPE_ID or selector.workflow_family == "book_intent"
+
+
+def _author_asset_options() -> List[ExecutionOption]:
+    return [
+        ExecutionOption(
+            action="create_author",
+            summary="Create a versioned BookForge author persona from influences or an author brief.",
+            branch_policy="main_only",
+            workflow_family="author_assets",
+            mutates_canonical_state=True,
+            requires_expected_node=False,
+            allowed=True,
+            selector_requirements=["book_id", "details.influences_or_prompt"],
+            details={
+                "library_scope_id": AUTHOR_LIBRARY_SCOPE_ID,
+                "artifact_status_after_success": "authoritative",
+                "versioned": True,
+            },
+        ),
+        ExecutionOption(
+            action="refine_author",
+            summary="Refine an existing BookForge author persona into a new version without overwriting prior versions.",
+            branch_policy="main_only",
+            workflow_family="author_assets",
+            mutates_canonical_state=True,
+            requires_expected_node=False,
+            allowed=True,
+            selector_requirements=["book_id", "details.author_ref", "details.instructions_or_prompt"],
+            details={
+                "library_scope_id": AUTHOR_LIBRARY_SCOPE_ID,
+                "artifact_status_after_success": "authoritative",
+                "versioned": True,
+                "overwrite_behavior": "creates_new_version",
+            },
+        ),
+    ]
+
+
+def _book_intent_options(workspace) -> List[ExecutionOption]:
+    intents = list_book_intents(workspace)
+    draft_count = sum(1 for record in intents if record.intent.status == "draft")
+    approved_count = sum(1 for record in intents if record.intent.status == "approved")
+    created_count = sum(1 for record in intents if record.intent.status == "created")
+    common_details = {
+        "library_scope_id": BOOK_INTENT_LIBRARY_SCOPE_ID,
+        "intent_count": len(intents),
+        "draft_count": draft_count,
+        "approved_count": approved_count,
+        "created_count": created_count,
+    }
+    return [
+        ExecutionOption(
+            action="draft_book_intent",
+            summary="Create a provisional BookIntent from an author-only seed, title, author, genre, and synopsis fields.",
+            branch_policy="main_only",
+            workflow_family="book_intent",
+            mutates_canonical_state=False,
+            requires_expected_node=False,
+            allowed=True,
+            selector_requirements=["book_id", "details.title", "details.author_ref", "details.genre", "details.seed_text_or_seed_file"],
+            details={
+                **common_details,
+                "artifact_status_after_success": "provisional",
+                "canonical_book_created": False,
+            },
+        ),
+        ExecutionOption(
+            action="approve_book_intent",
+            summary="Approve a drafted BookIntent so it can be used to create a canonical BookForge book workspace.",
+            branch_policy="main_only",
+            workflow_family="book_intent",
+            mutates_canonical_state=True,
+            requires_expected_node=False,
+            allowed=draft_count > 0,
+            selector_requirements=["book_id", "details.intent_ref"],
+            refusal_reason=None if draft_count > 0 else "No draft BookIntent is available to approve.",
+            details={
+                **common_details,
+                "artifact_status_after_success": "authoritative",
+                "approval_required": True,
+            },
+        ),
+        ExecutionOption(
+            action="create_book_from_intent",
+            summary="Create a canonical BookForge book workspace from an approved BookIntent.",
+            branch_policy="main_only",
+            workflow_family="book_intent",
+            mutates_canonical_state=True,
+            requires_expected_node=False,
+            allowed=approved_count > 0,
+            selector_requirements=["book_id", "details.intent_ref"],
+            refusal_reason=None if approved_count > 0 else "No approved BookIntent is available to create a book from.",
+            details={
+                **common_details,
+                "artifact_status_after_success": "authoritative",
+                "canonical_transition": "author_only_seed_to_book_scope",
+            },
+        ),
+    ]
+
+
 _LINEAGE_BLOCKED_MAIN_ACTIONS = {
+    "draft_starter_outline_from_intent",
     "freeze_section_from_phase03_artifact",
     "write_frozen_section",
     "lock_section_from_written_state",
@@ -32,6 +145,10 @@ _LINEAGE_BLOCKED_MAIN_ACTIONS = {
     "lint_scene_prose",
     "repair_scene_prose",
     "apply_scene_commit",
+    "continue_scene",
+    "align_scene_pair_seam",
+    "plan_bridge_scene_insertion",
+    "apply_bridge_scene_insertion",
     "refresh_character_appearance_projection",
     "draft_scene_setting_projection",
     "extract_scene_setting_from_prose",
@@ -116,6 +233,47 @@ def _evaluate_initialize_workflow(workspace, book_id: str, selector: ScopeSelect
     return True, None, {"run_id": latest_run_id}
 
 
+def _evaluate_draft_starter_outline_from_intent(workspace, book_id: str, selector: ScopeSelector) -> Tuple[bool, Optional[str], dict]:
+    book_root = _common.book_root(workspace, book_id)
+    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
+        return False, "draft_starter_outline_from_intent only supports main-branch execution.", {}
+    if not book_root.exists():
+        return False, f"Book workspace not found: {book_id}", {}
+    intent = _common.read_json(book_root / "book_intent.json") or {}
+    if not intent:
+        return False, "draft_starter_outline_from_intent requires a canonical book created from a BookIntent.", {}
+    if str(intent.get("status") or "").strip() != "created":
+        return False, "draft_starter_outline_from_intent requires a created BookIntent.", {
+            "book_intent_status": intent.get("status"),
+        }
+    latest_run_id = _common.latest_outline_run_id(book_root)
+    if latest_run_id:
+        return False, "An outline pipeline run already exists for this book.", {
+            "run_id": latest_run_id,
+            "next_recommended_action": "initialize_section_workflow",
+        }
+    if _workflow_initialized(book_root):
+        return False, "Workflow is already initialized; use narrower workflow actions.", {}
+    book = _common.read_json(book_root / "book.json") or {}
+    targets = book.get("targets") if isinstance(book.get("targets"), dict) else {}
+    return True, None, {
+        "book_intent_id": intent.get("intent_id"),
+        "workflow_family": "thin_outline",
+        "starter_outline": True,
+        "provider_used": True,
+        "deep_outline_pipeline": False,
+        "target_chapters": targets.get("chapters"),
+        "next_recommended_action": "initialize_section_workflow",
+        "produced_artifacts": [
+            "outline_spine_v1.json",
+            "outline_sections_v1.json",
+            "outline_final_v1_1.json",
+            "outline_pipeline_report.json",
+        ],
+        "produced_artifact_statuses": ["authoritative", "diagnostic"],
+    }
+
+
 def _evaluate_resume_paused_section(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
     if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
         return False, "resume_paused_section only supports main-branch execution.", {}
@@ -176,8 +334,17 @@ def _evaluate_freeze_section(workspace, book_id: str, selector: ScopeSelector) -
 
 def _evaluate_finalize_chapter(workspace, book_id: str, selector: ScopeSelector) -> Tuple[bool, Optional[str], dict]:
     book_root = _common.book_root(workspace, book_id)
-    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
-        return False, "finalize_chapter_from_locked_sections only supports main-branch execution.", {}
+    branch_id = _resolved_branch_id(selector)
+    execution_root = _execution_book_root(book_root, branch_id)
+    if branch_id != MAIN_BRANCH_ID:
+        manifest = _load_branch_manifest(book_root, branch_id)
+        if manifest is None:
+            return False, f"Branch {branch_id} does not exist.", {"branch_id": branch_id}
+        if manifest.lifecycle_state in {"discard", "promoted"}:
+            return False, f"Branch {branch_id} is already in terminal lifecycle state {manifest.lifecycle_state}.", {
+                "branch_id": branch_id,
+                "lifecycle_state": manifest.lifecycle_state,
+            }
     if not _workflow_initialized(book_root):
         return False, "Workflow must be initialized before a chapter can be finalized.", {}
     if selector.chapter is None:
@@ -185,7 +352,7 @@ def _evaluate_finalize_chapter(workspace, book_id: str, selector: ScopeSelector)
     if selector.section is not None:
         return False, "finalize_chapter_from_locked_sections requires chapter scope without section scope.", {}
 
-    registry = _common.load_registry(book_root)
+    registry = _common.load_registry(execution_root)
     chapters = registry.get("chapters") if isinstance(registry.get("chapters"), list) else []
     target_chapter = None
     for chapter in chapters:
@@ -232,18 +399,29 @@ def _evaluate_finalize_chapter(workspace, book_id: str, selector: ScopeSelector)
         "chapter_status": target_chapter.get("chapter_status"),
         "locked_sections": locked_sections,
         "total_sections": total_sections,
+        "branch_id": branch_id,
+        "mutation_scope": "canonical" if branch_id == MAIN_BRANCH_ID else "branch_authoritative",
     }
 
 
 def _evaluate_lock_section(workspace, book_id: str, selector: ScopeSelector) -> Tuple[bool, Optional[str], dict]:
     book_root = _common.book_root(workspace, book_id)
-    if _resolved_branch_id(selector) != MAIN_BRANCH_ID:
-        return False, "lock_section_from_written_state only supports main-branch execution.", {}
+    branch_id = _resolved_branch_id(selector)
+    execution_root = _execution_book_root(book_root, branch_id)
+    if branch_id != MAIN_BRANCH_ID:
+        manifest = _load_branch_manifest(book_root, branch_id)
+        if manifest is None:
+            return False, f"Branch {branch_id} does not exist.", {"branch_id": branch_id}
+        if manifest.lifecycle_state in {"discard", "promoted"}:
+            return False, f"Branch {branch_id} is already in terminal lifecycle state {manifest.lifecycle_state}.", {
+                "branch_id": branch_id,
+                "lifecycle_state": manifest.lifecycle_state,
+            }
     if not _workflow_initialized(book_root):
         return False, "Workflow must be initialized before a section can be locked.", {}
     if selector.chapter is None or selector.section is None:
         return False, "lock_section_from_written_state requires chapter and section scope.", {}
-    section_status = get_section_status(workspace, book_id, selector.chapter, selector.section) or {}
+    section_status = get_section_status(workspace, book_id, selector.chapter, selector.section, branch_id=branch_id) or {}
     normalized_status = str(section_status.get("status") or "").strip().lower()
     if normalized_status == "locked":
         return True, None, {
@@ -251,6 +429,8 @@ def _evaluate_lock_section(workspace, book_id: str, selector: ScopeSelector) -> 
             "section_id": int(selector.section),
             "section_status": section_status.get("status"),
             "already_locked": True,
+            "branch_id": branch_id,
+            "mutation_scope": "canonical" if branch_id == MAIN_BRANCH_ID else "branch_authoritative",
         }
     if normalized_status != "frozen":
         return False, "lock_section_from_written_state requires the selected section to be frozen.", {
@@ -273,7 +453,7 @@ def _evaluate_lock_section(workspace, book_id: str, selector: ScopeSelector) -> 
             "scene_ref_start": section_status.get("scene_ref_start"),
             "scene_ref_end": section_status.get("scene_ref_end"),
         }
-    chapter_dir = _common.book_root(workspace, book_id) / "draft" / "chapters" / f"ch_{int(selector.chapter):03d}"
+    chapter_dir = execution_root / "draft" / "chapters" / f"ch_{int(selector.chapter):03d}"
     missing = []
     for scene_id in range(scene_start, scene_end + 1):
         prose_path = chapter_dir / f"scene_{scene_id:03d}.md"
@@ -294,6 +474,8 @@ def _evaluate_lock_section(workspace, book_id: str, selector: ScopeSelector) -> 
         "section_status": section_status.get("status"),
         "scene_ref_start": scene_ref_start,
         "scene_ref_end": scene_ref_end,
+        "branch_id": branch_id,
+        "mutation_scope": "canonical" if branch_id == MAIN_BRANCH_ID else "branch_authoritative",
     }
 
 
@@ -381,9 +563,18 @@ def _evaluate_write_section(workspace, book_id: str, selector: ScopeSelector, *,
         "section_status": section_status.get("status"),
         "scene_ref_start": scene_ref_start,
         "scene_ref_end": scene_ref_end,
+        "scene_start": scene_start,
+        "scene_end": scene_end,
+        "scene_count": scene_end - scene_start + 1,
         "missing_artifact_count": len(missing),
         "branch_id": branch_id,
         "mutation_scope": "canonical" if branch_id == MAIN_BRANCH_ID else "branch_authoritative",
+        "macro_kind": "section_write_range",
+        "broad_macro": True,
+        "not_for_single_scene_requests": True,
+        "preferred_single_scene_action": "continue_scene",
+        "step_count_per_call": "all missing scenes in the selected frozen section",
+        "runs_until": "selected frozen section terminal scene",
     }
 
 
@@ -402,6 +593,61 @@ def _evaluate_create_branch(workspace, book_id: str, selector: ScopeSelector, *,
         "section": selector.section if selector.section is not None else live_node.section,
         "prefer_emitted": bool(prefer_emitted),
     }
+
+
+def _evaluate_plan_visual_asset(workspace, book_id: str, selector: ScopeSelector) -> Tuple[bool, Optional[str], dict]:
+    book_root = _common.book_root(workspace, book_id)
+    if not book_root.exists():
+        return False, f"Book workspace not found: {book_id}", {}
+    branch_id = _resolved_branch_id(selector)
+    if branch_id != MAIN_BRANCH_ID and _load_branch_manifest(book_root, branch_id) is None:
+        return False, f"Branch {branch_id} does not exist.", {"branch_id": branch_id}
+    return True, None, {
+        "branch_id": branch_id,
+        "workflow_family": "visual_assets",
+        "requires_prompt_text": True,
+        "readiness_source": "visual_action_readiness",
+        "default_provider_model": "nano-banana",
+        "supported_purposes": [
+            "background_layer",
+            "character_reference",
+            "character_in_scene",
+            "scene_illustration",
+            "style_transfer",
+        ],
+        "produced_artifacts": ["visual_prompt_plan"],
+        "produced_artifact_statuses": ["provisional"],
+    }
+
+
+def _evaluate_generate_visual_asset(workspace, book_id: str, selector: ScopeSelector) -> Tuple[bool, Optional[str], dict]:
+    book_root = _common.book_root(workspace, book_id)
+    if not book_root.exists():
+        return False, f"Book workspace not found: {book_id}", {}
+    branch_id = _resolved_branch_id(selector)
+    if branch_id != MAIN_BRANCH_ID and _load_branch_manifest(book_root, branch_id) is None:
+        return False, f"Branch {branch_id} does not exist.", {"branch_id": branch_id}
+    try:
+        visual_index = get_visual_asset_index(workspace, book_id, branch_id=branch_id)
+    except Exception as exc:
+        return False, f"Visual asset index is unavailable: {exc}", {"branch_id": branch_id}
+    prompt_plans = [item.to_dict() for item in visual_index.prompt_plans]
+    details = {
+        "branch_id": branch_id,
+        "workflow_family": "visual_assets",
+        "requires_prompt_plan_path": True,
+        "requires_allow_spend": True,
+        "approval_required": True,
+        "readiness_source": "visual_action_readiness",
+        "prompt_plan_count": len(prompt_plans),
+        "available_prompt_plans": prompt_plans[:20],
+        "produced_artifacts": ["visual_image", "visual_asset_manifest"],
+        "produced_artifact_statuses": ["provisional", "diagnostic"],
+        "existing_asset_count": len(visual_index.assets),
+    }
+    if not prompt_plans:
+        return False, "generate_visual_asset requires an existing visual prompt plan.", details
+    return True, None, details
 
 
 def _evaluate_create_recovery_branch(workspace, book_id: str, selector: ScopeSelector) -> Tuple[bool, Optional[str], dict]:
@@ -1013,9 +1259,240 @@ def _evaluate_apply_scene_commit(workspace, book_id: str, selector: ScopeSelecto
     return bool(action_row.legal and action_row.ready), action_row.refusal_reason, details
 
 
+def _evaluate_continue_scene(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
+    resolved_branch_id = _resolved_branch_id(selector)
+    if selector.chapter is None or selector.scene is None:
+        return False, "continue_scene requires chapter and scene scope.", {}
+    readiness = get_scene_phase_readiness(
+        workspace,
+        book_id,
+        branch_id=resolved_branch_id,
+        chapter_id=selector.chapter,
+        scene_id=selector.scene,
+        section_id=selector.section,
+        prefer_emitted=prefer_emitted,
+    )
+    recommended = readiness.recommended_next_action
+    action_row = next((item for item in readiness.actions if item.action == recommended), None)
+    details = {
+        "chapter_id": readiness.selector.chapter,
+        "section_id": readiness.selector.section,
+        "scene_id": readiness.selector.scene,
+        "scene_status": readiness.scene_status,
+        "recommended_next_action": recommended,
+        "macro_kind": "single_recommended_scene_phase_step",
+        "child_actions": [item.action for item in readiness.actions],
+        "ready_child_action": recommended,
+        "after_success_query": "scene_phase_readiness",
+    }
+    if action_row is not None:
+        details.update(
+            {
+                "child_mutation_scope": action_row.mutation_scope,
+                "available_inputs": list(action_row.available_inputs),
+                "missing_prerequisites": list(action_row.missing_prerequisites),
+            }
+        )
+    if not recommended:
+        return False, "No ready recommended scene-phase action is available for the selected scene.", details
+    return bool(action_row and action_row.legal and action_row.ready), action_row.refusal_reason if action_row else None, details
+
+
+def _chapter_scene_ids(outline: dict, chapter_id: int) -> List[int]:
+    chapters = outline.get("chapters") if isinstance(outline.get("chapters"), list) else []
+    for chapter in chapters:
+        if not isinstance(chapter, dict):
+            continue
+        try:
+            current = int(chapter.get("chapter_id"))
+        except (TypeError, ValueError):
+            continue
+        if current != int(chapter_id):
+            continue
+        scene_ids: List[int] = []
+        sections = chapter.get("sections") if isinstance(chapter.get("sections"), list) else []
+        for section in sections:
+            if not isinstance(section, dict):
+                continue
+            scenes = section.get("scenes") if isinstance(section.get("scenes"), list) else []
+            for index, scene in enumerate(scenes, start=1):
+                if not isinstance(scene, dict):
+                    continue
+                try:
+                    scene_ids.append(int(scene.get("scene_id") or scene.get("beat_id") or scene.get("id") or index))
+                except (TypeError, ValueError):
+                    continue
+        return scene_ids
+    return []
+
+
+def _adjacent_scene_id(workspace, book_id: str, branch_id: str, chapter_id: int, scene_id: int) -> Optional[int]:
+    book_root = _common.execution_book_root(_common.book_root(workspace, book_id), branch_id)
+    outline = _common.load_outline(book_root)
+    scene_ids = _chapter_scene_ids(outline, chapter_id)
+    for index, current in enumerate(scene_ids):
+        if current == int(scene_id) and index + 1 < len(scene_ids):
+            return scene_ids[index + 1]
+    return None
+
+
+def _scene_markdown_exists(workspace, book_id: str, branch_id: str, chapter_id: int, scene_id: int) -> bool:
+    book_root = _common.execution_book_root(_common.book_root(workspace, book_id), branch_id)
+    return (book_root / "draft" / "chapters" / f"ch_{int(chapter_id):03d}" / f"scene_{int(scene_id):03d}.md").exists()
+
+
+def _evaluate_align_scene_pair_seam(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
+    del prefer_emitted
+    branch_id = _resolved_branch_id(selector)
+    if branch_id == MAIN_BRANCH_ID:
+        return False, "align_scene_pair_seam requires a derived branch; canonical main is never rewritten directly.", {}
+    if selector.chapter is None or selector.scene is None:
+        return False, "align_scene_pair_seam requires chapter and scene scope.", {}
+    scene_b_id = _adjacent_scene_id(workspace, book_id, branch_id, int(selector.chapter), int(selector.scene))
+    details = {
+        "chapter_id": int(selector.chapter),
+        "scene_a_id": int(selector.scene),
+        "scene_b_id": scene_b_id,
+        "mutation_scope": "branch_authoritative",
+        "artifact_status_after_success": "authoritative",
+        "canonical_changed": False,
+        "pair_window_policy": "scene_a_tail_and_scene_b_head_only",
+    }
+    if scene_b_id is None:
+        return False, "No adjacent next scene exists in the selected chapter outline.", details
+    missing = []
+    if not _scene_markdown_exists(workspace, book_id, branch_id, int(selector.chapter), int(selector.scene)):
+        missing.append(f"scene_{int(selector.scene):03d}.md")
+    if not _scene_markdown_exists(workspace, book_id, branch_id, int(selector.chapter), int(scene_b_id)):
+        missing.append(f"scene_{int(scene_b_id):03d}.md")
+    if missing:
+        return False, "Both adjacent scene prose files must exist before seam alignment.", {**details, "missing_scene_files": missing}
+    return True, None, details
+
+
+def _evaluate_plan_bridge_scene_insertion(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
+    del prefer_emitted
+    branch_id = _resolved_branch_id(selector)
+    if branch_id == MAIN_BRANCH_ID:
+        return False, "plan_bridge_scene_insertion requires a derived branch; bridge insertion planning is branch-local.", {
+            "refusal_code": "branch_required",
+            "mutation_scope": "branch_provisional",
+            "canonical_changed": False,
+        }
+    if selector.chapter is None or selector.scene is None:
+        return False, "plan_bridge_scene_insertion requires chapter and scene scope.", {
+            "refusal_code": "missing_chapter_or_scene_scope",
+            "mutation_scope": "branch_provisional",
+            "canonical_changed": False,
+        }
+    scene_b_id = _adjacent_scene_id(workspace, book_id, branch_id, int(selector.chapter), int(selector.scene))
+    details = {
+        "chapter_id": int(selector.chapter),
+        "scene_a_id": int(selector.scene),
+        "scene_b_id": scene_b_id,
+        "mutation_scope": "branch_provisional",
+        "artifact_status_after_success": "provisional",
+        "canonical_changed": False,
+        "proposal_only": True,
+        "does_not_modify_outline_or_prose": True,
+    }
+    if scene_b_id is None:
+        details["refusal_code"] = "no_adjacent_scene"
+        return False, "No adjacent next scene exists in the selected chapter outline.", details
+    return True, None, details
+
+
+def _bridge_plan_path(workspace, book_id: str, branch_id: str, chapter_id: int, scene_a_id: int, scene_b_id: int):
+    book_root = _common.execution_book_root(_common.book_root(workspace, book_id), branch_id)
+    return book_root / "draft" / "context" / "bridge_scenes" / f"ch_{int(chapter_id):03d}" / f"bridge_after_scene_{int(scene_a_id):03d}_before_{int(scene_b_id):03d}.json"
+
+
+def _evaluate_apply_bridge_scene_insertion(workspace, book_id: str, selector: ScopeSelector, *, prefer_emitted: bool) -> Tuple[bool, Optional[str], dict]:
+    del prefer_emitted
+    branch_id = _resolved_branch_id(selector)
+    if branch_id == MAIN_BRANCH_ID:
+        return False, "apply_bridge_scene_insertion requires a derived branch; bridge insertion is branch-local.", {
+            "refusal_code": "branch_required",
+            "mutation_scope": "branch_authoritative",
+            "canonical_changed": False,
+        }
+    if selector.chapter is None or selector.scene is None:
+        return False, "apply_bridge_scene_insertion requires chapter and scene scope.", {
+            "refusal_code": "missing_chapter_or_scene_scope",
+            "mutation_scope": "branch_authoritative",
+            "canonical_changed": False,
+        }
+    scene_b_id = _adjacent_scene_id(workspace, book_id, branch_id, int(selector.chapter), int(selector.scene))
+    details = {
+        "chapter_id": int(selector.chapter),
+        "scene_a_id": int(selector.scene),
+        "scene_b_id": scene_b_id,
+        "mutation_scope": "branch_authoritative",
+        "artifact_status_after_success": "authoritative",
+        "canonical_changed": False,
+        "renumbering_policy": "branch_local_shift_following_integer_scene_ids",
+        "same_section_only": True,
+    }
+    if scene_b_id is None:
+        details["refusal_code"] = "no_adjacent_scene"
+        return False, "No adjacent next scene exists in the selected chapter outline.", details
+    plan_path = _bridge_plan_path(workspace, book_id, branch_id, int(selector.chapter), int(selector.scene), int(scene_b_id))
+    details["bridge_plan_path"] = str(plan_path)
+    if not plan_path.exists():
+        details["refusal_code"] = "missing_bridge_scene_insertion_plan"
+        return False, "apply_bridge_scene_insertion requires an existing bridge scene insertion plan.", details
+    return True, None, details
+
+
 def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted: bool = True) -> List[ExecutionOption]:
     book_id = selector.book_id
+    if _is_author_assets_selector(selector):
+        return _author_asset_options()
+    if _is_book_intent_selector(selector):
+        return _book_intent_options(workspace)
     resolved_branch_id = _resolved_branch_id(selector)
+    if selector.workflow_family == "visual_assets":
+        plan_visual_allowed, plan_visual_refusal, plan_visual_details = _evaluate_plan_visual_asset(
+            workspace,
+            book_id,
+            selector,
+        )
+        generate_visual_allowed, generate_visual_refusal, generate_visual_details = _evaluate_generate_visual_asset(
+            workspace,
+            book_id,
+            selector,
+        )
+        return [
+            ExecutionOption(
+                action="plan_visual_asset",
+                summary="Create a provisional visual prompt plan for a book, scene, author, or branch-scoped visual asset.",
+                branch_policy="any",
+                workflow_family="visual_assets",
+                mutates_canonical_state=False,
+                requires_expected_node=False,
+                allowed=plan_visual_allowed,
+                selector_requirements=["book_id", "details.prompt_text"],
+                refusal_reason=plan_visual_refusal,
+                details=plan_visual_details,
+            ),
+            ExecutionOption(
+                action="generate_visual_asset",
+                summary="Generate a provisional visual asset from an existing visual prompt plan after explicit spend approval.",
+                branch_policy="any",
+                workflow_family="visual_assets",
+                mutates_canonical_state=False,
+                requires_expected_node=False,
+                allowed=generate_visual_allowed,
+                selector_requirements=["book_id", "details.prompt_plan_path", "details.allow_spend"],
+                refusal_reason=generate_visual_refusal,
+                details=generate_visual_details,
+            ),
+        ]
+    starter_outline_allowed, starter_outline_refusal, starter_outline_details = _evaluate_draft_starter_outline_from_intent(
+        workspace,
+        book_id,
+        selector,
+    )
     init_allowed, init_refusal, init_details = _evaluate_initialize_workflow(workspace, book_id, selector)
     create_branch_allowed, create_branch_refusal, create_branch_details = _evaluate_create_branch(
         workspace,
@@ -1184,6 +1661,30 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
         selector,
         prefer_emitted=prefer_emitted,
     )
+    continue_scene_allowed, continue_scene_refusal, continue_scene_details = _evaluate_continue_scene(
+        workspace,
+        book_id,
+        selector,
+        prefer_emitted=prefer_emitted,
+    )
+    align_pair_allowed, align_pair_refusal, align_pair_details = _evaluate_align_scene_pair_seam(
+        workspace,
+        book_id,
+        selector,
+        prefer_emitted=prefer_emitted,
+    )
+    bridge_plan_allowed, bridge_plan_refusal, bridge_plan_details = _evaluate_plan_bridge_scene_insertion(
+        workspace,
+        book_id,
+        selector,
+        prefer_emitted=prefer_emitted,
+    )
+    bridge_apply_allowed, bridge_apply_refusal, bridge_apply_details = _evaluate_apply_bridge_scene_insertion(
+        workspace,
+        book_id,
+        selector,
+        prefer_emitted=prefer_emitted,
+    )
     freeze_allowed, freeze_refusal, freeze_details = _evaluate_freeze_section(workspace, book_id, selector)
     resume_allowed, resume_refusal, resume_details = _evaluate_resume_paused_section(
         workspace,
@@ -1192,6 +1693,33 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
         prefer_emitted=prefer_emitted,
     )
     options = [
+        ExecutionOption(
+            action="continue_scene",
+            summary="Execute the single recommended next scene-phase action for the selected scene and return a wrapper receipt.",
+            branch_policy="any",
+            workflow_family="section_write",
+            mutates_canonical_state=bool(
+                resolved_branch_id == MAIN_BRANCH_ID
+                and continue_scene_details.get("child_mutation_scope") == "canonical"
+            ),
+            requires_expected_node=True,
+            allowed=continue_scene_allowed,
+            selector_requirements=["book_id", "chapter", "scene"],
+            refusal_reason=continue_scene_refusal,
+            details=continue_scene_details,
+        ),
+        ExecutionOption(
+            action="draft_starter_outline_from_intent",
+            summary="Author a thin starter outline from the created BookIntent and emit immutable run artifacts.",
+            branch_policy="main_only",
+            workflow_family="thin_outline",
+            mutates_canonical_state=True,
+            requires_expected_node=False,
+            allowed=starter_outline_allowed,
+            selector_requirements=["book_id"],
+            refusal_reason=starter_outline_refusal,
+            details=starter_outline_details,
+        ),
         ExecutionOption(
             action="initialize_section_workflow",
             summary="Initialize canonical workflow state from an immutable outline run.",
@@ -1218,7 +1746,10 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
         ),
         ExecutionOption(
             action="create_recovery_branch",
-            summary="Create a derived recovery branch from contaminated main state using an explicit timeline anchor and affected scope.",
+            summary=(
+                "Create an isolated recovery branch, record the explicit timeline anchor and affected scope, "
+                "and leave cleanup/normalization to later recovery actions."
+            ),
             branch_policy="main_only",
             workflow_family="recovery_import",
             mutates_canonical_state=False,
@@ -1230,8 +1761,8 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
         ),
         ExecutionOption(
             action="finalize_chapter_from_locked_sections",
-            summary="Run pairwise seam repair and chapter finalization for a locked chapter on main.",
-            branch_policy="main_only",
+            summary="Run pairwise seam repair and chapter finalization for a locked chapter in the selected execution root.",
+            branch_policy="any",
             workflow_family="section_local_outline",
             mutates_canonical_state=True,
             requires_expected_node=False,
@@ -1242,10 +1773,10 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
         ),
         ExecutionOption(
             action="lock_section_from_written_state",
-            summary="Lock one frozen section after all required scene prose and meta artifacts exist.",
-            branch_policy="main_only",
+            summary="Lock one frozen section after all required scene prose and meta artifacts exist in the selected execution root.",
+            branch_policy="any",
             workflow_family="section_local_outline",
-            mutates_canonical_state=True,
+            mutates_canonical_state=resolved_branch_id == MAIN_BRANCH_ID,
             requires_expected_node=False,
             allowed=lock_allowed,
             selector_requirements=["book_id", "chapter", "section"],
@@ -1363,7 +1894,10 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
         ),
         ExecutionOption(
             action="create_recovery_branch",
-            summary="Create a derived recovery branch from contaminated main state using an explicit timeline anchor and affected scope.",
+            summary=(
+                "Create an isolated recovery branch, record the explicit timeline anchor and affected scope, "
+                "and leave cleanup/normalization to later recovery actions."
+            ),
             branch_policy="main_only",
             workflow_family="recovery_import",
             mutates_canonical_state=False,
@@ -1530,7 +2064,80 @@ def list_execution_options(workspace, selector: ScopeSelector, *, prefer_emitted
             details=promote_recovery_details,
         ),
     ]
+    if resolved_branch_id != MAIN_BRANCH_ID and selector.section is not None:
+        options.append(
+            ExecutionOption(
+                action="lock_section_from_written_state",
+                summary="Lock one frozen section inside the selected branch after all required scene prose and meta artifacts exist.",
+                branch_policy="any",
+                workflow_family="section_local_outline",
+                mutates_canonical_state=False,
+                requires_expected_node=False,
+                allowed=lock_allowed,
+                selector_requirements=["book_id", "chapter", "section"],
+                refusal_reason=lock_refusal,
+                details=lock_details,
+            )
+        )
+    if resolved_branch_id != MAIN_BRANCH_ID and selector.chapter is not None and selector.section is None:
+        options.append(
+            ExecutionOption(
+                action="finalize_chapter_from_locked_sections",
+                summary="Run pairwise seam repair and chapter finalization inside the selected branch.",
+                branch_policy="any",
+                workflow_family="section_local_outline",
+                mutates_canonical_state=False,
+                requires_expected_node=False,
+                allowed=finalize_allowed,
+                selector_requirements=["book_id", "chapter"],
+                refusal_reason=finalize_refusal,
+                details=finalize_details,
+            )
+        )
     if selector.scene is not None:
+        if resolved_branch_id != MAIN_BRANCH_ID:
+            options.append(
+                ExecutionOption(
+                    action="align_scene_pair_seam",
+                    summary="Re-author the seam between the selected scene and its next adjacent scene inside a branch.",
+                    branch_policy="derived_only",
+                    workflow_family="section_write",
+                    mutates_canonical_state=False,
+                    requires_expected_node=True,
+                    allowed=align_pair_allowed,
+                    selector_requirements=["book_id", "branch_id", "chapter", "scene"],
+                    refusal_reason=align_pair_refusal,
+                    details=align_pair_details,
+                )
+            )
+            options.append(
+                ExecutionOption(
+                    action="plan_bridge_scene_insertion",
+                    summary="Create a provisional branch-local plan for inserting an adaptive bridge scene after the selected scene.",
+                    branch_policy="derived_only",
+                    workflow_family="section_write",
+                    mutates_canonical_state=False,
+                    requires_expected_node=True,
+                    allowed=bridge_plan_allowed,
+                    selector_requirements=["book_id", "branch_id", "chapter", "scene"],
+                    refusal_reason=bridge_plan_refusal,
+                    details=bridge_plan_details,
+                )
+            )
+            options.append(
+                ExecutionOption(
+                    action="apply_bridge_scene_insertion",
+                    summary="Apply a planned adaptive bridge scene insertion to the selected branch outline and scene sequence.",
+                    branch_policy="derived_only",
+                    workflow_family="section_write",
+                    mutates_canonical_state=False,
+                    requires_expected_node=True,
+                    allowed=bridge_apply_allowed,
+                    selector_requirements=["book_id", "branch_id", "chapter", "scene"],
+                    refusal_reason=bridge_apply_refusal,
+                    details=bridge_apply_details,
+                )
+            )
         options.append(
             ExecutionOption(
                 action="plan_scene",

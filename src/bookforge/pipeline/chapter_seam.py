@@ -670,7 +670,7 @@ def _run_chapter_seam_pairs(
         return [dict(block) for block in blocks], []
 
     config = load_config()
-    workspace = book_root.parents[1]
+    workspace = _workspace_for_book_root(book_root)
     system_path = book_root / "prompts" / "system_v1.md"
     linter_client = get_llm_client(config, phase="linter")
     repair_client = get_llm_client(config, phase="repair")
@@ -790,6 +790,17 @@ def _write_fixed_scene_versions(book_root: Path, blocks: List[Dict[str, Any]], *
     return scene_artifacts
 
 
+def _workspace_for_book_root(book_root: Path) -> Path:
+    if (
+        book_root.name == "snapshot"
+        and len(book_root.parents) >= 7
+        and book_root.parent.parent.name == "branches"
+        and book_root.parent.parent.parent.name == "supervision"
+    ):
+        return book_root.parents[6]
+    return book_root.parents[1]
+
+
 def _count_repair_actions(pair_reports: List[Dict[str, Any]]) -> int:
     count = 0
     for pair in pair_reports:
@@ -827,6 +838,91 @@ def seam_candidate_path(book_root: Path, chapter_num: int) -> Path:
 
 def seam_report_path(book_root: Path, chapter_num: int) -> Path:
     return _chapter_seam_dir(book_root, chapter_num) / "chapter_seam_report.json"
+
+
+def scene_pair_seam_report_path(book_root: Path, chapter_num: int, scene_a_id: int, scene_b_id: int) -> Path:
+    return _chapter_seam_dir(book_root, chapter_num) / f"pair_{int(scene_a_id):03d}_{int(scene_b_id):03d}_seam_report.json"
+
+
+def align_scene_pair_seam(book_root: Path, outline: Dict[str, Any], chapter_num: int, scene_a_id: int, scene_b_id: int) -> Dict[str, Any]:
+    blocks = _chapter_scene_blocks(book_root, outline, chapter_num)
+    pair_indexes = [
+        index
+        for index in range(1, len(blocks))
+        if int(blocks[index - 1].get("scene_id") or 0) == int(scene_a_id)
+        and int(blocks[index].get("scene_id") or 0) == int(scene_b_id)
+    ]
+    if not pair_indexes:
+        raise ValueError(
+            f"Scene pair ch{int(chapter_num):03d} sc{int(scene_a_id):03d}->sc{int(scene_b_id):03d} is not an adjacent chapter seam."
+        )
+
+    pair_index = pair_indexes[0]
+    pair_blocks = [dict(blocks[pair_index - 1]), dict(blocks[pair_index])]
+    original_scene_snapshots = _snapshot_original_scene_versions(pair_blocks)
+    original_blocks = _blocks_with_original_texts(pair_blocks)
+    initial_issues = audit_scene_boundary(chapter_num, pair_blocks[0], pair_blocks[1])
+    repaired_pair_blocks, pair_reports = _run_chapter_seam_pairs(book_root, outline, chapter_num, pair_blocks)
+    final_issues = audit_scene_boundary(chapter_num, repaired_pair_blocks[0], repaired_pair_blocks[1])
+    error_count = sum(1 for issue in final_issues if str(issue.get("severity") or "").lower() == "error")
+    warning_count = sum(1 for issue in final_issues if str(issue.get("severity") or "").lower() == "warning")
+    status = "aligned" if error_count == 0 else "attention_required"
+    scene_artifacts = _write_fixed_scene_versions(book_root, repaired_pair_blocks, promote=status == "aligned")
+
+    if status == "aligned":
+        repaired_by_scene = {int(block.get("scene_id") or 0): block for block in repaired_pair_blocks}
+        assembled_blocks = [
+            dict(repaired_by_scene.get(int(block.get("scene_id") or 0), block))
+            for block in blocks
+        ]
+        chapter_text = _assemble_chapter_text(outline, chapter_num, assembled_blocks)
+        _write_text(book_root / "draft" / "chapters" / f"ch_{chapter_num:03d}.md", chapter_text)
+
+    payload = {
+        "schema_version": "scene_pair_seam_report_v1",
+        "chapter_id": int(chapter_num),
+        "scene_a_id": int(scene_a_id),
+        "scene_b_id": int(scene_b_id),
+        "generated_at": _now_iso(),
+        "status": status,
+        "repair_action_count": _count_repair_actions(pair_reports),
+        "original_scene_snapshots_created": original_scene_snapshots,
+        "scene_artifacts": scene_artifacts,
+        "pairs": pair_reports,
+        "before": {
+            "schema_version": "scene_pair_seam_audit_v1",
+            "status": "pass" if not any(str(issue.get("severity") or "").lower() == "error" for issue in initial_issues) else "fail",
+            "issue_counts": {
+                "error": sum(1 for issue in initial_issues if str(issue.get("severity") or "").lower() == "error"),
+                "warning": sum(1 for issue in initial_issues if str(issue.get("severity") or "").lower() == "warning"),
+                "total": len(initial_issues),
+            },
+            "issues": initial_issues,
+        },
+        "after": {
+            "schema_version": "scene_pair_seam_audit_v1",
+            "status": "pass" if error_count == 0 else "fail",
+            "issue_counts": {"error": error_count, "warning": warning_count, "total": len(final_issues)},
+            "issues": final_issues,
+        },
+        "original_windows": [
+            {
+                "scene_ref": str(block.get("scene_ref") or ""),
+                "writable_window": _pair_window_text(str(block.get("text") or ""), from_end=index == 0),
+            }
+            for index, block in enumerate(original_blocks)
+        ],
+    }
+    report_path = scene_pair_seam_report_path(book_root, chapter_num, scene_a_id, scene_b_id)
+    _write_json(report_path, payload)
+    return {
+        "status": status,
+        "report_path": report_path.relative_to(book_root).as_posix(),
+        "repair_action_count": payload["repair_action_count"],
+        "issue_counts_before": dict(payload["before"]["issue_counts"]),
+        "issue_counts_after": dict(payload["after"]["issue_counts"]),
+        "scene_artifacts": scene_artifacts,
+    }
 
 
 def finalize_locked_chapter(book_root: Path, outline: Dict[str, Any], chapter_num: int) -> Dict[str, Any]:

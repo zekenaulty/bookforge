@@ -139,6 +139,7 @@ def reconcile_main_branch_transition(
         "pre_reconciliation_status": requested_status,
         "state_change_status": state_change_status,
         "canonical_change_status": canonical_change_status,
+        "canonical_changed": canonical_change_status == "canonical",
         "integrity_change": integrity_change,
         "integrity_status_before": before.integrity_status if before is not None else None,
         "integrity_status_after": after.integrity_status if after is not None else None,
@@ -169,6 +170,7 @@ def reconcile_branch_transition(
     details: Dict[str, Any] = {
         "pre_reconciliation_status": requested_status,
         "branch_change_status": branch_change_status,
+        "canonical_changed": False,
         "integrity_change": integrity_change,
         "integrity_status_before": before.integrity_status if before is not None else None,
         "integrity_status_after": after.integrity_status if after is not None else None,

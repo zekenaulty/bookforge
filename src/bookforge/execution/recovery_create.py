@@ -144,6 +144,12 @@ def create_recovery_branch(workspace: Path, request: ExecutionRequest) -> Execut
         "anchor": recovery_anchor.to_dict(),
         "scope": recovery_scope.to_dict(),
         "status": "active",
+        "cleanliness_status": "isolated_not_clean",
+        "cleanliness_note": (
+            "Recovery branch creation snapshots current branch state and materializes recovery evidence. "
+            "The branch is isolated, but it is not clean until quarantine, normalization, invalidation, rebuild, "
+            "redraft, and validation complete."
+        ),
         "materialized_inputs": copied_inputs,
         "scope_output_ranges": output_ranges,
     }
@@ -159,6 +165,16 @@ def create_recovery_branch(workspace: Path, request: ExecutionRequest) -> Execut
         details={
             "anchor": recovery_anchor.to_dict(),
             "scope": recovery_scope.to_dict(),
+            "cleanliness_status": "isolated_not_clean",
+            "cleanliness_note": payload["cleanliness_note"],
+            "required_cleanup_actions": [
+                "quarantine_artifacts",
+                "normalize_outline_scope",
+                "invalidate_scope_outputs",
+                "rebuild_state_scope",
+                "redraft_scope",
+                "validate_recovery_branch",
+            ],
             "materialized_inputs": copied_inputs,
             "scope_output_ranges": output_ranges,
         },

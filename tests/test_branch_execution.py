@@ -346,6 +346,7 @@ def test_branch_apply_scene_commit_writes_only_to_branch_snapshot(tmp_path: Path
     assert execution_result["action"] == "apply_scene_commit"
     assert execution_result["node"]["branch_id"] == "rewrite-scene1"
     assert "canonical_change_status" not in execution_result["details"]
+    assert execution_result["details"]["canonical_changed"] is False
     assert execution_result["details"]["branch_change_status"] == "changed"
 
 
@@ -593,6 +594,7 @@ def test_rerun_freeze_section_on_branch_emits_branch_local_reconciliation(tmp_pa
     assert branch_execution_result["status"] == "promotion_required"
     assert branch_execution_result["details"]["pre_reconciliation_status"] == "promotion_required"
     assert branch_execution_result["details"]["branch_change_status"] == "changed"
+    assert branch_execution_result["details"]["canonical_changed"] is False
     assert branch_execution_result["details"]["pre_revision_id"] != branch_execution_result["details"]["post_revision_id"]
     assert "canonical_change_status" not in branch_execution_result["details"]
 

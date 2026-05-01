@@ -1,0 +1,86 @@
+{
+  "schema_version": "nanda_visual_skill_fixture_v1",
+  "verified_on": "2026-04-28",
+  "bookforge_surfaces": {
+    "static_projection": "bookforge.query.get_capability_projection(workspace, book_id=book_id)",
+    "legal_actions": "bookforge.query.list_execution_options(workspace, ScopeSelector(book_id=book_id, branch_id=branch_id, workflow_family=\"visual_assets\"))",
+    "readiness": "bookforge.query.get_visual_action_readiness(workspace, book_id=book_id, action=action, visual_purpose=purpose, provider_model=model)",
+    "provider_descriptors": "bookforge.query.list_visual_provider_descriptors()",
+    "artifact_index": "bookforge.query.get_visual_asset_index(workspace, book_id, branch_id=branch_id)",
+    "prompt_plan_detail": "bookforge.query.get_visual_prompt_plan_detail(workspace, book_id, prompt_plan_ref, branch_id=branch_id)",
+    "asset_detail": "bookforge.query.get_visual_asset_detail(workspace, book_id, asset_id, branch_id=branch_id)",
+    "plan_action": "bookforge.execution.plan_visual_asset_action(workspace, build_plan_visual_asset_request(...))",
+    "generate_action": "bookforge.execution.generate_visual_asset_action(workspace, build_generate_visual_asset_request(...))"
+  },
+  "nanda_wiring_expectations": [
+    {
+      "capability_id": "action.plan_visual_asset",
+      "nanda_bucket": "wired_when_bridge_route_exists",
+      "approval_required": false,
+      "expected_inputs": ["book_id", "prompt_text", "visual_purpose", "provider_model"],
+      "expected_outputs": ["execution_result_v1", "visual_prompt_plan"],
+      "artifact_statuses": ["provisional"]
+    },
+    {
+      "capability_id": "action.generate_visual_asset",
+      "nanda_bucket": "wired_when_bridge_route_exists_and_spend_gate_exists",
+      "approval_required": true,
+      "expected_inputs": ["book_id", "prompt_plan_path", "allow_spend", "provider_model"],
+      "expected_outputs": ["execution_result_v1", "visual_image", "visual_asset_manifest"],
+      "artifact_statuses": ["provisional", "diagnostic"],
+      "approval_copy": "This will call a live image provider and may spend credits."
+    },
+    {
+      "capability_id": "query.visual_asset_index",
+      "nanda_bucket": "queryable",
+      "approval_required": false,
+      "expected_outputs": ["prompt_plans", "assets"]
+    },
+    {
+      "capability_id": "readiness.visual_action_readiness",
+      "nanda_bucket": "queryable",
+      "approval_required": false,
+      "expected_outputs": ["ready", "allowed", "missing_prerequisites", "refusal_reasons", "provider"]
+    }
+  ],
+  "provider_examples": [
+    {
+      "model": "nano-banana",
+      "status": "adapter_ready",
+      "best_first_use": "background_layer",
+      "credential": "GEMINI_API_KEY or GOOGLE_API_KEY",
+      "transparent_background_supported": false
+    },
+    {
+      "model": "gpt-image-2",
+      "status": "adapter_ready",
+      "best_first_use": "scene_illustration",
+      "credential": "OPENAI_API_KEY or OPENAI_KEY",
+      "transparent_background_supported": false
+    },
+    {
+      "model": "grok-imagine-image",
+      "status": "experimental_descriptor",
+      "best_first_use": "inspectable only",
+      "credential": "XAI_API_KEY",
+      "transparent_background_supported": false
+    }
+  ],
+  "refusal_examples": [
+    {
+      "request": "transparent foreground using gpt-image-2",
+      "expected_refusal_reasons": ["unsupported_visual_purpose", "unsupported_transparent_background"],
+      "nanda_behavior": "Explain that this provider cannot produce an alpha layer; offer a supported background/scene illustration or wait for a transparency-capable provider."
+    },
+    {
+      "request": "generate visual asset without prompt plan",
+      "expected_legal_action_refusal": "generate_visual_asset requires an existing visual prompt plan.",
+      "nanda_behavior": "Run or offer plan_visual_asset first."
+    },
+    {
+      "request": "generate visual asset without allow_spend",
+      "expected_execution_refusal": "generate_visual_asset requires explicit allow_spend=true.",
+      "nanda_behavior": "Ask for spend approval before dispatch."
+    }
+  ]
+}

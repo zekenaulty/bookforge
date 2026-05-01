@@ -4,11 +4,13 @@ This folder contains per-command help with exact usage and examples.
 
 Runtime family vocabulary
 - `deep_outline`: full batch outline generation under `bookforge outline generate`
+- `thin_outline`: provider-authored starter/thin outline artifacts from a created BookIntent under `bookforge workflow draft-starter-outline`
 - `section_local_outline`: section-scoped freeze/materialization under `bookforge workflow ...`
 - `section_write`: lower-level prose loop under `bookforge run`
 - `resume_paused_section`: truthful main-branch same-lineage resume adapter under `bookforge workflow resume-paused-section`
-- `thin_outline`: reserved vocabulary, not a public command yet
 - `recovery_import`: explicit recovery/import lineage, not a same-family resume
+- `author_assets`: versioned author persona creation/refinement under `workspace/authors`
+- `book_intent`: author-only seed, synopsis, approval, and canonical create-book transition
 
 Result truth
 - Supervised execution results classify outcomes as one of:
@@ -27,6 +29,32 @@ Result truth
   - `post_revision_id`
 - Programmatic execution discovery now has a first-class seam:
   - Python:
+    - `bookforge.query.get_capability_projection(...)`
+    - `bookforge.query.list_author_profiles(...)`
+    - `bookforge.query.get_author_profile(...)`
+    - `bookforge.query.list_book_intents(...)`
+    - `bookforge.query.get_book_intent(...)`
+    - `bookforge.execution.build_create_author_request(...)`
+    - `bookforge.execution.create_author_action(...)`
+    - `bookforge.execution.build_refine_author_request(...)`
+    - `bookforge.execution.refine_author_action(...)`
+    - `bookforge.execution.build_draft_book_intent_request(...)`
+    - `bookforge.execution.draft_book_intent_action(...)`
+    - `bookforge.execution.build_approve_book_intent_request(...)`
+    - `bookforge.execution.approve_book_intent_action(...)`
+    - `bookforge.execution.build_create_book_from_intent_request(...)`
+    - `bookforge.execution.create_book_from_intent_action(...)`
+    - `bookforge.execution.build_draft_starter_outline_request(...)`
+    - `bookforge.execution.draft_starter_outline_from_intent(...)`
+    - `bookforge.query.list_book_cards(...)`
+    - `bookforge.query.get_book_reader_view(...)`
+    - `bookforge.query.get_book_reader_anchor(...)`
+    - `bookforge.query.get_branch_inventory(...)`
+    - `bookforge.query.get_branch_detail(...)`
+    - `bookforge.query.get_branch_artifact_index(...)`
+    - `bookforge.query.get_branch_diff_summary(...)`
+    - `bookforge.query.get_recovery_anchor_candidates(...)`
+    - `bookforge.query.get_recovery_plan_preview(...)`
     - `bookforge.execution.build_create_assembly_branch_request(...)`
     - `bookforge.execution.create_assembly_branch_action(...)`
     - `bookforge.execution.build_create_branch_request(...)`
@@ -69,6 +97,17 @@ Result truth
     - `bookforge.execution.repair_scene_prose(...)`
     - `bookforge.execution.build_apply_scene_commit_request(...)`
     - `bookforge.execution.apply_scene_commit(...)`
+    - `bookforge.execution.build_continue_scene_request(...)`
+    - `bookforge.execution.continue_scene(...)`
+    - `bookforge.query.get_author_loop_envelopes(...)`
+    - `bookforge.execution.build_align_scene_pair_seam_request(...)`
+    - `bookforge.execution.align_scene_pair_seam_action(...)`
+    - `bookforge.execution.build_plan_bridge_scene_insertion_request(...)`
+    - `bookforge.execution.plan_bridge_scene_insertion_action(...)`
+    - `bookforge.execution.build_apply_bridge_scene_insertion_request(...)`
+    - `bookforge.execution.apply_bridge_scene_insertion_action(...)`
+    - `bookforge.query.get_chapter_seam_queue(...)`
+    - `bookforge.query.get_scene_pair_seam_detail(...)`
     - `bookforge.execution.build_write_section_request(...)`
     - `bookforge.execution.write_frozen_section(...)`
     - `bookforge.query.list_appearance_projection_views(...)`
@@ -76,6 +115,9 @@ Result truth
     - `bookforge.query.get_scene_context_projection(...)`
     - `bookforge.query.get_thought_context_projection(...)`
     - `bookforge.query.get_scene_phase_readiness(...)`
+    - `bookforge.query.get_next_writing_target(...)`
+    - `bookforge.query.get_writing_bootstrap_status(...)`
+    - `bookforge.query.get_writing_gate_status(...)`
     - `bookforge.query.get_outline_lineage_audit(...)`
     - `bookforge.query.get_section_lineage_matrix(...)`
     - `bookforge.query.get_stale_outline_artifact_inventory(...)`
@@ -96,17 +138,47 @@ Result truth
     - `bookforge.execution.redraft_scope(...)`
     - `bookforge.execution.validate_recovery_branch(...)`
     - `bookforge.execution.promote_recovery_branch(...)`
+    - `bookforge.query.list_visual_provider_descriptors(...)`
+    - `bookforge.query.get_visual_action_readiness(...)`
+    - `bookforge.query.get_visual_asset_index(...)`
+    - `bookforge.query.get_visual_prompt_plan_detail(...)`
+    - `bookforge.query.get_visual_asset_detail(...)`
+    - `bookforge.execution.build_plan_visual_asset_request(...)`
+    - `bookforge.execution.plan_visual_asset_action(...)`
+    - `bookforge.execution.build_generate_visual_asset_request(...)`
+    - `bookforge.execution.generate_visual_asset_action(...)`
   - `bookforge run` now provides the batch/operator macro over the extracted scene-phase execution path.
   - section-level write wrappers now use a dedicated section-range macro over that same extracted path instead of parameterizing `bookforge run` directly.
   - CLI:
+    - `bookforge capabilities --json`
+    - `bookforge author list`
+    - `bookforge author profile <author_ref>`
+    - `bookforge author create`
+    - `bookforge author refine <author_ref>`
+    - `bookforge book list`
+    - `bookforge book reader`
+    - `bookforge book reader-anchor`
+    - `bookforge book intent list`
+    - `bookforge book intent show`
+    - `bookforge book intent draft`
+    - `bookforge book intent approve`
+    - `bookforge book intent create`
+    - `bookforge workflow branch-inventory`
+    - `bookforge workflow branch-detail`
+    - `bookforge workflow branch-artifact-index`
+    - `bookforge workflow branch-diff-summary`
     - `bookforge workflow legal-actions`
+    - `bookforge workflow draft-starter-outline`
     - `bookforge workflow legal-actions --branch-id <id>`
     - `bookforge workflow legal-actions --fork-group-id <id>`
     - `bookforge workflow legal-actions --scene <s>`
+    - `bookforge workflow legal-actions --workflow-family visual_assets --json`
     - `bookforge workflow outline-lineage-audit`
     - `bookforge workflow section-lineage-matrix`
     - `bookforge workflow stale-outline-artifacts`
     - `bookforge workflow outline-repair-candidates`
+    - `bookforge workflow recovery-anchor-candidates`
+    - `bookforge workflow recovery-plan-preview`
     - `bookforge workflow create-recovery-branch`
     - `bookforge workflow recovery-readiness`
     - `bookforge workflow recovery-health`
@@ -132,6 +204,12 @@ Result truth
     - `bookforge workflow generate-continuity-pack`
     - `bookforge workflow scene-readiness`
     - `bookforge workflow scene-readiness --branch-id <id>`
+    - `bookforge workflow next-writing-target`
+    - `bookforge workflow next-writing-target --branch-id <id>`
+    - `bookforge workflow writing-bootstrap`
+    - `bookforge workflow writing-bootstrap --branch-id <id>`
+    - `bookforge workflow writing-gates`
+    - `bookforge workflow writing-gates --branch-id <id>`
     - `bookforge workflow write-scene-prose`
     - `bookforge workflow write-scene-prose --branch-id <id>`
     - `bookforge workflow state-repair-scene-patch`
@@ -139,7 +217,22 @@ Result truth
     - `bookforge workflow repair-scene-prose`
     - `bookforge workflow apply-scene-commit`
     - `bookforge workflow apply-scene-commit --branch-id <id>`
+    - `bookforge workflow continue-scene`
+    - `bookforge workflow continue-scene --branch-id <id>`
+    - `bookforge workflow author-loop-envelopes`
+    - `bookforge workflow chapter-seam-queue`
+    - `bookforge workflow scene-pair-seam-detail`
+    - `bookforge workflow align-scene-pair-seam`
+    - `bookforge workflow plan-bridge-scene-insertion`
+    - `bookforge workflow apply-bridge-scene-insertion`
     - `bookforge workflow write-section --branch-id <id>`
+    - `bookforge visual providers`
+    - `bookforge visual readiness`
+    - `bookforge visual plan`
+    - `bookforge visual generate`
+    - `bookforge visual artifacts`
+    - `bookforge visual asset`
+    - `bookforge visual prompt-plan`
 
 Lineage rule
 - Immutable run artifacts under `outline/pipeline_runs/<run_id>/...` are the preferred lineage anchors.
@@ -155,6 +248,7 @@ Stub commands
 Commands
 - init: docs/help/init.md
 - author generate: docs/help/author_generate.md
+- capabilities: docs/help/capabilities.md
 - workflow: docs/help/workflow.md
 - outline generate: docs/help/outline_generate.md
 - outline backup: docs/help/outline_backup.md
@@ -167,5 +261,8 @@ Commands
 - book set-current (stub): docs/help/book_set_current.md
 - book show-current (stub): docs/help/book_show_current.md
 - book clear-current (stub): docs/help/book_clear_current.md
+- book list: docs/help/book_list.md
+- book reader: docs/help/book_reader.md
+- visual: docs/help/visual.md
 - book reset: docs/help/book_reset.md
 - book update-templates: docs/help/book_update_templates.md

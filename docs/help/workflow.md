@@ -27,6 +27,38 @@ Lifecycle
 
 Commands
 
+## `bookforge workflow draft-starter-outline`
+
+Purpose
+- Use the outline provider to author starter/thin outline run artifacts from a created BookIntent.
+- This is the public bridge from a newly created book shell to workflow initialization.
+- It writes immutable source artifacts under `outline/pipeline_runs/<run_id>/`.
+- It is not the full multi-phase `bookforge outline generate` deep-outline pipeline.
+
+Usage
+- `bookforge workflow draft-starter-outline --book <id> [--run-id <run>] [--chapters N] [--sections-per-chapter N] [--scenes-per-section N] [--overwrite] [--json]`
+
+Behavior
+- Requires `book.json` and a copied `book_intent.json` with status `created`.
+- Calls the configured outline provider once to author the starter/thin outline.
+- Does not initialize workflow state, freeze a section, create a branch, or write prose.
+- Updates outline latest pointers so `workflow init` can consume a truthful immutable run id.
+- Refuses to overwrite once workflow state has already been initialized.
+- Current implementation note:
+  - this command routes through the narrow engine action `draft_starter_outline_from_intent`
+  - the resulting workflow family is `thin_outline`
+  - the action exists to close the BookIntent -> workflow bootstrap gap, not to replace the full deep outline pipeline
+  - later adaptive authoring may outline narrower missing fragments at scene/section scope instead of rerunning this starter action
+
+Recommended sequence
+- `bookforge book intent draft`
+- `bookforge book intent approve`
+- `bookforge book intent create`
+- `bookforge workflow draft-starter-outline`
+- `bookforge workflow init`
+- `bookforge workflow freeze-section`
+- branch-local writing actions such as `create-branch`, `scene-readiness`, and `continue-scene`
+
 ## `bookforge workflow init`
 
 Purpose
@@ -70,6 +102,7 @@ Behavior
   - `create_assembly_branch`
   - `create_branch`
   - `discard_branch`
+  - `draft_starter_outline_from_intent`
   - `finalize_chapter_from_locked_sections`
   - `initialize_section_workflow`
   - `freeze_section_from_phase03_artifact`
@@ -77,6 +110,7 @@ Behavior
   - `promote_branch_to_main`
   - `record_assembly_validation`
   - `resume_paused_section`
+  - `continue_scene` when scene scope is selected
   - `plan_scene` when scene scope is selected
   - `preflight_scene_state` when scene scope is selected
   - `generate_continuity_pack` when scene scope is selected
@@ -88,6 +122,9 @@ Behavior
   - `lint_scene_prose` when scene scope is selected
   - `repair_scene_prose` when scene scope is selected
   - `apply_scene_commit` when scene scope is selected
+  - `align_scene_pair_seam` when a derived branch has adjacent scene prose available
+  - `plan_bridge_scene_insertion` when a derived branch has an adjacent scene pair in the outline sequence
+  - `apply_bridge_scene_insertion` when a derived branch has an existing bridge-scene insertion plan
   - `create_recovery_branch` when lineage contamination exists, or when recovery scope is explicitly selected with `workflow_family=recovery_import`
   - `quarantine_artifacts` on a recovery branch
   - `normalize_outline_scope` on a recovery branch
@@ -100,6 +137,7 @@ Behavior
 - Shows whether each action is allowed right now or blocked.
 - Includes refusal reasons for blocked actions so operators do not have to infer transition rules from docs alone.
 - If outline lineage audit reports `chimera_risk`, unsafe main-branch mutation actions are blocked with affected scope details. Use `outline-lineage-audit` and `section-lineage-matrix` before repair.
+- For static engine capability discovery, use `bookforge capabilities --json` instead. Capability projection describes what BookForge supports; legal actions describe what is allowed for this exact scope right now.
 - `main` branch examples:
   - `create_assembly_branch` when fork-group scope resolves to sibling branches that can be assembled
   - `finalize_chapter_from_locked_sections` when a chapter's sections are already locked
@@ -111,6 +149,7 @@ Behavior
   - `preflight_scene_state` when the active cursor scene has a scene card but no preflight patch
   - `generate_continuity_pack` when the active cursor scene has scene-card and preflight artifacts but no continuity pack
   - `resume_paused_section`
+  - `continue_scene` when the active cursor scene has a ready recommended scene-phase action
   - `write_scene_prose` when the active cursor scene has the required scene-card, preflight, continuity, and style-anchor inputs
   - `refresh_character_appearance_projection` when a scene scope has a current execution node and the caller wants a derived, non-mutating appearance projection for the scene/cast
   - `draft_scene_setting_projection` when a scene scope has a current execution node and the caller wants to record provisional author setting intent
@@ -124,7 +163,77 @@ Behavior
   - `discard_branch`
   - `record_assembly_validation` for active assembly branches
   - `promote_branch_to_main` once the branch reaches `promote_ready`
+  - `align_scene_pair_seam` for adjacent written scene pairs that need local transition re-authoring
+  - `plan_bridge_scene_insertion` for adjacent scene pairs where the honest fix may require a new connective beat
+  - `apply_bridge_scene_insertion` to materialize a planned bridge scene into the branch-local outline sequence
   - `quarantine_artifacts`, `normalize_outline_scope`, `invalidate_scope_outputs`, `rebuild_state_scope`, `redraft_scope`, `validate_recovery_branch`, and `promote_recovery_branch` for branches created with recovery manifests
+
+## `bookforge workflow branch-inventory`
+
+Purpose
+- Show derived branch and fork-group inventory for one book.
+
+Usage
+- `bookforge workflow branch-inventory --book <id>`
+- `bookforge workflow branch-inventory --book <id> --json`
+
+Behavior
+- Uses `bookforge.query.get_branch_inventory(...)`.
+- Reports branch ids, fork groups, lifecycle state, merge operation, source run, parent/current nodes, validation status, and stale-parent warnings.
+- This is read-only and safe to run before choosing recovery, rebase, discard, or promotion actions.
+
+## `bookforge workflow branch-detail`
+
+Purpose
+- Show a single branch workbench view for Nanda or an operator.
+- This is the branch-live inspection surface after `branch-inventory` identifies a branch.
+
+Usage
+- `bookforge workflow branch-detail --book <id> --branch-id <id> [--chapter <n>] [--section <m>] [--scene <s>] [--max-text-chars <n>]`
+- `bookforge workflow branch-detail --book <id> --branch-id <id> --json`
+
+Behavior
+- Uses `bookforge.query.get_branch_detail(...)`.
+- Bundles the branch manifest/current node, main node, branch-local workspace status, legal execution options, optional reader selection, optional scene-phase readiness, and recovery health when the branch is a recovery branch.
+- Returns warnings for missing branches, stale parents, unavailable subviews, and non-recovery branches where recovery health is not applicable.
+- This command does not mutate the branch or main. It is intended to let Nanda build a real branch inspector before dispatching branch-local write, recovery, rebase, discard, or promotion actions.
+
+## `bookforge workflow branch-artifact-index`
+
+Purpose
+- Show a read-only artifact inventory for main or one derived branch.
+- This is the low-level branch inspector surface for Nanda when it needs to know what a branch contains before comparing, validating, or promoting it.
+
+Usage
+- `bookforge workflow branch-artifact-index --book <id> [--branch-id <id>] [--limit <n>]`
+- `bookforge workflow branch-artifact-index --book <id> --branch-id <id> --json`
+
+Behavior
+- Uses `bookforge.query.get_branch_artifact_index(...)`.
+- Lists artifact paths without loading prose content.
+- Classifies artifacts by broad class such as `outline`, `prose`, `scene_metadata`, `scene_context`, `continuity_context`, `state`, and `supervision`.
+- Compares derived branches to main with relationship labels:
+  - `inherited_from_main`
+  - `branch_modified`
+  - `branch_only`
+  - `canonical_main`
+- This is read-only. It is not a diff, promotion, cleanup, or validation command.
+
+## `bookforge workflow branch-diff-summary`
+
+Purpose
+- Summarize branch-local artifact changes against main.
+- This is the operator/author workbench companion to `branch-artifact-index`.
+
+Usage
+- `bookforge workflow branch-diff-summary --book <id> --branch-id <id> [--limit <n>]`
+- `bookforge workflow branch-diff-summary --book <id> --branch-id <id> --json`
+
+Behavior
+- Uses `bookforge.query.get_branch_diff_summary(...)`.
+- Reports changed artifact records where the branch has files that are modified from main or only exist on the branch.
+- Does not read prose content and does not promote or validate the branch.
+- Current comparison target is `main`.
 
 ## Outline Lineage Audit Commands
 
@@ -137,6 +246,8 @@ Commands
 - `bookforge workflow section-lineage-matrix --book <id> [--branch-id <id>] [--chapter <n>] [--section <m>] [--json]`
 - `bookforge workflow stale-outline-artifacts --book <id> [--branch-id <id>] [--json]`
 - `bookforge workflow outline-repair-candidates --book <id> [--branch-id <id>] [--json]`
+- `bookforge workflow recovery-anchor-candidates --book <id> [--branch-id <id>] [--json]`
+- `bookforge workflow recovery-plan-preview --book <id> [--anchor-type <type>] [--source-run-id <run>] [--branch-id <planned-id>] [--salvage-policy <policy>] [--json]`
 
 Behavior
 - `outline-lineage-audit` returns the global verdict plus localized evidence:
@@ -162,6 +273,15 @@ Behavior
   - `restore_affected_sections_from_frozen_chapter_projection`
   - `quarantine_stale_section_drafts`
   - `shelf_book`
+- `recovery-anchor-candidates` turns lineage evidence into author-facing timeline anchor choices:
+  - `declared_source_run`
+  - `latest_outline_run`
+  - `frozen_chapter_projection`
+  - `manual_hybrid`
+  - `shelf`
+- If exactly one coherent non-shelf timeline is selectable, `recovery-anchor-candidates` returns `auto_selected_candidate_id` so Nanda can proceed without asking a redundant question.
+- If multiple conflicting coherent timelines exist, Nanda must ask the user which timeline to inhabit before mutation.
+- `recovery-plan-preview` converts the selected or auto-selected anchor into an ordered plan using existing recovery primitives.
 - Mutation-capable recovery actions are now available, but only through explicit recovery branches with receipts and validation gates.
 - Nanda should use these surfaces before answering content questions about contaminated books or before presenting author repair choices.
 
@@ -227,6 +347,7 @@ Recovery sequence
 
 Truth rules
 - Recovery mutation never writes directly to contaminated `main`.
+- `create-recovery-branch` does not create a clean branch. It creates an isolated recovery branch that still contains copied evidence and branch-local copies of current state; cleanup starts with `quarantine-artifacts` and `normalize-outline-scope`.
 - Every branch-local recovery receipt includes a postcondition snapshot with branch health, outline lineage status, completed/remaining required receipts, blockers/warnings, approval metadata, and the recommended next recovery action.
 - Receipt prerequisites are status-aware: a failed validation attempt does not count as a completed validation receipt.
 - Existing polluted prose is salvage/reference material only unless later redrafted or explicitly promoted by a future tool.
@@ -299,6 +420,99 @@ Behavior
   - `apply_scene_commit`
 - This is the truthful query surface behind deeper author control.
 - It exists so callers do not have to infer scene readiness from file presence or persona text.
+
+## `bookforge workflow next-writing-target`
+
+Purpose
+- Show the next query-only writing target for a book or branch.
+- This is the BookForge evidence surface an external author loop can use to decide whether to keep calling `continue_scene`, stop, ask the user, lock a section, freeze the next section, or treat the book as complete.
+
+Usage
+- `bookforge workflow next-writing-target --book <id> [--branch-id <id>] [--chapter <n>] [--section <m>] [--scene <s>]`
+- `bookforge workflow next-writing-target --book <id> --branch-id <id> --json`
+
+Behavior
+- Does not mutate `main`, a branch, prose, outline, state, or phase artifacts.
+- Reports:
+  - status: `ready`, `blocked`, or `complete`
+  - current scene target
+  - next scene target when a committed scene can advance within the same section
+  - next section or chapter gate when scene writing cannot continue
+  - `book_complete`
+  - `can_continue`
+  - `recommended_action`
+  - `blocked_reason`
+  - branch/node context
+- Uses the selected branch snapshot when `--branch-id` targets a derived branch.
+- Treats `continue_scene` as the recommended one-step authoring action only when a scene-phase action is actually ready.
+- On `main`, a committed terminal scene stops at the section lock gate instead of pretending scene writing can continue.
+- On derived branches, committed scene files may be replaceable branch baselines for rewrite work; canonical mutation still requires explicit promotion.
+
+## `bookforge workflow writing-bootstrap`
+
+Purpose
+- Show the read-only setup-to-writing status for a created book.
+- This is the BookForge evidence surface Nanda can use after BookIntent creation to determine whether the next move is starter outline generation, workflow initialization, section freeze, branch creation, or branch-local `continue_scene`.
+
+Usage
+- `bookforge workflow writing-bootstrap --book <id> [--chapter <n>] [--section <m>] [--scene <s>]`
+- `bookforge workflow writing-bootstrap --book <id> --branch-id <id> --chapter <n> --section <m> --scene <s> --json`
+
+Behavior
+- Does not mutate `main`, create outline artifacts, call a provider, create branches, or write prose.
+- Reports:
+  - overall bootstrap status
+  - whether branch-local writing can start now
+  - the recommended next action
+  - required approval class
+  - target selector and target branch, when resolved
+  - per-stage status for:
+    - `book_workspace`
+    - `book_intent`
+    - `starter_outline`
+    - `outline_integrity`
+    - `workflow_registry`
+    - `section_materialization`
+    - `branch_workspace`
+    - `scene_continue`
+  - artifact refs and statuses for known BookIntent, outline, and workflow registry artifacts
+  - warnings and blocked reasons
+- Uses `legal-actions` evidence before recommending setup actions.
+- Blocks on `chimera_risk` and points callers toward lineage/recovery diagnostics rather than letting a new author loop start on contaminated outline state.
+- Treats existing outline artifacts as enough to continue legacy/pre-intent books, but warns when `book_intent.json` is missing or not created.
+- Keeps `draft_starter_outline_from_intent` separate from execution: that action is provider-authored and must be run explicitly; this query only says whether it is the next legal setup step.
+
+## `bookforge workflow writing-gates`
+
+Purpose
+- Show read-only writing gates for the selected book, branch, chapter, section, or scene.
+- This is the BookForge readiness surface for Nanda's author loop and workbench cards.
+
+Usage
+- `bookforge workflow writing-gates --book <id> [--branch-id <id>] [--chapter <n>] [--section <m>] [--scene <s>]`
+- `bookforge workflow writing-gates --book <id> --branch-id <id> --json`
+
+Behavior
+- Does not mutate any artifacts.
+- Wraps `next-writing-target` evidence and emits gate rows for:
+  - `scene_continue`
+  - `section_lock`
+  - `chapter_finalize`
+  - `book_continue`
+  - `manuscript_export`
+- Each gate row reports:
+  - status
+  - readiness
+  - scope
+  - action, when BookForge has a real action for the gate
+  - blocked reason
+  - details
+- The section and chapter gates are deliberately conservative:
+  - `section_lock` is currently main-branch only.
+  - `chapter_finalize` is currently main-branch only.
+  - derived branch section locking is branch-local and does not mutate canonical `main`.
+- `manuscript_export` is reported as blocked because compile/export quality gates are still a designed gap.
+- Book completion comes from this BookForge gate surface, not from Nanda cursor inference.
 
 ## Projection Query Surfaces
 
@@ -434,6 +648,10 @@ Behavior
 - Emits authoritative or derived produced-artifact receipts instead of forcing callers to infer commit success from filesystem changes.
 - On `main`, existing committed scene files are protected and block accidental overwrite.
 - In a derived branch, existing copied scene files are replaceable branch-local baselines; replacement preserves `.original` backups before writing the new branch-local authoritative scene files.
+- Reconciled receipts now expose `canonical_changed` explicitly:
+  - `true` only when the action changed canonical `main`
+  - `false` for branch-local commits
+- Branch-local commit receipts expose `branch_change_status` and intentionally do not expose `canonical_change_status`; promotion remains the separate canonical operation.
 - Current implementation note:
   - this command routes through the narrow engine action `apply_scene_commit`
   - the action emits a reconciled main-branch result on `main` or a branch-local reconciled result when `--branch-id` is selected
@@ -461,12 +679,14 @@ Purpose
 - Mark a frozen section locked after scene prose/meta files exist for every scene in the section.
 
 Usage
-- `bookforge workflow lock-section --book <id> --chapter <n> --section <m>`
+- `bookforge workflow lock-section --book <id> [--branch-id <id>] --chapter <n> --section <m>`
 
 Behavior
 - Validates that all required scene prose/meta files exist for the selected frozen section.
-- Commits the section as `locked` in canonical workflow state.
-- May also trigger chapter seam finalization when the chapter becomes fully locked.
+- Commits the section as `locked` in the selected execution root.
+- On `main`, this is a canonical workflow-state mutation.
+- On a derived branch, this is branch-local and emits `canonical_changed: false` with `branch_change_status`.
+- May also trigger chapter seam finalization in the selected execution root when the chapter becomes fully locked.
 - Current implementation note:
   - this command now routes through the narrow engine action `lock_section_from_written_state`
   - the CLI wrapper is no longer the only caller-visible implementation path
@@ -522,6 +742,245 @@ Behavior
 - Current implementation note:
   - this command routes through the narrow engine action `write_scene_prose`
   - the action emits explicit produced-artifact receipts so callers can inspect artifact truth without reverse-engineering phase-history files
+
+## `bookforge workflow continue-scene`
+
+Purpose
+- Execute exactly one recommended scene-phase child action for a selected scene.
+- This is the adaptive authoring macro Nanda can call repeatedly when it wants "continue this scene" behavior without hiding a full section batch.
+
+Usage
+- `bookforge workflow continue-scene --book <id> [--branch-id <id>] --chapter <n> --scene <s> [--section <m>]`
+- `bookforge workflow continue-scene --book <id> --chapter <n> --scene <s> --json`
+
+Behavior
+- Reads `ScenePhaseReadiness` for the selected scope.
+- Runs exactly the current `recommended_next_action`, for example:
+  - `plan_scene`
+  - `preflight_scene_state`
+  - `generate_continuity_pack`
+  - `write_scene_prose`
+  - `state_repair_scene_patch`
+  - `lint_scene_prose`
+  - `repair_scene_prose`
+  - `apply_scene_commit`
+- Returns a wrapper `ExecutionResult` with:
+  - `action=continue_scene`
+  - `child_action`
+  - `child_status`
+  - compact pre/post readiness refs
+  - before/after scene status
+  - before/after recommended next action
+  - `recommended_next_action`
+  - `stop_reason`
+  - `canonical_changed`
+  - child result/request ids
+  - produced artifact refs
+  - `author_loop_step_receipt`
+  - produced artifacts copied from the child result
+- Does not loop through the rest of the scene.
+- Does not choose a different action than the readiness surface recommends.
+- On a derived branch, writes against the branch snapshot/root just like the child action would.
+- On `main`, unsafe mutation is still gated by the same lineage and readiness rules as the underlying child action.
+- `stop_reason` is `null` when the author loop may continue immediately; otherwise it reports a loop-friendly reason such as `no_legal_action`, `provider_failed`, `branch_stale`, `tool_unavailable`, or `completed_scope`.
+- `author_loop_step_receipt` is the stable nested shape for Nanda loop jobs. It includes:
+  - `step_index`
+  - pre/post readiness refs
+  - child action/result/request refs
+  - produced artifact refs
+  - `canonical_changed`
+  - next recommended action
+  - stop reason
+
+## `bookforge workflow author-loop-envelopes`
+
+Purpose
+- Return query-only loop envelope options for Nanda's higher-level author work loop.
+- This is not an executor. It tells the orchestrator which loop shapes are currently supportable and what they would target.
+
+Usage
+- `bookforge workflow author-loop-envelopes --book <id> [--branch-id <id>] [--chapter <n>] [--section <m>] [--scene <s>]`
+- `bookforge workflow author-loop-envelopes --book <id> --branch-id <id> --chapter <n> --section <m> --scene <s> --json`
+
+Behavior
+- Reads next-writing-target and writing-gate state.
+- Returns envelope options such as:
+  - `continue_one_step`
+  - `continue_scene`
+  - `continue_section`
+  - `continue_chapter`
+- Each option reports:
+  - target scope
+  - branch id
+  - whether the envelope is ready
+  - target action
+  - allowed actions
+  - mutation scope
+  - approval requirement
+  - canonical-change expectation
+  - stop conditions
+  - blocked reason, when any
+- The current chapter envelope may include seam alignment and bridge-scene proposal as legal optional moves, but Nanda still owns loop policy, budgets, interruption, and user-choice handling.
+- This query lets Nanda offer "continue one step", "continue this scene", "continue this section", and "continue this chapter" without pretending BookForge has started a long autonomous process.
+
+## `bookforge workflow chapter-seam-queue`
+
+Purpose
+- Return a read-only chapter queue of adjacent scene-pair seam work.
+- This gives Nanda an evidence surface for `A -> B`, `B -> C`, `C -> D` seam choices instead of making the author agent infer pairs from prose files.
+
+Usage
+- `bookforge workflow chapter-seam-queue --book <id> --chapter <n> [--branch-id <id>]`
+- `bookforge workflow chapter-seam-queue --book <id> --branch-id <id> --chapter <n> --json`
+
+Behavior
+- Does not mutate any artifacts.
+- Reads the selected branch or `main` outline and chapter scene files.
+- Lists adjacent outline scene pairs in chapter order.
+- For each pair, reports:
+  - scene A and scene B ids
+  - section ids on each side
+  - scene markdown paths and existence
+  - existing scene-pair seam report path/status, when present
+  - `ready`, `blocked`, or `aligned`
+  - `align_scene_pair_seam` as the action for ready derived-branch pairs
+- Blocks `main` because semantic seam re-authoring must happen on a derived branch.
+- Marks a pair `aligned` when a prior scene-pair seam report has `status: aligned`.
+
+Operator notes
+- Use this before `align-scene-pair-seam` when the author loop is operating at chapter scope.
+- This query is a selector surface, not a repair action.
+- Nanda should show it as a seam work queue and still re-check legal actions/readiness before running a mutation.
+
+## `bookforge workflow scene-pair-seam-detail`
+
+Purpose
+- Return focused read-only detail for one adjacent scene-pair seam.
+- This is the post-queue inspector: Nanda can show whether a pair is ready, blocked, aligned, or still attention-required, and can display any existing pair seam report without raw artifact digging.
+
+Usage
+- `bookforge workflow scene-pair-seam-detail --book <id> --chapter <n> --scene-a <s> --scene-b <s> [--branch-id <id>]`
+- `bookforge workflow scene-pair-seam-detail --book <id> --branch-id <id> --chapter <n> --scene-a <s> --scene-b <s> --json`
+- `bookforge workflow scene-pair-seam-detail --book <id> --branch-id <id> --chapter <n> --scene-a <s> --scene-b <s> --summary-only --json`
+
+Behavior
+- Does not mutate any artifacts.
+- Validates that the requested pair is adjacent in the selected outline.
+- Reuses the same branch/main readiness policy as `chapter-seam-queue`.
+- Reports:
+  - pair readiness/status
+  - source scene paths and file existence
+  - existing pair seam report path/status
+  - before/after issue counts when a report exists
+  - repair action count and emitted scene artifact refs when a report exists
+  - next safe action, when applicable
+- JSON output includes the full report payload by default; use `--summary-only` to omit it.
+
+Operator notes
+- Use this after `chapter-seam-queue` when the author needs to explain one seam candidate or review an alignment result.
+- A report with `attention_required` is evidence, not a completed repair.
+- A detail result with `action: align_scene_pair_seam` still needs an explicit execution call before mutation happens.
+
+## `bookforge workflow align-scene-pair-seam`
+
+Purpose
+- Run bounded LLM-author seam alignment for one adjacent scene pair in a derived branch.
+- This is the scene A -> scene B repair shape the author wants: rewrite the end of scene A and beginning of scene B together, preserving events while fixing duplicate regrounding, repeated UI prompts, tense blending, and awkward overlap.
+
+Usage
+- `bookforge workflow align-scene-pair-seam --book <id> --branch-id <id> --chapter <n> --scene-a <s> --scene-b <s> [--section <m>]`
+- `bookforge workflow align-scene-pair-seam --book <id> --branch-id <id> --chapter <n> --scene-a <s> --scene-b <s> --json`
+
+Behavior
+- Requires a derived branch. It refuses on `main`.
+- Requires adjacent scene ids from the chapter outline sequence.
+- Requires both scene markdown files to exist in the selected branch snapshot.
+- Preserves `.original` scene copies before any successful replacement.
+- Runs the existing chapter seam LLM repair prompt contract against only the selected pair.
+- Writes a pair seam report under `draft/context/chapter_seams/ch_###/`.
+- If the final pair audit passes, writes fixed scene versions and updates the branch-local current scene files.
+- If issues remain, returns `attention_required` and leaves the report/artifacts for inspection rather than claiming the branch is clean.
+- Emits branch-local receipts with `canonical_changed: false`.
+- This is semantic re-authoring under scope constraints. It is not a deterministic text patcher.
+
+## `bookforge workflow plan-bridge-scene-insertion`
+
+Purpose
+- Produce a branch-local proposal for inserting a bridge scene between two adjacent scenes.
+- This is for cases where seam alignment cannot honestly fix the transition because the story needs a new connective beat.
+
+Usage
+- `bookforge workflow plan-bridge-scene-insertion --book <id> --branch-id <id> --chapter <n> --scene-a <s> --scene-b <s> [--section <m>] [--reason <text>]`
+- `bookforge workflow plan-bridge-scene-insertion --book <id> --branch-id <id> --chapter <n> --scene-a <s> --scene-b <s> --json`
+
+Behavior
+- Requires a derived branch. It refuses on `main`.
+- Requires adjacent scene ids from the chapter outline sequence.
+- Writes a provisional bridge-scene proposal under `draft/context/bridge_scenes/ch_###/`.
+- Does not mutate outline scene order.
+- Does not create a new scene card.
+- Does not renumber scenes or write prose.
+- Emits branch-local receipts with `canonical_changed: false`.
+- Nanda should treat this as planning evidence for an author choice, not as completed story insertion.
+
+## `bookforge workflow apply-bridge-scene-insertion`
+
+Purpose
+- Apply an existing branch-local bridge-scene insertion plan to the branch outline and scene sequence.
+- This materializes the author choice that a new connective beat is needed; it still does not write the bridge prose.
+
+Usage
+- `bookforge workflow apply-bridge-scene-insertion --book <id> --branch-id <id> --chapter <n> --scene-a <s> [--scene-b <s>] [--bridge-plan <path>]`
+- `bookforge workflow apply-bridge-scene-insertion --book <id> --branch-id <id> --chapter <n> --scene-a <s> --json`
+
+Behavior
+- Requires a derived branch. It refuses on `main`.
+- Requires an existing bridge-scene insertion plan for the adjacent scene pair.
+- Current first slice supports same-section bridge insertion only.
+- Inserts the bridge scene after scene A using branch-local integer scene renumbering.
+- Shifts following branch-local scene prose/meta, phase-history, setting, and appearance artifacts up by one scene id.
+- Updates branch-local `outline/outline.json`, `outline/snapshot_registry.json`, and rebuilt outline projection files.
+- Leaves the inserted scene unwritten so the normal scene-phase graph can run:
+  - `plan_scene`
+  - `preflight_scene_state`
+  - `generate_continuity_pack`
+  - `write_scene_prose`
+  - `state_repair_scene_patch`
+  - `lint_scene_prose`
+  - `apply_scene_commit`
+- Writes a diagnostic apply report under `draft/context/bridge_scenes/ch_###/`.
+- Emits branch-local receipts with `canonical_changed: false`.
+- Promotion to a parent branch or `main` remains a separate validation-gated branch operation.
+
+Nanda integration contract
+- Legal action key: `apply_bridge_scene_insertion`.
+- Static capability id: `action.apply_bridge_scene_insertion`.
+- Dynamic legality comes from `bookforge.workflow legal-actions` / `bookforge.query.list_execution_options(...)` for a derived branch scene scope.
+- A legal row becomes allowed only when:
+  - branch id is not `main`
+  - `chapter` and `scene` are selected
+  - the selected scene has an adjacent next scene in the branch outline
+  - the matching bridge-scene insertion plan exists
+- Expected success result:
+  - `status=success`
+  - `details.canonical_changed=false`
+  - `details.branch_change_status=changed`
+  - `details.inserted_scene_id=<n>`
+  - `details.recommended_next_actions=["plan_scene", "continue_scene"]`
+  - `artifact_paths.bridge_scene_insertion_apply_report`
+  - `artifact_paths.outline`
+  - `artifact_paths.snapshot_registry`
+- Expected produced artifacts:
+  - `bridge_scene_insertion_apply_report` with `artifact_status=diagnostic`
+  - `branch_outline` with `artifact_status=authoritative`
+  - `branch_snapshot_registry` with `artifact_status=authoritative`
+- Important refusals:
+  - `branch_required`: direct execution on `main`
+  - `missing_live_node`: no current branch execution node
+  - `stale_write`: expected node revision was superseded
+  - `scope_contract_violation`: expected node scope does not match the live node
+  - `bridge_scene_insertion_apply_failed`: missing/mismatched bridge plan, non-adjacent pair, unsupported plan shape, or failed branch-local materialization
+- A successful apply is not completed prose. It creates an unwritten branch-local bridge scene and hands control back to normal scene-phase writing.
 
 ## `bookforge workflow state-repair-scene-patch`
 
@@ -618,11 +1077,13 @@ Purpose
 - Run pairwise seam repair and chapter finalization for a chapter whose sections are already locked.
 
 Usage
-- `bookforge workflow finalize-chapter --book <id> --chapter <n>`
+- `bookforge workflow finalize-chapter --book <id> [--branch-id <id>] --chapter <n>`
 
 Behavior
-- Runs chapter seam repair/finalization against the currently locked chapter state when the chapter is not already finalized.
+- Runs chapter seam repair/finalization against the currently locked chapter state in the selected execution root when the chapter is not already finalized.
 - Returns `no_op` when the chapter is already finalized and has a recorded final markdown artifact.
+- On `main`, this is canonical.
+- On a derived branch, this updates only the branch snapshot and emits `canonical_changed: false` with `branch_change_status`.
 - Current implementation note:
   - this command now routes through the narrow engine action `finalize_chapter_from_locked_sections`
   - the CLI wrapper is no longer the only caller-visible implementation path
@@ -695,6 +1156,7 @@ Current implementation note
   - `state_repair_scene_patch`
   - `lint_scene_prose`
   - `repair_scene_prose`
+  - `continue_scene`
   - `write_frozen_section`
 - The first legal-next-action query seam now exists below the CLI:
   - `bookforge.query.list_execution_options(...)`
@@ -703,18 +1165,26 @@ Current implementation note
   - `bookforge.query.get_scene_phase_readiness(...)`
 - The lower-level commands still exist and have narrower responsibilities:
   - `bookforge outline generate` = `deep_outline`
+  - `bookforge workflow draft-starter-outline` = one outline-provider call for `thin_outline` starter source artifacts from BookIntent
   - `bookforge run` = `section_write`
 - `bookforge workflow init`, `bookforge workflow freeze-section`, `bookforge workflow write-section`, and `bookforge workflow resume-paused-section` now run through the extracted execution layer instead of directly owning orchestration.
 - `bookforge workflow lock-section` and `bookforge workflow finalize-chapter` now also run through the extracted execution layer instead of directly owning orchestration.
 - `bookforge workflow write-section`, `bookforge workflow resume-paused-section`, and `bookforge workflow advance-section` now use a dedicated section-range macro over the extracted scene-phase actions rather than calling the generic batch `run` surface directly.
 - `bookforge workflow advance-section` is still a macro convenience wrapper, but it now composes the extracted execution actions instead of calling its own orchestration path.
-- `thin_outline` remains reserved vocabulary for a future thinner batch surface and is not a public command today.
+- `thin_outline` is public only through the BookIntent-derived starter outline action; full multi-phase outline generation remains `deep_outline`.
 - Main-branch workflow commands emit reconciliation details alongside result status.
 - Scene-phase commands and `write-section` now accept `--branch-id <id>` for derived-branch execution roots.
 - Derived-branch lifecycle operations such as create/discard/promote/rebase are still a lower-level engine surface and are not exposed as public CLI commands yet.
 - `bookforge workflow legal-actions --branch-id <id>` is the current operator-facing way to inspect derived-branch action legality without calling Python directly.
 - `bookforge workflow legal-actions --fork-group-id <id>` is the current operator-facing way to inspect whether a main-branch fork group is eligible for assembly-branch creation.
 - `bookforge workflow legal-actions --scene <s>` is the current operator-facing way to expose scene-scoped execution options such as `write_scene_prose`.
+- `bookforge workflow continue-scene` is the adaptive one-step scene macro: it executes the current recommended scene-phase action and then returns updated readiness context.
+- `bookforge workflow author-loop-envelopes` is the query-only higher-level loop shape surface for Nanda. It does not execute a loop.
+- `bookforge workflow chapter-seam-queue` is the read-only adjacent scene-pair work queue for chapter-level author decisions.
+- `bookforge workflow scene-pair-seam-detail` is the read-only focused inspector for one adjacent scene-pair seam and its existing report.
+- `bookforge workflow align-scene-pair-seam` is the branch-only LLM seam-alignment action for adjacent written scene pairs.
+- `bookforge workflow plan-bridge-scene-insertion` is the branch-only bridge-scene proposal action. It does not insert or renumber scenes yet.
+- `bookforge workflow apply-bridge-scene-insertion` is the branch-only bridge materialization action. It updates the branch outline/sequence and then hands control back to scene-phase writing.
 - `bookforge workflow scene-readiness --branch-id <id>` is the operator-facing way to inspect branch-local scene-phase readiness without reading branch files directly.
 - `bookforge workflow create-branch`, `promote-branch`, `rebase-branch`, `discard-branch`, `create-assembly-branch`, `validate-assembly-branch`, and `record-assembly-validation` expose the first operator-facing branch lifecycle controls.
 - The extracted section materialization path on `main` now covers:
@@ -733,6 +1203,8 @@ Current implementation note
   - prose-repair generation without implicit state-repair/lint/commit
 
 Examples
+- Create starter outline artifacts from a newly created BookIntent book:
+  - `bookforge --workspace workspace workflow draft-starter-outline --book criticulous_the_rng_hellscape --chapters 1 --sections-per-chapter 1 --scenes-per-section 1`
 - Initialize workflow state from a known outline run:
   - `bookforge --workspace workspace workflow init --book criticulous_the_rng_hellscape --run-id 20260404_041439`
 - Freeze the first section:
@@ -759,6 +1231,8 @@ Examples
   - `bookforge --workspace workspace workflow generate-continuity-pack --book criticulous_the_rng_hellscape --chapter 1 --scene 1 --section 1`
 - Generate provisional prose for the active cursor scene only:
   - `bookforge --workspace workspace workflow write-scene-prose --book criticulous_the_rng_hellscape --chapter 1 --scene 1 --section 1`
+- Continue the active cursor scene by exactly one recommended scene-phase action:
+  - `bookforge --workspace workspace workflow continue-scene --book criticulous_the_rng_hellscape --chapter 1 --scene 1 --section 1`
 - Inspect scene-phase readiness inside a derived branch:
   - `bookforge --workspace workspace workflow scene-readiness --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --chapter 1 --scene 1 --section 1`
 - Create a scene rewrite branch from `main`:
@@ -767,8 +1241,22 @@ Examples
   - `bookforge --workspace workspace workflow create-branch --book criticulous_the_rng_hellscape --parent-branch-id chapter-1-rewrite --branch-id rewrite-ch1-sc1 --chapter 1 --section 1 --branch-role scene`
 - Generate provisional prose inside a derived branch without touching `main`:
   - `bookforge --workspace workspace workflow write-scene-prose --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --chapter 1 --scene 1 --section 1`
+- Continue a scene inside a derived branch by one recommended scene-phase action:
+  - `bookforge --workspace workspace workflow continue-scene --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --chapter 1 --scene 1 --section 1`
+- Inspect higher-level author loop envelopes for a branch-local scene:
+  - `bookforge --workspace workspace workflow author-loop-envelopes --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --chapter 1 --section 1 --scene 1`
+- Inspect adjacent seam work for a branch-local chapter:
+  - `bookforge --workspace workspace workflow chapter-seam-queue --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --chapter 1`
+- Inspect one adjacent seam pair and existing report evidence:
+  - `bookforge --workspace workspace workflow scene-pair-seam-detail --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --chapter 1 --scene-a 1 --scene-b 2`
 - Commit a rewritten scene inside a derived branch while preserving the branch snapshot's original scene as `.original` backup:
   - `bookforge --workspace workspace workflow apply-scene-commit --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --chapter 1 --scene 1 --section 1`
+- Align the transition between two adjacent branch-local scenes:
+  - `bookforge --workspace workspace workflow align-scene-pair-seam --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --chapter 1 --scene-a 1 --scene-b 2 --section 1`
+- Plan a provisional bridge scene between two adjacent branch-local scenes:
+  - `bookforge --workspace workspace workflow plan-bridge-scene-insertion --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --chapter 1 --scene-a 1 --scene-b 2 --section 1 --reason "transition needs a concrete travel beat"`
+- Apply the planned bridge scene to the branch outline sequence:
+  - `bookforge --workspace workspace workflow apply-bridge-scene-insertion --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --chapter 1 --scene-a 1 --scene-b 2`
 - Promote a scene branch back into its parent branch:
   - `bookforge --workspace workspace workflow promote-branch --book criticulous_the_rng_hellscape --branch-id rewrite-ch1-sc1 --target-branch-id chapter-1-rewrite`
 - Rebase a stale branch into a refreshed child:

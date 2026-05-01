@@ -5,9 +5,12 @@ from pathlib import Path
 
 import pytest
 
+from bookforge.branching import create_branch
+from bookforge.contracts import ExecutionRequest, ExecutionResult, ScenePhaseActionReadiness, ScenePhaseReadiness, ScopeSelector, TimelineNodeRef
 from bookforge.execution import (
     apply_scene_commit,
     build_apply_scene_commit_request,
+    build_continue_scene_request,
     build_generate_continuity_pack_request,
     build_lint_scene_prose_request,
     build_plan_scene_request,
@@ -15,6 +18,7 @@ from bookforge.execution import (
     build_repair_scene_prose_request,
     build_state_repair_scene_patch_request,
     build_write_scene_prose_request,
+    continue_scene,
     generate_continuity_pack,
     lint_scene_prose,
     plan_scene_action,
@@ -26,6 +30,7 @@ from bookforge.execution import (
 from bookforge.llm.signatures import append_signature_records
 from bookforge.memory.continuity import save_style_anchor, style_anchor_path
 from bookforge.pipeline.phase_history import _record_phase_success, _write_phase_artifact
+from bookforge.query import get_branch_artifact_index, get_branch_diff_summary, get_next_writing_target
 from bookforge.section_workflow import freeze_section_from_phase03_artifact, initialize_section_workflow
 from bookforge.supervision import paths as supervision_paths
 from bookforge.workspace import init_book_workspace
@@ -178,6 +183,11 @@ def _read_last_jsonl(path: Path) -> dict:
     lines = [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
     assert lines
     return json.loads(lines[-1])
+
+
+def _read_jsonl(path: Path) -> list[dict]:
+    lines = [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    return [json.loads(line) for line in lines]
 
 
 def _record_artifact(book_root: Path, chapter: int, scene: int, phase: str, name: str, payload, *, as_json: bool = True, artifact_key: str) -> None:
@@ -373,10 +383,7 @@ def test_plan_scene_action_generates_provisional_scene_card_receipt(tmp_path: Pa
     freeze_section_from_phase03_artifact(workspace=tmp_path, book_id="my_book", chapter_id=1, section_id=1)
 
     def _fake_plan_scene(*args, **kwargs):
-        scene_path = book_root / "draft" / "chapters" / "ch_001" / "scene_001.meta.json"
-        scene_path.parent.mkdir(parents=True, exist_ok=True)
-        scene_path.write_text(json.dumps(_scene_card(), ensure_ascii=True, indent=2), encoding="utf-8")
-        return scene_path
+        return _write_phase_artifact(book_root, 1, 1, "scene_card", _scene_card(), as_json=True)
 
     monkeypatch.setattr("bookforge.execution.scene_actions._plan_scene", _fake_plan_scene)
 
@@ -390,6 +397,374 @@ def test_plan_scene_action_generates_provisional_scene_card_receipt(tmp_path: Pa
     assert execution_result["action"] == "plan_scene"
     assert execution_result["status"] == "success"
     assert execution_result["produced_artifacts"][0]["artifact_key"] == "scene_card"
+
+
+def test_continue_scene_executes_one_recommended_child_and_records_wrapper(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root)
+    initialize_section_workflow(workspace=tmp_path, book_id="my_book", overwrite=True)
+    freeze_section_from_phase03_artifact(workspace=tmp_path, book_id="my_book", chapter_id=1, section_id=1)
+
+    def _fake_plan_scene(*args, **kwargs):
+        return _write_phase_artifact(book_root, 1, 1, "scene_card", _scene_card(), as_json=True)
+
+    monkeypatch.setattr("bookforge.execution.scene_actions._plan_scene", _fake_plan_scene)
+
+    request = build_continue_scene_request(tmp_path, "my_book", chapter_id=1, scene_id=1, section_id=1)
+    result = continue_scene(tmp_path, request)
+    execution_results = _read_jsonl(supervision_paths.execution_results_path(book_root))
+
+    assert result.status == "success"
+    assert result.action == "continue_scene"
+    assert result.details["macro_kind"] == "single_recommended_scene_phase_step"
+    assert result.details["child_action"] == "plan_scene"
+    assert result.details["child_status"] == "success"
+    assert result.details["before_scene_status"] == "unstarted"
+    assert result.details["before_recommended_next_action"] == "plan_scene"
+    assert result.details["after_scene_status"] == "planned"
+    assert result.details["after_recommended_next_action"] == "preflight_scene_state"
+    assert result.details["recommended_next_action"] == "preflight_scene_state"
+    assert result.details["stop_reason"] is None
+    assert result.details["pre_readiness_ref"]["scene_status"] == "unstarted"
+    assert result.details["post_readiness_ref"]["scene_status"] == "planned"
+    assert result.details["child_mutation_scope"] == "provisional"
+    assert result.details["canonical_changed"] is False
+    assert result.details["produced_artifact_refs"][0]["artifact_key"] == "scene_card"
+    assert result.details["produced_artifact_refs"][0]["artifact_status"] == "provisional"
+    step_receipt = result.details["author_loop_step_receipt"]
+    assert step_receipt["schema_version"] == "author_loop_step_receipt_v1"
+    assert step_receipt["action_run"] == "plan_scene"
+    assert step_receipt["child_status"] == "success"
+    assert step_receipt["canonical_changed"] is False
+    assert step_receipt["next_recommended_action"] == "preflight_scene_state"
+    assert step_receipt["stop_reason"] is None
+    assert step_receipt["produced_artifact_refs"][0]["artifact_key"] == "scene_card"
+    assert [item.artifact_key for item in result.produced_artifacts] == ["scene_card"]
+    assert execution_results[-2]["action"] == "plan_scene"
+    assert execution_results[-1]["action"] == "continue_scene"
+    assert execution_results[-1]["details"]["child_result_id"] == execution_results[-2]["result_id"]
+    assert execution_results[-1]["details"]["stop_reason"] is None
+
+
+def test_continue_scene_branch_local_heartbeat_preserves_main_and_exposes_artifacts(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root)
+    initialize_section_workflow(workspace=tmp_path, book_id="my_book", overwrite=True)
+    freeze_section_from_phase03_artifact(workspace=tmp_path, book_id="my_book", chapter_id=1, section_id=1)
+    create_branch(
+        workspace=tmp_path,
+        book_id="my_book",
+        selector=ScopeSelector(book_id="my_book", branch_id="main", workflow_family="section_write", chapter=1, section=1, scene=1),
+        branch_id="heartbeat-branch",
+        merge_operation="promotion",
+        branch_role="authoring_heartbeat",
+    )
+    branch_root = supervision_paths.branch_snapshot_root(book_root, "heartbeat-branch")
+
+    def _fake_plan_scene(*args, **kwargs):
+        return _write_phase_artifact(branch_root, 1, 1, "scene_card", _scene_card(), as_json=True)
+
+    monkeypatch.setattr("bookforge.execution.scene_actions._plan_scene", _fake_plan_scene)
+
+    request = build_continue_scene_request(
+        tmp_path,
+        "my_book",
+        chapter_id=1,
+        section_id=1,
+        scene_id=1,
+        branch_id="heartbeat-branch",
+    )
+    result = continue_scene(tmp_path, request)
+    branch_results = _read_jsonl(supervision_paths.execution_results_path(book_root, "heartbeat-branch"))
+    main_scene_card = book_root / result.artifact_paths["scene_card"]
+    branch_scene_card = branch_root / result.artifact_paths["scene_card"]
+    artifact_index = get_branch_artifact_index(tmp_path, "my_book", "heartbeat-branch")
+    diff = get_branch_diff_summary(tmp_path, "my_book", "heartbeat-branch")
+    target = get_next_writing_target(
+        tmp_path,
+        "my_book",
+        branch_id="heartbeat-branch",
+        chapter_id=1,
+        section_id=1,
+        scene_id=1,
+        prefer_emitted=False,
+    )
+    records = {record.path: record for record in artifact_index.records}
+    changed_paths = {record.path for record in diff.changed_records}
+
+    assert result.status == "success"
+    assert result.action == "continue_scene"
+    assert result.selector.branch_id == "heartbeat-branch"
+    assert result.details["child_action"] == "plan_scene"
+    assert result.details["canonical_changed"] is False
+    assert result.details["author_loop_step_receipt"]["canonical_changed"] is False
+    assert result.details["author_loop_step_receipt"]["next_recommended_action"] == "preflight_scene_state"
+    assert branch_results[-2]["action"] == "plan_scene"
+    assert branch_results[-1]["action"] == "continue_scene"
+    assert not main_scene_card.exists()
+    assert branch_scene_card.exists()
+    assert records[result.artifact_paths["scene_card"]].branch_relationship == "branch_only"
+    assert records[result.artifact_paths["scene_card"]].artifact_class == "scene_phase_artifact"
+    assert records[result.artifact_paths["scene_card"]].artifact_status == "provisional"
+    assert result.artifact_paths["scene_card"] in changed_paths
+    assert target.branch_id == "heartbeat-branch"
+    assert target.status == "ready"
+    assert target.recommended_action == "continue_scene"
+    assert target.details["scene_readiness_recommended_next_action"] == "preflight_scene_state"
+
+
+def test_continue_scene_branch_local_commit_reports_completed_scope(tmp_path: Path) -> None:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root)
+    initialize_section_workflow(workspace=tmp_path, book_id="my_book", overwrite=True)
+    freeze_section_from_phase03_artifact(workspace=tmp_path, book_id="my_book", chapter_id=1, section_id=1)
+    create_branch(
+        workspace=tmp_path,
+        book_id="my_book",
+        selector=ScopeSelector(book_id="my_book", branch_id="main", workflow_family="section_write", chapter=1, section=1, scene=1),
+        branch_id="heartbeat-branch",
+        merge_operation="promotion",
+        branch_role="authoring_heartbeat",
+    )
+    branch_root = supervision_paths.branch_snapshot_root(book_root, "heartbeat-branch")
+    _record_artifact(branch_root, 1, 1, "plan", "scene_card", _scene_card(), artifact_key="scene_card")
+    _record_artifact(
+        branch_root,
+        1,
+        1,
+        "preflight",
+        "preflight_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        artifact_key="patch",
+    )
+    _record_artifact(
+        branch_root,
+        1,
+        1,
+        "continuity_pack",
+        "continuity_pack",
+        {
+            "scene_end_anchor": "The lock clicks.",
+            "constraints": [],
+            "open_threads": [],
+            "cast_present": ["Rhea"],
+            "location": "Front Gate",
+            "next_action": "Open the door.",
+            "summary": {},
+        },
+        artifact_key="pack",
+    )
+    _record_write_pair(branch_root)
+    _record_artifact(
+        branch_root,
+        1,
+        1,
+        "state_repair",
+        "state_repair_patch",
+        {"summary_update": {}, "character_updates": [], "character_continuity_system_updates": []},
+        artifact_key="patch",
+    )
+    _record_artifact(
+        branch_root,
+        1,
+        1,
+        "lint",
+        "lint_report",
+        {"schema_version": "1.0", "status": "pass", "issues": [], "mode": "smoke"},
+        artifact_key="report",
+    )
+
+    request = build_continue_scene_request(
+        tmp_path,
+        "my_book",
+        chapter_id=1,
+        section_id=1,
+        scene_id=1,
+        branch_id="heartbeat-branch",
+    )
+    result = continue_scene(tmp_path, request)
+    target = get_next_writing_target(
+        tmp_path,
+        "my_book",
+        branch_id="heartbeat-branch",
+        chapter_id=1,
+        section_id=1,
+        scene_id=1,
+        prefer_emitted=False,
+    )
+
+    assert result.status == "success"
+    assert result.details["child_action"] == "apply_scene_commit"
+    assert result.details["canonical_changed"] is False
+    assert result.details["stop_reason"] == "completed_scope"
+    assert result.details["recommended_next_action"] is None
+    assert result.details["author_loop_step_receipt"]["stop_reason"] == "completed_scope"
+    assert result.details["author_loop_step_receipt"]["next_recommended_action"] is None
+    assert target.status == "blocked"
+    assert target.recommended_action == "lock_section_from_written_state"
+
+
+def test_continue_scene_no_ready_child_reports_no_legal_action_stop_reason(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _init_book(tmp_path)
+    selector = ScopeSelector(
+        book_id="my_book",
+        branch_id="main",
+        workflow_family="section_write",
+        chapter=1,
+        section=1,
+        scene=1,
+        phase_id="continue_scene",
+    )
+    node = TimelineNodeRef(
+        book_id="my_book",
+        workflow_family="section_write",
+        source_run_id="run_001",
+        branch_id="main",
+        chapter=1,
+        section=1,
+        scene=1,
+        phase_id="continue_scene",
+        revision_id="rev_001",
+    )
+    readiness = ScenePhaseReadiness(
+        book_id="my_book",
+        selector=selector,
+        node=node,
+        scene_status="committed",
+        actions=[],
+        recommended_next_action=None,
+        updated_at="2026-04-28T00:00:00Z",
+    )
+    request = ExecutionRequest(
+        request_id="continue-noop",
+        action="continue_scene",
+        selector=selector,
+        expected_node=node,
+        branch_id="main",
+        requested_at="2026-04-28T00:00:00Z",
+        details={},
+    )
+
+    monkeypatch.setattr("bookforge.execution.scene_sequence.current_execution_node", lambda *args, **kwargs: node)
+    monkeypatch.setattr("bookforge.execution.scene_sequence.get_scene_phase_readiness", lambda *args, **kwargs: readiness)
+
+    result = continue_scene(tmp_path, request)
+
+    assert result.status == "no_op"
+    assert result.details["child_action"] is None
+    assert result.details["stop_reason"] == "no_legal_action"
+    assert result.details["pre_readiness_ref"]["scene_status"] == "committed"
+    assert result.details["post_readiness_ref"]["recommended_next_action"] is None
+    assert result.details["produced_artifact_refs"] == []
+    assert result.details["author_loop_step_receipt"]["stop_reason"] == "no_legal_action"
+    assert result.details["author_loop_step_receipt"]["action_run"] is None
+
+
+@pytest.mark.parametrize(
+    ("child_status", "child_details", "after_recommended_action", "expected_stop_reason"),
+    [
+        ("retryable_pause", {}, "plan_scene", "provider_failed"),
+        ("hard_fail", {"failure_code": "stale_write"}, "plan_scene", "branch_stale"),
+        ("hard_fail", {}, "plan_scene", "tool_unavailable"),
+        ("integrity_degraded", {}, "plan_scene", "tool_unavailable"),
+        ("success", {}, None, "completed_scope"),
+    ],
+)
+def test_continue_scene_maps_child_outcome_to_loop_stop_reason(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    child_status: str,
+    child_details: dict,
+    after_recommended_action: str | None,
+    expected_stop_reason: str,
+) -> None:
+    _init_book(tmp_path)
+    selector = ScopeSelector(
+        book_id="my_book",
+        branch_id="author-branch",
+        workflow_family="section_write",
+        chapter=1,
+        section=1,
+        scene=1,
+        phase_id="continue_scene",
+    )
+    node = TimelineNodeRef(
+        book_id="my_book",
+        workflow_family="section_write",
+        source_run_id="run_001",
+        branch_id="author-branch",
+        chapter=1,
+        section=1,
+        scene=1,
+        phase_id="continue_scene",
+        revision_id="rev_001",
+    )
+    before = ScenePhaseReadiness(
+        book_id="my_book",
+        selector=selector,
+        node=node,
+        scene_status="ready",
+        actions=[
+            ScenePhaseActionReadiness(
+                action="plan_scene",
+                legal=True,
+                ready=True,
+                mutation_scope="provisional",
+                recommended=True,
+            )
+        ],
+        recommended_next_action="plan_scene",
+        updated_at="2026-04-28T00:00:00Z",
+    )
+    after = ScenePhaseReadiness(
+        book_id="my_book",
+        selector=selector,
+        node=node,
+        scene_status="after-child",
+        actions=[],
+        recommended_next_action=after_recommended_action,
+        updated_at="2026-04-28T00:00:01Z",
+    )
+    child_result = ExecutionResult(
+        result_id="child-result",
+        action="plan_scene",
+        status=child_status,
+        node=node,
+        selector=selector,
+        message="child outcome",
+        details=child_details,
+        request_id="child-request",
+    )
+    request = ExecutionRequest(
+        request_id="continue-stop-map",
+        action="continue_scene",
+        selector=selector,
+        expected_node=node,
+        branch_id="author-branch",
+        requested_at="2026-04-28T00:00:00Z",
+        details={},
+    )
+    readiness_results = iter([before, after])
+
+    monkeypatch.setattr("bookforge.execution.scene_sequence.current_execution_node", lambda *args, **kwargs: node)
+    monkeypatch.setattr("bookforge.execution.scene_sequence.get_scene_phase_readiness", lambda *args, **kwargs: next(readiness_results))
+    monkeypatch.setattr("bookforge.execution.scene_sequence.run_scene_phase_action", lambda *args, **kwargs: child_result)
+
+    result = continue_scene(tmp_path, request)
+
+    assert result.details["stop_reason"] == expected_stop_reason
+    assert result.details["author_loop_step_receipt"]["stop_reason"] == expected_stop_reason
+    assert result.details["author_loop_step_receipt"]["child_status"] == child_status
+    assert result.details["author_loop_step_receipt"]["canonical_changed"] is False
 
 
 def test_plan_scene_action_returns_no_op_when_scene_card_exists(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -1157,10 +1532,12 @@ def test_apply_scene_commit_commits_latest_passing_provisional_scene_outputs(
     assert state["status"] == "COMPLETE"
     assert result.details["source_prose_phase"] == "repair"
     assert result.details["canonical_change_status"] == "canonical"
+    assert result.details["canonical_changed"] is True
     assert [item.artifact_key for item in result.produced_artifacts[:3]] == ["state", "scene_prose", "scene_meta"]
     assert execution_result["action"] == "apply_scene_commit"
     assert execution_result["status"] == "success"
     assert execution_result["details"]["canonical_change_status"] == "canonical"
+    assert execution_result["details"]["canonical_changed"] is True
 
 
 def test_apply_scene_commit_returns_no_op_when_scene_is_already_committed(

@@ -27,6 +27,7 @@ from bookforge.execution import (
 )
 from bookforge.branching import create_assembly_branch, create_branch, rerun_freeze_section_on_branch
 from bookforge.section_workflow import lock_section_from_written_state
+from bookforge.supervision import paths as supervision_paths
 from bookforge.workspace import init_book_workspace
 
 
@@ -400,6 +401,118 @@ def test_lock_section_action_returns_main_scoped_emitted_result(tmp_path: Path, 
     assert result.details["section_id"] == 1
     assert result.details["status"] == "locked"
     assert result.artifact_paths["chapter_seam_report"].endswith("draft/chapters/ch_001.seam_report.json")
+
+
+def test_lock_section_action_on_branch_writes_only_branch_snapshot(tmp_path: Path, monkeypatch) -> None:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root)
+
+    def _stub_finalize(book_root_arg: Path, outline_arg: dict, chapter_num: int) -> dict:
+        assert book_root_arg.name == "snapshot"
+        assert chapter_num == 1
+        return {
+            "status": "finalized",
+            "report_path": "draft/chapters/ch_001.seam_report.json",
+            "original_path": "draft/chapters/ch_001.original.md",
+            "fixed_path": "draft/chapters/ch_001.fixed.md",
+            "provisional_path": None,
+            "candidate_path": None,
+            "final_path": "draft/chapters/ch_001.md",
+            "repair_action_count": 0,
+        }
+
+    monkeypatch.setattr("bookforge.execution.materialize.finalize_locked_chapter", _stub_finalize)
+
+    init_request = build_initialize_workflow_request(tmp_path, "my_book")
+    initialize_workflow(tmp_path, init_request)
+    freeze_request = build_freeze_section_request(tmp_path, "my_book", chapter_id=1, section_id=1)
+    freeze_section(tmp_path, freeze_request)
+    create_request = build_create_branch_request(tmp_path, "my_book", chapter=1, section=1, branch_id="rewrite-sec1")
+    create_branch_action(tmp_path, create_request)
+    branch_root = supervision_paths.branch_snapshot_root(book_root, "rewrite-sec1")
+    _write_scene_artifacts(branch_root, 1, 1, text="Branch-local section prose.")
+
+    request = build_lock_section_request(
+        tmp_path,
+        "my_book",
+        chapter_id=1,
+        section_id=1,
+        branch_id="rewrite-sec1",
+    )
+    result = lock_section(tmp_path, request)
+    main_registry = json.loads((book_root / "outline" / "snapshot_registry.json").read_text(encoding="utf-8"))
+    branch_registry = json.loads((branch_root / "outline" / "snapshot_registry.json").read_text(encoding="utf-8"))
+    branch_manifest = json.loads(supervision_paths.branch_manifest_path(book_root, "rewrite-sec1").read_text(encoding="utf-8"))
+
+    assert result.action == "lock_section_from_written_state"
+    assert result.status == "success"
+    assert result.node.branch_id == "rewrite-sec1"
+    assert result.details["branch_change_status"] == "changed"
+    assert result.details["canonical_changed"] is False
+    assert "canonical_change_status" not in result.details
+    assert result.details["mutation_scope"] == "branch_authoritative"
+    assert main_registry["chapters"][0]["sections"][0]["status"] == "frozen"
+    assert branch_registry["chapters"][0]["sections"][0]["status"] == "locked"
+    assert branch_manifest["lifecycle_state"] == "promote_ready"
+
+
+def test_finalize_chapter_action_on_branch_writes_only_branch_snapshot(tmp_path: Path, monkeypatch) -> None:
+    book_root = _init_book(tmp_path)
+    _write_run_artifacts(book_root)
+
+    def _stub_finalize(book_root_arg: Path, outline_arg: dict, chapter_num: int) -> dict:
+        assert book_root_arg.name == "snapshot"
+        assert chapter_num == 1
+        return {
+            "status": "finalized",
+            "report_path": "draft/chapters/ch_001.seam_report.json",
+            "original_path": "draft/chapters/ch_001.original.md",
+            "fixed_path": "draft/chapters/ch_001.fixed.md",
+            "provisional_path": None,
+            "candidate_path": None,
+            "final_path": "draft/chapters/ch_001.md",
+            "repair_action_count": 0,
+        }
+
+    monkeypatch.setattr("bookforge.execution.materialize.finalize_locked_chapter", _stub_finalize)
+
+    init_request = build_initialize_workflow_request(tmp_path, "my_book")
+    initialize_workflow(tmp_path, init_request)
+    freeze_request = build_freeze_section_request(tmp_path, "my_book", chapter_id=1, section_id=1)
+    freeze_section(tmp_path, freeze_request)
+    create_request = build_create_branch_request(tmp_path, "my_book", chapter=1, section=1, branch_id="chapter-branch")
+    create_branch_action(tmp_path, create_request)
+    branch_root = supervision_paths.branch_snapshot_root(book_root, "chapter-branch")
+    _write_scene_artifacts(branch_root, 1, 1, text="Branch-local chapter prose.")
+    branch_outline_path = branch_root / "outline" / "outline.json"
+    branch_registry_path = branch_root / "outline" / "snapshot_registry.json"
+    branch_outline = json.loads(branch_outline_path.read_text(encoding="utf-8"))
+    branch_registry = json.loads(branch_registry_path.read_text(encoding="utf-8"))
+    branch_outline["chapters"][0]["sections"][0]["status"] = "locked"
+    branch_registry["chapters"][0]["sections"][0]["status"] = "locked"
+    branch_registry["chapters"][0]["chapter_status"] = "in_progress"
+    branch_outline_path.write_text(json.dumps(branch_outline, ensure_ascii=True, indent=2), encoding="utf-8")
+    branch_registry_path.write_text(json.dumps(branch_registry, ensure_ascii=True, indent=2), encoding="utf-8")
+
+    request = build_finalize_chapter_request(
+        tmp_path,
+        "my_book",
+        chapter_id=1,
+        branch_id="chapter-branch",
+    )
+    result = finalize_chapter(tmp_path, request)
+    main_registry = json.loads((book_root / "outline" / "snapshot_registry.json").read_text(encoding="utf-8"))
+    finalized_branch_registry = json.loads(branch_registry_path.read_text(encoding="utf-8"))
+
+    assert result.action == "finalize_chapter_from_locked_sections"
+    assert result.status == "success"
+    assert result.node.branch_id == "chapter-branch"
+    assert result.details["branch_change_status"] == "changed"
+    assert result.details["canonical_changed"] is False
+    assert "canonical_change_status" not in result.details
+    assert result.details["mutation_scope"] == "branch_authoritative"
+    assert main_registry["chapters"][0]["chapter_status"] != "finalized"
+    assert finalized_branch_registry["chapters"][0]["chapter_status"] == "finalized"
 
 
 def test_write_section_action_returns_main_scoped_emitted_result(tmp_path: Path, monkeypatch) -> None:

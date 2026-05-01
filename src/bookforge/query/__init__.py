@@ -1,5 +1,24 @@
 from .actions import legal_next_actions, list_execution_options
 from .appearance import AppearanceProjectionView, list_appearance_projection_views
+from .author_loop import get_author_loop_envelopes
+from .authors import AuthorProfileView, AuthorVersionRecord, get_author_profile, list_author_profiles
+from .books import BookCard, get_book_card, list_book_cards
+from .book_intent import BookIntentRecord, get_book_intent, list_book_intents
+from .branches import (
+    BranchArtifactIndex,
+    BranchArtifactRecord,
+    BranchDetailView,
+    BranchDiffSummary,
+    BranchInventory,
+    BranchInventoryRecord,
+    ForkGroupInventoryRecord,
+    get_branch_artifact_index,
+    get_branch_detail,
+    get_branch_diff_summary,
+    get_branch_inventory,
+    get_branch_inventory_record,
+)
+from .capabilities import get_capability_projection
 from .characters import CharacterView, list_character_views
 from .continuity import ContinuityView, get_continuity_view
 from .integrity import IntegrityIssue, IntegrityVerdict, get_integrity_verdict
@@ -22,10 +41,16 @@ from .outline_lineage import (
     get_stale_outline_artifact_inventory,
 )
 from .recovery import (
+    RecoveryAnchorCandidate,
+    RecoveryAnchorCandidateReport,
     get_downstream_dependency_review,
+    get_recovery_anchor_candidates,
     get_recovery_branch_health,
     get_recovery_blast_radius,
     get_recovery_manifest,
+    get_recovery_plan_preview,
+    RecoveryPlanPreview,
+    RecoveryPlanStep,
     get_recovery_plan_readiness,
     get_recovery_semantic_review,
     get_recovery_semantic_review_readiness,
@@ -33,11 +58,40 @@ from .recovery import (
     get_scope_invalidation_preview,
     get_state_rebuild_preview,
 )
+from .reader import (
+    BookReaderAnchor,
+    BookReaderChapter,
+    BookReaderScene,
+    BookReaderSelection,
+    BookReaderView,
+    get_book_reader_anchor,
+    get_book_reader_chapter,
+    get_book_reader_index,
+    get_book_reader_scene,
+    get_book_reader_view,
+)
 from .scene_phase import get_scene_phase_readiness
 from .scene_context import SceneContextProjectionView, get_scene_context_projection
+from .seams import ChapterSeamQueue, ScenePairSeamDetail, ScenePairSeamQueueItem, get_chapter_seam_queue, get_scene_pair_seam_detail
 from .setting import SceneSettingProjectionView, get_scene_setting_projection
 from .thought_context import ThoughtContextProjectionView, get_thought_context_projection
+from .visual import (
+    DEFAULT_VISUAL_MODEL,
+    VisualAssetDetail,
+    VisualAssetIndex,
+    VisualAssetRecord,
+    get_visual_action_readiness,
+    get_visual_asset_detail,
+    get_visual_asset_index,
+    get_visual_prompt_plan_detail,
+    list_visual_provider_descriptors,
+    resolve_visual_provider,
+    VisualPromptPlanDetail,
+    VisualPromptPlanRecord,
+)
 from .workflow import WorkflowSnapshot, get_workflow_snapshot
+from .writing import get_next_writing_target, get_writing_gate_status
+from .writing_bootstrap import get_writing_bootstrap_status
 from .workspace import (
     BranchState,
     WorkspaceStatus,
@@ -50,7 +104,22 @@ from .workspace import (
 
 __all__ = [
     "BranchState",
+    "BookCard",
+    "BookIntentRecord",
+    "BookReaderAnchor",
+    "BookReaderChapter",
+    "BookReaderScene",
+    "BookReaderSelection",
+    "BookReaderView",
+    "BranchArtifactIndex",
+    "BranchArtifactRecord",
+    "BranchDetailView",
+    "BranchDiffSummary",
+    "BranchInventory",
+    "BranchInventoryRecord",
     "AppearanceProjectionView",
+    "AuthorProfileView",
+    "AuthorVersionRecord",
     "CharacterView",
     "ContinuityView",
     "IntegrityIssue",
@@ -58,29 +127,69 @@ __all__ = [
     "OutlineArtifactObservation",
     "OutlineLineageAudit",
     "OutlineRepairCandidate",
+    "RecoveryAnchorCandidate",
+    "RecoveryAnchorCandidateReport",
+    "ForkGroupInventoryRecord",
+    "RecoveryPlanPreview",
+    "RecoveryPlanStep",
     "SceneSettingProjectionView",
     "SceneContextProjectionView",
+    "ChapterSeamQueue",
+    "ScenePairSeamDetail",
+    "ScenePairSeamQueueItem",
     "SectionLineageRow",
     "StaleOutlineArtifact",
     "ThoughtContextProjectionView",
+    "VisualAssetDetail",
+    "VisualAssetIndex",
+    "VisualAssetRecord",
+    "VisualPromptPlanDetail",
+    "VisualPromptPlanRecord",
+    "DEFAULT_VISUAL_MODEL",
     "legal_next_actions",
     "list_execution_options",
+    "get_capability_projection",
+    "get_author_profile",
+    "get_author_loop_envelopes",
     "WorkflowSnapshot",
     "WorkspaceStatus",
     "current_execution_node",
     "current_main_node",
     "get_scene_setting_projection",
+    "get_book_card",
+    "get_book_intent",
+    "get_book_reader_anchor",
+    "get_book_reader_chapter",
+    "get_book_reader_index",
+    "get_book_reader_scene",
+    "get_book_reader_view",
+    "get_branch_artifact_index",
+    "get_branch_detail",
+    "get_branch_diff_summary",
+    "get_branch_inventory",
+    "get_branch_inventory_record",
     "get_scene_context_projection",
+    "get_chapter_seam_queue",
+    "get_scene_pair_seam_detail",
     "get_thought_context_projection",
+    "get_visual_action_readiness",
+    "get_visual_asset_detail",
+    "get_visual_asset_index",
+    "get_visual_prompt_plan_detail",
     "get_continuity_view",
     "get_frozen_chapter_projection",
     "get_integrity_verdict",
+    "get_next_writing_target",
+    "get_writing_gate_status",
+    "get_writing_bootstrap_status",
     "get_outline_lineage_audit",
     "get_outline_repair_candidates",
+    "get_recovery_anchor_candidates",
     "get_recovery_branch_health",
     "get_recovery_blast_radius",
     "get_downstream_dependency_review",
     "get_recovery_manifest",
+    "get_recovery_plan_preview",
     "get_recovery_plan_readiness",
     "get_recovery_semantic_review",
     "get_recovery_semantic_review_readiness",
@@ -97,7 +206,12 @@ __all__ = [
     "get_workspace_status_for_branch",
     "list_character_views",
     "list_appearance_projection_views",
+    "list_author_profiles",
+    "list_book_cards",
+    "list_book_intents",
+    "list_visual_provider_descriptors",
     "materialization_source_for_section",
     "resolve_scope_selector",
+    "resolve_visual_provider",
     "get_scene_phase_readiness",
 ]

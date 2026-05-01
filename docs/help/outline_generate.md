@@ -81,7 +81,7 @@ Artifact truth
 - Semantic handoff files inside `outline/pipeline_runs/<run_id>/...` are immutable lineage anchors.
 - `outline/outline.json` and pointer files such as `outline/pipeline_latest.json` are convenience views and discovery aids, not sufficient lineage anchors by themselves.
 - `outline/chapters/ch_###.json` and workflow-generated files such as `outline/outline.thin.json` are derived projections.
-- `thin_outline` is frozen vocabulary for a future thinner outline family, but this command does not implement it.
+- `thin_outline` is implemented by `bookforge workflow draft-starter-outline` as a provider-authored BookIntent bootstrap action. This `outline generate` command remains the full multi-phase `deep_outline` surface.
 
 Debugging
 - If the model returns invalid JSON, raw request/response logs are written under `workspace/logs/llm/` using phase/attempt labels.
@@ -106,6 +106,7 @@ Examples
   - `bookforge --workspace workspace outline generate --book my_novel_v1 --prompt-file prompts\outline_seed.md`
 
 Related commands
+- `bookforge workflow draft-starter-outline` (author starter/thin outline source artifacts from a created BookIntent)
 - `bookforge workflow init` (initialize section workflow state from outline artifacts)
 - `bookforge workflow freeze-section` (promote one section into canonical outline state)
 - `bookforge workflow write-section` (run only the active frozen section through the writer loop)

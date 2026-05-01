@@ -346,7 +346,7 @@ def _classify_live_node_mismatch(
     if all(expected.get(key) == live.get(key) for key in comparable_keys) and expected.get("revision_id") != live.get("revision_id"):
         return (
             "stale_write",
-            f"Requested {action} target has been superseded by a newer main-branch revision.",
+            f"Requested {action} target has been superseded by a newer execution revision.",
         )
     return (
         "scope_contract_violation",

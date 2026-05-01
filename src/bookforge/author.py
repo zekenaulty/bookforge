@@ -102,13 +102,14 @@ def generate_author(
     prompt_file: Optional[Path],
     name: Optional[str],
     notes: Optional[str],
+    prompt_text: Optional[str] = None,
 ) -> Path:
-    if not influences and not prompt_file:
+    if not influences and not prompt_file and not prompt_text:
         raise ValueError('Provide --influences or --prompt-file.')
 
-    prompt_text = None
     if prompt_file:
-        prompt_text = prompt_file.read_text(encoding='utf-8')
+        file_text = prompt_file.read_text(encoding='utf-8')
+        prompt_text = f"{prompt_text}\n\n{file_text}" if prompt_text else file_text
 
     config = load_config()
     client = get_llm_client(config, phase="planner")
