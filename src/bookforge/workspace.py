@@ -10,6 +10,11 @@ from datetime import datetime, timezone
 
 from bookforge.prompt.composition import compose_prompt_templates
 from bookforge.prompt.system import write_system_prompt
+from bookforge.llm.storage import (
+    legacy_book_log_prefix,
+    llm_book_log_dir,
+    llm_transport_root,
+)
 from bookforge.memory.durable_state import ensure_durable_state_files
 from bookforge.util.paths import repo_root
 from bookforge.util.schema import SCHEMA_VERSION, validate_json
@@ -387,23 +392,28 @@ def _ensure_dir(path: Path, report: Dict[str, Any], key: str) -> None:
 
 
 def _clear_workspace_logs(workspace: Path, book_id: str, logs_scope: str, report: Dict[str, Any]) -> None:
-    logs_root = workspace / "logs" / "llm"
+    logs_root = llm_transport_root(workspace)
     if not logs_root.exists() or not logs_root.is_dir():
         return
 
     deleted = 0
     if logs_scope == "all":
-        for candidate in logs_root.iterdir():
-            if candidate.is_file():
-                candidate.unlink()
-                deleted += 1
+        deleted = sum(1 for candidate in logs_root.rglob("*") if candidate.is_file())
+        shutil.rmtree(logs_root)
+        logs_root.mkdir(parents=True, exist_ok=True)
         report["all_log_files_deleted"] = int(report.get("all_log_files_deleted", 0)) + deleted
     else:
-        pattern = f"{book_id}_*"
-        for candidate in logs_root.glob(pattern):
-            if candidate.is_file():
-                candidate.unlink()
-                deleted += 1
+        book_logs = llm_book_log_dir(workspace, book_id)
+        if book_logs.exists() and book_logs.is_dir():
+            deleted += sum(1 for candidate in book_logs.rglob("*") if candidate.is_file())
+            shutil.rmtree(book_logs)
+
+        legacy_prefix = legacy_book_log_prefix(book_id)
+        if legacy_prefix:
+            for candidate in logs_root.iterdir():
+                if candidate.is_file() and candidate.name.startswith(f"{legacy_prefix}_"):
+                    candidate.unlink()
+                    deleted += 1
         report["book_log_files_deleted"] = int(report.get("book_log_files_deleted", 0)) + deleted
 
     report["files_deleted"] = int(report.get("files_deleted", 0)) + deleted
@@ -469,17 +479,17 @@ def _collect_reset_archive_targets(
     _add_if_exists(context_dir / 'plot_devices')
 
     if include_logs and not keep_logs:
-        logs_root = workspace / 'logs' / 'llm'
+        logs_root = llm_transport_root(workspace)
         if logs_root.exists() and logs_root.is_dir():
             if logs_scope == 'all':
-                for candidate in logs_root.iterdir():
-                    if candidate.is_file():
-                        targets.append(candidate)
+                targets.append(logs_root)
             else:
-                pattern = f"{book_id}_*"
-                for candidate in logs_root.glob(pattern):
-                    if candidate.is_file():
-                        targets.append(candidate)
+                _add_if_exists(llm_book_log_dir(workspace, book_id))
+                legacy_prefix = legacy_book_log_prefix(book_id)
+                if legacy_prefix:
+                    for candidate in logs_root.iterdir():
+                        if candidate.is_file() and candidate.name.startswith(f"{legacy_prefix}_"):
+                            targets.append(candidate)
 
     # Deduplicate and ensure we don't include child paths when parent is already included.
     unique_targets = []

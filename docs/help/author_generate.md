@@ -20,7 +20,8 @@ Optional parameters
 
 
 Debugging
-- If the model returns invalid JSON, the raw response is written to workspace/logs/llm/author_generate_<timestamp>.json.
+- If the model returns invalid JSON, the raw response is written under `workspace/logs/llm/global/unscoped/global/author_generate/`.
+- Each JSON, readable `.txt`, and prompt `.prompt.txt` file shares a collision-resistant event id.
 - To always log raw responses, set BOOKFORGE_LOG_LLM=1 before running.
   Example (PowerShell): $env:BOOKFORGE_LOG_LLM="1"
 
