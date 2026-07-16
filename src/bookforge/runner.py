@@ -13,6 +13,7 @@ from bookforge.characters import characters_ready, generate_characters, resolve_
 from bookforge.llm.client import LLMClient
 from bookforge.llm.errors import LLMRequestError
 from bookforge.llm.factory import get_llm_client, resolve_model
+from bookforge.llm.logging import llm_log_context
 from bookforge.llm.types import LLMResponse, Message
 from bookforge.memory.continuity import (
     continuity_pack_path,
@@ -49,8 +50,9 @@ from bookforge.pipeline.state_patch import _coerce_stat_updates
 from bookforge.pipeline.lint import _heuristic_invariant_issues, _linked_durable_consistency_issues
 from bookforge.pipeline.durable import _durable_state_context
 from bookforge.pipeline.parse import _extract_prose_and_patch
-from bookforge.pipeline.log import _status, _now_iso, set_run_log_path
+from bookforge.pipeline.log import _status, _now_iso, use_run_log_path
 from bookforge.util.schema import validate_json
+from bookforge.writer_lock import book_writer_lock
 
 PAUSE_EXIT_CODE = 75
 
@@ -432,6 +434,34 @@ def run_loop(
     if not book_root.exists():
         raise FileNotFoundError(f"Book workspace not found: {book_root}")
 
+    with book_writer_lock(book_root, operation="run_loop"):
+        run_id = _current_run_id()
+        _write_latest_run_pointer(book_root, run_id)
+        run_log_path = _run_log_path(book_root, run_id)
+        _append_run_log(book_root, run_id, f"run_id: {run_id}")
+        _append_run_log(book_root, run_id, f"book_id: {book_id}")
+        _append_run_log(book_root, run_id, f"started_at: {_now_iso()}")
+        with use_run_log_path(run_log_path), llm_log_context(book_id=book_id, run_id=run_id):
+            _run_loop_unlocked(
+                workspace=workspace,
+                book_id=book_id,
+                steps=steps,
+                until=until,
+                resume=resume,
+            )
+
+
+def _run_loop_unlocked(
+    workspace: Path,
+    book_id: str,
+    steps: Optional[int] = None,
+    until: Optional[str] = None,
+    resume: bool = False,
+) -> None:
+    book_root = workspace / "books" / book_id
+    if not book_root.exists():
+        raise FileNotFoundError(f"Book workspace not found: {book_root}")
+
     book_path = book_root / "book.json"
     state_path = book_root / "state.json"
     outline_path = book_root / "outline" / "outline.json"
@@ -445,13 +475,6 @@ def run_loop(
         raise FileNotFoundError(f"Missing outline.json: {outline_path}")
     if not system_path.exists():
         raise FileNotFoundError(f"Missing system_v1.md: {system_path}")
-
-    run_id = _current_run_id()
-    _write_latest_run_pointer(book_root, run_id)
-    set_run_log_path(_run_log_path(book_root, run_id))
-    _append_run_log(book_root, run_id, f"run_id: {run_id}")
-    _append_run_log(book_root, run_id, f"book_id: {book_id}")
-    _append_run_log(book_root, run_id, f"started_at: {_now_iso()}")
 
     book = _load_json(book_path)
     outline = _load_json(outline_path)
@@ -1028,9 +1051,6 @@ def run_loop(
 
 def run() -> None:
     raise NotImplementedError("Use run_loop via CLI.")
-
-
-
 
 
 

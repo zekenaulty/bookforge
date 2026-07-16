@@ -1,14 +1,23 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Iterator, Optional
 import json
 import re
 
 from .errors import LLMRequestError
+from .storage import llm_log_dir, llm_log_path
 from .types import LLMResponse, Message
 from bookforge.config.env import read_env_value
+
+
+_LLM_LOG_CONTEXT: ContextVar[Optional[Dict[str, Any]]] = ContextVar(
+    "bookforge_llm_log_context",
+    default=None,
+)
 
 
 def _extract_text_payload(text: str) -> str:
@@ -93,36 +102,22 @@ def _pretty_text_payload(text: str) -> str:
     return json.dumps(parsed, ensure_ascii=True, indent=2)
 
 
-def _sanitize_log_component(value: str) -> str:
-    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "-", value)
-    return cleaned.strip("-_")
-
-
-def _format_scope_number(prefix: str, value: Any) -> str:
-    if value is None:
-        return f"{prefix}000"
+@contextmanager
+def llm_log_context(**extra: Any) -> Iterator[None]:
+    merged = dict(_LLM_LOG_CONTEXT.get() or {})
+    merged.update(extra)
+    token = _LLM_LOG_CONTEXT.set(merged)
     try:
-        number = int(str(value))
-    except (TypeError, ValueError):
-        cleaned = _sanitize_log_component(str(value))
-        if not cleaned:
-            cleaned = "000"
-        return f"{prefix}{cleaned}"
-    return f"{prefix}{number:03d}"
+        yield
+    finally:
+        _LLM_LOG_CONTEXT.reset(token)
 
 
-def _log_scope_prefix(extra: Optional[Dict[str, Any]]) -> str:
-    if not extra:
-        return ""
-    book_id = extra.get("book_id")
-    if not book_id:
-        return ""
-    book_label = _sanitize_log_component(str(book_id))
-    if not book_label:
-        return ""
-    chapter = _format_scope_number("ch", extra.get("chapter"))
-    scene = _format_scope_number("sc", extra.get("scene"))
-    return f"{book_label}_{chapter}_{scene}_"
+def _effective_extra(extra: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    merged = dict(_LLM_LOG_CONTEXT.get() or {})
+    if extra:
+        merged.update(extra)
+    return merged or None
 
 
 def _split_prompt_messages(messages: Optional[list[Message]]) -> tuple[str, list[Message]]:
@@ -174,12 +169,6 @@ def should_log_llm() -> bool:
     return flag in {"1", "true", "yes", "on"}
 
 
-def llm_log_dir(workspace: Path) -> Path:
-    return workspace / "logs" / "llm"
-
-
-
-
 def _format_error_payload(error: LLMRequestError) -> Dict[str, Any]:
     return {
         "status_code": error.status_code,
@@ -213,11 +202,9 @@ def log_llm_response(
     extra: Optional[Dict[str, Any]] = None,
     messages: Optional[list[Message]] = None,
 ) -> Path:
-    log_dir = llm_log_dir(workspace)
-    log_dir.mkdir(parents=True, exist_ok=True)
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    prefix = _log_scope_prefix(extra)
-    log_path = log_dir / f"{prefix}{label}_{timestamp}.json"
+    effective_extra = _effective_extra(extra)
+    log_path = llm_log_path(workspace, label=label, extra=effective_extra)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
     system_text = ""
     non_system: list[Message] = []
     if messages:
@@ -232,8 +219,8 @@ def log_llm_response(
     }
     if request:
         payload["request"] = request
-    if extra:
-        payload["extra"] = extra
+    if effective_extra:
+        payload["extra"] = effective_extra
     if system_text or non_system:
         payload["prompt"] = {
             "system": system_text,
@@ -258,11 +245,9 @@ def log_llm_error(
     extra: Optional[Dict[str, Any]] = None,
     messages: Optional[list[Message]] = None,
 ) -> Path:
-    log_dir = llm_log_dir(workspace)
-    log_dir.mkdir(parents=True, exist_ok=True)
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    prefix = _log_scope_prefix(extra)
-    log_path = log_dir / f"{prefix}{label}_{timestamp}.json"
+    effective_extra = _effective_extra(extra)
+    log_path = llm_log_path(workspace, label=label, extra=effective_extra)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
     system_text = ""
     non_system: list[Message] = []
     if messages:
@@ -273,8 +258,10 @@ def log_llm_error(
         "error": _format_error_payload(error),
         "raw": error.raw_response,
     }
-    if extra:
-        payload["extra"] = extra
+    if request:
+        payload["request"] = request
+    if effective_extra:
+        payload["extra"] = effective_extra
     if system_text or non_system:
         payload["prompt"] = {
             "system": system_text,
@@ -290,4 +277,3 @@ def log_llm_error(
     except OSError:
         pass
     return log_path
-

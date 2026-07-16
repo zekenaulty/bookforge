@@ -17,6 +17,9 @@ ENV/
 .coverage
 .coverage.*
 .pytest_cache/
+.pytest_cache_local/
+.pytest_tmp/
+.pytest_tmp_*/
 .mypy_cache/
 .ruff_cache/
 
@@ -28,6 +31,6 @@ ENV/
 .env
 .env.*
 workspace/current_book.json
-.pytest_cache/
-.pytest_cache_local/
-.pytest_tmp/
+
+# Runtime-only per-book process lock.
+**/.bookforge/writer.lock

@@ -13,8 +13,8 @@ Required parameters
 - `--book`: Book id slug.
 
 Optional parameters
-- `--keep-logs`: Preserve `workspace/logs/llm` files.
-- `--logs-scope`: When logs are cleared, remove only this book's logs (`book`, default) or all logs (`all`).
+- `--keep-logs`: Preserve the `workspace/logs/llm` tree.
+- `--logs-scope`: When logs are cleared, recursively remove only this book's directory (`book`, default) or the complete LLM log tree (`all`). Legacy flat files for the selected book, including companion text and prompt files, are also removed.
 - `--archive`: Archive reset targets to `workspace/archives/<book_id>/reset_<timestamp>_<hash>/` before deletion. If archive creation fails, reset aborts without deleting.
 - `--archive-mode`: Archive mode (`copy`, default) or `move`. Copy is safer; move is faster but still validated.
 - `--archive-logs`: Include `workspace/logs/llm` and `workspace/books/<book>/logs/runs` in the archive when those logs would be cleared.
@@ -33,7 +33,7 @@ What gets reset
   - `draft/context/plot_devices/*`
 - `draft/context/bible.md` and `draft/context/last_excerpt.md` are emptied.
 - `exports/*` and book-local `logs/*` are cleared and recreated.
-- Workspace-level `logs/llm` is cleared unless `--keep-logs` is set (scope controlled by `--logs-scope`).
+- Workspace-level `logs/llm` is cleared unless `--keep-logs` is set (recursive scope controlled by `--logs-scope`).
 
 What stays intact
 - `book.json`, prompts, outline, and immutable author/series assets.

@@ -32,8 +32,15 @@ Outputs
 - draft/context/continuity_pack.json
 - draft/context/bible.md and draft/context/last_excerpt.md
 - draft/context/phase_history/ch###_sc###/* (per-phase prompts, patches, and lint reports)
-- workspace/books/<book>/logs/runs/run_<timestamp>.log
-- workspace/logs/llm (when BOOKFORGE_LOG_LLM=1; includes quota error logs)
+- workspace/books/<book>/logs/runs/run_<timestamp>_<unique-suffix>.log
+- workspace/books/<book>/.bookforge/writer.lock (persistent lock file with last-owner metadata)
+- workspace/logs/llm/<book>/<run-id>/<chapter>/<action>/* (when BOOKFORGE_LOG_LLM=1; includes quota errors, retries, prompts, and readable response copies)
+
+Concurrency
+- Only one `bookforge run` process may mutate a given book at a time.
+- A second run for the same book fails immediately and reports the active lock owner.
+- Runs for different books use different locks.
+- Run status and LLM log routing are context-local, so concurrent runs for different books cannot redirect each other's log lines.
 
 
 Environment

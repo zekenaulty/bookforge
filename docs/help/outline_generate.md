@@ -26,9 +26,9 @@ Outputs
 - Updates state.json with outline path and status when applicable.
 
 Debugging
-- If the model returns invalid JSON, the raw response is written to workspace/logs/llm/outline_generate_<timestamp>.json.
-- A human-readable text copy is also written to workspace/logs/llm/outline_generate_<timestamp>.txt.
-- When logging is enabled, the request prompt is written to workspace/logs/llm/outline_generate_<timestamp>.prompt.txt (system + user).
+- If the model returns invalid JSON, the raw response is written under `workspace/logs/llm/<book>/unscoped/global/outline_generate/`.
+- A human-readable `.txt` copy and a `.prompt.txt` request copy (system + user) are written beside the JSON with the same event id.
+- Retry and error labels are grouped in the base `outline_generate` action directory without overwriting earlier attempts.
 - To always log raw responses, set BOOKFORGE_LOG_LLM=1 before running.
   Example (PowerShell): $env:BOOKFORGE_LOG_LLM="1"
 - If the output is truncated (MAX_TOKENS), raise BOOKFORGE_OUTLINE_MAX_TOKENS (default: 98304).
