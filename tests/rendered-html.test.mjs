@@ -19,7 +19,7 @@ test("server-renders the private living-fiction library", async () => {
 });
 
 test("keeps runtime writing and persistence wired", async () => {
-  const [route, hosting, page, layout, client, ai, database, pdf] = await Promise.all([
+  const [route, hosting, page, layout, client, ai, database, pdf, navigation, styles] = await Promise.all([
     readFile(new URL("app/api/app/route.ts", root), "utf8"),
     readFile(new URL(".openai/hosting.json", root), "utf8"),
     readFile(new URL("app/page.tsx", root), "utf8"),
@@ -28,10 +28,14 @@ test("keeps runtime writing and persistence wired", async () => {
     readFile(new URL("lib/ai.ts", root), "utf8"),
     readFile(new URL("lib/app-db.ts", root), "utf8"),
     readFile(new URL("lib/story-pdf.ts", root), "utf8"),
+    readFile(new URL("lib/reader-navigation.ts", root), "utf8"),
+    readFile(new URL("app/globals.css", root), "utf8"),
   ]);
   assert.match(hosting, /"d1":\s*"DB"/);
   assert.match(hosting, /"r2":\s*"ART"/);
   assert.match(route, /action === "continueStory"/);
+  assert.match(client, /expectedLatestTurnNumber: latest/);
+  assert.match(route, /story\.latestAcceptedTurnNumber > expectedLatest/);
   assert.match(route, /generation_jobs/);
   assert.match(route, /runBackgroundJob/);
   assert.match(route, /context_reconcile/);
@@ -51,6 +55,17 @@ test("keeps runtime writing and persistence wired", async () => {
   assert.match(client, /Note to the author/i);
   assert.match(client, /Story gallery/i);
   assert.match(client, /Download illustrated PDF/i);
+  assert.match(client, /aria-label="First section"/);
+  assert.match(client, /aria-label="Previous section"/);
+  assert.match(client, /aria-label=\{nextLabel\}/);
+  assert.match(client, /aria-label=\{lastLabel\}/);
+  assert.match(client, /navigateReader\("previous"\)/);
+  assert.match(client, /navigateReader\("next"\)/);
+  assert.match(navigation, /resolveReaderNavigation/);
+  assert.match(styles, /env\(safe-area-inset-bottom\)/);
+  assert.match(styles, /\.theme-button \{[^}]*width: 44px;[^}]*height: 44px/);
+  assert.match(styles, /\.reader-top > div:not\(\.reader-tools\)/);
+  assert.doesNotMatch(styles, /\.reader-top > div \{ display: none; \}/);
   assert.match(client, /Generation log/i);
   assert.match(page, /<KotobaApp/);
   assert.match(layout, /private living-fiction library/i);
@@ -105,10 +120,23 @@ test("generates resumable story art with selectable Google Nano Banana models", 
   assert.match(generator, /:generateContent/);
   assert.match(generator, /responseModalities: \["IMAGE"\]/);
   assert.match(generator, /responseFormat/);
+  assert.match(generator, /generativelanguage\.googleapis\.com\/v1/);
+  assert.match(generator, /retrying with the compatible imageConfig schema/);
   assert.match(generator, /TRANSPORT_TIMEOUT_MS = 10 \* 60 \* 1000/);
   assert.match(route, /bucket\.put/);
+  assert.match(route, /enqueueReusableJobStatement/);
+  assert.match(route, /job_type<>'art_cover'/);
+  assert.match(route, /\["Placeholder", "Queued", "Preparing"\]\.includes\(coverStatus\)/);
+  assert.match(route, /AND locked_at=\?/);
+  assert.match(route, /status='running' AND locked_at=\?/);
+  assert.match(route, /Superseded by regenerated section',locked_at=NULL/);
+  assert.match(route, /const renderVersion = type === "scene" \? turn!\.id : "cover"/);
+  assert.match(route, /ORDER BY updated_at DESC LIMIT 30/);
+  assert.match(route, /art_cover:\$\{storyId\}:1/);
+  assert.match(route, /generateGoogleImage/);
   assert.match(route, /status='Ready'/);
   assert.match(route, /GoogleImageFailure/);
+  assert.match(generator, /MAX_HTTP_ATTEMPTS = 3/);
   assert.match(hosting, /"r2":\s*"ART"/);
   assert.doesNotMatch(generator, /Buffer\.from/);
 });

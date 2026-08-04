@@ -1,4 +1,4 @@
-import { createArtBrief, createAuthorProfile, createCheckpoint, createContextReconciliation, createStoryFoundation, continueStory, repairTurn, validationIssues } from "../../../lib/ai";
+import { createAuthorProfile, createCheckpoint, createContextReconciliation, createStoryFoundation, continueStory, repairTurn, validationIssues } from "../../../lib/ai";
 import { ensureDatabase, getArtBucket, getD1, json, now, words } from "../../../lib/app-db";
 import { generateGoogleImage, GoogleImageFailure, selectedGoogleImageModel } from "../../../lib/google-image";
 import { isGoogleImageModel } from "../../../lib/image-models";
@@ -11,13 +11,16 @@ export const dynamic = "force-dynamic";
 type Row = Record<string, string | number | null>;
 
 export async function GET(request: Request) {
+  let storyId = "";
+  let operation = "load_library";
   try {
     await ensureDatabase();
     const url = new URL(request.url);
     const assetId = url.searchParams.get("assetId");
-    if (assetId) return await serveArtAsset(assetId);
-    const storyId = url.searchParams.get("storyId");
+    if (assetId) { operation = "load_art_asset"; return await serveArtAsset(assetId); }
+    storyId = url.searchParams.get("storyId") || "";
     if (storyId) {
+      operation = url.searchParams.get("format") === "pdf" ? "compile_story_pdf" : "load_story";
       const story = await loadStory(storyId, true);
       if (!story) return Response.json({ error: "Story not found." }, { status: 404 });
       if (url.searchParams.get("format") === "pdf") {
@@ -30,15 +33,20 @@ export async function GET(request: Request) {
     if (url.searchParams.get("logs") === "1") return Response.json({ logs: await loadLogs() });
     return Response.json(await loadLibrary());
   } catch (error) {
-    return routeError(error);
+    return routeError(error, { storyId, operation });
   }
 }
 
 export async function POST(request: Request) {
+  let action = "api_post";
+  let storyId = "";
+  let turnNumber: number | undefined;
   try {
     await ensureDatabase();
     const body = await request.json() as Record<string, unknown>;
-    const action = String(body.action || "");
+    action = String(body.action || "api_post");
+    storyId = String(body.storyId || "");
+    turnNumber = Number.isFinite(Number(body.turnNumber)) ? Number(body.turnNumber) : undefined;
 
     if (action === "previewAuthor") {
       const genres = stringList(body.genres);
@@ -106,7 +114,7 @@ export async function POST(request: Request) {
 
     return bad("Unknown library action.");
   } catch (error) {
-    return routeError(error);
+    return routeError(error, { storyId, turnNumber, operation: action });
   }
 }
 
@@ -163,6 +171,7 @@ async function handleCreateStory(body: Record<string, unknown>) {
     priorCast: generated.foundation.initialCast,
     turnIntent: firstTurn.turnIntent,
   };
+  const artProfile = initialArtProfile(generated.foundation);
   const statements = [
     db.prepare(`INSERT INTO stories (id,title,short_description,selected_author_id,author_snapshot_json,original_idea,
       foundation_json,status,latest_accepted_turn_number,latest_checkpoint_turn_number,default_narration_voice,
@@ -189,15 +198,15 @@ async function handleCreateStory(body: Record<string, unknown>) {
       }), stamp,
     ),
     db.prepare("INSERT INTO story_art_profiles (story_id,profile_json,last_updated_turn,updated_at) VALUES (?,?,1,?)").bind(
-      storyId, JSON.stringify(initialArtProfile(generated.foundation)), stamp,
+      storyId, JSON.stringify(artProfile), stamp,
     ),
   ];
   const coverAssetId = crypto.randomUUID();
   statements.push(db.prepare(`INSERT INTO art_assets (id,story_id,turn_id,turn_number,type,category,title,caption,prompt_summary,status,created_at,updated_at)
     VALUES (?,?,?,1,'cover','Cover',?,?,?,'Placeholder',?,?)`).bind(
-    coverAssetId, storyId, turnId, `${generated.foundation.title} cover`, `Cover for ${generated.foundation.title}`, "Typographic placeholder while illustrated art is prepared.", stamp, stamp,
+    coverAssetId, storyId, turnId, `${generated.foundation.title} cover`, `Cover for ${generated.foundation.title}`, coverPromptSummary(generated.foundation, artProfile), stamp, stamp,
   ));
-  statements.push(enqueueJobStatement(db, { id: `art_cover:${storyId}:1`, storyId, turnNumber: 1, jobType: "art_cover", input: { assetId: coverAssetId } }));
+  statements.push(enqueueJobStatement(db, { id: `art_cover:${storyId}:1`, storyId, turnNumber: 1, jobType: "art_cover", input: { assetId: coverAssetId, briefReady: true } }));
   statements.push(enqueueJobStatement(db, { id: `context_reconcile:${storyId}:1`, storyId, turnNumber: 1, jobType: "context_reconcile", input: { reason: "initial visual and character context" } }));
   for (const member of mergeCast(generated.foundation.initialCast, firstTurn.castUpdates, 1)) statements.push(castUpsert(db, storyId, member, 1));
   await db.batch(statements);
@@ -210,12 +219,25 @@ async function handleContinue(body: Record<string, unknown>) {
   const note = String(body.note || "").trim();
   const story = await loadStory(storyId, true);
   if (!story) return Response.json({ error: "Story not found." }, { status: 404 });
+  const requestedLatest = Number(body.expectedLatestTurnNumber);
+  const expectedLatest = Number.isSafeInteger(requestedLatest) && requestedLatest >= 0
+    ? requestedLatest
+    : story.latestAcceptedTurnNumber;
+  if (story.latestAcceptedTurnNumber > expectedLatest) {
+    return Response.json({ story, alreadyCompleted: true });
+  }
+  if (story.latestAcceptedTurnNumber < expectedLatest) {
+    return Response.json({ error: "This reader is ahead of the saved story. Refresh before writing another section." }, { status: 409 });
+  }
   if (story.status !== "Active") return bad("Only active stories can be continued.");
   const db = getD1();
-  const nextTurnNumber = story.latestAcceptedTurnNumber + 1;
+  const nextTurnNumber = expectedLatest + 1;
   const key = `${storyId}:${nextTurnNumber}`;
-  const existing = await db.prepare("SELECT status FROM generation_jobs WHERE idempotency_key=?").bind(key).first<Row>();
-  if (existing?.status === "generating") return Response.json({ error: "The author is already writing this section." }, { status: 409 });
+  const existing = await db.prepare("SELECT status,updated_at FROM generation_jobs WHERE idempotency_key=?").bind(key).first<Row>();
+  const staleGeneration = existing?.status === "generating" && Date.parse(String(existing.updated_at || "")) < Date.now() - 12 * 60 * 1000;
+  if (existing?.status === "generating" && !staleGeneration) return Response.json({ error: "The author is already writing this section." }, { status: 409 });
+  if (staleGeneration) await recordOperationLog({ storyId, turnNumber: nextTurnNumber, operation: "continue_story", category: "stale_generation_resume",
+    attempt: 1, status: "recovered", message: "Resumed writing after an interrupted request left a stale generation lock." });
   if (existing?.status === "completed") {
     const refreshed = await loadStory(storyId, true);
     return Response.json({ story: refreshed, alreadyCompleted: true });
@@ -317,7 +339,7 @@ async function handleAcceptRegeneration(body: Record<string, unknown>) {
     db.prepare("UPDATE story_states SET state_json=?, last_updated_turn=? WHERE story_id=?").bind(JSON.stringify(candidate.nextStoryState), latest.turnNumber, storyId),
     db.prepare("DELETE FROM cast_members WHERE story_id=?").bind(storyId),
     db.prepare("DELETE FROM checkpoints WHERE story_id=? AND through_turn_number>=?").bind(storyId, latest.turnNumber),
-    db.prepare("UPDATE background_jobs SET status='failed',last_error='Superseded by regenerated section',updated_at=? WHERE story_id=? AND turn_number=? AND status IN ('pending','running','retrying')").bind(stamp, storyId, latest.turnNumber),
+    db.prepare("UPDATE background_jobs SET status='failed',last_error='Superseded by regenerated section',locked_at=NULL,updated_at=? WHERE story_id=? AND turn_number=? AND job_type<>'art_cover' AND status IN ('pending','running','retrying')").bind(stamp, storyId, latest.turnNumber),
     db.prepare("UPDATE art_assets SET status='Failed',caption='Superseded by regenerated section',updated_at=? WHERE story_id=? AND turn_number=? AND type<>'cover'").bind(stamp, storyId, latest.turnNumber),
     db.prepare("UPDATE stories SET latest_checkpoint_turn_number=?, updated_at=? WHERE id=?").bind(previousCheckpointTurn, stamp, storyId),
   ];
@@ -335,6 +357,19 @@ function enqueueJobStatement(db: D1Database, job: { id: string; storyId: string;
   return db.prepare(`INSERT OR IGNORE INTO background_jobs
     (id,story_id,turn_number,job_type,status,attempts,max_attempts,run_after,input_json,result_json,created_at,updated_at)
     VALUES (?,?,?,?,'pending',0,3,?,?,'{}',?,?)`).bind(
+    job.id, job.storyId, job.turnNumber ?? null, job.jobType, stamp, JSON.stringify(job.input || {}), stamp, stamp,
+  );
+}
+
+function enqueueReusableJobStatement(db: D1Database, job: { id: string; storyId: string; turnNumber?: number; jobType: JobType; input?: Record<string, unknown> }) {
+  const stamp = now();
+  return db.prepare(`INSERT INTO background_jobs
+    (id,story_id,turn_number,job_type,status,attempts,max_attempts,run_after,input_json,result_json,last_error,locked_at,created_at,updated_at)
+    VALUES (?,?,?,?,'pending',0,3,?,?,'{}',NULL,NULL,?,?)
+    ON CONFLICT(id) DO UPDATE SET story_id=excluded.story_id,turn_number=excluded.turn_number,job_type=excluded.job_type,
+      status='pending',attempts=0,max_attempts=3,run_after=excluded.run_after,input_json=excluded.input_json,result_json='{}',
+      last_error=NULL,locked_at=NULL,updated_at=excluded.updated_at
+    WHERE background_jobs.status IN ('completed','failed','unsupported')`).bind(
     job.id, job.storyId, job.turnNumber ?? null, job.jobType, stamp, JSON.stringify(job.input || {}), stamp, stamp,
   );
 }
@@ -367,97 +402,255 @@ async function handleQueueArt(body: Record<string, unknown>) {
   if (body.model != null && !isGoogleImageModel(body.model)) return bad("Choose a supported Google image model.");
   const model = selectedGoogleImageModel(body.model);
   const db = getD1();
+  await failExhaustedJobs(db, storyId);
+  const jobType: JobType = type === "cover" ? "art_cover" : "art_scene";
+  await reconcileActiveArtJobs(db, storyId, jobType, turnNumber);
+  const jobId = `${jobType}:${storyId}:${turnNumber}`;
+  const active = await db.prepare(`SELECT id,input_json FROM background_jobs WHERE story_id=? AND job_type=? AND turn_number=?
+    AND (status='running' OR (status IN ('pending','retrying') AND attempts<max_attempts)) ORDER BY updated_at DESC LIMIT 1`).bind(storyId, jobType, turnNumber).first<Row>();
+  if (active) {
+    const activeInput = json<Record<string, unknown>>(String(active.input_json || ""), {});
+    return Response.json({ story: await loadStory(storyId, true), jobId: String(active.id), queued: false, model: selectedGoogleImageModel(activeInput.model) });
+  }
+
   const stamp = now();
   const assetId = crypto.randomUUID();
   const title = type === "cover" ? `${story.title} cover` : `Section ${turnNumber} illustration`;
+  const promptSummary = type === "cover" ? coverPromptSummary(story.foundation, story.artProfile || initialArtProfile(story.foundation)) : scenePromptSummary(story, turn!);
   await db.batch([
     db.prepare(`INSERT INTO art_assets (id,story_id,turn_id,turn_number,type,category,title,caption,prompt_summary,status,created_at,updated_at)
       VALUES (?,?,?,?,?,?,?,?,?,'Queued',?,?)`).bind(
       assetId, storyId, turn?.id || null, turnNumber, type, type === "cover" ? "Cover" : "Scenes", title,
-      type === "cover" ? `Cover for ${story.title}` : `Section ${turnNumber} - awaiting scene selection`, "Queued for background art direction.", stamp, stamp,
+      type === "cover" ? `Cover for ${story.title}` : `Illustration for Section ${turnNumber}`, promptSummary, stamp, stamp,
     ),
-    enqueueJobStatement(db, { id: `${type === "cover" ? "art_cover" : "art_scene"}:${storyId}:${turnNumber}:${assetId}`, storyId, turnNumber,
-      jobType: type === "cover" ? "art_cover" : "art_scene", input: { assetId, turnId: turn?.id, requestedByUser: true, model } }),
+    enqueueReusableJobStatement(db, { id: jobId, storyId, turnNumber, jobType,
+      input: { assetId, turnId: turn?.id, requestedByUser: true, model, briefReady: true } }),
   ]);
-  return Response.json({ story: await loadStory(storyId, true) });
+  const claimed = await db.prepare("SELECT input_json FROM background_jobs WHERE id=?").bind(jobId).first<Row>();
+  const claimedInput = json<Record<string, unknown>>(String(claimed?.input_json || ""), {});
+  if (String(claimedInput.assetId || "") !== assetId) await db.prepare("DELETE FROM art_assets WHERE id=? AND status='Queued'").bind(assetId).run();
+  return Response.json({ story: await loadStory(storyId, true), jobId, queued: String(claimedInput.assetId || "") === assetId,
+    model: selectedGoogleImageModel(claimedInput.model) });
 }
 
 async function handleRetryBackgroundJob(body: Record<string, unknown>) {
   const jobId = String(body.jobId || "");
+  if (body.model != null && !isGoogleImageModel(body.model)) return bad("Choose a supported Google image model.");
+  const db = getD1();
+  const row = await db.prepare("SELECT * FROM background_jobs WHERE id=?").bind(jobId).first<Row>();
+  if (!row) return Response.json({ error: "That background job no longer exists." }, { status: 404 });
+  if (!["failed", "retrying", "unsupported"].includes(String(row.status))) {
+    return Response.json({ error: "That background job is already active or complete." }, { status: 409 });
+  }
+  const input = json<Record<string, unknown>>(String(row.input_json || ""), {});
+  delete input.interactionId;
+  if (body.model != null) input.model = selectedGoogleImageModel(body.model);
+  const jobType = String(row.job_type) as JobType;
+  const storyId = String(row.story_id);
+  const turnNumber = Number(row.turn_number || 0);
+  const activeOther = await db.prepare(`SELECT id FROM background_jobs WHERE story_id=? AND job_type=? AND turn_number=? AND id<>?
+    AND (status='running' OR (status IN ('pending','retrying') AND attempts<max_attempts)) ORDER BY updated_at DESC LIMIT 1`)
+    .bind(storyId, jobType, turnNumber, jobId).first<Row>();
+  if (activeOther) return Response.json({ ok: true, jobId: String(activeOther.id), story: await loadStory(storyId, true), queued: false });
+  let refreshedTurnId = "";
+  if (jobType === "art_scene") {
+    const currentTurn = await db.prepare("SELECT id FROM turns WHERE story_id=? AND turn_number=?").bind(storyId, turnNumber).first<Row>();
+    if (currentTurn && String(currentTurn.id) !== String(input.turnId || "")) {
+      refreshedTurnId = String(currentTurn.id);
+      input.turnId = refreshedTurnId;
+      input.refreshBrief = true;
+      input.briefReady = false;
+    }
+  }
   const stamp = now();
-  await getD1().prepare(`UPDATE background_jobs SET status='pending',attempts=0,run_after=?,last_error=NULL,locked_at=NULL,updated_at=?
-    WHERE id=? AND status IN ('failed','retrying','unsupported')`).bind(stamp, stamp, jobId).run();
-  return Response.json({ ok: true });
+  const retried = await db.prepare(`UPDATE background_jobs SET status='pending',attempts=0,run_after=?,input_json=?,last_error=NULL,locked_at=NULL,updated_at=?
+    WHERE id=? AND status=? AND COALESCE(updated_at,'')=? AND COALESCE(locked_at,'')=?`).bind(
+    stamp, JSON.stringify(input), stamp, jobId, String(row.status), String(row.updated_at || ""), String(row.locked_at || ""),
+  ).run();
+  if (Number(retried.meta.changes || 0) < 1) {
+    const current = await db.prepare("SELECT status FROM background_jobs WHERE id=?").bind(jobId).first<Row>();
+    if (current && ["pending", "running", "retrying"].includes(String(current.status))) {
+      return Response.json({ ok: true, jobId, story: await loadStory(storyId, true), queued: false });
+    }
+    return Response.json({ error: "That background job changed while it was being retried. Refresh its status and try again." }, { status: 409 });
+  }
+  if (refreshedTurnId && input.assetId) await db.prepare("UPDATE art_assets SET turn_id=?,status='Queued',caption='Queued after the section changed',prompt_summary='',updated_at=? WHERE id=? AND status<>'Ready'")
+    .bind(refreshedTurnId, stamp, String(input.assetId)).run();
+  if (input.assetId) await db.prepare("UPDATE art_assets SET status='Queued',updated_at=? WHERE id=? AND status<>'Ready'").bind(stamp, String(input.assetId)).run();
+  return Response.json({ ok: true, jobId, story: await loadStory(storyId, true) });
 }
 
 async function handleRunBackgroundJob(body: Record<string, unknown>) {
   const db = getD1();
   const storyId = String(body.storyId || "");
+  const requestedJobId = String(body.jobId || "");
+  const runningRows = await db.prepare("SELECT * FROM background_jobs WHERE status='running'").all<Row>();
+  const staleRows = runningRows.results.filter((row) => {
+    const artJob = ["art_cover", "art_scene"].includes(String(row.job_type));
+    const leaseMs = artJob ? 12 * 60_000 : 25 * 60_000;
+    const updatedAt = Date.parse(String(row.updated_at || ""));
+    return !Number.isFinite(updatedAt) || updatedAt < Date.now() - leaseMs;
+  });
+  for (const row of staleRows) {
+    const exhausted = Number(row.attempts || 0) >= Number(row.max_attempts || 3);
+    const stamp = now();
+    const staleMessage = exhausted ? "Interrupted job exhausted its retry limit." : "Interrupted job resumed after a stale lock.";
+    const staleTransition = await db.prepare(`UPDATE background_jobs SET status=?,locked_at=NULL,run_after=?,last_error=?,updated_at=?
+      WHERE id=? AND status='running' AND locked_at=?`).bind(
+      exhausted ? "failed" : "retrying", stamp, staleMessage, stamp, String(row.id), String(row.locked_at || ""),
+    ).run();
+    if (exhausted && Number(staleTransition.meta.changes || 0) > 0) {
+      const staleInput = json<Record<string, unknown>>(String(row.input_json || ""), {});
+      if (staleInput.assetId) await db.prepare("UPDATE art_assets SET status='Failed',updated_at=? WHERE id=? AND status IN ('Queued','Preparing')")
+        .bind(stamp, String(staleInput.assetId)).run();
+      await recordOperationLog({ storyId: String(row.story_id), turnNumber: Number(row.turn_number || 0), operation: String(row.job_type),
+        category: "stale_job_exhausted", attempt: Number(row.attempts || 1), status: "failed", message: staleMessage });
+    }
+  }
   if (storyId) await ensureBaselineJobs(db, storyId);
-  const staleBefore = new Date(Date.now() - 25 * 60 * 1000).toISOString();
-  await db.prepare(`UPDATE background_jobs SET status='retrying',locked_at=NULL,run_after=?,last_error='Interrupted job resumed after a stale lock',updated_at=?
-    WHERE status='running' AND locked_at<?`).bind(now(), now(), staleBefore).run();
   const jobRow = await db.prepare(`SELECT * FROM background_jobs WHERE status IN ('pending','retrying') AND attempts<max_attempts AND run_after<=?
-    AND (?='' OR story_id=?) ORDER BY run_after ASC,created_at ASC LIMIT 1`).bind(now(), storyId, storyId).first<Row>();
-  if (!jobRow) return Response.json({ processed: false, more: false });
+    AND (?='' OR story_id=?) AND (?='' OR id=?)
+    ORDER BY CASE job_type WHEN 'art_cover' THEN 0 WHEN 'art_scene' THEN 1 ELSE 2 END,run_after ASC,created_at ASC LIMIT 1`)
+    .bind(now(), storyId, storyId, requestedJobId, requestedJobId).first<Row>();
+  if (!jobRow) return Response.json({ processed: false, more: false, waiting: Boolean(requestedJobId) });
   const lock = crypto.randomUUID();
   await db.prepare(`UPDATE background_jobs SET status='running',attempts=attempts+1,locked_at=?,updated_at=?
-    WHERE id=? AND status IN ('pending','retrying')`).bind(lock, now(), String(jobRow.id)).run();
-  const claimed = await db.prepare("SELECT * FROM background_jobs WHERE id=? AND locked_at=?").bind(String(jobRow.id), lock).first<Row>();
+    WHERE id=? AND status IN ('pending','retrying') AND attempts<max_attempts AND run_after<=?`).bind(lock, now(), String(jobRow.id), now()).run();
+  const claimed = await db.prepare("SELECT * FROM background_jobs WHERE id=? AND status='running' AND locked_at=?").bind(String(jobRow.id), lock).first<Row>();
   if (!claimed) return Response.json({ processed: false, more: true });
   const job = jobFromRow(claimed);
+  const input = json<Record<string, unknown>>(String(claimed.input_json || ""), {});
   try {
-    const outcome = await processBackgroundJob(job, json(String(claimed.input_json || ""), {}));
-    const status = outcome.unsupported ? "unsupported" : "completed";
-    await db.prepare("UPDATE background_jobs SET status=?,result_json=?,last_error=?,locked_at=NULL,updated_at=? WHERE id=?").bind(
-      status, JSON.stringify(outcome.result || {}), outcome.message || null, now(), job.id,
-    ).run();
-    if (outcome.unsupported) await recordOperationLog({ storyId: job.storyId, turnNumber: job.turnNumber, operation: job.jobType,
-      category: "native_image_unavailable", attempt: job.attempts, status: "unsupported", message: outcome.message || "Native image rendering is unavailable." });
+    const outcome = await processBackgroundJob(job, input, lock);
+    if (outcome.deferred) {
+      const runAfter = new Date(Date.now() + Math.max(2_000, outcome.runAfterMs || 5_000)).toISOString();
+      await db.prepare(`UPDATE background_jobs SET status='pending',attempts=MAX(attempts-1,0),run_after=?,input_json=?,result_json=?,
+        last_error=NULL,locked_at=NULL,updated_at=? WHERE id=? AND status='running' AND locked_at=?`).bind(
+        runAfter, JSON.stringify(outcome.input || {}), JSON.stringify(outcome.result || {}), now(), job.id, lock,
+      ).run();
+    } else {
+      const status = outcome.unsupported ? "unsupported" : "completed";
+      const completion = await db.prepare("UPDATE background_jobs SET status=?,result_json=?,last_error=?,locked_at=NULL,updated_at=? WHERE id=? AND status='running' AND locked_at=?").bind(
+        status, JSON.stringify(outcome.result || {}), outcome.message || null, now(), job.id, lock,
+      ).run();
+      if (outcome.unsupported && Number(completion.meta.changes || 0) > 0) await recordOperationLog({ storyId: job.storyId, turnNumber: job.turnNumber, operation: job.jobType,
+        category: "native_image_unavailable", attempt: job.attempts, status: "unsupported", message: outcome.message || "Native image rendering is unavailable." });
+    }
   } catch (error) {
     const failure = backgroundFailure(error);
     const retrying = failure.recoverable && job.attempts < job.maxAttempts;
     const runAfter = new Date(Date.now() + Math.max(failure.retryAfterMs, Math.min(60_000, 4_000 * 2 ** Math.max(0, job.attempts - 1)))).toISOString();
-    await db.prepare("UPDATE background_jobs SET status=?,run_after=?,last_error=?,locked_at=NULL,updated_at=? WHERE id=?").bind(
-      retrying ? "retrying" : "failed", runAfter, failure.message, now(), job.id,
+    const retryInput = { ...input };
+    if (failure.restartRequired) delete retryInput.interactionId;
+    const failureTransition = await db.prepare("UPDATE background_jobs SET status=?,run_after=?,input_json=?,last_error=?,locked_at=NULL,updated_at=? WHERE id=? AND status='running' AND locked_at=?").bind(
+      retrying ? "retrying" : "failed", runAfter, JSON.stringify(retryInput), failure.message, now(), job.id, lock,
     ).run();
-    await recordOperationLog({ storyId: job.storyId, turnNumber: job.turnNumber, operation: job.jobType, category: failure.category,
+    if (Number(failureTransition.meta.changes || 0) > 0) await recordOperationLog({ storyId: job.storyId, turnNumber: job.turnNumber, operation: job.jobType, category: failure.category,
       attempt: job.attempts, status: retrying ? "retrying" : "failed", message: failure.message,
       context: { recoverable: failure.recoverable, maxAttempts: job.maxAttempts, transportTimeoutMs: 10 * 60 * 1000 } });
   }
   const more = Boolean(await db.prepare(`SELECT id FROM background_jobs WHERE status IN ('pending','retrying') AND attempts<max_attempts AND run_after<=?
-    AND (?='' OR story_id=?) LIMIT 1`).bind(now(), storyId, storyId).first<Row>());
+    AND (?='' OR story_id=?) AND (?='' OR id=?) LIMIT 1`).bind(now(), storyId, storyId, requestedJobId, requestedJobId).first<Row>());
   return Response.json({ processed: true, jobId: job.id, more });
 }
 
 async function ensureBaselineJobs(db: D1Database, storyId: string) {
-  const [storyRow, contextRow, coverRow] = await Promise.all([
+  await failExhaustedJobs(db, storyId);
+  await reconcileActiveArtJobs(db, storyId);
+  const [storyRow, contextRow, coverRow, activeCoverJob] = await Promise.all([
     db.prepare("SELECT title,latest_accepted_turn_number FROM stories WHERE id=?").bind(storyId).first<Row>(),
     db.prepare("SELECT id FROM context_snapshots WHERE story_id=? LIMIT 1").bind(storyId).first<Row>(),
-    db.prepare("SELECT id FROM art_assets WHERE story_id=? AND type='cover' LIMIT 1").bind(storyId).first<Row>(),
+    db.prepare(`SELECT * FROM art_assets WHERE story_id=? AND type='cover'
+      ORDER BY CASE WHEN status='Ready' THEN 0 WHEN status IN ('Placeholder','Queued','Preparing') THEN 1 ELSE 2 END,created_at DESC LIMIT 1`).bind(storyId).first<Row>(),
+    db.prepare(`SELECT id FROM background_jobs WHERE story_id=? AND job_type='art_cover'
+      AND (status='running' OR (status IN ('pending','retrying') AND attempts<max_attempts)) LIMIT 1`).bind(storyId).first<Row>(),
   ]);
   if (!storyRow) return;
   const turnNumber = Math.max(1, Number(storyRow.latest_accepted_turn_number || 1));
   const statements: D1PreparedStatement[] = [];
+  let repairAssetId = "";
   if (!contextRow) statements.push(enqueueJobStatement(db, {
     id: `context_reconcile:${storyId}:${turnNumber}:baseline`, storyId, turnNumber, jobType: "context_reconcile", input: { reason: "baseline context for an existing story" },
   }));
-  if (!coverRow) {
-    const assetId = `cover-baseline:${storyId}`;
+  const coverStatus = String(coverRow?.status || "");
+  const repairableCover = !coverRow || ["Placeholder", "Queued", "Preparing"].includes(coverStatus);
+  if (repairableCover && !activeCoverJob) {
+    const assetId = String(coverRow?.id || `cover-baseline:${storyId}`);
+    repairAssetId = assetId;
     const stamp = now();
-    statements.push(db.prepare(`INSERT OR IGNORE INTO art_assets (id,story_id,turn_number,type,category,title,caption,prompt_summary,status,created_at,updated_at)
-      VALUES (?,?,1,'cover','Cover',?,?,?,'Placeholder',?,?)`).bind(
-      assetId, storyId, `${String(storyRow.title)} cover`, `Cover for ${String(storyRow.title)}`, "Typographic placeholder while illustrated art is prepared.", stamp, stamp,
-    ));
-    statements.push(enqueueJobStatement(db, { id: `art_cover:${storyId}:1:baseline`, storyId, turnNumber: 1, jobType: "art_cover", input: { assetId } }));
+    if (!coverRow) statements.push(db.prepare(`INSERT OR IGNORE INTO art_assets (id,story_id,turn_number,type,category,title,caption,prompt_summary,status,created_at,updated_at)
+        VALUES (?,?,1,'cover','Cover',?,?,?,'Placeholder',?,?)`).bind(
+        assetId, storyId, `${String(storyRow.title)} cover`, `Cover for ${String(storyRow.title)}`, "Typographic placeholder while illustrated art is prepared.", stamp, stamp,
+      ));
+    else statements.push(db.prepare("UPDATE art_assets SET status='Queued',updated_at=? WHERE id=?").bind(stamp, assetId));
+    statements.push(enqueueReusableJobStatement(db, { id: `art_cover:${storyId}:1`, storyId, turnNumber: 1, jobType: "art_cover", input: { assetId } }));
   }
   if (statements.length) await db.batch(statements);
+  if (repairAssetId) {
+    const claimed = await db.prepare("SELECT input_json FROM background_jobs WHERE id=?").bind(`art_cover:${storyId}:1`).first<Row>();
+    const claimedAssetId = String(json<Record<string, unknown>>(String(claimed?.input_json || ""), {}).assetId || "");
+    if (claimedAssetId && claimedAssetId !== repairAssetId) {
+      if (coverRow) await db.prepare("UPDATE art_assets SET status='Failed',caption='Superseded by a newer cover request',updated_at=? WHERE id=? AND status<>'Ready'")
+        .bind(now(), repairAssetId).run();
+      else await db.prepare("DELETE FROM art_assets WHERE id=? AND status='Placeholder'").bind(repairAssetId).run();
+    }
+  }
 }
 
-async function processBackgroundJob(job: BackgroundJob, input: Record<string, unknown>): Promise<{ result: unknown; unsupported?: boolean; message?: string }> {
+async function failExhaustedJobs(db: D1Database, storyId = "") {
+  const rows = await db.prepare(`SELECT * FROM background_jobs WHERE status IN ('pending','retrying') AND attempts>=max_attempts
+    AND (?='' OR story_id=?)`).bind(storyId, storyId).all<Row>();
+  for (const row of rows.results) {
+    const stamp = now();
+    const error = "This job exhausted its automatic retry limit. Review the diagnostics and retry it explicitly.";
+    const transition = await db.prepare("UPDATE background_jobs SET status='failed',last_error=?,locked_at=NULL,updated_at=? WHERE id=? AND status IN ('pending','retrying') AND attempts>=max_attempts")
+      .bind(error, stamp, String(row.id)).run();
+    if (Number(transition.meta.changes || 0) < 1) continue;
+    const input = json<Record<string, unknown>>(String(row.input_json || ""), {});
+    if (input.assetId) await db.prepare("UPDATE art_assets SET status='Failed',updated_at=? WHERE id=? AND status IN ('Queued','Preparing')")
+      .bind(stamp, String(input.assetId)).run();
+    await recordOperationLog({ storyId: String(row.story_id), turnNumber: Number(row.turn_number || 0), operation: String(row.job_type),
+      category: "retry_limit", attempt: Number(row.attempts || 1), status: "failed", message: error });
+  }
+}
+
+async function reconcileActiveArtJobs(db: D1Database, storyId: string, onlyType: JobType | "" = "", onlyTurn = 0) {
+  const rows = await db.prepare(`SELECT * FROM background_jobs WHERE story_id=? AND job_type IN ('art_cover','art_scene')
+    AND (status='running' OR (status IN ('pending','retrying') AND attempts<max_attempts))
+    AND (?='' OR job_type=?) AND (?=0 OR turn_number=?) ORDER BY updated_at DESC`)
+    .bind(storyId, onlyType, onlyType, onlyTurn, onlyTurn).all<Row>();
+  const targets = new Map<string, Row[]>();
+  for (const row of rows.results) {
+    const key = `${String(row.job_type)}:${Number(row.turn_number || 0)}`;
+    targets.set(key, [...(targets.get(key) || []), row]);
+  }
+  for (const group of targets.values()) {
+    if (group.length < 2) continue;
+    const first = group[0];
+    const canonicalId = `${String(first.job_type)}:${storyId}:${Number(first.turn_number || 0)}`;
+    const keeper = group.find((row) => String(row.status) === "running") || group.find((row) => String(row.id) === canonicalId) || first;
+    for (const row of group) {
+      if (String(row.id) === String(keeper.id)) continue;
+      const stamp = now();
+      const superseded = "Superseded by the active artwork request for the same target.";
+      const transition = await db.prepare(`UPDATE background_jobs SET status='failed',last_error=?,locked_at=NULL,updated_at=? WHERE id=?
+        AND (status='running' OR status IN ('pending','retrying'))`).bind(superseded, stamp, String(row.id)).run();
+      if (Number(transition.meta.changes || 0) < 1) continue;
+      const input = json<Record<string, unknown>>(String(row.input_json || ""), {});
+      if (input.assetId) await db.prepare("UPDATE art_assets SET status='Failed',updated_at=? WHERE id=? AND status<>'Ready'")
+        .bind(stamp, String(input.assetId)).run();
+      await recordOperationLog({ storyId, turnNumber: Number(row.turn_number || 0), operation: String(row.job_type),
+        category: "duplicate_art_job", attempt: Number(row.attempts || 1), status: "failed", message: superseded });
+    }
+  }
+}
+
+type BackgroundJobOutcome = { result: unknown; unsupported?: boolean; message?: string; deferred?: boolean; runAfterMs?: number; input?: Record<string, unknown> };
+
+async function processBackgroundJob(job: BackgroundJob, input: Record<string, unknown>, lock: string): Promise<BackgroundJobOutcome> {
   if (job.jobType === "context_reconcile") return { result: await runContextJob(job) };
   if (job.jobType === "checkpoint_reconcile") return { result: await runCheckpointJob(job) };
-  if (job.jobType === "art_cover" || job.jobType === "art_scene") return runArtJob(job, input);
+  if (job.jobType === "art_cover" || job.jobType === "art_scene") return runArtJob(job, input, lock);
   throw new Error("Unknown background job type.");
 }
 
@@ -503,57 +696,87 @@ async function runCheckpointJob(job: BackgroundJob) {
   return { throughTurnNumber: through };
 }
 
-async function runArtJob(job: BackgroundJob, input: Record<string, unknown>) {
+async function runArtJob(job: BackgroundJob, input: Record<string, unknown>, lock: string) {
   const story = await loadStory(job.storyId, true);
   if (!story) throw new Error("Story not found for art preparation.");
   const type = job.jobType === "art_cover" ? "cover" : "scene";
   const turn = type === "scene" ? story.turns?.find((item) => item.turnNumber === job.turnNumber) : undefined;
+  if (type === "scene" && !turn) throw new GoogleImageFailure("The section selected for this illustration no longer exists.", "art_turn_missing", false);
   const db = getD1();
-  const assetId = String(input.assetId || "") || crypto.randomUUID();
+  const activeLease = await db.prepare("SELECT id FROM background_jobs WHERE id=? AND status='running' AND locked_at=?").bind(job.id, lock).first<Row>();
+  if (!activeLease) return { result: { cancelled: true } };
+  if (type === "scene" && String(input.turnId || "") !== turn!.id) {
+    input.turnId = turn!.id;
+    input.refreshBrief = true;
+    input.briefReady = false;
+  }
+  const assetId = String(input.assetId || "") || `art-asset:${job.id}`;
+  input.assetId = assetId;
   const existing = await db.prepare("SELECT * FROM art_assets WHERE id=?").bind(assetId).first<Row>();
-  const reusableBrief = existing && !["Placeholder", "Queued"].includes(String(existing.status || "")) && String(existing.prompt_summary || "").trim();
-  const generatedBrief = reusableBrief ? null : await createArtBrief({ storyId: story.id, turnNumber: job.turnNumber, type,
-    story: { title: story.title, shortDescription: story.shortDescription, foundation: story.foundation, author: story.authorSnapshot },
-    prose: turn?.prose, artProfile: story.artProfile, visualProfiles: story.visualProfiles });
-  const brief = generatedBrief || {
+  const reusableBrief = Boolean(input.refreshBrief !== true && existing && (input.briefReady === true
+    || (!["Placeholder", "Queued"].includes(String(existing.status || "")) && String(existing.prompt_summary || "").trim())));
+  const brief = reusableBrief ? {
     shouldIllustrate: true,
     category: String(existing?.category || (type === "cover" ? "Cover" : "Scenes")) as ArtAsset["category"],
     title: String(existing?.title || (type === "cover" ? `${story.title} cover` : `Section ${job.turnNumber} illustration`)),
     caption: String(existing?.caption || ""),
     promptSummary: String(existing?.prompt_summary || ""),
+  } : {
+    shouldIllustrate: true,
+    category: (type === "cover" ? "Cover" : "Scenes") as ArtAsset["category"],
+    title: type === "cover" ? `${story.title} cover` : `Section ${job.turnNumber} illustration`,
+    caption: type === "cover" ? `Cover for ${story.title}` : `Illustration for Section ${job.turnNumber}`,
+    promptSummary: type === "cover"
+      ? coverPromptSummary(story.foundation, story.artProfile || initialArtProfile(story.foundation))
+      : scenePromptSummary(story, turn!),
   };
   const stamp = now();
   if (!brief.shouldIllustrate && type === "scene") {
-    await db.prepare("UPDATE art_assets SET title=?,caption=?,prompt_summary=?,status='Failed',updated_at=? WHERE id=?").bind(
-      brief.title, brief.caption || "This section was not selected as a strong illustration moment.", brief.promptSummary, stamp, assetId,
+    await db.prepare(`UPDATE art_assets SET title=?,caption=?,prompt_summary=?,status='Failed',updated_at=? WHERE id=?
+      AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(
+      brief.title, brief.caption || "This section was not selected as a strong illustration moment.", brief.promptSummary, stamp, assetId, job.id, lock,
     ).run();
     return { result: { selected: false, assetId } };
   }
-  if (existing) await db.prepare("UPDATE art_assets SET category=?,title=?,caption=?,prompt_summary=?,status='Preparing',updated_at=? WHERE id=?").bind(
-    brief.category, brief.title, brief.caption, brief.promptSummary, stamp, assetId,
+  if (existing) await db.prepare(`UPDATE art_assets SET turn_id=?,category=?,title=?,caption=?,prompt_summary=?,status='Preparing',updated_at=? WHERE id=?
+    AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(
+    turn?.id || null, brief.category, brief.title, brief.caption, brief.promptSummary, stamp, assetId, job.id, lock,
   ).run();
   else await db.prepare(`INSERT INTO art_assets (id,story_id,turn_id,turn_number,type,category,title,caption,prompt_summary,status,created_at,updated_at)
-    VALUES (?,?,?,?,?,?,?,?,?,'Preparing',?,?)`).bind(assetId, story.id, turn?.id || null, job.turnNumber || null, type, brief.category, brief.title, brief.caption, brief.promptSummary, stamp, stamp).run();
+    SELECT ?,?,?,?,?,?,?,?,?,'Preparing',?,? WHERE EXISTS
+      (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(
+    assetId, story.id, turn?.id || null, job.turnNumber || null, type, brief.category, brief.title, brief.caption, brief.promptSummary, stamp, stamp, job.id, lock,
+  ).run();
 
   const bucket = getArtBucket();
-  if (!bucket || !process.env.GEMINI_API_KEY) {
-    const unavailable = !bucket ? "Private art storage is not configured." : "Google image generation is not configured.";
-    await db.prepare("UPDATE art_assets SET status='Unsupported',updated_at=? WHERE id=?").bind(now(), assetId).run();
+  if (!bucket) {
+    const unavailable = "Private art storage is not configured.";
+    await db.prepare(`UPDATE art_assets SET status='Unsupported',updated_at=? WHERE id=?
+      AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(now(), assetId, job.id, lock).run();
     return { unsupported: true, result: { assetId, brief }, message: unavailable };
   }
 
   const model = selectedGoogleImageModel(input.model);
-  const objectKey = `stories/${story.id}/${assetId}/image`;
+  input.model = model;
+  const renderVersion = type === "scene" ? turn!.id : "cover";
+  const objectKey = `stories/${story.id}/${assetId}/${encodeURIComponent(renderVersion)}/image`;
   const stored = await bucket.get(objectKey);
   if (stored) {
     await stored.body.cancel().catch(() => {});
     const storedMime = stored.httpMetadata?.contentType || String(existing?.mime_type || "image/jpeg");
-    await db.prepare("UPDATE art_assets SET status='Ready',image_reference=?,mime_type=?,updated_at=? WHERE id=?").bind(
-      `r2:${objectKey}`, storedMime, now(), assetId,
+    const recovered = await db.prepare(`UPDATE art_assets SET status='Ready',image_reference=?,mime_type=?,updated_at=? WHERE id=?
+      AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(
+      `r2:${objectKey}`, storedMime, now(), assetId, job.id, lock,
     ).run();
-    await recordOperationLog({ storyId: story.id, turnNumber: job.turnNumber, operation: job.jobType, category: "art_storage_resume",
+    if (Number(recovered.meta.changes || 0) > 0) await recordOperationLog({ storyId: story.id, turnNumber: job.turnNumber, operation: job.jobType, category: "art_storage_resume",
       attempt: job.attempts, status: "recovered", message: "Recovered a completed art file after an interrupted status update." });
     return { result: { assetId, model: stored.customMetadata?.model || model, mimeType: storedMime, resumed: true } };
+  }
+  if (!process.env.GEMINI_API_KEY) {
+    const unavailable = "Google image generation is not configured.";
+    await db.prepare(`UPDATE art_assets SET status='Unsupported',updated_at=? WHERE id=?
+      AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(now(), assetId, job.id, lock).run();
+    return { unsupported: true, result: { assetId, brief }, message: unavailable };
   }
   const prompt = [
     `Create one finished ${type === "cover" ? "portrait book-cover illustration" : "cinematic story illustration"} for a private literary edition.`,
@@ -567,21 +790,27 @@ async function runArtJob(job: BackgroundJob, input: Record<string, unknown>) {
       httpMetadata: { contentType: image.mimeType },
       customMetadata: { storyId: story.id, assetId, model: image.model },
     });
-    await db.prepare("UPDATE art_assets SET status='Ready',image_reference=?,mime_type=?,updated_at=? WHERE id=?").bind(
-      `r2:${objectKey}`, image.mimeType, now(), assetId,
+    const published = await db.prepare(`UPDATE art_assets SET status='Ready',image_reference=?,mime_type=?,updated_at=? WHERE id=?
+      AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(
+      `r2:${objectKey}`, image.mimeType, now(), assetId, job.id, lock,
     ).run();
-    await recordOperationLog({ storyId: story.id, turnNumber: job.turnNumber, operation: job.jobType, category: "google_image",
+    if (Number(published.meta.changes || 0) < 1) return { result: { assetId, cancelled: true } };
+    await recordOperationLog({ storyId: story.id, turnNumber: job.turnNumber, operation: job.jobType,
+      category: "google_image_generate_content",
       attempt: job.attempts, status: "completed", message: `Generated ${type} art with ${image.model}.`, context: { model: image.model, bytes: image.bytes.byteLength } });
     return { result: { assetId, model: image.model, mimeType: image.mimeType } };
   } catch (error) {
-    await db.prepare("UPDATE art_assets SET status='Failed',updated_at=? WHERE id=?").bind(now(), assetId).run();
+    const failure = backgroundFailure(error);
+    const retrying = failure.recoverable && job.attempts < job.maxAttempts;
+    await db.prepare(`UPDATE art_assets SET status=?,updated_at=? WHERE id=?
+      AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(retrying ? "Preparing" : "Failed", now(), assetId, job.id, lock).run();
     throw error;
   }
 }
 
 function backgroundFailure(error: unknown) {
   if (error instanceof GoogleImageFailure) return error;
-  return { message: message(error), category: "background_job", recoverable: true, retryAfterMs: 0 };
+  return { message: message(error), category: "background_job", recoverable: true, retryAfterMs: 0, restartRequired: false };
 }
 
 async function loadStory(storyId: string, includeDetails: boolean): Promise<Story | null> {
@@ -598,7 +827,7 @@ async function loadStory(storyId: string, includeDetails: boolean): Promise<Stor
     db.prepare("SELECT * FROM story_art_profiles WHERE story_id=?").bind(storyId).first<Row>(),
     db.prepare("SELECT * FROM visual_profiles WHERE story_id=? ORDER BY kind,name").bind(storyId).all<Row>(),
     db.prepare("SELECT * FROM art_assets WHERE story_id=? ORDER BY CASE category WHEN 'Cover' THEN 0 WHEN 'Scenes' THEN 1 WHEN 'Characters' THEN 2 ELSE 3 END,turn_number,created_at DESC").bind(storyId).all<Row>(),
-    db.prepare("SELECT * FROM background_jobs WHERE story_id=? ORDER BY created_at DESC LIMIT 30").bind(storyId).all<Row>(),
+    db.prepare("SELECT * FROM background_jobs WHERE story_id=? ORDER BY updated_at DESC LIMIT 30").bind(storyId).all<Row>(),
   ]);
   story.turns = turnRows.results.map(turnFromRow);
   story.cast = castRows.results.map((cast: Row) => json<CastMember>(String(cast.canonical_json || ""), {} as CastMember));
@@ -625,7 +854,12 @@ async function serveArtAsset(assetId: string) {
   const mimeType = String(row.mime_type || "image/jpeg");
   if (reference.startsWith("r2:")) {
     const object = await getArtBucket()?.get(reference.slice(3));
-    if (!object) return Response.json({ error: "Art file not found." }, { status: 404 });
+        if (!object) {
+          const db = getD1();
+          await db.prepare("UPDATE art_assets SET status=?,updated_at=? WHERE id=?").bind(String(row.type) === "cover" ? "Placeholder" : "Failed", now(), assetId).run();
+          if (String(row.type) === "cover") await ensureBaselineJobs(db, String(row.story_id));
+      return Response.json({ error: "Art file not found. A replacement has been queued." }, { status: 404 });
+    }
     return new Response(object.body as BodyInit, { headers: { "content-type": mimeType, "cache-control": "private, max-age=3600" } });
   }
   if (!/^https:\/\//i.test(reference)) return Response.json({ error: "Art reference is invalid." }, { status: 404 });
@@ -649,6 +883,30 @@ function initialArtProfile(foundation: StoryFoundation): StoryArtProfile {
     avoid: ["text baked into the image", "unestablished costume changes", "visual spoilers", "generic stock-art composition"],
     lastUpdatedTurn: 1,
   };
+}
+
+function coverPromptSummary(foundation: StoryFoundation, profile: StoryArtProfile) {
+  return [
+    `Design language: ${profile.coverStyle}. ${profile.artStyle}.`,
+    `Story premise: ${foundation.shortDescription || foundation.openingSituation}.`,
+    `Setting: ${foundation.setting}. Mood: ${profile.mood}. Palette: ${(profile.palette || []).join(", ")}.`,
+    `Primary figure: ${profile.protagonistAppearance}.`,
+    profile.majorCastAppearance?.length ? `Other established figures: ${profile.majorCastAppearance.slice(0, 4).join("; ")}.` : "",
+    profile.recurringMotifs?.length ? `Recurring visual motifs: ${profile.recurringMotifs.slice(0, 5).join(", ")}.` : "",
+    `Avoid: ${(profile.avoid || []).join(", ")}.`,
+  ].filter(Boolean).join("\n");
+}
+
+function scenePromptSummary(story: Story, turn: Turn) {
+  const profile = story.artProfile || initialArtProfile(story.foundation);
+  const visibleProfiles = (story.visualProfiles || []).slice(0, 8).map((item) => `${item.name}: ${item.visualDescription || [item.clothing, item.architecture, item.atmosphere].filter(Boolean).join(", ")}`);
+  return [
+    `Choose the clearest visually decisive moment from Section ${turn.turnNumber} and illustrate that single moment.`,
+    `Story art direction: ${profile.artStyle}. Mood: ${profile.mood}. Palette: ${(profile.palette || []).join(", ")}.`,
+    visibleProfiles.length ? `Established visual continuity: ${visibleProfiles.join("; ")}.` : `Protagonist continuity: ${profile.protagonistAppearance}.`,
+    `Section text:\n${turn.prose.slice(0, 2_800)}`,
+    `Avoid: ${(profile.avoid || []).join(", ")}.`,
+  ].filter(Boolean).join("\n\n");
 }
 
 function visualProfileUpsert(db: D1Database, storyId: string, profile: VisualProfile, turn: number) {
@@ -740,4 +998,10 @@ function castUpsert(db: D1Database, storyId: string, member: CastMember, turn: n
 function stringList(value: unknown) { return Array.isArray(value) ? value.map(String).map((item) => item.trim()).filter(Boolean) : []; }
 function bad(error: string) { return Response.json({ error }, { status: 400 }); }
 function message(error: unknown) { return error instanceof Error ? error.message : "Something interrupted the author."; }
-function routeError(error: unknown) { return Response.json({ error: message(error) }, { status: 500 }); }
+async function routeError(error: unknown, context: { storyId?: string; turnNumber?: number; operation?: string } = {}) {
+  const errorMessage = message(error);
+  console.error("[kotoba-api]", errorMessage);
+  await recordOperationLog({ storyId: context.storyId, turnNumber: context.turnNumber, operation: context.operation || "api_route",
+    category: "api_route", status: "failed", message: errorMessage });
+  return Response.json({ error: errorMessage }, { status: 500 });
+}

@@ -9,7 +9,7 @@
     "dev": "vinext dev",
     "build": "vinext build",
     "start": "vinext start",
-    "test": "npm run build && node --test tests/rendered-html.test.mjs",
+    "test": "npm run build && node --no-warnings --experimental-strip-types --test --test-concurrency=1 tests/*.test.mjs",
     "lint": "eslint app lib db worker tests vite.config.ts drizzle.config.ts next.config.ts postcss.config.mjs eslint.config.mjs --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },
