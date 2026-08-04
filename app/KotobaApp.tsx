@@ -1,10 +1,11 @@
 "use client";
+/* eslint-disable @next/next/no-img-element -- private R2-backed art is served through the authenticated app route. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { AuthorProfile, CastMember, Story, Turn, TurnResult } from "../lib/types";
+import type { ArtAsset, AuthorProfile, BackgroundJob, CastMember, OperationLog, Story, Turn, TurnResult } from "../lib/types";
 
 type View = "library" | "authors" | "archived" | "settings" | "reader" | "author";
-type LibraryPayload = { authors: AuthorProfile[]; stories: Story[] };
+type LibraryPayload = { authors: AuthorProfile[]; stories: Story[]; logs: OperationLog[] };
 
 const genres = ["Fantasy", "Science fiction", "Romance", "Mystery", "Horror", "Historical", "Literary", "Adventure", "Cozy", "Gothic", "Progression", "Speculative"];
 
@@ -17,8 +18,18 @@ async function api<T>(body?: Record<string, unknown>, storyId?: string): Promise
   return payload;
 }
 
+async function drainBackgroundJobs(storyId: string, onStory?: (story: Story) => void) {
+  let processed = false;
+  for (let pass = 0; pass < 6; pass += 1) {
+    const result = await api<{ processed: boolean; more: boolean }>({ action: "runBackgroundJob", storyId });
+    processed ||= result.processed;
+    if (!result.more) break;
+  }
+  if (processed && onStory) onStory((await api<{ story: Story }>(undefined, storyId)).story);
+}
+
 export default function KotobaApp() {
-  const [library, setLibrary] = useState<LibraryPayload>({ authors: [], stories: [] });
+  const [library, setLibrary] = useState<LibraryPayload>({ authors: [], stories: [], logs: [] });
   const [view, setView] = useState<View>("library");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -58,6 +69,7 @@ export default function KotobaApp() {
     try {
       const result = await api<{ story: Story }>(undefined, story.id);
       setSelectedStory(result.story); setView("reader");
+      void drainBackgroundJobs(story.id, setSelectedStory).catch(() => {});
     } catch (err) { setError(message(err)); }
     finally { setLoading(false); }
   }
@@ -97,12 +109,12 @@ export default function KotobaApp() {
           }
         } catch (err) { setError(message(err)); }
       }} />}
-      {view === "settings" && <SettingsView theme={theme} onTheme={changeTheme} />}
+      {view === "settings" && <SettingsView theme={theme} onTheme={changeTheme} logs={library.logs} />}
       {view === "reader" && selectedStory && <Reader story={selectedStory} onStory={setSelectedStory} onBack={async () => { await refresh(); navigate("library"); }} onAuthor={openAuthor} onError={setError} />}
     </main>
 
     {authorOpen && <AuthorDialog existing={selectedAuthor} onClose={() => setAuthorOpen(false)} onSaved={async (author) => { setAuthorOpen(false); setSelectedAuthor(author); await refresh(); setView("author"); }} />}
-    {storyOpen && <StoryDialog authors={library.authors.filter((author) => !author.archived)} preferredAuthor={view === "author" ? selectedAuthor : null} onNeedAuthor={() => { setStoryOpen(false); setSelectedAuthor(null); setAuthorOpen(true); }} onClose={() => setStoryOpen(false)} onCreated={async (story) => { setStoryOpen(false); setSelectedStory(story); await refresh(); setView("reader"); }} />}
+    {storyOpen && <StoryDialog authors={library.authors.filter((author) => !author.archived)} preferredAuthor={view === "author" ? selectedAuthor : null} onNeedAuthor={() => { setStoryOpen(false); setSelectedAuthor(null); setAuthorOpen(true); }} onClose={() => setStoryOpen(false)} onCreated={async (story) => { setStoryOpen(false); setSelectedStory(story); await refresh(); setView("reader"); void drainBackgroundJobs(story.id, setSelectedStory).catch(() => {}); }} />}
   </div>;
 }
 
@@ -125,8 +137,10 @@ function NewStoryCard({ onClick }: { onClick: () => void }) {
 }
 
 function StoryCard({ story, index, author, onOpen, onAuthor }: { story: Story; index: number; author?: AuthorProfile; onOpen: () => void; onAuthor: (author: AuthorProfile) => void }) {
+  const cover = story.art?.find((asset) => asset.type === "cover" && asset.status === "Ready");
   return <article className="story-card">
     <button className={`cover cover-${index % 5}`} onClick={onOpen} aria-label={`Open ${story.title}`}>
+      {cover && <img src={`/api/app?assetId=${encodeURIComponent(cover.id)}`} alt="" />}
       <span className="cover-rule" /><strong>{story.title}</strong><em>{author?.displayName || story.authorSnapshot.displayName}</em><span className="cover-mark">⌁</span>
     </button>
     <div className="story-card-body">
@@ -163,11 +177,13 @@ function ArchiveView({ stories, onOpen, onRestore }: { stories: Story[]; onOpen:
   </section>;
 }
 
-function SettingsView({ theme, onTheme }: { theme: string; onTheme: (theme: "light" | "dark") => void }) {
+function SettingsView({ theme, onTheme, logs }: { theme: string; onTheme: (theme: "light" | "dark") => void; logs: OperationLog[] }) {
   return <section className="page settings-page"><div className="page-heading"><div><p className="eyebrow">Reading room</p><h1>Settings</h1><p>A few quiet choices for your private library.</p></div></div>
     <div className="settings-card"><div><h2>Appearance</h2><p>Choose a comfortable reading surface.</p></div><div className="segmented"><button className={theme === "light" ? "active" : ""} onClick={() => onTheme("light")}>Warm paper</button><button className={theme === "dark" ? "active" : ""} onClick={() => onTheme("dark")}>Night ink</button></div></div>
     <div className="settings-card"><div><h2>Private by design</h2><p>Your authors, stories, cast, reading place, and continuity records live in this private application. There is no public profile or story discovery.</p></div><span className="privacy-seal">Private</span></div>
     <div className="settings-card"><div><h2>Narration</h2><p>Voices come from your browser or device. Your preferred voice and speed are remembered per story.</p></div></div>
+    <div className="settings-card log-settings"><div><h2>Generation log</h2><p>Recoverable transport and parser failures are retried up to three times. Each request may wait up to ten minutes before timing out; retries and resumable-job failures remain visible here for diagnosis.</p></div></div>
+    <div className="operation-log">{logs.length ? logs.map((log) => <article key={log.id}><span className={`status-pill ${log.status}`}>{log.status}</span><div><strong>{humanJobName(log.operation)}</strong><p>{log.message}</p><small>{new Date(log.createdAt).toLocaleString()} · {log.category} · attempt {log.attempt}</small></div></article>) : <p className="empty-note">No generation failures or retries have been logged.</p>}</div>
   </section>;
 }
 
@@ -177,6 +193,7 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
   const [note, setNote] = useState("");
   const [noteOpen, setNoteOpen] = useState(false);
   const [drawer, setDrawer] = useState(false);
+  const [gallery, setGallery] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
   const [rate, setRate] = useState(story.playbackRate || 1);
@@ -200,6 +217,11 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
   }, [story, turnNumber, autoRead, autoWrite, note]);
 
   useEffect(() => {
+    const timer = window.setInterval(() => void drainBackgroundJobs(story.id, (next) => { storyRef.current = next; onStory(next); }).catch(() => {}), 60_000);
+    return () => window.clearInterval(timer);
+  }, [onStory, story.id]);
+
+  useEffect(() => {
     const loadVoices = () => setVoices(window.speechSynthesis?.getVoices() || []);
     loadVoices(); window.speechSynthesis?.addEventListener("voiceschanged", loadVoices);
     return () => { window.speechSynthesis?.removeEventListener("voiceschanged", loadVoices); window.speechSynthesis?.cancel(); };
@@ -218,6 +240,7 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
     try {
       const result = await api<{ story: Story }>({ action: "continueStory", storyId: storyRef.current.id, note: direction });
       storyRef.current = result.story; onStory(result.story);
+      void drainBackgroundJobs(result.story.id, (next) => { storyRef.current = next; onStory(next); }).catch(() => {});
       if (direction && noteRef.current === direction) { noteRef.current = ""; setNote(""); }
       if (!background) { setTurnNumber(result.story.latestAcceptedTurnNumber); turnRef.current = result.story.latestAcceptedTurnNumber; }
     } catch (err) { onError(message(err)); }
@@ -277,14 +300,15 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
 
   if (!current) return <div className="quiet-loading">The first page is being prepared…</div>;
   const paragraphs = current.prose.split(/\n\s*\n/).filter(Boolean);
+  const sectionArt = story.art?.find((asset) => asset.turnNumber === current.turnNumber && asset.type !== "cover" && asset.status === "Ready");
   return <section className="reader-shell">
-    <div className="reader-top"><button className="reader-back" onClick={onBack}>← Library</button><div><strong>{story.title}</strong><button onClick={() => onAuthor(story.authorSnapshot)}>by {story.authorSnapshot.displayName}</button></div><button className="secondary small" onClick={() => setDrawer(true)}>Cast &amp; story</button></div>
-    <article className="reader-page"><p className="section-label">Section {current.turnNumber} of {story.latestAcceptedTurnNumber}</p><h1>{story.title}</h1><button className="reader-author" onClick={() => onAuthor(story.authorSnapshot)}>{story.authorSnapshot.displayName}</button><div className="prose">{paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div></article>
+    <div className="reader-top"><button className="reader-back" onClick={onBack}>← Library</button><div><strong>{story.title}</strong><button onClick={() => onAuthor(story.authorSnapshot)}>by {story.authorSnapshot.displayName}</button></div><div className="reader-tools"><button className="secondary small" onClick={() => setGallery(true)}>Gallery</button><button className="secondary small" onClick={() => setDrawer(true)}>Cast &amp; story</button></div></div>
+    <article className="reader-page"><p className="section-label">Section {current.turnNumber} of {story.latestAcceptedTurnNumber}</p><h1>{story.title}</h1><button className="reader-author" onClick={() => onAuthor(story.authorSnapshot)}>{story.authorSnapshot.displayName}</button>{sectionArt && <figure className="section-art"><img src={`/api/app?assetId=${encodeURIComponent(sectionArt.id)}`} alt={sectionArt.caption || sectionArt.title} /><figcaption>{sectionArt.caption}</figcaption></figure>}<div className="prose">{paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div></article>
     <div className="reader-actions"><button className="ghost" disabled={turnNumber <= 1} onClick={() => move(turnNumber - 1)}>← Previous section</button>
       {turnNumber < story.latestAcceptedTurnNumber ? <button className="secondary" onClick={() => move(turnNumber + 1)}>Next section →</button> : <button className="continue-button" disabled={writing} onClick={() => void continueWriting(false)}>{writing ? <><span className="ink-dot" /> The author is writing…</> : "Continue writing →"}</button>}
     </div>
     <div className="note-panel"><button onClick={() => setNoteOpen(!noteOpen)}><span>Note to the author</span><small>Optional direction for one section</small><b>{noteOpen ? "−" : "+"}</b></button>{noteOpen && <div><textarea value={note} onChange={(event) => setNote(event.target.value)} maxLength={500} placeholder="Stay with this character. Slow the scene down. Reveal what is behind the door…" /><p>{writing ? `The current draft is already underway. This note will wait for Section ${story.latestAcceptedTurnNumber + 2}.` : "Clears automatically after the next section is written."}</p></div>}</div>
-    <div className="reader-secondary"><button className="ghost danger" disabled={regenerating || writing || turnNumber !== story.latestAcceptedTurnNumber} onClick={async () => {
+    <div className="reader-secondary"><a className="secondary pdf-link" href={`/api/app?storyId=${encodeURIComponent(story.id)}&format=pdf`} download>Download illustrated PDF</a><button className="ghost danger" disabled={regenerating || writing || turnNumber !== story.latestAcceptedTurnNumber} onClick={async () => {
       if (!confirm("Prepare a new version of the latest section? The original will remain until you choose.")) return;
       setRegenerating(true); try { setRegen(await api({ action: "regenerateLatest", storyId: story.id, note })); } catch (err) { onError(message(err)); } finally { setRegenerating(false); }
     }}>{regenerating ? "Preparing another version…" : "Regenerate latest section"}</button></div>
@@ -292,12 +316,50 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
     <div className="audio-dock" aria-label="Narration controls"><button className="play-button" onClick={togglePlay} aria-label={speaking && !paused ? "Pause narration" : "Play narration"}>{speaking && !paused ? "Ⅱ" : "▶"}</button><div className="audio-title"><strong>Section {turnNumber}</strong><span>{writing && autoWrite ? "The author is writing the next section…" : speaking ? (paused ? "Narration paused" : "Narrating") : "Ready to listen"}</span></div><button className="skip" onClick={() => skipNarration(-10)} aria-label="Skip narration backward ten seconds">−10</button><button className="skip" onClick={() => skipNarration(10)} aria-label="Skip narration forward ten seconds">+10</button><label>Speed<select value={rate} onChange={(event) => { const next = Number(event.target.value); setRate(next); persist(turnNumber, next); }}><option value="0.8">0.8×</option><option value="1">1×</option><option value="1.2">1.2×</option><option value="1.5">1.5×</option><option value="1.8">1.8×</option></select></label><label>Voice<select value={voiceId} onChange={(event) => { setVoiceId(event.target.value); persist(turnNumber, rate, autoRead, autoWrite, event.target.value); }}><option value="">Device default</option>{voices.map((voice) => <option key={voice.voiceURI} value={voice.voiceURI}>{voice.name}</option>)}</select></label><label className="switch-label"><input type="checkbox" checked={autoRead} onChange={(event) => { setAutoRead(event.target.checked); autoReadRef.current = event.target.checked; if (!event.target.checked && autoWrite) toggleAutoWrite(false); else persist(turnNumber, rate, event.target.checked, autoWrite); }} /><span />Auto read next</label><label className="switch-label"><input type="checkbox" checked={autoWrite} disabled={typeof window === "undefined" || !("speechSynthesis" in window)} onChange={(event) => toggleAutoWrite(event.target.checked)} /><span />Auto write next</label></div>
 
     {drawer && <StoryDrawer story={story} onClose={() => setDrawer(false)} />}
-    {regen && <RegenerationDialog data={regen} onClose={() => setRegen(null)} onAccept={async () => { try { const result = await api<{ story: Story }>({ action: "acceptRegeneration", storyId: story.id, candidate: regen.candidate }); onStory(result.story); storyRef.current = result.story; setRegen(null); } catch (err) { onError(message(err)); } }} />}
+    {gallery && <StoryGallery story={story} currentTurn={current.turnNumber} onClose={() => setGallery(false)} onStory={(next) => { storyRef.current = next; onStory(next); }} onError={onError} />}
+    {regen && <RegenerationDialog data={regen} onClose={() => setRegen(null)} onAccept={async () => { try { const result = await api<{ story: Story }>({ action: "acceptRegeneration", storyId: story.id, candidate: regen.candidate }); onStory(result.story); storyRef.current = result.story; setRegen(null); void drainBackgroundJobs(result.story.id, (next) => { storyRef.current = next; onStory(next); }).catch(() => {}); } catch (err) { onError(message(err)); } }} />}
   </section>;
 }
 
 function StoryDrawer({ story, onClose }: { story: Story; onClose: () => void }) {
-  return <div className="drawer-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><aside className="story-drawer"><div className="drawer-heading"><div><p className="eyebrow">Cast &amp; story</p><h2>{story.title}</h2></div><button onClick={onClose}>×</button></div><p>{story.shortDescription}</p><dl className="story-facts"><dt>Where</dt><dd>{story.storyState?.currentLocation}</dd><dt>Now</dt><dd>{story.storyState?.currentScene}</dd><dt>Story pressure</dt><dd>{story.storyState?.currentNarrativePressure}</dd></dl><h3>Known cast</h3><div className="cast-list">{story.cast?.map((member: CastMember) => <article key={member.id}><span>{initials(member.name)}</span><div><h4>{member.name}</h4><small>{member.narrativeRole} · {member.pronouns}</small><p>{member.readerKnownSummary || member.physicalDescription}</p><em>{member.currentStatus} · {member.currentLocation}</em></div></article>)}</div></aside></div>;
+  return <div className="drawer-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><aside className="story-drawer"><div className="drawer-heading"><div><p className="eyebrow">Cast &amp; story</p><h2>{story.title}</h2></div><button onClick={onClose}>×</button></div><p>{story.shortDescription}</p><dl className="story-facts"><dt>Where</dt><dd>{story.storyState?.currentLocation}</dd><dt>Now</dt><dd>{story.storyState?.currentScene}</dd><dt>Story pressure</dt><dd>{story.storyState?.currentNarrativePressure}</dd><dt>Context</dt><dd>{story.contextSnapshot ? `Reconciled through Section ${story.contextSnapshot.throughTurnNumber}` : "Queued for background reconciliation"}</dd></dl><h3>Known cast</h3><div className="cast-list">{story.cast?.map((member: CastMember) => <article key={member.id}><span>{initials(member.name)}</span><div><h4>{member.name}</h4><small>{member.narrativeRole} · {member.pronouns}</small><p>{member.readerKnownSummary || member.physicalDescription}</p><em>{member.currentStatus} · {member.currentLocation}</em></div></article>)}</div><h3>Background work</h3><div className="job-list">{story.jobs?.slice(0, 12).map((job) => <JobRow key={job.id} job={job} />)}</div><h3>Recent diagnostics</h3><div className="drawer-logs">{story.logs?.slice(0, 8).map((log) => <p key={log.id}><strong>{log.status}</strong> {log.message}</p>)}{!story.logs?.length && <p>No retries or failures logged for this story.</p>}</div></aside></div>;
+}
+
+function StoryGallery({ story, currentTurn, onClose, onStory, onError }: { story: Story; currentTurn: number; onClose: () => void; onStory: (story: Story) => void; onError: (error: string) => void }) {
+  const [category, setCategory] = useState<ArtAsset["category"]>("Cover");
+  const [working, setWorking] = useState("");
+  const assets = (story.art || []).filter((asset) => asset.category === category);
+  const profiles = (story.visualProfiles || []).filter((profile) => category === "Characters" ? profile.kind === "character" : category === "Locations" ? profile.kind === "location" : false);
+  async function queue(type: "cover" | "scene", turnNumber?: number) {
+    setWorking(`${type}:${turnNumber || 0}`);
+    try {
+      const result = await api<{ story: Story }>({ action: "queueArt", storyId: story.id, type, turnNumber });
+      onStory(result.story);
+      void drainBackgroundJobs(story.id, onStory).catch(() => {});
+    } catch (error) { onError(message(error)); }
+    finally { setWorking(""); }
+  }
+  async function retry(job: BackgroundJob) {
+    setWorking(job.id);
+    try { await api({ action: "retryBackgroundJob", jobId: job.id }); void drainBackgroundJobs(story.id, onStory).catch(() => {}); }
+    catch (error) { onError(message(error)); }
+    finally { setWorking(""); }
+  }
+  return <Modal onClose={onClose} wide><div className="dialog-heading"><p className="eyebrow">Story gallery</p><h1>Visual continuity</h1><p>Art preparation never blocks the story. Missing or disliked pieces can be regenerated while reading and narration continue.</p></div>
+    <div className="gallery-tabs">{(["Cover", "Scenes", "Characters", "Locations"] as const).map((item) => <button key={item} className={category === item ? "active" : ""} onClick={() => setCategory(item)}>{item}</button>)}</div>
+    <div className="gallery-actions">{category === "Cover" && <button className="primary" disabled={Boolean(working)} onClick={() => void queue("cover")}>{working.startsWith("cover") ? "Preparing…" : "Regenerate cover"}</button>}{category === "Scenes" && <button className="primary" disabled={Boolean(working)} onClick={() => void queue("scene", currentTurn)}>{working.startsWith("scene") ? "Preparing…" : `Illustrate Section ${currentTurn}`}</button>}</div>
+    <div className="gallery-grid">{assets.map((asset) => <article key={asset.id} className="gallery-card">{asset.status === "Ready" ? <img src={`/api/app?assetId=${encodeURIComponent(asset.id)}`} alt={asset.caption || asset.title} /> : <div className="art-placeholder"><span>{asset.type === "cover" ? story.title.slice(0, 1) : asset.turnNumber || "✦"}</span><small>{asset.status}</small></div>}<div><span className={`status-pill ${asset.status.toLowerCase()}`}>{asset.status}</span><h2>{asset.title}</h2><p>{asset.caption}</p>{asset.promptSummary && <details><summary>Saved art brief</summary><p>{asset.promptSummary}</p></details>}</div></article>)}{profiles.map((profile) => <article key={profile.id} className="gallery-card profile-card"><div className="art-placeholder"><span>{profile.name.slice(0, 1)}</span><small>Continuity profile</small></div><div><span className="status-pill completed">Tracked</span><h2>{profile.name}</h2><p>{profile.visualDescription || [profile.bodyType, profile.hair, profile.clothing, profile.architecture, profile.atmosphere].filter(Boolean).join(" · ")}</p><details><summary>Current visual details</summary><p>{[...(profile.currentVisualChanges || []), ...(profile.distinctiveMarkings || []), ...(profile.importantLandmarks || [])].join(" · ") || `Updated through Section ${profile.lastUpdatedTurn}`}</p></details></div></article>)}</div>
+    {!assets.length && !profiles.length && <div className="gallery-empty"><p>No {category.toLowerCase()} art has been prepared yet.</p>{(category === "Characters" || category === "Locations") && <small>Visual profiles appear after a background context reconciliation discovers stable subjects.</small>}</div>}
+    {story.jobs?.some((job) => ["failed", "unsupported"].includes(job.status) && job.jobType.startsWith("art_")) && <div className="retry-panel"><h3>Art jobs needing attention</h3>{story.jobs.filter((job) => ["failed", "unsupported"].includes(job.status) && job.jobType.startsWith("art_")).slice(0, 8).map((job) => <div key={job.id}><JobRow job={job} /><button className="secondary small" disabled={working === job.id} onClick={() => void retry(job)}>Retry</button></div>)}</div>}
+  </Modal>;
+}
+
+function JobRow({ job }: { job: BackgroundJob }) {
+  return <article className="job-row"><span className={`status-pill ${job.status}`}>{job.status}</span><div><strong>{humanJobName(job.jobType)}</strong><small>{job.turnNumber ? `Section ${job.turnNumber} · ` : ""}attempt {job.attempts}/{job.maxAttempts}</small>{job.lastError && <p>{job.lastError}</p>}</div></article>;
+}
+
+function humanJobName(value: string) {
+  return ({ context_reconcile: "Context and motives", checkpoint_reconcile: "Continuity checkpoint", art_cover: "Cover art", art_scene: "Scene art", story_foundation: "Story opening", story_continuation: "Story continuation", story_repair: "Continuity repair" } as Record<string, string>)[value] || value.replace(/_/g, " ");
 }
 
 function AuthorDialog({ existing, onClose, onSaved }: { existing: AuthorProfile | null; onClose: () => void; onSaved: (author: AuthorProfile) => void }) {

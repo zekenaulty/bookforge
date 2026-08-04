@@ -4,7 +4,9 @@ import type {
   StoryFoundation,
   StoryState,
   TurnResult,
+  ContextSnapshot,
 } from "./types";
+import { recordOperationLog } from "./operation-log";
 
 const authorShape = `{
   "displayName": string,
@@ -67,54 +69,114 @@ const stateShape = `{
   "lastUpdatedTurn": number
 }`;
 
-async function callJson<T>(system: string, prompt: string, maxOutputTokens = 8192): Promise<T> {
+type AiCallContext = { operation: string; storyId?: string; turnNumber?: number };
+
+class AiFailure extends Error {
+  constructor(message: string, public category: string, public recoverable: boolean, public retryAfterMs = 0) {
+    super(message);
+  }
+}
+
+class JsonParseFailure extends AiFailure {
+  constructor() { super("The author returned an unreadable draft.", "parser", true); }
+}
+
+const MAX_ATTEMPTS = 3;
+const TRANSPORT_TIMEOUT_MS = 10 * 60 * 1000;
+const BASE_BACKOFF_MS = [2_000, 8_000, 20_000];
+
+async function callJson<T>(system: string, prompt: string, maxOutputTokens = 8192, context: AiCallContext = { operation: "runtime_generation" }): Promise<T> {
+  let lastFailure: AiFailure | null = null;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+    try {
+      const strictSystem = lastFailure?.category === "parser"
+        ? `${system}\nA previous response was not valid JSON. Return one complete strict JSON object with no markdown fence, preamble, or trailing commentary.`
+        : system;
+      const text = await requestText(strictSystem, prompt, maxOutputTokens);
+      const parsed = parseJson<T>(text);
+      if (attempt > 1 && lastFailure) {
+        await recordOperationLog({ ...context, category: lastFailure.category, attempt, status: "recovered", message: `Recovered on attempt ${attempt} after ${lastFailure.category}.` });
+      }
+      return parsed;
+    } catch (error) {
+      const failure = normalizeFailure(error);
+      lastFailure = failure;
+      const canRetry = failure.recoverable && attempt < MAX_ATTEMPTS;
+      await recordOperationLog({
+        ...context, category: failure.category, attempt, status: canRetry ? "retrying" : "failed",
+        message: canRetry ? `${failure.message} A bounded retry is scheduled.` : `${failure.message} Retry limit reached.`,
+        context: { maxAttempts: MAX_ATTEMPTS, transportTimeoutMs: TRANSPORT_TIMEOUT_MS },
+      });
+      if (!canRetry) throw new Error(`${failure.message} Existing story data is unchanged.`);
+      const waitMs = Math.max(failure.retryAfterMs, BASE_BACKOFF_MS[attempt - 1] || 20_000);
+      await delay(waitMs);
+    }
+  }
+  throw new Error("The author could not complete the request. Existing story data is unchanged.");
+}
+
+async function requestText(system: string, prompt: string, maxOutputTokens: number): Promise<string> {
   const provider = (process.env.LLM_PROVIDER || (process.env.GEMINI_API_KEY ? "gemini" : "openai")).toLowerCase();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), TRANSPORT_TIMEOUT_MS);
 
-  if (provider === "gemini" && process.env.GEMINI_API_KEY) {
-    const base = (process.env.GEMINI_API_URL || "https://generativelanguage.googleapis.com/v1beta").replace(/\/$/, "");
-    const model = process.env.WRITER_MODEL || process.env.DEFAULT_MODEL || "gemini-2.5-flash";
-    const response = await fetch(`${base}/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(process.env.GEMINI_API_KEY)}`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: system }] },
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.86,
-          maxOutputTokens,
-        },
-      }),
-    });
-    if (!response.ok) throw new Error(`The author could not write right now (${response.status}).`);
-    const payload = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
-    const text = payload.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("") || "";
-    return parseJson<T>(text);
+  try {
+    if (provider === "gemini" && process.env.GEMINI_API_KEY) {
+      const base = (process.env.GEMINI_API_URL || "https://generativelanguage.googleapis.com/v1beta").replace(/\/$/, "");
+      const model = process.env.WRITER_MODEL || process.env.DEFAULT_MODEL || "gemini-2.5-flash";
+      const response = await fetch(`${base}/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(process.env.GEMINI_API_KEY)}`, {
+        method: "POST", signal: controller.signal,
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: system }] },
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: { responseMimeType: "application/json", temperature: 0.86, maxOutputTokens },
+        }),
+      });
+      if (!response.ok) throw httpFailure(response);
+      const payload = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
+      return payload.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("") || "";
+    }
+
+    if (process.env.OPENAI_API_KEY) {
+      const base = (process.env.OPENAI_API_URL || "https://api.openai.com/v1").replace(/\/$/, "");
+      const model = process.env.WRITER_MODEL || process.env.DEFAULT_MODEL || "gpt-4.1-mini";
+      const response = await fetch(`${base}/chat/completions`, {
+        method: "POST", signal: controller.signal,
+        headers: { "content-type": "application/json", authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+        body: JSON.stringify({
+          model, messages: [{ role: "system", content: system }, { role: "user", content: prompt }],
+          response_format: { type: "json_object" }, temperature: 0.86, max_tokens: maxOutputTokens,
+        }),
+      });
+      if (!response.ok) throw httpFailure(response);
+      const payload = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
+      return payload.choices?.[0]?.message?.content || "";
+    }
+
+    throw new AiFailure("Runtime writing is not configured.", "configuration", false);
+  } catch (error) {
+    if (error instanceof AiFailure) throw error;
+    if (controller.signal.aborted) throw new AiFailure("The writing request timed out after ten minutes.", "timeout", true);
+    throw new AiFailure(error instanceof Error ? error.message : "The writing transport was interrupted.", "transport", true);
+  } finally {
+    clearTimeout(timeout);
   }
+}
 
-  if (process.env.OPENAI_API_KEY) {
-    const base = (process.env.OPENAI_API_URL || "https://api.openai.com/v1").replace(/\/$/, "");
-    const model = process.env.WRITER_MODEL || process.env.DEFAULT_MODEL || "gpt-4.1-mini";
-    const response = await fetch(`${base}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages: [{ role: "system", content: system }, { role: "user", content: prompt }],
-        response_format: { type: "json_object" },
-        temperature: 0.86,
-        max_tokens: maxOutputTokens,
-      }),
-    });
-    if (!response.ok) throw new Error(`The author could not write right now (${response.status}).`);
-    const payload = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
-    return parseJson<T>(payload.choices?.[0]?.message?.content || "");
-  }
+function httpFailure(response: Response) {
+  const retryable = [408, 409, 425, 429, 500, 502, 503, 504].includes(response.status);
+  const retryAfter = Number(response.headers.get("retry-after") || 0);
+  return new AiFailure(`The author service returned HTTP ${response.status}.`, `http_${response.status}`, retryable, Number.isFinite(retryAfter) ? Math.min(retryAfter * 1000, 60_000) : 0);
+}
 
-  throw new Error("Runtime writing is not configured. Add an OpenAI or Gemini API key in Settings for the hosted app.");
+function normalizeFailure(error: unknown) {
+  if (error instanceof AiFailure) return error;
+  return new AiFailure(error instanceof Error ? error.message : "The writing request was interrupted.", "transport", true);
+}
+
+function delay(ms: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
 
 function parseJson<T>(value: string): T {
@@ -124,8 +186,11 @@ function parseJson<T>(value: string): T {
   } catch {
     const start = clean.indexOf("{");
     const end = clean.lastIndexOf("}");
-    if (start >= 0 && end > start) return JSON.parse(clean.slice(start, end + 1)) as T;
-    throw new Error("The author returned an unreadable draft. Please try again.");
+    if (start >= 0 && end > start) {
+      try { return JSON.parse(clean.slice(start, end + 1)) as T; }
+      catch { /* Normalize every malformed response as a recoverable parser failure. */ }
+    }
+    throw new JsonParseFailure();
   }
 }
 
@@ -144,7 +209,7 @@ Revision request: ${input.revision || "None"}
 
 Use this exact shape: ${authorShape}
 Keep rules practical and literary. Avoid AI jargon, prompt language, or generic filler.`,
-    4096,
+    4096, { operation: "author_profile" },
   );
   return normalizeAuthor(result, input.genres, input.name);
 }
@@ -175,7 +240,7 @@ type StoryCreationResult = {
   firstTurn: TurnResult;
 };
 
-export async function createStoryFoundation(input: { author: AuthorProfile; idea: string; title?: string }) {
+export async function createStoryFoundation(input: { author: AuthorProfile; idea: string; title?: string; storyId?: string }) {
   const result = await callJson<StoryCreationResult>(
     "You are a meticulous fiction engine. Build one private story foundation and write exactly one opening section. Return JSON only. Preserve a clear separation between prose and continuity data.",
     `Pinned fictional author profile (never modify it):
@@ -215,7 +280,7 @@ Return exactly:
 }
 
 Section 1 must be a substantial 900–1,300 word coherent dramatic unit (never more than 1,600), begin in motion, contain no visible section heading, and not resolve the premise. Use stable lowercase IDs for cast. Put hidden secrets only in knownSecrets; readerKnownSummary must reveal only what the prose reveals.`,
-    16384,
+    16384, { operation: "story_foundation", storyId: input.storyId, turnNumber: 1 },
   );
   result.foundation.title = input.title?.trim() || result.foundation.title || "Untitled Story";
   result.foundation.initialCast = normalizeCast(result.foundation.initialCast, 1);
@@ -225,6 +290,7 @@ Section 1 must be a substantial 900–1,300 word coherent dramatic unit (never m
 }
 
 export async function continueStory(input: {
+  storyId: string;
   author: AuthorProfile;
   foundation: StoryFoundation;
   checkpoint: unknown;
@@ -233,6 +299,7 @@ export async function continueStory(input: {
   recentTurns: Array<{ turnNumber: number; prose: string; stateDelta: unknown }>;
   nextTurnNumber: number;
   note?: string;
+  managedContext?: unknown;
 }) {
   const result = await callJson<TurnResult>(
     "You continue a private living novel one section at a time. Return JSON only. Continuity is authoritative. Never mention AI, prompts, state, or application behavior in prose.",
@@ -242,6 +309,7 @@ PINNED AUTHOR: ${JSON.stringify(input.author)}
 FOUNDATION: ${JSON.stringify(input.foundation)}
 LATEST CHECKPOINT: ${JSON.stringify(input.checkpoint || {})}
 CURRENT AUTHORITATIVE STATE: ${JSON.stringify(input.state)}
+LATEST MANAGED CHARACTER/FACT CONTEXT: ${JSON.stringify(input.managedContext || {})}
 CANONICAL CAST: ${JSON.stringify(input.cast)}
 RECENT SECTIONS AND DELTAS: ${JSON.stringify(input.recentTurns)}
 ONE-TIME NOTE TO THE AUTHOR: ${input.note?.trim() || "None"}
@@ -268,12 +336,13 @@ First make a hidden TurnIntent for this one section. Then write the prose and du
 The stateDelta object must include "checkpointRecommended": true and a short "checkpointReason" only when this section contains a major time jump, major location change, sustained viewpoint change, cast restructuring, arc ending, major reveal, or major status/power change. Otherwise set checkpointRecommended to false.
 
 Prose rules: 900–1,300 words preferred, 700 minimum unless a dramatically necessary ending, 1,600 maximum. Begin in motion, not recap. One coherent dramatic unit. Preserve names, pronouns, chronology, possessions, injuries, abilities, relationships, POV, tense, and world rules. Advance something meaningful without resolving the premise. Do not repeat the last opening, discovery, events, or emotional conclusion. No visible heading and no reader address unless the form requires it. The one-time note influences only this section and must never appear as an instruction in prose.`,
-    16384,
+    16384, { operation: "continue_story", storyId: input.storyId, turnNumber: input.nextTurnNumber },
   );
   return normalizeTurn(result, input.nextTurnNumber, input.foundation, input.state);
 }
 
 export async function repairTurn(input: {
+  storyId?: string;
   draft: TurnResult;
   issues: string[];
   author: AuthorProfile;
@@ -292,12 +361,12 @@ Cast: ${JSON.stringify(input.cast)}
 Candidate: ${JSON.stringify(input.draft)}
 
 Return the same JSON shape. Keep prose 900–1,300 words, 700–1,600 hard range, no heading, no recap, and ensure state/cast updates describe only the repaired prose.`,
-    16384,
+    16384, { operation: "repair_turn", storyId: input.storyId, turnNumber: input.nextTurnNumber },
   );
   return normalizeTurn(result, input.nextTurnNumber, input.foundation, input.state);
 }
 
-export async function createCheckpoint(input: { previous: unknown; turns: unknown[]; state: StoryState; cast: CastMember[]; throughTurnNumber: number }) {
+export async function createCheckpoint(input: { storyId: string; previous: unknown; turns: unknown[]; state: StoryState; cast: CastMember[]; throughTurnNumber: number }) {
   return callJson<Record<string, unknown>>(
     "Reconcile a compact canonical fiction checkpoint. Return JSON only. Never invent facts not supported by the supplied material.",
     `Reconcile continuity through Section ${input.throughTurnNumber}.
@@ -307,7 +376,63 @@ Current state: ${JSON.stringify(input.state)}
 Current cast: ${JSON.stringify(input.cast)}
 
 Return {"storyId":string,"throughTurnNumber":number,"compactStorySummary":string,"canonicalCast":array,"canonicalRelationships":array,"canonicalWorldFacts":array,"currentTimeline":string,"currentLocation":string,"activeThreads":array,"resolvedThreads":array,"importantItems":array,"factsThatMustRemainTrue":array,"milestones":object,"narrativeDirection":string}. Deduplicate facts, reconcile contradictions, and preserve items, injuries, powers, promises, constraints, and stable character IDs.`,
-    8192,
+    8192, { operation: "checkpoint_reconcile", storyId: input.storyId, turnNumber: input.throughTurnNumber },
+  );
+}
+
+export async function createContextReconciliation(input: {
+  storyId: string;
+  throughTurnNumber: number;
+  foundation: StoryFoundation;
+  state: StoryState;
+  cast: CastMember[];
+  recentTurns: unknown[];
+  previousContext?: unknown;
+  previousArtProfile?: unknown;
+}) {
+  return callJson<ContextSnapshot>(
+    "You reconcile compact story, character, motive, fact, and visual continuity for an ongoing private novel. Return JSON only. Do not invent unsupported facts or reveal hidden secrets in reader-facing summaries.",
+    `Reconcile durable context through Section ${input.throughTurnNumber}.
+Foundation: ${JSON.stringify(input.foundation)}
+Current state: ${JSON.stringify(input.state)}
+Current cast: ${JSON.stringify(input.cast)}
+Recent accepted sections and deltas: ${JSON.stringify(input.recentTurns)}
+Previous managed context: ${JSON.stringify(input.previousContext || {})}
+Previous story art profile: ${JSON.stringify(input.previousArtProfile || {})}
+
+Return exactly {
+  "throughTurnNumber": ${input.throughTurnNumber},
+  "compactStorySummary": string,
+  "characterState": [{"characterId":string,"name":string,"currentMotives":string[],"immediateGoals":string[],"emotionalState":string,"appearanceNow":string,"keyFacts":string[],"relationships":string[],"currentLocation":string}],
+  "keyFacts": string[], "openQuestions": string[], "visualContinuityNotes": string[],
+  "storyArtProfile": {"artStyle":string,"coverStyle":string,"palette":string[],"mood":string,"protagonistAppearance":string,"majorCastAppearance":string[],"keyLocationAppearance":string[],"creatureDesignLanguage":string,"recurringMotifs":string[],"avoid":string[],"lastUpdatedTurn":${input.throughTurnNumber}},
+  "characterVisualProfiles": [{"id":string,"kind":"character","entityId":string,"name":string,"agePresentation":string,"genderPresentation":string,"bodyType":string,"hair":string,"face":string,"clothing":string,"notableProps":string[],"distinctiveMarkings":string[],"armorOrGear":string[],"currentVisualChanges":string[],"lastUpdatedTurn":${input.throughTurnNumber}}],
+  "locationVisualProfiles": [{"id":string,"kind":"location","entityId":string,"name":string,"visualDescription":string,"architecture":string,"lighting":string,"atmosphere":string,"dominantColors":string[],"importantLandmarks":string[],"lastUpdatedTurn":${input.throughTurnNumber}}]
+}. Preserve stable character IDs and visual facts unless the prose explicitly changes them.`,
+    8192, { operation: "context_reconcile", storyId: input.storyId, turnNumber: input.throughTurnNumber },
+  );
+}
+
+export async function createArtBrief(input: {
+  storyId: string;
+  turnNumber?: number;
+  type: "cover" | "scene";
+  story: { title: string; shortDescription: string; foundation: StoryFoundation; author: AuthorProfile };
+  prose?: string;
+  artProfile?: unknown;
+  visualProfiles?: unknown[];
+}) {
+  return callJson<{ shouldIllustrate: boolean; category: "Cover" | "Scenes" | "Characters" | "Locations"; title: string; caption: string; promptSummary: string }>(
+    "You are the art director for a quiet literary living-fiction edition. Select a visually concrete, emotionally important, compositionally legible image. Return JSON only.",
+    `Prepare a ${input.type} art brief for ${input.story.title}.
+Story: ${JSON.stringify(input.story)}
+Section prose, when applicable: ${input.prose || "Not applicable"}
+Persistent story art profile: ${JSON.stringify(input.artProfile || {})}
+Persistent character and location visual profiles: ${JSON.stringify(input.visualProfiles || [])}
+
+Return {"shouldIllustrate":boolean,"category":"Cover"|"Scenes"|"Characters"|"Locations","title":string,"caption":string,"promptSummary":string}.
+For a cover, shouldIllustrate must be true. For a scene, choose false when the moment is redundant or visually vague. The prompt summary must preserve established faces, clothing, props, locations, palette, motifs, and edition style; describe one exact moment; avoid text in the image, spoilers beyond this section, overbusy composition, cartoonish default styling, or stock imagery.`,
+    4096, { operation: `art_${input.type}_brief`, storyId: input.storyId, turnNumber: input.turnNumber },
   );
 }
 

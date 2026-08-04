@@ -19,19 +19,37 @@ test("server-renders the private living-fiction library", async () => {
 });
 
 test("keeps runtime writing and persistence wired", async () => {
-  const [route, hosting, page, layout, client] = await Promise.all([
+  const [route, hosting, page, layout, client, ai, database, pdf] = await Promise.all([
     readFile(new URL("app/api/app/route.ts", root), "utf8"),
     readFile(new URL(".openai/hosting.json", root), "utf8"),
     readFile(new URL("app/page.tsx", root), "utf8"),
     readFile(new URL("app/layout.tsx", root), "utf8"),
     readFile(new URL("app/KotobaApp.tsx", root), "utf8"),
+    readFile(new URL("lib/ai.ts", root), "utf8"),
+    readFile(new URL("lib/app-db.ts", root), "utf8"),
+    readFile(new URL("lib/story-pdf.ts", root), "utf8"),
   ]);
   assert.match(hosting, /"d1":\s*"DB"/);
+  assert.match(hosting, /"r2":\s*"ART"/);
   assert.match(route, /action === "continueStory"/);
   assert.match(route, /generation_jobs/);
-  assert.match(route, /maybeCheckpoint/);
+  assert.match(route, /runBackgroundJob/);
+  assert.match(route, /context_reconcile/);
+  assert.match(route, /queueArt/);
+  assert.match(database, /operation_logs/);
+  assert.match(database, /background_jobs/);
+  assert.match(database, /context_snapshots/);
+  assert.match(database, /art_assets/);
+  assert.match(ai, /MAX_ATTEMPTS = 3/);
+  assert.match(ai, /TRANSPORT_TIMEOUT_MS = 10 \* 60 \* 1000/);
+  assert.match(ai, /category: "parser"|"parser", true/);
+  assert.match(pdf, /PDFDocument/);
+  assert.match(pdf, /embedPng/);
   assert.match(client, /Auto write next/i);
   assert.match(client, /Note to the author/i);
+  assert.match(client, /Story gallery/i);
+  assert.match(client, /Download illustrated PDF/i);
+  assert.match(client, /Generation log/i);
   assert.match(page, /<KotobaApp/);
   assert.match(layout, /private living-fiction library/i);
   assert.doesNotMatch(client, /chat bubble|chat message/i);

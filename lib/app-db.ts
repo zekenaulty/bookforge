@@ -7,6 +7,10 @@ export function getD1(): D1Database {
   return env.DB as D1Database;
 }
 
+export function getArtBucket(): R2Bucket | null {
+  return env.ART ? env.ART as R2Bucket : null;
+}
+
 const schemaStatements = [
   `CREATE TABLE IF NOT EXISTS authors (
     id TEXT PRIMARY KEY,
@@ -92,11 +96,86 @@ const schemaStatements = [
     error TEXT,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`,
+  `CREATE TABLE IF NOT EXISTS operation_logs (
+    id TEXT PRIMARY KEY,
+    story_id TEXT,
+    turn_number INTEGER,
+    operation TEXT NOT NULL,
+    category TEXT NOT NULL,
+    attempt INTEGER NOT NULL DEFAULT 1,
+    status TEXT NOT NULL,
+    message TEXT NOT NULL,
+    context_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS background_jobs (
+    id TEXT PRIMARY KEY,
+    story_id TEXT NOT NULL,
+    turn_number INTEGER,
+    job_type TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    attempts INTEGER NOT NULL DEFAULT 0,
+    max_attempts INTEGER NOT NULL DEFAULT 3,
+    run_after TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    input_json TEXT NOT NULL DEFAULT '{}',
+    result_json TEXT NOT NULL DEFAULT '{}',
+    last_error TEXT,
+    locked_at TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS context_snapshots (
+    id TEXT PRIMARY KEY,
+    story_id TEXT NOT NULL,
+    through_turn_number INTEGER NOT NULL,
+    snapshot_json TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(story_id, through_turn_number)
+  )`,
+  `CREATE TABLE IF NOT EXISTS story_art_profiles (
+    story_id TEXT PRIMARY KEY,
+    profile_json TEXT NOT NULL,
+    last_updated_turn INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS visual_profiles (
+    id TEXT PRIMARY KEY,
+    story_id TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    profile_json TEXT NOT NULL,
+    last_updated_turn INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(story_id, kind, entity_id)
+  )`,
+  `CREATE TABLE IF NOT EXISTS art_assets (
+    id TEXT PRIMARY KEY,
+    story_id TEXT NOT NULL,
+    turn_id TEXT,
+    turn_number INTEGER,
+    type TEXT NOT NULL,
+    category TEXT NOT NULL,
+    title TEXT NOT NULL,
+    caption TEXT NOT NULL,
+    prompt_summary TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'Placeholder',
+    image_reference TEXT,
+    mime_type TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`,
   `CREATE INDEX IF NOT EXISTS stories_status_updated_idx ON stories(status, updated_at DESC)`,
   `CREATE INDEX IF NOT EXISTS turns_story_number_idx ON turns(story_id, turn_number)`,
   `CREATE INDEX IF NOT EXISTS narrations_story_turn_idx ON narrations(story_id, turn_id)`,
   `CREATE INDEX IF NOT EXISTS cast_story_idx ON cast_members(story_id)`,
   `CREATE INDEX IF NOT EXISTS checkpoints_story_turn_idx ON checkpoints(story_id, through_turn_number DESC)`,
+  `CREATE INDEX IF NOT EXISTS operation_logs_story_created_idx ON operation_logs(story_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS background_jobs_status_run_idx ON background_jobs(status, run_after)`,
+  `CREATE INDEX IF NOT EXISTS background_jobs_story_idx ON background_jobs(story_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS context_snapshots_story_turn_idx ON context_snapshots(story_id, through_turn_number DESC)`,
+  `CREATE INDEX IF NOT EXISTS visual_profiles_story_idx ON visual_profiles(story_id, kind)`,
+  `CREATE INDEX IF NOT EXISTS art_assets_story_turn_idx ON art_assets(story_id, turn_number, created_at)`,
 ];
 
 export async function ensureDatabase() {

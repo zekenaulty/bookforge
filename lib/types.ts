@@ -137,4 +137,115 @@ export type Story = {
   turns?: Turn[];
   cast?: CastMember[];
   storyState?: StoryState;
+  contextSnapshot?: ContextSnapshot;
+  artProfile?: StoryArtProfile;
+  visualProfiles?: VisualProfile[];
+  art?: ArtAsset[];
+  jobs?: BackgroundJob[];
+  logs?: OperationLog[];
+};
+
+export type StoryArtProfile = {
+  artStyle: string;
+  coverStyle: string;
+  palette: string[];
+  mood: string;
+  protagonistAppearance: string;
+  majorCastAppearance: string[];
+  keyLocationAppearance: string[];
+  creatureDesignLanguage: string;
+  recurringMotifs: string[];
+  avoid: string[];
+  lastUpdatedTurn: number;
+};
+
+export type VisualProfile = {
+  id: string;
+  storyId?: string;
+  kind: "character" | "location";
+  entityId: string;
+  name: string;
+  agePresentation?: string;
+  genderPresentation?: string;
+  bodyType?: string;
+  hair?: string;
+  face?: string;
+  clothing?: string;
+  notableProps?: string[];
+  distinctiveMarkings?: string[];
+  armorOrGear?: string[];
+  currentVisualChanges?: string[];
+  visualDescription?: string;
+  architecture?: string;
+  lighting?: string;
+  atmosphere?: string;
+  dominantColors?: string[];
+  importantLandmarks?: string[];
+  lastUpdatedTurn: number;
+};
+
+export type ContextSnapshot = {
+  throughTurnNumber: number;
+  compactStorySummary: string;
+  characterState: Array<{
+    characterId: string;
+    name: string;
+    currentMotives: string[];
+    immediateGoals: string[];
+    emotionalState: string;
+    appearanceNow: string;
+    keyFacts: string[];
+    relationships: string[];
+    currentLocation: string;
+  }>;
+  keyFacts: string[];
+  openQuestions: string[];
+  visualContinuityNotes: string[];
+  storyArtProfile: StoryArtProfile;
+  characterVisualProfiles: VisualProfile[];
+  locationVisualProfiles: VisualProfile[];
+};
+
+export type ArtAsset = {
+  id: string;
+  storyId: string;
+  turnId?: string;
+  turnNumber?: number;
+  type: "cover" | "scene" | "character" | "location";
+  category: "Cover" | "Scenes" | "Characters" | "Locations";
+  title: string;
+  caption: string;
+  promptSummary: string;
+  status: "Placeholder" | "Queued" | "Preparing" | "Ready" | "Failed" | "Unsupported";
+  imageReference?: string;
+  mimeType?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type BackgroundJob = {
+  id: string;
+  storyId: string;
+  turnNumber?: number;
+  jobType: "context_reconcile" | "checkpoint_reconcile" | "art_cover" | "art_scene";
+  status: "pending" | "running" | "retrying" | "completed" | "failed" | "unsupported";
+  attempts: number;
+  maxAttempts: number;
+  runAfter: string;
+  lastError?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type OperationLog = {
+  id: string;
+  storyId?: string;
+  turnNumber?: number;
+  operation: string;
+  category: string;
+  attempt: number;
+  status: "retrying" | "recovered" | "failed" | "completed" | "unsupported";
+  message: string;
+  context: Record<string, unknown>;
+  createdAt: string;
 };

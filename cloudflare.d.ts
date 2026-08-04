@@ -17,10 +17,22 @@ interface D1Database {
   batch<T = unknown>(statements: D1PreparedStatement[]): Promise<D1Result<T>[]>;
 }
 
+interface R2ObjectBody {
+  body: ReadableStream;
+  httpMetadata?: { contentType?: string };
+  customMetadata?: Record<string, string>;
+}
+
+interface R2Bucket {
+  get(key: string): Promise<R2ObjectBody | null>;
+  put(key: string, value: ArrayBuffer | Uint8Array | ReadableStream, options?: { httpMetadata?: { contentType?: string }; customMetadata?: Record<string, string> }): Promise<unknown>;
+  delete(key: string): Promise<void>;
+}
+
 interface Fetcher {
   fetch(input: Request | string, init?: RequestInit): Promise<Response>;
 }
 
 declare module "cloudflare:workers" {
-  export const env: { DB?: D1Database; [key: string]: unknown };
+  export const env: { DB?: D1Database; ART?: R2Bucket; [key: string]: unknown };
 }
