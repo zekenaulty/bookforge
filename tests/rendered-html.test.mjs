@@ -46,6 +46,8 @@ test("keeps runtime writing and persistence wired", async () => {
   assert.match(pdf, /%PDF-1\.4/);
   assert.match(pdf, /DCTDecode/);
   assert.match(client, /Auto write next/i);
+  assert.match(client, /High-quality local voice/i);
+  assert.match(client, /device voice instead/i);
   assert.match(client, /Note to the author/i);
   assert.match(client, /Story gallery/i);
   assert.match(client, /Download illustrated PDF/i);
@@ -53,4 +55,25 @@ test("keeps runtime writing and persistence wired", async () => {
   assert.match(page, /<KotobaApp/);
   assert.match(layout, /private living-fiction library/i);
   assert.doesNotMatch(client, /chat bubble|chat message/i);
+});
+
+test("keeps neural narration local, lazy, and off the UI thread", async () => {
+  const [client, player, worker, manifest] = await Promise.all([
+    readFile(new URL("app/KotobaApp.tsx", root), "utf8"),
+    readFile(new URL("lib/local-voice.ts", root), "utf8"),
+    readFile(new URL("lib/local-voice-worker.ts", root), "utf8"),
+    readFile(new URL("package.json", root), "utf8"),
+  ]);
+  assert.match(manifest, /"kokoro-js": "1\.2\.1"/);
+  assert.match(client, /kotoba-high-quality-local-voice/);
+  assert.match(client, /speechSynthesis/);
+  assert.match(player, /new Worker\(new URL/);
+  assert.match(player, /navigator\.storage\.persist/);
+  assert.match(worker, /KokoroTTS\.from_pretrained/);
+  assert.match(worker, /dtype: "q8"/);
+  assert.match(worker, /"webgpu"/);
+  assert.match(worker, /"wasm"/);
+  assert.match(worker, /useBrowserCache = true/);
+  assert.doesNotMatch(worker, /API[_ -]?key/i);
+  assert.doesNotMatch(worker, /\.onnx["']/i);
 });

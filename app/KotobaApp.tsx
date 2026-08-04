@@ -2,6 +2,8 @@
 /* eslint-disable @next/next/no-img-element -- private R2-backed art is served through the authenticated app route. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { LocalVoicePlayer, requestPersistentVoiceStorage } from "../lib/local-voice";
+import type { LocalVoiceProgress } from "../lib/local-voice-types";
 import type { ArtAsset, AuthorProfile, BackgroundJob, CastMember, OperationLog, Story, Turn, TurnResult } from "../lib/types";
 
 type View = "library" | "authors" | "archived" | "settings" | "reader" | "author";
@@ -181,7 +183,7 @@ function SettingsView({ theme, onTheme, logs }: { theme: string; onTheme: (theme
   return <section className="page settings-page"><div className="page-heading"><div><p className="eyebrow">Reading room</p><h1>Settings</h1><p>A few quiet choices for your private library.</p></div></div>
     <div className="settings-card"><div><h2>Appearance</h2><p>Choose a comfortable reading surface.</p></div><div className="segmented"><button className={theme === "light" ? "active" : ""} onClick={() => onTheme("light")}>Warm paper</button><button className={theme === "dark" ? "active" : ""} onClick={() => onTheme("dark")}>Night ink</button></div></div>
     <div className="settings-card"><div><h2>Private by design</h2><p>Your authors, stories, cast, reading place, and continuity records live in this private application. There is no public profile or story discovery.</p></div><span className="privacy-seal">Private</span></div>
-    <div className="settings-card"><div><h2>Narration</h2><p>Voices come from your browser or device. Your preferred voice and speed are remembered per story.</p></div></div>
+    <div className="settings-card"><div><h2>Narration</h2><p>Device speech remains the instant, zero-download default. Readers can optionally enable a private local neural voice; its model is downloaded and cached by the browser, with no API key or server audio.</p></div></div>
     <div className="settings-card log-settings"><div><h2>Generation log</h2><p>Recoverable transport and parser failures are retried up to three times. Each request may wait up to ten minutes before timing out; retries and resumable-job failures remain visible here for diagnosis.</p></div></div>
     <div className="operation-log">{logs.length ? logs.map((log) => <article key={log.id}><span className={`status-pill ${log.status}`}>{log.status}</span><div><strong>{humanJobName(log.operation)}</strong><p>{log.message}</p><small>{new Date(log.createdAt).toLocaleString()} · {log.category} · attempt {log.attempt}</small></div></article>) : <p className="empty-note">No generation failures or retries have been logged.</p>}</div>
   </section>;
@@ -201,10 +203,15 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [autoRead, setAutoRead] = useState(story.autoReadNext);
   const [autoWrite, setAutoWrite] = useState(story.autoWriteNext);
+  const [highQuality, setHighQuality] = useState(false);
+  const [localVoice, setLocalVoice] = useState<LocalVoiceProgress>({ phase: "idle" });
+  const [voiceStoragePersistent, setVoiceStoragePersistent] = useState(false);
   const [regen, setRegen] = useState<{ candidate: TurnResult; original: Turn } | null>(null);
   const [regenerating, setRegenerating] = useState(false);
   const storyRef = useRef(story); const turnRef = useRef(turnNumber); const autoReadRef = useRef(autoRead); const autoWriteRef = useRef(autoWrite); const noteRef = useRef(note); const writingRef = useRef(false);
-  const speechCharRef = useRef(0); const speechTextRef = useRef(""); const manualCancelRef = useRef(false);
+  const speechCharRef = useRef(0); const speechTextRef = useRef(""); const manualCancelRef = useRef(false); const narrationActiveRef = useRef(false); const activeNarratorRef = useRef<"local" | "device" | null>(null);
+  const highQualityRef = useRef(false); const localPlayerRef = useRef<LocalVoicePlayer | null>(null);
+  const narrationFinishedRef = useRef<(target: number) => void>(() => {}); const deviceFallbackRef = useRef<(target: number, startAt: number) => void>(() => {});
   const speakTurnRef = useRef<(target: number, startAt?: number) => void>(() => {});
   const current = story.turns?.find((turn) => turn.turnNumber === turnNumber) || story.turns?.at(-1);
 
@@ -224,7 +231,7 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
   useEffect(() => {
     const loadVoices = () => setVoices(window.speechSynthesis?.getVoices() || []);
     loadVoices(); window.speechSynthesis?.addEventListener("voiceschanged", loadVoices);
-    return () => { window.speechSynthesis?.removeEventListener("voiceschanged", loadVoices); window.speechSynthesis?.cancel(); };
+    return () => { window.speechSynthesis?.removeEventListener("voiceschanged", loadVoices); window.speechSynthesis?.cancel(); localPlayerRef.current?.destroy(); localPlayerRef.current = null; };
   }, []);
 
   const persist = useCallback((nextTurn = turnRef.current, nextRate = rate, nextAutoRead = autoReadRef.current, nextAutoWrite = autoWriteRef.current, nextVoice = voiceId) => {
@@ -247,13 +254,29 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
     finally { writingRef.current = false; setWriting(false); }
   }, [onError, onStory]);
 
-  const speakTurn = useCallback((target: number, startAt = 0) => {
+  const narrationFinished = useCallback((target: number) => {
+    narrationActiveRef.current = false; activeNarratorRef.current = null;
+    setSpeaking(false); setPaused(false);
+    const latestStory = storyRef.current;
+    const next = target + 1;
+    if (autoReadRef.current && latestStory.turns?.some((turn) => turn.turnNumber === next)) {
+      window.setTimeout(() => speakTurnRef.current(next), 30);
+    } else if (autoReadRef.current && writingRef.current) {
+      const wait = window.setInterval(() => {
+        if (storyRef.current.turns?.some((turn) => turn.turnNumber === next)) { clearInterval(wait); speakTurnRef.current(next); }
+        else if (!writingRef.current) clearInterval(wait);
+      }, 400);
+    }
+  }, []);
+
+  useEffect(() => { narrationFinishedRef.current = narrationFinished; }, [narrationFinished]);
+
+  const speakWithDevice = useCallback((target: number, startAt = 0) => {
     const synth = window.speechSynthesis;
     const item = storyRef.current.turns?.find((turn) => turn.turnNumber === target);
-    if (!synth || !item) return;
+    if (!synth || !item) { narrationActiveRef.current = false; activeNarratorRef.current = null; setSpeaking(false); return; }
+    activeNarratorRef.current = "device";
     manualCancelRef.current = true; synth.cancel(); manualCancelRef.current = false;
-    speechTextRef.current = item.prose; speechCharRef.current = startAt;
-    setTurnNumber(target); turnRef.current = target; setSpeaking(true); setPaused(false);
     const utterance = new SpeechSynthesisUtterance(item.prose.slice(startAt));
     utterance.rate = rate;
     const chosen = voices.find((voice) => voice.voiceURI === voiceId || voice.name === voiceId);
@@ -261,35 +284,71 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
     utterance.onboundary = (event) => { speechCharRef.current = startAt + event.charIndex; };
     utterance.onend = () => {
       if (manualCancelRef.current) return;
-      setSpeaking(false); setPaused(false);
-      const latestStory = storyRef.current;
-      const next = target + 1;
-      if (autoReadRef.current && latestStory.turns?.some((turn) => turn.turnNumber === next)) {
-        window.setTimeout(() => speakTurnRef.current(next), 30);
-      } else if (autoReadRef.current && writingRef.current) {
-        const wait = window.setInterval(() => {
-          if (storyRef.current.turns?.some((turn) => turn.turnNumber === next)) { clearInterval(wait); speakTurnRef.current(next); }
-          else if (!writingRef.current) clearInterval(wait);
-        }, 400);
-      }
+      narrationFinishedRef.current(target);
     };
-    utterance.onerror = () => { setSpeaking(false); setPaused(false); onError("Narration stopped. The prose is safe, and you can try playing it again."); };
+    utterance.onerror = () => { narrationActiveRef.current = false; activeNarratorRef.current = null; setSpeaking(false); setPaused(false); onError("Narration stopped. The prose is safe, and you can try playing it again."); };
     synth.speak(utterance);
+  }, [onError, rate, voiceId, voices]);
+
+  useEffect(() => { deviceFallbackRef.current = speakWithDevice; }, [speakWithDevice]);
+
+  const ensureLocalPlayer = useCallback(() => {
+    if (localPlayerRef.current) return localPlayerRef.current;
+    const player = new LocalVoicePlayer({
+      onState: (state) => {
+        setLocalVoice(state);
+        if (narrationActiveRef.current && ["loading", "generating", "playing"].includes(state.phase)) { setSpeaking(true); setPaused(false); }
+        if (state.phase === "paused") setPaused(true);
+      },
+      onPosition: (character) => { speechCharRef.current = character; },
+      onEnd: () => narrationFinishedRef.current(turnRef.current),
+      onError: () => {
+        if (!narrationActiveRef.current) return;
+        localPlayerRef.current?.stop();
+        activeNarratorRef.current = "device";
+        onError("The high-quality local voice could not continue. Using your device voice instead.");
+        deviceFallbackRef.current(turnRef.current, speechCharRef.current);
+      },
+    });
+    localPlayerRef.current = player;
+    return player;
+  }, [onError]);
+
+  useEffect(() => {
+    const enabled = window.localStorage.getItem("kotoba-high-quality-local-voice") === "true";
+    const timer = window.setTimeout(() => {
+      highQualityRef.current = enabled;
+      setHighQuality(enabled);
+      if (enabled) ensureLocalPlayer().prepare();
+    }, 0);
+    void navigator.storage?.persisted?.().then(setVoiceStoragePersistent).catch(() => {});
+    return () => window.clearTimeout(timer);
+  }, [ensureLocalPlayer]);
+
+  const speakTurn = useCallback((target: number, startAt = 0) => {
+    const item = storyRef.current.turns?.find((turn) => turn.turnNumber === target);
+    if (!item) return;
+    manualCancelRef.current = true; window.speechSynthesis?.cancel(); manualCancelRef.current = false;
+    localPlayerRef.current?.stop();
+    speechTextRef.current = item.prose; speechCharRef.current = startAt; narrationActiveRef.current = true;
+    setTurnNumber(target); turnRef.current = target; setSpeaking(true); setPaused(false);
+    if (highQualityRef.current) { activeNarratorRef.current = "local"; ensureLocalPlayer().speak(item.prose, startAt, rate); }
+    else { activeNarratorRef.current = "device"; speakWithDevice(target, startAt); }
     persist(target);
     if (autoWriteRef.current && target === storyRef.current.latestAcceptedTurnNumber) void continueWriting(true);
-  }, [continueWriting, onError, persist, rate, voiceId, voices]);
+  }, [continueWriting, ensureLocalPlayer, persist, rate, speakWithDevice]);
 
   useEffect(() => { speakTurnRef.current = speakTurn; }, [speakTurn]);
 
   function togglePlay() {
     const synth = window.speechSynthesis;
-    if (!synth || !current) return;
-    if (speaking && !paused) { synth.pause(); setPaused(true); return; }
-    if (speaking && paused) { synth.resume(); setPaused(false); return; }
+    if (!current || (!synth && !highQualityRef.current)) return;
+    if (speaking && !paused) { if (activeNarratorRef.current === "local") void localPlayerRef.current?.pause(); else synth?.pause(); setPaused(true); return; }
+    if (speaking && paused) { if (activeNarratorRef.current === "local") void localPlayerRef.current?.resume(); else synth?.resume(); setPaused(false); return; }
     speakTurn(current.turnNumber);
   }
 
-  function stopAudio() { manualCancelRef.current = true; window.speechSynthesis?.cancel(); manualCancelRef.current = false; setSpeaking(false); setPaused(false); }
+  function stopAudio() { narrationActiveRef.current = false; activeNarratorRef.current = null; localPlayerRef.current?.stop(); manualCancelRef.current = true; window.speechSynthesis?.cancel(); manualCancelRef.current = false; setSpeaking(false); setPaused(false); }
   function skipNarration(seconds: number) {
     if (!speaking || !speechTextRef.current) return;
     const next = Math.max(0, Math.min(speechTextRef.current.length - 1, speechCharRef.current + seconds * 18));
@@ -297,10 +356,30 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
   }
   function move(target: number) { stopAudio(); setTurnNumber(target); turnRef.current = target; persist(target); }
   function toggleAutoWrite(next: boolean) { setAutoWrite(next); autoWriteRef.current = next; if (next) { setAutoRead(true); autoReadRef.current = true; } persist(turnNumber, rate, next ? true : autoRead, next, voiceId); }
+  async function toggleHighQuality(next: boolean) {
+    stopAudio();
+    highQualityRef.current = next; setHighQuality(next);
+    window.localStorage.setItem("kotoba-high-quality-local-voice", String(next));
+    if (next) {
+      setVoiceStoragePersistent(await requestPersistentVoiceStorage());
+      ensureLocalPlayer().prepare();
+    } else {
+      localPlayerRef.current?.destroy(); localPlayerRef.current = null; setLocalVoice({ phase: "idle" });
+    }
+  }
 
   if (!current) return <div className="quiet-loading">The first page is being prepared…</div>;
   const paragraphs = current.prose.split(/\n\s*\n/).filter(Boolean);
   const sectionArt = story.art?.find((asset) => asset.turnNumber === current.turnNumber && asset.type !== "cover" && asset.status === "Ready");
+  const localProgress = typeof localVoice.progress === "number" ? ` ${Math.round(localVoice.progress)}%` : "";
+  const localBackend = localVoice.backend === "webgpu" ? "WebGPU" : localVoice.backend === "wasm" ? "WebAssembly" : "local";
+  const narrationStatus = writing && autoWrite ? "The author is writing the next section…" : highQuality
+    ? localVoice.phase === "loading" ? `Downloading or loading ${localBackend}${localProgress}`
+      : localVoice.phase === "generating" ? `Generating on ${localBackend}`
+        : localVoice.phase === "error" ? (speaking ? "Narrating with device fallback" : "Local voice unavailable · device fallback ready")
+          : speaking ? (paused ? "Local narration paused" : `Narrating on ${localBackend}`)
+            : localVoice.phase === "ready" ? `${localBackend} ready${voiceStoragePersistent ? " · persistent cache" : " · browser cache"}` : "Local voice enabled · about 116 MB first download"
+    : speaking ? (paused ? "Narration paused" : "Narrating") : "Ready to listen";
   return <section className="reader-shell">
     <div className="reader-top"><button className="reader-back" onClick={onBack}>← Library</button><div><strong>{story.title}</strong><button onClick={() => onAuthor(story.authorSnapshot)}>by {story.authorSnapshot.displayName}</button></div><div className="reader-tools"><button className="secondary small" onClick={() => setGallery(true)}>Gallery</button><button className="secondary small" onClick={() => setDrawer(true)}>Cast &amp; story</button></div></div>
     <article className="reader-page"><p className="section-label">Section {current.turnNumber} of {story.latestAcceptedTurnNumber}</p><h1>{story.title}</h1><button className="reader-author" onClick={() => onAuthor(story.authorSnapshot)}>{story.authorSnapshot.displayName}</button>{sectionArt && <figure className="section-art"><img src={`/api/app?assetId=${encodeURIComponent(sectionArt.id)}`} alt={sectionArt.caption || sectionArt.title} /><figcaption>{sectionArt.caption}</figcaption></figure>}<div className="prose">{paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div></article>
@@ -313,7 +392,16 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
       setRegenerating(true); try { setRegen(await api({ action: "regenerateLatest", storyId: story.id, note })); } catch (err) { onError(message(err)); } finally { setRegenerating(false); }
     }}>{regenerating ? "Preparing another version…" : "Regenerate latest section"}</button></div>
 
-    <div className="audio-dock" aria-label="Narration controls"><button className="play-button" onClick={togglePlay} aria-label={speaking && !paused ? "Pause narration" : "Play narration"}>{speaking && !paused ? "Ⅱ" : "▶"}</button><div className="audio-title"><strong>Section {turnNumber}</strong><span>{writing && autoWrite ? "The author is writing the next section…" : speaking ? (paused ? "Narration paused" : "Narrating") : "Ready to listen"}</span></div><button className="skip" onClick={() => skipNarration(-10)} aria-label="Skip narration backward ten seconds">−10</button><button className="skip" onClick={() => skipNarration(10)} aria-label="Skip narration forward ten seconds">+10</button><label>Speed<select value={rate} onChange={(event) => { const next = Number(event.target.value); setRate(next); persist(turnNumber, next); }}><option value="0.8">0.8×</option><option value="1">1×</option><option value="1.2">1.2×</option><option value="1.5">1.5×</option><option value="1.8">1.8×</option></select></label><label>Voice<select value={voiceId} onChange={(event) => { setVoiceId(event.target.value); persist(turnNumber, rate, autoRead, autoWrite, event.target.value); }}><option value="">Device default</option>{voices.map((voice) => <option key={voice.voiceURI} value={voice.voiceURI}>{voice.name}</option>)}</select></label><label className="switch-label"><input type="checkbox" checked={autoRead} onChange={(event) => { setAutoRead(event.target.checked); autoReadRef.current = event.target.checked; if (!event.target.checked && autoWrite) toggleAutoWrite(false); else persist(turnNumber, rate, event.target.checked, autoWrite); }} /><span />Auto read next</label><label className="switch-label"><input type="checkbox" checked={autoWrite} disabled={typeof window === "undefined" || !("speechSynthesis" in window)} onChange={(event) => toggleAutoWrite(event.target.checked)} /><span />Auto write next</label></div>
+    <div className="audio-dock" aria-label="Narration controls">
+      <button className="play-button" onClick={togglePlay} aria-label={speaking && !paused ? "Pause narration" : "Play narration"}>{speaking && !paused ? "Ⅱ" : "▶"}</button>
+      <div className="audio-title"><strong>Section {turnNumber}</strong><span>{narrationStatus}</span></div>
+      <button className="skip" onClick={() => skipNarration(-10)} aria-label="Skip narration backward ten seconds">−10</button><button className="skip" onClick={() => skipNarration(10)} aria-label="Skip narration forward ten seconds">+10</button>
+      <label>Speed<select value={rate} onChange={(event) => { const next = Number(event.target.value); setRate(next); persist(turnNumber, next); }}><option value="0.8">0.8×</option><option value="1">1×</option><option value="1.2">1.2×</option><option value="1.5">1.5×</option><option value="1.8">1.8×</option></select></label>
+      <label>{highQuality ? "Fallback voice" : "Voice"}<select value={voiceId} onChange={(event) => { setVoiceId(event.target.value); persist(turnNumber, rate, autoRead, autoWrite, event.target.value); }}><option value="">Device default</option>{voices.map((voice) => <option key={voice.voiceURI} value={voice.voiceURI}>{voice.name}</option>)}</select></label>
+      <label className="switch-label local-voice-toggle" title="Runs Kokoro q8 entirely in a browser worker. The first enable downloads about 116 MB; later uses are cached."><input type="checkbox" checked={highQuality} onChange={(event) => void toggleHighQuality(event.target.checked)} /><span />High-quality local voice</label>
+      <label className="switch-label"><input type="checkbox" checked={autoRead} onChange={(event) => { setAutoRead(event.target.checked); autoReadRef.current = event.target.checked; if (!event.target.checked && autoWrite) toggleAutoWrite(false); else persist(turnNumber, rate, event.target.checked, autoWrite); }} /><span />Auto read next</label>
+      <label className="switch-label"><input type="checkbox" checked={autoWrite} disabled={typeof window === "undefined" || (!("speechSynthesis" in window) && !highQuality)} onChange={(event) => toggleAutoWrite(event.target.checked)} /><span />Auto write next</label>
+    </div>
 
     {drawer && <StoryDrawer story={story} onClose={() => setDrawer(false)} />}
     {gallery && <StoryGallery story={story} currentTurn={current.turnNumber} onClose={() => setGallery(false)} onStory={(next) => { storyRef.current = next; onStory(next); }} onError={onError} />}
