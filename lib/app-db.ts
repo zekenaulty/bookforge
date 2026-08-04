@@ -11,6 +11,10 @@ export function getArtBucket(): R2Bucket | null {
   return env.ART ? env.ART as R2Bucket : null;
 }
 
+export function getImageTransformer(): ImagesBinding | null {
+  return env.IMAGES ? env.IMAGES as ImagesBinding : null;
+}
+
 const schemaStatements = [
   `CREATE TABLE IF NOT EXISTS authors (
     id TEXT PRIMARY KEY,

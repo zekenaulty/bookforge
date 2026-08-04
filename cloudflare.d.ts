@@ -29,10 +29,18 @@ interface R2Bucket {
   delete(key: string): Promise<void>;
 }
 
+interface ImagesBinding {
+  input(stream: ReadableStream): {
+    transform(options: Record<string, unknown>): {
+      output(options: { format: string; quality: number }): Promise<{ response(): Response }>;
+    };
+  };
+}
+
 interface Fetcher {
   fetch(input: Request | string, init?: RequestInit): Promise<Response>;
 }
 
 declare module "cloudflare:workers" {
-  export const env: { DB?: D1Database; ART?: R2Bucket; [key: string]: unknown };
+  export const env: { DB?: D1Database; ART?: R2Bucket; IMAGES?: ImagesBinding; [key: string]: unknown };
 }

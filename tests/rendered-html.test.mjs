@@ -43,8 +43,8 @@ test("keeps runtime writing and persistence wired", async () => {
   assert.match(ai, /MAX_ATTEMPTS = 3/);
   assert.match(ai, /TRANSPORT_TIMEOUT_MS = 10 \* 60 \* 1000/);
   assert.match(ai, /category: "parser"|"parser", true/);
-  assert.match(pdf, /PDFDocument/);
-  assert.match(pdf, /embedPng/);
+  assert.match(pdf, /%PDF-1\.4/);
+  assert.match(pdf, /DCTDecode/);
   assert.match(client, /Auto write next/i);
   assert.match(client, /Note to the author/i);
   assert.match(client, /Story gallery/i);
