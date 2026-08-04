@@ -1,0 +1,140 @@
+export type AuthorProfile = {
+  id: string;
+  displayName: string;
+  shortDescription: string;
+  selectedGenres: string[];
+  voice: string;
+  tone: string[];
+  pacing: string;
+  preferredPointOfView: string;
+  preferredTense: string;
+  proseDensity: string;
+  sensoryBias: string[];
+  recurringThemes: string[];
+  cadenceRules: string[];
+  writingRules: string[];
+  thingsToAvoid: string[];
+  archived?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type CastMember = {
+  id: string;
+  storyId?: string;
+  name: string;
+  aliases: string[];
+  pronouns: string;
+  genderPresentation: string;
+  narrativeRole: string;
+  viewpointPriority: string;
+  physicalDescription: string;
+  personality: string;
+  goals: string[];
+  fears: string[];
+  knownSecrets: string[];
+  importantRelationships: string[];
+  currentStatus: string;
+  currentLocation: string;
+  importantPossessions: string[];
+  abilitiesOrPowers: string[];
+  lastUpdatedTurn: number;
+  readerKnownSummary?: string;
+};
+
+export type StoryFoundation = {
+  title: string;
+  shortDescription: string;
+  genres: string[];
+  tone: string[];
+  pointOfView: string;
+  tense: string;
+  openingSituation: string;
+  centralConflict: string;
+  narrativePromises: string[];
+  importantConstraints: string[];
+  additionalInstructions: string;
+  broadDirection: string;
+  setting: string;
+  initialWorldFacts: string[];
+  initialRelationshipFacts: string[];
+  initialOpenPlotThreads: string[];
+  factsThatMustRemainTrue: string[];
+  initialNarrationVoiceRecommendation: string;
+  mainViewpointCharacterId: string;
+  initialCast: CastMember[];
+};
+
+export type StoryState = {
+  currentTime: string;
+  currentLocation: string;
+  currentScene: string;
+  activeViewpointCharacterId: string;
+  castPresent: string[];
+  recentEvents: string[];
+  establishedWorldFacts: string[];
+  importantRelationshipFacts: string[];
+  openPlotThreads: string[];
+  resolvedPlotThreads: string[];
+  activePromises: string[];
+  importantItems: string[];
+  injuriesAndConditions: string[];
+  factsThatMustRemainTrue: string[];
+  milestonesCompleted: string[];
+  milestonesNotYetCompleted: string[];
+  currentNarrativePressure: string;
+  currentArcDirection: string;
+  lastUpdatedTurn: number;
+};
+
+export type TurnResult = {
+  prose: string;
+  stateDelta: Record<string, unknown>;
+  nextStoryState: StoryState;
+  castUpdates: CastMember[];
+  relationshipUpdates: string[];
+  worldFactUpdates: string[];
+  threadUpdates: string[];
+  milestoneUpdates: string[];
+  viewpointCharacterId: string;
+  narrationVoiceHint: string;
+  turnIntent: Record<string, unknown>;
+};
+
+export type Turn = {
+  id: string;
+  storyId: string;
+  turnNumber: number;
+  prose: string;
+  wordCount: number;
+  createdAt: string;
+  directionUsed: string;
+  stateDelta: Record<string, unknown>;
+  narration: Record<string, unknown>;
+  generationStatus: string;
+  validationStatus: string;
+};
+
+export type Story = {
+  id: string;
+  title: string;
+  shortDescription: string;
+  selectedAuthorId: string;
+  authorSnapshot: AuthorProfile;
+  originalIdea: string;
+  foundation: StoryFoundation;
+  status: "Active" | "Finished" | "Archived";
+  latestAcceptedTurnNumber: number;
+  latestCheckpointTurnNumber: number;
+  defaultNarrationVoice?: string;
+  mainViewpointCharacterId?: string;
+  readingTurnNumber: number;
+  playbackRate: number;
+  autoReadNext: boolean;
+  autoWriteNext: boolean;
+  createdAt: string;
+  updatedAt: string;
+  turns?: Turn[];
+  cast?: CastMember[];
+  storyState?: StoryState;
+};
