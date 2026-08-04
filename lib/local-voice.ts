@@ -1,4 +1,4 @@
-import type { LocalVoiceProgress, LocalVoiceRequest, LocalVoiceResponse } from "./local-voice-types";
+import type { LocalVoiceId, LocalVoiceProgress, LocalVoiceRequest, LocalVoiceResponse } from "./local-voice-types";
 
 type Chunk = Extract<LocalVoiceResponse, { type: "audio" }>;
 
@@ -30,7 +30,7 @@ export class LocalVoicePlayer {
     this.send({ type: "prepare", preferWebGpu: "gpu" in navigator });
   }
 
-  speak(text: string, startAt: number, speed: number) {
+  speak(text: string, startAt: number, speed: number, voice: LocalVoiceId) {
     this.stop();
     this.stopped = false;
     this.startAt = startAt;
@@ -40,7 +40,7 @@ export class LocalVoicePlayer {
     this.audioContext ||= new AudioContext();
     void this.audioContext.resume();
     this.setState({ phase: "loading", detail: "Preparing local voice" });
-    this.send({ type: "speak", jobId: this.activeJobId, text: text.slice(startAt), voice: "af_heart", speed });
+    this.send({ type: "speak", jobId: this.activeJobId, text: text.slice(startAt), voice, speed });
   }
 
   async pause() {
@@ -120,7 +120,7 @@ export class LocalVoicePlayer {
     const chunk = this.queue.shift();
     if (!chunk) { this.finishIfComplete(); return; }
     const buffer = this.audioContext.createBuffer(1, chunk.samples.length, chunk.sampleRate);
-    buffer.copyToChannel(chunk.samples, 0);
+    buffer.copyToChannel(new Float32Array(chunk.samples), 0);
     const source = this.audioContext.createBufferSource();
     source.buffer = buffer;
     source.connect(this.audioContext.destination);

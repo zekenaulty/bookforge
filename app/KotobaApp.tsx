@@ -2,8 +2,9 @@
 /* eslint-disable @next/next/no-img-element -- private R2-backed art is served through the authenticated app route. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { DEFAULT_GOOGLE_IMAGE_MODEL, GOOGLE_IMAGE_MODELS, type GoogleImageModel, isGoogleImageModel } from "../lib/image-models";
 import { LocalVoicePlayer, requestPersistentVoiceStorage } from "../lib/local-voice";
-import type { LocalVoiceProgress } from "../lib/local-voice-types";
+import { isLocalVoiceId, LOCAL_VOICE_OPTIONS, type LocalVoiceId, type LocalVoiceProgress } from "../lib/local-voice-types";
 import type { ArtAsset, AuthorProfile, BackgroundJob, CastMember, OperationLog, Story, Turn, TurnResult } from "../lib/types";
 
 type View = "library" | "authors" | "archived" | "settings" | "reader" | "author";
@@ -204,13 +205,14 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
   const [autoRead, setAutoRead] = useState(story.autoReadNext);
   const [autoWrite, setAutoWrite] = useState(story.autoWriteNext);
   const [highQuality, setHighQuality] = useState(false);
+  const [localVoiceId, setLocalVoiceId] = useState<LocalVoiceId>("af_heart");
   const [localVoice, setLocalVoice] = useState<LocalVoiceProgress>({ phase: "idle" });
   const [voiceStoragePersistent, setVoiceStoragePersistent] = useState(false);
   const [regen, setRegen] = useState<{ candidate: TurnResult; original: Turn } | null>(null);
   const [regenerating, setRegenerating] = useState(false);
   const storyRef = useRef(story); const turnRef = useRef(turnNumber); const autoReadRef = useRef(autoRead); const autoWriteRef = useRef(autoWrite); const noteRef = useRef(note); const writingRef = useRef(false);
   const speechCharRef = useRef(0); const speechTextRef = useRef(""); const manualCancelRef = useRef(false); const narrationActiveRef = useRef(false); const activeNarratorRef = useRef<"local" | "device" | null>(null);
-  const highQualityRef = useRef(false); const localPlayerRef = useRef<LocalVoicePlayer | null>(null);
+  const highQualityRef = useRef(false); const localVoiceIdRef = useRef<LocalVoiceId>("af_heart"); const localPlayerRef = useRef<LocalVoicePlayer | null>(null);
   const narrationFinishedRef = useRef<(target: number) => void>(() => {}); const deviceFallbackRef = useRef<(target: number, startAt: number) => void>(() => {});
   const speakTurnRef = useRef<(target: number, startAt?: number) => void>(() => {});
   const current = story.turns?.find((turn) => turn.turnNumber === turnNumber) || story.turns?.at(-1);
@@ -316,9 +318,13 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
 
   useEffect(() => {
     const enabled = window.localStorage.getItem("kotoba-high-quality-local-voice") === "true";
+    const savedVoice = window.localStorage.getItem("kotoba-local-voice");
+    const nextVoice = isLocalVoiceId(savedVoice) ? savedVoice : "af_heart";
     const timer = window.setTimeout(() => {
       highQualityRef.current = enabled;
+      localVoiceIdRef.current = nextVoice;
       setHighQuality(enabled);
+      setLocalVoiceId(nextVoice);
       if (enabled) ensureLocalPlayer().prepare();
     }, 0);
     void navigator.storage?.persisted?.().then(setVoiceStoragePersistent).catch(() => {});
@@ -332,7 +338,7 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
     localPlayerRef.current?.stop();
     speechTextRef.current = item.prose; speechCharRef.current = startAt; narrationActiveRef.current = true;
     setTurnNumber(target); turnRef.current = target; setSpeaking(true); setPaused(false);
-    if (highQualityRef.current) { activeNarratorRef.current = "local"; ensureLocalPlayer().speak(item.prose, startAt, rate); }
+    if (highQualityRef.current) { activeNarratorRef.current = "local"; ensureLocalPlayer().speak(item.prose, startAt, rate, localVoiceIdRef.current); }
     else { activeNarratorRef.current = "device"; speakWithDevice(target, startAt); }
     persist(target);
     if (autoWriteRef.current && target === storyRef.current.latestAcceptedTurnNumber) void continueWriting(true);
@@ -367,6 +373,11 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
       localPlayerRef.current?.destroy(); localPlayerRef.current = null; setLocalVoice({ phase: "idle" });
     }
   }
+  function changeLocalVoice(next: LocalVoiceId) {
+    stopAudio();
+    localVoiceIdRef.current = next; setLocalVoiceId(next);
+    window.localStorage.setItem("kotoba-local-voice", next);
+  }
 
   if (!current) return <div className="quiet-loading">The first page is being prepared…</div>;
   const paragraphs = current.prose.split(/\n\s*\n/).filter(Boolean);
@@ -397,8 +408,9 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
       <div className="audio-title"><strong>Section {turnNumber}</strong><span>{narrationStatus}</span></div>
       <button className="skip" onClick={() => skipNarration(-10)} aria-label="Skip narration backward ten seconds">−10</button><button className="skip" onClick={() => skipNarration(10)} aria-label="Skip narration forward ten seconds">+10</button>
       <label>Speed<select value={rate} onChange={(event) => { const next = Number(event.target.value); setRate(next); persist(turnNumber, next); }}><option value="0.8">0.8×</option><option value="1">1×</option><option value="1.2">1.2×</option><option value="1.5">1.5×</option><option value="1.8">1.8×</option></select></label>
-      <label>{highQuality ? "Fallback voice" : "Voice"}<select value={voiceId} onChange={(event) => { setVoiceId(event.target.value); persist(turnNumber, rate, autoRead, autoWrite, event.target.value); }}><option value="">Device default</option>{voices.map((voice) => <option key={voice.voiceURI} value={voice.voiceURI}>{voice.name}</option>)}</select></label>
-      <label className="switch-label local-voice-toggle" title="Runs Kokoro q8 entirely in a browser worker. The first enable downloads about 116 MB; later uses are cached."><input type="checkbox" checked={highQuality} onChange={(event) => void toggleHighQuality(event.target.checked)} /><span />High-quality local voice</label>
+      <label>{highQuality ? "Fallback voice" : "Device voice"}<select value={voiceId} onChange={(event) => { setVoiceId(event.target.value); persist(turnNumber, rate, autoRead, autoWrite, event.target.value); }}><option value="">Device default</option>{voices.map((voice) => <option key={voice.voiceURI} value={voice.voiceURI}>{voice.name}</option>)}</select></label>
+      <label title="Device speech is instant. Kokoro runs locally in a browser worker and downloads about 116 MB the first time.">High-quality local voice<select value={highQuality ? "kokoro-q8" : "device"} onChange={(event) => void toggleHighQuality(event.target.value === "kokoro-q8")}><option value="device">Off · device speech</option><option value="kokoro-q8">On · Kokoro 82M q8</option></select></label>
+      {highQuality && <label title="Kokoro's local model supports English narration. Choose an American or British English voice.">Local voice · English<select value={localVoiceId} onChange={(event) => isLocalVoiceId(event.target.value) && changeLocalVoice(event.target.value)}>{LOCAL_VOICE_OPTIONS.map((voice) => <option key={voice.id} value={voice.id}>{voice.label} · {voice.locale.replace("English ", "")}</option>)}</select></label>}
       <label className="switch-label"><input type="checkbox" checked={autoRead} onChange={(event) => { setAutoRead(event.target.checked); autoReadRef.current = event.target.checked; if (!event.target.checked && autoWrite) toggleAutoWrite(false); else persist(turnNumber, rate, event.target.checked, autoWrite); }} /><span />Auto read next</label>
       <label className="switch-label"><input type="checkbox" checked={autoWrite} disabled={typeof window === "undefined" || (!("speechSynthesis" in window) && !highQuality)} onChange={(event) => toggleAutoWrite(event.target.checked)} /><span />Auto write next</label>
     </div>
@@ -416,12 +428,21 @@ function StoryDrawer({ story, onClose }: { story: Story; onClose: () => void }) 
 function StoryGallery({ story, currentTurn, onClose, onStory, onError }: { story: Story; currentTurn: number; onClose: () => void; onStory: (story: Story) => void; onError: (error: string) => void }) {
   const [category, setCategory] = useState<ArtAsset["category"]>("Cover");
   const [working, setWorking] = useState("");
+  const [imageModel, setImageModel] = useState<GoogleImageModel>(() => {
+    if (typeof window === "undefined") return DEFAULT_GOOGLE_IMAGE_MODEL;
+    const saved = window.localStorage.getItem("kotoba-google-image-model");
+    return isGoogleImageModel(saved) ? saved : DEFAULT_GOOGLE_IMAGE_MODEL;
+  });
   const assets = (story.art || []).filter((asset) => asset.category === category);
   const profiles = (story.visualProfiles || []).filter((profile) => category === "Characters" ? profile.kind === "character" : category === "Locations" ? profile.kind === "location" : false);
+  function chooseImageModel(model: GoogleImageModel) {
+    setImageModel(model);
+    window.localStorage.setItem("kotoba-google-image-model", model);
+  }
   async function queue(type: "cover" | "scene", turnNumber?: number) {
     setWorking(`${type}:${turnNumber || 0}`);
     try {
-      const result = await api<{ story: Story }>({ action: "queueArt", storyId: story.id, type, turnNumber });
+      const result = await api<{ story: Story }>({ action: "queueArt", storyId: story.id, type, turnNumber, model: imageModel });
       onStory(result.story);
       void drainBackgroundJobs(story.id, onStory).catch(() => {});
     } catch (error) { onError(message(error)); }
@@ -433,9 +454,9 @@ function StoryGallery({ story, currentTurn, onClose, onStory, onError }: { story
     catch (error) { onError(message(error)); }
     finally { setWorking(""); }
   }
-  return <Modal onClose={onClose} wide><div className="dialog-heading"><p className="eyebrow">Story gallery</p><h1>Visual continuity</h1><p>Art preparation never blocks the story. Missing or disliked pieces can be regenerated while reading and narration continue.</p></div>
+  return <Modal onClose={onClose} wide><div className="dialog-heading"><p className="eyebrow">Story gallery</p><h1>Visual continuity</h1><p>Google Nano Banana generates art in a resumable background job. Missing or disliked pieces can be regenerated while reading and narration continue.</p></div>
     <div className="gallery-tabs">{(["Cover", "Scenes", "Characters", "Locations"] as const).map((item) => <button key={item} className={category === item ? "active" : ""} onClick={() => setCategory(item)}>{item}</button>)}</div>
-    <div className="gallery-actions">{category === "Cover" && <button className="primary" disabled={Boolean(working)} onClick={() => void queue("cover")}>{working.startsWith("cover") ? "Preparing…" : "Regenerate cover"}</button>}{category === "Scenes" && <button className="primary" disabled={Boolean(working)} onClick={() => void queue("scene", currentTurn)}>{working.startsWith("scene") ? "Preparing…" : `Illustrate Section ${currentTurn}`}</button>}</div>
+    <div className="gallery-actions"><label>Google image model<select value={imageModel} disabled={Boolean(working)} onChange={(event) => isGoogleImageModel(event.target.value) && chooseImageModel(event.target.value)}>{GOOGLE_IMAGE_MODELS.map((model) => <option key={model.id} value={model.id}>{model.label} · {model.detail}</option>)}</select></label>{category === "Cover" && <button className="primary" disabled={Boolean(working)} onClick={() => void queue("cover")}>{working.startsWith("cover") ? "Preparing…" : "Regenerate cover"}</button>}{category === "Scenes" && <button className="primary" disabled={Boolean(working)} onClick={() => void queue("scene", currentTurn)}>{working.startsWith("scene") ? "Preparing…" : `Illustrate Section ${currentTurn}`}</button>}</div>
     <div className="gallery-grid">{assets.map((asset) => <article key={asset.id} className="gallery-card">{asset.status === "Ready" ? <img src={`/api/app?assetId=${encodeURIComponent(asset.id)}`} alt={asset.caption || asset.title} /> : <div className="art-placeholder"><span>{asset.type === "cover" ? story.title.slice(0, 1) : asset.turnNumber || "✦"}</span><small>{asset.status}</small></div>}<div><span className={`status-pill ${asset.status.toLowerCase()}`}>{asset.status}</span><h2>{asset.title}</h2><p>{asset.caption}</p>{asset.promptSummary && <details><summary>Saved art brief</summary><p>{asset.promptSummary}</p></details>}</div></article>)}{profiles.map((profile) => <article key={profile.id} className="gallery-card profile-card"><div className="art-placeholder"><span>{profile.name.slice(0, 1)}</span><small>Continuity profile</small></div><div><span className="status-pill completed">Tracked</span><h2>{profile.name}</h2><p>{profile.visualDescription || [profile.bodyType, profile.hair, profile.clothing, profile.architecture, profile.atmosphere].filter(Boolean).join(" · ")}</p><details><summary>Current visual details</summary><p>{[...(profile.currentVisualChanges || []), ...(profile.distinctiveMarkings || []), ...(profile.importantLandmarks || [])].join(" · ") || `Updated through Section ${profile.lastUpdatedTurn}`}</p></details></div></article>)}</div>
     {!assets.length && !profiles.length && <div className="gallery-empty"><p>No {category.toLowerCase()} art has been prepared yet.</p>{(category === "Characters" || category === "Locations") && <small>Visual profiles appear after a background context reconciliation discovers stable subjects.</small>}</div>}
     {story.jobs?.some((job) => ["failed", "unsupported"].includes(job.status) && job.jobType.startsWith("art_")) && <div className="retry-panel"><h3>Art jobs needing attention</h3>{story.jobs.filter((job) => ["failed", "unsupported"].includes(job.status) && job.jobType.startsWith("art_")).slice(0, 8).map((job) => <div key={job.id}><JobRow job={job} /><button className="secondary small" disabled={working === job.id} onClick={() => void retry(job)}>Retry</button></div>)}</div>}

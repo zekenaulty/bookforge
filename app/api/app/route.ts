@@ -1,5 +1,7 @@
 import { createArtBrief, createAuthorProfile, createCheckpoint, createContextReconciliation, createStoryFoundation, continueStory, repairTurn, validationIssues } from "../../../lib/ai";
 import { ensureDatabase, getArtBucket, getD1, json, now, words } from "../../../lib/app-db";
+import { generateGoogleImage, GoogleImageFailure, selectedGoogleImageModel } from "../../../lib/google-image";
+import { isGoogleImageModel } from "../../../lib/image-models";
 import { recordOperationLog } from "../../../lib/operation-log";
 import { buildStoryPdf } from "../../../lib/story-pdf";
 import type { ArtAsset, AuthorProfile, BackgroundJob, CastMember, ContextSnapshot, OperationLog, Story, StoryArtProfile, StoryFoundation, StoryState, Turn, TurnResult, VisualProfile } from "../../../lib/types";
@@ -362,6 +364,8 @@ async function handleQueueArt(body: Record<string, unknown>) {
   const turnNumber = type === "scene" ? Math.max(1, Number(body.turnNumber || story.latestAcceptedTurnNumber)) : 1;
   const turn = story.turns?.find((item) => item.turnNumber === turnNumber);
   if (type === "scene" && !turn) return bad("That section is unavailable.");
+  if (body.model != null && !isGoogleImageModel(body.model)) return bad("Choose a supported Google image model.");
+  const model = selectedGoogleImageModel(body.model);
   const db = getD1();
   const stamp = now();
   const assetId = crypto.randomUUID();
@@ -373,7 +377,7 @@ async function handleQueueArt(body: Record<string, unknown>) {
       type === "cover" ? `Cover for ${story.title}` : `Section ${turnNumber} - awaiting scene selection`, "Queued for background art direction.", stamp, stamp,
     ),
     enqueueJobStatement(db, { id: `${type === "cover" ? "art_cover" : "art_scene"}:${storyId}:${turnNumber}:${assetId}`, storyId, turnNumber,
-      jobType: type === "cover" ? "art_cover" : "art_scene", input: { assetId, turnId: turn?.id, requestedByUser: true } }),
+      jobType: type === "cover" ? "art_cover" : "art_scene", input: { assetId, turnId: turn?.id, requestedByUser: true, model } }),
   ]);
   return Response.json({ story: await loadStory(storyId, true) });
 }
@@ -411,13 +415,15 @@ async function handleRunBackgroundJob(body: Record<string, unknown>) {
     if (outcome.unsupported) await recordOperationLog({ storyId: job.storyId, turnNumber: job.turnNumber, operation: job.jobType,
       category: "native_image_unavailable", attempt: job.attempts, status: "unsupported", message: outcome.message || "Native image rendering is unavailable." });
   } catch (error) {
-    const retrying = job.attempts < job.maxAttempts;
-    const runAfter = new Date(Date.now() + Math.min(60_000, 4_000 * 2 ** Math.max(0, job.attempts - 1))).toISOString();
+    const failure = backgroundFailure(error);
+    const retrying = failure.recoverable && job.attempts < job.maxAttempts;
+    const runAfter = new Date(Date.now() + Math.max(failure.retryAfterMs, Math.min(60_000, 4_000 * 2 ** Math.max(0, job.attempts - 1)))).toISOString();
     await db.prepare("UPDATE background_jobs SET status=?,run_after=?,last_error=?,locked_at=NULL,updated_at=? WHERE id=?").bind(
-      retrying ? "retrying" : "failed", runAfter, message(error), now(), job.id,
+      retrying ? "retrying" : "failed", runAfter, failure.message, now(), job.id,
     ).run();
-    await recordOperationLog({ storyId: job.storyId, turnNumber: job.turnNumber, operation: job.jobType, category: "background_job",
-      attempt: job.attempts, status: retrying ? "retrying" : "failed", message: message(error) });
+    await recordOperationLog({ storyId: job.storyId, turnNumber: job.turnNumber, operation: job.jobType, category: failure.category,
+      attempt: job.attempts, status: retrying ? "retrying" : "failed", message: failure.message,
+      context: { recoverable: failure.recoverable, maxAttempts: job.maxAttempts, transportTimeoutMs: 10 * 60 * 1000 } });
   }
   const more = Boolean(await db.prepare(`SELECT id FROM background_jobs WHERE status IN ('pending','retrying') AND attempts<max_attempts AND run_after<=?
     AND (?='' OR story_id=?) LIMIT 1`).bind(now(), storyId, storyId).first<Row>());
@@ -502,11 +508,20 @@ async function runArtJob(job: BackgroundJob, input: Record<string, unknown>) {
   if (!story) throw new Error("Story not found for art preparation.");
   const type = job.jobType === "art_cover" ? "cover" : "scene";
   const turn = type === "scene" ? story.turns?.find((item) => item.turnNumber === job.turnNumber) : undefined;
-  const brief = await createArtBrief({ storyId: story.id, turnNumber: job.turnNumber, type,
-    story: { title: story.title, shortDescription: story.shortDescription, foundation: story.foundation, author: story.authorSnapshot },
-    prose: turn?.prose, artProfile: story.artProfile, visualProfiles: story.visualProfiles });
   const db = getD1();
   const assetId = String(input.assetId || "") || crypto.randomUUID();
+  const existing = await db.prepare("SELECT * FROM art_assets WHERE id=?").bind(assetId).first<Row>();
+  const reusableBrief = existing && !["Placeholder", "Queued"].includes(String(existing.status || "")) && String(existing.prompt_summary || "").trim();
+  const generatedBrief = reusableBrief ? null : await createArtBrief({ storyId: story.id, turnNumber: job.turnNumber, type,
+    story: { title: story.title, shortDescription: story.shortDescription, foundation: story.foundation, author: story.authorSnapshot },
+    prose: turn?.prose, artProfile: story.artProfile, visualProfiles: story.visualProfiles });
+  const brief = generatedBrief || {
+    shouldIllustrate: true,
+    category: String(existing?.category || (type === "cover" ? "Cover" : "Scenes")) as ArtAsset["category"],
+    title: String(existing?.title || (type === "cover" ? `${story.title} cover` : `Section ${job.turnNumber} illustration`)),
+    caption: String(existing?.caption || ""),
+    promptSummary: String(existing?.prompt_summary || ""),
+  };
   const stamp = now();
   if (!brief.shouldIllustrate && type === "scene") {
     await db.prepare("UPDATE art_assets SET title=?,caption=?,prompt_summary=?,status='Failed',updated_at=? WHERE id=?").bind(
@@ -514,13 +529,59 @@ async function runArtJob(job: BackgroundJob, input: Record<string, unknown>) {
     ).run();
     return { result: { selected: false, assetId } };
   }
-  const existing = await db.prepare("SELECT id FROM art_assets WHERE id=?").bind(assetId).first<Row>();
-  if (existing) await db.prepare("UPDATE art_assets SET category=?,title=?,caption=?,prompt_summary=?,status='Unsupported',updated_at=? WHERE id=?").bind(
+  if (existing) await db.prepare("UPDATE art_assets SET category=?,title=?,caption=?,prompt_summary=?,status='Preparing',updated_at=? WHERE id=?").bind(
     brief.category, brief.title, brief.caption, brief.promptSummary, stamp, assetId,
   ).run();
   else await db.prepare(`INSERT INTO art_assets (id,story_id,turn_id,turn_number,type,category,title,caption,prompt_summary,status,created_at,updated_at)
-    VALUES (?,?,?,?,?,?,?,?,?,'Unsupported',?,?)`).bind(assetId, story.id, turn?.id || null, job.turnNumber || null, type, brief.category, brief.title, brief.caption, brief.promptSummary, stamp, stamp).run();
-  return { unsupported: true, result: { assetId, brief }, message: "This Sites runtime does not expose a native image renderer. The visual brief and continuity profiles are saved; prose, narration, and the placeholder remain available." };
+    VALUES (?,?,?,?,?,?,?,?,?,'Preparing',?,?)`).bind(assetId, story.id, turn?.id || null, job.turnNumber || null, type, brief.category, brief.title, brief.caption, brief.promptSummary, stamp, stamp).run();
+
+  const bucket = getArtBucket();
+  if (!bucket || !process.env.GEMINI_API_KEY) {
+    const unavailable = !bucket ? "Private art storage is not configured." : "Google image generation is not configured.";
+    await db.prepare("UPDATE art_assets SET status='Unsupported',updated_at=? WHERE id=?").bind(now(), assetId).run();
+    return { unsupported: true, result: { assetId, brief }, message: unavailable };
+  }
+
+  const model = selectedGoogleImageModel(input.model);
+  const objectKey = `stories/${story.id}/${assetId}/image`;
+  const stored = await bucket.get(objectKey);
+  if (stored) {
+    await stored.body.cancel().catch(() => {});
+    const storedMime = stored.httpMetadata?.contentType || String(existing?.mime_type || "image/jpeg");
+    await db.prepare("UPDATE art_assets SET status='Ready',image_reference=?,mime_type=?,updated_at=? WHERE id=?").bind(
+      `r2:${objectKey}`, storedMime, now(), assetId,
+    ).run();
+    await recordOperationLog({ storyId: story.id, turnNumber: job.turnNumber, operation: job.jobType, category: "art_storage_resume",
+      attempt: job.attempts, status: "recovered", message: "Recovered a completed art file after an interrupted status update." });
+    return { result: { assetId, model: stored.customMetadata?.model || model, mimeType: storedMime, resumed: true } };
+  }
+  const prompt = [
+    `Create one finished ${type === "cover" ? "portrait book-cover illustration" : "cinematic story illustration"} for a private literary edition.`,
+    brief.promptSummary,
+    `Story title for context only: ${story.title}. Do not render the title or any other text in the image.`,
+    "Preserve every supplied character, costume, prop, location, palette, and motif continuity detail. Avoid spoilers, watermarks, borders, mockups, and stock-art composition.",
+  ].filter(Boolean).join("\n\n");
+  try {
+    const image = await generateGoogleImage({ prompt, model, aspectRatio: type === "cover" ? "2:3" : "16:9" });
+    await bucket.put(objectKey, image.bytes, {
+      httpMetadata: { contentType: image.mimeType },
+      customMetadata: { storyId: story.id, assetId, model: image.model },
+    });
+    await db.prepare("UPDATE art_assets SET status='Ready',image_reference=?,mime_type=?,updated_at=? WHERE id=?").bind(
+      `r2:${objectKey}`, image.mimeType, now(), assetId,
+    ).run();
+    await recordOperationLog({ storyId: story.id, turnNumber: job.turnNumber, operation: job.jobType, category: "google_image",
+      attempt: job.attempts, status: "completed", message: `Generated ${type} art with ${image.model}.`, context: { model: image.model, bytes: image.bytes.byteLength } });
+    return { result: { assetId, model: image.model, mimeType: image.mimeType } };
+  } catch (error) {
+    await db.prepare("UPDATE art_assets SET status='Failed',updated_at=? WHERE id=?").bind(now(), assetId).run();
+    throw error;
+  }
+}
+
+function backgroundFailure(error: unknown) {
+  if (error instanceof GoogleImageFailure) return error;
+  return { message: message(error), category: "background_job", recoverable: true, retryAfterMs: 0 };
 }
 
 async function loadStory(storyId: string, includeDetails: boolean): Promise<Story | null> {

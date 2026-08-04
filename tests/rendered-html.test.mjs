@@ -58,16 +58,23 @@ test("keeps runtime writing and persistence wired", async () => {
 });
 
 test("keeps neural narration local, lazy, and off the UI thread", async () => {
-  const [client, player, worker, manifest, vite] = await Promise.all([
+  const [client, player, worker, voiceTypes, manifest, vite] = await Promise.all([
     readFile(new URL("app/KotobaApp.tsx", root), "utf8"),
     readFile(new URL("lib/local-voice.ts", root), "utf8"),
     readFile(new URL("lib/local-voice-worker.ts", root), "utf8"),
+    readFile(new URL("lib/local-voice-types.ts", root), "utf8"),
     readFile(new URL("package.json", root), "utf8"),
     readFile(new URL("vite.config.ts", root), "utf8"),
   ]);
   assert.match(manifest, /"kokoro-js": "1\.2\.1"/);
   assert.match(client, /kotoba-high-quality-local-voice/);
+  assert.match(client, /Kokoro 82M q8/);
+  assert.match(client, /Local voice · English/);
   assert.match(client, /speechSynthesis/);
+  assert.match(player, /voice: LocalVoiceId/);
+  assert.match(voiceTypes, /English \(US\)/);
+  assert.match(voiceTypes, /English \(UK\)/);
+  assert.match(voiceTypes, /bf_emma/);
   assert.match(player, /new Worker\(new URL/);
   assert.match(player, /navigator\.storage\.persist/);
   assert.match(worker, /KokoroTTS\.from_pretrained/);
@@ -79,4 +86,29 @@ test("keeps neural narration local, lazy, and off the UI thread", async () => {
   assert.match(vite, /omit-pinned-onnx-wasm/);
   assert.doesNotMatch(worker, /API[_ -]?key/i);
   assert.doesNotMatch(worker, /\.onnx["']/i);
+});
+
+test("generates resumable story art with selectable Google Nano Banana models", async () => {
+  const [client, route, generator, models, hosting] = await Promise.all([
+    readFile(new URL("app/KotobaApp.tsx", root), "utf8"),
+    readFile(new URL("app/api/app/route.ts", root), "utf8"),
+    readFile(new URL("lib/google-image.ts", root), "utf8"),
+    readFile(new URL("lib/image-models.ts", root), "utf8"),
+    readFile(new URL(".openai/hosting.json", root), "utf8"),
+  ]);
+  assert.match(client, /Google image model/);
+  assert.match(client, /Google Nano Banana generates art/);
+  assert.match(models, /gemini-3\.1-flash-image/);
+  assert.match(models, /gemini-3\.1-flash-lite-image/);
+  assert.match(models, /gemini-3-pro-image/);
+  assert.match(models, /gemini-2\.5-flash-image/);
+  assert.match(generator, /:generateContent/);
+  assert.match(generator, /responseModalities: \["IMAGE"\]/);
+  assert.match(generator, /responseFormat/);
+  assert.match(generator, /TRANSPORT_TIMEOUT_MS = 10 \* 60 \* 1000/);
+  assert.match(route, /bucket\.put/);
+  assert.match(route, /status='Ready'/);
+  assert.match(route, /GoogleImageFailure/);
+  assert.match(hosting, /"r2":\s*"ART"/);
+  assert.doesNotMatch(generator, /Buffer\.from/);
 });

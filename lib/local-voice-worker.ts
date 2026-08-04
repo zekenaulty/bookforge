@@ -2,7 +2,7 @@
 
 import { env as transformersEnv } from "@huggingface/transformers";
 import { KokoroTTS } from "kokoro-js";
-import type { LocalVoiceBackend, LocalVoiceRequest, LocalVoiceResponse } from "./local-voice-types";
+import { isLocalVoiceId, type LocalVoiceBackend, type LocalVoiceRequest, type LocalVoiceResponse } from "./local-voice-types";
 
 const MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
 const ORT_WASM_CDN = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0-dev.20250409-89f8206ba4/dist/";
@@ -16,12 +16,12 @@ let activeJobId: string | null = null;
 transformersEnv.allowLocalModels = false;
 transformersEnv.allowRemoteModels = true;
 transformersEnv.useBrowserCache = true;
-transformersEnv.backends.onnx.wasm ||= {};
-transformersEnv.backends.onnx.wasm.wasmPaths = ORT_WASM_CDN;
+const wasmBackend = transformersEnv.backends.onnx.wasm;
+if (wasmBackend) wasmBackend.wasmPaths = ORT_WASM_CDN;
 
 // Sites responses are not cross-origin isolated, so ORT cannot use shared-memory
 // threading. Inference stays responsive because this entire module is a worker.
-if (transformersEnv.backends.onnx.wasm) transformersEnv.backends.onnx.wasm.numThreads = 1;
+if (wasmBackend) wasmBackend.numThreads = 1;
 
 function post(message: LocalVoiceResponse, transfer: Transferable[] = []) {
   scope.postMessage(message, transfer);
@@ -37,9 +37,10 @@ function progressDetail(value: unknown) {
 }
 
 async function canUseWebGpu() {
-  if (!("gpu" in navigator)) return false;
+  const gpu = (navigator as Navigator & { gpu?: { requestAdapter: () => Promise<unknown> } }).gpu;
+  if (!gpu) return false;
   try {
-    return Boolean(await navigator.gpu.requestAdapter());
+    return Boolean(await gpu.requestAdapter());
   } catch {
     return false;
   }
@@ -83,6 +84,7 @@ async function loadEngine(preferWebGpu: boolean) {
 async function speak(request: Extract<LocalVoiceRequest, { type: "speak" }>) {
   activeJobId = request.jobId;
   try {
+    if (!isLocalVoiceId(request.voice)) throw new Error("That English local voice is unavailable.");
     const tts = await loadEngine(true);
     if (activeJobId !== request.jobId) return;
     post({ type: "status", phase: "generating", backend, detail: "Generating sentence audio" });
