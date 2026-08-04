@@ -265,6 +265,8 @@ First make a hidden TurnIntent for this one section. Then write the prose and du
   }
 }
 
+The stateDelta object must include "checkpointRecommended": true and a short "checkpointReason" only when this section contains a major time jump, major location change, sustained viewpoint change, cast restructuring, arc ending, major reveal, or major status/power change. Otherwise set checkpointRecommended to false.
+
 Prose rules: 900–1,300 words preferred, 700 minimum unless a dramatically necessary ending, 1,600 maximum. Begin in motion, not recap. One coherent dramatic unit. Preserve names, pronouns, chronology, possessions, injuries, abilities, relationships, POV, tense, and world rules. Advance something meaningful without resolving the premise. Do not repeat the last opening, discovery, events, or emotional conclusion. No visible heading and no reader address unless the form requires it. The one-time note influences only this section and must never appear as an instruction in prose.`,
     16384,
   );

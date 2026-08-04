@@ -223,7 +223,7 @@ async function handleContinue(body: Record<string, unknown>) {
     ];
     for (const member of mergedCast) statements.push(castUpsert(db, storyId, member, nextTurnNumber));
     await db.batch(statements);
-    await maybeCheckpoint(storyId, nextTurnNumber);
+    await maybeCheckpoint(storyId, nextTurnNumber, result.stateDelta);
     return Response.json({ story: await loadStory(storyId, true) });
   } catch (error) {
     await db.prepare("UPDATE generation_jobs SET status='failed', error=?, updated_at=? WHERE idempotency_key=?").bind(message(error), now(), key).run();
@@ -264,6 +264,8 @@ async function handleAcceptRegeneration(body: Record<string, unknown>) {
   const priorCast = Array.isArray(delta.priorCast) ? delta.priorCast : story.cast || [];
   const mergedCast = mergeCast(priorCast, candidate.castUpdates || [], latest.turnNumber);
   const db = getD1();
+  const previousCheckpoint = await db.prepare("SELECT MAX(through_turn_number) AS turn_number FROM checkpoints WHERE story_id=? AND through_turn_number<?").bind(storyId, latest.turnNumber).first<Row>();
+  const previousCheckpointTurn = Number(previousCheckpoint?.turn_number || 0);
   const turnId = crypto.randomUUID();
   const narration = makeNarration(storyId, turnId, candidate.narrationVoiceHint, latest.turnNumber);
   const stateDelta = { ...candidate.stateDelta, priorState: delta.priorState, nextStoryState: candidate.nextStoryState, priorCast, turnIntent: candidate.turnIntent };
@@ -278,19 +280,24 @@ async function handleAcceptRegeneration(body: Record<string, unknown>) {
       narration.id, storyId, turnId, narration.voiceId, narration.voicePresentation, stamp),
     db.prepare("UPDATE story_states SET state_json=?, last_updated_turn=? WHERE story_id=?").bind(JSON.stringify(candidate.nextStoryState), latest.turnNumber, storyId),
     db.prepare("DELETE FROM cast_members WHERE story_id=?").bind(storyId),
-    db.prepare("UPDATE stories SET updated_at=? WHERE id=?").bind(stamp, storyId),
+    db.prepare("DELETE FROM checkpoints WHERE story_id=? AND through_turn_number>=?").bind(storyId, latest.turnNumber),
+    db.prepare("UPDATE stories SET latest_checkpoint_turn_number=?, updated_at=? WHERE id=?").bind(previousCheckpointTurn, stamp, storyId),
   ];
   for (const member of mergedCast) statements.push(castUpsert(db, storyId, member, latest.turnNumber));
   await db.batch(statements);
+  if (story.latestCheckpointTurnNumber >= latest.turnNumber) await maybeCheckpoint(storyId, latest.turnNumber, candidate.stateDelta, true);
   return Response.json({ story: await loadStory(storyId, true) });
 }
 
-async function maybeCheckpoint(storyId: string, throughTurnNumber: number) {
-  if (throughTurnNumber % 12 !== 0) return;
+async function maybeCheckpoint(storyId: string, throughTurnNumber: number, stateDelta?: unknown, force = false) {
   try {
     const db = getD1();
     const story = await loadStory(storyId, true);
     if (!story) return;
+    const delta = stateDelta && typeof stateDelta === "object" ? stateDelta as Record<string, unknown> : {};
+    const checkpointRecommended = delta.checkpointRecommended === true;
+    const intervalDue = throughTurnNumber - story.latestCheckpointTurnNumber >= 12;
+    if (!force && !intervalDue && !checkpointRecommended) return;
     const previousRow = await db.prepare("SELECT checkpoint_json, through_turn_number FROM checkpoints WHERE story_id=? ORDER BY through_turn_number DESC LIMIT 1").bind(storyId).first<Row>();
     const after = Number(previousRow?.through_turn_number || 0);
     const turns = (story.turns || []).filter((turn) => turn.turnNumber > after).map((turn) => ({ turnNumber: turn.turnNumber, prose: turn.prose, delta: turn.stateDelta }));
