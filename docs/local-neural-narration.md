@@ -6,8 +6,8 @@ The optional “High-quality local voice” prototype uses `kokoro-js` 1.2.1 wit
 
 - The application and Worker do not set a Content-Security-Policy header. Sites serves the application over HTTPS, which is required for WebGPU and persistent storage.
 - The q8 model and voice requests resolve to Hugging Face CDN responses with `Access-Control-Allow-Origin: *`. They can therefore be fetched by the deployed browser origin.
-- ONNX Runtime assets are emitted as ordinary application/runtime assets by the build. The 92 MB model weights are fetched by the browser from Hugging Face and are never copied into the Cloudflare Worker or deployment archive.
-- If a CSP is added later, it must allow the app's worker source and `connect-src https://huggingface.co https://*.hf.co`; deployed headers should be rechecked before tightening it.
+- ONNX Runtime WASM is fetched from an exact, immutable jsDelivr package URL. The build omits its redundant local copy. The 92 MB model weights are fetched by the browser from Hugging Face and are never copied into the Cloudflare Worker or deployment archive.
+- If a CSP is added later, it must allow the app's worker source and `connect-src https://huggingface.co https://*.hf.co https://cdn.jsdelivr.net`; deployed headers should be rechecked before tightening it.
 
 ## Execution and responsiveness
 
@@ -21,7 +21,7 @@ The optional “High-quality local voice” prototype uses `kokoro-js` 1.2.1 wit
 - Transformers.js uses the browser Cache API for model files, and `kokoro-js` maintains a Cache API entry for the selected voice. Enabling the flag also calls `navigator.storage.persist()` from the user gesture; Chromium may silently grant or deny it. A denied request still leaves a best-effort browser cache.
 - q8 model: 92,361,116 bytes (92.36 MB decimal).
 - Default `af_heart` voice: 522,240 bytes (0.52 MB).
-- ONNX Runtime WebGPU/WASM binary plus lazy Worker JavaScript: roughly 22–25 MB in the current dependency set. Expected first enable is approximately 115–120 MB. Subsequent loads normally use the origin cache.
+- Pinned ONNX Runtime WASM plus lazy Worker JavaScript: roughly 23 MB in the current dependency set. Expected first enable is approximately 115–120 MB. Subsequent model and voice loads normally use the origin cache; the immutable runtime uses the browser HTTP cache.
 - The model repository also contains `model_q8f16.onnx` (about 86 MB), but `kokoro-js` 1.2.1 does not expose `q8f16` in its supported dtype API. The prototype therefore uses supported `q8` rather than an untyped implementation detail.
 
 ## Browser support decision

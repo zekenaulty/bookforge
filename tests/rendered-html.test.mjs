@@ -58,11 +58,12 @@ test("keeps runtime writing and persistence wired", async () => {
 });
 
 test("keeps neural narration local, lazy, and off the UI thread", async () => {
-  const [client, player, worker, manifest] = await Promise.all([
+  const [client, player, worker, manifest, vite] = await Promise.all([
     readFile(new URL("app/KotobaApp.tsx", root), "utf8"),
     readFile(new URL("lib/local-voice.ts", root), "utf8"),
     readFile(new URL("lib/local-voice-worker.ts", root), "utf8"),
     readFile(new URL("package.json", root), "utf8"),
+    readFile(new URL("vite.config.ts", root), "utf8"),
   ]);
   assert.match(manifest, /"kokoro-js": "1\.2\.1"/);
   assert.match(client, /kotoba-high-quality-local-voice/);
@@ -74,6 +75,8 @@ test("keeps neural narration local, lazy, and off the UI thread", async () => {
   assert.match(worker, /"webgpu"/);
   assert.match(worker, /"wasm"/);
   assert.match(worker, /useBrowserCache = true/);
+  assert.match(worker, /wasmPaths = ORT_WASM_CDN/);
+  assert.match(vite, /omit-pinned-onnx-wasm/);
   assert.doesNotMatch(worker, /API[_ -]?key/i);
   assert.doesNotMatch(worker, /\.onnx["']/i);
 });

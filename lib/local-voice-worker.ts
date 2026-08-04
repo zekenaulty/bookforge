@@ -5,6 +5,7 @@ import { KokoroTTS } from "kokoro-js";
 import type { LocalVoiceBackend, LocalVoiceRequest, LocalVoiceResponse } from "./local-voice-types";
 
 const MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
+const ORT_WASM_CDN = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0-dev.20250409-89f8206ba4/dist/";
 const scope = self as DedicatedWorkerGlobalScope;
 
 let engine: KokoroTTS | null = null;
@@ -15,6 +16,8 @@ let activeJobId: string | null = null;
 transformersEnv.allowLocalModels = false;
 transformersEnv.allowRemoteModels = true;
 transformersEnv.useBrowserCache = true;
+transformersEnv.backends.onnx.wasm ||= {};
+transformersEnv.backends.onnx.wasm.wasmPaths = ORT_WASM_CDN;
 
 // Sites responses are not cross-origin isolated, so ORT cannot use shared-memory
 // threading. Inference stays responsive because this entire module is a worker.
