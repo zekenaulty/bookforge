@@ -15,6 +15,12 @@ type GenerateContentPayload = {
 
 export type GoogleImage = { bytes: Uint8Array; mimeType: string; model: GoogleImageModel };
 
+type ProviderSubmissionBudget = {
+  used: number;
+  maximum: number;
+  beforeSubmit?: (nextSubmissionCount: number) => Promise<void> | void;
+};
+
 export class GoogleImageFailure extends Error {
   category: string;
   recoverable: boolean;
@@ -37,8 +43,20 @@ export function selectedGoogleImageModel(value: unknown): GoogleImageModel {
   return DEFAULT_GOOGLE_IMAGE_MODEL;
 }
 
-export async function generateGoogleImage(input: { prompt: string; model?: unknown; aspectRatio: "2:3" | "16:9" }): Promise<GoogleImage> {
+export async function generateGoogleImage(input: {
+  prompt: string;
+  model?: unknown;
+  aspectRatio: "2:3" | "16:9";
+  providerSubmissionsUsed?: number;
+  maxProviderSubmissions?: number;
+  beforeProviderSubmit?: (nextSubmissionCount: number) => Promise<void> | void;
+}): Promise<GoogleImage> {
   const model = selectedGoogleImageModel(input.model);
+  const budget: ProviderSubmissionBudget = {
+    used: Math.max(0, Math.floor(input.providerSubmissionsUsed || 0)),
+    maximum: Math.max(1, Math.min(6, Math.floor(input.maxProviderSubmissions || 3))),
+    beforeSubmit: input.beforeProviderSubmit,
+  };
   const responseFormat = model === "gemini-2.5-flash-image"
     ? { image: { aspectRatio: input.aspectRatio } }
     : { image: { aspectRatio: input.aspectRatio, imageSize: "1K" } };
@@ -52,7 +70,7 @@ export async function generateGoogleImage(input: { prompt: string; model?: unkno
         ? { responseModalities: ["IMAGE"], imageConfig: responseFormat.image }
         : { responseModalities: ["IMAGE"], responseFormat },
     }),
-  }, TRANSPORT_TIMEOUT_MS, "generate_content");
+  }, TRANSPORT_TIMEOUT_MS, "generate_content", budget);
   let payload: GenerateContentPayload;
   try {
     payload = await request();
@@ -75,7 +93,7 @@ export async function generateGoogleImage(input: { prompt: string; model?: unkno
     if (typeof blockReason === "string" && /safety|block|prohibited/i.test(blockReason)) {
       throw new GoogleImageFailure("Google declined this art brief under its safety policy.", "safety", false);
     }
-    throw new GoogleImageFailure("Google returned no final image for this art brief.", "empty_image", true);
+    throw new GoogleImageFailure("Google returned no final image for this art brief.", "empty_image", false);
   }
   return decodeGoogleImage(inline.data, inline.mimeType, model);
 }
@@ -83,22 +101,42 @@ export async function generateGoogleImage(input: { prompt: string; model?: unkno
 function decodeGoogleImage(data: string, rawMimeType: unknown, model: GoogleImageModel): GoogleImage {
   const mimeType = typeof rawMimeType === "string" && rawMimeType ? rawMimeType : "image/jpeg";
   if (!SUPPORTED_MIME_TYPES.has(mimeType)) {
-    throw new GoogleImageFailure(`Google returned an unsupported image format (${safeMimeType(mimeType)}).`, "image_mime", true);
+    throw new GoogleImageFailure(`Google returned an unsupported image format (${safeMimeType(mimeType)}).`, "image_mime", false);
   }
   return { bytes: decodeImageData(data), mimeType, model };
 }
 
-async function googleJson<T>(url: string, init: RequestInit, timeoutMs: number, operation: string): Promise<T> {
+async function googleJson<T>(url: string, init: RequestInit, timeoutMs: number, operation: string, budget: ProviderSubmissionBudget): Promise<T> {
   const deadline = Date.now() + timeoutMs;
   let lastFailure: GoogleImageFailure | null = null;
+  let ambiguousFailures = 0;
   for (let attempt = 1; attempt <= MAX_HTTP_ATTEMPTS; attempt += 1) {
     const remaining = deadline - Date.now();
     if (remaining <= 0) break;
     const controller = new AbortController();
-    const attemptsLeft = MAX_HTTP_ATTEMPTS - attempt + 1;
-    const attemptTimeout = Math.max(1_000, Math.floor(remaining / attemptsLeft));
+    // A slow but healthy image response may legitimately take several
+    // minutes. Give the active request the complete remaining ten-minute
+    // transport window; quick failures still leave room for a short retry.
+    const attemptTimeout = Math.max(1_000, remaining);
     const timeout = setTimeout(() => controller.abort(), attemptTimeout);
     try {
+      if (budget.used >= budget.maximum) {
+        if (lastFailure) throw new GoogleImageFailure(
+          `${lastFailure.message} The automatic provider-submission budget is now exhausted; retry explicitly after reviewing diagnostics.`,
+          lastFailure.category, false, lastFailure.retryAfterMs,
+        );
+        throw new GoogleImageFailure("The automatic image-provider submission budget was exhausted. Review the diagnostics before retrying explicitly.", "provider_submission_budget", false);
+      }
+      const nextSubmissionCount = budget.used + 1;
+      if (budget.beforeSubmit) {
+        try {
+          await budget.beforeSubmit(nextSubmissionCount);
+        } catch (error) {
+          if (error instanceof GoogleImageFailure) throw error;
+          throw new GoogleImageFailure("The image request could not be guarded before provider submission.", "provider_submission_guard", true);
+        }
+      }
+      budget.used = nextSubmissionCount;
       const response = await fetch(url, { ...init, signal: controller.signal });
       if (!response.ok) throw await imageHttpFailure(response);
       try {
@@ -111,7 +149,21 @@ async function googleJson<T>(url: string, init: RequestInit, timeoutMs: number, 
         ? new GoogleImageFailure("The Google image request timed out within its ten-minute request window.", `${operation}_timeout`, true)
         : new GoogleImageFailure("The Google image transport was interrupted.", `${operation}_transport`, true);
       lastFailure = failure;
-      if (!failure.recoverable || attempt === MAX_HTTP_ATTEMPTS) throw failure;
+      const ambiguous = new RegExp(`^${operation}_(?:parser|timeout|transport)$`).test(failure.category);
+      if (ambiguous) ambiguousFailures += 1;
+      const deadlineExhausted = Date.now() >= deadline;
+      const budgetExhausted = budget.used >= budget.maximum;
+      if (!failure.recoverable || attempt === MAX_HTTP_ATTEMPTS || deadlineExhausted || budgetExhausted || (ambiguous && ambiguousFailures >= 2)) {
+        if (budgetExhausted) throw new GoogleImageFailure(
+          `${failure.message} The automatic provider-submission budget is now exhausted; retry explicitly after reviewing diagnostics.`,
+          failure.category, false, failure.retryAfterMs,
+        );
+        if (ambiguous) throw new GoogleImageFailure(
+          `${failure.message} A bounded ambiguous retry was already used, so another possibly duplicate image request will not be sent automatically.`,
+          failure.category, false, failure.retryAfterMs,
+        );
+        throw failure;
+      }
       console.warn(`[kotoba-google-image] ${operation} attempt ${attempt} will retry after ${failure.category}.`);
       const delay = Math.max(failure.retryAfterMs, 500 * 2 ** (attempt - 1));
       if (Date.now() + delay >= deadline) throw failure;
@@ -120,7 +172,7 @@ async function googleJson<T>(url: string, init: RequestInit, timeoutMs: number, 
       clearTimeout(timeout);
     }
   }
-  throw lastFailure || new GoogleImageFailure("The Google image request timed out.", `${operation}_timeout`, true);
+  throw lastFailure || new GoogleImageFailure("The Google image request timed out.", `${operation}_timeout`, false);
 }
 
 function googleBase() {
@@ -139,7 +191,7 @@ function googleHeaders() {
 function decodeImageData(value: string) {
   const clean = value.replace(/^data:image\/[a-z0-9.+-]+;base64,/i, "").replace(/\s/g, "");
   if (!clean || clean.length > MAX_BASE64_LENGTH || !/^[A-Za-z0-9+/]*={0,2}$/.test(clean)) {
-    throw new GoogleImageFailure("Google returned invalid or oversized image data.", "image_payload", true);
+    throw new GoogleImageFailure("Google returned invalid or oversized image data.", "image_payload", false);
   }
   try {
     const binary = atob(clean);
@@ -148,7 +200,7 @@ function decodeImageData(value: string) {
     if (!bytes.length) throw new Error("empty");
     return bytes;
   } catch {
-    throw new GoogleImageFailure("Google returned unreadable image data.", "image_payload", true);
+    throw new GoogleImageFailure("Google returned unreadable image data.", "image_payload", false);
   }
 }
 

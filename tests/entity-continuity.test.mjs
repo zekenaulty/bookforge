@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   entitySlug,
+  exactProseSurfaceMatch,
   mergeEntityAppearanceGuides,
   nextReconciliationThrough,
   normalizeEntityTimeline,
@@ -15,14 +16,22 @@ const foundation = {
   initialCast: [{
     id: "mara-vale", name: "Mara Vale", aliases: ["Mara"], genderPresentation: "woman",
     physicalDescription: "Tall, silver-streaked black hair, amber coat, brass compass.",
-    importantPossessions: ["brass compass"], abilitiesOrPowers: [], currentStatus: "uninjured", currentLocation: "harbor",
+    importantPossessions: ["secret brass key"], abilitiesOrPowers: ["latent tide-sight"], currentStatus: "secretly cursed", currentLocation: "hidden cell",
   }],
 };
+
+test("prose identity matching is token-bounded and returns the published surface", () => {
+  assert.equal(exactProseSurfaceMatch("The party crashed into annual rites.", "Art"), undefined);
+  assert.equal(exactProseSurfaceMatch("ANN waited beneath the arch.", "Ann"), "ANN");
+  assert.equal(exactProseSurfaceMatch("仮面の葵は振り返った。", "葵"), "葵");
+});
 
 test("seeds character and location style baselines with Section 1 timeline links", () => {
   const guides = seedEntityAppearanceGuides(foundation, 1);
   assert.deepEqual(guides.map((guide) => guide.kind), ["character", "location"]);
   assert.match(guides[0].baseline.summary, /silver-streaked black hair/);
+  assert.deepEqual(guides[0].baseline.signatureTraits, ["woman"]);
+  assert.doesNotMatch(JSON.stringify(guides[0]), /secret brass key|latent tide-sight|secretly cursed|hidden cell/);
   assert.equal(guides[0].timelineObservations[0].turnNumber, 1);
   assert.equal(guides[1].entityId, "opening-setting");
 });
@@ -40,7 +49,8 @@ test("rolling reconciliation enriches a baseline without erasing prior traits", 
   }], 12);
   const mara = merged.find((guide) => guide.entityId === "mara-vale");
   assert.match(mara.baseline.summary, /silver-streaked black hair/);
-  assert.ok(mara.baseline.signatureTraits.includes("brass compass"));
+  assert.ok(mara.baseline.signatureTraits.includes("woman"));
+  assert.ok(!mara.baseline.signatureTraits.includes("secret brass key"));
   assert.ok(mara.baseline.signatureTraits.includes("scar over left eyebrow"));
   assert.ok(mara.aliases.includes("Captain Vale"));
   assert.equal(mara.current.condition, "minor cut");
@@ -135,7 +145,7 @@ test("persists guides and observations and atomically rejects stale continuity c
   assert.match(route, /DELETE FROM entity_appearance_guides WHERE story_id=\?/);
   assert.match(route, /DELETE FROM visual_profiles WHERE story_id=\?/);
   assert.match(route, /story\.turns\.slice\(0, -1\)\.slice\(-12\)/);
-  assert.match(route, /if \(input\.rebuildFromTurn && previousContext\?\.entityAppearanceGuides\?\.length\)/);
+  assert.match(route, /if \(input\.rebuildFromTurn && previousVisualContext\?\.entityAppearanceGuides\?\.length\)/);
   assert.match(route, /writerMutationGuardStatement\(db/);
   assert.match(route, /regenerationMutationGuardStatement\(db/);
   assert.match(route, /backgroundBoundaryMutationGuardStatement\(db/);

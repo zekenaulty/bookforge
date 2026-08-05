@@ -148,6 +148,15 @@ const schemaStatements = [
     last_updated_turn INTEGER NOT NULL DEFAULT 0,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`,
+  `CREATE TABLE IF NOT EXISTS story_art_style_anchors (
+    story_id TEXT PRIMARY KEY,
+    anchor_json TEXT NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1 CHECK(revision >= 1),
+    provenance_json TEXT NOT NULL DEFAULT '{}',
+    updated_through_turn INTEGER NOT NULL DEFAULT 0 CHECK(updated_through_turn >= 0),
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`,
   `CREATE TABLE IF NOT EXISTS visual_profiles (
     id TEXT PRIMARY KEY,
     story_id TEXT NOT NULL,

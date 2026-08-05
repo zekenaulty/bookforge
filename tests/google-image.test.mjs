@@ -66,7 +66,7 @@ test("keeps image generation on the documented v1 endpoint when text uses v1beta
   }
 });
 
-test("retries a recoverable parser failure inside one ten-minute request window", async () => {
+test("uses one bounded retry after an ambiguous successful-response parser failure", async () => {
   let attempts = 0;
   globalThis.fetch = async () => {
     attempts += 1;
@@ -76,6 +76,56 @@ test("retries a recoverable parser failure inside one ten-minute request window"
   const image = await generateGoogleImage({ prompt: "cover", aspectRatio: "2:3" });
   assert.equal(attempts, 2);
   assert.equal(new TextDecoder().decode(image.bytes), "retry");
+});
+
+test("stops after one ambiguous retry and records both guarded submissions", async () => {
+  const guardedCounts = [];
+  let attempts = 0;
+  globalThis.fetch = async () => { attempts += 1; return new Response("not-json", { status: 200 }); };
+  await assert.rejects(() => generateGoogleImage({
+    prompt: "cover", aspectRatio: "2:3", beforeProviderSubmit: (count) => guardedCounts.push(count),
+  }), (error) => {
+    assert.equal(error.category, "generate_content_parser");
+    assert.equal(error.recoverable, false);
+    assert.match(error.message, /bounded ambiguous retry/i);
+    return true;
+  });
+  assert.equal(attempts, 2);
+  assert.deepEqual(guardedCounts, [1, 2]);
+});
+
+test("recovers from one quick transport interruption without shortening a healthy request window", async () => {
+  let attempts = 0;
+  globalThis.fetch = async () => {
+    attempts += 1;
+    if (attempts === 1) throw new TypeError("connection reset");
+    return Response.json({ candidates: [{ content: { parts: [{ inlineData: { data: btoa("transport-retry"), mimeType: "image/png" } }] } }] });
+  };
+  const image = await generateGoogleImage({ prompt: "scene", aspectRatio: "16:9" });
+  assert.equal(attempts, 2);
+  assert.equal(new TextDecoder().decode(image.bytes), "transport-retry");
+});
+
+test("persists and enforces one provider-submission budget across compatibility and HTTP retries", async () => {
+  const guardedCounts = [];
+  let attempts = 0;
+  globalThis.fetch = async (_url, init) => {
+    attempts += 1;
+    const body = JSON.parse(init.body);
+    if (attempts === 1) return new Response(JSON.stringify({ error: {
+      status: "INVALID_ARGUMENT",
+      message: "Invalid generation_config.response_format.image.aspect_ratio",
+    } }), { status: 400 });
+    assert.ok(body.generationConfig.imageConfig, "the compatibility schema should share the same budget");
+    return new Response(JSON.stringify({ error: { status: "RESOURCE_EXHAUSTED", message: "slow down" } }), { status: 429 });
+  };
+  await assert.rejects(() => generateGoogleImage({
+    prompt: "cover", aspectRatio: "2:3", maxProviderSubmissions: 2,
+    beforeProviderSubmit: async (count) => { guardedCounts.push(count); },
+  }), (error) => error instanceof GoogleImageFailure && error.category === "http_429"
+    && error.recoverable === false && /budget/i.test(error.message));
+  assert.equal(attempts, 2);
+  assert.deepEqual(guardedCounts, [1, 2]);
 });
 
 test("ignores thought images and saves the last final image", async () => {

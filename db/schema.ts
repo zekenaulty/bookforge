@@ -162,6 +162,25 @@ export const storyArtProfiles = sqliteTable("story_art_profiles", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+// The rolling art profile may evolve as the story grows. This anchor is the
+// separately versioned, story-wide visual identity that scene prompts inherit.
+export const storyArtStyleAnchors = sqliteTable(
+  "story_art_style_anchors",
+  {
+    storyId: text("story_id").primaryKey(),
+    anchorJson: text("anchor_json").notNull(),
+    revision: integer("revision").notNull().default(1),
+    provenanceJson: text("provenance_json").notNull().default("{}"),
+    updatedThroughTurn: integer("updated_through_turn").notNull().default(0),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    check("story_art_style_anchor_revision_check", sql`${table.revision} >= 1`),
+    check("story_art_style_anchor_turn_check", sql`${table.updatedThroughTurn} >= 0`),
+  ],
+);
+
 export const visualProfiles = sqliteTable(
   "visual_profiles",
   {

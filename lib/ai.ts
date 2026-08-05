@@ -7,7 +7,10 @@ import type {
   ContextSnapshot,
   EntityAppearanceGuide,
   EntityAppearanceObservation,
+  StoryArtProfile,
+  VisualProfile,
 } from "./types";
+import type { StoryArtStyleAnchor } from "./story-art-style-anchor";
 import { recordOperationLog } from "./operation-log";
 
 const authorShape = `{
@@ -80,14 +83,20 @@ export class AiFailure extends Error {
 }
 
 class JsonParseFailure extends AiFailure {
-  constructor() { super("The author returned an unreadable draft.", "parser", true); }
+  constructor(message = "The author returned an unreadable draft.") { super(message, "parser", true); }
 }
 
 const MAX_ATTEMPTS = 3;
 const TRANSPORT_TIMEOUT_MS = 10 * 60 * 1000;
 const BASE_BACKOFF_MS = [2_000, 8_000, 20_000];
 
-async function callJson<T>(system: string, prompt: string, maxOutputTokens = 8192, context: AiCallContext = { operation: "runtime_generation" }): Promise<T> {
+async function callJson<T>(
+  system: string,
+  prompt: string,
+  maxOutputTokens = 8192,
+  context: AiCallContext = { operation: "runtime_generation" },
+  validate?: (value: T) => boolean,
+): Promise<T> {
   let lastFailure: AiFailure | null = null;
   const deadline = Date.now() + TRANSPORT_TIMEOUT_MS;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
@@ -99,6 +108,7 @@ async function callJson<T>(system: string, prompt: string, maxOutputTokens = 819
       if (remainingMs <= 0) throw new AiFailure("The writing request timed out after ten minutes.", "timeout", true);
       const text = await requestText(strictSystem, prompt, maxOutputTokens, remainingMs);
       const parsed = parseJson<T>(text);
+      if (validate && !validate(parsed)) throw new JsonParseFailure("The author returned valid JSON with an incomplete response shape.");
       if (attempt > 1 && lastFailure) {
         await recordOperationLog({ ...context, category: lastFailure.category, attempt, status: "recovered", message: `Recovered on attempt ${attempt} after ${lastFailure.category}.` });
       }
@@ -404,6 +414,35 @@ Return {"storyId":string,"throughTurnNumber":number,"compactStorySummary":string
   );
 }
 
+type NarrativeContextReconciliation = Pick<ContextSnapshot,
+  "throughTurnNumber" | "compactStorySummary" | "characterState" | "keyFacts" | "openQuestions"
+>;
+
+export type VisualContextReconciliation = {
+  visualContinuityNotes: string[];
+  storyArtProfile: StoryArtProfile;
+  characterVisualProfiles: VisualProfile[];
+  locationVisualProfiles: VisualProfile[];
+  entityAppearanceGuides: EntityAppearanceGuide[];
+};
+
+function completeVisualContext(value: VisualContextReconciliation) {
+  if (!value || typeof value !== "object") return false;
+  const profile = value.storyArtProfile;
+  if (!profile || typeof profile !== "object") return false;
+  if (![value.visualContinuityNotes, value.characterVisualProfiles, value.locationVisualProfiles, value.entityAppearanceGuides,
+    profile.palette, profile.majorCastAppearance, profile.keyLocationAppearance, profile.recurringMotifs, profile.avoid]
+    .every(Array.isArray)) return false;
+  if (![profile.artStyle, profile.coverStyle, profile.mood, profile.protagonistAppearance, profile.creatureDesignLanguage]
+    .every((item) => typeof item === "string")) return false;
+  if (!profile.artStyle.trim() || !profile.coverStyle.trim() || value.entityAppearanceGuides.length < 1) return false;
+  return value.entityAppearanceGuides.every((guide) => Boolean(
+    guide && typeof guide === "object" && typeof guide.entityId === "string" && guide.entityId.trim()
+    && typeof guide.name === "string" && guide.name.trim() && typeof guide.baseline === "object" && typeof guide.current === "object"
+    && Array.isArray(guide.timelineObservations),
+  ));
+}
+
 export async function createContextReconciliation(input: {
   storyId: string;
   throughTurnNumber: number;
@@ -412,28 +451,53 @@ export async function createContextReconciliation(input: {
   cast: CastMember[];
   recentTurns: unknown[];
   previousContext?: unknown;
-  previousArtProfile?: unknown;
-  previousEntityGuides?: EntityAppearanceGuide[];
-  recentEntityObservations?: EntityAppearanceObservation[];
-  previousThroughTurnNumber?: number;
 }) {
-  return callJson<ContextSnapshot>(
-    "You reconcile compact story, character, motive, fact, and visual continuity for an ongoing private novel. Return JSON only. Do not invent unsupported facts or reveal hidden secrets in reader-facing summaries.",
+  return callJson<NarrativeContextReconciliation>(
+    "You reconcile compact private author-state continuity for an ongoing novel. Return JSON only. Do not invent unsupported facts or expose this hidden working context in story prose.",
     `Reconcile durable context through Section ${input.throughTurnNumber}.
 Foundation: ${JSON.stringify(input.foundation)}
 Current state: ${JSON.stringify(input.state)}
 Current cast: ${JSON.stringify(input.cast)}
 Recent accepted sections and deltas: ${JSON.stringify(input.recentTurns)}
 Previous managed context: ${JSON.stringify(input.previousContext || {})}
-Previous story art profile: ${JSON.stringify(input.previousArtProfile || {})}
-Previous durable entity appearance/style guides: ${JSON.stringify(input.previousEntityGuides || [])}
-Previously recorded appearance observations: ${JSON.stringify(input.recentEntityObservations || [])}
 
 Return exactly {
   "throughTurnNumber": ${input.throughTurnNumber},
   "compactStorySummary": string,
   "characterState": [{"characterId":string,"name":string,"currentMotives":string[],"immediateGoals":string[],"emotionalState":string,"appearanceNow":string,"keyFacts":string[],"relationships":string[],"currentLocation":string}],
-  "keyFacts": string[], "openQuestions": string[], "visualContinuityNotes": string[],
+  "keyFacts": string[], "openQuestions": string[]
+}. Preserve motives, goals, relationships, chronology, promises, constraints, secrets, possessions, injuries, powers, and other author-only facts. This pass does not create or update art direction, visual profiles, or appearance guides.`,
+    8192, { operation: "context_reconcile", storyId: input.storyId, turnNumber: input.throughTurnNumber },
+  );
+}
+
+export async function createVisualContextReconciliation(input: {
+  storyId: string;
+  throughTurnNumber: number;
+  foundation: Pick<StoryFoundation, "title" | "shortDescription" | "genres" | "tone" | "setting" | "openingSituation">;
+  acceptedTurns: Array<{ turnNumber: number; prose: string }>;
+  previousVisualContext?: Partial<VisualContextReconciliation>;
+  recentEntityObservations?: EntityAppearanceObservation[];
+  previousThroughTurnNumber?: number;
+}) {
+  const safeFoundation = {
+    title: input.foundation.title,
+    shortDescription: input.foundation.shortDescription,
+    genres: input.foundation.genres,
+    tone: input.foundation.tone,
+    setting: input.foundation.setting,
+    openingSituation: input.foundation.openingSituation,
+  };
+  return callJson<VisualContextReconciliation>(
+    "You reconcile illustration continuity from published story prose only. Return JSON only. You have no access to hidden author state. Never infer a secret, latent ability, concealed possession, unseen location, future costume, unrevealed identity, or transformation. An entity fact is eligible only when the supplied accepted prose visibly establishes it.",
+    `Reconcile spoiler-safe visual context through Section ${input.throughTurnNumber}.
+Opening-level book projection (style guidance only; never use it as evidence for an entity fact): ${JSON.stringify(safeFoundation)}
+Accepted prose evidence: ${JSON.stringify(input.acceptedTurns)}
+Previous prose-only visual context: ${JSON.stringify(input.previousVisualContext || {})}
+Previous prose-only appearance observations: ${JSON.stringify(input.recentEntityObservations || [])}
+
+Return exactly {
+  "visualContinuityNotes": string[],
   "storyArtProfile": {"artStyle":string,"coverStyle":string,"palette":string[],"mood":string,"protagonistAppearance":string,"majorCastAppearance":string[],"keyLocationAppearance":string[],"creatureDesignLanguage":string,"recurringMotifs":string[],"avoid":string[],"lastUpdatedTurn":${input.throughTurnNumber}},
   "characterVisualProfiles": [{"id":string,"kind":"character","entityId":string,"name":string,"agePresentation":string,"genderPresentation":string,"bodyType":string,"hair":string,"face":string,"clothing":string,"notableProps":string[],"distinctiveMarkings":string[],"armorOrGear":string[],"currentVisualChanges":string[],"lastUpdatedTurn":${input.throughTurnNumber}}],
   "locationVisualProfiles": [{"id":string,"kind":"location","entityId":string,"name":string,"visualDescription":string,"architecture":string,"lighting":string,"atmosphere":string,"dominantColors":string[],"importantLandmarks":string[],"lastUpdatedTurn":${input.throughTurnNumber}}],
@@ -444,8 +508,31 @@ Return exactly {
     "firstSeenTurn":number,"lastUpdatedTurn":${input.throughTurnNumber},
     "timelineObservations":[{"turnNumber":number,"summary":string,"changes":string[],"evidence":string[]}]
   }]
-}. Include every recurring named visual entity supported by the text: characters, locations, important items, creatures, and groups. Reuse stable entity IDs. Treat each baseline as an additive appearance and style guide: never discard an established trait, motif, palette, or avoid rule. Use current for the latest wardrobe, surface, condition, location, and temporary changes. timelineObservations must contain only newly supported observations from Sections ${(input.previousThroughTurnNumber || 0) + 1}-${input.throughTurnNumber}, with the exact source section number and concise evidence. Preserve prior facts unless later prose explicitly changes them, and record a change rather than silently overwriting history.`,
-    8192, { operation: "context_reconcile", storyId: input.storyId, turnNumber: input.throughTurnNumber },
+}. Include recurring named visual entities supported by the accepted prose: characters, locations, important items, creatures, and groups. Reuse stable entity IDs. Treat each baseline as additive and preserve earlier prose-supported traits unless later prose explicitly changes them. Use current only for the latest visibly established wardrobe, surface, condition, location, and temporary changes. timelineObservations must contain only newly supported observations from Sections ${(input.previousThroughTurnNumber || 0) + 1}-${input.throughTurnNumber}; every evidence entry must identify its exact Section number and a short phrase actually present in that section. If prose does not support a field, use an empty string or empty array. Never fill a gap by inference.`,
+    8192, { operation: "visual_context_reconcile", storyId: input.storyId, turnNumber: input.throughTurnNumber }, completeVisualContext,
+  );
+}
+
+export async function createStoryArtStyleAnchor(input: {
+  storyId: string;
+  foundation: Pick<StoryFoundation, "title" | "shortDescription" | "genres" | "tone" | "setting" | "openingSituation">;
+}) {
+  const safeProjection = {
+    title: input.foundation.title,
+    shortDescription: input.foundation.shortDescription,
+    genres: input.foundation.genres,
+    tone: input.foundation.tone,
+    setting: input.foundation.setting,
+    openingSituation: input.foundation.openingSituation,
+  };
+  return callJson<StoryArtStyleAnchor>(
+    "You define one permanent visual identity for a private novel from a spoiler-safe opening projection. Return JSON only. Never name or imitate a living artist, and never infer later plot events, identities, powers, injuries, costumes, or locations.",
+    `Create a concrete, distinctive book-wide art style anchor from this opening-only projection:
+${JSON.stringify(safeProjection)}
+
+Return exactly {"summary":string,"medium":string,"visualLanguage":string,"palette":string[],"lighting":string,"compositionRules":string[],"textureNotes":string[],"recurringMotifs":string[],"negativeConstraints":string[]}.
+Anchor craft, materials, palette, lighting, composition, and non-plot motifs in the supplied setting and tone. The result must remain appropriate for the cover and every historical section without revealing or assuming anything outside this projection.`,
+    4096, { operation: "art_style_anchor", storyId: input.storyId, turnNumber: 1 },
   );
 }
 
@@ -453,21 +540,30 @@ export async function createArtBrief(input: {
   storyId: string;
   turnNumber?: number;
   type: "cover" | "scene";
-  story: { title: string; shortDescription: string; foundation: StoryFoundation; author: AuthorProfile };
-  prose?: string;
-  artProfile?: unknown;
-  visualProfiles?: unknown[];
+  storyTitle: string;
+  layeredGroundingPrompt: string;
+  candidateEntities: Array<{ entityId: string; kind: string; name: string }>;
 }) {
-  return callJson<{ shouldIllustrate: boolean; category: "Cover" | "Scenes" | "Characters" | "Locations"; title: string; caption: string; promptSummary: string }>(
-    "You are the art director for a quiet literary living-fiction edition. Select a visually concrete, emotionally important, compositionally legible image. Return JSON only.",
-    `Prepare a ${input.type} art brief for ${input.story.title}.
-Story: ${JSON.stringify(input.story)}
-Section prose, when applicable: ${input.prose || "Not applicable"}
-Persistent story art profile: ${JSON.stringify(input.artProfile || {})}
-Persistent character and location visual profiles: ${JSON.stringify(input.visualProfiles || [])}
+  return callJson<{
+    shouldIllustrate: boolean;
+    category: "Cover" | "Scenes" | "Characters" | "Locations";
+    title: string;
+    caption: string;
+    chosenMoment: string;
+    compositionPlan: string;
+    referencedEntityIds: string[];
+    promptSummary: string;
+  }>(
+    "You are a hidden art director for a private living-fiction edition. Select one visually concrete, emotionally important, compositionally legible image. The supplied style and continuity layers are authoritative. Return JSON only.",
+    `Prepare a ${input.type} art brief for ${input.storyTitle}.
 
-Return {"shouldIllustrate":boolean,"category":"Cover"|"Scenes"|"Characters"|"Locations","title":string,"caption":string,"promptSummary":string}.
-For a cover, shouldIllustrate must be true. For a scene, choose false when the moment is redundant or visually vague. The prompt summary must preserve established faces, clothing, props, locations, palette, motifs, and edition style; describe one exact moment; avoid text in the image, spoilers beyond this section, overbusy composition, cartoonish default styling, or stock imagery.`,
+AUTHORITATIVE LAYERED GROUNDING:
+${input.layeredGroundingPrompt}
+
+Eligible scoped entities: ${JSON.stringify(input.candidateEntities)}
+
+Return {"shouldIllustrate":boolean,"category":"Cover"|"Scenes"|"Characters"|"Locations","title":string,"caption":string,"chosenMoment":string,"compositionPlan":string,"referencedEntityIds":string[],"promptSummary":string}.
+For a cover, shouldIllustrate must be true. For a scene, choose false only when no concrete single moment is supportable. referencedEntityIds may contain only the exact kind-qualified ID strings from Eligible scoped entities, and only for entities actually visible or architecturally defining the chosen image. The prompt summary is a concise shot plan, not a replacement for the authoritative grounding. Preserve supplied faces, bodies, clothing, props, locations, palette, materials, motifs, lighting, and edition style. Never add facts, people, locations, costumes, injuries, text, or spoilers absent from the grounding. Prefer omission or obscurity when evidence is incomplete.`,
     4096, { operation: `art_${input.type}_brief`, storyId: input.storyId, turnNumber: input.turnNumber },
   );
 }

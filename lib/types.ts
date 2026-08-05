@@ -1,3 +1,5 @@
+import type { StoryArtStyleAnchorRecord } from "./story-art-style-anchor";
+
 export type AuthorProfile = {
   id: string;
   displayName: string;
@@ -139,6 +141,7 @@ export type Story = {
   storyState?: StoryState;
   contextSnapshot?: ContextSnapshot;
   artProfile?: StoryArtProfile;
+  artStyleAnchor?: StoryArtStyleAnchorRecord;
   visualProfiles?: VisualProfile[];
   entityAppearanceGuides?: EntityAppearanceGuide[];
   entityAppearanceTimeline?: EntityAppearanceObservation[];
@@ -250,6 +253,7 @@ export type WritingJob = {
 
 export type ContextSnapshot = {
   throughTurnNumber: number;
+  visualContextVersion?: number;
   compactStorySummary: string;
   characterState: Array<{
     characterId: string;

@@ -39,6 +39,22 @@ export function entitySlug(value: unknown, fallback = "entity"): string {
   return text(value, fallback).normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "-").replace(/(^-|-$)/g, "") || fallback;
 }
 
+export function exactProseSurfaceMatch(proseValue: unknown, candidateValue: unknown): string | undefined {
+  if (typeof proseValue !== "string" || typeof candidateValue !== "string") return undefined;
+  const prose = proseValue.normalize("NFKC").replace(/\s+/g, " ");
+  const candidate = candidateValue.normalize("NFKC").replace(/\s+/g, " ").trim();
+  const unsegmented = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Thai}\p{Script=Lao}\p{Script=Khmer}]/u.test(candidate);
+  if (candidate.length < (unsegmented ? 1 : 2)) return undefined;
+  const escaped = candidate.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  // Scripts without whitespace word boundaries need literal matching; other
+  // names are token-bounded so Art cannot match party and Ann cannot match annual.
+  const expression = unsegmented
+    ? new RegExp(`(${escaped})`, "iu")
+    : new RegExp(`(^|[^\\p{L}\\p{N}\\p{M}])(${escaped})(?=$|[^\\p{L}\\p{N}\\p{M}])`, "iu");
+  const match = expression.exec(prose);
+  return match?.[unsegmented ? 1 : 2];
+}
+
 function normalizeKind(value: unknown): EntityKind {
   const kind = text(value, "other") as EntityKind;
   return ENTITY_KINDS.has(kind) ? kind : "other";
@@ -207,15 +223,21 @@ export function seedEntityAppearanceGuides(foundation: StoryFoundation, throughT
     aliases: unique(member.aliases || []),
     baseline: {
       summary: text(member.physicalDescription, "Not yet visually established"),
-      signatureTraits: unique([member.genderPresentation, ...(member.importantPossessions || []), ...(member.abilitiesOrPowers || [])].filter(Boolean)),
+      // Foundation cast records may contain concealed possessions or latent
+      // powers. Seed only appearance-level traits here; visible objects and
+      // abilities must be established by accepted prose/context evidence.
+      signatureTraits: unique([member.genderPresentation].filter(Boolean)),
       styleNotes: [], palette: [], motifs: [],
       avoid: ["unestablished facial, body, costume, or equipment changes"],
     },
     current: {
       appearance: text(member.physicalDescription, "Not yet visually established"),
       wardrobeOrSurface: "",
-      condition: text(member.currentStatus),
-      location: text(member.currentLocation),
+      // Initial canonical status/location can contain author-only information.
+      // Turn-scoped state and accepted prose establish visible conditions and
+      // placement later without leaking them into opening/cover guidance.
+      condition: "",
+      location: "",
       temporaryChanges: [],
     },
     firstSeenTurn: throughTurnNumber,

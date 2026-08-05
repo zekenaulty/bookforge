@@ -130,9 +130,17 @@ test("generates resumable story art with selectable Google Nano Banana models", 
   assert.match(route, /AND locked_at=\?/);
   assert.match(route, /status='running' AND locked_at=\?/);
   assert.match(route, /Superseded by regenerated section',locked_at=NULL/);
-  assert.match(route, /const renderVersion = type === "scene" \? turn!\.id : "cover"/);
+  assert.match(route, /const renderVersion = targetTurnId/);
   assert.match(route, /artAttemptObjectKey\(\{ storyId: story\.id, assetId, renderVersion, model, lease: lock \}\)/);
   assert.match(route, /UPDATE background_jobs SET input_json=\?,updated_at=\?/);
+  assert.match(route, /promptPlanVersion: 3/);
+  assert.match(route, /promptPhase: "render"/);
+  assert.match(route, /return \{ deferred: true, runAfterMs: 0, input/);
+  assert.match(route, /createArtBrief/);
+  assert.match(route, /composeLayeredArtPrompt/);
+  assert.match(route, /beforeProviderSubmit/);
+  assert.match(route, /providerSubmissionCount/);
+  assert.match(route, /art_submission_guard/);
   assert.match(route, /job\.jobType\.startsWith\("art_"\) \? 2 : 3/);
   assert.match(route, /ORDER BY updated_at DESC LIMIT 30/);
   assert.match(route, /art_cover:\$\{storyId\}:1/);
@@ -140,6 +148,7 @@ test("generates resumable story art with selectable Google Nano Banana models", 
   assert.match(route, /status='Ready'/);
   assert.match(route, /GoogleImageFailure/);
   assert.match(generator, /MAX_HTTP_ATTEMPTS = 3/);
+  assert.match(generator, /const attemptTimeout = Math\.max\(1_000, remaining\)/);
   assert.match(hosting, /"r2":\s*"ART"/);
   assert.doesNotMatch(generator, /Buffer\.from/);
 });

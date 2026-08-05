@@ -1,12 +1,14 @@
-import { AiFailure, createAuthorProfile, createCheckpoint, createContextReconciliation, createStoryFoundation, continueStory, repairTurn, validationIssues } from "../../../lib/ai";
+import { AiFailure, createArtBrief, createAuthorProfile, createCheckpoint, createContextReconciliation, createStoryArtStyleAnchor, createStoryFoundation, createVisualContextReconciliation, continueStory, repairTurn, validationIssues } from "../../../lib/ai";
 import { ensureDatabase, getArtBucket, getD1, json, now, words } from "../../../lib/app-db";
 import { generateGoogleImage, GoogleImageFailure, selectedGoogleImageModel } from "../../../lib/google-image";
 import { isGoogleImageModel } from "../../../lib/image-models";
 import { recordOperationLog } from "../../../lib/operation-log";
 import { buildStoryPdf } from "../../../lib/story-pdf";
-import { mergeEntityAppearanceGuides, nextReconciliationThrough, observationsFromGuides, seedEntityAppearanceGuides } from "../../../lib/entity-continuity";
+import { entitySlug, exactProseSurfaceMatch, mergeEntityAppearanceGuides, nextReconciliationThrough, observationsFromGuides, seedEntityAppearanceGuides } from "../../../lib/entity-continuity";
 import { regenerationTargetsCurrentTurn, storyTailMatches } from "../../../lib/story-revision";
 import { artAttemptObjectKey } from "../../../lib/art-storage";
+import { composeLayeredArtPrompt, deriveStoryVisualStyleAnchor } from "../../../lib/art-prompt";
+import { normalizeStoryArtStyleAnchor, storyArtStyleAnchorFromRow, storyArtStyleAnchorUpsertStatement, type StoryArtStyleAnchorRecord } from "../../../lib/story-art-style-anchor";
 import type { ArtAsset, AuthorProfile, BackgroundJob, CastMember, ContextSnapshot, EntityAppearanceGuide, EntityAppearanceObservation, OperationLog, Story, StoryArtProfile, StoryFoundation, StoryState, Turn, TurnResult, VisualProfile, WritingJob } from "../../../lib/types";
 
 export const dynamic = "force-dynamic";
@@ -197,6 +199,7 @@ async function handleCreateStory(body: Record<string, unknown>) {
     turnIntent: firstTurn.turnIntent,
   };
   const artProfile = initialArtProfile(generated.foundation);
+  const artStyleAnchor = initialStoryArtStyleAnchorRecord(storyId, generated.foundation, undefined, { stamp });
   const entityGuides = seedEntityAppearanceGuides({ ...generated.foundation, initialCast: openingCast }, 1);
   const statements = [
     db.prepare(`INSERT INTO stories (id,title,short_description,selected_author_id,author_snapshot_json,original_idea,
@@ -226,13 +229,14 @@ async function handleCreateStory(body: Record<string, unknown>) {
     db.prepare("INSERT INTO story_art_profiles (story_id,profile_json,last_updated_turn,updated_at) VALUES (?,?,1,?)").bind(
       storyId, JSON.stringify(artProfile), stamp,
     ),
+    storyArtStyleAnchorUpsertStatement(db, artStyleAnchor),
   ];
   const coverAssetId = crypto.randomUUID();
   statements.push(db.prepare(`INSERT INTO art_assets (id,story_id,turn_id,turn_number,type,category,title,caption,prompt_summary,status,created_at,updated_at)
     VALUES (?,?,?,1,'cover','Cover',?,?,?,'Placeholder',?,?)`).bind(
-    coverAssetId, storyId, turnId, `${generated.foundation.title} cover`, `Cover for ${generated.foundation.title}`, coverPromptSummary(generated.foundation, artProfile, entityGuides), stamp, stamp,
+    coverAssetId, storyId, turnId, `${generated.foundation.title} cover`, `Cover for ${generated.foundation.title}`, coverPromptSummary(generated.foundation, artProfile, entityGuides, artStyleAnchor), stamp, stamp,
   ));
-  statements.push(enqueueJobStatement(db, { id: `art_cover:${storyId}:1`, storyId, turnNumber: 1, jobType: "art_cover", input: { assetId: coverAssetId, briefReady: true } }));
+  statements.push(enqueueJobStatement(db, { id: `art_cover:${storyId}:1`, storyId, turnNumber: 1, jobType: "art_cover", input: { assetId: coverAssetId } }));
   statements.push(enqueueJobStatement(db, { id: `context_reconcile:${storyId}:1`, storyId, turnNumber: 1, jobType: "context_reconcile", input: { reason: "initial visual and character context" } }));
   for (const member of openingCast) statements.push(castUpsert(db, storyId, member, 1));
   for (const guide of entityGuides) statements.push(entityAppearanceGuideUpsert(db, storyId, guide, stamp));
@@ -441,6 +445,7 @@ async function handleAcceptRegeneration(body: Record<string, unknown>) {
   const narration = makeNarration(storyId, turnId, candidate.narrationVoiceHint, latest.turnNumber);
   const stateDelta = { ...candidate.stateDelta, priorState: delta.priorState, nextStoryState: candidate.nextStoryState, priorCast, nextCast: mergedCast, turnIntent: candidate.turnIntent };
   const stamp = now();
+  const coverAssetId = latest.turnNumber === 1 ? String(story.art?.find((asset) => asset.type === "cover")?.id || "") : "";
   const mutationGuardId = `regeneration:${storyId}:${latest.turnNumber}:${crypto.randomUUID()}`;
   const statements = [
     regenerationMutationGuardStatement(db, {
@@ -466,18 +471,23 @@ async function handleAcceptRegeneration(body: Record<string, unknown>) {
       storyId, JSON.stringify(rollbackArtProfile), rollbackTurn, stamp),
     db.prepare(`UPDATE background_jobs SET status='failed',last_error='Superseded by regenerated section',locked_at=NULL,updated_at=? WHERE story_id=?
       AND ((job_type IN ('context_reconcile','checkpoint_reconcile') AND COALESCE(turn_number,0)>=? AND status IN ('pending','retrying'))
-        OR (job_type='art_scene' AND turn_number=? AND status IN ('pending','running','retrying')))`)
-      .bind(stamp, storyId, latest.turnNumber, latest.turnNumber),
+        OR (job_type IN ('art_scene','art_cover') AND turn_number=? AND status IN ('pending','running','retrying')
+          AND (job_type='art_scene' OR ?=1)))`)
+      .bind(stamp, storyId, latest.turnNumber, latest.turnNumber, latest.turnNumber),
     db.prepare("UPDATE generation_jobs SET status='failed',error=?,updated_at=? WHERE idempotency_key=? AND status='generating' AND error=?").bind(
       JSON.stringify({ message: "The preceding section was regenerated; the in-flight draft must restart from the accepted replacement.",
         category: "writer_predecessor_changed", recoverable: true, retryAfterMs: 0 }), stamp, writerGuardKey, writerGuardLease),
-    db.prepare("UPDATE art_assets SET status='Failed',caption='Superseded by regenerated section',updated_at=? WHERE story_id=? AND turn_number=? AND type<>'cover'").bind(stamp, storyId, latest.turnNumber),
+    db.prepare(`UPDATE art_assets SET status='Failed',caption='Superseded by regenerated section',updated_at=?
+      WHERE story_id=? AND turn_number=? AND (type<>'cover' OR ?=1)`).bind(stamp, storyId, latest.turnNumber, latest.turnNumber),
     db.prepare("UPDATE stories SET latest_checkpoint_turn_number=?, updated_at=? WHERE id=?").bind(previousCheckpointTurn, stamp, storyId),
   ];
   for (const member of mergedCast) statements.push(castUpsert(db, storyId, member, latest.turnNumber));
   for (const guide of rollbackGuides) statements.push(entityAppearanceGuideUpsert(db, storyId, guide, stamp));
   statements.push(enqueueJobStatement(db, { id: `context_reconcile:${storyId}:${latest.turnNumber}:regen:${turnId}`, storyId, turnNumber: latest.turnNumber, jobType: "context_reconcile", input: { reason: "latest section regenerated", force: true, rebuildFromTurn: latest.turnNumber } }));
   if (story.latestCheckpointTurnNumber >= latest.turnNumber) statements.push(enqueueJobStatement(db, { id: `checkpoint_reconcile:${storyId}:${latest.turnNumber}:regen:${turnId}`, storyId, turnNumber: latest.turnNumber, jobType: "checkpoint_reconcile", input: { force: true } }));
+  if (coverAssetId) statements.push(enqueueReusableJobStatement(db, {
+    id: `art_cover:${storyId}:1`, storyId, turnNumber: 1, jobType: "art_cover", input: { assetId: coverAssetId, turnId },
+  }));
   statements.push(mutationGuardReleaseStatement(db, mutationGuardId));
   try {
     await db.batch(statements);
@@ -564,8 +574,9 @@ async function handleQueueArt(body: Record<string, unknown>) {
   const stamp = now();
   const assetId = crypto.randomUUID();
   const title = type === "cover" ? `${story.title} cover` : `Section ${turnNumber} illustration`;
-  const artStory = type === "scene" ? await storyForArtTurn(db, story, turnNumber) : story;
-  const promptSummary = type === "cover" ? coverPromptSummary(story.foundation, initialArtProfile(story.foundation), seedEntityAppearanceGuides(story.foundation, 1)) : scenePromptSummary(artStory, turn!);
+  const promptSummary = type === "cover"
+    ? coverPromptSummary(story.foundation, story.artProfile || initialArtProfile(story.foundation), seedEntityAppearanceGuides(story.foundation, 1), story.artStyleAnchor)
+    : `A section-scoped layered art brief will be prepared for Section ${turnNumber}.`;
   await db.batch([
     db.prepare(`INSERT INTO art_assets (id,story_id,turn_id,turn_number,type,category,title,caption,prompt_summary,status,created_at,updated_at)
       VALUES (?,?,?,?,?,?,?,?,?,'Queued',?,?)`).bind(
@@ -573,7 +584,7 @@ async function handleQueueArt(body: Record<string, unknown>) {
       type === "cover" ? `Cover for ${story.title}` : `Illustration for Section ${turnNumber}`, promptSummary, stamp, stamp,
     ),
     enqueueReusableJobStatement(db, { id: jobId, storyId, turnNumber, jobType,
-      input: { assetId, turnId: turn?.id, requestedByUser: true, model, briefReady: true, briefVersion: 2 } }),
+      input: { assetId, turnId: turn?.id, requestedByUser: true, model } }),
   ]);
   const claimed = await db.prepare("SELECT input_json FROM background_jobs WHERE id=?").bind(jobId).first<Row>();
   const claimedInput = json<Record<string, unknown>>(String(claimed?.input_json || ""), {});
@@ -599,6 +610,7 @@ async function handleRetryBackgroundJob(body: Record<string, unknown>) {
     input.model = nextModel;
   }
   const jobType = String(row.job_type) as JobType;
+  if (jobType === "art_cover" || jobType === "art_scene") input.providerSubmissionCount = 0;
   const storyId = String(row.story_id);
   const turnNumber = Number(row.turn_number || 0);
   const activeOther = await db.prepare(`SELECT id FROM background_jobs WHERE story_id=? AND job_type=? AND turn_number=? AND id<>?
@@ -613,6 +625,7 @@ async function handleRetryBackgroundJob(body: Record<string, unknown>) {
       input.turnId = refreshedTurnId;
       input.refreshBrief = true;
       input.briefReady = false;
+      clearArtPromptPlan(input);
       delete input.objectKey;
       delete input.objectKeyLock;
     }
@@ -665,7 +678,8 @@ async function handleRunBackgroundJob(body: Record<string, unknown>) {
   if (storyId) await ensureBaselineJobs(db, storyId);
   const jobRow = await db.prepare(`SELECT * FROM background_jobs WHERE status IN ('pending','retrying') AND attempts<max_attempts AND run_after<=?
     AND (?='' OR story_id=?) AND (?='' OR id=?)
-    ORDER BY CASE job_type WHEN 'art_cover' THEN 0 WHEN 'art_scene' THEN 1 ELSE 2 END,run_after ASC,created_at ASC LIMIT 1`)
+    ORDER BY CASE job_type WHEN 'context_reconcile' THEN 0 WHEN 'checkpoint_reconcile' THEN 1 WHEN 'art_cover' THEN 2 WHEN 'art_scene' THEN 3 ELSE 4 END,
+      run_after ASC,created_at ASC LIMIT 1`)
     .bind(now(), storyId, storyId, requestedJobId, requestedJobId).first<Row>();
   if (!jobRow) return Response.json({ processed: false, more: false, waiting: Boolean(requestedJobId) });
   const lock = crypto.randomUUID();
@@ -678,7 +692,10 @@ async function handleRunBackgroundJob(body: Record<string, unknown>) {
   try {
     const outcome = await processBackgroundJob(job, input, lock);
     if (outcome.deferred) {
-      const runAfter = new Date(Date.now() + Math.max(2_000, outcome.runAfterMs || 5_000)).toISOString();
+      // Prepare/render is an intentionally persisted boundary, but the next
+      // pass is immediately runnable so one ordinary six-pass drain cannot
+      // strand automatic art while the page is open.
+      const runAfter = new Date(Date.now() + Math.max(0, outcome.runAfterMs ?? 0)).toISOString();
       await db.prepare(`UPDATE background_jobs SET status='pending',attempts=MAX(attempts-1,0),run_after=?,input_json=?,result_json=?,
         last_error=NULL,locked_at=NULL,updated_at=? WHERE id=? AND status='running' AND locked_at=?`).bind(
         runAfter, JSON.stringify(outcome.input || {}), JSON.stringify(outcome.result || {}), now(), job.id, lock,
@@ -712,10 +729,12 @@ async function handleRunBackgroundJob(body: Record<string, unknown>) {
 async function ensureBaselineJobs(db: D1Database, storyId: string) {
   await failExhaustedJobs(db, storyId);
   await reconcileActiveArtJobs(db, storyId);
-  const [storyRow, contextRow, entityGuideRow, coverRow, activeCoverJob] = await Promise.all([
+  const [storyRow, contextRow, entityGuideRow, artProfileRow, artStyleAnchorRow, coverRow, activeCoverJob] = await Promise.all([
     db.prepare("SELECT title,foundation_json,latest_accepted_turn_number FROM stories WHERE id=?").bind(storyId).first<Row>(),
-    db.prepare("SELECT id FROM context_snapshots WHERE story_id=? LIMIT 1").bind(storyId).first<Row>(),
+    db.prepare("SELECT id,snapshot_json,through_turn_number FROM context_snapshots WHERE story_id=? ORDER BY through_turn_number DESC LIMIT 1").bind(storyId).first<Row>(),
     db.prepare("SELECT id FROM entity_appearance_guides WHERE story_id=? LIMIT 1").bind(storyId).first<Row>(),
+    db.prepare("SELECT profile_json FROM story_art_profiles WHERE story_id=?").bind(storyId).first<Row>(),
+    db.prepare("SELECT story_id FROM story_art_style_anchors WHERE story_id=?").bind(storyId).first<Row>(),
     db.prepare(`SELECT * FROM art_assets WHERE story_id=? AND type='cover'
       ORDER BY CASE WHEN status='Ready' THEN 0 WHEN status IN ('Placeholder','Queued','Preparing') THEN 1 ELSE 2 END,created_at DESC LIMIT 1`).bind(storyId).first<Row>(),
     db.prepare(`SELECT id FROM background_jobs WHERE story_id=? AND job_type='art_cover'
@@ -725,12 +744,25 @@ async function ensureBaselineJobs(db: D1Database, storyId: string) {
   const turnNumber = Math.max(1, Number(storyRow.latest_accepted_turn_number || 1));
   const statements: D1PreparedStatement[] = [];
   let repairAssetId = "";
+  const foundation = json<StoryFoundation>(String(storyRow.foundation_json || ""), {} as StoryFoundation);
+  if (!artStyleAnchorRow) statements.push(storyArtStyleAnchorUpsertStatement(
+    db,
+    initialStoryArtStyleAnchorRecord(storyId, foundation, undefined, {
+      priorArtProfile: json<StoryArtProfile | undefined>(String(artProfileRow?.profile_json || ""), undefined),
+    }),
+  ));
   if (!contextRow) statements.push(enqueueJobStatement(db, {
     id: `context_reconcile:${storyId}:${turnNumber}:baseline`, storyId, turnNumber, jobType: "context_reconcile", input: { reason: "baseline context for an existing story" },
   }));
+  else {
+    const latestContext = json<ContextSnapshot | undefined>(String(contextRow.snapshot_json || ""), undefined);
+    if (Number(latestContext?.visualContextVersion || 0) < 2) statements.push(enqueueReusableJobStatement(db, {
+      id: `context_reconcile:${storyId}:${turnNumber}:visual-safe-v2`, storyId, turnNumber, jobType: "context_reconcile",
+      input: { reason: "rebuild illustration continuity from accepted prose only", force: true, rebuildVisual: true },
+    }));
+  }
   if (!entityGuideRow) {
     const stamp = now();
-    const foundation = json<StoryFoundation>(String(storyRow.foundation_json || ""), {} as StoryFoundation);
     const seedGuides = seedEntityAppearanceGuides(foundation, Math.min(1, turnNumber));
     for (const guide of seedGuides) statements.push(entityAppearanceGuideUpsert(db, storyId, guide, stamp));
     for (const observation of observationsFromGuides(storyId, seedGuides, Math.min(1, turnNumber), 0, "", stamp)) statements.push(entityAppearanceObservationUpsert(db, observation));
@@ -821,6 +853,112 @@ async function processBackgroundJob(job: BackgroundJob, input: Record<string, un
   throw new Error("Unknown background job type.");
 }
 
+function visualFoundationProjection(foundation: StoryFoundation) {
+  return {
+    title: foundation.title,
+    shortDescription: foundation.shortDescription,
+    genres: foundation.genres,
+    tone: foundation.tone,
+    setting: foundation.setting,
+    openingSituation: foundation.openingSituation,
+  };
+}
+
+function clippedVisualProse(prose: string, maximum = 5_200) {
+  if (prose.length <= maximum) return prose;
+  const marker = "\n[bounded excerpt continues]\n";
+  const segment = Math.max(1, Math.floor((maximum - marker.length * 2) / 3));
+  const middleStart = Math.max(0, Math.floor((prose.length - segment) / 2));
+  return `${prose.slice(0, segment)}${marker}${prose.slice(middleStart, middleStart + segment)}${marker}${prose.slice(-segment)}`;
+}
+
+function visualEvidenceExcerpt(prose: string, index: number, maximum = 900) {
+  const start = Math.max(0, index - Math.floor(maximum / 2));
+  return prose.slice(start, Math.min(prose.length, start + maximum));
+}
+
+function proseOnlyVisualRebuildTurns(story: Story, through: number) {
+  const turns = (story.turns || []).filter((turn) => turn.turnNumber <= through);
+  const candidates: Array<{ turnNumber: number; prose: string }> = [];
+  const seen = new Set<string>();
+  let used = 0;
+  const budget = 95_000;
+  const add = (turnNumber: number, prose: string) => {
+    const clean = prose.trim();
+    if (!clean) return;
+    const key = `${turnNumber}:${clean}`;
+    if (seen.has(key) || used + clean.length > budget) return;
+    seen.add(key);
+    used += clean.length;
+    candidates.push({ turnNumber, prose: clean });
+  };
+
+  // Every accepted section contributes opening/middle/closing evidence. The
+  // per-section allowance shrinks for very long books while the total prompt
+  // remains bounded for a resumable background migration.
+  const perTurnMaximum = Math.max(700, Math.min(5_200, Math.floor(70_000 / Math.max(1, turns.length))));
+  for (const turn of turns) add(turn.turnNumber, clippedVisualProse(turn.prose, perTurnMaximum));
+
+  // Legacy guide fields are never reused. Their names/aliases are used only
+  // as search needles, and only matching published prose excerpts cross the
+  // prose-only visual boundary.
+  const needles = [...new Set((story.entityAppearanceGuides || []).flatMap((guide) => [guide.name, ...(guide.aliases || [])])
+    .map((value) => value.trim()).filter((value) => value.length >= 3))].slice(0, 48);
+  for (const needle of needles) {
+    const normalizedNeedle = needle.toLocaleLowerCase("en-US");
+    const matches = turns.flatMap((turn) => {
+      const index = turn.prose.toLocaleLowerCase("en-US").indexOf(normalizedNeedle);
+      return index >= 0 ? [{ turn, index }] : [];
+    });
+    for (const match of [...new Map([matches[0], matches.at(-1)].filter(Boolean).map((item) => [item!.turn.turnNumber, item!])).values()]) {
+      add(match.turn.turnNumber, visualEvidenceExcerpt(match.turn.prose, match.index));
+    }
+  }
+  return candidates.sort((a, b) => a.turnNumber - b.turnNumber);
+}
+
+function normalizedProseEvidence(value: string) {
+  return value.normalize("NFKC").toLocaleLowerCase("en-US").replace(/[\u201c\u201d"']/g, "").replace(/\s+/g, " ").trim();
+}
+
+function proseVerifiedLegacyObservations(story: Story, through: number) {
+  const turns = new Map((story.turns || []).filter((turn) => turn.turnNumber <= through).map((turn) => [turn.turnNumber, turn]));
+  const guideAliases = new Map((story.entityAppearanceGuides || []).map((guide) => [
+    `${guide.kind}:${guide.entityId}`,
+    [guide.name, ...(guide.aliases || [])].filter(Boolean),
+  ]));
+  return (story.entityAppearanceTimeline || []).flatMap((observation): EntityAppearanceObservation[] => {
+    const turn = turns.get(observation.turnNumber);
+    if (!turn) return [];
+    const prose = normalizedProseEvidence(turn.prose);
+    const names = guideAliases.get(`${observation.kind}:${observation.entityId}`) || [observation.name];
+    const safeName = names.map((name) => exactProseSurfaceMatch(turn.prose, name)).find(Boolean)?.trim();
+    if (!safeName) return [];
+    const verified = (items: string[]) => items.map((item) => item.replace(/^section\s+\d+\s*[:\u2014-]\s*/i, "").trim())
+      .filter((item) => {
+        const normalized = normalizedProseEvidence(item);
+        return normalized.length >= 12 && prose.includes(normalized);
+      });
+    const safeSummary = verified([observation.summary])[0];
+    const safeChanges = verified(observation.changes || []);
+    const safeEvidence = verified(observation.evidence || []);
+    const summary = safeSummary || safeEvidence[0] || safeChanges[0];
+    if (!summary) return [];
+    const entityId = `legacy-${entitySlug(safeName)}`;
+    const guideId = `${story.id}:${observation.kind}:${entityId}`;
+    return [{
+      ...observation,
+      id: `${guideId}:${observation.turnNumber}`,
+      guideId,
+      entityId,
+      name: safeName,
+      summary,
+      changes: safeChanges,
+      evidence: safeEvidence,
+    }];
+  });
+}
+
 async function runContextJob(job: BackgroundJob, input: Record<string, unknown>, lock: string) {
   const db = getD1();
   const story = await loadStory(job.storyId, true);
@@ -841,30 +979,52 @@ async function runContextJob(job: BackgroundJob, input: Record<string, unknown>,
   const previousContext = json<ContextSnapshot | undefined>(String(previousRow?.snapshot_json || ""), undefined);
   const recentTurns = (story.turns || []).filter((turn) => turn.turnNumber > previousThrough && turn.turnNumber <= through)
     .map((turn) => ({ turnNumber: turn.turnNumber, prose: turn.prose, stateDelta: turn.stateDelta }));
-  let existingGuides = previousContext?.entityAppearanceGuides?.length
-    ? previousContext.entityAppearanceGuides
-    : story.entityAppearanceGuides?.filter((guide) => guide.lastUpdatedTurn <= previousThrough).length
-      ? story.entityAppearanceGuides.filter((guide) => guide.lastUpdatedTurn <= previousThrough)
-    : seedEntityAppearanceGuides(story.foundation, Math.min(1, through));
-  if (input.rebuildFromTurn && previousContext?.entityAppearanceGuides?.length) {
-    const previousGuides = new Map(previousContext.entityAppearanceGuides.map((guide) => [`${guide.kind}:${guide.entityId}`, guide]));
+  const rebuildVisual = input.rebuildVisual === true;
+  const previousVisualIsSafe = previousContext?.visualContextVersion === 2 && !rebuildVisual;
+  const previousVisualContext = previousVisualIsSafe ? {
+    visualContinuityNotes: previousContext.visualContinuityNotes || [],
+    storyArtProfile: previousContext.storyArtProfile,
+    characterVisualProfiles: previousContext.characterVisualProfiles || [],
+    locationVisualProfiles: previousContext.locationVisualProfiles || [],
+    entityAppearanceGuides: previousContext.entityAppearanceGuides || [],
+  } : undefined;
+  let existingGuides = previousVisualContext?.entityAppearanceGuides || [];
+  if (input.rebuildFromTurn && previousVisualContext?.entityAppearanceGuides?.length) {
+    const previousGuides = new Map((previousVisualContext?.entityAppearanceGuides || []).map((guide) => [`${guide.kind}:${guide.entityId}`, guide]));
     existingGuides = existingGuides.map((guide) => {
       const previous = previousGuides.get(`${guide.kind}:${guide.entityId}`);
       return previous ? { ...guide, current: previous.current, lastUpdatedTurn: previous.lastUpdatedTurn } : guide;
     });
   }
-  const priorObservations = (story.entityAppearanceTimeline || []).filter((item) => item.turnNumber <= previousThrough).slice(-120);
-  const snapshot = await createContextReconciliation({
-    storyId: story.id, throughTurnNumber: through, foundation: story.foundation, state: storyStateThrough(story, through), cast: storyCastThrough(story, through),
-    recentTurns, previousContext, previousArtProfile: previousContext?.storyArtProfile || initialArtProfile(story.foundation), previousEntityGuides: existingGuides,
-    recentEntityObservations: priorObservations, previousThroughTurnNumber: previousThrough,
-  });
+  const verifiedLegacyObservations = previousVisualIsSafe ? [] : proseVerifiedLegacyObservations(story, through);
+  const priorObservations = previousVisualIsSafe
+    ? (story.entityAppearanceTimeline || []).filter((item) => item.turnNumber <= previousThrough).slice(-120)
+    : verifiedLegacyObservations.slice(-120);
+  const acceptedVisualTurns = rebuildVisual || (!previousVisualIsSafe && previousThrough > 0)
+    ? proseOnlyVisualRebuildTurns(story, through)
+    : recentTurns.map(({ turnNumber, prose }) => ({ turnNumber, prose }));
+  const [snapshot, visualSnapshot] = await Promise.all([
+    createContextReconciliation({
+      storyId: story.id, throughTurnNumber: through, foundation: story.foundation, state: storyStateThrough(story, through), cast: storyCastThrough(story, through),
+      recentTurns, previousContext,
+    }),
+    createVisualContextReconciliation({
+      storyId: story.id,
+      throughTurnNumber: through,
+      foundation: visualFoundationProjection(story.foundation),
+      acceptedTurns: acceptedVisualTurns,
+      previousVisualContext,
+      recentEntityObservations: priorObservations,
+      previousThroughTurnNumber: previousVisualIsSafe ? previousThrough : 0,
+    }),
+  ]);
   const lease = await db.prepare("SELECT id FROM background_jobs WHERE id=? AND status='running' AND locked_at=?").bind(job.id, lock).first<Row>();
   if (!lease) return { throughTurnNumber: through, cancelled: true };
-  const snapshotGuides = mergeEntityAppearanceGuides(existingGuides, snapshot.entityAppearanceGuides, through);
+  const snapshotGuides = mergeEntityAppearanceGuides(existingGuides, visualSnapshot.entityAppearanceGuides, through);
   const latestGuideRows = await db.prepare("SELECT * FROM entity_appearance_guides WHERE story_id=? ORDER BY kind,name").bind(story.id).all<Row>();
   const latestGuides = latestGuideRows.results.map(entityAppearanceGuideFromRow).filter((guide) => guide.lastUpdatedTurn <= through);
-  let mergeBase = latestGuides.length ? latestGuides : snapshotGuides;
+  const resetVisualStores = !previousVisualIsSafe;
+  let mergeBase = previousVisualIsSafe && latestGuides.length ? latestGuides : snapshotGuides;
   if (input.rebuildFromTurn) {
     const resetCurrents = new Map(existingGuides.map((guide) => [`${guide.kind}:${guide.entityId}`, guide.current]));
     mergeBase = mergeBase.map((guide) => ({ ...guide, current: resetCurrents.get(`${guide.kind}:${guide.entityId}`) || guide.current }));
@@ -872,29 +1032,48 @@ async function runContextJob(job: BackgroundJob, input: Record<string, unknown>,
   const durableGuides = mergeEntityAppearanceGuides(mergeBase, snapshotGuides, through);
   const stamp = now();
   const snapshotId = crypto.randomUUID();
-  const observations = observationsFromGuides(story.id, snapshotGuides, through, previousThrough, snapshotId, stamp);
+  const generatedObservations = observationsFromGuides(story.id, snapshotGuides, through, previousVisualIsSafe ? previousThrough : 0, snapshotId, stamp);
+  const observationsByKey = new Map<string, EntityAppearanceObservation>(verifiedLegacyObservations.map((observation) => [
+    `${observation.kind}:${observation.entityId}:${observation.turnNumber}`,
+    { ...observation, sourceSnapshotId: snapshotId, createdAt: stamp },
+  ]));
+  for (const observation of generatedObservations) observationsByKey.set(
+    `${observation.kind}:${observation.entityId}:${observation.turnNumber}`,
+    observation,
+  );
+  const observations = [...observationsByKey.values()].sort((left, right) => left.turnNumber - right.turnNumber
+    || left.kind.localeCompare(right.kind) || left.entityId.localeCompare(right.entityId));
   const managedSnapshot: ContextSnapshot = {
     ...snapshot,
     throughTurnNumber: through,
-    storyArtProfile: snapshot.storyArtProfile || previousContext?.storyArtProfile || initialArtProfile(story.foundation),
-    characterVisualProfiles: snapshot.characterVisualProfiles || [],
-    locationVisualProfiles: snapshot.locationVisualProfiles || [],
+    visualContextVersion: 2,
+    visualContinuityNotes: visualSnapshot.visualContinuityNotes || [],
+    storyArtProfile: visualSnapshot.storyArtProfile || previousVisualContext?.storyArtProfile || initialArtProfile(story.foundation),
+    characterVisualProfiles: visualSnapshot.characterVisualProfiles || [],
+    locationVisualProfiles: visualSnapshot.locationVisualProfiles || [],
     entityAppearanceGuides: snapshotGuides.map((guide) => ({ ...guide, timelineObservations: undefined })),
     entityAppearanceObservations: observations.map(({ turnNumber, summary, changes, evidence }) => ({ turnNumber, summary, changes, evidence })),
   };
   const mutationGuardId = `context:${job.id}:${through}:${crypto.randomUUID()}`;
-  const statements = [
+  const statements: D1PreparedStatement[] = [
     backgroundBoundaryMutationGuardStatement(db, {
       id: mutationGuardId, storyId: story.id, throughTurnNumber: through, boundaryTurnId,
       jobId: job.id, lock, chain: "context", expectedHeadThrough: latestSnapshotThrough, expectedHeadId: latestSnapshotId, stamp,
     }),
+  ];
+  if (resetVisualStores) statements.push(
+    db.prepare("DELETE FROM visual_profiles WHERE story_id=?").bind(story.id),
+    db.prepare("DELETE FROM entity_appearance_observations WHERE story_id=?").bind(story.id),
+    db.prepare("DELETE FROM entity_appearance_guides WHERE story_id=?").bind(story.id),
+  );
+  statements.push(
     db.prepare("INSERT OR REPLACE INTO context_snapshots (id,story_id,through_turn_number,snapshot_json,created_at) VALUES (?,?,?,?,?)").bind(
       snapshotId, story.id, through, JSON.stringify(managedSnapshot), stamp),
     db.prepare(`INSERT INTO story_art_profiles (story_id,profile_json,last_updated_turn,updated_at) VALUES (?,?,?,?)
       ON CONFLICT(story_id) DO UPDATE SET profile_json=excluded.profile_json,last_updated_turn=excluded.last_updated_turn,updated_at=excluded.updated_at
       WHERE excluded.last_updated_turn>=story_art_profiles.last_updated_turn`).bind(
       story.id, JSON.stringify(managedSnapshot.storyArtProfile), through, stamp),
-  ];
+  );
   if (through < latestAccepted) statements.push(enqueueJobStatement(db, {
     id: `context_reconcile:${story.id}:${through + 1}-${Math.min(latestAccepted, through + 12)}:catchup`, storyId: story.id,
     turnNumber: Math.min(latestAccepted, through + 12), jobType: "context_reconcile", input: { reason: "bounded continuity catch-up" },
@@ -984,118 +1163,337 @@ async function runArtJob(job: BackgroundJob, input: Record<string, unknown>, loc
   const type = job.jobType === "art_cover" ? "cover" : "scene";
   const turn = type === "scene" ? story.turns?.find((item) => item.turnNumber === job.turnNumber) : undefined;
   if (type === "scene" && !turn) throw new GoogleImageFailure("The section selected for this illustration no longer exists.", "art_turn_missing", false);
+  const targetTurnNumber = type === "cover" ? 1 : turn!.turnNumber;
+  const targetTurn = story.turns?.find((item) => item.turnNumber === targetTurnNumber);
+  if (!targetTurn) throw new GoogleImageFailure("The section boundary selected for this artwork no longer exists.", "art_turn_missing", false);
+  const targetTurnId = targetTurn.id;
   const db = getD1();
   const activeLease = await db.prepare("SELECT id FROM background_jobs WHERE id=? AND status='running' AND locked_at=?").bind(job.id, lock).first<Row>();
   if (!activeLease) return { result: { cancelled: true } };
-  if (type === "scene" && String(input.turnId || "") !== turn!.id) {
-    input.turnId = turn!.id;
+  const suppliedTurnId = String(input.turnId || "");
+  if ((type === "scene" && suppliedTurnId !== targetTurnId) || (type === "cover" && suppliedTurnId && suppliedTurnId !== targetTurnId)) {
     input.refreshBrief = true;
     input.briefReady = false;
+    clearArtPromptPlan(input);
     delete input.objectKey;
     delete input.objectKeyLock;
   }
+  input.turnId = targetTurnId;
   const assetId = String(input.assetId || "") || `art-asset:${job.id}`;
   input.assetId = assetId;
-  const existing = await db.prepare("SELECT * FROM art_assets WHERE id=?").bind(assetId).first<Row>();
-  const reusableBrief = Boolean(input.refreshBrief !== true && input.briefVersion === 2 && existing && (input.briefReady === true
-    || (!["Placeholder", "Queued"].includes(String(existing.status || "")) && String(existing.prompt_summary || "").trim())));
-  const artStory = type === "scene" ? await storyForArtTurn(db, story, turn!.turnNumber) : story;
-  const brief = reusableBrief ? {
-    shouldIllustrate: true,
-    category: String(existing?.category || (type === "cover" ? "Cover" : "Scenes")) as ArtAsset["category"],
-    title: String(existing?.title || (type === "cover" ? `${story.title} cover` : `Section ${job.turnNumber} illustration`)),
-    caption: String(existing?.caption || ""),
-    promptSummary: String(existing?.prompt_summary || ""),
-  } : {
-    shouldIllustrate: true,
-    category: (type === "cover" ? "Cover" : "Scenes") as ArtAsset["category"],
-    title: type === "cover" ? `${story.title} cover` : `Section ${job.turnNumber} illustration`,
-    caption: type === "cover" ? `Cover for ${story.title}` : `Illustration for Section ${job.turnNumber}`,
-    promptSummary: type === "cover"
-      ? coverPromptSummary(story.foundation, initialArtProfile(story.foundation), seedEntityAppearanceGuides(story.foundation, 1))
-      : scenePromptSummary(artStory, turn!),
-  };
-  input.briefVersion = 2;
-  input.briefReady = true;
-  const stamp = now();
-  if (!brief.shouldIllustrate && type === "scene") {
-    await db.prepare(`UPDATE art_assets SET title=?,caption=?,prompt_summary=?,status='Failed',updated_at=? WHERE id=?
-      AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(
-      brief.title, brief.caption || "This section was not selected as a strong illustration moment.", brief.promptSummary, stamp, assetId, job.id, lock,
-    ).run();
-    return { result: { selected: false, assetId } };
+  let existing = await db.prepare("SELECT * FROM art_assets WHERE id=?").bind(assetId).first<Row>();
+  const artStory = await storyForArtTurn(db, story, targetTurnNumber);
+  let styleAnchor = story.artStyleAnchor;
+  if (!styleAnchor) {
+    const candidateAnchor = initialStoryArtStyleAnchorRecord(story.id, story.foundation, undefined, { priorArtProfile: story.artProfile });
+    await storyArtStyleAnchorUpsertStatement(db, candidateAnchor).run();
+    const persistedAnchor = await db.prepare("SELECT * FROM story_art_style_anchors WHERE story_id=?").bind(story.id).first<Row>();
+    styleAnchor = persistedAnchor ? storyArtStyleAnchorFromRow(persistedAnchor) : candidateAnchor;
+    story.artStyleAnchor = styleAnchor;
+    artStory.artStyleAnchor = styleAnchor;
   }
-  if (existing) await db.prepare(`UPDATE art_assets SET turn_id=?,category=?,title=?,caption=?,prompt_summary=?,status='Preparing',updated_at=? WHERE id=?
-    AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(
-    turn?.id || null, brief.category, brief.title, brief.caption, brief.promptSummary, stamp, assetId, job.id, lock,
-  ).run();
-  else await db.prepare(`INSERT INTO art_assets (id,story_id,turn_id,turn_number,type,category,title,caption,prompt_summary,status,created_at,updated_at)
-    SELECT ?,?,?,?,?,?,?,?,?,'Preparing',?,? WHERE EXISTS
-      (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(
-    assetId, story.id, turn?.id || null, job.turnNumber || null, type, brief.category, brief.title, brief.caption, brief.promptSummary, stamp, stamp, job.id, lock,
-  ).run();
-
+  const model = selectedGoogleImageModel(input.model);
+  input.model = model;
   const bucket = getArtBucket();
   if (!bucket) {
     const unavailable = "Private art storage is not configured.";
-    await db.prepare(`UPDATE art_assets SET status='Unsupported',updated_at=? WHERE id=?
-      AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(now(), assetId, job.id, lock).run();
-    return { unsupported: true, result: { assetId, brief }, message: unavailable };
+    await ensureArtAssetForLease(db, { job, lock, assetId, story, turn: targetTurn, type, status: "Unsupported",
+      promptSummary: safeArtSummary(String(existing?.prompt_summary || "Artwork is unavailable until private storage is configured.")) });
+    return { unsupported: true, result: { assetId }, message: unavailable };
+  }
+  if (!process.env.GEMINI_API_KEY) {
+    const unavailable = "Google image generation is not configured.";
+    await ensureArtAssetForLease(db, { job, lock, assetId, story, turn: targetTurn, type, status: "Unsupported",
+      promptSummary: safeArtSummary(String(existing?.prompt_summary || "Artwork is unavailable until Google image generation is configured.")) });
+    return { unsupported: true, result: { assetId }, message: unavailable };
   }
 
-  const model = selectedGoogleImageModel(input.model);
-  input.model = model;
-  const renderVersion = type === "scene" ? turn!.id : "cover";
+  if (styleAnchor.revision === 1 && styleAnchor.provenance.source !== "safe_projection_agent"
+    && input.styleAnchorRefinementAttempted !== true) {
+    input.styleAnchorRefinementAttempted = true;
+    try {
+      const proposed = normalizeStoryArtStyleAnchor(await createStoryArtStyleAnchor({ storyId: story.id, foundation: story.foundation }));
+      const current = styleAnchor.anchor;
+      const refinedAnchor = normalizeStoryArtStyleAnchor({
+        summary: proposed.summary || current.summary,
+        medium: proposed.medium || current.medium,
+        visualLanguage: proposed.visualLanguage || current.visualLanguage,
+        palette: proposed.palette.length ? proposed.palette : current.palette,
+        lighting: proposed.lighting || current.lighting,
+        compositionRules: proposed.compositionRules.length ? proposed.compositionRules : current.compositionRules,
+        textureNotes: proposed.textureNotes.length ? proposed.textureNotes : current.textureNotes,
+        recurringMotifs: proposed.recurringMotifs.length ? proposed.recurringMotifs : current.recurringMotifs,
+        negativeConstraints: [...new Set([...proposed.negativeConstraints, ...current.negativeConstraints])],
+      });
+      await storyArtStyleAnchorUpsertStatement(db, {
+        ...styleAnchor,
+        anchor: refinedAnchor,
+        revision: styleAnchor.revision + 1,
+        provenance: { source: "safe_projection_agent", reason: "Refined from title, reader-visible premise, genre, tone, setting, and opening situation only." },
+        updatedAt: now(),
+      }).run();
+      const refinedRow = await db.prepare("SELECT * FROM story_art_style_anchors WHERE story_id=?").bind(story.id).first<Row>();
+      if (refinedRow) {
+        styleAnchor = storyArtStyleAnchorFromRow(refinedRow);
+        story.artStyleAnchor = styleAnchor;
+        artStory.artStyleAnchor = styleAnchor;
+      }
+      await recordOperationLog({ storyId: story.id, turnNumber: targetTurnNumber, operation: job.jobType,
+        category: "art_style_anchor_refined", attempt: job.attempts, status: "completed",
+        message: "Refined the permanent book style from a spoiler-safe opening projection.",
+        context: { revision: styleAnchor.revision, provenance: styleAnchor.provenance.source } });
+    } catch (error) {
+      await recordOperationLog({ storyId: story.id, turnNumber: targetTurnNumber, operation: job.jobType,
+        category: "art_style_anchor_fallback", attempt: job.attempts, status: "recovered",
+        message: "The spoiler-safe style refinement was unavailable, so the stable deterministic book anchor remains active.",
+        context: { failureCategory: error instanceof AiFailure ? error.category : "art_style_anchor" } });
+    }
+  }
+  const styleAnchorRevision = styleAnchor.revision;
+  if (Number(input.promptPlanVersion || 0) >= 3 && Number(input.styleAnchorRevision || 0) !== styleAnchorRevision) {
+    clearArtPromptPlan(input);
+    delete input.objectKey;
+    delete input.objectKeyLock;
+  }
+
+  const renderVersion = targetTurnId;
   const resumableKey = String(input.objectKey || "");
   const safePrefix = `stories/${story.id}/${assetId}/`;
-  const stored = resumableKey.startsWith(safePrefix) ? await bucket.get(resumableKey) : null;
+  const expectedRenderPrefix = `${safePrefix}${encodeURIComponent(renderVersion)}/${encodeURIComponent(model)}/`;
+  const v3PlanHashValid = Number(input.promptPlanVersion || 0) === 3
+    && Boolean(String(input.finalPrompt || ""))
+    && await sha256Hex(String(input.finalPrompt || "")) === String(input.promptHash || "");
+  const v3StoredCandidate = Number(input.promptPlanVersion || 0) === 3
+    && v3PlanHashValid && resumableKey.startsWith(expectedRenderPrefix);
+  // Legacy scene keys encoded the exact turn id and can be recovered safely.
+  // Legacy cover keys used only "cover", so they cannot survive a Section 1
+  // regeneration without risking stale publication and must be rebuilt.
+  const legacyStoredCandidate = Number(input.promptPlanVersion || 0) < 3 && type === "scene"
+    && resumableKey.startsWith(expectedRenderPrefix);
+  const stored = v3StoredCandidate || legacyStoredCandidate ? await bucket.get(resumableKey) : null;
   if (stored) {
     const storedModel = stored.customMetadata?.model || model;
-    if (storedModel === model) {
+    const storedMatchesPlan = legacyStoredCandidate || (
+      stored.customMetadata?.promptHash === String(input.promptHash || "")
+      && stored.customMetadata?.styleAnchorRevision === String(styleAnchorRevision)
+      && stored.customMetadata?.targetTurnId === targetTurnId
+    );
+    if (storedModel === model && storedMatchesPlan) {
       await stored.body.cancel().catch(() => {});
+      if (!existing) {
+        await ensureArtAssetForLease(db, { job, lock, assetId, story, turn: targetTurn, type, status: "Preparing",
+          promptSummary: safeArtSummary(String(input.safePromptSummary || "Recovering completed artwork from private storage.")) });
+      }
       const storedMime = stored.httpMetadata?.contentType || String(existing?.mime_type || "image/jpeg");
       const recovered = await db.prepare(`UPDATE art_assets SET status='Ready',image_reference=?,mime_type=?,updated_at=? WHERE id=?
-        AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(
+        AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)
+        AND EXISTS (SELECT 1 FROM turns WHERE story_id=? AND turn_number=? AND id=?)
+        AND EXISTS (SELECT 1 FROM story_art_style_anchors WHERE story_id=? AND revision=?)`).bind(
         `r2:${resumableKey}`, storedMime, now(), assetId, job.id, lock,
+        story.id, targetTurnNumber, targetTurnId, story.id, styleAnchorRevision,
       ).run();
-      if (Number(recovered.meta.changes || 0) > 0) await recordOperationLog({ storyId: story.id, turnNumber: job.turnNumber, operation: job.jobType, category: "art_storage_resume",
+      if (Number(recovered.meta.changes || 0) < 1) {
+        return artGuardFailureOutcome(db, { job, lock, input, assetId, storyId: story.id, targetTurnNumber, targetTurnId, styleAnchorRevision });
+      }
+      await recordOperationLog({ storyId: story.id, turnNumber: job.turnNumber, operation: job.jobType, category: "art_storage_resume",
         attempt: job.attempts, status: "recovered", message: "Recovered a completed art file after an interrupted status update." });
       return { result: { assetId, model: storedModel, mimeType: storedMime, resumed: true } };
     }
     await stored.body.cancel().catch(() => {});
   }
+
+  const migratedFromBriefVersion = Number(input.briefVersion || 0) === 2 ? 2 : undefined;
+  const reusablePlan = Boolean(
+    input.refreshBrief !== true
+    && input.promptPlanVersion === 3
+    && input.promptPhase === "render"
+    && String(input.targetTurnId || "") === targetTurnId
+    && Number(input.scopeThroughTurn || 0) === targetTurnNumber
+    && Number(input.styleAnchorRevision || 0) === styleAnchorRevision
+    && String(input.finalPrompt || "").trim()
+    && String(input.promptHash || "").trim(),
+  );
+
+  if (!reusablePlan) {
+    const basePrompt = composeLayeredArtPrompt({
+      storyId: story.id,
+      storyTitle: story.title,
+      assetType: type,
+      targetTurnNumber,
+      foundation: story.foundation,
+      artProfile: artStory.artProfile,
+      styleAnchor,
+      turn: type === "scene" ? targetTurn : undefined,
+      acceptedTurns: (artStory.turns || []).filter((item) => item.turnNumber <= targetTurnNumber),
+      storyState: artStory.storyState,
+      cast: artStory.cast,
+      entityAppearanceGuides: artStory.entityAppearanceGuides,
+      entityAppearanceTimeline: artStory.entityAppearanceTimeline,
+      visualProfiles: artStory.visualProfiles,
+      maxEntities: type === "cover" ? 5 : 8,
+      maxSourceCharacters: 4_800,
+    });
+    let direction = {
+      shouldIllustrate: true,
+      category: (type === "cover" ? "Cover" : "Scenes") as ArtAsset["category"],
+      title: type === "cover" ? `${story.title} cover` : `Section ${targetTurnNumber} illustration`,
+      caption: type === "cover" ? `Cover for ${story.title}` : `Illustration for Section ${targetTurnNumber}`,
+      chosenMoment: type === "cover" ? story.foundation.shortDescription : `A decisive moment from Section ${targetTurnNumber}`,
+      compositionPlan: type === "cover" ? "One iconic spoiler-safe composition" : "One coherent camera position and instant",
+      referencedEntityIds: basePrompt.scopedEntities.map((item) => `${item.kind}:${item.entityId}`),
+      promptSummary: "",
+    };
+    let plannerSucceeded = false;
+    try {
+      const prepared = await createArtBrief({
+        storyId: story.id,
+        turnNumber: targetTurnNumber,
+        type,
+        storyTitle: story.title,
+        layeredGroundingPrompt: basePrompt.prompt,
+        candidateEntities: basePrompt.scopedEntities.map((item) => ({ entityId: `${item.kind}:${item.entityId}`, kind: item.kind, name: item.name })),
+      });
+      direction = { ...direction, ...prepared };
+      plannerSucceeded = true;
+    } catch (error) {
+      await recordOperationLog({ storyId: story.id, turnNumber: targetTurnNumber, operation: job.jobType,
+        category: "art_brief_fallback", attempt: job.attempts, status: "recovered",
+        message: "The hidden art-director pass failed, so the deterministic continuity brief was used without blocking image recovery.",
+        context: { failureCategory: error instanceof AiFailure ? error.category : "art_brief" } });
+    }
+    if (direction.shouldIllustrate === false && type === "scene" && input.requestedByUser !== true) {
+      const safeSummary = safeArtSummary(direction.promptSummary || direction.chosenMoment || "This section did not yield a concrete illustration moment.");
+      await ensureArtAssetForLease(db, { job, lock, assetId, story, turn: targetTurn, type, status: "Failed",
+        title: direction.title, caption: direction.caption || "No concrete illustration moment was selected.", promptSummary: safeSummary });
+      return { result: { selected: false, assetId } };
+    }
+    const eligibleEntities = new Map(basePrompt.scopedEntities.map((item) => [`${item.kind}:${item.entityId}`, item]));
+    const selectedEntityRefs = stringList(direction.referencedEntityIds)
+      .filter((reference) => eligibleEntities.has(reference)).slice(0, type === "cover" ? 5 : 8);
+    // An explicit empty/invalid planner selection stays empty. Only a failed
+    // planner falls back to all deterministically scoped entities.
+    const selected = plannerSucceeded ? new Set(selectedEntityRefs) : undefined;
+    const selectedEntityIds = selectedEntityRefs.map((reference) => eligibleEntities.get(reference)?.entityId || "").filter(Boolean);
+    const finalPromptLayers = composeLayeredArtPrompt({
+      storyId: story.id,
+      storyTitle: story.title,
+      assetType: type,
+      targetTurnNumber,
+      foundation: story.foundation,
+      artProfile: artStory.artProfile,
+      styleAnchor,
+      turn: type === "scene" ? targetTurn : undefined,
+      acceptedTurns: (artStory.turns || []).filter((item) => item.turnNumber <= targetTurnNumber),
+      storyState: artStory.storyState,
+      cast: selected ? (artStory.cast || []).filter((item) => selected.has(`character:${item.id}`)) : artStory.cast,
+      sceneIntent: [direction.chosenMoment, direction.compositionPlan].filter(Boolean).join(". "),
+      requestedEntityRefs: selectedEntityRefs,
+      entityAppearanceGuides: selected ? (artStory.entityAppearanceGuides || []).filter((item) => selected.has(`${item.kind}:${item.entityId}`)) : artStory.entityAppearanceGuides,
+      entityAppearanceTimeline: selected ? (artStory.entityAppearanceTimeline || []).filter((item) => selected.has(`${item.kind}:${item.entityId}`)) : artStory.entityAppearanceTimeline,
+      visualProfiles: selected ? (artStory.visualProfiles || []).filter((item) => selected.has(`${item.kind}:${item.entityId}`)) : artStory.visualProfiles,
+      maxEntities: type === "cover" ? 5 : 8,
+      maxSourceCharacters: 4_800,
+    });
+    const finalPrompt = finalPromptLayers.prompt;
+    const safeSummary = safeArtSummary(direction.promptSummary || [direction.chosenMoment, direction.compositionPlan].filter(Boolean).join(". "));
+    const promptHash = await sha256Hex(finalPrompt);
+    Object.assign(input, {
+      briefVersion: 3,
+      briefReady: true,
+      promptPlanVersion: 3,
+      promptPhase: "render",
+      targetTurnId,
+      scopeThroughTurn: targetTurnNumber,
+      styleAnchorRevision,
+      selectedEntityRefs,
+      selectedEntityIds,
+      safePromptSummary: safeSummary,
+      finalPrompt,
+      promptHash,
+      providerSubmissionCount: Math.max(0, Number(input.providerSubmissionCount || 0)),
+    });
+    delete input.refreshBrief;
+    delete input.objectKey;
+    delete input.objectKeyLock;
+    const persistedPlan = await db.prepare(`UPDATE background_jobs SET input_json=?,updated_at=?
+      WHERE id=? AND status='running' AND locked_at=?`).bind(JSON.stringify(input), now(), job.id, lock).run();
+    if (Number(persistedPlan.meta.changes || 0) < 1) return { result: { assetId, cancelled: true } };
+    await ensureArtAssetForLease(db, { job, lock, assetId, story, turn: targetTurn, type, status: "Preparing",
+      title: direction.title, caption: direction.caption, promptSummary: safeSummary });
+    await recordOperationLog({ storyId: story.id, turnNumber: targetTurnNumber, operation: job.jobType,
+      category: "art_prompt_prepared", attempt: job.attempts, status: "completed", message: "Prepared and persisted a section-scoped layered art brief.",
+      context: { promptPlanVersion: 3, promptHash: promptHash.slice(0, 16), styleAnchorRevision, selectedEntityRefs,
+        migratedFromBriefVersion } });
+    return { deferred: true, runAfterMs: 0, input, result: { prepared: true, assetId, promptHash: promptHash.slice(0, 16) } };
+  }
+
+  const finalPrompt = String(input.finalPrompt || "");
+  const promptHash = String(input.promptHash || "");
+  if (!finalPrompt || !promptHash || await sha256Hex(finalPrompt) !== promptHash) {
+    clearArtPromptPlan(input);
+    return { deferred: true, runAfterMs: 0, input, result: { rebuild: true, reason: "prompt_hash" } };
+  }
+  const [leaseBeforeRender, turnBeforeRender, anchorBeforeRender] = await Promise.all([
+    db.prepare("SELECT id FROM background_jobs WHERE id=? AND status='running' AND locked_at=?").bind(job.id, lock).first<Row>(),
+    db.prepare("SELECT id FROM turns WHERE story_id=? AND turn_number=?").bind(story.id, targetTurnNumber).first<Row>(),
+    db.prepare("SELECT revision FROM story_art_style_anchors WHERE story_id=?").bind(story.id).first<Row>(),
+  ]);
+  if (!leaseBeforeRender) return { result: { assetId, cancelled: true } };
+  if (String(turnBeforeRender?.id || "") !== targetTurnId || Number(anchorBeforeRender?.revision || 0) !== styleAnchorRevision) {
+    clearArtPromptPlan(input);
+    delete input.objectKey;
+    delete input.objectKeyLock;
+    return { deferred: true, runAfterMs: 0, input, result: { rebuild: true, reason: "art_scope_changed" } };
+  }
+  await ensureArtAssetForLease(db, { job, lock, assetId, story, turn: targetTurn, type, status: "Preparing",
+    promptSummary: safeArtSummary(String(input.safePromptSummary || existing?.prompt_summary || "Layered art brief prepared.")) });
+  existing = await db.prepare("SELECT * FROM art_assets WHERE id=?").bind(assetId).first<Row>();
   const objectKey = artAttemptObjectKey({ storyId: story.id, assetId, renderVersion, model, lease: lock });
   input.objectKey = objectKey;
   input.objectKeyLock = lock;
   const persistedAttempt = await db.prepare(`UPDATE background_jobs SET input_json=?,updated_at=?
     WHERE id=? AND status='running' AND locked_at=?`).bind(JSON.stringify(input), now(), job.id, lock).run();
   if (Number(persistedAttempt.meta.changes || 0) < 1) return { result: { assetId, cancelled: true } };
-  if (!process.env.GEMINI_API_KEY) {
-    const unavailable = "Google image generation is not configured.";
-    await db.prepare(`UPDATE art_assets SET status='Unsupported',updated_at=? WHERE id=?
-      AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(now(), assetId, job.id, lock).run();
-    return { unsupported: true, result: { assetId, brief }, message: unavailable };
-  }
-  const prompt = [
-    `Create one finished ${type === "cover" ? "portrait book-cover illustration" : "cinematic story illustration"} for a private literary edition.`,
-    brief.promptSummary,
-    `Story title for context only: ${story.title}. Do not render the title or any other text in the image.`,
-    "Preserve every supplied character, costume, prop, location, palette, and motif continuity detail. Avoid spoilers, watermarks, borders, mockups, and stock-art composition.",
-  ].filter(Boolean).join("\n\n");
   try {
-    const image = await generateGoogleImage({ prompt, model, aspectRatio: type === "cover" ? "2:3" : "16:9" });
+    const image = await generateGoogleImage({
+      prompt: finalPrompt,
+      model,
+      aspectRatio: type === "cover" ? "2:3" : "16:9",
+      providerSubmissionsUsed: Number(input.providerSubmissionCount || 0),
+      maxProviderSubmissions: 3,
+      beforeProviderSubmit: async (nextSubmissionCount) => {
+        const guardedInput = { ...input, providerSubmissionCount: nextSubmissionCount };
+        const guarded = await db.prepare(`UPDATE background_jobs SET input_json=?,updated_at=? WHERE id=? AND status='running' AND locked_at=?
+          AND EXISTS (SELECT 1 FROM turns WHERE story_id=? AND turn_number=? AND id=?)
+          AND EXISTS (SELECT 1 FROM story_art_style_anchors WHERE story_id=? AND revision=?)`).bind(
+          JSON.stringify(guardedInput), now(), job.id, lock, story.id, targetTurnNumber, targetTurnId, story.id, styleAnchorRevision,
+        ).run();
+        if (Number(guarded.meta.changes || 0) < 1) throw new GoogleImageFailure(
+          "The story, art style, or job lease changed before provider submission; no image request was sent.", "art_submission_guard", false,
+        );
+        input.providerSubmissionCount = nextSubmissionCount;
+      },
+    });
     await bucket.put(objectKey, image.bytes, {
       httpMetadata: { contentType: image.mimeType },
-      customMetadata: { storyId: story.id, assetId, model: image.model },
+      customMetadata: { storyId: story.id, assetId, model: image.model, promptHash, styleAnchorRevision: String(styleAnchorRevision), targetTurnId },
     });
     const published = await db.prepare(`UPDATE art_assets SET status='Ready',image_reference=?,mime_type=?,updated_at=? WHERE id=?
-      AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(
+      AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)
+      AND EXISTS (SELECT 1 FROM turns WHERE story_id=? AND turn_number=? AND id=?)
+      AND EXISTS (SELECT 1 FROM story_art_style_anchors WHERE story_id=? AND revision=?)`).bind(
       `r2:${objectKey}`, image.mimeType, now(), assetId, job.id, lock,
+      story.id, targetTurnNumber, targetTurnId, story.id, styleAnchorRevision,
     ).run();
-    if (Number(published.meta.changes || 0) < 1) return { result: { assetId, cancelled: true } };
+    if (Number(published.meta.changes || 0) < 1) {
+      return artGuardFailureOutcome(db, { job, lock, input, assetId, storyId: story.id, targetTurnNumber, targetTurnId, styleAnchorRevision });
+    }
     await recordOperationLog({ storyId: story.id, turnNumber: job.turnNumber, operation: job.jobType,
       category: "google_image_generate_content",
-      attempt: job.attempts, status: "completed", message: `Generated ${type} art with ${image.model}.`, context: { model: image.model, bytes: image.bytes.byteLength } });
+      attempt: job.attempts, status: "completed", message: `Generated ${type} art with ${image.model}.`, context: {
+        model: image.model, bytes: image.bytes.byteLength, promptPlanVersion: 3, promptHash: promptHash.slice(0, 16),
+        styleAnchorRevision, selectedEntityRefs: stringList(input.selectedEntityRefs), providerSubmissions: Number(input.providerSubmissionCount || 0),
+      } });
     return { result: { assetId, model: image.model, mimeType: image.mimeType } };
   } catch (error) {
     const failure = backgroundFailure(error);
@@ -1104,6 +1502,87 @@ async function runArtJob(job: BackgroundJob, input: Record<string, unknown>, loc
       AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(retrying ? "Preparing" : "Failed", now(), assetId, job.id, lock).run();
     throw error;
   }
+}
+
+function clearArtPromptPlan(input: Record<string, unknown>) {
+  input.briefReady = false;
+  for (const key of [
+    "briefVersion", "promptPlanVersion", "promptPhase", "targetTurnId", "scopeThroughTurn", "styleAnchorRevision",
+    "selectedEntityRefs", "selectedEntityIds", "safePromptSummary", "finalPrompt", "promptHash", "providerSubmissionCount",
+  ]) delete input[key];
+}
+
+function safeArtSummary(value: unknown) {
+  const text = typeof value === "string" ? value.normalize("NFKC").replace(/[\u0000-\u001F\u007F]/g, " ").replace(/\s+/g, " ").trim() : "";
+  return (text || "A section-scoped layered art brief is prepared.").slice(0, 900);
+}
+
+async function sha256Hex(value: string) {
+  const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return [...new Uint8Array(bytes)].map((item) => item.toString(16).padStart(2, "0")).join("");
+}
+
+async function ensureArtAssetForLease(db: D1Database, input: {
+  job: BackgroundJob;
+  lock: string;
+  assetId: string;
+  story: Story;
+  turn: Turn;
+  type: "cover" | "scene";
+  status: ArtAsset["status"];
+  title?: string;
+  caption?: string;
+  promptSummary?: string;
+}) {
+  const current = await db.prepare("SELECT * FROM art_assets WHERE id=?").bind(input.assetId).first<Row>();
+  const category = input.type === "cover" ? "Cover" : "Scenes";
+  const title = safeArtSummary(input.title || current?.title || (input.type === "cover" ? `${input.story.title} cover` : `Section ${input.turn.turnNumber} illustration`));
+  const caption = safeArtSummary(input.caption || current?.caption || (input.type === "cover" ? `Cover for ${input.story.title}` : `Illustration for Section ${input.turn.turnNumber}`));
+  const promptSummary = safeArtSummary(input.promptSummary || current?.prompt_summary || "A section-scoped layered art brief is prepared.");
+  const stamp = now();
+  if (current) return db.prepare(`UPDATE art_assets SET turn_id=?,turn_number=?,type=?,category=?,title=?,caption=?,prompt_summary=?,status=?,updated_at=? WHERE id=?
+    AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(
+    input.turn.id, input.turn.turnNumber, input.type, category, title, caption, promptSummary, input.status, stamp,
+    input.assetId, input.job.id, input.lock,
+  ).run();
+  return db.prepare(`INSERT INTO art_assets (id,story_id,turn_id,turn_number,type,category,title,caption,prompt_summary,status,created_at,updated_at)
+    SELECT ?,?,?,?,?,?,?,?,?,?,?,? WHERE EXISTS
+      (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(
+    input.assetId, input.story.id, input.turn.id, input.turn.turnNumber, input.type, category, title, caption, promptSummary, input.status, stamp, stamp,
+    input.job.id, input.lock,
+  ).run();
+}
+
+async function artGuardFailureOutcome(db: D1Database, input: {
+  job: BackgroundJob;
+  lock: string;
+  input: Record<string, unknown>;
+  assetId: string;
+  storyId: string;
+  targetTurnNumber: number;
+  targetTurnId: string;
+  styleAnchorRevision: number;
+}): Promise<BackgroundJobOutcome> {
+  const [lease, turn, anchor] = await Promise.all([
+    db.prepare("SELECT id FROM background_jobs WHERE id=? AND status='running' AND locked_at=?")
+      .bind(input.job.id, input.lock).first<Row>(),
+    db.prepare("SELECT id FROM turns WHERE story_id=? AND turn_number=?")
+      .bind(input.storyId, input.targetTurnNumber).first<Row>(),
+    db.prepare("SELECT revision FROM story_art_style_anchors WHERE story_id=?")
+      .bind(input.storyId).first<Row>(),
+  ]);
+  if (!lease) return { result: { assetId: input.assetId, cancelled: true } };
+  if (String(turn?.id || "") !== input.targetTurnId || Number(anchor?.revision || 0) !== input.styleAnchorRevision) {
+    clearArtPromptPlan(input.input);
+    delete input.input.objectKey;
+    delete input.input.objectKeyLock;
+    return { deferred: true, runAfterMs: 0, input: input.input,
+      result: { assetId: input.assetId, rebuild: true, reason: "art_scope_changed_during_publish" } };
+  }
+  throw new GoogleImageFailure(
+    "The generated image was saved, but its database status could not be committed. Recovery will reuse the saved object without another provider submission.",
+    "art_publish_guard", true,
+  );
 }
 
 function backgroundFailure(error: unknown) {
@@ -1129,16 +1608,39 @@ function storyCastThrough(story: Story, throughTurnNumber: number): CastMember[]
   return Array.isArray(nextDelta?.priorCast) ? nextDelta.priorCast : story.cast || [];
 }
 
+function artStoryStateThrough(story: Story, throughTurnNumber: number): StoryState | undefined {
+  if (throughTurnNumber >= story.latestAcceptedTurnNumber) return story.storyState;
+  const target = story.turns?.find((turn) => turn.turnNumber === throughTurnNumber);
+  const delta = target?.stateDelta as { nextStoryState?: StoryState } | undefined;
+  return delta?.nextStoryState;
+}
+
+function artStoryCastThrough(story: Story, throughTurnNumber: number): CastMember[] {
+  if (throughTurnNumber >= story.latestAcceptedTurnNumber) return story.cast || [];
+  const target = story.turns?.find((turn) => turn.turnNumber === throughTurnNumber);
+  const targetDelta = target?.stateDelta as { nextCast?: CastMember[] } | undefined;
+  if (Array.isArray(targetDelta?.nextCast)) return targetDelta.nextCast;
+  const next = story.turns?.find((turn) => turn.turnNumber === throughTurnNumber + 1);
+  const nextDelta = next?.stateDelta as { priorCast?: CastMember[] } | undefined;
+  return Array.isArray(nextDelta?.priorCast) ? nextDelta.priorCast : [];
+}
+
 async function storyForArtTurn(db: D1Database, story: Story, turnNumber: number): Promise<Story> {
   const row = await db.prepare("SELECT snapshot_json FROM context_snapshots WHERE story_id=? AND through_turn_number<=? ORDER BY through_turn_number DESC LIMIT 1")
     .bind(story.id, turnNumber).first<Row>();
   const context = json<ContextSnapshot | undefined>(String(row?.snapshot_json || ""), undefined);
+  const proseSafeContext = context?.visualContextVersion === 2 ? context : undefined;
   return {
     ...story,
-    contextSnapshot: context,
-    artProfile: context?.storyArtProfile || initialArtProfile(story.foundation),
-    entityAppearanceGuides: context?.entityAppearanceGuides || (story.entityAppearanceGuides || []).filter((guide) => guide.lastUpdatedTurn <= turnNumber),
-    entityAppearanceTimeline: (story.entityAppearanceTimeline || []).filter((item) => item.turnNumber <= turnNumber),
+    contextSnapshot: proseSafeContext,
+    artProfile: proseSafeContext?.storyArtProfile || initialArtProfile(story.foundation),
+    // Historical illustration is fail-closed: malformed/missing deltas must
+    // never substitute the current tail state or cast into earlier art.
+    storyState: artStoryStateThrough(story, turnNumber),
+    cast: artStoryCastThrough(story, turnNumber),
+    entityAppearanceGuides: proseSafeContext?.entityAppearanceGuides || seedEntityAppearanceGuides(story.foundation, 1).filter((guide) => guide.firstSeenTurn <= turnNumber),
+    entityAppearanceTimeline: proseSafeContext ? (story.entityAppearanceTimeline || []).filter((item) => item.turnNumber <= turnNumber) : [],
+    visualProfiles: proseSafeContext ? (story.visualProfiles || []).filter((item) => item.lastUpdatedTurn <= turnNumber) : [],
   };
 }
 
@@ -1207,12 +1709,13 @@ async function loadStory(storyId: string, includeDetails: boolean): Promise<Stor
   if (!row) return null;
   const story = storyFromRow(row);
   if (!includeDetails) return story;
-  const [turnRows, castRows, stateRow, contextRow, artProfileRow, visualRows, entityGuideRows, entityObservationRows, artRows, jobRows, writingJobRow] = await Promise.all([
+  const [turnRows, castRows, stateRow, contextRow, artProfileRow, artStyleAnchorRow, visualRows, entityGuideRows, entityObservationRows, artRows, jobRows, writingJobRow] = await Promise.all([
     db.prepare("SELECT * FROM turns WHERE story_id=? ORDER BY turn_number ASC").bind(storyId).all<Row>(),
     db.prepare("SELECT * FROM cast_members WHERE story_id=? ORDER BY name ASC").bind(storyId).all<Row>(),
     db.prepare("SELECT * FROM story_states WHERE story_id=?").bind(storyId).first<Row>(),
     db.prepare("SELECT * FROM context_snapshots WHERE story_id=? ORDER BY through_turn_number DESC LIMIT 1").bind(storyId).first<Row>(),
     db.prepare("SELECT * FROM story_art_profiles WHERE story_id=?").bind(storyId).first<Row>(),
+    db.prepare("SELECT * FROM story_art_style_anchors WHERE story_id=?").bind(storyId).first<Row>(),
     db.prepare("SELECT * FROM visual_profiles WHERE story_id=? ORDER BY kind,name").bind(storyId).all<Row>(),
     db.prepare("SELECT * FROM entity_appearance_guides WHERE story_id=? ORDER BY kind,name").bind(storyId).all<Row>(),
     db.prepare(`SELECT * FROM (SELECT * FROM entity_appearance_observations WHERE story_id=? ORDER BY turn_number DESC,created_at DESC LIMIT 240)
@@ -1226,6 +1729,7 @@ async function loadStory(storyId: string, includeDetails: boolean): Promise<Stor
   story.storyState = json<StoryState>(String(stateRow?.state_json || ""), {} as StoryState);
   story.contextSnapshot = contextRow ? json<ContextSnapshot | undefined>(String(contextRow.snapshot_json || ""), undefined) : undefined;
   story.artProfile = artProfileRow ? json<StoryArtProfile | undefined>(String(artProfileRow.profile_json || ""), undefined) : undefined;
+  story.artStyleAnchor = artStyleAnchorRow ? storyArtStyleAnchorFromRow(artStyleAnchorRow) : undefined;
   story.visualProfiles = visualRows.results.map(visualFromRow);
   story.entityAppearanceGuides = entityGuideRows.results.map(entityAppearanceGuideFromRow);
   story.entityAppearanceTimeline = entityObservationRows.results.map(entityAppearanceObservationFromRow);
@@ -1274,41 +1778,92 @@ function initialArtProfile(foundation: StoryFoundation): StoryArtProfile {
     majorCastAppearance: cast.slice(0, 5).map((member) => `${member.name}: ${member.physicalDescription}`),
     keyLocationAppearance: foundation.setting ? [foundation.setting] : [],
     creatureDesignLanguage: "Follow established setting logic; avoid generic fantasy shorthand unless the prose establishes it",
-    recurringMotifs: foundation.narrativePromises?.slice(0, 4) || [],
+    // Narrative promises may describe future reveals. Rolling reconciliation
+    // adds motifs only after accepted prose establishes them.
+    recurringMotifs: [],
     avoid: ["text baked into the image", "unestablished costume changes", "visual spoilers", "generic stock-art composition"],
     lastUpdatedTurn: 1,
   };
 }
 
-function coverPromptSummary(foundation: StoryFoundation, profile: StoryArtProfile, entityGuides: EntityAppearanceGuide[] = []) {
-  const durableEntities = entityGuides.filter((guide) => guide.firstSeenTurn <= 1).slice(0, 10)
+function initialStoryArtStyleAnchorRecord(
+  storyId: string,
+  foundation: StoryFoundation,
+  supplied: unknown,
+  options: { stamp?: string; priorArtProfile?: StoryArtProfile } = {},
+): StoryArtStyleAnchorRecord {
+  const stamp = options.stamp || now();
+  const normalized = normalizeStoryArtStyleAnchor(supplied);
+  // Always derive a materially story-specific base. Existing rolling profiles
+  // may contribute their spoiler-safe style fields, but cannot replace this
+  // book-specific medium, palette, and framing identity with generic defaults.
+  const fallback = deriveStoryVisualStyleAnchor({
+    storyId,
+    storyTitle: foundation.title,
+    foundation,
+    targetTurnNumber: 1,
+  });
+  const prior = options.priorArtProfile;
+  const priorStyle = String(prior?.artStyle || "").trim();
+  const priorCoverStyle = String(prior?.coverStyle || "").trim();
+  const priorPalette = stringList(prior?.palette).slice(0, 8);
+  const agentAuthored = Boolean(normalized.summary && normalized.medium && normalized.visualLanguage);
+  const migratedFromExistingProfile = !agentAuthored && Boolean(prior);
+  const anchor = normalizeStoryArtStyleAnchor({
+    summary: normalized.summary || `${fallback.mood} visual identity rooted in ${fallback.settingSignature || foundation.title}`,
+    medium: normalized.medium || [priorStyle, fallback.artStyle].filter(Boolean).join(". "),
+    visualLanguage: normalized.visualLanguage || fallback.renderingRules.join("; "),
+    palette: normalized.palette.length ? normalized.palette : [...new Set([...priorPalette, ...fallback.palette])].slice(0, 12),
+    lighting: normalized.lighting || `Lighting follows the physical sources and atmosphere established in ${fallback.settingSignature || "the story setting"}`,
+    compositionRules: normalized.compositionRules.length ? normalized.compositionRules : [...new Set([priorCoverStyle, fallback.coverStyle, "Keep one unmistakable focal hierarchy"].filter(Boolean))],
+    textureNotes: normalized.textureNotes.length ? normalized.textureNotes : ["Preserve tactile, setting-derived material surfaces"],
+    recurringMotifs: normalized.recurringMotifs.length ? normalized.recurringMotifs : fallback.recurringMotifs,
+    negativeConstraints: [...new Set([...normalized.negativeConstraints, ...fallback.avoid])].slice(0, 18),
+  });
+  return {
+    storyId,
+    anchor,
+    revision: 1,
+    provenance: {
+      source: agentAuthored ? "story_foundation_agent" : migratedFromExistingProfile ? "existing_art_profile_backfill" : "deterministic_foundation_seed",
+      reason: agentAuthored
+        ? "Permanent spoiler-safe art direction returned with the hidden story foundation."
+        : migratedFromExistingProfile
+          ? "Spoiler-safe style fields from the existing rolling profile were merged with a stable story-derived identity."
+        : "Stable story-derived fallback for an existing or incomplete foundation response.",
+    },
+    updatedThroughTurn: Math.max(1, Number(prior?.lastUpdatedTurn || 1)),
+    createdAt: stamp,
+    updatedAt: stamp,
+  };
+}
+
+function coverPromptSummary(
+  foundation: StoryFoundation,
+  profile: StoryArtProfile,
+  entityGuides: EntityAppearanceGuide[] = [],
+  styleAnchor?: StoryArtStyleAnchorRecord,
+) {
+  const openingEvidence = `${foundation.shortDescription || ""} ${foundation.openingSituation || ""}`.normalize("NFKC").toLocaleLowerCase("en-US");
+  const durableEntities = entityGuides.filter((guide) => guide.firstSeenTurn <= 1 && (
+    guide.kind === "location"
+    || guide.entityId === foundation.mainViewpointCharacterId
+    || [guide.name, ...(guide.aliases || [])].some((name) => name && openingEvidence.includes(name.normalize("NFKC").toLocaleLowerCase("en-US")))
+  )).slice(0, 6)
     .map((guide) => entityGuidePromptLine(guide, [], 1, false));
+  const anchor = styleAnchor?.anchor;
   return [
+    anchor ? `Locked book identity: ${anchor.medium}. ${anchor.visualLanguage}. Lighting: ${anchor.lighting}.` : "",
+    anchor?.compositionRules?.length ? `Book composition rules: ${anchor.compositionRules.join("; ")}.` : "",
+    anchor?.palette?.length ? `Locked book palette: ${anchor.palette.join(", ")}.` : "",
     `Design language: ${profile.coverStyle}. ${profile.artStyle}.`,
     `Story premise: ${foundation.shortDescription || foundation.openingSituation}.`,
     `Setting: ${foundation.setting}. Mood: ${profile.mood}. Palette: ${(profile.palette || []).join(", ")}.`,
     `Primary figure: ${profile.protagonistAppearance}.`,
-    profile.majorCastAppearance?.length ? `Other established figures: ${profile.majorCastAppearance.slice(0, 4).join("; ")}.` : "",
     durableEntities.length ? `Durable entity appearance/style guides: ${durableEntities.join("; ")}.` : "",
     profile.recurringMotifs?.length ? `Recurring visual motifs: ${profile.recurringMotifs.slice(0, 5).join(", ")}.` : "",
     `Avoid: ${(profile.avoid || []).join(", ")}.`,
   ].filter(Boolean).join("\n");
-}
-
-function scenePromptSummary(story: Story, turn: Turn) {
-  const profile = story.artProfile || initialArtProfile(story.foundation);
-  const visibleProfiles = (story.visualProfiles || []).filter((item) => item.lastUpdatedTurn <= turn.turnNumber).slice(0, 8)
-    .map((item) => `${item.name}: ${item.visualDescription || [item.clothing, item.architecture, item.atmosphere].filter(Boolean).join(", ")}`);
-  const durableEntities = (story.entityAppearanceGuides || []).filter((guide) => guide.firstSeenTurn <= turn.turnNumber).slice(0, 12)
-    .map((guide) => entityGuidePromptLine(guide, story.entityAppearanceTimeline || [], turn.turnNumber, true));
-  return [
-    `Choose the clearest visually decisive moment from Section ${turn.turnNumber} and illustrate that single moment.`,
-    `Story art direction: ${profile.artStyle}. Mood: ${profile.mood}. Palette: ${(profile.palette || []).join(", ")}.`,
-    durableEntities.length ? `Durable entity appearance/style guides (baseline traits are authoritative; current details apply at this timeline point): ${durableEntities.join("; ")}.` : "",
-    visibleProfiles.length ? `Established visual continuity: ${visibleProfiles.join("; ")}.` : `Protagonist continuity: ${profile.protagonistAppearance}.`,
-    `Section text:\n${turn.prose.slice(0, 2_800)}`,
-    `Avoid: ${(profile.avoid || []).join(", ")}.`,
-  ].filter(Boolean).join("\n\n");
 }
 
 function entityGuidePromptLine(guide: EntityAppearanceGuide, timeline: EntityAppearanceObservation[], targetTurn: number, includeCurrent: boolean) {
