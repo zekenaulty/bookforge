@@ -140,6 +140,9 @@ export type Story = {
   contextSnapshot?: ContextSnapshot;
   artProfile?: StoryArtProfile;
   visualProfiles?: VisualProfile[];
+  entityAppearanceGuides?: EntityAppearanceGuide[];
+  entityAppearanceTimeline?: EntityAppearanceObservation[];
+  writingJob?: WritingJob;
   art?: ArtAsset[];
   jobs?: BackgroundJob[];
   logs?: OperationLog[];
@@ -184,6 +187,67 @@ export type VisualProfile = {
   lastUpdatedTurn: number;
 };
 
+export type EntityKind = "character" | "location" | "item" | "creature" | "group" | "other";
+
+export type EntityAppearanceBaseline = {
+  summary: string;
+  signatureTraits: string[];
+  styleNotes: string[];
+  palette: string[];
+  motifs: string[];
+  avoid: string[];
+};
+
+export type EntityAppearanceCurrent = {
+  appearance: string;
+  wardrobeOrSurface: string;
+  condition: string;
+  location: string;
+  temporaryChanges: string[];
+};
+
+export type EntityAppearanceTimelineDraft = {
+  turnNumber: number;
+  summary: string;
+  changes: string[];
+  evidence: string[];
+};
+
+export type EntityAppearanceGuide = {
+  id: string;
+  storyId?: string;
+  kind: EntityKind;
+  entityId: string;
+  name: string;
+  aliases: string[];
+  baseline: EntityAppearanceBaseline;
+  current: EntityAppearanceCurrent;
+  firstSeenTurn: number;
+  lastUpdatedTurn: number;
+  timelineObservations?: EntityAppearanceTimelineDraft[];
+};
+
+export type EntityAppearanceObservation = EntityAppearanceTimelineDraft & {
+  id: string;
+  storyId: string;
+  guideId: string;
+  kind: EntityKind;
+  entityId: string;
+  name: string;
+  sourceSnapshotId?: string;
+  createdAt: string;
+};
+
+export type WritingJob = {
+  turnNumber: number;
+  status: "generating" | "completed" | "failed";
+  error?: string;
+  category?: string;
+  recoverable?: boolean;
+  retryAfterMs?: number;
+  updatedAt: string;
+};
+
 export type ContextSnapshot = {
   throughTurnNumber: number;
   compactStorySummary: string;
@@ -204,6 +268,8 @@ export type ContextSnapshot = {
   storyArtProfile: StoryArtProfile;
   characterVisualProfiles: VisualProfile[];
   locationVisualProfiles: VisualProfile[];
+  entityAppearanceGuides?: EntityAppearanceGuide[];
+  entityAppearanceObservations?: EntityAppearanceTimelineDraft[];
 };
 
 export type ArtAsset = {

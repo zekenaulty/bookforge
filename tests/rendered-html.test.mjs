@@ -125,12 +125,15 @@ test("generates resumable story art with selectable Google Nano Banana models", 
   assert.match(generator, /TRANSPORT_TIMEOUT_MS = 10 \* 60 \* 1000/);
   assert.match(route, /bucket\.put/);
   assert.match(route, /enqueueReusableJobStatement/);
-  assert.match(route, /job_type<>'art_cover'/);
+  assert.match(route, /job_type IN \('context_reconcile','checkpoint_reconcile'\) AND COALESCE\(turn_number,0\)>=\? AND status IN \('pending','retrying'\)/);
   assert.match(route, /\["Placeholder", "Queued", "Preparing"\]\.includes\(coverStatus\)/);
   assert.match(route, /AND locked_at=\?/);
   assert.match(route, /status='running' AND locked_at=\?/);
   assert.match(route, /Superseded by regenerated section',locked_at=NULL/);
   assert.match(route, /const renderVersion = type === "scene" \? turn!\.id : "cover"/);
+  assert.match(route, /artAttemptObjectKey\(\{ storyId: story\.id, assetId, renderVersion, model, lease: lock \}\)/);
+  assert.match(route, /UPDATE background_jobs SET input_json=\?,updated_at=\?/);
+  assert.match(route, /job\.jobType\.startsWith\("art_"\) \? 2 : 3/);
   assert.match(route, /ORDER BY updated_at DESC LIMIT 30/);
   assert.match(route, /art_cover:\$\{storyId\}:1/);
   assert.match(route, /generateGoogleImage/);

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { check, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const authors = sqliteTable("authors", {
   id: text("id").primaryKey(),
@@ -112,6 +112,20 @@ export const operationLogs = sqliteTable("operation_logs", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+// D1 batch() is transactional, but a conditional UPDATE that affects zero rows does
+// not abort the remaining statements. Mutation guards turn a failed compare-and-
+//-swap predicate into a CHECK violation so the entire batch rolls back atomically.
+export const mutationGuards = sqliteTable(
+  "mutation_guards",
+  {
+    id: text("id").primaryKey(),
+    storyId: text("story_id").notNull(),
+    asserted: integer("asserted").notNull(),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [check("mutation_guard_asserted_check", sql`${table.asserted} = 1`)],
+);
+
 export const backgroundJobs = sqliteTable("background_jobs", {
   id: text("id").primaryKey(),
   storyId: text("story_id").notNull(),
@@ -161,6 +175,42 @@ export const visualProfiles = sqliteTable(
     updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [uniqueIndex("visual_story_kind_entity_unique").on(table.storyId, table.kind, table.entityId)],
+);
+
+export const entityAppearanceGuides = sqliteTable(
+  "entity_appearance_guides",
+  {
+    id: text("id").primaryKey(),
+    storyId: text("story_id").notNull(),
+    kind: text("kind").notNull(),
+    entityId: text("entity_id").notNull(),
+    name: text("name").notNull(),
+    aliasesJson: text("aliases_json").notNull().default("[]"),
+    baselineJson: text("baseline_json").notNull(),
+    currentJson: text("current_json").notNull(),
+    firstSeenTurn: integer("first_seen_turn").notNull().default(0),
+    lastUpdatedTurn: integer("last_updated_turn").notNull().default(0),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [uniqueIndex("entity_appearance_story_kind_entity_unique").on(table.storyId, table.kind, table.entityId)],
+);
+
+export const entityAppearanceObservations = sqliteTable(
+  "entity_appearance_observations",
+  {
+    id: text("id").primaryKey(),
+    storyId: text("story_id").notNull(),
+    guideId: text("guide_id").notNull(),
+    kind: text("kind").notNull(),
+    entityId: text("entity_id").notNull(),
+    name: text("name").notNull(),
+    turnNumber: integer("turn_number").notNull(),
+    observationJson: text("observation_json").notNull(),
+    sourceSnapshotId: text("source_snapshot_id"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [uniqueIndex("entity_observation_story_kind_entity_turn_unique").on(table.storyId, table.kind, table.entityId, table.turnNumber)],
 );
 
 export const artAssets = sqliteTable("art_assets", {

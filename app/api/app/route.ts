@@ -1,14 +1,25 @@
-import { createAuthorProfile, createCheckpoint, createContextReconciliation, createStoryFoundation, continueStory, repairTurn, validationIssues } from "../../../lib/ai";
+import { AiFailure, createAuthorProfile, createCheckpoint, createContextReconciliation, createStoryFoundation, continueStory, repairTurn, validationIssues } from "../../../lib/ai";
 import { ensureDatabase, getArtBucket, getD1, json, now, words } from "../../../lib/app-db";
 import { generateGoogleImage, GoogleImageFailure, selectedGoogleImageModel } from "../../../lib/google-image";
 import { isGoogleImageModel } from "../../../lib/image-models";
 import { recordOperationLog } from "../../../lib/operation-log";
 import { buildStoryPdf } from "../../../lib/story-pdf";
-import type { ArtAsset, AuthorProfile, BackgroundJob, CastMember, ContextSnapshot, OperationLog, Story, StoryArtProfile, StoryFoundation, StoryState, Turn, TurnResult, VisualProfile } from "../../../lib/types";
+import { mergeEntityAppearanceGuides, nextReconciliationThrough, observationsFromGuides, seedEntityAppearanceGuides } from "../../../lib/entity-continuity";
+import { regenerationTargetsCurrentTurn, storyTailMatches } from "../../../lib/story-revision";
+import { artAttemptObjectKey } from "../../../lib/art-storage";
+import type { ArtAsset, AuthorProfile, BackgroundJob, CastMember, ContextSnapshot, EntityAppearanceGuide, EntityAppearanceObservation, OperationLog, Story, StoryArtProfile, StoryFoundation, StoryState, Turn, TurnResult, VisualProfile, WritingJob } from "../../../lib/types";
 
 export const dynamic = "force-dynamic";
 
 type Row = Record<string, string | number | null>;
+const WRITER_LEASE_MS = 12 * 60_000;
+const TEXT_BACKGROUND_LEASE_MS = 12 * 60_000;
+const CONTEXT_RECONCILE_INTERVAL = 12;
+
+class ApiRouteFailure extends Error {
+  restartRequired = false;
+  constructor(message: string, public category: string, public recoverable: boolean, public retryAfterMs = 0) { super(message); }
+}
 
 export async function GET(request: Request) {
   let storyId = "";
@@ -120,10 +131,11 @@ export async function POST(request: Request) {
 
 async function loadLibrary() {
   const db = getD1();
-  const [authorResult, storyResult, artResult] = await Promise.all([
+  const [authorResult, storyResult, artResult, coverJobResult] = await Promise.all([
     db.prepare("SELECT * FROM authors ORDER BY archived ASC, updated_at DESC").all<Row>(),
     db.prepare("SELECT * FROM stories ORDER BY CASE status WHEN 'Active' THEN 0 WHEN 'Finished' THEN 1 ELSE 2 END, updated_at DESC").all<Row>(),
     db.prepare("SELECT * FROM art_assets WHERE type='cover' ORDER BY created_at DESC").all<Row>(),
+    db.prepare("SELECT * FROM background_jobs WHERE job_type='art_cover' ORDER BY updated_at DESC").all<Row>(),
   ]);
   const covers = new Map<string, ArtAsset[]>();
   for (const row of artResult.results) {
@@ -132,9 +144,20 @@ async function loadLibrary() {
     current.push(asset);
     covers.set(asset.storyId, current);
   }
+  const coverJobs = new Map<string, BackgroundJob[]>();
+  for (const row of coverJobResult.results) {
+    const job = jobFromRow(row);
+    const current = coverJobs.get(job.storyId) || [];
+    current.push(job);
+    coverJobs.set(job.storyId, current);
+  }
   return {
     authors: authorResult.results.map(authorFromRow),
-    stories: storyResult.results.map((row) => ({ ...storyFromRow(row), art: covers.get(String(row.id)) || [] })),
+    stories: storyResult.results.map((row) => ({
+      ...storyFromRow(row),
+      art: covers.get(String(row.id)) || [],
+      jobs: coverJobs.get(String(row.id)) || [],
+    })),
     logs: await loadLogs(20),
   };
 }
@@ -163,15 +186,18 @@ async function handleCreateStory(body: Record<string, unknown>) {
 
   const turnId = crypto.randomUUID();
   const narration = makeNarration(storyId, turnId, firstTurn.narrationVoiceHint, 1);
+  const openingCast = mergeCast(generated.foundation.initialCast, firstTurn.castUpdates, 1);
   const stamp = now();
   const stateDelta = {
     ...firstTurn.stateDelta,
     priorState: generated.initialState,
     nextStoryState: firstTurn.nextStoryState,
     priorCast: generated.foundation.initialCast,
+    nextCast: openingCast,
     turnIntent: firstTurn.turnIntent,
   };
   const artProfile = initialArtProfile(generated.foundation);
+  const entityGuides = seedEntityAppearanceGuides({ ...generated.foundation, initialCast: openingCast }, 1);
   const statements = [
     db.prepare(`INSERT INTO stories (id,title,short_description,selected_author_id,author_snapshot_json,original_idea,
       foundation_json,status,latest_accepted_turn_number,latest_checkpoint_turn_number,default_narration_voice,
@@ -204,11 +230,13 @@ async function handleCreateStory(body: Record<string, unknown>) {
   const coverAssetId = crypto.randomUUID();
   statements.push(db.prepare(`INSERT INTO art_assets (id,story_id,turn_id,turn_number,type,category,title,caption,prompt_summary,status,created_at,updated_at)
     VALUES (?,?,?,1,'cover','Cover',?,?,?,'Placeholder',?,?)`).bind(
-    coverAssetId, storyId, turnId, `${generated.foundation.title} cover`, `Cover for ${generated.foundation.title}`, coverPromptSummary(generated.foundation, artProfile), stamp, stamp,
+    coverAssetId, storyId, turnId, `${generated.foundation.title} cover`, `Cover for ${generated.foundation.title}`, coverPromptSummary(generated.foundation, artProfile, entityGuides), stamp, stamp,
   ));
   statements.push(enqueueJobStatement(db, { id: `art_cover:${storyId}:1`, storyId, turnNumber: 1, jobType: "art_cover", input: { assetId: coverAssetId, briefReady: true } }));
   statements.push(enqueueJobStatement(db, { id: `context_reconcile:${storyId}:1`, storyId, turnNumber: 1, jobType: "context_reconcile", input: { reason: "initial visual and character context" } }));
-  for (const member of mergeCast(generated.foundation.initialCast, firstTurn.castUpdates, 1)) statements.push(castUpsert(db, storyId, member, 1));
+  for (const member of openingCast) statements.push(castUpsert(db, storyId, member, 1));
+  for (const guide of entityGuides) statements.push(entityAppearanceGuideUpsert(db, storyId, guide, stamp));
+  for (const observation of observationsFromGuides(storyId, entityGuides, 1, 0, "", stamp)) statements.push(entityAppearanceObservationUpsert(db, observation));
   await db.batch(statements);
   const story = await loadStory(storyId, true);
   return Response.json({ story }, { status: 201 });
@@ -232,18 +260,37 @@ async function handleContinue(body: Record<string, unknown>) {
   if (story.status !== "Active") return bad("Only active stories can be continued.");
   const db = getD1();
   const nextTurnNumber = expectedLatest + 1;
+  const predecessorTurnId = story.turns?.at(-1)?.id || "";
   const key = `${storyId}:${nextTurnNumber}`;
-  const existing = await db.prepare("SELECT status,updated_at FROM generation_jobs WHERE idempotency_key=?").bind(key).first<Row>();
-  const staleGeneration = existing?.status === "generating" && Date.parse(String(existing.updated_at || "")) < Date.now() - 12 * 60 * 1000;
-  if (existing?.status === "generating" && !staleGeneration) return Response.json({ error: "The author is already writing this section." }, { status: 409 });
+  const existing = await db.prepare("SELECT status,error,updated_at FROM generation_jobs WHERE idempotency_key=?").bind(key).first<Row>();
+  const generationUpdatedAt = Date.parse(String(existing?.updated_at || ""));
+  const staleGeneration = existing?.status === "generating"
+    && (!Number.isFinite(generationUpdatedAt) || generationUpdatedAt < Date.now() - WRITER_LEASE_MS);
+  if (existing?.status === "generating" && !staleGeneration) return Response.json({
+    error: "The author is already writing this section.", category: "writer_lease", recoverable: true, retryAfterMs: 2_000,
+  }, { status: 409 });
   if (staleGeneration) await recordOperationLog({ storyId, turnNumber: nextTurnNumber, operation: "continue_story", category: "stale_generation_resume",
     attempt: 1, status: "recovered", message: "Resumed writing after an interrupted request left a stale generation lock." });
   if (existing?.status === "completed") {
     const refreshed = await loadStory(storyId, true);
     return Response.json({ story: refreshed, alreadyCompleted: true });
   }
-  await db.prepare(`INSERT INTO generation_jobs (idempotency_key,story_id,turn_number,status,updated_at) VALUES (?,?,?,'generating',?)
-    ON CONFLICT(idempotency_key) DO UPDATE SET status='generating', error=NULL, updated_at=excluded.updated_at`).bind(key, storyId, nextTurnNumber, now()).run();
+  const generationLease = `lease:${crypto.randomUUID()}`;
+  const claimStamp = now();
+  if (!existing) {
+    await db.prepare("INSERT OR IGNORE INTO generation_jobs (idempotency_key,story_id,turn_number,status,error,updated_at) VALUES (?,?,?,'generating',?,?)")
+      .bind(key, storyId, nextTurnNumber, generationLease, claimStamp).run();
+  } else {
+    await db.prepare(`UPDATE generation_jobs SET status='generating',error=?,updated_at=? WHERE idempotency_key=? AND COALESCE(error,'')=?
+      AND ((status='failed' AND updated_at=?) OR (status='generating' AND updated_at=?))`).bind(
+      generationLease, claimStamp, key, String(existing.error || ""), String(existing.updated_at || ""), String(existing.updated_at || ""),
+    ).run();
+  }
+  const claimedGeneration = await db.prepare("SELECT status,error FROM generation_jobs WHERE idempotency_key=?").bind(key).first<Row>();
+  if (String(claimedGeneration?.status || "") === "completed") return Response.json({ story: await loadStory(storyId, true), alreadyCompleted: true });
+  if (String(claimedGeneration?.error || "") !== generationLease) {
+    return Response.json({ error: "The author is already writing this section.", category: "writer_lease", recoverable: true, retryAfterMs: 2_000 }, { status: 409 });
+  }
 
   try {
     const checkpointRow = await db.prepare("SELECT checkpoint_json FROM checkpoints WHERE story_id=? ORDER BY through_turn_number DESC LIMIT 1").bind(storyId).first<Row>();
@@ -253,23 +300,40 @@ async function handleContinue(body: Record<string, unknown>) {
     let result = await continueStory({
       storyId, author: story.authorSnapshot, foundation: story.foundation, checkpoint: json(String(checkpointRow?.checkpoint_json || ""), {}),
       state: story.storyState!, cast: priorCast, recentTurns: recent, nextTurnNumber, note,
-      managedContext: json(String(contextRow?.snapshot_json || ""), {}),
+      managedContext: { ...json<Record<string, unknown>>(String(contextRow?.snapshot_json || ""), {}), entityAppearanceGuides: story.entityAppearanceGuides || [] },
     });
+    await refreshGenerationLease(db, key, generationLease);
     let issues = validationIssues(result, recent.at(-1)?.prose || "");
     if (issues.length) {
       result = await repairTurn({ storyId, draft: result, issues, author: story.authorSnapshot, foundation: story.foundation,
         state: story.storyState!, cast: priorCast, nextTurnNumber });
+      await refreshGenerationLease(db, key, generationLease);
       issues = validationIssues(result, recent.at(-1)?.prose || "");
     }
     if (issues.length) throw new Error(`The section did not pass continuity review: ${issues.join("; ")}. Your existing story is unchanged.`);
-    const latest = await db.prepare("SELECT latest_accepted_turn_number FROM stories WHERE id=?").bind(storyId).first<Row>();
-    if (Number(latest?.latest_accepted_turn_number) !== nextTurnNumber - 1) throw new Error("A newer section arrived first. This late draft was safely discarded.");
+    const [latest, latestTurn] = await Promise.all([
+      db.prepare("SELECT latest_accepted_turn_number FROM stories WHERE id=?").bind(storyId).first<Row>(),
+      db.prepare("SELECT id FROM turns WHERE story_id=? ORDER BY turn_number DESC LIMIT 1").bind(storyId).first<Row>(),
+    ]);
+    if (!storyTailMatches({ turnNumber: nextTurnNumber - 1, turnId: predecessorTurnId }, {
+      turnNumber: latest?.latest_accepted_turn_number, turnId: latestTurn?.id,
+    })) {
+      throw new ApiRouteFailure("The preceding section changed while this draft was being written. The late draft was safely discarded.",
+        "writer_predecessor_changed", true);
+    }
+    const ownedGeneration = await db.prepare("SELECT idempotency_key FROM generation_jobs WHERE idempotency_key=? AND status='generating' AND error=?").bind(key, generationLease).first<Row>();
+    if (!ownedGeneration) throw new Error("A resumed writing request replaced this late draft, so it was safely discarded.");
     const turnId = crypto.randomUUID();
     const narration = makeNarration(storyId, turnId, result.narrationVoiceHint, nextTurnNumber);
-    const stateDelta = { ...result.stateDelta, priorState: story.storyState, nextStoryState: result.nextStoryState, priorCast, turnIntent: result.turnIntent };
     const mergedCast = mergeCast(priorCast, result.castUpdates, nextTurnNumber);
+    const stateDelta = { ...result.stateDelta, priorState: story.storyState, nextStoryState: result.nextStoryState, priorCast, nextCast: mergedCast, turnIntent: result.turnIntent };
     const stamp = now();
+    const mutationGuardId = `writer:${key}:${crypto.randomUUID()}`;
     const statements = [
+      writerMutationGuardStatement(db, {
+        id: mutationGuardId, storyId, expectedTurnNumber: nextTurnNumber - 1, expectedTurnId: predecessorTurnId,
+        generationKey: key, generationLease, stamp,
+      }),
       db.prepare(`INSERT INTO turns (id,story_id,turn_number,prose,word_count,direction_used,state_delta_json,narration_json,generation_status,validation_status,created_at)
         VALUES (?,?,?,?,?,?,?,?,?,?,?)`).bind(turnId, storyId, nextTurnNumber, result.prose, words(result.prose), note,
         JSON.stringify(stateDelta), JSON.stringify(narration), "Accepted", issues.length ? "Accepted after repair" : "Passed", stamp),
@@ -277,15 +341,26 @@ async function handleContinue(body: Record<string, unknown>) {
         narration.id, storyId, turnId, narration.voiceId, narration.voicePresentation, stamp),
       db.prepare("UPDATE story_states SET state_json=?, last_updated_turn=? WHERE story_id=?").bind(JSON.stringify(result.nextStoryState), nextTurnNumber, storyId),
       db.prepare("UPDATE stories SET latest_accepted_turn_number=?, updated_at=? WHERE id=?").bind(nextTurnNumber, stamp, storyId),
-      db.prepare("UPDATE generation_jobs SET status='completed', updated_at=? WHERE idempotency_key=?").bind(stamp, key),
+      db.prepare("UPDATE generation_jobs SET status='completed',error=NULL,updated_at=? WHERE idempotency_key=? AND status='generating' AND error=?").bind(stamp, key, generationLease),
     ];
     for (const member of mergedCast) statements.push(castUpsert(db, storyId, member, nextTurnNumber));
     for (const statement of automaticJobStatements(db, story, nextTurnNumber, result.stateDelta, turnId)) statements.push(statement);
-    await db.batch(statements);
+    statements.push(mutationGuardReleaseStatement(db, mutationGuardId));
+    try {
+      await db.batch(statements);
+    } catch (error) {
+      if (isMutationGuardFailure(error)) throw new ApiRouteFailure(
+        "The preceding section changed while this draft was being written. The late draft was safely discarded.",
+        "writer_predecessor_changed", true,
+      );
+      throw error;
+    }
     return Response.json({ story: await loadStory(storyId, true) });
   } catch (error) {
-    await db.prepare("UPDATE generation_jobs SET status='failed', error=?, updated_at=? WHERE idempotency_key=?").bind(message(error), now(), key).run();
-    throw error;
+    const failure = writingFailure(error);
+    await db.prepare("UPDATE generation_jobs SET status='failed', error=?, updated_at=? WHERE idempotency_key=? AND status='generating' AND error=?")
+      .bind(JSON.stringify(failure), now(), key, generationLease).run();
+    throw new ApiRouteFailure(failure.message, failure.category, failure.recoverable, failure.retryAfterMs);
   }
 }
 
@@ -296,11 +371,25 @@ async function handleRegenerate(body: Record<string, unknown>) {
   const delta = latest.stateDelta as { priorState?: StoryState; priorCast?: CastMember[] };
   const priorState = delta.priorState || story.storyState!;
   const priorCast = Array.isArray(delta.priorCast) ? delta.priorCast : story.cast || [];
-  const previousTurns = story.turns.slice(0, -1).slice(-3);
+  const previousTurns = story.turns.slice(0, -1).slice(-12);
+  const db = getD1();
+  const [previousContextRow, previousCheckpointRow] = await Promise.all([
+    db.prepare("SELECT snapshot_json FROM context_snapshots WHERE story_id=? AND through_turn_number<? ORDER BY through_turn_number DESC LIMIT 1")
+      .bind(story.id, latest.turnNumber).first<Row>(),
+    db.prepare("SELECT checkpoint_json FROM checkpoints WHERE story_id=? AND through_turn_number<? ORDER BY through_turn_number DESC LIMIT 1")
+      .bind(story.id, latest.turnNumber).first<Row>(),
+  ]);
+  const previousContext = json<ContextSnapshot | undefined>(String(previousContextRow?.snapshot_json || ""), undefined);
+  const previousGuides = previousContext?.entityAppearanceGuides || [];
+  const preSectionGuides = mergeEntityAppearanceGuides(previousGuides, seedEntityAppearanceGuides({
+    ...story.foundation, setting: previousGuides.length ? "" : story.foundation.setting, initialCast: priorCast,
+  }, Math.max(1, latest.turnNumber - 1)), Math.max(1, latest.turnNumber - 1));
   let candidate = await continueStory({
-    storyId: story.id, author: story.authorSnapshot, foundation: story.foundation, checkpoint: {}, state: priorState, cast: priorCast,
+    storyId: story.id, author: story.authorSnapshot, foundation: story.foundation,
+    checkpoint: json(String(previousCheckpointRow?.checkpoint_json || ""), {}), state: priorState, cast: priorCast,
     recentTurns: previousTurns.map((turn) => ({ turnNumber: turn.turnNumber, prose: turn.prose, stateDelta: turn.stateDelta })),
-    nextTurnNumber: latest.turnNumber, note: String(body.note || latest.directionUsed || ""), managedContext: story.contextSnapshot,
+    nextTurnNumber: latest.turnNumber, note: String(body.note || latest.directionUsed || ""),
+    managedContext: { ...(previousContext || {}), entityAppearanceGuides: preSectionGuides },
   });
   let issues = validationIssues(candidate, previousTurns.at(-1)?.prose || "");
   if (issues.length) {
@@ -309,6 +398,7 @@ async function handleRegenerate(body: Record<string, unknown>) {
     issues = validationIssues(candidate, previousTurns.at(-1)?.prose || "");
   }
   if (issues.length) throw new Error(`The new version did not pass continuity review: ${issues.join("; ")}. The original remains unchanged.`);
+  candidate.turnIntent = { ...candidate.turnIntent, intendedTurnNumber: latest.turnNumber, regenerationOfTurnId: latest.id };
   return Response.json({ candidate, validationStatus: issues.length ? "Accepted after repair" : "Passed", original: latest });
 }
 
@@ -318,17 +408,45 @@ async function handleAcceptRegeneration(body: Record<string, unknown>) {
   const story = await loadStory(storyId, true);
   if (!story?.turns?.length || !candidate?.prose || !candidate?.nextStoryState) return bad("The replacement draft is incomplete.");
   const latest = story.turns.at(-1)!;
+  if (!regenerationTargetsCurrentTurn(candidate.turnIntent, latest)) {
+    return Response.json({ error: "The story changed after this replacement was drafted. Regenerate the current latest section again.",
+      category: "stale_regeneration", recoverable: false, retryAfterMs: 0 }, { status: 409 });
+  }
   const delta = latest.stateDelta as { priorState?: StoryState; priorCast?: CastMember[] };
   const priorCast = Array.isArray(delta.priorCast) ? delta.priorCast : story.cast || [];
   const mergedCast = mergeCast(priorCast, candidate.castUpdates || [], latest.turnNumber);
   const db = getD1();
-  const previousCheckpoint = await db.prepare("SELECT MAX(through_turn_number) AS turn_number FROM checkpoints WHERE story_id=? AND through_turn_number<?").bind(storyId, latest.turnNumber).first<Row>();
+  const [previousCheckpoint, previousContextRow] = await Promise.all([
+    db.prepare("SELECT MAX(through_turn_number) AS turn_number FROM checkpoints WHERE story_id=? AND through_turn_number<?").bind(storyId, latest.turnNumber).first<Row>(),
+    db.prepare("SELECT snapshot_json,through_turn_number FROM context_snapshots WHERE story_id=? AND through_turn_number<? ORDER BY through_turn_number DESC LIMIT 1")
+      .bind(storyId, latest.turnNumber).first<Row>(),
+  ]);
   const previousCheckpointTurn = Number(previousCheckpoint?.turn_number || 0);
+  const previousContext = json<ContextSnapshot | undefined>(String(previousContextRow?.snapshot_json || ""), undefined);
+  const rollbackTurn = Math.max(1, latest.turnNumber - 1);
+  const rollbackSeed = seedEntityAppearanceGuides({
+    ...story.foundation,
+    setting: previousContext?.entityAppearanceGuides?.length ? "" : story.foundation.setting,
+    initialCast: priorCast,
+  }, rollbackTurn);
+  const rollbackGuides = mergeEntityAppearanceGuides(previousContext?.entityAppearanceGuides || [], rollbackSeed, rollbackTurn);
+  const rollbackArtProfile = previousContext?.storyArtProfile || initialArtProfile(story.foundation);
+  const writerGuardKey = `${storyId}:${latest.turnNumber + 1}`;
+  const writerGuardLease = `lease:regeneration:${crypto.randomUUID()}`;
+  if (!await claimGenerationGuard(db, writerGuardKey, storyId, latest.turnNumber + 1, writerGuardLease)) {
+    return Response.json({ error: "The next section is already being written or the story advanced. Wait for it to finish, then regenerate the latest section again.",
+      category: "writer_lease", recoverable: true, retryAfterMs: 2_000 }, { status: 409 });
+  }
   const turnId = crypto.randomUUID();
   const narration = makeNarration(storyId, turnId, candidate.narrationVoiceHint, latest.turnNumber);
-  const stateDelta = { ...candidate.stateDelta, priorState: delta.priorState, nextStoryState: candidate.nextStoryState, priorCast, turnIntent: candidate.turnIntent };
+  const stateDelta = { ...candidate.stateDelta, priorState: delta.priorState, nextStoryState: candidate.nextStoryState, priorCast, nextCast: mergedCast, turnIntent: candidate.turnIntent };
   const stamp = now();
+  const mutationGuardId = `regeneration:${storyId}:${latest.turnNumber}:${crypto.randomUUID()}`;
   const statements = [
+    regenerationMutationGuardStatement(db, {
+      id: mutationGuardId, storyId, expectedTurnNumber: latest.turnNumber, expectedTurnId: latest.id,
+      generationKey: writerGuardKey, generationLease: writerGuardLease, stamp,
+    }),
     db.prepare("DELETE FROM narrations WHERE turn_id=?").bind(latest.id),
     db.prepare("DELETE FROM turns WHERE id=? AND story_id=? AND turn_number=?").bind(latest.id, storyId, latest.turnNumber),
     db.prepare(`INSERT INTO turns (id,story_id,turn_number,prose,word_count,direction_used,state_delta_json,narration_json,generation_status,validation_status,created_at)
@@ -339,14 +457,40 @@ async function handleAcceptRegeneration(body: Record<string, unknown>) {
     db.prepare("UPDATE story_states SET state_json=?, last_updated_turn=? WHERE story_id=?").bind(JSON.stringify(candidate.nextStoryState), latest.turnNumber, storyId),
     db.prepare("DELETE FROM cast_members WHERE story_id=?").bind(storyId),
     db.prepare("DELETE FROM checkpoints WHERE story_id=? AND through_turn_number>=?").bind(storyId, latest.turnNumber),
-    db.prepare("UPDATE background_jobs SET status='failed',last_error='Superseded by regenerated section',locked_at=NULL,updated_at=? WHERE story_id=? AND turn_number=? AND job_type<>'art_cover' AND status IN ('pending','running','retrying')").bind(stamp, storyId, latest.turnNumber),
+    db.prepare("DELETE FROM context_snapshots WHERE story_id=? AND through_turn_number>=?").bind(storyId, latest.turnNumber),
+    db.prepare("DELETE FROM entity_appearance_observations WHERE story_id=? AND turn_number>=?").bind(storyId, latest.turnNumber),
+    db.prepare("DELETE FROM entity_appearance_guides WHERE story_id=?").bind(storyId),
+    db.prepare("DELETE FROM visual_profiles WHERE story_id=?").bind(storyId),
+    db.prepare(`INSERT INTO story_art_profiles (story_id,profile_json,last_updated_turn,updated_at) VALUES (?,?,?,?)
+      ON CONFLICT(story_id) DO UPDATE SET profile_json=excluded.profile_json,last_updated_turn=excluded.last_updated_turn,updated_at=excluded.updated_at`).bind(
+      storyId, JSON.stringify(rollbackArtProfile), rollbackTurn, stamp),
+    db.prepare(`UPDATE background_jobs SET status='failed',last_error='Superseded by regenerated section',locked_at=NULL,updated_at=? WHERE story_id=?
+      AND ((job_type IN ('context_reconcile','checkpoint_reconcile') AND COALESCE(turn_number,0)>=? AND status IN ('pending','retrying'))
+        OR (job_type='art_scene' AND turn_number=? AND status IN ('pending','running','retrying')))`)
+      .bind(stamp, storyId, latest.turnNumber, latest.turnNumber),
+    db.prepare("UPDATE generation_jobs SET status='failed',error=?,updated_at=? WHERE idempotency_key=? AND status='generating' AND error=?").bind(
+      JSON.stringify({ message: "The preceding section was regenerated; the in-flight draft must restart from the accepted replacement.",
+        category: "writer_predecessor_changed", recoverable: true, retryAfterMs: 0 }), stamp, writerGuardKey, writerGuardLease),
     db.prepare("UPDATE art_assets SET status='Failed',caption='Superseded by regenerated section',updated_at=? WHERE story_id=? AND turn_number=? AND type<>'cover'").bind(stamp, storyId, latest.turnNumber),
     db.prepare("UPDATE stories SET latest_checkpoint_turn_number=?, updated_at=? WHERE id=?").bind(previousCheckpointTurn, stamp, storyId),
   ];
   for (const member of mergedCast) statements.push(castUpsert(db, storyId, member, latest.turnNumber));
-  statements.push(enqueueJobStatement(db, { id: `context_reconcile:${storyId}:${latest.turnNumber}:regen`, storyId, turnNumber: latest.turnNumber, jobType: "context_reconcile", input: { reason: "latest section regenerated" } }));
-  if (story.latestCheckpointTurnNumber >= latest.turnNumber) statements.push(enqueueJobStatement(db, { id: `checkpoint_reconcile:${storyId}:${latest.turnNumber}:regen`, storyId, turnNumber: latest.turnNumber, jobType: "checkpoint_reconcile", input: { force: true } }));
-  await db.batch(statements);
+  for (const guide of rollbackGuides) statements.push(entityAppearanceGuideUpsert(db, storyId, guide, stamp));
+  statements.push(enqueueJobStatement(db, { id: `context_reconcile:${storyId}:${latest.turnNumber}:regen:${turnId}`, storyId, turnNumber: latest.turnNumber, jobType: "context_reconcile", input: { reason: "latest section regenerated", force: true, rebuildFromTurn: latest.turnNumber } }));
+  if (story.latestCheckpointTurnNumber >= latest.turnNumber) statements.push(enqueueJobStatement(db, { id: `checkpoint_reconcile:${storyId}:${latest.turnNumber}:regen:${turnId}`, storyId, turnNumber: latest.turnNumber, jobType: "checkpoint_reconcile", input: { force: true } }));
+  statements.push(mutationGuardReleaseStatement(db, mutationGuardId));
+  try {
+    await db.batch(statements);
+  } catch (error) {
+    await db.prepare("UPDATE generation_jobs SET status='failed',error=?,updated_at=? WHERE idempotency_key=? AND status='generating' AND error=?")
+      .bind(JSON.stringify({ message: "The regeneration did not commit; the next writing attempt may safely resume.", category: "regeneration_commit", recoverable: true, retryAfterMs: 0 }),
+        now(), writerGuardKey, writerGuardLease).run();
+    if (isMutationGuardFailure(error)) {
+      return Response.json({ error: "The story changed before this replacement could be saved. Regenerate the current latest section again.",
+        category: "stale_regeneration", recoverable: false, retryAfterMs: 0 }, { status: 409 });
+    }
+    throw error;
+  }
   return Response.json({ story: await loadStory(storyId, true) });
 }
 
@@ -354,35 +498,39 @@ type JobType = BackgroundJob["jobType"];
 
 function enqueueJobStatement(db: D1Database, job: { id: string; storyId: string; turnNumber?: number; jobType: JobType; input?: Record<string, unknown> }) {
   const stamp = now();
+  const maxAttempts = job.jobType.startsWith("art_") ? 2 : 3;
   return db.prepare(`INSERT OR IGNORE INTO background_jobs
     (id,story_id,turn_number,job_type,status,attempts,max_attempts,run_after,input_json,result_json,created_at,updated_at)
-    VALUES (?,?,?,?,'pending',0,3,?,?,'{}',?,?)`).bind(
-    job.id, job.storyId, job.turnNumber ?? null, job.jobType, stamp, JSON.stringify(job.input || {}), stamp, stamp,
+    VALUES (?,?,?,?,'pending',0,?,?,?,'{}',?,?)`).bind(
+    job.id, job.storyId, job.turnNumber ?? null, job.jobType, maxAttempts, stamp, JSON.stringify(job.input || {}), stamp, stamp,
   );
 }
 
 function enqueueReusableJobStatement(db: D1Database, job: { id: string; storyId: string; turnNumber?: number; jobType: JobType; input?: Record<string, unknown> }) {
   const stamp = now();
+  const maxAttempts = job.jobType.startsWith("art_") ? 2 : 3;
   return db.prepare(`INSERT INTO background_jobs
     (id,story_id,turn_number,job_type,status,attempts,max_attempts,run_after,input_json,result_json,last_error,locked_at,created_at,updated_at)
-    VALUES (?,?,?,?,'pending',0,3,?,?,'{}',NULL,NULL,?,?)
+    VALUES (?,?,?,?,'pending',0,?,?,?,'{}',NULL,NULL,?,?)
     ON CONFLICT(id) DO UPDATE SET story_id=excluded.story_id,turn_number=excluded.turn_number,job_type=excluded.job_type,
-      status='pending',attempts=0,max_attempts=3,run_after=excluded.run_after,input_json=excluded.input_json,result_json='{}',
+      status='pending',attempts=0,max_attempts=excluded.max_attempts,run_after=excluded.run_after,input_json=excluded.input_json,result_json='{}',
       last_error=NULL,locked_at=NULL,updated_at=excluded.updated_at
     WHERE background_jobs.status IN ('completed','failed','unsupported')`).bind(
-    job.id, job.storyId, job.turnNumber ?? null, job.jobType, stamp, JSON.stringify(job.input || {}), stamp, stamp,
+    job.id, job.storyId, job.turnNumber ?? null, job.jobType, maxAttempts, stamp, JSON.stringify(job.input || {}), stamp, stamp,
   );
 }
 
 function automaticJobStatements(db: D1Database, story: Story, turnNumber: number, stateDelta: Record<string, unknown>, turnId: string) {
   const statements: D1PreparedStatement[] = [];
   const majorChange = stateDelta?.checkpointRecommended === true;
-  if (turnNumber % 3 === 0 || majorChange) statements.push(enqueueJobStatement(db, {
+  if (turnNumber % CONTEXT_RECONCILE_INTERVAL === 0 || majorChange) statements.push(enqueueJobStatement(db, {
     id: `context_reconcile:${story.id}:${turnNumber}`, storyId: story.id, turnNumber, jobType: "context_reconcile",
-    input: { reason: majorChange ? stateDelta.checkpointReason || "major story change" : "periodic three-section refresh" },
+    input: { reason: majorChange ? stateDelta.checkpointReason || "major story change" : "periodic twelve-section refresh" },
   }));
-  if (turnNumber - story.latestCheckpointTurnNumber >= 12 || majorChange) statements.push(enqueueJobStatement(db, {
-    id: `checkpoint_reconcile:${story.id}:${turnNumber}`, storyId: story.id, turnNumber, jobType: "checkpoint_reconcile",
+  const checkpointTarget = story.latestCheckpointTurnNumber + 12;
+  if (turnNumber >= checkpointTarget || majorChange) statements.push(enqueueJobStatement(db, {
+    id: majorChange ? `checkpoint_reconcile:${story.id}:${turnNumber}:major:${turnId}` : `checkpoint_reconcile:${story.id}:${checkpointTarget}`,
+    storyId: story.id, turnNumber, jobType: "checkpoint_reconcile",
     input: { reason: majorChange ? stateDelta.checkpointReason || "major story change" : "twelve-section reconciliation" },
   }));
   if (turnNumber % 4 === 0 || majorChange) statements.push(enqueueJobStatement(db, {
@@ -416,7 +564,8 @@ async function handleQueueArt(body: Record<string, unknown>) {
   const stamp = now();
   const assetId = crypto.randomUUID();
   const title = type === "cover" ? `${story.title} cover` : `Section ${turnNumber} illustration`;
-  const promptSummary = type === "cover" ? coverPromptSummary(story.foundation, story.artProfile || initialArtProfile(story.foundation)) : scenePromptSummary(story, turn!);
+  const artStory = type === "scene" ? await storyForArtTurn(db, story, turnNumber) : story;
+  const promptSummary = type === "cover" ? coverPromptSummary(story.foundation, initialArtProfile(story.foundation), seedEntityAppearanceGuides(story.foundation, 1)) : scenePromptSummary(artStory, turn!);
   await db.batch([
     db.prepare(`INSERT INTO art_assets (id,story_id,turn_id,turn_number,type,category,title,caption,prompt_summary,status,created_at,updated_at)
       VALUES (?,?,?,?,?,?,?,?,?,'Queued',?,?)`).bind(
@@ -424,7 +573,7 @@ async function handleQueueArt(body: Record<string, unknown>) {
       type === "cover" ? `Cover for ${story.title}` : `Illustration for Section ${turnNumber}`, promptSummary, stamp, stamp,
     ),
     enqueueReusableJobStatement(db, { id: jobId, storyId, turnNumber, jobType,
-      input: { assetId, turnId: turn?.id, requestedByUser: true, model, briefReady: true } }),
+      input: { assetId, turnId: turn?.id, requestedByUser: true, model, briefReady: true, briefVersion: 2 } }),
   ]);
   const claimed = await db.prepare("SELECT input_json FROM background_jobs WHERE id=?").bind(jobId).first<Row>();
   const claimedInput = json<Record<string, unknown>>(String(claimed?.input_json || ""), {});
@@ -444,7 +593,11 @@ async function handleRetryBackgroundJob(body: Record<string, unknown>) {
   }
   const input = json<Record<string, unknown>>(String(row.input_json || ""), {});
   delete input.interactionId;
-  if (body.model != null) input.model = selectedGoogleImageModel(body.model);
+  if (body.model != null) {
+    const nextModel = selectedGoogleImageModel(body.model);
+    if (input.model && input.model !== nextModel) { delete input.objectKey; delete input.objectKeyLock; }
+    input.model = nextModel;
+  }
   const jobType = String(row.job_type) as JobType;
   const storyId = String(row.story_id);
   const turnNumber = Number(row.turn_number || 0);
@@ -460,6 +613,8 @@ async function handleRetryBackgroundJob(body: Record<string, unknown>) {
       input.turnId = refreshedTurnId;
       input.refreshBrief = true;
       input.briefReady = false;
+      delete input.objectKey;
+      delete input.objectKeyLock;
     }
   }
   const stamp = now();
@@ -487,7 +642,7 @@ async function handleRunBackgroundJob(body: Record<string, unknown>) {
   const runningRows = await db.prepare("SELECT * FROM background_jobs WHERE status='running'").all<Row>();
   const staleRows = runningRows.results.filter((row) => {
     const artJob = ["art_cover", "art_scene"].includes(String(row.job_type));
-    const leaseMs = artJob ? 12 * 60_000 : 25 * 60_000;
+    const leaseMs = artJob ? 12 * 60_000 : TEXT_BACKGROUND_LEASE_MS;
     const updatedAt = Date.parse(String(row.updated_at || ""));
     return !Number.isFinite(updatedAt) || updatedAt < Date.now() - leaseMs;
   });
@@ -557,9 +712,10 @@ async function handleRunBackgroundJob(body: Record<string, unknown>) {
 async function ensureBaselineJobs(db: D1Database, storyId: string) {
   await failExhaustedJobs(db, storyId);
   await reconcileActiveArtJobs(db, storyId);
-  const [storyRow, contextRow, coverRow, activeCoverJob] = await Promise.all([
-    db.prepare("SELECT title,latest_accepted_turn_number FROM stories WHERE id=?").bind(storyId).first<Row>(),
+  const [storyRow, contextRow, entityGuideRow, coverRow, activeCoverJob] = await Promise.all([
+    db.prepare("SELECT title,foundation_json,latest_accepted_turn_number FROM stories WHERE id=?").bind(storyId).first<Row>(),
     db.prepare("SELECT id FROM context_snapshots WHERE story_id=? LIMIT 1").bind(storyId).first<Row>(),
+    db.prepare("SELECT id FROM entity_appearance_guides WHERE story_id=? LIMIT 1").bind(storyId).first<Row>(),
     db.prepare(`SELECT * FROM art_assets WHERE story_id=? AND type='cover'
       ORDER BY CASE WHEN status='Ready' THEN 0 WHEN status IN ('Placeholder','Queued','Preparing') THEN 1 ELSE 2 END,created_at DESC LIMIT 1`).bind(storyId).first<Row>(),
     db.prepare(`SELECT id FROM background_jobs WHERE story_id=? AND job_type='art_cover'
@@ -572,6 +728,17 @@ async function ensureBaselineJobs(db: D1Database, storyId: string) {
   if (!contextRow) statements.push(enqueueJobStatement(db, {
     id: `context_reconcile:${storyId}:${turnNumber}:baseline`, storyId, turnNumber, jobType: "context_reconcile", input: { reason: "baseline context for an existing story" },
   }));
+  if (!entityGuideRow) {
+    const stamp = now();
+    const foundation = json<StoryFoundation>(String(storyRow.foundation_json || ""), {} as StoryFoundation);
+    const seedGuides = seedEntityAppearanceGuides(foundation, Math.min(1, turnNumber));
+    for (const guide of seedGuides) statements.push(entityAppearanceGuideUpsert(db, storyId, guide, stamp));
+    for (const observation of observationsFromGuides(storyId, seedGuides, Math.min(1, turnNumber), 0, "", stamp)) statements.push(entityAppearanceObservationUpsert(db, observation));
+    statements.push(enqueueJobStatement(db, {
+      id: `context_reconcile:${storyId}:${turnNumber}:entity-baseline-v1`, storyId, turnNumber, jobType: "context_reconcile",
+      input: { reason: "durable entity appearance baseline for an existing story" },
+    }));
+  }
   const coverStatus = String(coverRow?.status || "");
   const repairableCover = !coverRow || ["Placeholder", "Queued", "Preparing"].includes(coverStatus);
   if (repairableCover && !activeCoverJob) {
@@ -648,51 +815,166 @@ async function reconcileActiveArtJobs(db: D1Database, storyId: string, onlyType:
 type BackgroundJobOutcome = { result: unknown; unsupported?: boolean; message?: string; deferred?: boolean; runAfterMs?: number; input?: Record<string, unknown> };
 
 async function processBackgroundJob(job: BackgroundJob, input: Record<string, unknown>, lock: string): Promise<BackgroundJobOutcome> {
-  if (job.jobType === "context_reconcile") return { result: await runContextJob(job) };
-  if (job.jobType === "checkpoint_reconcile") return { result: await runCheckpointJob(job) };
+  if (job.jobType === "context_reconcile") return { result: await runContextJob(job, input, lock) };
+  if (job.jobType === "checkpoint_reconcile") return { result: await runCheckpointJob(job, lock) };
   if (job.jobType === "art_cover" || job.jobType === "art_scene") return runArtJob(job, input, lock);
   throw new Error("Unknown background job type.");
 }
 
-async function runContextJob(job: BackgroundJob) {
+async function runContextJob(job: BackgroundJob, input: Record<string, unknown>, lock: string) {
+  const db = getD1();
   const story = await loadStory(job.storyId, true);
   if (!story) throw new Error("Story not found for context reconciliation.");
-  const through = Math.min(job.turnNumber || story.latestAcceptedTurnNumber, story.latestAcceptedTurnNumber);
+  const latestAccepted = story.latestAcceptedTurnNumber;
+  const latestRow = await db.prepare("SELECT id,through_turn_number FROM context_snapshots WHERE story_id=? ORDER BY through_turn_number DESC LIMIT 1").bind(story.id).first<Row>();
+  const latestSnapshotThrough = Number(latestRow?.through_turn_number || 0);
+  const latestSnapshotId = String(latestRow?.id || "");
+  if (latestSnapshotThrough >= latestAccepted && input.force !== true) {
+    return { throughTurnNumber: latestAccepted, alreadyReconciled: true };
+  }
+  const through = nextReconciliationThrough(latestAccepted, latestSnapshotThrough);
+  const boundaryTurnId = story.turns?.find((turn) => turn.turnNumber === through)?.id || "";
+  if (!boundaryTurnId) throw new ApiRouteFailure("The continuity window no longer has an accepted boundary section.", "story_revision_changed", true);
+  const previousRow = await db.prepare("SELECT snapshot_json,through_turn_number FROM context_snapshots WHERE story_id=? AND through_turn_number<? ORDER BY through_turn_number DESC LIMIT 1")
+    .bind(story.id, through).first<Row>();
+  const previousThrough = Number(previousRow?.through_turn_number || 0);
+  const previousContext = json<ContextSnapshot | undefined>(String(previousRow?.snapshot_json || ""), undefined);
+  const recentTurns = (story.turns || []).filter((turn) => turn.turnNumber > previousThrough && turn.turnNumber <= through)
+    .map((turn) => ({ turnNumber: turn.turnNumber, prose: turn.prose, stateDelta: turn.stateDelta }));
+  let existingGuides = previousContext?.entityAppearanceGuides?.length
+    ? previousContext.entityAppearanceGuides
+    : story.entityAppearanceGuides?.filter((guide) => guide.lastUpdatedTurn <= previousThrough).length
+      ? story.entityAppearanceGuides.filter((guide) => guide.lastUpdatedTurn <= previousThrough)
+    : seedEntityAppearanceGuides(story.foundation, Math.min(1, through));
+  if (input.rebuildFromTurn && previousContext?.entityAppearanceGuides?.length) {
+    const previousGuides = new Map(previousContext.entityAppearanceGuides.map((guide) => [`${guide.kind}:${guide.entityId}`, guide]));
+    existingGuides = existingGuides.map((guide) => {
+      const previous = previousGuides.get(`${guide.kind}:${guide.entityId}`);
+      return previous ? { ...guide, current: previous.current, lastUpdatedTurn: previous.lastUpdatedTurn } : guide;
+    });
+  }
+  const priorObservations = (story.entityAppearanceTimeline || []).filter((item) => item.turnNumber <= previousThrough).slice(-120);
   const snapshot = await createContextReconciliation({
-    storyId: story.id, throughTurnNumber: through, foundation: story.foundation, state: story.storyState!, cast: story.cast || [],
-    recentTurns: (story.turns || []).slice(-5).map((turn) => ({ turnNumber: turn.turnNumber, prose: turn.prose, stateDelta: turn.stateDelta })),
-    previousContext: story.contextSnapshot, previousArtProfile: story.artProfile,
+    storyId: story.id, throughTurnNumber: through, foundation: story.foundation, state: storyStateThrough(story, through), cast: storyCastThrough(story, through),
+    recentTurns, previousContext, previousArtProfile: previousContext?.storyArtProfile || initialArtProfile(story.foundation), previousEntityGuides: existingGuides,
+    recentEntityObservations: priorObservations, previousThroughTurnNumber: previousThrough,
   });
-  const db = getD1();
+  const lease = await db.prepare("SELECT id FROM background_jobs WHERE id=? AND status='running' AND locked_at=?").bind(job.id, lock).first<Row>();
+  if (!lease) return { throughTurnNumber: through, cancelled: true };
+  const snapshotGuides = mergeEntityAppearanceGuides(existingGuides, snapshot.entityAppearanceGuides, through);
+  const latestGuideRows = await db.prepare("SELECT * FROM entity_appearance_guides WHERE story_id=? ORDER BY kind,name").bind(story.id).all<Row>();
+  const latestGuides = latestGuideRows.results.map(entityAppearanceGuideFromRow).filter((guide) => guide.lastUpdatedTurn <= through);
+  let mergeBase = latestGuides.length ? latestGuides : snapshotGuides;
+  if (input.rebuildFromTurn) {
+    const resetCurrents = new Map(existingGuides.map((guide) => [`${guide.kind}:${guide.entityId}`, guide.current]));
+    mergeBase = mergeBase.map((guide) => ({ ...guide, current: resetCurrents.get(`${guide.kind}:${guide.entityId}`) || guide.current }));
+  }
+  const durableGuides = mergeEntityAppearanceGuides(mergeBase, snapshotGuides, through);
   const stamp = now();
+  const snapshotId = crypto.randomUUID();
+  const observations = observationsFromGuides(story.id, snapshotGuides, through, previousThrough, snapshotId, stamp);
+  const managedSnapshot: ContextSnapshot = {
+    ...snapshot,
+    throughTurnNumber: through,
+    storyArtProfile: snapshot.storyArtProfile || previousContext?.storyArtProfile || initialArtProfile(story.foundation),
+    characterVisualProfiles: snapshot.characterVisualProfiles || [],
+    locationVisualProfiles: snapshot.locationVisualProfiles || [],
+    entityAppearanceGuides: snapshotGuides.map((guide) => ({ ...guide, timelineObservations: undefined })),
+    entityAppearanceObservations: observations.map(({ turnNumber, summary, changes, evidence }) => ({ turnNumber, summary, changes, evidence })),
+  };
+  const mutationGuardId = `context:${job.id}:${through}:${crypto.randomUUID()}`;
   const statements = [
+    backgroundBoundaryMutationGuardStatement(db, {
+      id: mutationGuardId, storyId: story.id, throughTurnNumber: through, boundaryTurnId,
+      jobId: job.id, lock, chain: "context", expectedHeadThrough: latestSnapshotThrough, expectedHeadId: latestSnapshotId, stamp,
+    }),
     db.prepare("INSERT OR REPLACE INTO context_snapshots (id,story_id,through_turn_number,snapshot_json,created_at) VALUES (?,?,?,?,?)").bind(
-      crypto.randomUUID(), story.id, through, JSON.stringify(snapshot), stamp),
+      snapshotId, story.id, through, JSON.stringify(managedSnapshot), stamp),
     db.prepare(`INSERT INTO story_art_profiles (story_id,profile_json,last_updated_turn,updated_at) VALUES (?,?,?,?)
-      ON CONFLICT(story_id) DO UPDATE SET profile_json=excluded.profile_json,last_updated_turn=excluded.last_updated_turn,updated_at=excluded.updated_at`).bind(
-      story.id, JSON.stringify(snapshot.storyArtProfile), through, stamp),
+      ON CONFLICT(story_id) DO UPDATE SET profile_json=excluded.profile_json,last_updated_turn=excluded.last_updated_turn,updated_at=excluded.updated_at
+      WHERE excluded.last_updated_turn>=story_art_profiles.last_updated_turn`).bind(
+      story.id, JSON.stringify(managedSnapshot.storyArtProfile), through, stamp),
   ];
-  for (const profile of [...(snapshot.characterVisualProfiles || []), ...(snapshot.locationVisualProfiles || [])]) statements.push(visualProfileUpsert(db, story.id, profile, through));
-  await db.batch(statements);
-  return { throughTurnNumber: through, characters: snapshot.characterState?.length || 0, visualProfiles: (snapshot.characterVisualProfiles?.length || 0) + (snapshot.locationVisualProfiles?.length || 0) };
+  if (through < latestAccepted) statements.push(enqueueJobStatement(db, {
+    id: `context_reconcile:${story.id}:${through + 1}-${Math.min(latestAccepted, through + 12)}:catchup`, storyId: story.id,
+    turnNumber: Math.min(latestAccepted, through + 12), jobType: "context_reconcile", input: { reason: "bounded continuity catch-up" },
+  }));
+  for (const profile of [...managedSnapshot.characterVisualProfiles, ...managedSnapshot.locationVisualProfiles]) statements.push(visualProfileUpsert(db, story.id, profile, through));
+  for (const guide of durableGuides) statements.push(entityAppearanceGuideUpsert(db, story.id, guide, stamp));
+  for (const observation of observations) statements.push(entityAppearanceObservationUpsert(db, observation));
+  statements.push(mutationGuardReleaseStatement(db, mutationGuardId));
+  try {
+    await db.batch(statements);
+  } catch (error) {
+    if (isMutationGuardFailure(error)) throw new ApiRouteFailure(
+      "The reconciled continuity window changed before it could be saved; the job will restart from the accepted timeline.",
+      "story_revision_changed", true,
+    );
+    throw error;
+  }
+  return {
+    throughTurnNumber: through,
+    characters: managedSnapshot.characterState?.length || 0,
+    visualProfiles: managedSnapshot.characterVisualProfiles.length + managedSnapshot.locationVisualProfiles.length,
+    entityGuides: snapshotGuides.length,
+    entityObservations: observations.length,
+  };
 }
 
-async function runCheckpointJob(job: BackgroundJob) {
+async function runCheckpointJob(job: BackgroundJob, lock: string) {
   const db = getD1();
   const story = await loadStory(job.storyId, true);
   if (!story) throw new Error("Story not found for checkpoint reconciliation.");
-  const through = Math.min(job.turnNumber || story.latestAcceptedTurnNumber, story.latestAcceptedTurnNumber);
+  const latestAccepted = story.latestAcceptedTurnNumber;
+  const newestRow = await db.prepare("SELECT id,through_turn_number FROM checkpoints WHERE story_id=? ORDER BY through_turn_number DESC LIMIT 1").bind(story.id).first<Row>();
+  const after = Number(newestRow?.through_turn_number || 0);
+  const checkpointHeadId = String(newestRow?.id || "");
+  if (after >= latestAccepted) return { throughTurnNumber: latestAccepted, alreadyReconciled: true };
+  const through = nextReconciliationThrough(latestAccepted, after);
+  const boundaryTurnId = story.turns?.find((turn) => turn.turnNumber === through)?.id || "";
+  if (!boundaryTurnId) throw new ApiRouteFailure("The checkpoint window no longer has an accepted boundary section.", "story_revision_changed", true);
   const previousRow = await db.prepare("SELECT checkpoint_json,through_turn_number FROM checkpoints WHERE story_id=? AND through_turn_number<? ORDER BY through_turn_number DESC LIMIT 1").bind(story.id, through).first<Row>();
-  const after = Number(previousRow?.through_turn_number || 0);
   const turns = (story.turns || []).filter((turn) => turn.turnNumber > after && turn.turnNumber <= through).map((turn) => ({ turnNumber: turn.turnNumber, prose: turn.prose, delta: turn.stateDelta }));
+  const [contextRow, entityObservationRows] = await Promise.all([
+    db.prepare("SELECT snapshot_json FROM context_snapshots WHERE story_id=? AND through_turn_number<=? ORDER BY through_turn_number DESC LIMIT 1")
+      .bind(story.id, through).first<Row>(),
+    db.prepare("SELECT * FROM entity_appearance_observations WHERE story_id=? AND turn_number>? AND turn_number<=? ORDER BY turn_number,kind,name")
+      .bind(story.id, after, through).all<Row>(),
+  ]);
+  const entityObservations = entityObservationRows.results.map(entityAppearanceObservationFromRow);
+  const checkpointContext = json<ContextSnapshot | undefined>(String(contextRow?.snapshot_json || ""), undefined);
   const checkpoint = await createCheckpoint({ storyId: story.id, previous: json(String(previousRow?.checkpoint_json || ""), {}), turns,
-    state: story.storyState!, cast: story.cast || [], throughTurnNumber: through });
+    state: storyStateThrough(story, through), cast: storyCastThrough(story, through), throughTurnNumber: through,
+    entityAppearanceGuides: checkpointContext?.entityAppearanceGuides
+      || (story.entityAppearanceGuides || []).filter((guide) => guide.lastUpdatedTurn <= through),
+    entityAppearanceObservations: entityObservations });
+  const lease = await db.prepare("SELECT id FROM background_jobs WHERE id=? AND status='running' AND locked_at=?").bind(job.id, lock).first<Row>();
+  if (!lease) return { throughTurnNumber: through, cancelled: true };
   const stamp = now();
-  await db.batch([
+  const mutationGuardId = `checkpoint:${job.id}:${through}:${crypto.randomUUID()}`;
+  const statements = [
+    backgroundBoundaryMutationGuardStatement(db, {
+      id: mutationGuardId, storyId: story.id, throughTurnNumber: through, boundaryTurnId,
+      jobId: job.id, lock, chain: "checkpoint", expectedHeadThrough: after, expectedHeadId: checkpointHeadId, stamp,
+    }),
     db.prepare("INSERT OR REPLACE INTO checkpoints (id,story_id,through_turn_number,checkpoint_json,created_at) VALUES (?,?,?,?,?)").bind(
       crypto.randomUUID(), story.id, through, JSON.stringify(checkpoint), stamp),
-    db.prepare("UPDATE stories SET latest_checkpoint_turn_number=?,updated_at=? WHERE id=?").bind(through, stamp, story.id),
-  ]);
+    db.prepare("UPDATE stories SET latest_checkpoint_turn_number=MAX(latest_checkpoint_turn_number,?),updated_at=? WHERE id=?").bind(through, stamp, story.id),
+  ];
+  if (through < latestAccepted) statements.push(enqueueJobStatement(db, {
+    id: `checkpoint_reconcile:${story.id}:${through + 1}-${Math.min(latestAccepted, through + 12)}:catchup`, storyId: story.id,
+    turnNumber: Math.min(latestAccepted, through + 12), jobType: "checkpoint_reconcile", input: { reason: "bounded checkpoint catch-up" },
+  }));
+  statements.push(mutationGuardReleaseStatement(db, mutationGuardId));
+  try {
+    await db.batch(statements);
+  } catch (error) {
+    if (isMutationGuardFailure(error)) throw new ApiRouteFailure(
+      "The checkpoint window changed before it could be saved; the job will restart from the accepted timeline.",
+      "story_revision_changed", true,
+    );
+    throw error;
+  }
   return { throughTurnNumber: through };
 }
 
@@ -709,12 +991,15 @@ async function runArtJob(job: BackgroundJob, input: Record<string, unknown>, loc
     input.turnId = turn!.id;
     input.refreshBrief = true;
     input.briefReady = false;
+    delete input.objectKey;
+    delete input.objectKeyLock;
   }
   const assetId = String(input.assetId || "") || `art-asset:${job.id}`;
   input.assetId = assetId;
   const existing = await db.prepare("SELECT * FROM art_assets WHERE id=?").bind(assetId).first<Row>();
-  const reusableBrief = Boolean(input.refreshBrief !== true && existing && (input.briefReady === true
+  const reusableBrief = Boolean(input.refreshBrief !== true && input.briefVersion === 2 && existing && (input.briefReady === true
     || (!["Placeholder", "Queued"].includes(String(existing.status || "")) && String(existing.prompt_summary || "").trim())));
+  const artStory = type === "scene" ? await storyForArtTurn(db, story, turn!.turnNumber) : story;
   const brief = reusableBrief ? {
     shouldIllustrate: true,
     category: String(existing?.category || (type === "cover" ? "Cover" : "Scenes")) as ArtAsset["category"],
@@ -727,9 +1012,11 @@ async function runArtJob(job: BackgroundJob, input: Record<string, unknown>, loc
     title: type === "cover" ? `${story.title} cover` : `Section ${job.turnNumber} illustration`,
     caption: type === "cover" ? `Cover for ${story.title}` : `Illustration for Section ${job.turnNumber}`,
     promptSummary: type === "cover"
-      ? coverPromptSummary(story.foundation, story.artProfile || initialArtProfile(story.foundation))
-      : scenePromptSummary(story, turn!),
+      ? coverPromptSummary(story.foundation, initialArtProfile(story.foundation), seedEntityAppearanceGuides(story.foundation, 1))
+      : scenePromptSummary(artStory, turn!),
   };
+  input.briefVersion = 2;
+  input.briefReady = true;
   const stamp = now();
   if (!brief.shouldIllustrate && type === "scene") {
     await db.prepare(`UPDATE art_assets SET title=?,caption=?,prompt_summary=?,status='Failed',updated_at=? WHERE id=?
@@ -759,19 +1046,30 @@ async function runArtJob(job: BackgroundJob, input: Record<string, unknown>, loc
   const model = selectedGoogleImageModel(input.model);
   input.model = model;
   const renderVersion = type === "scene" ? turn!.id : "cover";
-  const objectKey = `stories/${story.id}/${assetId}/${encodeURIComponent(renderVersion)}/image`;
-  const stored = await bucket.get(objectKey);
+  const resumableKey = String(input.objectKey || "");
+  const safePrefix = `stories/${story.id}/${assetId}/`;
+  const stored = resumableKey.startsWith(safePrefix) ? await bucket.get(resumableKey) : null;
   if (stored) {
+    const storedModel = stored.customMetadata?.model || model;
+    if (storedModel === model) {
+      await stored.body.cancel().catch(() => {});
+      const storedMime = stored.httpMetadata?.contentType || String(existing?.mime_type || "image/jpeg");
+      const recovered = await db.prepare(`UPDATE art_assets SET status='Ready',image_reference=?,mime_type=?,updated_at=? WHERE id=?
+        AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(
+        `r2:${resumableKey}`, storedMime, now(), assetId, job.id, lock,
+      ).run();
+      if (Number(recovered.meta.changes || 0) > 0) await recordOperationLog({ storyId: story.id, turnNumber: job.turnNumber, operation: job.jobType, category: "art_storage_resume",
+        attempt: job.attempts, status: "recovered", message: "Recovered a completed art file after an interrupted status update." });
+      return { result: { assetId, model: storedModel, mimeType: storedMime, resumed: true } };
+    }
     await stored.body.cancel().catch(() => {});
-    const storedMime = stored.httpMetadata?.contentType || String(existing?.mime_type || "image/jpeg");
-    const recovered = await db.prepare(`UPDATE art_assets SET status='Ready',image_reference=?,mime_type=?,updated_at=? WHERE id=?
-      AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)`).bind(
-      `r2:${objectKey}`, storedMime, now(), assetId, job.id, lock,
-    ).run();
-    if (Number(recovered.meta.changes || 0) > 0) await recordOperationLog({ storyId: story.id, turnNumber: job.turnNumber, operation: job.jobType, category: "art_storage_resume",
-      attempt: job.attempts, status: "recovered", message: "Recovered a completed art file after an interrupted status update." });
-    return { result: { assetId, model: stored.customMetadata?.model || model, mimeType: storedMime, resumed: true } };
   }
+  const objectKey = artAttemptObjectKey({ storyId: story.id, assetId, renderVersion, model, lease: lock });
+  input.objectKey = objectKey;
+  input.objectKeyLock = lock;
+  const persistedAttempt = await db.prepare(`UPDATE background_jobs SET input_json=?,updated_at=?
+    WHERE id=? AND status='running' AND locked_at=?`).bind(JSON.stringify(input), now(), job.id, lock).run();
+  if (Number(persistedAttempt.meta.changes || 0) < 1) return { result: { assetId, cancelled: true } };
   if (!process.env.GEMINI_API_KEY) {
     const unavailable = "Google image generation is not configured.";
     await db.prepare(`UPDATE art_assets SET status='Unsupported',updated_at=? WHERE id=?
@@ -810,7 +1108,97 @@ async function runArtJob(job: BackgroundJob, input: Record<string, unknown>, loc
 
 function backgroundFailure(error: unknown) {
   if (error instanceof GoogleImageFailure) return error;
+  if (error instanceof ApiRouteFailure) return error;
   return { message: message(error), category: "background_job", recoverable: true, retryAfterMs: 0, restartRequired: false };
+}
+
+function storyStateThrough(story: Story, throughTurnNumber: number): StoryState {
+  if (throughTurnNumber >= story.latestAcceptedTurnNumber) return story.storyState!;
+  const target = story.turns?.find((turn) => turn.turnNumber === throughTurnNumber);
+  const delta = target?.stateDelta as { nextStoryState?: StoryState } | undefined;
+  return delta?.nextStoryState || story.storyState!;
+}
+
+function storyCastThrough(story: Story, throughTurnNumber: number): CastMember[] {
+  if (throughTurnNumber >= story.latestAcceptedTurnNumber) return story.cast || [];
+  const target = story.turns?.find((turn) => turn.turnNumber === throughTurnNumber);
+  const targetDelta = target?.stateDelta as { nextCast?: CastMember[] } | undefined;
+  if (Array.isArray(targetDelta?.nextCast)) return targetDelta.nextCast;
+  const next = story.turns?.find((turn) => turn.turnNumber === throughTurnNumber + 1);
+  const nextDelta = next?.stateDelta as { priorCast?: CastMember[] } | undefined;
+  return Array.isArray(nextDelta?.priorCast) ? nextDelta.priorCast : story.cast || [];
+}
+
+async function storyForArtTurn(db: D1Database, story: Story, turnNumber: number): Promise<Story> {
+  const row = await db.prepare("SELECT snapshot_json FROM context_snapshots WHERE story_id=? AND through_turn_number<=? ORDER BY through_turn_number DESC LIMIT 1")
+    .bind(story.id, turnNumber).first<Row>();
+  const context = json<ContextSnapshot | undefined>(String(row?.snapshot_json || ""), undefined);
+  return {
+    ...story,
+    contextSnapshot: context,
+    artProfile: context?.storyArtProfile || initialArtProfile(story.foundation),
+    entityAppearanceGuides: context?.entityAppearanceGuides || (story.entityAppearanceGuides || []).filter((guide) => guide.lastUpdatedTurn <= turnNumber),
+    entityAppearanceTimeline: (story.entityAppearanceTimeline || []).filter((item) => item.turnNumber <= turnNumber),
+  };
+}
+
+function writerMutationGuardStatement(db: D1Database, input: {
+  id: string; storyId: string; expectedTurnNumber: number; expectedTurnId: string;
+  generationKey: string; generationLease: string; stamp: string;
+}) {
+  return db.prepare(`INSERT INTO mutation_guards (id,story_id,asserted,created_at)
+    SELECT ?,?,CASE WHEN
+      EXISTS (SELECT 1 FROM stories WHERE id=? AND latest_accepted_turn_number=?)
+      AND COALESCE((SELECT MAX(turn_number) FROM turns WHERE story_id=?),0)=?
+      AND COALESCE((SELECT id FROM turns WHERE story_id=? ORDER BY turn_number DESC LIMIT 1),'')=?
+      AND EXISTS (SELECT 1 FROM generation_jobs WHERE idempotency_key=? AND status='generating' AND error=?)
+    THEN 1 ELSE 0 END,?`).bind(
+    input.id, input.storyId, input.storyId, input.expectedTurnNumber,
+    input.storyId, input.expectedTurnNumber, input.storyId, input.expectedTurnId,
+    input.generationKey, input.generationLease, input.stamp,
+  );
+}
+
+function regenerationMutationGuardStatement(db: D1Database, input: {
+  id: string; storyId: string; expectedTurnNumber: number; expectedTurnId: string;
+  generationKey: string; generationLease: string; stamp: string;
+}) {
+  return db.prepare(`INSERT INTO mutation_guards (id,story_id,asserted,created_at)
+    SELECT ?,?,CASE WHEN
+      EXISTS (SELECT 1 FROM stories WHERE id=? AND latest_accepted_turn_number=?)
+      AND EXISTS (SELECT 1 FROM turns WHERE story_id=? AND turn_number=? AND id=?)
+      AND EXISTS (SELECT 1 FROM generation_jobs WHERE idempotency_key=? AND status='generating' AND error=?)
+    THEN 1 ELSE 0 END,?`).bind(
+    input.id, input.storyId, input.storyId, input.expectedTurnNumber,
+    input.storyId, input.expectedTurnNumber, input.expectedTurnId,
+    input.generationKey, input.generationLease, input.stamp,
+  );
+}
+
+function backgroundBoundaryMutationGuardStatement(db: D1Database, input: {
+  id: string; storyId: string; throughTurnNumber: number; boundaryTurnId: string;
+  jobId: string; lock: string; chain: "context" | "checkpoint";
+  expectedHeadThrough: number; expectedHeadId: string; stamp: string;
+}) {
+  const chainTable = input.chain === "context" ? "context_snapshots" : "checkpoints";
+  return db.prepare(`INSERT INTO mutation_guards (id,story_id,asserted,created_at)
+    SELECT ?,?,CASE WHEN
+      EXISTS (SELECT 1 FROM turns WHERE story_id=? AND turn_number=? AND id=?)
+      AND EXISTS (SELECT 1 FROM background_jobs WHERE id=? AND status='running' AND locked_at=?)
+      AND COALESCE((SELECT through_turn_number FROM ${chainTable} WHERE story_id=? ORDER BY through_turn_number DESC LIMIT 1),0)=?
+      AND COALESCE((SELECT id FROM ${chainTable} WHERE story_id=? ORDER BY through_turn_number DESC LIMIT 1),'')=?
+    THEN 1 ELSE 0 END,?`).bind(
+    input.id, input.storyId, input.storyId, input.throughTurnNumber, input.boundaryTurnId,
+    input.jobId, input.lock, input.storyId, input.expectedHeadThrough, input.storyId, input.expectedHeadId, input.stamp,
+  );
+}
+
+function mutationGuardReleaseStatement(db: D1Database, id: string) {
+  return db.prepare("DELETE FROM mutation_guards WHERE id=?").bind(id);
+}
+
+function isMutationGuardFailure(error: unknown) {
+  return /mutation_guard_asserted_check|check constraint failed/i.test(message(error));
 }
 
 async function loadStory(storyId: string, includeDetails: boolean): Promise<Story | null> {
@@ -819,15 +1207,19 @@ async function loadStory(storyId: string, includeDetails: boolean): Promise<Stor
   if (!row) return null;
   const story = storyFromRow(row);
   if (!includeDetails) return story;
-  const [turnRows, castRows, stateRow, contextRow, artProfileRow, visualRows, artRows, jobRows] = await Promise.all([
+  const [turnRows, castRows, stateRow, contextRow, artProfileRow, visualRows, entityGuideRows, entityObservationRows, artRows, jobRows, writingJobRow] = await Promise.all([
     db.prepare("SELECT * FROM turns WHERE story_id=? ORDER BY turn_number ASC").bind(storyId).all<Row>(),
     db.prepare("SELECT * FROM cast_members WHERE story_id=? ORDER BY name ASC").bind(storyId).all<Row>(),
     db.prepare("SELECT * FROM story_states WHERE story_id=?").bind(storyId).first<Row>(),
     db.prepare("SELECT * FROM context_snapshots WHERE story_id=? ORDER BY through_turn_number DESC LIMIT 1").bind(storyId).first<Row>(),
     db.prepare("SELECT * FROM story_art_profiles WHERE story_id=?").bind(storyId).first<Row>(),
     db.prepare("SELECT * FROM visual_profiles WHERE story_id=? ORDER BY kind,name").bind(storyId).all<Row>(),
+    db.prepare("SELECT * FROM entity_appearance_guides WHERE story_id=? ORDER BY kind,name").bind(storyId).all<Row>(),
+    db.prepare(`SELECT * FROM (SELECT * FROM entity_appearance_observations WHERE story_id=? ORDER BY turn_number DESC,created_at DESC LIMIT 240)
+      ORDER BY turn_number ASC,kind,name`).bind(storyId).all<Row>(),
     db.prepare("SELECT * FROM art_assets WHERE story_id=? ORDER BY CASE category WHEN 'Cover' THEN 0 WHEN 'Scenes' THEN 1 WHEN 'Characters' THEN 2 ELSE 3 END,turn_number,created_at DESC").bind(storyId).all<Row>(),
     db.prepare("SELECT * FROM background_jobs WHERE story_id=? ORDER BY updated_at DESC LIMIT 30").bind(storyId).all<Row>(),
+    db.prepare("SELECT * FROM generation_jobs WHERE story_id=? ORDER BY turn_number DESC LIMIT 1").bind(storyId).first<Row>(),
   ]);
   story.turns = turnRows.results.map(turnFromRow);
   story.cast = castRows.results.map((cast: Row) => json<CastMember>(String(cast.canonical_json || ""), {} as CastMember));
@@ -835,8 +1227,11 @@ async function loadStory(storyId: string, includeDetails: boolean): Promise<Stor
   story.contextSnapshot = contextRow ? json<ContextSnapshot | undefined>(String(contextRow.snapshot_json || ""), undefined) : undefined;
   story.artProfile = artProfileRow ? json<StoryArtProfile | undefined>(String(artProfileRow.profile_json || ""), undefined) : undefined;
   story.visualProfiles = visualRows.results.map(visualFromRow);
+  story.entityAppearanceGuides = entityGuideRows.results.map(entityAppearanceGuideFromRow);
+  story.entityAppearanceTimeline = entityObservationRows.results.map(entityAppearanceObservationFromRow);
   story.art = artRows.results.map(artFromRow);
   story.jobs = jobRows.results.map(jobFromRow);
+  story.writingJob = writingJobRow ? writingJobFromRow(writingJobRow) : undefined;
   story.logs = await loadLogs(30, storyId);
   return story;
 }
@@ -885,13 +1280,16 @@ function initialArtProfile(foundation: StoryFoundation): StoryArtProfile {
   };
 }
 
-function coverPromptSummary(foundation: StoryFoundation, profile: StoryArtProfile) {
+function coverPromptSummary(foundation: StoryFoundation, profile: StoryArtProfile, entityGuides: EntityAppearanceGuide[] = []) {
+  const durableEntities = entityGuides.filter((guide) => guide.firstSeenTurn <= 1).slice(0, 10)
+    .map((guide) => entityGuidePromptLine(guide, [], 1, false));
   return [
     `Design language: ${profile.coverStyle}. ${profile.artStyle}.`,
     `Story premise: ${foundation.shortDescription || foundation.openingSituation}.`,
     `Setting: ${foundation.setting}. Mood: ${profile.mood}. Palette: ${(profile.palette || []).join(", ")}.`,
     `Primary figure: ${profile.protagonistAppearance}.`,
     profile.majorCastAppearance?.length ? `Other established figures: ${profile.majorCastAppearance.slice(0, 4).join("; ")}.` : "",
+    durableEntities.length ? `Durable entity appearance/style guides: ${durableEntities.join("; ")}.` : "",
     profile.recurringMotifs?.length ? `Recurring visual motifs: ${profile.recurringMotifs.slice(0, 5).join(", ")}.` : "",
     `Avoid: ${(profile.avoid || []).join(", ")}.`,
   ].filter(Boolean).join("\n");
@@ -899,21 +1297,36 @@ function coverPromptSummary(foundation: StoryFoundation, profile: StoryArtProfil
 
 function scenePromptSummary(story: Story, turn: Turn) {
   const profile = story.artProfile || initialArtProfile(story.foundation);
-  const visibleProfiles = (story.visualProfiles || []).slice(0, 8).map((item) => `${item.name}: ${item.visualDescription || [item.clothing, item.architecture, item.atmosphere].filter(Boolean).join(", ")}`);
+  const visibleProfiles = (story.visualProfiles || []).filter((item) => item.lastUpdatedTurn <= turn.turnNumber).slice(0, 8)
+    .map((item) => `${item.name}: ${item.visualDescription || [item.clothing, item.architecture, item.atmosphere].filter(Boolean).join(", ")}`);
+  const durableEntities = (story.entityAppearanceGuides || []).filter((guide) => guide.firstSeenTurn <= turn.turnNumber).slice(0, 12)
+    .map((guide) => entityGuidePromptLine(guide, story.entityAppearanceTimeline || [], turn.turnNumber, true));
   return [
     `Choose the clearest visually decisive moment from Section ${turn.turnNumber} and illustrate that single moment.`,
     `Story art direction: ${profile.artStyle}. Mood: ${profile.mood}. Palette: ${(profile.palette || []).join(", ")}.`,
+    durableEntities.length ? `Durable entity appearance/style guides (baseline traits are authoritative; current details apply at this timeline point): ${durableEntities.join("; ")}.` : "",
     visibleProfiles.length ? `Established visual continuity: ${visibleProfiles.join("; ")}.` : `Protagonist continuity: ${profile.protagonistAppearance}.`,
     `Section text:\n${turn.prose.slice(0, 2_800)}`,
     `Avoid: ${(profile.avoid || []).join(", ")}.`,
   ].filter(Boolean).join("\n\n");
 }
 
+function entityGuidePromptLine(guide: EntityAppearanceGuide, timeline: EntityAppearanceObservation[], targetTurn: number, includeCurrent: boolean) {
+  const baseline = [guide.baseline.summary, ...(guide.baseline.signatureTraits || []), ...(guide.baseline.styleNotes || [])].filter(Boolean).join(", ");
+  const current = includeCurrent && guide.lastUpdatedTurn <= targetTurn
+    ? [guide.current.appearance, guide.current.wardrobeOrSurface, guide.current.condition, ...(guide.current.temporaryChanges || [])].filter(Boolean).join(", ")
+    : "";
+  const observations = timeline.filter((item) => item.kind === guide.kind && item.entityId === guide.entityId && item.turnNumber <= targetTurn)
+    .slice(-6).map((item) => `Section ${item.turnNumber}: ${item.summary}`).join("; ");
+  return `${guide.kind} ${guide.name} [${guide.entityId}] — baseline: ${baseline || "not yet established"}${current ? `; current at this point: ${current}` : ""}${observations ? `; timeline through this section: ${observations}` : ""}; avoid: ${(guide.baseline.avoid || []).join(", ") || "unestablished changes"}`;
+}
+
 function visualProfileUpsert(db: D1Database, storyId: string, profile: VisualProfile, turn: number) {
   const id = `${storyId}:${profile.kind}:${profile.entityId}`;
   return db.prepare(`INSERT INTO visual_profiles (id,story_id,kind,entity_id,name,profile_json,last_updated_turn,updated_at)
     VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(story_id,kind,entity_id) DO UPDATE SET name=excluded.name,profile_json=excluded.profile_json,
-    last_updated_turn=excluded.last_updated_turn,updated_at=excluded.updated_at`).bind(
+    last_updated_turn=excluded.last_updated_turn,updated_at=excluded.updated_at
+    WHERE excluded.last_updated_turn>=visual_profiles.last_updated_turn`).bind(
     id, storyId, profile.kind, profile.entityId, profile.name, JSON.stringify({ ...profile, id, storyId, lastUpdatedTurn: turn }), turn, now(),
   );
 }
@@ -921,6 +1334,52 @@ function visualProfileUpsert(db: D1Database, storyId: string, profile: VisualPro
 function visualFromRow(row: Row): VisualProfile {
   return { ...json<VisualProfile>(String(row.profile_json || ""), {} as VisualProfile), id: String(row.id), storyId: String(row.story_id),
     kind: String(row.kind) as VisualProfile["kind"], entityId: String(row.entity_id), name: String(row.name), lastUpdatedTurn: Number(row.last_updated_turn || 0) };
+}
+
+function entityAppearanceGuideUpsert(db: D1Database, storyId: string, guide: EntityAppearanceGuide, stamp = now()) {
+  const id = `${storyId}:${guide.kind}:${guide.entityId}`;
+  return db.prepare(`INSERT INTO entity_appearance_guides
+    (id,story_id,kind,entity_id,name,aliases_json,baseline_json,current_json,first_seen_turn,last_updated_turn,created_at,updated_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+    ON CONFLICT(story_id,kind,entity_id) DO UPDATE SET name=excluded.name,aliases_json=excluded.aliases_json,
+      baseline_json=excluded.baseline_json,current_json=excluded.current_json,first_seen_turn=MIN(entity_appearance_guides.first_seen_turn,excluded.first_seen_turn),
+      last_updated_turn=excluded.last_updated_turn,updated_at=excluded.updated_at
+    WHERE excluded.last_updated_turn>=entity_appearance_guides.last_updated_turn`).bind(
+    id, storyId, guide.kind, guide.entityId, guide.name, JSON.stringify(guide.aliases || []), JSON.stringify(guide.baseline),
+    JSON.stringify(guide.current), guide.firstSeenTurn, guide.lastUpdatedTurn, stamp, stamp,
+  );
+}
+
+function entityAppearanceObservationUpsert(db: D1Database, observation: EntityAppearanceObservation) {
+  return db.prepare(`INSERT INTO entity_appearance_observations
+    (id,story_id,guide_id,kind,entity_id,name,turn_number,observation_json,source_snapshot_id,created_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?)
+    ON CONFLICT(story_id,kind,entity_id,turn_number) DO UPDATE SET name=excluded.name,observation_json=excluded.observation_json,
+      source_snapshot_id=excluded.source_snapshot_id,created_at=excluded.created_at`).bind(
+    observation.id, observation.storyId, observation.guideId, observation.kind, observation.entityId, observation.name,
+    observation.turnNumber, JSON.stringify({ summary: observation.summary, changes: observation.changes, evidence: observation.evidence }),
+    observation.sourceSnapshotId || null, observation.createdAt,
+  );
+}
+
+function entityAppearanceGuideFromRow(row: Row): EntityAppearanceGuide {
+  return {
+    id: String(row.id), storyId: String(row.story_id), kind: String(row.kind) as EntityAppearanceGuide["kind"],
+    entityId: String(row.entity_id), name: String(row.name), aliases: json<string[]>(String(row.aliases_json || ""), []),
+    baseline: json(String(row.baseline_json || ""), { summary: "Not yet visually established", signatureTraits: [], styleNotes: [], palette: [], motifs: [], avoid: [] }),
+    current: json(String(row.current_json || ""), { appearance: "Not yet visually established", wardrobeOrSurface: "", condition: "", location: "", temporaryChanges: [] }),
+    firstSeenTurn: Number(row.first_seen_turn || 0), lastUpdatedTurn: Number(row.last_updated_turn || 0),
+  };
+}
+
+function entityAppearanceObservationFromRow(row: Row): EntityAppearanceObservation {
+  const observation = json<{ summary?: string; changes?: string[]; evidence?: string[] }>(String(row.observation_json || ""), {});
+  return {
+    id: String(row.id), storyId: String(row.story_id), guideId: String(row.guide_id),
+    kind: String(row.kind) as EntityAppearanceObservation["kind"], entityId: String(row.entity_id), name: String(row.name),
+    turnNumber: Number(row.turn_number || 0), summary: String(observation.summary || ""), changes: observation.changes || [], evidence: observation.evidence || [],
+    sourceSnapshotId: row.source_snapshot_id ? String(row.source_snapshot_id) : undefined, createdAt: String(row.created_at),
+  };
 }
 
 function artFromRow(row: Row): ArtAsset {
@@ -937,6 +1396,18 @@ function jobFromRow(row: Row): BackgroundJob {
     jobType: String(row.job_type) as BackgroundJob["jobType"], status: String(row.status) as BackgroundJob["status"],
     attempts: Number(row.attempts || 0), maxAttempts: Number(row.max_attempts || 3), runAfter: String(row.run_after),
     lastError: row.last_error ? String(row.last_error) : undefined, createdAt: String(row.created_at), updatedAt: String(row.updated_at) };
+}
+
+function writingJobFromRow(row: Row): WritingJob {
+  const rawError = String(row.error || "");
+  const detail = rawError.startsWith("{")
+    ? json<{ message?: string; category?: string; recoverable?: boolean; retryAfterMs?: number }>(rawError, {})
+    : {};
+  return {
+    turnNumber: Number(row.turn_number || 0), status: String(row.status) as WritingJob["status"],
+    error: detail.message || (rawError && !rawError.startsWith("lease:") ? rawError : undefined),
+    category: detail.category, recoverable: detail.recoverable, retryAfterMs: detail.retryAfterMs, updatedAt: String(row.updated_at),
+  };
 }
 
 function logFromRow(row: Row): OperationLog {
@@ -998,10 +1469,53 @@ function castUpsert(db: D1Database, storyId: string, member: CastMember, turn: n
 function stringList(value: unknown) { return Array.isArray(value) ? value.map(String).map((item) => item.trim()).filter(Boolean) : []; }
 function bad(error: string) { return Response.json({ error }, { status: 400 }); }
 function message(error: unknown) { return error instanceof Error ? error.message : "Something interrupted the author."; }
+async function claimGenerationGuard(db: D1Database, key: string, storyId: string, turnNumber: number, lease: string) {
+  const existing = await db.prepare("SELECT status,error,updated_at FROM generation_jobs WHERE idempotency_key=?").bind(key).first<Row>();
+  const status = String(existing?.status || "");
+  const updatedAt = String(existing?.updated_at || "");
+  const stale = status === "generating" && (!Number.isFinite(Date.parse(updatedAt)) || Date.parse(updatedAt) < Date.now() - WRITER_LEASE_MS);
+  const stamp = now();
+  if (!existing) {
+    await db.prepare("INSERT OR IGNORE INTO generation_jobs (idempotency_key,story_id,turn_number,status,error,updated_at) VALUES (?,?,?,'generating',?,?)")
+      .bind(key, storyId, turnNumber, lease, stamp).run();
+  } else if (status === "failed" || stale) {
+    await db.prepare(`UPDATE generation_jobs SET status='generating',error=?,updated_at=?
+      WHERE idempotency_key=? AND status=? AND COALESCE(error,'')=? AND updated_at=?`).bind(
+      lease, stamp, key, status, String(existing.error || ""), updatedAt,
+    ).run();
+  } else {
+    return false;
+  }
+  const claimed = await db.prepare("SELECT status,error FROM generation_jobs WHERE idempotency_key=?").bind(key).first<Row>();
+  return String(claimed?.status || "") === "generating" && String(claimed?.error || "") === lease;
+}
+async function refreshGenerationLease(db: D1Database, key: string, lease: string) {
+  const refreshed = await db.prepare("UPDATE generation_jobs SET updated_at=? WHERE idempotency_key=? AND status='generating' AND error=?")
+    .bind(now(), key, lease).run();
+  if (Number(refreshed.meta.changes || 0) < 1) throw new ApiRouteFailure(
+    "A resumed writing request replaced this late draft, so it was safely discarded.", "writer_concurrency", true,
+  );
+}
+function writingFailure(error: unknown) {
+  if (error instanceof AiFailure || error instanceof ApiRouteFailure) return {
+    message: error.message, category: error.category, recoverable: error.recoverable, retryAfterMs: error.retryAfterMs,
+  };
+  const errorMessage = message(error);
+  if (/did not pass continuity review|empty section|replacement draft is incomplete/i.test(errorMessage)) {
+    return { message: errorMessage, category: "validation", recoverable: false, retryAfterMs: 0 };
+  }
+  if (/newer section arrived|resumed writing request replaced/i.test(errorMessage)) {
+    return { message: errorMessage, category: "writer_concurrency", recoverable: true, retryAfterMs: 0 };
+  }
+  return { message: errorMessage, category: "server", recoverable: false, retryAfterMs: 0 };
+}
 async function routeError(error: unknown, context: { storyId?: string; turnNumber?: number; operation?: string } = {}) {
   const errorMessage = message(error);
+  const details = error instanceof ApiRouteFailure || error instanceof AiFailure
+    ? { category: error.category, recoverable: error.recoverable, retryAfterMs: error.retryAfterMs }
+    : { category: "server", recoverable: false, retryAfterMs: 0 };
   console.error("[kotoba-api]", errorMessage);
   await recordOperationLog({ storyId: context.storyId, turnNumber: context.turnNumber, operation: context.operation || "api_route",
-    category: "api_route", status: "failed", message: errorMessage });
-  return Response.json({ error: errorMessage }, { status: 500 });
+    category: details.category, status: "failed", message: errorMessage, context: { recoverable: details.recoverable, retryAfterMs: details.retryAfterMs } });
+  return Response.json({ error: errorMessage, ...details }, { status: 500 });
 }

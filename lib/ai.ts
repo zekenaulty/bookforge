@@ -5,6 +5,8 @@ import type {
   StoryState,
   TurnResult,
   ContextSnapshot,
+  EntityAppearanceGuide,
+  EntityAppearanceObservation,
 } from "./types";
 import { recordOperationLog } from "./operation-log";
 
@@ -71,7 +73,7 @@ const stateShape = `{
 
 type AiCallContext = { operation: string; storyId?: string; turnNumber?: number };
 
-class AiFailure extends Error {
+export class AiFailure extends Error {
   constructor(message: string, public category: string, public recoverable: boolean, public retryAfterMs = 0) {
     super(message);
   }
@@ -87,12 +89,15 @@ const BASE_BACKOFF_MS = [2_000, 8_000, 20_000];
 
 async function callJson<T>(system: string, prompt: string, maxOutputTokens = 8192, context: AiCallContext = { operation: "runtime_generation" }): Promise<T> {
   let lastFailure: AiFailure | null = null;
+  const deadline = Date.now() + TRANSPORT_TIMEOUT_MS;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
     try {
       const strictSystem = lastFailure?.category === "parser"
         ? `${system}\nA previous response was not valid JSON. Return one complete strict JSON object with no markdown fence, preamble, or trailing commentary.`
         : system;
-      const text = await requestText(strictSystem, prompt, maxOutputTokens);
+      const remainingMs = deadline - Date.now();
+      if (remainingMs <= 0) throw new AiFailure("The writing request timed out after ten minutes.", "timeout", true);
+      const text = await requestText(strictSystem, prompt, maxOutputTokens, remainingMs);
       const parsed = parseJson<T>(text);
       if (attempt > 1 && lastFailure) {
         await recordOperationLog({ ...context, category: lastFailure.category, attempt, status: "recovered", message: `Recovered on attempt ${attempt} after ${lastFailure.category}.` });
@@ -101,24 +106,24 @@ async function callJson<T>(system: string, prompt: string, maxOutputTokens = 819
     } catch (error) {
       const failure = normalizeFailure(error);
       lastFailure = failure;
-      const canRetry = failure.recoverable && attempt < MAX_ATTEMPTS;
+      const waitMs = Math.max(failure.retryAfterMs, BASE_BACKOFF_MS[attempt - 1] || 20_000);
+      const canRetry = failure.recoverable && attempt < MAX_ATTEMPTS && deadline - Date.now() > waitMs;
       await recordOperationLog({
         ...context, category: failure.category, attempt, status: canRetry ? "retrying" : "failed",
         message: canRetry ? `${failure.message} A bounded retry is scheduled.` : `${failure.message} Retry limit reached.`,
-        context: { maxAttempts: MAX_ATTEMPTS, transportTimeoutMs: TRANSPORT_TIMEOUT_MS },
+        context: { maxAttempts: MAX_ATTEMPTS, totalTransportWindowMs: TRANSPORT_TIMEOUT_MS },
       });
-      if (!canRetry) throw new Error(`${failure.message} Existing story data is unchanged.`);
-      const waitMs = Math.max(failure.retryAfterMs, BASE_BACKOFF_MS[attempt - 1] || 20_000);
+      if (!canRetry) throw new AiFailure(`${failure.message} Existing story data is unchanged.`, failure.category, failure.recoverable, failure.retryAfterMs);
       await delay(waitMs);
     }
   }
-  throw new Error("The author could not complete the request. Existing story data is unchanged.");
+  throw new AiFailure("The author could not complete the request. Existing story data is unchanged.", "retry_limit", true);
 }
 
-async function requestText(system: string, prompt: string, maxOutputTokens: number): Promise<string> {
+async function requestText(system: string, prompt: string, maxOutputTokens: number, timeoutMs: number): Promise<string> {
   const provider = (process.env.LLM_PROVIDER || (process.env.GEMINI_API_KEY ? "gemini" : "openai")).toLowerCase();
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), TRANSPORT_TIMEOUT_MS);
+  const timeout = setTimeout(() => controller.abort(), Math.max(1, timeoutMs));
 
   try {
     if (provider === "gemini" && process.env.GEMINI_API_KEY) {
@@ -134,7 +139,7 @@ async function requestText(system: string, prompt: string, maxOutputTokens: numb
         }),
       });
       if (!response.ok) throw httpFailure(response);
-      const payload = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
+      const payload = await parseProviderResponse<{ candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> }>(response);
       return payload.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("") || "";
     }
 
@@ -150,7 +155,7 @@ async function requestText(system: string, prompt: string, maxOutputTokens: numb
         }),
       });
       if (!response.ok) throw httpFailure(response);
-      const payload = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
+      const payload = await parseProviderResponse<{ choices?: Array<{ message?: { content?: string } }> }>(response);
       return payload.choices?.[0]?.message?.content || "";
     }
 
@@ -161,6 +166,14 @@ async function requestText(system: string, prompt: string, maxOutputTokens: numb
     throw new AiFailure(error instanceof Error ? error.message : "The writing transport was interrupted.", "transport", true);
   } finally {
     clearTimeout(timeout);
+  }
+}
+
+async function parseProviderResponse<T>(response: Response): Promise<T> {
+  try {
+    return await response.json() as T;
+  } catch {
+    throw new AiFailure("The author service returned an unreadable response.", "parser", true);
   }
 }
 
@@ -366,7 +379,16 @@ Return the same JSON shape. Keep prose 900–1,300 words, 700–1,600 hard range
   return normalizeTurn(result, input.nextTurnNumber, input.foundation, input.state);
 }
 
-export async function createCheckpoint(input: { storyId: string; previous: unknown; turns: unknown[]; state: StoryState; cast: CastMember[]; throughTurnNumber: number }) {
+export async function createCheckpoint(input: {
+  storyId: string;
+  previous: unknown;
+  turns: unknown[];
+  state: StoryState;
+  cast: CastMember[];
+  throughTurnNumber: number;
+  entityAppearanceGuides?: EntityAppearanceGuide[];
+  entityAppearanceObservations?: EntityAppearanceObservation[];
+}) {
   return callJson<Record<string, unknown>>(
     "Reconcile a compact canonical fiction checkpoint. Return JSON only. Never invent facts not supported by the supplied material.",
     `Reconcile continuity through Section ${input.throughTurnNumber}.
@@ -374,8 +396,10 @@ Previous checkpoint: ${JSON.stringify(input.previous || {})}
 Later accepted sections and deltas: ${JSON.stringify(input.turns)}
 Current state: ${JSON.stringify(input.state)}
 Current cast: ${JSON.stringify(input.cast)}
+Durable entity appearance/style guides: ${JSON.stringify(input.entityAppearanceGuides || [])}
+Appearance observations linked to this timeline window: ${JSON.stringify(input.entityAppearanceObservations || [])}
 
-Return {"storyId":string,"throughTurnNumber":number,"compactStorySummary":string,"canonicalCast":array,"canonicalRelationships":array,"canonicalWorldFacts":array,"currentTimeline":string,"currentLocation":string,"activeThreads":array,"resolvedThreads":array,"importantItems":array,"factsThatMustRemainTrue":array,"milestones":object,"narrativeDirection":string}. Deduplicate facts, reconcile contradictions, and preserve items, injuries, powers, promises, constraints, and stable character IDs.`,
+Return {"storyId":string,"throughTurnNumber":number,"compactStorySummary":string,"canonicalCast":array,"canonicalRelationships":array,"canonicalWorldFacts":array,"currentTimeline":string,"currentLocation":string,"activeThreads":array,"resolvedThreads":array,"importantItems":array,"factsThatMustRemainTrue":array,"milestones":object,"narrativeDirection":string,"entityAppearanceGuideSummary":array}. Deduplicate facts, reconcile contradictions, and preserve items, injuries, powers, promises, constraints, stable character IDs, stable entity IDs, baseline visual traits, and section-linked appearance changes.`,
     8192, { operation: "checkpoint_reconcile", storyId: input.storyId, turnNumber: input.throughTurnNumber },
   );
 }
@@ -389,6 +413,9 @@ export async function createContextReconciliation(input: {
   recentTurns: unknown[];
   previousContext?: unknown;
   previousArtProfile?: unknown;
+  previousEntityGuides?: EntityAppearanceGuide[];
+  recentEntityObservations?: EntityAppearanceObservation[];
+  previousThroughTurnNumber?: number;
 }) {
   return callJson<ContextSnapshot>(
     "You reconcile compact story, character, motive, fact, and visual continuity for an ongoing private novel. Return JSON only. Do not invent unsupported facts or reveal hidden secrets in reader-facing summaries.",
@@ -399,6 +426,8 @@ Current cast: ${JSON.stringify(input.cast)}
 Recent accepted sections and deltas: ${JSON.stringify(input.recentTurns)}
 Previous managed context: ${JSON.stringify(input.previousContext || {})}
 Previous story art profile: ${JSON.stringify(input.previousArtProfile || {})}
+Previous durable entity appearance/style guides: ${JSON.stringify(input.previousEntityGuides || [])}
+Previously recorded appearance observations: ${JSON.stringify(input.recentEntityObservations || [])}
 
 Return exactly {
   "throughTurnNumber": ${input.throughTurnNumber},
@@ -407,8 +436,15 @@ Return exactly {
   "keyFacts": string[], "openQuestions": string[], "visualContinuityNotes": string[],
   "storyArtProfile": {"artStyle":string,"coverStyle":string,"palette":string[],"mood":string,"protagonistAppearance":string,"majorCastAppearance":string[],"keyLocationAppearance":string[],"creatureDesignLanguage":string,"recurringMotifs":string[],"avoid":string[],"lastUpdatedTurn":${input.throughTurnNumber}},
   "characterVisualProfiles": [{"id":string,"kind":"character","entityId":string,"name":string,"agePresentation":string,"genderPresentation":string,"bodyType":string,"hair":string,"face":string,"clothing":string,"notableProps":string[],"distinctiveMarkings":string[],"armorOrGear":string[],"currentVisualChanges":string[],"lastUpdatedTurn":${input.throughTurnNumber}}],
-  "locationVisualProfiles": [{"id":string,"kind":"location","entityId":string,"name":string,"visualDescription":string,"architecture":string,"lighting":string,"atmosphere":string,"dominantColors":string[],"importantLandmarks":string[],"lastUpdatedTurn":${input.throughTurnNumber}}]
-}. Preserve stable character IDs and visual facts unless the prose explicitly changes them.`,
+  "locationVisualProfiles": [{"id":string,"kind":"location","entityId":string,"name":string,"visualDescription":string,"architecture":string,"lighting":string,"atmosphere":string,"dominantColors":string[],"importantLandmarks":string[],"lastUpdatedTurn":${input.throughTurnNumber}}],
+  "entityAppearanceGuides": [{
+    "id":string,"kind":"character"|"location"|"item"|"creature"|"group"|"other","entityId":stable-lowercase-slug,"name":string,"aliases":string[],
+    "baseline":{"summary":string,"signatureTraits":string[],"styleNotes":string[],"palette":string[],"motifs":string[],"avoid":string[]},
+    "current":{"appearance":string,"wardrobeOrSurface":string,"condition":string,"location":string,"temporaryChanges":string[]},
+    "firstSeenTurn":number,"lastUpdatedTurn":${input.throughTurnNumber},
+    "timelineObservations":[{"turnNumber":number,"summary":string,"changes":string[],"evidence":string[]}]
+  }]
+}. Include every recurring named visual entity supported by the text: characters, locations, important items, creatures, and groups. Reuse stable entity IDs. Treat each baseline as an additive appearance and style guide: never discard an established trait, motif, palette, or avoid rule. Use current for the latest wardrobe, surface, condition, location, and temporary changes. timelineObservations must contain only newly supported observations from Sections ${(input.previousThroughTurnNumber || 0) + 1}-${input.throughTurnNumber}, with the exact source section number and concise evidence. Preserve prior facts unless later prose explicitly changes them, and record a change rather than silently overwriting history.`,
     8192, { operation: "context_reconcile", storyId: input.storyId, turnNumber: input.throughTurnNumber },
   );
 }

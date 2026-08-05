@@ -112,6 +112,12 @@ const schemaStatements = [
     context_json TEXT NOT NULL DEFAULT '{}',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`,
+  `CREATE TABLE IF NOT EXISTS mutation_guards (
+    id TEXT PRIMARY KEY,
+    story_id TEXT NOT NULL,
+    asserted INTEGER NOT NULL CHECK(asserted = 1),
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`,
   `CREATE TABLE IF NOT EXISTS background_jobs (
     id TEXT PRIMARY KEY,
     story_id TEXT NOT NULL,
@@ -153,6 +159,34 @@ const schemaStatements = [
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(story_id, kind, entity_id)
   )`,
+  `CREATE TABLE IF NOT EXISTS entity_appearance_guides (
+    id TEXT PRIMARY KEY,
+    story_id TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    aliases_json TEXT NOT NULL DEFAULT '[]',
+    baseline_json TEXT NOT NULL,
+    current_json TEXT NOT NULL,
+    first_seen_turn INTEGER NOT NULL DEFAULT 0,
+    last_updated_turn INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(story_id, kind, entity_id)
+  )`,
+  `CREATE TABLE IF NOT EXISTS entity_appearance_observations (
+    id TEXT PRIMARY KEY,
+    story_id TEXT NOT NULL,
+    guide_id TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    turn_number INTEGER NOT NULL,
+    observation_json TEXT NOT NULL,
+    source_snapshot_id TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(story_id, kind, entity_id, turn_number)
+  )`,
   `CREATE TABLE IF NOT EXISTS art_assets (
     id TEXT PRIMARY KEY,
     story_id TEXT NOT NULL,
@@ -179,6 +213,8 @@ const schemaStatements = [
   `CREATE INDEX IF NOT EXISTS background_jobs_story_idx ON background_jobs(story_id, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS context_snapshots_story_turn_idx ON context_snapshots(story_id, through_turn_number DESC)`,
   `CREATE INDEX IF NOT EXISTS visual_profiles_story_idx ON visual_profiles(story_id, kind)`,
+  `CREATE INDEX IF NOT EXISTS entity_appearance_guides_story_idx ON entity_appearance_guides(story_id, kind, name)`,
+  `CREATE INDEX IF NOT EXISTS entity_appearance_observations_story_turn_idx ON entity_appearance_observations(story_id, turn_number, kind)`,
   `CREATE INDEX IF NOT EXISTS art_assets_story_turn_idx ON art_assets(story_id, turn_number, created_at)`,
 ];
 

@@ -2,16 +2,32 @@
 /* eslint-disable @next/next/no-img-element -- private R2-backed art is served through the authenticated app route. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { filterAndSortAuthors, filterAndSortStories, latestCoverAsset, latestReadyCover, uniqueGenres, type AuthorSort, type StorySort } from "../lib/discovery";
 import { DEFAULT_GOOGLE_IMAGE_MODEL, GOOGLE_IMAGE_MODELS, type GoogleImageModel, isGoogleImageModel } from "../lib/image-models";
-import { LocalVoicePlayer, requestPersistentVoiceStorage } from "../lib/local-voice";
-import { isLocalVoiceId, LOCAL_VOICE_OPTIONS, type LocalVoiceId, type LocalVoiceProgress } from "../lib/local-voice-types";
+import { getLocalVoiceCacheInfo, LocalVoicePlayer, requestPersistentVoiceStorage, type LocalVoiceCacheInfo } from "../lib/local-voice";
+import { isLocalVoiceId, LOCAL_VOICE_DOWNLOAD_ESTIMATE, LOCAL_VOICE_OPTIONS, type LocalVoiceId, type LocalVoiceProgress } from "../lib/local-voice-types";
 import { normalizeReaderTurn, readerTurnNumbers, resolveReaderNavigation, type ReaderNavigationIntent } from "../lib/reader-navigation";
 import type { ArtAsset, AuthorProfile, BackgroundJob, CastMember, OperationLog, Story, Turn, TurnResult } from "../lib/types";
 
 type View = "library" | "authors" | "archived" | "settings" | "reader" | "author";
 type LibraryPayload = { authors: AuthorProfile[]; stories: Story[]; logs: OperationLog[] };
 class BackgroundJobStopped extends Error {}
+class AppRequestError extends Error {
+  constructor(
+    message: string,
+    public status = 0,
+    public category = "transport",
+    public recoverable = true,
+    public retryAfterMs = 0,
+  ) { super(message); }
+}
 const HTTP_TIMEOUT_MS = 10 * 60 * 1000;
+const CLIENT_RETRY_DELAYS_MS = [750, 2_000];
+const WRITING_RECOVERY_DELAYS_MS = [2_000, 8_000, 20_000];
+const WRITING_RECOVERY_CATEGORIES = new Set([
+  "transport", "timeout", "parser", "response_parser", "writer_lease", "writer_concurrency",
+  "http_408", "http_409", "http_425", "http_429", "http_500", "http_502", "http_503", "http_504",
+]);
 
 const genres = ["Fantasy", "Science fiction", "Romance", "Mystery", "Horror", "Historical", "Literary", "Adventure", "Cozy", "Gothic", "Progression", "Speculative"];
 
@@ -21,15 +37,44 @@ async function api<T>(body?: Record<string, unknown>, storyId?: string, signal?:
   const abort = () => controller.abort(signal?.reason);
   if (signal?.aborted) abort(); else signal?.addEventListener("abort", abort, { once: true });
   const timeout = window.setTimeout(() => { timedOut = true; controller.abort(); }, HTTP_TIMEOUT_MS);
+  const action = String(body?.action || "");
+  const replaySafe = !body || ["continueStory", "runBackgroundJob", "updatePreferences"].includes(action);
   try {
-    const response = await fetch(storyId ? `/api/app?storyId=${encodeURIComponent(storyId)}` : "/api/app", body ? {
-      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal: controller.signal,
-    } : { cache: "no-store", signal: controller.signal });
-    const payload = await response.json() as T & { error?: string };
-    if (!response.ok) throw new Error(payload.error || "The library could not complete that request.");
-    return payload;
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        const response = await fetch(storyId ? `/api/app?storyId=${encodeURIComponent(storyId)}` : "/api/app", body ? {
+          method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal: controller.signal,
+        } : { cache: "no-store", signal: controller.signal });
+        const raw = await response.text();
+        let payload: T & { error?: string; category?: string; recoverable?: boolean; retryAfterMs?: number };
+        try {
+          payload = JSON.parse(raw) as typeof payload;
+        } catch {
+          throw new AppRequestError("The app returned an unreadable response.", response.status, "response_parser", true);
+        }
+        if (!response.ok) {
+          throw new AppRequestError(
+            payload.error || "The library could not complete that request.",
+            response.status,
+            payload.category || `http_${response.status}`,
+            payload.recoverable ?? [408, 409, 425, 429, 500, 502, 503, 504].includes(response.status),
+            Number(payload.retryAfterMs || 0),
+          );
+        }
+        return payload;
+      } catch (error) {
+        if (controller.signal.aborted) throw error;
+        const failure = error instanceof AppRequestError
+          ? error
+          : new AppRequestError(error instanceof Error ? error.message : "The app transport was interrupted.");
+        const retryableStatus = [408, 425, 429, 500, 502, 503, 504].includes(failure.status);
+        const retryableCategory = ["transport", "response_parser"].includes(failure.category);
+        if (!replaySafe || attempt >= CLIENT_RETRY_DELAYS_MS.length || !failure.recoverable || (!retryableStatus && !retryableCategory)) throw failure;
+        await abortableDelay(Math.max(failure.retryAfterMs, CLIENT_RETRY_DELAYS_MS[attempt]), controller.signal);
+      }
+    }
   } catch (error) {
-    if (timedOut) throw new Error("The request did not complete within ten minutes. Your saved story data is unchanged; try again when the connection is steadier.");
+    if (timedOut) throw new AppRequestError("The request did not complete within ten minutes. Your saved story data is unchanged; recovery can resume when the connection is steadier.", 0, "timeout", true);
     throw error;
   } finally {
     window.clearTimeout(timeout);
@@ -71,7 +116,7 @@ async function waitForBackgroundJob(storyId: string, jobId: string, onStory: (st
       const applyStory = (story: Story) => { if (!signal.aborted) onStory(story); };
       let story = await drainBackgroundJobs(storyId, applyStory, jobId);
       signal.throwIfAborted();
-      if (!story) story = (await api<{ story: Story }>(undefined, storyId)).story;
+      if (!story) story = (await api<{ story: Story }>(undefined, storyId, signal)).story;
       signal.throwIfAborted();
       const job = story.jobs?.find((item) => item.id === jobId);
       if (!job) throw new Error("The artwork job could not be found.");
@@ -97,6 +142,7 @@ export default function KotobaApp() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [selectedAuthor, setSelectedAuthor] = useState<AuthorProfile | null>(null);
+  const [readerGalleryStoryId, setReaderGalleryStoryId] = useState<string | null>(null);
   const [authorOpen, setAuthorOpen] = useState(false);
   const [storyOpen, setStoryOpen] = useState(false);
 
@@ -125,18 +171,19 @@ export default function KotobaApp() {
     setTheme(next); localStorage.setItem("kotoba-theme", next); document.documentElement.dataset.theme = next;
   }
 
-  async function openStory(story: Story) {
+  async function openStory(story: Story, openGallery = false) {
     setError(""); setLoading(true);
+    setReaderGalleryStoryId(openGallery ? story.id : null);
     try {
       const result = await api<{ story: Story }>(undefined, story.id);
       setSelectedStory(result.story); setView("reader");
       void drainBackgroundJobs(story.id, (next) => setSelectedStory((current) => current?.id === next.id ? next : current)).catch(() => {});
-    } catch (err) { setError(message(err)); }
+    } catch (err) { setReaderGalleryStoryId(null); setError(message(err)); }
     finally { setLoading(false); }
   }
 
   function openAuthor(author: AuthorProfile) { setSelectedAuthor(author); setView("author"); }
-  function navigate(next: View) { window.speechSynthesis?.cancel(); setView(next); setSelectedStory(null); }
+  function navigate(next: View) { window.speechSynthesis?.cancel(); setView(next); setSelectedStory(null); setReaderGalleryStoryId(null); }
   const updateSelectedStory = useCallback((next: Story) => setSelectedStory((current) => current?.id === next.id ? next : current), []);
 
   return <div className="app-shell">
@@ -160,7 +207,7 @@ export default function KotobaApp() {
     {loading && <div className="quiet-loading" aria-live="polite"><span className="ink-dot" /> Opening your library…</div>}
 
     <main>
-      {view === "library" && <LibraryView stories={library.stories.filter((story) => story.status !== "Archived")} authors={library.authors} onNew={() => setStoryOpen(true)} onOpen={openStory} onAuthor={openAuthor} />}
+      {view === "library" && <LibraryView stories={library.stories.filter((story) => story.status !== "Archived")} authors={library.authors} onNew={() => setStoryOpen(true)} onOpen={openStory} onCover={(story) => void openStory(story, true)} onAuthor={openAuthor} />}
       {view === "archived" && <ArchiveView stories={library.stories.filter((story) => story.status === "Archived")} onOpen={openStory} onRestore={async (story) => { await api({ action: "setStoryStatus", storyId: story.id, status: "Active" }); await refresh(); }} />}
       {view === "authors" && <AuthorsView authors={library.authors.filter((author) => !author.archived)} stories={library.stories} onNew={() => { setSelectedAuthor(null); setAuthorOpen(true); }} onOpen={openAuthor} />}
       {view === "author" && selectedAuthor && <AuthorView author={selectedAuthor} stories={library.stories.filter((story) => story.selectedAuthorId === selectedAuthor.id)} onStory={openStory} onCreate={() => setStoryOpen(true)} onEdit={() => setAuthorOpen(true)} onArchive={async () => {
@@ -172,22 +219,90 @@ export default function KotobaApp() {
         } catch (err) { setError(message(err)); }
       }} />}
       {view === "settings" && <SettingsView theme={theme} onTheme={changeTheme} logs={library.logs} />}
-      {view === "reader" && selectedStory && <Reader story={selectedStory} onStory={updateSelectedStory} onBack={() => { navigate("library"); void refresh(); }} onAuthor={openAuthor} onError={setError} />}
+      {view === "reader" && selectedStory && <Reader story={selectedStory} initialGallery={readerGalleryStoryId === selectedStory.id} onStory={updateSelectedStory} onBack={() => { navigate("library"); void refresh(); }} onAuthor={openAuthor} onError={setError} />}
     </main>
 
     {authorOpen && <AuthorDialog existing={selectedAuthor} onClose={() => setAuthorOpen(false)} onSaved={async (author) => { setAuthorOpen(false); setSelectedAuthor(author); await refresh(); setView("author"); }} />}
-    {storyOpen && <StoryDialog authors={library.authors.filter((author) => !author.archived)} preferredAuthor={view === "author" ? selectedAuthor : null} onNeedAuthor={() => { setStoryOpen(false); setSelectedAuthor(null); setAuthorOpen(true); }} onClose={() => setStoryOpen(false)} onCreated={async (story) => { setStoryOpen(false); setSelectedStory(story); await refresh(); setView("reader"); void drainBackgroundJobs(story.id, updateSelectedStory).catch(() => {}); }} />}
+    {storyOpen && <StoryDialog authors={library.authors.filter((author) => !author.archived)} preferredAuthor={view === "author" ? selectedAuthor : null} onNeedAuthor={() => { setStoryOpen(false); setSelectedAuthor(null); setAuthorOpen(true); }} onClose={() => setStoryOpen(false)} onCreated={async (story) => { setStoryOpen(false); setReaderGalleryStoryId(null); setSelectedStory(story); await refresh(); setView("reader"); void drainBackgroundJobs(story.id, updateSelectedStory).catch(() => {}); }} />}
   </div>;
 }
 
-function LibraryView({ stories, authors, onNew, onOpen, onAuthor }: { stories: Story[]; authors: AuthorProfile[]; onNew: () => void; onOpen: (story: Story) => void; onAuthor: (author: AuthorProfile) => void }) {
+function useIncrementalResults(total: number, resultKey: string, batchSize = 12) {
+  const [windowState, setWindowState] = useState({ key: resultKey, count: batchSize });
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const visibleCount = Math.min(total, windowState.key === resultKey ? windowState.count : batchSize);
+  const hasMore = visibleCount < total;
+  const showMore = useCallback(() => {
+    setWindowState((current) => ({
+      key: resultKey,
+      count: Math.min(total, (current.key === resultKey ? current.count : batchSize) + batchSize),
+    }));
+  }, [batchSize, resultKey, total]);
+
+  useEffect(() => {
+    const node = triggerRef.current;
+    if (!node || !hasMore || !("IntersectionObserver" in window)) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer.unobserve(node);
+      showMore();
+    }, { rootMargin: "280px 0px" });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMore, showMore, visibleCount]);
+
+  return { visibleCount, hasMore, showMore, triggerRef };
+}
+
+function GenreFilters({ id, options, selected, onChange }: { id: string; options: string[]; selected: string[]; onChange: (genres: string[]) => void }) {
+  if (!options.length) return null;
+  return <fieldset className="discovery-genres">
+    <legend id={`${id}-legend`}>Genres <small>Match any selected</small></legend>
+    <div className="genre-filter" aria-labelledby={`${id}-legend`}>
+      {options.map((genre) => {
+        const active = selected.includes(genre);
+        return <button type="button" key={genre} className={active ? "selected" : ""} aria-pressed={active} onClick={() => onChange(active ? selected.filter((item) => item !== genre) : [...selected, genre])}>{genre}</button>;
+      })}
+    </div>
+  </fieldset>;
+}
+
+function IncrementalResults({ noun, visibleCount, total, hasMore, onMore, triggerRef }: { noun: string; visibleCount: number; total: number; hasMore: boolean; onMore: () => void; triggerRef: React.RefObject<HTMLButtonElement | null> }) {
+  const plural = noun === "story" ? "stories" : `${noun}s`;
+  return <div className="incremental-results">
+    <p aria-live="polite">Showing {visibleCount} of {total} {total === 1 ? noun : plural}</p>
+    {hasMore && <button ref={triggerRef} type="button" className="secondary" onClick={onMore}>Show more {plural}</button>}
+  </div>;
+}
+
+function LibraryView({ stories, authors, onNew, onOpen, onCover, onAuthor }: { stories: Story[]; authors: AuthorProfile[]; onNew: () => void; onOpen: (story: Story) => void; onCover: (story: Story) => void; onAuthor: (author: AuthorProfile) => void }) {
+  const [query, setQuery] = useState("");
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [sort, setSort] = useState<StorySort>("recent");
+  const genreOptions = uniqueGenres(stories.map((story) => story.foundation?.genres));
+  const results = filterAndSortStories(stories, query, selectedGenres, sort);
+  const resultKey = `${query}\u0000${selectedGenres.slice().sort().join("\u0001")}\u0000${sort}\u0000${results.map((story) => `${story.id}:${story.updatedAt}`).join("\u0001")}`;
+  const incremental = useIncrementalResults(results.length, resultKey);
+  const visibleStories = results.slice(0, incremental.visibleCount);
+  const filtersActive = Boolean(query.trim() || selectedGenres.length);
+
   return <section className="page library-page">
     <div className="page-heading"><div><p className="eyebrow">Your living-fiction library</p><h1>Stories waiting for you</h1><p>Read what has been written. Invite the author to continue when you reach the edge.</p></div><button className="primary" onClick={onNew}>New story</button></div>
-    <div className="story-grid">
+    {!!stories.length && <form className="discovery-panel" role="search" aria-label="Filter and sort stories" onSubmit={(event) => event.preventDefault()}>
+      <div className="discovery-fields">
+        <label className="discovery-search" htmlFor="story-search"><span>Search title or description</span><input id="story-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search your stories" aria-controls="story-results" /></label>
+        <label className="discovery-sort" htmlFor="story-sort"><span>Sort stories</span><select id="story-sort" value={sort} onChange={(event) => setSort(event.target.value as StorySort)} aria-controls="story-results"><option value="recent">Recent activity</option><option value="title-asc">Title A–Z</option><option value="title-desc">Title Z–A</option></select></label>
+      </div>
+      <GenreFilters id="story-genres" options={genreOptions} selected={selectedGenres} onChange={setSelectedGenres} />
+      <div className="discovery-summary"><p role="status" aria-live="polite">{results.length} {results.length === 1 ? "story" : "stories"} found</p>{filtersActive && <button type="button" className="ghost" onClick={() => { setQuery(""); setSelectedGenres([]); }}>Clear filters</button>}</div>
+    </form>}
+    <div className="story-grid" id="story-results">
       <NewStoryCard onClick={onNew} />
-      {stories.map((story, index) => <StoryCard key={story.id} story={story} index={index} author={authors.find((author) => author.id === story.selectedAuthorId)} onOpen={() => onOpen(story)} onAuthor={onAuthor} />)}
+      {visibleStories.map((story, index) => <StoryCard key={story.id} story={story} index={index} author={authors.find((author) => author.id === story.selectedAuthorId)} onOpen={() => onOpen(story)} onCover={() => onCover(story)} onAuthor={onAuthor} />)}
     </div>
     {!stories.length && <p className="empty-note">Your shelves are quiet. Begin with an unwritten page.</p>}
+    {!!stories.length && !results.length && <div className="filtered-empty"><h2>No stories match</h2><p>Try another title, description, or genre.</p><button type="button" className="secondary" onClick={() => { setQuery(""); setSelectedGenres([]); }}>Clear filters</button></div>}
+    {!!results.length && <IncrementalResults noun="story" visibleCount={incremental.visibleCount} total={results.length} hasMore={incremental.hasMore} onMore={incremental.showMore} triggerRef={incremental.triggerRef} />}
   </section>;
 }
 
@@ -198,43 +313,103 @@ function NewStoryCard({ onClick }: { onClick: () => void }) {
   </button>;
 }
 
-function StoryCard({ story, index, author, onOpen, onAuthor }: { story: Story; index: number; author?: AuthorProfile; onOpen: () => void; onAuthor: (author: AuthorProfile) => void }) {
-  const cover = story.art?.find((asset) => asset.type === "cover" && asset.status === "Ready");
+function StoryCard({ story, index, author, onOpen, onCover, onAuthor }: { story: Story; index: number; author?: AuthorProfile; onOpen: () => void; onCover: () => void; onAuthor: (author: AuthorProfile) => void }) {
+  const cover = latestReadyCover(story);
+  const latestCover = latestCoverAsset(story);
+  const [failedCoverId, setFailedCoverId] = useState("");
+  const showCover = Boolean(cover && cover.id !== failedCoverId);
+  const coverInProgress = !cover && story.jobs?.some((job) => job.jobType === "art_cover" && (job.status === "running" || (["pending", "retrying"].includes(job.status) && job.attempts < job.maxAttempts)));
+  const coverAction = failedCoverId ? "Review cover" : latestCover && ["Failed", "Unsupported"].includes(latestCover.status) ? "Retry cover" : "Add cover";
   return <article className="story-card">
-    <button className={`cover cover-${index % 5}`} onClick={onOpen} aria-label={`Open ${story.title}`}>
-      {cover && <img src={`/api/app?assetId=${encodeURIComponent(cover.id)}`} alt="" />}
+    <button className={`cover cover-${index % 5}${showCover ? " with-cover" : ""}`} onClick={onOpen} aria-label={`Open ${story.title}`}>
+      {showCover && cover && <img key={cover.id} src={`/api/app?assetId=${encodeURIComponent(cover.id)}`} alt="" loading="lazy" decoding="async" onError={() => setFailedCoverId(cover.id)} />}
       <span className="cover-rule" /><strong>{story.title}</strong><em>{author?.displayName || story.authorSnapshot.displayName}</em><span className="cover-mark">⌁</span>
     </button>
     <div className="story-card-body">
       <div className="story-meta"><span>{story.status}</span><span>Section {story.latestAcceptedTurnNumber}</span></div>
       <h2>{story.title}</h2><p>{story.shortDescription}</p>
       <button className="author-link" onClick={() => author && onAuthor(author)}>by {author?.displayName || story.authorSnapshot.displayName}</button>
-      <button className="text-action" onClick={onOpen}>{story.latestAcceptedTurnNumber ? "Continue reading" : "Begin reading"} <span>→</span></button>
+      <div className="story-card-actions"><button className="text-action" onClick={onOpen}>{story.latestAcceptedTurnNumber ? "Continue reading" : "Begin reading"} <span>→</span></button>{!showCover && (coverInProgress ? <span className="cover-pending"><span className="ink-dot" />Cover in progress</span> : <button className="cover-action" aria-label={`${coverAction} for ${story.title}`} onClick={onCover}>{coverAction}</button>)}</div>
     </div>
   </article>;
 }
 
+function MiniStoryCover({ story }: { story: Story }) {
+  const cover = latestReadyCover(story);
+  const [failedCoverId, setFailedCoverId] = useState("");
+  const showCover = Boolean(cover && cover.id !== failedCoverId);
+  return <span className={`mini-cover${showCover ? " with-image" : ""}`} aria-hidden="true">
+    {showCover && cover
+      ? <img src={`/api/app?assetId=${encodeURIComponent(cover.id)}`} alt="" loading="lazy" decoding="async" onError={() => setFailedCoverId(cover.id)} />
+      : story.title.slice(0, 1)}
+  </span>;
+}
+
 function AuthorsView({ authors, stories, onNew, onOpen }: { authors: AuthorProfile[]; stories: Story[]; onNew: () => void; onOpen: (author: AuthorProfile) => void }) {
+  const [query, setQuery] = useState("");
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [sort, setSort] = useState<AuthorSort>("name-asc");
+  const genreOptions = uniqueGenres(authors.map((author) => author.selectedGenres));
+  const results = filterAndSortAuthors(authors, query, selectedGenres, sort);
+  const resultKey = `${query}\u0000${selectedGenres.slice().sort().join("\u0001")}\u0000${sort}\u0000${results.map((author) => `${author.id}:${author.updatedAt || author.createdAt || ""}`).join("\u0001")}`;
+  const incremental = useIncrementalResults(results.length, resultKey);
+  const visibleAuthors = results.slice(0, incremental.visibleCount);
+  const filtersActive = Boolean(query.trim() || selectedGenres.length);
+  const storyCounts = new Map<string, number>();
+  for (const story of stories) storyCounts.set(story.selectedAuthorId, (storyCounts.get(story.selectedAuthorId) || 0) + 1);
+
   return <section className="page"><div className="page-heading"><div><p className="eyebrow">The atelier</p><h1>Fictional authors</h1><p>Reusable voices, each with their own instincts and craft.</p></div><button className="primary" onClick={onNew}>Create author</button></div>
-    <div className="author-grid">
-      {authors.map((author) => <button key={author.id} className="author-card" onClick={() => onOpen(author)}><span className="author-monogram">{initials(author.displayName)}</span><div><h2>{author.displayName}</h2><p>{author.shortDescription}</p><div className="tag-row">{author.selectedGenres.slice(0, 3).map((tag) => <span key={tag}>{tag}</span>)}</div><small>{stories.filter((story) => story.selectedAuthorId === author.id).length} stories</small></div></button>)}
+    {!!authors.length && <form className="discovery-panel" role="search" aria-label="Filter and sort authors" onSubmit={(event) => event.preventDefault()}>
+      <div className="discovery-fields">
+        <label className="discovery-search" htmlFor="author-search"><span>Search name, description, or voice</span><input id="author-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search your authors" aria-controls="author-results" /></label>
+        <label className="discovery-sort" htmlFor="author-sort"><span>Sort authors</span><select id="author-sort" value={sort} onChange={(event) => setSort(event.target.value as AuthorSort)} aria-controls="author-results"><option value="name-asc">Name A–Z</option><option value="name-desc">Name Z–A</option><option value="recent">Recently revised</option></select></label>
+      </div>
+      <GenreFilters id="author-genres" options={genreOptions} selected={selectedGenres} onChange={setSelectedGenres} />
+      <div className="discovery-summary"><p role="status" aria-live="polite">{results.length} {results.length === 1 ? "author" : "authors"} found</p>{filtersActive && <button type="button" className="ghost" onClick={() => { setQuery(""); setSelectedGenres([]); }}>Clear filters</button>}</div>
+    </form>}
+    <div className="author-grid" id="author-results">
+      {visibleAuthors.map((author) => <button key={author.id} className="author-card" onClick={() => onOpen(author)}><span className="author-monogram">{initials(author.displayName)}</span><div><h2>{author.displayName}</h2><p>{author.shortDescription}</p><div className="tag-row">{author.selectedGenres.slice(0, 3).map((tag) => <span key={tag}>{tag}</span>)}</div><small>{storyCounts.get(author.id) || 0} {(storyCounts.get(author.id) || 0) === 1 ? "story" : "stories"}</small></div></button>)}
     </div>
     {!authors.length && <div className="center-empty"><div className="nib" /><h2>No authors yet</h2><p>Create a storyteller from a few genres and a short description.</p><button className="primary" onClick={onNew}>Create your first author</button></div>}
+    {!!authors.length && !results.length && <div className="filtered-empty"><h2>No authors match</h2><p>Try another name, description, voice, or genre.</p><button type="button" className="secondary" onClick={() => { setQuery(""); setSelectedGenres([]); }}>Clear filters</button></div>}
+    {!!results.length && <IncrementalResults noun="author" visibleCount={incremental.visibleCount} total={results.length} hasMore={incremental.hasMore} onMore={incremental.showMore} triggerRef={incremental.triggerRef} />}
   </section>;
 }
 
 function AuthorView({ author, stories, onStory, onCreate, onEdit, onArchive }: { author: AuthorProfile; stories: Story[]; onStory: (story: Story) => void; onCreate: () => void; onEdit: () => void; onArchive: () => void }) {
+  const [query, setQuery] = useState("");
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [sort, setSort] = useState<StorySort>("recent");
+  const genreOptions = uniqueGenres(stories.map((story) => story.foundation?.genres));
+  const results = filterAndSortStories(stories, query, selectedGenres, sort);
+  const resultKey = `${author.id}\u0000${query}\u0000${selectedGenres.slice().sort().join("\u0001")}\u0000${sort}\u0000${results.map((story) => `${story.id}:${story.updatedAt}`).join("\u0001")}`;
+  const incremental = useIncrementalResults(results.length, resultKey, 10);
+  const visibleStories = results.slice(0, incremental.visibleCount);
+  const filtersActive = Boolean(query.trim() || selectedGenres.length);
+
   return <section className="page author-profile-page">
     <div className="author-hero"><span className="author-monogram large">{initials(author.displayName)}</span><div><p className="eyebrow">Fictional author</p><h1>{author.displayName}</h1><p>{author.shortDescription}</p><div className="tag-row">{[...author.selectedGenres, ...author.tone].slice(0, 7).map((tag) => <span key={tag}>{tag}</span>)}</div></div></div>
     <div className="profile-actions"><button className="primary" onClick={onCreate}>Create story with this author</button><button className="secondary" onClick={onEdit}>Revise author</button><button className="ghost danger" onClick={onArchive}>Archive author</button></div>
     <div className="profile-columns"><article><p className="eyebrow">Voice</p><h2>How the prose moves</h2><p>{author.voice}</p><dl><dt>Pacing</dt><dd>{author.pacing}</dd><dt>Point of view</dt><dd>{author.preferredPointOfView}</dd><dt>Tense</dt><dd>{author.preferredTense}</dd><dt>Texture</dt><dd>{author.proseDensity}</dd></dl></article><article><p className="eyebrow">Principles</p><h2>What guides the work</h2><ul>{author.writingRules.map((rule) => <li key={rule}>{rule}</li>)}</ul><p className="eyebrow minor">Avoids</p><ul className="muted-list">{author.thingsToAvoid.map((rule) => <li key={rule}>{rule}</li>)}</ul></article></div>
-    <div className="subsection-heading"><h2>Stories by {author.displayName}</h2></div><div className="compact-story-list">{stories.map((story) => <button key={story.id} onClick={() => onStory(story)}><span className="mini-cover">{story.title.slice(0, 1)}</span><span><strong>{story.title}</strong><small>Section {story.latestAcceptedTurnNumber} · {story.status}</small></span><b>→</b></button>)}</div>
+    <div className="subsection-heading"><h2>Stories by {author.displayName}</h2></div>
+    {!!stories.length && <form className="discovery-panel author-story-discovery" role="search" aria-label={`Filter and sort stories by ${author.displayName}`} onSubmit={(event) => event.preventDefault()}>
+      <div className="discovery-fields">
+        <label className="discovery-search" htmlFor="author-story-search"><span>Search title or description</span><input id="author-story-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search this author’s stories" aria-controls="author-story-results" /></label>
+        <label className="discovery-sort" htmlFor="author-story-sort"><span>Sort stories</span><select id="author-story-sort" value={sort} onChange={(event) => setSort(event.target.value as StorySort)} aria-controls="author-story-results"><option value="recent">Recent activity</option><option value="title-asc">Title A–Z</option><option value="title-desc">Title Z–A</option></select></label>
+      </div>
+      <GenreFilters id="author-story-genres" options={genreOptions} selected={selectedGenres} onChange={setSelectedGenres} />
+      <div className="discovery-summary"><p role="status" aria-live="polite">{results.length} {results.length === 1 ? "story" : "stories"} found</p>{filtersActive && <button type="button" className="ghost" onClick={() => { setQuery(""); setSelectedGenres([]); }}>Clear filters</button>}</div>
+    </form>}
+    <div className="compact-story-list" id="author-story-results">{visibleStories.map((story) => <button key={story.id} onClick={() => onStory(story)}><MiniStoryCover story={story} /><span><strong>{story.title}</strong><small>Section {story.latestAcceptedTurnNumber} · {story.status}</small></span><b>→</b></button>)}</div>
+    {!stories.length && <div className="filtered-empty author-stories-empty"><h2>No stories yet</h2><p>Begin a story with this author when the right idea arrives.</p><button type="button" className="primary" onClick={onCreate}>Create a story</button></div>}
+    {!!stories.length && !results.length && <div className="filtered-empty author-stories-empty"><h2>No stories match</h2><p>Try another title, description, or genre.</p><button type="button" className="secondary" onClick={() => { setQuery(""); setSelectedGenres([]); }}>Clear filters</button></div>}
+    {!!results.length && <IncrementalResults noun="story" visibleCount={incremental.visibleCount} total={results.length} hasMore={incremental.hasMore} onMore={incremental.showMore} triggerRef={incremental.triggerRef} />}
   </section>;
 }
 
 function ArchiveView({ stories, onOpen, onRestore }: { stories: Story[]; onOpen: (story: Story) => void; onRestore: (story: Story) => void }) {
   return <section className="page"><div className="page-heading"><div><p className="eyebrow">Shelved for now</p><h1>Archived stories</h1><p>Nothing is lost. Return any story to the active library.</p></div></div>
-    <div className="archive-list">{stories.map((story) => <article key={story.id}><div className="mini-cover">{story.title.slice(0, 1)}</div><div><h2>{story.title}</h2><p>{story.shortDescription}</p><small>{story.authorSnapshot.displayName} · {story.latestAcceptedTurnNumber} sections</small></div><div><button className="secondary" onClick={() => onOpen(story)}>Read</button><button className="ghost" onClick={() => onRestore(story)}>Restore</button></div></article>)}</div>
+    <div className="archive-list">{stories.map((story) => <article key={story.id}><MiniStoryCover story={story} /><div><h2>{story.title}</h2><p>{story.shortDescription}</p><small>{story.authorSnapshot.displayName} · {story.latestAcceptedTurnNumber} sections</small></div><div><button className="secondary" onClick={() => onOpen(story)}>Read</button><button className="ghost" onClick={() => onRestore(story)}>Restore</button></div></article>)}</div>
     {!stories.length && <div className="center-empty"><h2>No archived stories</h2><p>Your active shelves hold everything.</p></div>}
   </section>;
 }
@@ -249,13 +424,13 @@ function SettingsView({ theme, onTheme, logs }: { theme: string; onTheme: (theme
   </section>;
 }
 
-function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; onStory: (story: Story) => void; onBack: () => void; onAuthor: (author: AuthorProfile) => void; onError: (error: string) => void }) {
+function Reader({ story, initialGallery = false, onStory, onBack, onAuthor, onError }: { story: Story; initialGallery?: boolean; onStory: (story: Story) => void; onBack: () => void; onAuthor: (author: AuthorProfile) => void; onError: (error: string) => void }) {
   const [turnNumber, setTurnNumber] = useState(() => normalizeReaderTurn(story.turns, story.readingTurnNumber || story.latestAcceptedTurnNumber));
   const [writing, setWriting] = useState(false);
   const [note, setNote] = useState("");
   const [noteOpen, setNoteOpen] = useState(false);
   const [drawer, setDrawer] = useState(false);
-  const [gallery, setGallery] = useState(false);
+  const [gallery, setGallery] = useState(initialGallery);
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
   const [rate, setRate] = useState(story.playbackRate || 1);
@@ -266,14 +441,20 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
   const [highQuality, setHighQuality] = useState(false);
   const [localVoiceId, setLocalVoiceId] = useState<LocalVoiceId>("af_heart");
   const [localVoice, setLocalVoice] = useState<LocalVoiceProgress>({ phase: "idle" });
+  const [localVoiceCache, setLocalVoiceCache] = useState<LocalVoiceCacheInfo | null>(null);
   const [voiceStoragePersistent, setVoiceStoragePersistent] = useState(false);
+  const [voiceDownloadBusy, setVoiceDownloadBusy] = useState(false);
+  const [writingRecovery, setWritingRecovery] = useState("");
   const [regen, setRegen] = useState<{ candidate: TurnResult; original: Turn } | null>(null);
   const [regenerating, setRegenerating] = useState(false);
   const storyRef = useRef(story); const turnRef = useRef(turnNumber); const autoReadRef = useRef(autoRead); const autoWriteRef = useRef(autoWrite); const noteRef = useRef(note); const writingRef = useRef(false);
   const speechCharRef = useRef(0); const speechTextRef = useRef(""); const narrationActiveRef = useRef(false); const activeNarratorRef = useRef<"local" | "device" | null>(null);
   const activeNarrationTurnRef = useRef<number | null>(null); const narrationSequenceRef = useRef(0);
+  const deviceNarrationRetryRef = useRef({ sequence: 0, attempts: 0 });
   const autoAdvanceTimeoutRef = useRef<number | null>(null); const autoAdvanceIntervalRef = useRef<number | null>(null);
   const highQualityRef = useRef(false); const localVoiceIdRef = useRef<LocalVoiceId>("af_heart"); const localPlayerRef = useRef<LocalVoicePlayer | null>(null);
+  const voiceCacheRequestRef = useRef(0); const voiceDownloadBusyRef = useRef(false);
+  const writingRecoveryRef = useRef<{ controller: AbortController; background: boolean } | null>(null);
   const preferenceWriteRef = useRef<Promise<unknown>>(Promise.resolve());
   const narrationFinishedRef = useRef<(target: number) => void>(() => {}); const deviceFallbackRef = useRef<(target: number, startAt: number, sequence: number) => void>(() => {});
   const speakTurnRef = useRef<(target: number, startAt?: number) => void>(() => {});
@@ -301,6 +482,7 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
     loadVoices(); window.speechSynthesis?.addEventListener("voiceschanged", loadVoices);
     return () => {
       narrationSequenceRef.current += 1;
+      writingRecoveryRef.current?.controller.abort();
       if (autoAdvanceTimeoutRef.current != null) window.clearTimeout(autoAdvanceTimeoutRef.current);
       if (autoAdvanceIntervalRef.current != null) window.clearInterval(autoAdvanceIntervalRef.current);
       window.speechSynthesis?.removeEventListener("voiceschanged", loadVoices); window.speechSynthesis?.cancel(); localPlayerRef.current?.destroy(); localPlayerRef.current = null;
@@ -320,6 +502,14 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
     }));
   }, []);
 
+  const refreshLocalVoiceCache = useCallback(async (voice: LocalVoiceId) => {
+    const request = ++voiceCacheRequestRef.current;
+    const info = await getLocalVoiceCacheInfo(voice);
+    if (request !== voiceCacheRequestRef.current || localVoiceIdRef.current !== voice) return;
+    setLocalVoiceCache(info);
+    setVoiceStoragePersistent(info.persistent);
+  }, []);
+
   const continueWriting = useCallback(async (background = false) => {
     if (writingRef.current) return;
     if (storyRef.current.status !== "Active") return;
@@ -328,17 +518,62 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
     const originTurn = turnRef.current;
     writingRef.current = true; setWriting(true);
     const direction = noteRef.current;
+    const controller = new AbortController();
+    writingRecoveryRef.current?.controller.abort();
+    writingRecoveryRef.current = { controller, background };
+    let failureCount = 0;
+    let completedStory: Story | undefined;
     try {
-      const result = await api<{ story: Story }>({ action: "continueStory", storyId: storyRef.current.id, note: direction, expectedLatestTurnNumber: latest });
-      storyRef.current = result.story; onStory(result.story);
-      void drainBackgroundJobs(result.story.id, (next) => { storyRef.current = next; onStory(next); }).catch(() => {});
+      while (!completedStory) {
+        controller.signal.throwIfAborted();
+        try {
+          completedStory = (await api<{ story: Story }>({ action: "continueStory", storyId: storyRef.current.id, note: direction, expectedLatestTurnNumber: latest }, undefined, controller.signal)).story;
+        } catch (requestError) {
+          let refreshed: Story | undefined;
+          try {
+            refreshed = (await api<{ story: Story }>(undefined, storyRef.current.id, controller.signal)).story;
+            storyRef.current = refreshed; onStory(refreshed);
+          } catch (refreshError) {
+            if (controller.signal.aborted) throw refreshError;
+          }
+          if (refreshed && refreshed.latestAcceptedTurnNumber > latest) {
+            completedStory = refreshed;
+            break;
+          }
+
+          const job = refreshed?.writingJob;
+          if (job?.turnNumber === latest + 1 && job.status === "generating") {
+            const waitMs = Math.max(2_000, Math.min(60_000, Number(job.retryAfterMs || 2_000)));
+            setWritingRecovery("The author is still writing in the background. Listening can continue.");
+            await abortableDelay(waitMs, controller.signal);
+            continue;
+          }
+
+          const failure = requestError instanceof AppRequestError ? requestError : new AppRequestError(message(requestError));
+          const category = job?.category || failure.category;
+          const recoverable = (job?.recoverable ?? failure.recoverable) && WRITING_RECOVERY_CATEGORIES.has(category);
+          if (!recoverable || (failureCount >= WRITING_RECOVERY_DELAYS_MS.length && (!background || !autoWriteRef.current))) throw requestError;
+          const baseDelay = failureCount < WRITING_RECOVERY_DELAYS_MS.length ? WRITING_RECOVERY_DELAYS_MS[failureCount] : 60_000;
+          const retryAfterMs = Number(job?.retryAfterMs ?? failure.retryAfterMs ?? 0);
+          failureCount += 1;
+          setWritingRecovery(failureCount <= WRITING_RECOVERY_DELAYS_MS.length ? "The connection hiccupped. The author will resume automatically." : "Writing is paused by the connection and will keep checking quietly.");
+          await abortableDelay(Math.max(baseDelay, Math.min(60_000, retryAfterMs)), controller.signal);
+        }
+      }
+      if (!completedStory) return;
+      storyRef.current = completedStory; onStory(completedStory);
+      void drainBackgroundJobs(completedStory.id, (next) => { storyRef.current = next; onStory(next); }).catch(() => {});
       if (direction && noteRef.current === direction) { noteRef.current = ""; setNote(""); }
       if (!background && turnRef.current === originTurn) {
-        const nextTurn = result.story.latestAcceptedTurnNumber;
+        const nextTurn = completedStory.latestAcceptedTurnNumber;
         setTurnNumber(nextTurn); turnRef.current = nextTurn; persist(nextTurn); revealSection();
       }
-    } catch (err) { onError(message(err)); }
-    finally { writingRef.current = false; setWriting(false); }
+    } catch (err) {
+      if (!controller.signal.aborted) onError(message(err));
+    } finally {
+      if (writingRecoveryRef.current?.controller === controller) writingRecoveryRef.current = null;
+      writingRef.current = false; setWriting(false); setWritingRecovery("");
+    }
   }, [onError, onStory, persist, revealSection]);
 
   const clearAutoAdvance = useCallback(() => {
@@ -387,8 +622,19 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
       if (sequence !== narrationSequenceRef.current || !narrationActiveRef.current) return;
       narrationFinishedRef.current(target);
     };
-    utterance.onerror = () => {
+    utterance.onerror = (event) => {
       if (sequence !== narrationSequenceRef.current || !narrationActiveRef.current) return;
+      const permanent = ["not-allowed", "language-unavailable", "voice-unavailable", "text-too-long", "invalid-argument"].includes(event.error);
+      if (!permanent && deviceNarrationRetryRef.current.sequence === sequence && deviceNarrationRetryRef.current.attempts < 2) {
+        deviceNarrationRetryRef.current.attempts += 1;
+        const resumeAt = speechCharRef.current;
+        window.setTimeout(() => {
+          if (sequence === narrationSequenceRef.current && narrationActiveRef.current && activeNarrationTurnRef.current === target) {
+            deviceFallbackRef.current(target, resumeAt, sequence);
+          }
+        }, 350 * deviceNarrationRetryRef.current.attempts);
+        return;
+      }
       narrationActiveRef.current = false; activeNarratorRef.current = null; activeNarrationTurnRef.current = null;
       setSpeaking(false); setPaused(false); onError("Narration stopped. The prose is safe, and you can try playing it again.");
     };
@@ -402,8 +648,14 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
     const player = new LocalVoicePlayer({
       onState: (state) => {
         setLocalVoice(state);
-        if (narrationActiveRef.current && ["loading", "generating", "playing"].includes(state.phase)) { setSpeaking(true); setPaused(false); }
+        if (state.phase === "ready") {
+          voiceDownloadBusyRef.current = false; setVoiceDownloadBusy(false);
+          void refreshLocalVoiceCache(localVoiceIdRef.current).catch(() => {});
+        }
+        if (narrationActiveRef.current && ["loading", "generating", "buffering", "playing"].includes(state.phase)) setSpeaking(true);
+        if (state.phase === "playing") setPaused(false);
         if (state.phase === "paused") setPaused(true);
+        if (state.phase === "error") { voiceDownloadBusyRef.current = false; setVoiceDownloadBusy(false); }
       },
       onPosition: (character) => { speechCharRef.current = character; },
       onEnd: () => { const target = activeNarrationTurnRef.current; if (target != null) narrationFinishedRef.current(target); },
@@ -411,29 +663,31 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
         if (!narrationActiveRef.current) return;
         localPlayerRef.current?.stop();
         activeNarratorRef.current = "device";
+        setPaused(false);
         onError("The high-quality local voice could not continue. Using your device voice instead.");
         const target = activeNarrationTurnRef.current;
         if (target != null) deviceFallbackRef.current(target, speechCharRef.current, narrationSequenceRef.current);
       },
+      onMetrics: (metrics) => setLocalVoice((currentState) => ({ ...currentState, metrics })),
     });
     localPlayerRef.current = player;
     return player;
-  }, [onError]);
+  }, [onError, refreshLocalVoiceCache]);
 
   useEffect(() => {
     const enabled = window.localStorage.getItem("kotoba-high-quality-local-voice") === "true";
     const savedVoice = window.localStorage.getItem("kotoba-local-voice");
     const nextVoice = isLocalVoiceId(savedVoice) ? savedVoice : "af_heart";
+    localVoiceIdRef.current = nextVoice;
     const timer = window.setTimeout(() => {
       highQualityRef.current = enabled;
-      localVoiceIdRef.current = nextVoice;
       setHighQuality(enabled);
       setLocalVoiceId(nextVoice);
-      if (enabled) ensureLocalPlayer().prepare();
+      if (enabled) ensureLocalPlayer().prepare(nextVoice);
     }, 0);
-    void navigator.storage?.persisted?.().then(setVoiceStoragePersistent).catch(() => {});
+    void refreshLocalVoiceCache(nextVoice).catch(() => {});
     return () => window.clearTimeout(timer);
-  }, [ensureLocalPlayer]);
+  }, [ensureLocalPlayer, refreshLocalVoiceCache]);
 
   const speakTurn = useCallback((target: number, startAt = 0) => {
     const item = storyRef.current.turns?.find((turn) => turn.turnNumber === target);
@@ -441,6 +695,7 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
     const changedSection = target !== turnRef.current;
     clearAutoAdvance();
     const sequence = ++narrationSequenceRef.current;
+    deviceNarrationRetryRef.current = { sequence, attempts: 0 };
     window.speechSynthesis?.cancel();
     localPlayerRef.current?.stop();
     speechTextRef.current = item.prose; speechCharRef.current = startAt; narrationActiveRef.current = true; activeNarrationTurnRef.current = target;
@@ -465,6 +720,11 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
   function stopAudio() {
     clearAutoAdvance(); narrationSequenceRef.current += 1; narrationActiveRef.current = false; activeNarratorRef.current = null; activeNarrationTurnRef.current = null;
     localPlayerRef.current?.stop(); window.speechSynthesis?.cancel(); setSpeaking(false); setPaused(false);
+    setLocalVoice((currentState) => {
+      if (!["generating", "buffering", "playing", "paused"].includes(currentState.phase)) return currentState;
+      const metrics = currentState.metrics ? { ...currentState.metrics, queueDepth: 0, bufferedSeconds: 0, producerPaused: false } : undefined;
+      return { ...currentState, phase: "ready", detail: "Model ready on this device", metrics };
+    });
   }
   function skipNarration(seconds: number) {
     if (!speaking || !speechTextRef.current) return;
@@ -485,7 +745,10 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
     setAutoRead(next); autoReadRef.current = next;
     if (!next) {
       clearAutoAdvance();
-      if (autoWriteRef.current) { setAutoWrite(false); autoWriteRef.current = false; }
+      if (autoWriteRef.current) {
+        setAutoWrite(false); autoWriteRef.current = false;
+        if (writingRecoveryRef.current?.background) writingRecoveryRef.current.controller.abort();
+      }
     }
     persist(turnRef.current, rate, next, next ? autoWriteRef.current : false, voiceId);
   }
@@ -493,6 +756,7 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
     if (next && storyRef.current.status !== "Active") return;
     setAutoWrite(next); autoWriteRef.current = next;
     if (next) { setAutoRead(true); autoReadRef.current = true; }
+    else if (writingRecoveryRef.current?.background) writingRecoveryRef.current.controller.abort();
     persist(turnRef.current, rate, autoReadRef.current, next, voiceId);
   }
   async function toggleHighQuality(next: boolean) {
@@ -501,8 +765,9 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
     window.localStorage.setItem("kotoba-high-quality-local-voice", String(next));
     if (next) {
       setVoiceStoragePersistent(await requestPersistentVoiceStorage());
-      ensureLocalPlayer().prepare();
+      ensureLocalPlayer().prepare(localVoiceIdRef.current);
     } else {
+      voiceDownloadBusyRef.current = false; setVoiceDownloadBusy(false); voiceCacheRequestRef.current += 1;
       localPlayerRef.current?.destroy(); localPlayerRef.current = null; setLocalVoice({ phase: "idle" });
     }
   }
@@ -510,6 +775,22 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
     stopAudio();
     localVoiceIdRef.current = next; setLocalVoiceId(next);
     window.localStorage.setItem("kotoba-local-voice", next);
+    void refreshLocalVoiceCache(next).catch(() => {});
+    if (highQualityRef.current) ensureLocalPlayer().prepare(next);
+  }
+  async function manageLocalVoiceDownload(redownload: boolean) {
+    if (voiceDownloadBusyRef.current) return;
+    if (redownload && !confirm(`Redownload the ${LOCAL_VOICE_DOWNLOAD_ESTIMATE.estimatedFirstDownloadMegabytes.minimum}–${LOCAL_VOICE_DOWNLOAD_ESTIMATE.estimatedFirstDownloadMegabytes.maximum} MB local voice model and replace this device's cached copy?`)) return;
+    voiceDownloadBusyRef.current = true; setVoiceDownloadBusy(true);
+    stopAudio();
+    try {
+      setVoiceStoragePersistent(await requestPersistentVoiceStorage());
+      const player = ensureLocalPlayer();
+      if (redownload) player.redownload(localVoiceIdRef.current);
+      else player.download(localVoiceIdRef.current);
+    } catch (error) {
+      voiceDownloadBusyRef.current = false; setVoiceDownloadBusy(false); onError(message(error));
+    }
   }
 
   if (!current) return <div className="quiet-loading">The first page is being prepared…</div>;
@@ -517,12 +798,21 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
   const sectionArt = story.art?.find((asset) => asset.turnNumber === current.turnNumber && asset.type !== "cover" && asset.status === "Ready");
   const localProgress = typeof localVoice.progress === "number" ? ` ${Math.round(localVoice.progress)}%` : "";
   const localBackend = localVoice.backend === "webgpu" ? "WebGPU" : localVoice.backend === "wasm" ? "WebAssembly" : "local";
-  const narrationStatus = writing ? "The author is writing the next section…" : highQuality
+  const localVoiceDownloaded = Boolean(localVoiceCache?.modelCached && localVoiceCache.selectedVoiceCached);
+  const localModelCached = Boolean(localVoiceCache?.modelCached);
+  const localModelInMemory = Boolean(localVoice.backend && localVoice.phase === "ready");
+  const localVoiceRedownload = localVoiceDownloaded || (localModelInMemory && !localModelCached);
+  const localVoiceDownloadLabel = voiceDownloadBusy || localVoice.phase === "loading" ? "Downloading local voice…"
+    : localVoiceDownloaded ? "Redownload local voice"
+      : localModelCached ? "Download selected voice" : localModelInMemory ? "Redownload to retry device cache" : "Download local voice";
+  const localMetrics = localVoice.metrics;
+  const narrationStatus = writingRecovery ? `${writingRecovery}${speaking ? " Narration continues." : ""}` : writing && speaking ? "Narrating while the author writes…" : writing ? "The author is writing the next section…" : highQuality
     ? localVoice.phase === "loading" ? `Downloading or loading ${localBackend}${localProgress}`
       : localVoice.phase === "generating" ? `Generating on ${localBackend}`
+        : localVoice.phase === "buffering" ? `Buffering on ${localBackend}`
         : localVoice.phase === "error" ? (speaking ? "Narrating with device fallback" : "Local voice unavailable · device fallback ready")
           : speaking ? (paused ? "Local narration paused" : `Narrating on ${localBackend}`)
-             : localVoice.phase === "ready" ? `${localBackend} ready${voiceStoragePersistent ? " · persistent cache" : " · browser cache"}` : "Local voice enabled · about 116 MB first download"
+             : localVoice.phase === "ready" ? `${localBackend} ready${voiceStoragePersistent ? " · persistent cache" : " · browser cache"}` : `Local voice enabled · about ${LOCAL_VOICE_DOWNLOAD_ESTIMATE.estimatedFirstDownloadMegabytes.minimum}–${LOCAL_VOICE_DOWNLOAD_ESTIMATE.estimatedFirstDownloadMegabytes.maximum} MB first download`
     : speaking ? (paused ? "Narration paused" : "Narrating") : "Ready to listen";
   const availableTurnNumbers = readerTurnNumbers(story.turns);
   const firstTurnNumber = availableTurnNumbers[0] || current.turnNumber;
@@ -559,8 +849,10 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
           <div className="narration-skips" role="group" aria-label="Narration position"><button className="skip" onClick={() => skipNarration(-10)} aria-label="Skip narration backward ten seconds">−10</button><button className="skip" onClick={() => skipNarration(10)} aria-label="Skip narration forward ten seconds">+10</button></div>
           <label>Speed<select value={rate} onChange={(event) => { const next = Number(event.target.value); setRate(next); persist(current.turnNumber, next); }}><option value="0.8">0.8×</option><option value="1">1×</option><option value="1.2">1.2×</option><option value="1.5">1.5×</option><option value="1.8">1.8×</option></select></label>
           <label>{highQuality ? "Fallback voice" : "Device voice"}<select value={voiceId} onChange={(event) => { setVoiceId(event.target.value); persist(current.turnNumber, rate, autoRead, autoWrite, event.target.value); }}><option value="">Device default</option>{voices.map((voice) => <option key={voice.voiceURI} value={voice.voiceURI}>{voice.name}</option>)}</select></label>
-          <label title="Device speech is instant. Kokoro runs locally in a browser worker and downloads about 116 MB the first time.">High-quality local voice<select value={highQuality ? "kokoro-q8" : "device"} onChange={(event) => void toggleHighQuality(event.target.value === "kokoro-q8")}><option value="device">Off · device speech</option><option value="kokoro-q8">On · Kokoro 82M q8</option></select></label>
-          {highQuality && <label title="Kokoro's local model supports English narration. Choose an American or British English voice.">Local voice · English<select value={localVoiceId} onChange={(event) => isLocalVoiceId(event.target.value) && changeLocalVoice(event.target.value)}>{LOCAL_VOICE_OPTIONS.map((voice) => <option key={voice.id} value={voice.id}>{voice.label} · {voice.locale.replace("English ", "")}</option>)}</select></label>}
+          <label title={`Device speech is instant. Kokoro runs locally in a browser worker and downloads about ${LOCAL_VOICE_DOWNLOAD_ESTIMATE.estimatedFirstDownloadMegabytes.minimum}–${LOCAL_VOICE_DOWNLOAD_ESTIMATE.estimatedFirstDownloadMegabytes.maximum} MB the first time.`}>High-quality local voice<select value={highQuality ? "kokoro-q8" : "device"} onChange={(event) => void toggleHighQuality(event.target.value === "kokoro-q8")}><option value="device">Off · device speech</option><option value="kokoro-q8">On · Kokoro 82M q8</option></select></label>
+          {highQuality && <label title="Kokoro's local model supports English narration. Choose an American or British English voice.">Local voice · English<select value={localVoiceId} disabled={voiceDownloadBusy || localVoice.phase === "loading"} onChange={(event) => isLocalVoiceId(event.target.value) && changeLocalVoice(event.target.value)}>{LOCAL_VOICE_OPTIONS.map((voice) => <option key={voice.id} value={voice.id}>{voice.label} · {voice.locale.replace("English ", "")}</option>)}</select></label>}
+          {highQuality && <div className="local-voice-download"><button type="button" className="secondary" disabled={voiceDownloadBusy || localVoice.phase === "loading"} onClick={() => void manageLocalVoiceDownload(localVoiceRedownload)}>{localVoiceDownloadLabel}</button><small>{LOCAL_VOICE_DOWNLOAD_ESTIMATE.modelWeightsMegabytes} MB q8 model + selected English voice. Stored only on this device.</small></div>}
+          {highQuality && localMetrics && <div className="local-voice-metrics" aria-label="Local voice diagnostics"><span>{localBackend}</span><span>{localMetrics.bufferedSeconds.toFixed(1)}s buffered</span><span>{localMetrics.queueDepth} queued</span><span>RTF {localMetrics.realTimeFactor?.toFixed(2) ?? "—"}</span><span>{localMetrics.underruns} underruns</span></div>}
           <label className="switch-label"><input type="checkbox" checked={autoRead} onChange={(event) => toggleAutoRead(event.target.checked)} /><span />Auto read next</label>
           <label className="switch-label"><input type="checkbox" checked={autoWrite && canWrite} disabled={!canWrite || typeof window === "undefined" || (!("speechSynthesis" in window) && !highQuality)} onChange={(event) => toggleAutoWrite(event.target.checked)} /><span />Auto write next</label>
         </div>
@@ -574,7 +866,23 @@ function Reader({ story, onStory, onBack, onAuthor, onError }: { story: Story; o
 }
 
 function StoryDrawer({ story, onClose }: { story: Story; onClose: () => void }) {
-  return <div className="drawer-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><aside className="story-drawer"><div className="drawer-heading"><div><p className="eyebrow">Cast &amp; story</p><h2>{story.title}</h2></div><button onClick={onClose}>×</button></div><p>{story.shortDescription}</p><dl className="story-facts"><dt>Where</dt><dd>{story.storyState?.currentLocation}</dd><dt>Now</dt><dd>{story.storyState?.currentScene}</dd><dt>Story pressure</dt><dd>{story.storyState?.currentNarrativePressure}</dd><dt>Context</dt><dd>{story.contextSnapshot ? `Reconciled through Section ${story.contextSnapshot.throughTurnNumber}` : "Queued for background reconciliation"}</dd></dl><h3>Known cast</h3><div className="cast-list">{story.cast?.map((member: CastMember) => <article key={member.id}><span>{initials(member.name)}</span><div><h4>{member.name}</h4><small>{member.narrativeRole} · {member.pronouns}</small><p>{member.readerKnownSummary || member.physicalDescription}</p><em>{member.currentStatus} · {member.currentLocation}</em></div></article>)}</div><h3>Background work</h3><div className="job-list">{story.jobs?.slice(0, 12).map((job) => <JobRow key={job.id} job={job} />)}</div><h3>Recent diagnostics</h3><div className="drawer-logs">{story.logs?.slice(0, 8).map((log) => <p key={log.id}><strong>{log.status}</strong> {log.message}</p>)}{!story.logs?.length && <p>No retries or failures logged for this story.</p>}</div></aside></div>;
+  const guides = story.entityAppearanceGuides || [];
+  const timeline = [...(story.entityAppearanceTimeline || [])].sort((left, right) => right.turnNumber - left.turnNumber).slice(0, 12);
+  return <div className="drawer-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+    <aside className="story-drawer">
+      <div className="drawer-heading"><div><p className="eyebrow">Cast &amp; story</p><h2>{story.title}</h2></div><button onClick={onClose} aria-label="Close cast and story drawer">×</button></div>
+      <p>{story.shortDescription}</p>
+      <dl className="story-facts"><dt>Where</dt><dd>{story.storyState?.currentLocation}</dd><dt>Now</dt><dd>{story.storyState?.currentScene}</dd><dt>Story pressure</dt><dd>{story.storyState?.currentNarrativePressure}</dd><dt>Context</dt><dd>{story.contextSnapshot ? `Reconciled through Section ${story.contextSnapshot.throughTurnNumber}` : "Queued for background reconciliation"}</dd></dl>
+      <h3>Known cast</h3>
+      <div className="cast-list">{story.cast?.map((member: CastMember) => <article key={member.id}><span>{initials(member.name)}</span><div><h4>{member.name}</h4><small>{member.narrativeRole} · {member.pronouns}</small><p>{member.readerKnownSummary || member.physicalDescription}</p><em>{member.currentStatus} · {member.currentLocation}</em></div></article>)}</div>
+      <h3>Entity appearance &amp; style guide</h3>
+      <div className="entity-guide-list">{guides.slice(0, 16).map((guide) => <article key={`${guide.kind}:${guide.entityId}`}><div><h4>{guide.name}</h4><small>{guide.kind} · established Section {guide.firstSeenTurn}</small></div><p><strong>Baseline:</strong> {guide.baseline.summary}</p><p><strong>Current:</strong> {[...new Set([guide.current.appearance, guide.current.wardrobeOrSurface, guide.current.condition, guide.current.location].filter(Boolean))].join(" · ") || "No temporary change recorded."}</p>{guide.baseline.signatureTraits.length > 0 && <div className="entity-traits">{guide.baseline.signatureTraits.slice(0, 6).map((trait) => <span key={trait}>{trait}</span>)}</div>}</article>)}{!guides.length && <p className="empty-note">The first background continuity pass will establish durable entity baselines.</p>}</div>
+      <h3>Appearance timeline</h3>
+      <div className="entity-timeline">{timeline.map((entry) => <article key={entry.id}><span>Section {entry.turnNumber}</span><div><strong>{entry.name}</strong><p>{entry.summary}</p></div></article>)}{!timeline.length && <p className="empty-note">No section-linked appearance changes have been recorded yet.</p>}</div>
+      <h3>Background work</h3><div className="job-list">{story.jobs?.slice(0, 12).map((job) => <JobRow key={job.id} job={job} />)}</div>
+      <h3>Recent diagnostics</h3><div className="drawer-logs">{story.logs?.slice(0, 8).map((log) => <p key={log.id}><strong>{log.status}</strong> {log.message}</p>)}{!story.logs?.length && <p>No retries or failures logged for this story.</p>}</div>
+    </aside>
+  </div>;
 }
 
 function StoryGallery({ story, currentTurn, onClose, onStory, onError }: { story: Story; currentTurn: number; onClose: () => void; onStory: (story: Story) => void; onError: (error: string) => void }) {
